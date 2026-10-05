@@ -186,7 +186,7 @@ describe('store actions', () => {
     expect(s.weightMethod).toBe('entropy')
     expect(s.methodParams?.entropy).toEqual({})
     const w = computeWeights(s)
-    expectClose(w.value!.weights, zavadskas.published_as_printed.perm.map((_, j) => zavadskas.expected.weights[j]!), 1e-4)
+    expectClose(w.value!.weights, zavadskas.expected.weights, zavadskas.expected.tolerance)
     useWorkbench.getState().loadExample('krishnan-2021-smartphones', 'en')
     expect(useWorkbench.getState().weightMethod).toBe('critic')
   })

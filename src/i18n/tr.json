@@ -740,10 +740,10 @@
     },
     "entropy": {
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden Entropi ağırlığı 0.",
-      "zeros-in-column": "{{criterion}} sıfır içeriyor. Sıfırlar payları dengesizleştirir ve ağırlığı şişirebilir.",
+      "zeros-in-column": "{{criterion}} sıfır içeriyor; sıfırlar ağırlığını şişirebilir.",
       "two-alternatives-minmax": "2 alternatifle min-max, sabit olmayan her kritere aynı ağırlığı verir.",
-      "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor. Yayılımın gerçek mi gürültü mü olduğuna bakın.",
-      "all-constant-equal-weights": "Bütün kriterler sabit, ağırlıklandırılacak bilgi yok. Bunun yerine eşit ağırlık kullanıldı."
+      "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; yayılımın gerçek olup olmadığına bakın.",
+      "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden bunun yerine eşit ağırlık kullanıldı."
     },
     "topsis": {
       "zero-column": "{{criterion}} kriterinin bütün değerleri 0, bu yüzden sıralamayı etkilemiyor.",

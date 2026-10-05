@@ -88,7 +88,7 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
     tex: String.raw`r_{ij} = \begin{cases} \dfrac{x_{ij} - \min_i x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{+} \\[2ex] \dfrac{\max_i x_{ij} - x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{-} \end{cases}`,
     edgeCase: {
       en: 'A constant column (max = min) is set to 0 and never divided.',
-      tr: 'Sabit bir sütun (maks = min) 0 alınır, hiç bölünmez.',
+      tr: 'Sabit bir sütun (max = min) 0 alınır, hiç bölünmez.',
     },
   },
   'entropy.proportionsSum': {

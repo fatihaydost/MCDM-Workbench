@@ -511,12 +511,18 @@ export type WeightingRequirement = {
 export const weightingRequirements: readonly WeightingRequirement[] = [
   {
     methodId: 'entropy',
-    data: { en: 'Values of 0 or more, column sum above 0, with 0 ln 0 = 0', tr: '0 ya da daha büyük değerler, sütun toplamı 0\'dan büyük, 0 ln 0 = 0' },
+    data: {
+      en: 'Raw data (sum): values of 0 or more, with 0 ln 0 = 0; min-max accepts any sign',
+      tr: 'Ham veri (toplam): 0 ya da daha büyük değerler, 0 ln 0 = 0; Min-max her işareti kabul eder',
+    },
     normalization: {
       en: 'Unchanged by pure rescaling (sum, vector and max normalization give the same weights); changes under min-max, which also creates zeros.',
-      tr: 'Salt yeniden ölçeklemeden etkilenmez (toplam, vektör ve maks normalizasyonu aynı ağırlığı verir); min-maks altında değişir ve min-maks sıfır da üretir.',
+      tr: 'Salt yeniden ölçeklemeden etkilenmez (toplam, vektör ve maks normalizasyonu aynı ağırlığı verir); Min-max altında değişir ve Min-max sıfır da üretir.',
     },
-    degenerate: { en: 'Constant column: weight 0', tr: 'Sabit sütun: ağırlık 0' },
+    degenerate: {
+      en: 'Constant column, also all zeros: weight 0; every column constant: 1/n',
+      tr: 'Sabit sütun, tamamı sıfır olan da: ağırlık 0; bütün sütunlar sabit: 1/n',
+    },
     sources: [
       { label: 'Roszkowska & Wachowicz (2024), Entropy 26(5), 365', doi: '10.3390/e26050365' },
       { label: 'Chen (2019), Expert Systems with Applications 136, 33-41', doi: '10.1016/j.eswa.2019.06.035' },
@@ -539,7 +545,10 @@ export const weightingRequirements: readonly WeightingRequirement[] = [
     methodId: 'sd',
     data: { en: 'Any sign', tr: 'Herhangi bir işaret' },
     normalization: { en: 'Depends on the normalization (Mukhametzyanov 2021).', tr: 'Normalizasyona bağlıdır (Mukhametzyanov 2021).' },
-    degenerate: { en: 'Constant column: weight 0', tr: 'Sabit sütun: ağırlık 0' },
+    degenerate: {
+      en: 'Constant column, also all zeros: weight 0; every column constant: 1/n',
+      tr: 'Sabit sütun, tamamı sıfır olan da: ağırlık 0; bütün sütunlar sabit: 1/n',
+    },
     sources: [{ label: 'Mukhametzyanov (2021), DMAME 4(2), 76-105', doi: '10.31181/dmame210402076i' }],
   },
   {
@@ -657,10 +666,10 @@ export const riskyCombinations: readonly RiskyCombination[] = [
   },
   {
     id: 'minmax-before-entropy',
-    title: { en: 'Min-max normalization before Entropy', tr: 'Entropi öncesinde min-maks normalizasyonu' },
+    title: { en: 'Min-max normalization before Entropy', tr: 'Entropi öncesinde Min-max normalizasyonu' },
     text: {
       en: 'Min-max creates zeros (the column minimum) and changes the Entropy weights; Chen (2019) advises against it. Use raw non-negative data or sum normalization for Entropy.',
-      tr: 'Min-maks sıfırlar üretir (sütun minimumu) ve Entropi ağırlıklarını değiştirir; Chen (2019) bunu önermez. Entropi için ham, negatif olmayan veri ya da toplam normalizasyonu kullanın.',
+      tr: 'Min-max sıfırlar üretir (sütun minimumu) ve Entropi ağırlıklarını değiştirir; Chen (2019) bunu önermez. Entropi için ham, negatif olmayan veri ya da toplam normalizasyonu kullanın.',
     },
     basis: 'sourced',
     methodIds: ['entropy'],

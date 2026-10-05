@@ -40,14 +40,26 @@ test.describe('explanation bottom sheet below 1280 px', () => {
 test.describe('tables that scroll sideways at 390 px', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 
-  test('the weights table is a focusable, named region that scrolls with the arrow keys', async ({ page }) => {
-    await page.goto('/app?example=krishnan-2021-smartphones&stage=weights')
-    const region = page.getByRole('region', { name: 'Weights by criterion' })
-    await expect(region).toHaveAttribute('tabindex', '0')
+  test('the weights table fits: name, direction and w without a sideways scroll', async ({ page }) => {
+    for (const example of ['krishnan-2021-smartphones', 'zavadskas-2017-vilnius']) {
+      await page.goto(`/app?example=${example}&stage=weights`)
+      const table = page.getByRole('table', { name: 'Weights by criterion' })
+      await expect(table).toBeVisible()
+      await expect(page.getByRole('region', { name: 'Weights by criterion' })).toHaveCount(0)
+      const box = await table.boundingBox()
+      expect(box!.x + box!.width, example).toBeLessThanOrEqual(390)
+      await expect(table.getByRole('columnheader', { name: 'Weight w' })).toBeVisible()
+    }
+  })
+
+  test('a table that does not fit is a focusable, named region that scrolls with the arrow keys', async ({ page }) => {
+    await page.goto('/app?example=krishnan-2021-smartphones&stage=ranking')
+    const region = page.locator('[role="region"][tabindex="0"]', { has: page.locator('table') }).first()
+    await expect(region).toHaveAttribute('aria-labelledby', /.+/)
     // Reach it with Tab, like a keyboard user.
     await page.locator('#main').focus()
     let reached = false
-    for (let k = 0; k < 40 && !reached; k++) {
+    for (let k = 0; k < 60 && !reached; k++) {
       await page.keyboard.press('Tab')
       reached = await region.evaluate((el) => el === document.activeElement)
     }

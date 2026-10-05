@@ -740,10 +740,10 @@
     },
     "entropy": {
       "constant-column": "{{criterion}} has the same value for every alternative, so its Entropy weight is 0.",
-      "zeros-in-column": "{{criterion}} contains zeros. Zeros make the shares uneven and can inflate its weight.",
+      "zeros-in-column": "{{criterion}} contains zeros, which can inflate its weight.",
       "two-alternatives-minmax": "With 2 alternatives, min-max gives every criterion that is not constant the same weight.",
-      "dominant-weight": "{{criterion}} takes more than half of the weight. Check whether its spread is real or noise.",
-      "all-constant-equal-weights": "Every criterion is constant, so there is no information to weigh. Equal weights are used instead."
+      "dominant-weight": "{{criterion}} takes more than half of the weight, so check whether its spread is real.",
+      "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead."
     },
     "topsis": {
       "zero-column": "Every value of {{criterion}} is 0, so it does not affect the ranking.",

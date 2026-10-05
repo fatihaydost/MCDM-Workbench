@@ -171,8 +171,10 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
               <Tr>
                 <Th>{t('workbench.weights.columns.criterion')}</Th>
                 <Th>{t('workbench.weights.columns.direction')}</Th>
+                {/* Below sm the method's columns step aside, so name, direction and w fit without a sideways scroll;
+                    they stay in the picture and in "Show the calculation". */}
                 {extra.map((c) => (
-                  <Th key={c.step} numeric>
+                  <Th key={c.step} numeric className="hidden sm:table-cell">
                     {tr(t, c.label)}
                   </Th>
                 ))}
@@ -182,10 +184,14 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
             <TBody>
               {problem.criteria.map((c, j) => (
                 <Tr key={j}>
-                  <Th scope="row">{names[j]}</Th>
-                  <Td className="text-text-2">{t(`workbench.criterionType.${c.type}`)}</Td>
+                  <Th scope="row" className="max-sm:whitespace-normal">
+                    {names[j]}
+                  </Th>
+                  <Td className="text-text-2">
+                    <DirectionLabel type={c.type} />
+                  </Td>
                   {extra.map((c) => (
-                    <Td key={c.step} numeric>
+                    <Td key={c.step} numeric className="hidden sm:table-cell">
                       {nf.format(c.values?.[j])}
                     </Td>
                   ))}
@@ -200,6 +206,20 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
       </section>
 
       {getWeightingMethod(method) && <CalculationToggle groups={[{ steps: result.steps }]} problem={problem} />}
+    </>
+  )
+}
+
+/** "↑ Benefit"; below sm only the arrow, with the word kept for screen readers. */
+function DirectionLabel({ type }: { type: 'benefit' | 'cost' }) {
+  const { t } = useTranslation()
+  const label = t(`workbench.criterionType.${type}`)
+  return (
+    <>
+      <span aria-hidden className="sm:hidden">
+        {type === 'benefit' ? '↑' : '↓'}
+      </span>
+      <span className="max-sm:sr-only">{label}</span>
     </>
   )
 }

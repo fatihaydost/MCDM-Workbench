@@ -1,11 +1,12 @@
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { RankingResult } from '../../core'
+import { getRankingMethod, type RankingResult } from '../../core'
 import { BarChart } from '../../features/charts'
 import { TopsisGeometry } from '../../features/illustrations'
 import { useNumberFormat } from '../../i18n'
 import { isEmptyProblem, toProblem, useRanking, useWeights, useWorkbench, type DraftProblem, type RankingMethodId } from '../../state/workbench'
 import { Button, cn, EmptyState, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../ui'
+import { MethodParams } from './MethodParams'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
 import { alternativeName, DECIMALS, findStep, weightMethodFullLabel } from './shared'
@@ -173,6 +174,8 @@ export function RankingStage() {
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
+        {/* Nothing today (TOPSIS has no options); SAW, VIKOR and WASPAS will show theirs here. */}
+        <MethodParams methodId={rankingMethod} descriptors={getRankingMethod(rankingMethod)?.params} />
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
           <span>{t('workbench.ranking.weightsUsed', { method: weightMethodFullLabel(weightMethod, weightParams, t) })}</span>
           <button type="button" className="text-accent underline underline-offset-2 hover:no-underline" onClick={() => goTo('weights')}>

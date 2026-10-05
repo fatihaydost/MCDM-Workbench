@@ -308,13 +308,13 @@ export function computeValidation(draft: DraftProblem): ValidationIssue[] {
   return validateProblem(toProblem(draft))
 }
 
-/** Weights for the selected method, or null plus the blocking issues. */
 /** The options a registry method runs with: the saved ones checked against its descriptor, defaults filled in. */
 export function paramsFor(data: Pick<WorkbenchData, 'methodParams'>, methodId: string): MethodParams {
   const method = getWeightingMethod(methodId) ?? getRankingMethod(methodId)
   return resolveParams(method?.params, data.methodParams?.[methodId])
 }
 
+/** Weights for the selected method, or null plus the blocking issues. */
 export function computeWeights(
   data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'methodParams'>,
 ): Computed<WeightingResult> {

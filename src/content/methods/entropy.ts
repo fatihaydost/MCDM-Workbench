@@ -21,7 +21,7 @@ export const entropy: MethodContent = {
   },
   steps: [
     {
-      title: { en: 'Proportions', tr: 'Paylar' },
+      title: { en: 'Shares', tr: 'Paylar' },
       tex: String.raw`p_{ij} = \frac{x_{ij}}{\sum_{i=1}^{m} x_{ij}}`,
       note: {
         en: 'Default variant: raw data, criterion type ignored; the min-max option first normalizes with cost inversion, then takes shares.',
@@ -85,10 +85,10 @@ export const entropy: MethodContent = {
   reference: {
     source: 'Zavadskas, E.K.; Cavallaro, F.; Podvezko, V.; Ubarte, I.; Kaklauskas, A. (2017). MCDM Assessment of a Healthy and Safe Built Environment According to Sustainable Development Principles: A Practical Neighborhood Approach in Vilnius. Sustainability 9(5), 702',
     doi: '10.3390/su9050702',
-    match: 'partial',
+    match: 'match',
     note: {
-      en: 'Table 4 (input, economic block) and Table 8 (Entropy). Twenty-one Vilnius neighbourhoods, five criteria. Our weights match all five published values to 4 decimals (largest difference 4.6e-5), but the paper prints them on the wrong rows, a fixed permutation that we undo. The min-max option matches Krishnan et al. (2021), Table 5, to 4 decimals (4.5e-5), and its normalized matrix equals their Table 2.',
-      tr: 'Tablo 4 (girdi, ekonomik blok) ve Tablo 8 (Entropi). Yirmi bir Vilnius mahallesi, beş kriter. Ağırlıklarımız yayımlanan beş değerle 4 basamakta örtüşüyor (en büyük fark 4,6e-5), ama makale bunları yanlış satırlara basmış; bu sabit permütasyonu geri alıyoruz. Min-max seçeneği Krishnan vd. (2021) Tablo 5 ile 4 basamakta örtüşüyor (4,5e-5), normalize matrisi de Tablo 2 ile aynı.',
+      en: 'Table 4 (input, economic block) and Table 8 (Entropy). Twenty-one Vilnius neighbourhoods, five criteria. Our weights match all five published values to 4 decimals (largest difference 4.6e-5). The paper prints them on the wrong criterion rows, so we list them in the data\'s column order. The min-max option matches Krishnan et al. (2021), Table 5, to 4 decimals (4.5e-5), and its normalized matrix equals their Table 2.',
+      tr: 'Tablo 4 (girdi, ekonomik blok) ve Tablo 8 (Entropi). Yirmi bir Vilnius mahallesi, beş kriter. Ağırlıklarımız yayımlanan beş değerle 4 basamakta örtüşüyor (en büyük fark 4,6e-5). Makale bunları yanlış kriter satırlarına basmış, bu yüzden veri sütunlarının sırasıyla veriyoruz. Min-max seçeneği Krishnan vd. (2021) Tablo 5 ile 4 basamakta örtüşüyor (4,5e-5), normalize matrisi de Tablo 2 ile aynı.',
     },
   },
   sources: [
