@@ -6,10 +6,13 @@ import {
   getWeightingMethod,
   hasErrors,
   ProblemValidationError,
+  resolveParams,
   validateProblem,
   validateRequirements,
   validateWeights,
   type Criterion,
+  type MethodParams,
+  type MethodParamValue,
   type Problem,
   type RankingResult,
   type ValidationIssue,
@@ -22,8 +25,14 @@ import type { Lang } from '../i18n/lang'
 export const STAGES = ['data', 'weights', 'ranking', 'results', 'robustness'] as const
 export type Stage = (typeof STAGES)[number]
 
-export type WeightMethodId = 'critic' | 'equal' | 'manual'
+export type WeightMethodId = 'critic' | 'entropy' | 'equal' | 'manual'
 export type RankingMethodId = 'topsis'
+
+/**
+ * Options chosen per method id (Entropy's normalization, later VIKOR's v ...). A missing method or key means the
+ * method's default; values are checked against the method's descriptor before a method sees them.
+ */
+export type MethodParamsState = Partial<Record<string, Record<string, MethodParamValue>>>
 
 /** Raw user input. A null cell is an empty cell (never read as 0). */
 export type DraftProblem = {
@@ -43,6 +52,8 @@ export type WorkbenchData = {
   exampleId: string | null
   /** File name of the last import, cleared by the first edit of the data (like exampleId). */
   importedFrom?: string | null
+  /** Method options by method id. Optional: a state saved before options existed loads without it. */
+  methodParams?: MethodParamsState | undefined
 }
 
 export type WorkbenchActions = {
@@ -65,6 +76,8 @@ export type WorkbenchActions = {
   setWeightMethod: (method: WeightMethodId) => void
   setManualWeight: (col: number, value: number | null) => void
   setRankingMethod: (method: RankingMethodId) => void
+  /** Sets one option of one method (weighting or ranking), e.g. ('entropy', 'normalization', 'minmax'). */
+  setMethodParam: (methodId: string, key: string, value: MethodParamValue) => void
   reset: () => void
 }
 
@@ -113,6 +126,7 @@ export const initialWorkbench = (): WorkbenchData => ({
   stage: 'data',
   exampleId: null,
   importedFrom: null,
+  methodParams: {},
 })
 
 const fitWeights = (w: (number | null)[], n: number): (number | null)[] =>
@@ -144,7 +158,11 @@ export const useWorkbench = create<WorkbenchState>()(
       loadExample: (id, lang) => {
         const ex = getExample(id)
         if (!ex) return
-        set({
+        // An example published for a weighting method opens with that method in its default variant (the
+        // variant the paper used); otherwise the paper's weights when it gives them, else CRITIC.
+        const reference = ex.referenceFor.find((m) => getWeightingMethod(m) !== undefined) as WeightMethodId | undefined
+        set((s) => ({
+          ...(reference && { methodParams: { ...s.methodParams, [reference]: {} } }),
           problem: {
             alternatives: [...ex.alternatives],
             criteria: ex.criteria.map((c) => ({ name: c.name[lang], type: c.type })),
@@ -152,9 +170,9 @@ export const useWorkbench = create<WorkbenchState>()(
           },
           exampleId: ex.id,
           importedFrom: null,
-          weightMethod: ex.weights ? 'manual' : 'critic',
+          weightMethod: reference ?? (ex.weights ? 'manual' : 'critic'),
           manualWeights: ex.weights ? [...ex.weights] : new Array<number | null>(ex.criteria.length).fill(null),
-        })
+        }))
       },
 
       startBlank: (m = 3, n = 3, names) =>
@@ -246,6 +264,9 @@ export const useWorkbench = create<WorkbenchState>()(
 
       setRankingMethod: (rankingMethod) => set({ rankingMethod }),
 
+      setMethodParam: (methodId, key, value) =>
+        set((s) => ({ methodParams: { ...s.methodParams, [methodId]: { ...s.methodParams?.[methodId], [key]: value } } })),
+
       reset: () => set(initialWorkbench()),
     }),
     {
@@ -260,6 +281,7 @@ export const useWorkbench = create<WorkbenchState>()(
         stage: s.stage,
         exampleId: s.exampleId,
         importedFrom: s.importedFrom ?? null,
+        methodParams: s.methodParams ?? {},
       }),
     },
   ),
@@ -287,8 +309,14 @@ export function computeValidation(draft: DraftProblem): ValidationIssue[] {
 }
 
 /** Weights for the selected method, or null plus the blocking issues. */
+/** The options a registry method runs with: the saved ones checked against its descriptor, defaults filled in. */
+export function paramsFor(data: Pick<WorkbenchData, 'methodParams'>, methodId: string): MethodParams {
+  const method = getWeightingMethod(methodId) ?? getRankingMethod(methodId)
+  return resolveParams(method?.params, data.methodParams?.[methodId])
+}
+
 export function computeWeights(
-  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights'>,
+  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'methodParams'>,
 ): Computed<WeightingResult> {
   const problem = toProblem(data.problem)
   const issues = validateProblem(problem)
@@ -312,7 +340,7 @@ export function computeWeights(
   const method = getWeightingMethod(data.weightMethod)
   if (!method) return { value: null, issues }
   try {
-    return { value: method.compute(problem, {}), issues }
+    return { value: method.compute(problem, paramsFor(data, method.id)), issues }
   } catch (err) {
     if (err instanceof ProblemValidationError) return { value: null, issues: err.issues }
     throw err
@@ -321,7 +349,7 @@ export function computeWeights(
 
 /** Ranking with the selected method on the computed weights, or null plus every blocking issue. */
 export function computeRanking(
-  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'rankingMethod'>,
+  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'rankingMethod' | 'methodParams'>,
   weights: Computed<WeightingResult> = computeWeights(data),
 ): Computed<RankingResult> {
   const problem = toProblem(data.problem)
@@ -333,7 +361,7 @@ export function computeRanking(
   }
   if (!method || hasErrors(issues)) return { value: null, issues }
   try {
-    return { value: method.compute(problem, weights.value.weights, {}), issues }
+    return { value: method.compute(problem, weights.value.weights, paramsFor(data, method.id)), issues }
   } catch (err) {
     if (err instanceof ProblemValidationError) return { value: null, issues: err.issues }
     throw err
@@ -351,7 +379,11 @@ export function useWeights(): Computed<WeightingResult> {
   const problem = useWorkbench((s) => s.problem)
   const weightMethod = useWorkbench((s) => s.weightMethod)
   const manualWeights = useWorkbench((s) => s.manualWeights)
-  return useMemo(() => computeWeights({ problem, weightMethod, manualWeights }), [problem, weightMethod, manualWeights])
+  const methodParams = useWorkbench((s) => s.methodParams)
+  return useMemo(
+    () => computeWeights({ problem, weightMethod, manualWeights, methodParams }),
+    [problem, weightMethod, manualWeights, methodParams],
+  )
 }
 
 /** Ranking for the current methods; value is null while data or weights have blocking issues. */
@@ -361,10 +393,17 @@ export function useRanking(): Computed<RankingResult> {
   const weightMethod = useWorkbench((s) => s.weightMethod)
   const manualWeights = useWorkbench((s) => s.manualWeights)
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
+  const methodParams = useWorkbench((s) => s.methodParams)
   return useMemo(
-    () => computeRanking({ problem, weightMethod, manualWeights, rankingMethod }, weights),
-    [problem, weightMethod, manualWeights, rankingMethod, weights],
+    () => computeRanking({ problem, weightMethod, manualWeights, rankingMethod, methodParams }, weights),
+    [problem, weightMethod, manualWeights, rankingMethod, methodParams, weights],
   )
+}
+
+/** The options of one method as the methods see them (defaults filled in). */
+export function useMethodParams(methodId: string): MethodParams {
+  const raw = useWorkbench((s) => s.methodParams?.[methodId])
+  return useMemo(() => paramsFor({ methodParams: raw ? { [methodId]: raw } : {} }, methodId), [raw, methodId])
 }
 
 /** True when the matrix has no rows and no columns (the Data stage shows its empty state). */

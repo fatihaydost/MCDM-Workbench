@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next'
-import type { Criterion, Step, ValidationIssue } from '../../core'
-import { MIN_ALTERNATIVES, MIN_CRITERIA } from '../../core'
+import type { Criterion, MethodParamValue, ParamDescriptor, Step, ValidationIssue } from '../../core'
+import { changedParams, getRankingMethod, getWeightingMethod, MIN_ALTERNATIVES, MIN_CRITERIA } from '../../core'
 import type { DraftProblem, Stage, WeightMethodId } from '../../state/workbench'
 
 /** Fixed decimals per kind of number (DESIGN.md §Type): weights and scores 4, correlation cells 2. */
@@ -35,6 +35,28 @@ export const criterionName = (criteria: readonly Criterion[], j: number, t: TFun
   criteria[j]?.name.trim() || t('workbench.criterionN', { n: j + 1 })
 
 export const weightMethodLabel = (m: WeightMethodId, t: TFunction): string => t(`workbench.weightMethod.${m}`)
+
+/** Label of a method option ("Normalization") and of one of its choices ("Min-max"), from workbench.params. */
+export const paramLabel = (methodId: string, d: ParamDescriptor, t: TFunction): string => tr(t, `workbench.params.${methodId}.${d.key}`)
+export const paramOptionLabel = (methodId: string, d: ParamDescriptor, option: string, t: TFunction): string =>
+  tr(t, `workbench.params.${methodId}.${d.key}Options.${option}`)
+
+/**
+ * The variant a method ran with, when it is not the default: "min-max" for Entropy with min-max normalization, "" for
+ * the defaults. A number option reads "label value".
+ */
+export function variantLabel(methodId: string, raw: Readonly<Record<string, MethodParamValue>> | undefined, t: TFunction): string {
+  const method = getWeightingMethod(methodId) ?? getRankingMethod(methodId)
+  return changedParams(method?.params, raw)
+    .map(([d, v]) => (d.kind === 'choice' ? tr(t, `workbench.params.${methodId}.${d.key}Variant.${String(v)}`) : `${paramLabel(methodId, d, t)} ${String(v)}`))
+    .join(', ')
+}
+
+/** The weighting method's name with its variant where the method is named as provenance: "Entropy (min-max)". */
+export function weightMethodFullLabel(m: WeightMethodId, raw: Readonly<Record<string, MethodParamValue>> | undefined, t: TFunction): string {
+  const variant = variantLabel(m, raw, t)
+  return variant ? `${weightMethodLabel(m, t)} (${variant})` : weightMethodLabel(m, t)
+}
 
 /** Short name of a step ("Contrast σ"), used as block title, xlsx column header and row label. */
 export const stepName = (key: string, t: TFunction): string => tr(t, `workbench.stepNames.${key}`)
@@ -77,6 +99,7 @@ export function placeIssue(
       return { ...base, stage: 'data', targetId: ids.addCriterion }
     case 'invalid-cell':
     case 'non-positive-value':
+    case 'negative-value':
       return { ...base, stage: 'data', targetId: row !== undefined && col !== undefined ? ids.cell(row, col) : ids.corner }
     case 'invalid-criterion-type':
       return { ...base, stage: 'data', targetId: col !== undefined ? ids.type(col) : ids.corner }

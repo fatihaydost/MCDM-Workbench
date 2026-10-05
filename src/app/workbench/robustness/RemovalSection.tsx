@@ -1,7 +1,7 @@
 import { ArrowsDownUp, Check } from '@phosphor-icons/react'
 import { useId, useMemo, useState } from 'react'
 import { removeCriteria, type RemovalRow } from '../../../core/robustness'
-import type { Problem, RankingMethod, WeightingMethod } from '../../../core/types'
+import type { MethodParams, Problem, RankingMethod, WeightingMethod } from '../../../core/types'
 import { useNumberFormat } from '../../../i18n'
 import { cn, Notice, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../../ui'
 import s from './robustness.module.css'
@@ -12,8 +12,12 @@ type Props = {
   problem: Problem
   weights: readonly number[]
   method: RankingMethod
-  /** The objective weighting method (CRITIC) when the weights come from one: offers "recompute". */
+  /** The ranking method's options. */
+  params: MethodParams
+  /** The objective weighting method (CRITIC, Entropy) when the weights come from one: offers "recompute". */
   weighting: WeightingMethod | undefined
+  /** Its options, so the recompute runs the same variant. */
+  weightingParams: MethodParams
   weightingName: string
   names: string[]
   criteria: string[]
@@ -21,14 +25,18 @@ type Props = {
 
 /**
  * D: leave one criterion out. One row per dropped criterion: does first place hold, and how close is the new ranking
- * to yours (Spearman ρ, WS). With CRITIC weights the rest can be rescaled or CRITIC run again without the criterion.
+ * to yours (Spearman ρ, WS). With objective weights (CRITIC, Entropy) the rest can be rescaled or the method run again
+ * without the criterion.
  */
-export function RemovalSection({ problem, weights, method, weighting, weightingName, names, criteria }: Props) {
+export function RemovalSection({ problem, weights, method, params, weighting, weightingParams, weightingName, names, criteria }: Props) {
   const { t } = useRobustnessText()
   const nf = useNumberFormat(4)
   const uid = useId()
   const [mode, setMode] = useState<RemovalRow['mode']>('renormalize')
-  const rows = useMemo(() => removeCriteria(problem, weights, method, weighting), [problem, weights, method, weighting])
+  const rows = useMemo(
+    () => removeCriteria(problem, weights, method, weighting, { rankingParams: params, weightingParams }),
+    [problem, weights, method, params, weighting, weightingParams],
+  )
   const shown = rows.filter((r) => r.mode === (weighting ? mode : 'renormalize'))
   const leader = (ranking: readonly number[]) =>
     ranking

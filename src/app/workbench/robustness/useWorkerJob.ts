@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Concentration, MonteCarloResult } from '../../../core/robustness'
-import type { Problem } from '../../../core/types'
+import type { MethodParams, Problem } from '../../../core/types'
 import { runRequest, type SweepResult, type WorkerRequest, type WorkerResponse } from './robustness.worker'
 
 export type JobState<T> = {
@@ -76,24 +76,28 @@ function useWorkerJob<T>(job: Job): JobState<T> {
   return state
 }
 
-/** Monte Carlo weights (core monteCarlo) in a worker. */
+/** Monte Carlo weights (core monteCarlo) in a worker; `params` are the ranking method's options (memoize them). */
 export function useMonteCarlo(
   problem: Problem,
   weights: readonly number[],
   method: string,
+  params: MethodParams,
   concentration: Concentration,
   n: number,
   seed: number,
 ): JobState<MonteCarloResult> {
   const job = useMemo(
-    (): Job => ({ kind: 'monteCarlo', problem, weights: [...weights], method, concentration, n, seed }),
-    [problem, weights, method, concentration, n, seed],
+    (): Job => ({ kind: 'monteCarlo', problem, weights: [...weights], method, params, concentration, n, seed }),
+    [problem, weights, method, params, concentration, n, seed],
   )
   return useWorkerJob<MonteCarloResult>(job)
 }
 
-/** The sweep of criterion k (core sweepWeight) and its crossing marks, in a worker. */
-export function useSweep(problem: Problem, weights: readonly number[], method: string, k: number): JobState<SweepResult> {
-  const job = useMemo((): Job => ({ kind: 'sweep', problem, weights: [...weights], method, k }), [problem, weights, method, k])
+/** The sweep of criterion k (core sweepWeight) and its crossing marks, in a worker; `params` as in useMonteCarlo. */
+export function useSweep(problem: Problem, weights: readonly number[], method: string, params: MethodParams, k: number): JobState<SweepResult> {
+  const job = useMemo(
+    (): Job => ({ kind: 'sweep', problem, weights: [...weights], method, params, k }),
+    [problem, weights, method, params, k],
+  )
   return useWorkerJob<SweepResult>(job)
 }

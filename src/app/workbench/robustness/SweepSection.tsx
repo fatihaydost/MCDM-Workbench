@@ -2,7 +2,7 @@ import { ArrowCounterClockwise } from '@phosphor-icons/react'
 import { useCallback, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { reweight } from '../../../core/robustness'
-import type { Problem, RankingMethod } from '../../../core/types'
+import type { MethodParams, Problem, RankingMethod } from '../../../core/types'
 import { SweepChart } from '../../../features/charts/SweepChart'
 import { useElementWidth } from '../../../features/charts/useElementWidth'
 import { useNumberFormat } from '../../../i18n'
@@ -21,6 +21,8 @@ type Props = {
   problem: Problem
   weights: readonly number[]
   method: RankingMethod
+  /** The ranking method's options, the same the workbench ranked with. */
+  params: MethodParams
   /** The ranking with the user's weights. */
   baseRanking: readonly number[]
   names: string[]
@@ -37,7 +39,7 @@ const NO_MARKS: { x: number; y: number }[] = []
  * ranking at that weight, its rows sliding to their new places as the order changes. The sweep of a criterion is
  * calculated in a worker (a large matrix takes a few hundred ms); the ranking at the cursor is one calculation, here.
  */
-export function SweepSection({ problem, weights, method, baseRanking, names, criteria }: Props) {
+export function SweepSection({ problem, weights, method, params, baseRanking, names, criteria }: Props) {
   const { t } = useRobustnessText()
   const { t: tw } = useTranslation()
   const nf = useNumberFormat(DECIMALS.weight)
@@ -59,14 +61,14 @@ export function SweepSection({ problem, weights, method, baseRanking, names, cri
     setWk(v)
   }
 
-  const job = useSweep(problem, weights, method.id, k)
+  const job = useSweep(problem, weights, method.id, params, k)
   const result = job.result
   const sweep = result?.sweep ?? null
   const current = sweep !== null && sweep.k === k
   const xs = useMemo(() => sweep?.points.map((p) => p.wk) ?? [], [sweep])
   const series = useMemo(() => (sweep ? names.map((_, i) => sweep.points.map((p) => p.scores[i]!)) : []), [sweep, names])
   // The ranking at the slider's weight: computed exactly there, never read off the grid.
-  const at = useMemo(() => method.compute(problem, reweight(weights, k, wk), {}), [method, problem, weights, k, wk])
+  const at = useMemo(() => method.compute(problem, reweight(weights, k, wk), params), [method, problem, weights, params, k, wk])
   const order = rankOrder(at.ranking)
   const leaders = order.filter((i) => at.ranking[i] === 1)
   const baseLeaders = rankOrder(baseRanking).filter((i) => baseRanking[i] === 1)

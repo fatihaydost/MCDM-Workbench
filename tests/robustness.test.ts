@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { critic, equal, rankScores, topsis, type Problem, type RankingMethod } from '../src/core'
+import { critic, entropy, equal, rankScores, topsis, type MethodParams, type Problem, type RankingMethod } from '../src/core'
 import {
   createRng,
   DEFAULT_DELTAS,
@@ -631,5 +631,32 @@ describe('removeCriteria', () => {
     const p = makeProblem([[1, 2, 3], [3, 1, 2], [2, 3, 1]], ['benefit', 'benefit', 'benefit'])
     const rows = removeCriteria(p, [1, 0, 0], topsis)
     expectClose(rows[0]!.weights, [0, 0.5, 0.5], 1e-15)
+  })
+})
+
+describe('method options reach the methods', () => {
+  it('removeCriteria recomputes with the weighting options it is given', () => {
+    const minmax = { normalization: 'minmax' } as const
+    const w = entropy.compute(krishnan, minmax).weights
+    const rows = removeCriteria(krishnan, w, topsis, entropy, { weightingParams: minmax }).filter((r) => r.mode === 'recompute')
+    const reduced: Problem = {
+      alternatives: krishnan.alternatives,
+      criteria: krishnan.criteria.slice(1),
+      matrix: krishnan.matrix.map((r) => r.slice(1)),
+    }
+    expectClose(rows[0]!.weights.slice(1), entropy.compute(reduced, minmax).weights, 1e-15)
+    expect(Math.abs(rows[0]!.weights[1]! - entropy.compute(reduced, {}).weights[0]!)).toBeGreaterThan(1e-3)
+  })
+
+  it('sweep, nudges and Monte Carlo pass the ranking options on', () => {
+    const seen: MethodParams[] = []
+    const spy: RankingMethod = { ...topsis, compute: (p, w, params) => (seen.push(params), topsis.compute(p, w, {})) }
+    const params = { probe: 'x' }
+    sweepWeight(krishnan, krishnanW, spy, 0, { steps: 4, params })
+    perturbWeights(krishnan, krishnanW, spy, [0.1], params)
+    monteCarlo(krishnan, krishnanW, spy, { concentration: 'uniform', n: 3, params })
+    removeCriteria(krishnan, krishnanW, spy, undefined, { rankingParams: params })
+    expect(seen.length).toBeGreaterThan(10)
+    expect(seen.every((x) => x === params)).toBe(true)
   })
 })

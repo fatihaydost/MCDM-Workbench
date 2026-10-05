@@ -36,9 +36,25 @@ export type WeightingResult = {
   warnings?: MethodWarning[]
 }
 
+/** Value of one method option (a choice is a string, a number parameter a number). */
+export type MethodParamValue = string | number
+
+/** The options a method was run with, by key; a missing key means the method's default. */
+export type MethodParams = Readonly<Record<string, MethodParamValue>>
+
+/**
+ * One option of a method, described as data so one generic control can render it (ADDING-A-METHOD.md §11).
+ * 'choice': one of a few named options (Entropy normalization); 'number': a value in [min, max] (VIKOR v, WASPAS λ).
+ */
+export type ParamDescriptor =
+  | { key: string; kind: 'choice'; options: readonly string[]; default: string }
+  | { key: string; kind: 'number'; min: number; max: number; step: number; default: number }
+
 export interface WeightingMethod<P = {}> {
   id: string
   kind: 'weighting'
+  /** Options the method takes; absent when it has none. */
+  params?: readonly ParamDescriptor[]
   compute(problem: Problem, params: P): WeightingResult
 }
 
@@ -57,6 +73,8 @@ export interface RankingMethod<P = {}> {
   id: string
   kind: 'ranking'
   requires?: { positiveValues?: boolean }
+  /** Options the method takes; absent when it has none. */
+  params?: readonly ParamDescriptor[]
   compute(problem: Problem, weights: number[], params: P): RankingResult
 }
 

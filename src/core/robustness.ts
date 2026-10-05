@@ -3,11 +3,12 @@
  * weights (Dirichlet) with rank acceptability, criterion removal, and rank agreement coefficients.
  * Formulas and sources: docs/research/combinations.md §C. Pure functions, no DOM; deterministic given a seed.
  *
- * The ranking method is passed in, so any RankingMethod (today TOPSIS) works unchanged.
+ * The ranking method is passed in, so any RankingMethod (today TOPSIS) works unchanged; its options (`params`, the
+ * same the workbench ranks with) go with it, so the analysis is of the variant the user chose.
  * Rankings are always the method's own `ranking` (competition ranks from rankScores: ties share, 1, 1, 3).
  */
 import { reweight } from './reweight'
-import type { Problem, RankingMethod, WeightingMethod } from './types'
+import type { MethodParams, Problem, RankingMethod, WeightingMethod } from './types'
 
 // ---------- shared helpers ----------
 
@@ -27,7 +28,7 @@ const sameList = (a: readonly number[], b: readonly number[]): boolean =>
 
 const rankKey = (ranking: readonly number[]): string => ranking.join(',')
 
-const rankWith = (problem: Problem, method: RankingMethod, weights: number[]) => method.compute(problem, weights, {})
+const rankWith = (problem: Problem, method: RankingMethod, weights: number[], params: MethodParams = {}) => method.compute(problem, weights, params)
 
 // ---------- C.1 One-at-a-time weight perturbation ----------
 
@@ -84,7 +85,7 @@ export function sweepWeight(
   weights: readonly number[],
   method: RankingMethod,
   k: number,
-  opts?: { steps?: number },
+  opts?: { steps?: number; params?: MethodParams },
 ): Sweep {
   const n = weights.length
   if (k < 0 || k >= n || !Number.isInteger(k)) throw new RangeError(`criterion index ${k} out of range`)
@@ -93,7 +94,7 @@ export function sweepWeight(
 
   const evalAt = (t: number): Eval => {
     const w = reweight(weights, k, t)
-    const res = rankWith(problem, method, w)
+    const res = rankWith(problem, method, w, opts?.params)
     return { t, weights: w, scores: res.scores, ranking: res.ranking, sign: res.order === 'desc' ? -1 : 1 }
   }
   // Pair order from the ranking itself (so it agrees with the ranking key): −1 a ahead, 0 tied, +1 b ahead.
@@ -265,15 +266,16 @@ export function perturbWeights(
   weights: readonly number[],
   method: RankingMethod,
   deltas?: readonly number[],
+  params?: MethodParams,
 ): PerturbationRow[] {
   const ds = deltas ?? DEFAULT_DELTAS
-  const baseRanking = rankWith(problem, method, [...weights]).ranking
+  const baseRanking = rankWith(problem, method, [...weights], params).ranking
   const baseTop = topSet(baseRanking)
   const rows: PerturbationRow[] = []
   for (let k = 0; k < weights.length; k++) {
     for (const delta of ds) {
       const w = reweight(weights, k, weights[k]! * (1 + delta))
-      const ranking = rankWith(problem, method, w).ranking
+      const ranking = rankWith(problem, method, w, params).ranking
       rows.push({
         k,
         delta,
@@ -399,7 +401,7 @@ export function monteCarlo(
   problem: Problem,
   weights: readonly number[],
   method: RankingMethod,
-  opts: { concentration: Concentration; n?: number; seed?: number },
+  opts: { concentration: Concentration; n?: number; seed?: number; params?: MethodParams },
 ): MonteCarloResult {
   const runs = opts.n ?? 10000
   if (!Number.isInteger(runs) || runs < 1) throw new RangeError('n must be a positive integer')
@@ -413,7 +415,7 @@ export function monteCarlo(
     alpha = weights.map((w) => (c * w) / total)
   }
 
-  const baseRanking = rankWith(problem, method, [...weights]).ranking
+  const baseRanking = rankWith(problem, method, [...weights], opts.params).ranking
   const m = baseRanking.length
   const counts = Array.from({ length: m }, () => new Array<number>(m).fill(0))
   let sameTop = 0
@@ -421,7 +423,7 @@ export function monteCarlo(
   let sumWs = 0
   for (let run = 0; run < runs; run++) {
     const w = sampleDirichlet(alpha, rng)
-    const ranking = rankWith(problem, method, w).ranking
+    const ranking = rankWith(problem, method, w, opts.params).ranking
     let top = true
     for (let i = 0; i < m; i++) {
       const r = ranking[i]!
@@ -464,6 +466,7 @@ export type RemovalRow = {
 
 /**
  * `weighting` is needed for 'recompute'; without it only 'renormalize' rows are returned. Skipped when n ≤ 2.
+ * `opts.rankingParams` / `opts.weightingParams` are the options both methods run with (default `{}`).
  * Rows are criterion-major: for each j the 'renormalize' row, then (with `weighting`) the 'recompute' row.
  * Renormalize divides by the actual sum of the remaining weights (1 − w_j for a valid vector); if that is 0
  * the remaining criteria share equally.
@@ -473,15 +476,17 @@ export function removeCriteria(
   weights: readonly number[],
   method: RankingMethod,
   weighting?: WeightingMethod,
+  opts?: { rankingParams?: MethodParams; weightingParams?: MethodParams },
 ): RemovalRow[] {
   const n = problem.criteria.length
   if (n <= 2) return []
-  const baseRanking = rankWith(problem, method, [...weights]).ranking
+  const rp = opts?.rankingParams ?? {}
+  const baseRanking = rankWith(problem, method, [...weights], rp).ranking
   const baseTop = topSet(baseRanking)
   const rows: RemovalRow[] = []
 
   const row = (j: number, mode: RemovalRow['mode'], reduced: Problem, w: number[]): RemovalRow => {
-    const ranking = rankWith(reduced, method, w).ranking
+    const ranking = rankWith(reduced, method, w, rp).ranking
     const full = [...w.slice(0, j), 0, ...w.slice(j)]
     return {
       j,
@@ -504,7 +509,7 @@ export function removeCriteria(
     const restSum = rest.reduce((s, w) => s + w, 0)
     const renorm = restSum > 0 ? rest.map((w) => w / restSum) : rest.map(() => 1 / rest.length)
     rows.push(row(j, 'renormalize', reduced, renorm))
-    if (weighting) rows.push(row(j, 'recompute', reduced, weighting.compute(reduced, {}).weights))
+    if (weighting) rows.push(row(j, 'recompute', reduced, weighting.compute(reduced, opts?.weightingParams ?? {}).weights))
   }
   return rows
 }

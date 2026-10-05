@@ -1,6 +1,6 @@
 import { useCallback, useId, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Problem } from '../../../core/types'
+import type { MethodParams, Problem } from '../../../core/types'
 import { Heatmap } from '../../../features/charts'
 import { RankIntervalChart } from '../../../features/charts/RankIntervalChart'
 import { useNumberFormat } from '../../../i18n'
@@ -16,6 +16,8 @@ type Props = {
   problem: Problem
   weights: readonly number[]
   method: string
+  /** The ranking method's options, the same the workbench ranked with. */
+  params: MethodParams
   names: string[]
   /** The ranking with the user's weights: rows of the heat map follow it, and its first place is the reference. */
   baseRanking: readonly number[]
@@ -26,13 +28,13 @@ type Props = {
  * weights) in a worker; the heat map gives the share of draws in which each alternative takes each rank, the interval
  * chart the mean rank and its 95 % interval. While a new preset is calculated the previous result stays, marked busy.
  */
-export function MonteCarloSection({ problem, weights, method, names, baseRanking }: Props) {
+export function MonteCarloSection({ problem, weights, method, params, names, baseRanking }: Props) {
   const { t } = useRobustnessText()
   const { t: tw } = useTranslation()
   const nf = useNumberFormat(2)
   const uid = useId()
   const [spread, setSpread] = useState<Spread>('medium')
-  const mc = useMonteCarlo(problem, weights, method, CONCENTRATION[spread], MC_RUNS, MC_SEED)
+  const mc = useMonteCarlo(problem, weights, method, params, CONCENTRATION[spread], MC_RUNS, MC_SEED)
   const r = mc.result
 
   const rowOrder = useMemo(() => rankOrder(baseRanking), [baseRanking])
