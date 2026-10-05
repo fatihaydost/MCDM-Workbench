@@ -9,6 +9,7 @@ export type ValidationCode =
   | 'invalid-criterion-type'
   | 'constant-column'
   | 'non-positive-value'
+  | 'negative-value'
   | 'weights-length-mismatch'
   | 'invalid-weight'
   | 'negative-weight'

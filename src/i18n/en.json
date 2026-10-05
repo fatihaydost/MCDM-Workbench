@@ -89,6 +89,9 @@
       "critic": {
         "claim": "Weights and standard deviations match {{citation}} to {{decimals}} decimals."
       },
+      "entropy": {
+        "claim": "Weights match {{citation}} to {{decimals}} decimals, once the paper's mislabeled rows are put back."
+      },
       "topsis": {
         "claim": "D+, D−, C and ranks match {{citation}} to {{decimals}} decimals."
       },
@@ -163,12 +166,30 @@
     "weightMethod": {
       "label": "Weighting method",
       "critic": "CRITIC",
+      "entropy": "Entropy",
       "equal": "Equal weights",
       "manual": "Manual"
     },
     "rankingMethod": {
       "label": "Ranking method",
       "topsis": "TOPSIS"
+    },
+    "params": {
+      "entropy": {
+        "normalization": "Normalization",
+        "normalizationOptions": {
+          "sum": "Raw data (sum)",
+          "minmax": "Min-max"
+        },
+        "normalizationHints": {
+          "sum": "Shares of the raw values; criterion types are not used.",
+          "minmax": "Scaled to 0 to 1 first, cost reversed; negatives allowed."
+        },
+        "normalizationVariant": {
+          "sum": "sum",
+          "minmax": "min-max"
+        }
+      }
     },
     "example": {
       "label": "Example",
@@ -254,6 +275,7 @@
     "weights": {
       "methodHint": {
         "critic": "Objective weights from how much each criterion varies and how much it disagrees with the others.",
+        "entropy": "Objective weights from how unevenly each criterion's values are spread over the alternatives.",
         "equal": "Every criterion gets the same weight.",
         "manual": "Enter your own weights. They must be 0 or more and sum to 1."
       },
@@ -263,6 +285,8 @@
         "sigma": "Contrast σ",
         "conflict": "Conflict Σ(1 − ρ)",
         "information": "Information C",
+        "entropy": "Entropy e",
+        "diversification": "Diversification d",
         "weight": "Weight w"
       },
       "tableTitle": "Weights by criterion",
@@ -365,6 +389,14 @@
         "informationTotal": "Total information ΣC",
         "weights": "Weights w"
       },
+      "entropy": {
+        "normalized": "Normalized matrix r (min-max)",
+        "proportionsSum": "Shares p (raw data)",
+        "proportionsMinmax": "Shares p (min-max)",
+        "entropy": "Entropy e",
+        "diversification": "Diversification d",
+        "weights": "Weights w"
+      },
       "topsis": {
         "normalized": "Normalized matrix r (vector)",
         "weighted": "Weighted matrix v",
@@ -429,6 +461,13 @@
         "weight": "Weight",
         "information": "Information C"
       },
+      "entropy": {
+        "title": "Uneven shares, more weight",
+        "even": "even share 1/m",
+        "entropy": "Entropy e",
+        "weight": "Weight w",
+        "share": "Share p"
+      },
       "topsis": {
         "title": "Distances to A+ and A−",
         "caption": "Closer to A+ and farther from A− gives a higher C.",
@@ -444,6 +483,14 @@
         "sigma": "Contrast",
         "correlation": "Correlation",
         "information": "Information",
+        "weights": "Weights"
+      },
+      "entropy": {
+        "normalized": "Normalize",
+        "proportionsSum": "Shares",
+        "proportionsMinmax": "Shares",
+        "entropy": "Entropy",
+        "diversification": "Diversification",
         "weights": "Weights"
       },
       "topsis": {
@@ -463,7 +510,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, equal or your own weights, rank the alternatives with TOPSIS and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, equal or your own weights, rank the alternatives with TOPSIS and see every step of the calculation."
     }
   },
   "methods": {
@@ -475,6 +522,7 @@
     },
     "names": {
       "critic": "CRITIC",
+      "entropy": "Entropy",
       "topsis": "TOPSIS",
       "equal": "Equal weights",
       "manual": "Manual weights"
@@ -528,6 +576,7 @@
       "oneLiner": {
         "topsis": "Ranks by distance to the best and the worst.",
         "critic": "Weights from contrast and conflict in the data.",
+        "entropy": "Weights from how unevenly the data spread.",
         "equal": "Every criterion gets 1/n."
       }
     },
@@ -608,6 +657,14 @@
           },
           "weightHead": "Weight = C / {{total}}"
         },
+        "entropy": {
+          "title": "Uneven shares, more weight",
+          "even": "even share 1/m",
+          "entropy": "Entropy e",
+          "weight": "Weight w",
+          "share": "Share p",
+          "caption": "Each bar is one alternative's share of the column total."
+        },
         "steps": {
           "start": "Step through the idea",
           "group": "Step through the idea",
@@ -629,6 +686,14 @@
       "information": "Information content of each criterion: its standard deviation times its total conflict.",
       "informationTotal": "Total information content over all criteria.",
       "weights": "Weights: each criterion's share of the total information content."
+    },
+    "entropy": {
+      "normalized": "Min-max normalization: each column is rescaled to the range 0 to 1, with cost criteria reversed so that 1 is always the best value.",
+      "proportionsSum": "Shares: each raw value divided by its column's total. Criterion types are not used.",
+      "proportionsMinmax": "Shares: each normalized value divided by its column's total.",
+      "entropy": "Entropy of each criterion: 1 when the shares are equal, lower the more uneven they are.",
+      "diversification": "Degree of diversification: 1 minus the entropy, the information a criterion carries.",
+      "weights": "Entropy weights: each criterion's share of the total diversification."
     },
     "topsis": {
       "normalized": "Vector normalization: each value divided by the length of its column.",
@@ -660,6 +725,7 @@
       "invalid-criterion-type": "Choose benefit or cost for {{criterion}}.",
       "constant-column": "Every alternative has the same value on {{criterion}}, so it cannot tell them apart.",
       "non-positive-value": "{{alternative}} on {{criterion}} is {{value}}. This method needs values above 0.",
+      "negative-value": "{{alternative}} on {{criterion}} is {{value}}. Raw data (sum) needs values of 0 or more; choose Min-max to use negative values.",
       "weights-length-mismatch": "There are {{value}} weights for {{n}} criteria.",
       "invalid-weight": "Enter a number for the weight of {{criterion}}.",
       "negative-weight": "The weight of {{criterion}} is {{value}}. Weights cannot be negative.",
@@ -670,6 +736,13 @@
     "critic": {
       "constant-column": "{{criterion}} has the same value for every alternative, so its CRITIC weight is 0.",
       "few-alternatives": "With fewer than 4 alternatives the correlations are unstable. Read the CRITIC weights with care.",
+      "all-constant-equal-weights": "Every criterion is constant, so there is no information to weigh. Equal weights are used instead."
+    },
+    "entropy": {
+      "constant-column": "{{criterion}} has the same value for every alternative, so its Entropy weight is 0.",
+      "zeros-in-column": "{{criterion}} contains zeros. Zeros make the shares uneven and can inflate its weight.",
+      "two-alternatives-minmax": "With 2 alternatives, min-max gives every criterion that is not constant the same weight.",
+      "dominant-weight": "{{criterion}} takes more than half of the weight. Check whether its spread is real or noise.",
       "all-constant-equal-weights": "Every criterion is constant, so there is no information to weigh. Equal weights are used instead."
     },
     "topsis": {

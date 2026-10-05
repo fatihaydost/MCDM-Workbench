@@ -89,6 +89,9 @@
       "critic": {
         "claim": "Ağırlıklar ve standart sapmalar {{citation}} ile {{decimals}} basamağa kadar aynı."
       },
+      "entropy": {
+        "claim": "Ağırlıklar, makaledeki yanlış etiketli satırlar yerine konunca {{citation}} ile {{decimals}} basamağa kadar aynı."
+      },
       "topsis": {
         "claim": "D+, D−, C ve sıralar {{citation}} ile {{decimals}} basamağa kadar aynı."
       },
@@ -163,12 +166,30 @@
     "weightMethod": {
       "label": "Ağırlıklandırma yöntemi",
       "critic": "CRITIC",
+      "entropy": "Entropi",
       "equal": "Eşit ağırlık",
       "manual": "Elle"
     },
     "rankingMethod": {
       "label": "Sıralama yöntemi",
       "topsis": "TOPSIS"
+    },
+    "params": {
+      "entropy": {
+        "normalization": "Normalizasyon",
+        "normalizationOptions": {
+          "sum": "Ham veri (toplam)",
+          "minmax": "Min-max"
+        },
+        "normalizationHints": {
+          "sum": "Ham değerlerin payları; kriter türleri kullanılmaz.",
+          "minmax": "Önce 0 ile 1 arasına ölçeklenir, maliyet ters çevrilir; negatif değer olabilir."
+        },
+        "normalizationVariant": {
+          "sum": "toplam",
+          "minmax": "min-max"
+        }
+      }
     },
     "example": {
       "label": "Örnek",
@@ -254,6 +275,7 @@
     "weights": {
       "methodHint": {
         "critic": "Her kriterin ne kadar değiştiğine ve diğerleriyle ne kadar çeliştiğine bakan nesnel ağırlıklar.",
+        "entropy": "Her kriterin değerlerinin alternatifler arasında ne kadar dengesiz dağıldığına bakan nesnel ağırlıklar.",
         "equal": "Her kriter aynı ağırlığı alır.",
         "manual": "Ağırlıkları kendiniz girin. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli."
       },
@@ -263,6 +285,8 @@
         "sigma": "Kontrast σ",
         "conflict": "Çatışma Σ(1 − ρ)",
         "information": "Bilgi miktarı C",
+        "entropy": "Entropi e",
+        "diversification": "Çeşitlenme d",
         "weight": "Ağırlık w"
       },
       "tableTitle": "Kriter ağırlıkları",
@@ -365,6 +389,14 @@
         "informationTotal": "Toplam bilgi ΣC",
         "weights": "Ağırlıklar w"
       },
+      "entropy": {
+        "normalized": "Normalize matris r (min-max)",
+        "proportionsSum": "Paylar p (ham veri)",
+        "proportionsMinmax": "Paylar p (min-max)",
+        "entropy": "Entropi e",
+        "diversification": "Çeşitlenme d",
+        "weights": "Ağırlıklar w"
+      },
       "topsis": {
         "normalized": "Normalize matris r (vektör)",
         "weighted": "Ağırlıklı matris v",
@@ -429,6 +461,13 @@
         "weight": "Ağırlık",
         "information": "Bilgi miktarı C"
       },
+      "entropy": {
+        "title": "Dengesiz pay, daha çok ağırlık",
+        "even": "eşit pay 1/m",
+        "entropy": "Entropi e",
+        "weight": "Ağırlık w",
+        "share": "Pay p"
+      },
       "topsis": {
         "title": "A+ ve A−'ye uzaklık",
         "caption": "A+'ya yakın ve A−'den uzak olanın C değeri yüksektir.",
@@ -444,6 +483,14 @@
         "sigma": "Kontrast",
         "correlation": "Korelasyon",
         "information": "Bilgi",
+        "weights": "Ağırlıklar"
+      },
+      "entropy": {
+        "normalized": "Normalize et",
+        "proportionsSum": "Paylar",
+        "proportionsMinmax": "Paylar",
+        "entropy": "Entropi",
+        "diversification": "Çeşitlenme",
         "weights": "Ağırlıklar"
       },
       "topsis": {
@@ -463,7 +510,7 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS ile sıralayın ve hesabın her adımını görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS ile sıralayın ve hesabın her adımını görün."
     }
   },
   "methods": {
@@ -475,6 +522,7 @@
     },
     "names": {
       "critic": "CRITIC",
+      "entropy": "Entropi",
       "topsis": "TOPSIS",
       "equal": "Eşit ağırlık",
       "manual": "Elle girilen ağırlık"
@@ -528,6 +576,7 @@
       "oneLiner": {
         "topsis": "En iyiye ve en kötüye uzaklıkla sıralar.",
         "critic": "Ağırlığı verideki kontrast ve çatışmadan bulur.",
+        "entropy": "Ağırlığı verinin ne kadar dengesiz dağıldığından bulur.",
         "equal": "Her kritere 1/n verir."
       }
     },
@@ -608,6 +657,14 @@
           },
           "weightHead": "Ağırlık = C / {{total}}"
         },
+        "entropy": {
+          "title": "Dengesiz pay, daha çok ağırlık",
+          "even": "eşit pay 1/m",
+          "entropy": "Entropi e",
+          "weight": "Ağırlık w",
+          "share": "Pay p",
+          "caption": "Her çubuk, bir alternatifin sütun toplamındaki payıdır."
+        },
         "steps": {
           "start": "Fikri adım adım izle",
           "group": "Fikri adım adım izleyin",
@@ -629,6 +686,14 @@
       "information": "Her kriterin bilgi içeriği: standart sapmasıyla toplam çatışmasının çarpımı.",
       "informationTotal": "Tüm kriterlerin toplam bilgi içeriği.",
       "weights": "Ağırlıklar: her kriterin toplam bilgi içeriğindeki payı."
+    },
+    "entropy": {
+      "normalized": "Min-max normalizasyonu: her sütun 0 ile 1 arasına ölçeklenir, maliyet kriterleri ters çevrilir; böylece 1 her zaman en iyi değerdir.",
+      "proportionsSum": "Paylar: her ham değer kendi sütununun toplamına bölünür. Kriter türleri kullanılmaz.",
+      "proportionsMinmax": "Paylar: her normalize değer kendi sütununun toplamına bölünür.",
+      "entropy": "Her kriterin entropisi: paylar eşitse 1, dengesizleştikçe daha düşük.",
+      "diversification": "Çeşitlenme derecesi: 1 eksi entropi, kriterin taşıdığı bilgi.",
+      "weights": "Entropi ağırlıkları: her kriterin toplam çeşitlenme içindeki payı."
     },
     "topsis": {
       "normalized": "Vektör normalizasyonu: her değer kendi sütununun uzunluğuna bölünür.",
@@ -660,6 +725,7 @@
       "invalid-criterion-type": "{{criterion}} için fayda ya da maliyet seç.",
       "constant-column": "{{criterion}} kriterinde bütün alternatiflerin değeri aynı, bu yüzden alternatifleri ayırt edemiyor.",
       "non-positive-value": "{{alternative}} için {{criterion}} değeri {{value}}. Bu yöntem 0'dan büyük değerler ister.",
+      "negative-value": "{{alternative}} için {{criterion}} değeri {{value}}. Ham veri (toplam) 0 ya da daha büyük değer ister; negatif değerler için Min-max seçin.",
       "weights-length-mismatch": "{{n}} kriter için {{value}} ağırlık var.",
       "invalid-weight": "{{criterion}} ağırlığına bir sayı gir.",
       "negative-weight": "{{criterion}} ağırlığı {{value}}. Ağırlıklar negatif olamaz.",
@@ -670,6 +736,13 @@
     "critic": {
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden CRITIC ağırlığı 0.",
       "few-alternatives": "4'ten az alternatifle korelasyonlar kararsızdır. CRITIC ağırlıklarını dikkatle yorumla.",
+      "all-constant-equal-weights": "Bütün kriterler sabit, ağırlıklandırılacak bilgi yok. Bunun yerine eşit ağırlık kullanıldı."
+    },
+    "entropy": {
+      "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden Entropi ağırlığı 0.",
+      "zeros-in-column": "{{criterion}} sıfır içeriyor. Sıfırlar payları dengesizleştirir ve ağırlığı şişirebilir.",
+      "two-alternatives-minmax": "2 alternatifle min-max, sabit olmayan her kritere aynı ağırlığı verir.",
+      "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor. Yayılımın gerçek mi gürültü mü olduğuna bakın.",
       "all-constant-equal-weights": "Bütün kriterler sabit, ağırlıklandırılacak bilgi yok. Bunun yerine eşit ağırlık kullanıldı."
     },
     "topsis": {

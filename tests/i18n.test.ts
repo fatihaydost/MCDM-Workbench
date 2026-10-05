@@ -57,6 +57,7 @@ describe('i18n resources', () => {
       'invalid-criterion-type',
       'constant-column',
       'non-positive-value',
+      'negative-value',
       'weights-length-mismatch',
       'invalid-weight',
       'negative-weight',
@@ -66,7 +67,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { critic, topsis } = await import('../src/core')
+    const { critic, entropy, topsis } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -81,7 +82,39 @@ describe('i18n resources', () => {
     }
     const w = critic.compute(p, {})
     const r = topsis.compute(p, [0.5, 0.5], {})
-    for (const s of [...w.steps, ...r.steps]) expect(flatEn[`steps.${s.key}`], s.key).toBeTypeOf('string')
-    for (const x of [...(w.warnings ?? []), ...(r.warnings ?? [])]) expect(flatEn[`warnings.${x.code}`], x.code).toBeTypeOf('string')
+    // Entropy: both variants, and small problems that trigger each of its notices.
+    const e = [
+      entropy.compute(p, {}),
+      entropy.compute(p, { normalization: 'minmax' }),
+      entropy.compute({ ...p, matrix: [[0, 1], [0, 2], [0, 4]] }, {}), // constant (all-zero) column
+      entropy.compute({ ...p, matrix: [[0, 1], [1, 2], [2, 4]] }, {}), // zeros in a column
+      entropy.compute({ ...p, alternatives: ['A', 'B'], matrix: [[1, 2], [3, 1]] }, { normalization: 'minmax' }), // m = 2
+      entropy.compute({ ...p, matrix: [[1, 1], [1, 1], [1, 1]] }, {}), // all constant
+      entropy.compute({ ...p, matrix: [[10, 0.045], [11, 0], [12, 0]] }, {}), // dominant weight
+    ]
+    const steps = [...w.steps, ...r.steps, ...e.flatMap((x) => x.steps)]
+    const warnings = [...(w.warnings ?? []), ...(r.warnings ?? []), ...e.flatMap((x) => x.warnings ?? [])]
+    expect(new Set(warnings.filter((x) => x.code.startsWith('entropy.')).map((x) => x.code))).toEqual(
+      new Set(['entropy.constant-column', 'entropy.zeros-in-column', 'entropy.two-alternatives-minmax', 'entropy.all-constant-equal-weights', 'entropy.dominant-weight']),
+    )
+    for (const s of steps) {
+      expect(flatEn[`steps.${s.key}`], s.key).toBeTypeOf('string')
+      expect(flatEn[`workbench.stepNames.${s.key}`], s.key).toBeTypeOf('string')
+    }
+    for (const x of warnings) expect(flatEn[`warnings.${x.code}`], x.code).toBeTypeOf('string')
+  })
+
+  it('label every option the registry methods declare', async () => {
+    const { listMethods } = await import('../src/core')
+    const declared = listMethods().flatMap((m) => (m.params ?? []).map((d) => [m.id, d] as const))
+    expect(declared.length).toBeGreaterThan(0)
+    for (const [id, d] of declared) {
+      expect(flatEn[`workbench.params.${id}.${d.key}`], `${id}.${d.key}`).toBeTypeOf('string')
+      if (d.kind !== 'choice') continue
+      for (const o of d.options) {
+        expect(flatEn[`workbench.params.${id}.${d.key}Options.${o}`], `${id}.${d.key}.${o}`).toBeTypeOf('string')
+        expect(flatEn[`workbench.params.${id}.${d.key}Variant.${o}`], `${id}.${d.key}.${o} variant`).toBeTypeOf('string')
+      }
+    }
   })
 })

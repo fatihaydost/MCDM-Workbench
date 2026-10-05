@@ -1,0 +1,120 @@
+{
+  "id": "entropy-krishnan2021-minmax",
+  "source": "Krishnan et al. 2021, Symmetry 13(6):973, doi:10.3390/sym13060973, Table 1 (input), Table 2 (min-max matrix), Table 5 column Entropy (output)",
+  "variant": "minmax",
+  "alternatives": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+  ],
+  "criteria": [
+    "price",
+    "screen",
+    "pixel_density",
+    "thickness",
+    "mass"
+  ],
+  "types": [
+    "cost",
+    "benefit",
+    "benefit",
+    "cost",
+    "cost"
+  ],
+  "matrix": [
+    [
+      649,
+      4.7,
+      326,
+      7.1,
+      143
+    ],
+    [
+      749,
+      5.5,
+      401,
+      7.3,
+      192
+    ],
+    [
+      740,
+      5.7,
+      520,
+      7.6,
+      171
+    ],
+    [
+      400,
+      5.7,
+      520,
+      11.1,
+      179
+    ],
+    [
+      600,
+      5.5,
+      538,
+      8.9,
+      152
+    ]
+  ],
+  "expected": {
+    "normalized_table2": [
+      [
+        0.2865,
+        0,
+        0,
+        1,
+        1
+      ],
+      [
+        0,
+        0.8,
+        0.3538,
+        0.95,
+        0
+      ],
+      [
+        0.0258,
+        1,
+        0.9151,
+        0.875,
+        0.4286
+      ],
+      [
+        1,
+        1,
+        0.9151,
+        0,
+        0.2653
+      ],
+      [
+        0.4269,
+        0.8,
+        1,
+        0.55,
+        0.8163
+      ]
+    ],
+    "normalized_tolerance": 5e-05,
+    "weights": [
+      0.3481,
+      0.136,
+      0.169,
+      0.1463,
+      0.2006
+    ],
+    "entropy_recomputed": [
+      0.63533,
+      0.85751,
+      0.82301,
+      0.8468,
+      0.78988
+    ],
+    "tolerance": 5e-05
+  },
+  "note": "The paper does not say which matrix its Entropy column was computed on; Table 5 is reproduced only on the Table 2 min-max matrix (variant b). Labels are consistent.",
+  "card": "docs/research/methods/entropy.md"
+}

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import katex from 'katex'
 import { describe, expect, it } from 'vitest'
 import { critic as criticCore } from '../core/methods/critic'
+import { entropy as entropyCore } from '../core/methods/entropy'
 import { topsis as topsisCore } from '../core/methods/topsis'
 import { listMethods } from '../core/registry'
 import type { Problem } from '../core/types'
@@ -108,7 +109,7 @@ describe('method content', () => {
     const available = allMethods.filter((m) => m.status === 'available').map((m) => m.id).sort()
     const registry = listMethods().map((m) => m.id).sort()
     expect(available).toEqual(registry)
-    expect(available).toEqual(['critic', 'equal', 'topsis'])
+    expect(available).toEqual(['critic', 'entropy', 'equal', 'topsis'])
   })
 
   it('gives each registry method the matching kind of family', () => {
@@ -193,9 +194,11 @@ describe('step content', () => {
   it('covers exactly the step keys the core emits', () => {
     const emitted = [
       ...criticCore.compute(problem, {}).steps.map((s) => s.key),
+      ...entropyCore.compute(problem, {}).steps.map((s) => s.key),
+      ...entropyCore.compute(problem, { normalization: 'minmax' }).steps.map((s) => s.key),
       ...topsisCore.compute(problem, [0.4, 0.3, 0.3], {}).steps.map((s) => s.key),
     ]
-    expect([...STEP_KEYS].sort()).toEqual([...emitted].sort())
+    expect([...STEP_KEYS].sort()).toEqual([...new Set(emitted)].sort())
   })
 
   it('has both languages for every key', () => {

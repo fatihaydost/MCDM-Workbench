@@ -3,7 +3,7 @@ import type { Bilingual } from './types'
 /**
  * One-line explanation and formula for every intermediate step the core returns
  * (Step.key in src/core/methods/*.ts). Formulas follow the code, including its edge cases:
- * src/core/methods/critic.ts and src/core/methods/topsis.ts.
+ * src/core/methods/critic.ts, src/core/methods/entropy.ts and src/core/methods/topsis.ts.
  * Notation: i = alternative (1..m), j, k = criterion (1..n), J+ benefit and J- cost criteria.
  */
 export type StepContent = Bilingual & {
@@ -20,6 +20,12 @@ export type StepKey =
   | 'critic.information'
   | 'critic.informationTotal'
   | 'critic.weights'
+  | 'entropy.normalized'
+  | 'entropy.proportionsSum'
+  | 'entropy.proportionsMinmax'
+  | 'entropy.entropy'
+  | 'entropy.diversification'
+  | 'entropy.weights'
   | 'topsis.normalized'
   | 'topsis.weighted'
   | 'topsis.idealBest'
@@ -71,6 +77,56 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
     en: 'CRITIC weights: each criterion\'s share of the total information.',
     tr: 'CRITIC ağırlıkları: her kriterin toplam bilgi içindeki payı.',
     tex: String.raw`w_j = \frac{C_j}{\sum_{k=1}^{n} C_k}`,
+    edgeCase: {
+      en: 'If the total is 0 (every column constant), every weight is 1/n.',
+      tr: 'Toplam 0 ise (bütün sütunlar sabit) her ağırlık 1/n olur.',
+    },
+  },
+  'entropy.normalized': {
+    en: 'Min-max normalized matrix: each column scaled to 0-1, 1 is best (cost reversed).',
+    tr: 'Min-max normalize matris: her sütun 0-1 aralığına iner, 1 en iyidir (maliyet ters).',
+    tex: String.raw`r_{ij} = \begin{cases} \dfrac{x_{ij} - \min_i x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{+} \\[2ex] \dfrac{\max_i x_{ij} - x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{-} \end{cases}`,
+    edgeCase: {
+      en: 'A constant column (max = min) is set to 0 and never divided.',
+      tr: 'Sabit bir sütun (maks = min) 0 alınır, hiç bölünmez.',
+    },
+  },
+  'entropy.proportionsSum': {
+    en: 'Shares of the raw values: each value over its column total.',
+    tr: 'Ham değerlerin payları: her değer sütun toplamına bölünür.',
+    tex: String.raw`p_{ij} = \frac{x_{ij}}{\sum_{i=1}^{m} x_{ij}}, \qquad x_{ij} \ge 0`,
+    edgeCase: {
+      en: 'A constant column, also all zeros, gets p = 1/m.',
+      tr: 'Sabit bir sütun, tamamı sıfır olan da, p = 1/m alır.',
+    },
+  },
+  'entropy.proportionsMinmax': {
+    en: 'Shares of the normalized values: each value over its column total.',
+    tr: 'Normalize değerlerin payları: her değer sütun toplamına bölünür.',
+    tex: String.raw`p_{ij} = \frac{r_{ij}}{\sum_{i=1}^{m} r_{ij}}`,
+    edgeCase: {
+      en: 'A constant column gets p = 1/m.',
+      tr: 'Sabit bir sütun p = 1/m alır.',
+    },
+  },
+  'entropy.entropy': {
+    en: 'Entropy per criterion: 1 for equal shares, lower when uneven.',
+    tr: 'Kriter başına entropi: eşit paylarda 1, dengesizleştikçe düşer.',
+    tex: String.raw`e_j = -\frac{1}{\ln m} \sum_{i=1}^{m} p_{ij} \ln p_{ij}, \qquad 0 \ln 0 = 0`,
+  },
+  'entropy.diversification': {
+    en: 'Degree of diversification: the information the criterion carries.',
+    tr: 'Çeşitlenme derecesi: kriterin taşıdığı bilgi.',
+    tex: String.raw`d_j = \max\left(0,\ 1 - e_j\right)`,
+    edgeCase: {
+      en: 'A constant column gets d = 0.',
+      tr: 'Sabit bir sütun d = 0 alır.',
+    },
+  },
+  'entropy.weights': {
+    en: "Entropy weights: each criterion's share of the total diversification.",
+    tr: 'Entropi ağırlıkları: her kriterin toplam çeşitlenme içindeki payı.',
+    tex: String.raw`w_j = \frac{d_j}{\sum_{k=1}^{n} d_k}`,
     edgeCase: {
       en: 'If the total is 0 (every column constant), every weight is 1/n.',
       tr: 'Toplam 0 ise (bütün sütunlar sabit) her ağırlık 1/n olur.',

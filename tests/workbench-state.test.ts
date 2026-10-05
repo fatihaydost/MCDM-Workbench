@@ -1,8 +1,18 @@
 import { describe, expect, it } from 'vitest'
 import { examples, getExample, shortCitation } from '../src/data/examples'
-import { computeRanking, computeValidation, computeWeights, useWorkbench, type DraftProblem } from '../src/state/workbench'
+import {
+  computeRanking,
+  computeValidation,
+  computeWeights,
+  initialWorkbench,
+  useWorkbench,
+  WORKBENCH_STORAGE_KEY,
+  type DraftProblem,
+} from '../src/state/workbench'
 import { expectClose } from './helpers'
 import critic2021 from './fixtures/critic-krishnan2021.json'
+import entropyK from './fixtures/entropy-krishnan2021-minmax.json'
+import zavadskas from './fixtures/entropy-zavadskas2017.json'
 import f from './fixtures/opricovic-tzeng-2004-f.json'
 import phi from './fixtures/opricovic-tzeng-2004-phi.json'
 
@@ -20,6 +30,13 @@ describe('examples match the published fixtures', () => {
     const ex = getExample('krishnan-2021-smartphones')!
     expect(ex.matrix).toEqual(critic2021.matrix)
     expect(ex.criteria.map((c) => c.type)).toEqual(critic2021.types)
+  })
+  it('Zavadskas et al. 2017', () => {
+    const ex = getExample('zavadskas-2017-vilnius')!
+    expect(ex.matrix).toEqual(zavadskas.matrix)
+    expect(ex.alternatives).toEqual(zavadskas.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(zavadskas.types)
+    expect(ex.published).toEqual([{ label: 'entropy.weights', values: zavadskas.expected.weights, decimals: 4 }])
   })
   for (const [id, fx] of [['opricovic-tzeng-2004-f', f], ['opricovic-tzeng-2004-phi', phi]] as const) {
     it(id, () => {
@@ -57,6 +74,44 @@ describe('derived results', () => {
     const r = computeRanking(data)
     expectClose(r.value!.scores, f.expected.closeness, f.expected.tolerance)
     expect(r.value!.ranking).toEqual(f.expected.ranking)
+  })
+
+  it('Entropy weights reproduce Zavadskas et al. 2017 (data column order) and, with min-max, Krishnan et al. 2021', () => {
+    const w = computeWeights({ problem: draftOf('zavadskas-2017-vilnius'), weightMethod: 'entropy', manualWeights: [] })
+    expectClose(w.value!.weights, zavadskas.expected.weights, zavadskas.expected.tolerance)
+    const k = computeWeights({
+      problem: draftOf('krishnan-2021-smartphones'),
+      weightMethod: 'entropy',
+      manualWeights: [],
+      methodParams: { entropy: { normalization: 'minmax' } },
+    })
+    expectClose(k.value!.weights, entropyK.expected.weights, entropyK.expected.tolerance)
+  })
+
+  it('ignores a saved option the method does not declare', () => {
+    const base = computeWeights({ problem: draftOf('zavadskas-2017-vilnius'), weightMethod: 'entropy', manualWeights: [] })
+    const odd = computeWeights({
+      problem: draftOf('zavadskas-2017-vilnius'),
+      weightMethod: 'entropy',
+      manualWeights: [],
+      methodParams: { entropy: { normalization: 'zscore', other: 3 } },
+    })
+    expect(odd.value!.weights).toEqual(base.value!.weights)
+  })
+
+  it('Entropy (sum) blocks on a negative value with its cell; min-max computes', () => {
+    const p = draftOf('zavadskas-2017-vilnius')
+    const matrix = p.matrix.map((r) => [...r]) as (number | null)[][]
+    matrix[3]![1] = -5
+    const draft = { ...p, matrix }
+    const w = computeWeights({ problem: draft, weightMethod: 'entropy', manualWeights: [] })
+    expect(w.value).toBeNull()
+    expect(w.issues).toContainEqual({ code: 'negative-value', severity: 'error', row: 3, col: 1, value: -5 })
+    const r = computeRanking({ problem: draft, weightMethod: 'entropy', manualWeights: [], rankingMethod: 'topsis' })
+    expect(r.value).toBeNull()
+    expect(r.issues.map((x) => x.code)).toContain('negative-value')
+    const mm = computeWeights({ problem: draft, weightMethod: 'entropy', manualWeights: [], methodParams: { entropy: { normalization: 'minmax' } } })
+    expect(mm.value).not.toBeNull()
   })
 
   it('equal weights are 1/n', () => {
@@ -121,6 +176,40 @@ describe('store actions', () => {
       [4500, null],
       [null, null],
     ])
+  })
+
+  it('loadExample opens a weighting method\'s reference example with that method in its default variant', () => {
+    const st = useWorkbench.getState()
+    st.setMethodParam('entropy', 'normalization', 'minmax')
+    st.loadExample('zavadskas-2017-vilnius', 'en')
+    const s = useWorkbench.getState()
+    expect(s.weightMethod).toBe('entropy')
+    expect(s.methodParams?.entropy).toEqual({})
+    const w = computeWeights(s)
+    expectClose(w.value!.weights, zavadskas.published_as_printed.perm.map((_, j) => zavadskas.expected.weights[j]!), 1e-4)
+    useWorkbench.getState().loadExample('krishnan-2021-smartphones', 'en')
+    expect(useWorkbench.getState().weightMethod).toBe('critic')
+  })
+
+  it('setMethodParam keeps other methods and keys', () => {
+    const st = useWorkbench.getState()
+    st.reset()
+    st.setMethodParam('entropy', 'normalization', 'minmax')
+    st.setMethodParam('vikor', 'v', 0.5)
+    expect(useWorkbench.getState().methodParams).toEqual({ entropy: { normalization: 'minmax' }, vikor: { v: 0.5 } })
+  })
+
+  it('a state saved before method options existed loads, with no options', async () => {
+    useWorkbench.getState().reset()
+    const storage = useWorkbench.persist.getOptions().storage!
+    const old = initialWorkbench() as Partial<ReturnType<typeof initialWorkbench>>
+    delete old.methodParams
+    await storage.setItem(WORKBENCH_STORAGE_KEY, { state: { ...old, weightMethod: 'critic', exampleId: 'x' }, version: 1 })
+    await useWorkbench.persist.rehydrate()
+    const s = useWorkbench.getState()
+    expect(s.exampleId).toBe('x')
+    expect(s.methodParams).toEqual({})
+    expect(computeWeights({ ...s, problem: draftOf('krishnan-2021-smartphones') }).value).not.toBeNull()
   })
 
   it('startBlank and reset', () => {
