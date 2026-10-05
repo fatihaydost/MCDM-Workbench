@@ -252,7 +252,8 @@ test('a new page starts at the top', async ({ page }) => {
 const krishnan = async () => {
   const { critic, topsis } = await import('../../src/core')
   const { reweight } = await import('../../src/core/robustness')
-  const { largestWeight, rankOrder } = await import('../../src/app/workbench/robustness/helpers')
+  const { largestWeight } = await import('../../src/app/workbench/robustness/helpers')
+  const { rankOrder } = await import('../../src/app/ranking/order')
   const { getExample } = await import('../../src/data/examples')
   const ex = getExample('krishnan-2021-smartphones')!
   const problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
@@ -353,4 +354,110 @@ test('robustness: a new κ changes the heat map\'s colours and never moves its c
   const heat = (await recorded(page)).filter((m) => m.startsWith('rect:'))
   expect(heat.length).toBeGreaterThan(0)
   expect(new Set(heat)).toEqual(new Set(['rect:fill']))
+})
+
+// ---------- Landing hero: the weight of price re-ranks the published example ----------
+
+const heroOrder = async () => {
+  const { critic, topsis } = await import('../../src/core')
+  const { reweight } = await import('../../src/core/robustness')
+  const { rankOrder } = await import('../../src/app/ranking/order')
+  const { getExample } = await import('../../src/data/examples')
+  const ex = getExample('krishnan-2021-smartphones')!
+  const problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const w = critic.compute(problem, {}).weights
+  const at = (weights: number[]) => rankOrder(topsis.compute(problem, weights, {}).ranking).map((i) => ex.alternatives[i]!)
+  // Price is the first criterion.
+  return { base: at(w), order: (wp: number) => at(reweight(w, 0, wp)) }
+}
+
+const hero = (page: Page) => page.locator('section[aria-labelledby="hero-result-title"]')
+
+test('landing hero: the price slider slides the rows into the core\'s order, and reset brings back CRITIC', async ({ page }) => {
+  const { base, order } = await heroOrder()
+  await recordRows(page)
+  await page.goto('/')
+  await expect(page.getByTestId('live-row')).toHaveCount(5)
+  await settled(page)
+  // The page opens without motion, at the CRITIC weights.
+  expect((await rowLog(page)).slides).toEqual([])
+  expect(await liveOrder(page)).toEqual(base)
+  await expect(hero(page).getByRole('button', { name: 'Back to CRITIC' })).toHaveCount(0)
+
+  const slider = hero(page).getByRole('slider', { name: 'Weight of price' })
+  await slider.focus()
+  await page.keyboard.press('End')
+  await expect(page.getByTestId('hero-price-weight')).toHaveText('1.0000')
+  await expect.poll(async () => (await rowLog(page)).slides.length).toBeGreaterThan(0)
+  expect((await rowLog(page)).tinted.length).toBeGreaterThan(0)
+  await settled(page)
+  expect(await liveOrder(page)).toEqual(order(1))
+  // The cheapest phone wins when price is all that counts; first place is announced.
+  expect((await liveOrder(page))[0]).toBe('D')
+  await expect(hero(page).locator('[aria-live="polite"]')).toHaveText('D is first at this weight.')
+  const offsets = await page.getByTestId('live-row').evaluateAll((els) => els.map((el) => getComputedStyle(el).transform))
+  expect(new Set(offsets)).toEqual(new Set(['none']))
+
+  await page.keyboard.press('Home')
+  await settled(page)
+  expect((await liveOrder(page))[0]).toBe('C')
+  expect(await liveOrder(page)).toEqual(order(0))
+
+  // Reset from the keyboard: the button goes away, focus returns to the slider, first place is said again.
+  await hero(page).getByRole('button', { name: 'Back to CRITIC' }).focus()
+  await page.keyboard.press('Enter')
+  await settled(page)
+  expect(await liveOrder(page)).toEqual(base)
+  await expect(slider).toBeFocused()
+  await expect(hero(page).locator('[aria-live="polite"]')).toHaveText(`${base[0]} is first at this weight.`)
+  await expect(hero(page).getByText('Drag it to re-rank')).toBeVisible()
+  await expect(page.getByTestId('hero-price-weight')).toHaveText('0.1872')
+})
+
+test('landing hero: the first arrow key from the CRITIC weight lands on the 0.01 grid', async ({ page }) => {
+  const { order } = await heroOrder()
+  await page.goto('/')
+  const slider = hero(page).getByRole('slider', { name: 'Weight of price' })
+  await slider.focus()
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByTestId('hero-price-weight')).toHaveText('0.1800')
+  await expect(slider).toHaveAttribute('aria-valuetext', '0.1800')
+  await settled(page)
+  expect(await liveOrder(page)).toEqual(order(0.18))
+})
+
+test('landing hero: a held-down arrow key re-ranks without sliding rows or moving bars', async ({ page }) => {
+  const { order } = await heroOrder()
+  await recordRows(page)
+  await page.goto('/')
+  await expect(page.getByTestId('live-row')).toHaveCount(5)
+  await settled(page)
+  await recordMotion(page)
+  await hero(page).getByRole('slider', { name: 'Weight of price' }).focus()
+  for (let n = 0; n < 30; n++) await page.keyboard.down('ArrowRight')
+  await page.keyboard.up('ArrowRight')
+  const wp = Number(await page.getByTestId('hero-price-weight').innerText())
+  expect(wp).toBeGreaterThan(0.4)
+  expect((await rowLog(page)).slides).toEqual([])
+  // Only the first keydown is not a repeat: at most one step of bar transitions, none after it.
+  const bars = (await recorded(page)).filter((m) => m.startsWith('rect:') || m.startsWith('text:'))
+  expect(bars.length).toBeLessThanOrEqual(10)
+  expect(await running(page, 'section[aria-labelledby="hero-result-title"] svg')).toBe(0)
+  expect(await liveOrder(page)).toEqual(order(wp))
+})
+
+test.describe('landing hero with reduced motion', () => {
+  test.use({ reducedMotion: 'reduce' })
+
+  test('rows jump to their new place without sliding, and still take the tint', async ({ page }) => {
+    const { order } = await heroOrder()
+    await recordRows(page)
+    await page.goto('/')
+    await expect(page.getByTestId('live-row')).toHaveCount(5)
+    await hero(page).getByRole('slider', { name: 'Weight of price' }).focus()
+    await page.keyboard.press('End')
+    await expect.poll(async () => (await rowLog(page)).tinted.length).toBeGreaterThan(0)
+    expect((await rowLog(page)).slides).toEqual([])
+    expect(await liveOrder(page)).toEqual(order(1))
+  })
 })

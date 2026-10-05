@@ -1,7 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
 import { critic, topsis } from '../../src/core'
 import { monteCarlo, perturbWeights, removeCriteria, reweight, sweepWeight } from '../../src/core/robustness'
-import { largestWeight, rankOrder, stepWeight } from '../../src/app/workbench/robustness/helpers'
+import { rankOrder, stepWeight } from '../../src/app/ranking/order'
+import { largestWeight } from '../../src/app/workbench/robustness/helpers'
 import { getExample } from '../../src/data/examples'
 
 const ex = getExample('krishnan-2021-smartphones')!

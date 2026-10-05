@@ -28,6 +28,8 @@ export type BarChartProps = {
     value: string
   }
   className?: string
+  /** Values come from a held-down key (key repeat): bars jump instead of moving (MOTION.md frequency rule). */
+  instant?: boolean
 }
 
 /**
@@ -46,10 +48,11 @@ export function BarChart({
   description,
   tableLabels,
   className,
+  instant = false,
 }: BarChartProps) {
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
-  const animate = useAnimateValues(width)
+  const animate = useAnimateValues(width) && !instant
   const layout = useMemo(
     () => layoutBars({ labels, values, width, format, sort, highlight, domain }),
     [labels, values, width, format, sort, highlight, domain],

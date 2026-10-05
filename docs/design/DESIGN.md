@@ -72,7 +72,9 @@ or Tailwind palette names (`bg-blue-500` is a bug). Light and dark are the same 
   control and the grid scrolls horizontally inside its own container, never the page.
 - **Landing (`/`):** one screen hero, left-aligned: headline, one sentence, primary action "Open workbench"
   and secondary "Methods". The right side is a **real, running component**: the Results table computed
-  live from the bundled example dataset, not a screenshot and not a div mock. Below: how it works (a
+  live from the bundled example dataset, not a screenshot and not a div mock. A slider under the table moves
+  the weight of price (the others keep their proportions), and the rows slide to their new ranks: the one
+  idea of the tool, that the result depends on the weights, in one gesture. Below: how it works (a
   diagram of the actual pipeline, data to weights to ranking), the methods catalogue with honest status
   (available / in research), and "verified against the literature" listing each method's reference paper
   and tolerance, taken from the test fixtures. Footer: source, author, licence. No logo wall, no

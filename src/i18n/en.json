@@ -56,15 +56,21 @@
     "result": {
       "title": "TOPSIS ranking of five smartphones",
       "subtitle": "CRITIC weights, computed live",
+      "subtitleMoved": "Price weight yours, the rest CRITIC",
       "rank": "Rank",
       "alternative": "Phone",
       "closeness": "Closeness C",
+      "priceWeight": "Weight of price",
+      "invite": "Drag it to re-rank",
+      "reset": "Back to CRITIC",
+      "leader": "{{name}} is first at this weight.",
       "weightsTitle": "CRITIC weights",
+      "weightsTitleMoved": "Weights",
       "showTable": "Show as table",
       "criterion": "Criterion",
       "weight": "Weight",
       "data": "Data: {{citation}}.",
-      "check": "Weights match the paper's Table 5. TOPSIS is computed here."
+      "check": "CRITIC weights match the paper's Table 5. TOPSIS is computed here."
     },
     "how": {
       "title": "How it works",

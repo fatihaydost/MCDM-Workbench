@@ -56,15 +56,21 @@
     "result": {
       "title": "Beş akıllı telefonun TOPSIS sıralaması",
       "subtitle": "CRITIC ağırlıkları, anlık hesaplanır",
+      "subtitleMoved": "Fiyat ağırlığı sizden, diğerleri CRITIC",
       "rank": "Sıra",
       "alternative": "Telefon",
       "closeness": "Yakınlık C",
+      "priceWeight": "Fiyatın ağırlığı",
+      "invite": "Kaydırın, sıralama değişsin",
+      "reset": "CRITIC ağırlığına dönün",
+      "leader": "Bu ağırlıkta birinci {{name}}.",
       "weightsTitle": "CRITIC ağırlıkları",
+      "weightsTitleMoved": "Ağırlıklar",
       "showTable": "Tablo olarak göster",
       "criterion": "Kriter",
       "weight": "Ağırlık",
       "data": "Veri: {{citation}}.",
-      "check": "Ağırlıklar makalenin Tablo 5'iyle örtüşür. TOPSIS burada hesaplanır."
+      "check": "CRITIC ağırlıkları makalenin Tablo 5'iyle örtüşür. TOPSIS burada hesaplanır."
     },
     "how": {
       "title": "Nasıl çalışır",

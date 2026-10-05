@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { cn, Table, TBody, Td, Th, THead, Tr } from '../../../ui'
-import { movedAlternatives } from './helpers'
+import { cn, Table, TBody, Td, Th, THead, Tr } from '../../ui'
+import { movedAlternatives } from './order'
 import { paintedOffsetY, reducedMotion, tokenEase, tokenMs } from './motion'
-import s from './robustness.module.css'
+import s from './ranking.module.css'
 
 /**
  * How long the rows that changed place keep their tint. A hold, not a motion: it is the same with reduced motion
@@ -25,6 +25,7 @@ export type LiveRankingProps = {
    * high-frequency keyboard action gets no motion); the tint stays.
    */
   instant?: boolean
+  density?: 'compact' | 'regular'
 }
 
 /**
@@ -33,7 +34,7 @@ export type LiveRankingProps = {
  * starts from their painted position, so dragging never makes a row jump. Rows that changed place take a short accent
  * tint. Closeness values change at once (no counting). With reduced motion the rows jump and the tint remains.
  */
-export function LiveRanking({ order, ranking, scores, names, format, labelledBy, columns, instant = false }: LiveRankingProps) {
+export function LiveRanking({ order, ranking, scores, names, format, labelledBy, columns, instant = false, density = 'regular' }: LiveRankingProps) {
   const rows = useRef(new Map<number, HTMLTableRowElement>())
   const tops = useRef(new Map<number, number>())
   const prevOrder = useRef<number[] | null>(null)
@@ -85,7 +86,7 @@ export function LiveRanking({ order, ranking, scores, names, format, labelledBy,
   }, [moved])
 
   return (
-    <Table density="regular" aria-labelledby={labelledBy} className="w-full" stickyHeader={false}>
+    <Table density={density} aria-labelledby={labelledBy} className="w-full" stickyHeader={false}>
       <THead>
         <Tr>
           <Th numeric className="w-16">
@@ -95,7 +96,7 @@ export function LiveRanking({ order, ranking, scores, names, format, labelledBy,
           <Th numeric>{columns.closeness}</Th>
         </Tr>
       </THead>
-      <TBody className={s.liveBody}>
+      <TBody>
         {order.map((i) => {
           const first = ranking[i] === 1
           return (

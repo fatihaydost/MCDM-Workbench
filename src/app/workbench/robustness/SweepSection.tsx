@@ -1,5 +1,5 @@
 import { ArrowCounterClockwise } from '@phosphor-icons/react'
-import { useCallback, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
+import { useCallback, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { reweight } from '../../../core/robustness'
 import type { Problem, RankingMethod } from '../../../core/types'
@@ -8,16 +8,10 @@ import { useElementWidth } from '../../../features/charts/useElementWidth'
 import { useNumberFormat } from '../../../i18n'
 import { Button, SegmentedControl, Select } from '../../../ui'
 import { DECIMALS } from '../shared'
-import {
-  labelledLines,
-  largestWeight,
-  MANY_ALTERNATIVES,
-  MANY_SWITCHES,
-  rankOrder,
-  snapWeight,
-  stepWeight,
-} from './helpers'
-import { LiveRanking } from './LiveRanking'
+import { LiveRanking } from '../../ranking/LiveRanking'
+import { rankOrder, snapWeight } from '../../ranking/order'
+import { THUMB, WeightRange } from '../../ranking/WeightRange'
+import { labelledLines, largestWeight, MANY_ALTERNATIVES, MANY_SWITCHES } from './helpers'
 import s from './robustness.module.css'
 import { SectionHead, segmentedWidth, SourcesDisclosure } from './SectionParts'
 import { useRobustnessText } from './text'
@@ -33,8 +27,6 @@ type Props = {
   criteria: string[]
 }
 
-/** Thumb of the range input (robustness.module.css --thumb): its centre runs from thumb/2 to width - thumb/2. */
-const THUMB = 16
 const EMPTY_XS = [0, 1]
 const NO_LINES: number[] = []
 const NO_MARKS: { x: number; y: number }[] = []
@@ -90,17 +82,6 @@ export function SweepSection({ problem, weights, method, baseRanking, names, cri
   const format4 = useCallback((v: number) => nf.format(v), [nf])
   const formatTick = useCallback((v: number, d: number) => nf.format(v, d), [nf])
   const formatWeight = useCallback((v: number) => nf.format(v, 2), [nf])
-
-  const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
-    const steps: Record<string, number> = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 10, PageDown: -10 }
-    if (e.key in steps) {
-      e.preventDefault()
-      setWeight(stepWeight(wk, steps[e.key]!), e.repeat)
-    } else if (e.key === 'Home' || e.key === 'End') {
-      e.preventDefault()
-      setWeight(e.key === 'Home' ? 0 : 1, e.repeat)
-    }
-  }
 
   let holds = ''
   if (baseLeaders.length > 1) holds = t('sweep.tied', { names: baseLeaders.map((i) => names[i]).join(', ') })
@@ -193,17 +174,15 @@ export function SweepSection({ problem, weights, method, baseRanking, names, cri
             }}
             below={({ left, right }) => (
               <div className="flex flex-col gap-1">
-                <div className={s.slider} style={{ marginLeft: left - THUMB / 2, width: right - left + THUMB } as CSSProperties}>
-                  <WeightInput
-                    id={sliderId}
-                    label={t('sweep.slider', { criterion })}
-                    value={wk}
-                    valueText={nf.format(wk)}
-                    onChange={(v) => setWeight(snapWeight(v))}
-                    onKeyDown={onKey}
-                  />
-                  <span aria-hidden className={s.baseTick} style={{ left: `calc(${THUMB / 2}px + ${base} * (100% - ${THUMB}px))` }} />
-                </div>
+                <WeightRange
+                  id={sliderId}
+                  label={t('sweep.slider', { criterion })}
+                  value={wk}
+                  base={base}
+                  valueText={nf.format(wk)}
+                  onChange={setWeight}
+                  style={{ marginLeft: left - THUMB / 2, width: right - left + THUMB }}
+                />
                 {readout}
               </div>
             )}
@@ -262,31 +241,5 @@ export function SweepSection({ problem, weights, method, baseRanking, names, cri
 
       <SourcesDisclosure part="sweep" />
     </section>
-  )
-}
-
-/** The weight as a native range input: 0..1 in 0.01 steps, the exact value in aria-valuetext. */
-function WeightInput(props: {
-  id: string
-  label: string
-  value: number
-  valueText: string
-  onChange: (v: number) => void
-  onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void
-}) {
-  return (
-    <input
-      id={props.id}
-      type="range"
-      className={s.range}
-      min={0}
-      max={1}
-      step={0.01}
-      value={props.value}
-      aria-label={props.label}
-      aria-valuetext={props.valueText}
-      onChange={(e) => props.onChange(Number(e.target.value))}
-      onKeyDown={props.onKeyDown}
-    />
   )
 }
