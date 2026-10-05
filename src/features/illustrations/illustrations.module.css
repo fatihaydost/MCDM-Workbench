@@ -532,6 +532,21 @@
 }
 
 
+/* Entropy idea -------------------------------------------------------------------------------- */
+
+/* The even share 1/m: what every bar would be if the criterion could not tell the alternatives apart. */
+.evenLine {
+  stroke: var(--text-2);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  shape-rendering: crispEdges;
+}
+
+.evenNote {
+  fill: var(--text-2);
+  font-size: 12px;
+}
+
 /* Method thumbnails (catalogue cards) --------------------------------------------------------- */
 
 .thumb {

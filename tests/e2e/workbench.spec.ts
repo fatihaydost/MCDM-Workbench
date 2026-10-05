@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { critic, topsis, type CriterionType } from '../../src/core'
+import { critic, entropy, topsis, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -205,11 +205,13 @@ test('the whole flow works with the keyboard alone', async ({ page }) => {
     await page.keyboard.press(key)
     await expect(page.getByRole('radio', { name: to })).toBeFocused()
   }
+  await arrow('ArrowRight', 'Entropy')
   await arrow('ArrowRight', 'Equal weights')
   await arrow('ArrowRight', 'Manual')
   await page.keyboard.press('Space')
   await expect(page.getByRole('radio', { name: 'Manual' })).toHaveAttribute('aria-checked', 'true')
   await arrow('ArrowLeft', 'Equal weights')
+  await arrow('ArrowLeft', 'Entropy')
   await arrow('ArrowLeft', 'CRITIC')
   await page.keyboard.press('Space')
   await expect(page.getByRole('radio', { name: 'CRITIC' })).toHaveAttribute('aria-checked', 'true')
@@ -246,3 +248,50 @@ test('the whole flow works with the keyboard alone', async ({ page }) => {
   await page.keyboard.press('Enter')
   await expect(stageHeading(page, 'Data')).toBeVisible()
 })
+
+test('Entropy: the Vilnius example gives the published weights; min-max, a negative value and the calculation', async ({ page }) => {
+  const z = fixture('entropy-zavadskas2017') as { matrix: number[][]; types: CriterionType[]; expected: { weights: number[] } }
+  await page.goto('/app?example=zavadskas-2017-vilnius&stage=weights')
+  await expect(stageHeading(page, 'Weights')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'Entropy' })).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByRole('radio', { name: 'Raw data (sum)' })).toHaveAttribute('aria-checked', 'true')
+  const weightCells = page.getByRole('table', { name: 'Weights by criterion' }).locator('tbody tr td:last-child')
+  await expect(weightCells).toHaveText(z.expected.weights.map(f4))
+  await expect(page.locator('figure', { hasText: 'Uneven shares, more weight' })).toBeVisible()
+
+  // Min-max: other weights, the same as the core's.
+  await page.getByRole('radio', { name: 'Min-max' }).click()
+  const p = { alternatives: z.matrix.map((_, i) => `A${i}`), criteria: z.types.map((type, j) => ({ name: `C${j}`, type })), matrix: z.matrix }
+  const minmax = entropy.compute(p, { normalization: 'minmax' }).weights.map(f4)
+  expect(minmax).not.toEqual(z.expected.weights.map(f4))
+  await expect(weightCells).toHaveText(minmax)
+  await expect(page.locator('nav[aria-label="Stages"]:visible')).toContainText('Entropy (min-max)')
+
+  // "Show the calculation": the min-max steps, then the four raw-data steps.
+  await page.getByRole('button', { name: 'Show the calculation' }).click()
+  const steps = page.locator('section[data-step]')
+  await expect(steps).toHaveCount(5)
+  await page.getByRole('radio', { name: 'Raw data (sum)' }).click()
+  await expect(steps).toHaveCount(4)
+  expect(await steps.evaluateAll((els) => els.map((e) => e.getAttribute('data-step')))).toEqual([
+    'entropy.proportionsSum',
+    'entropy.entropy',
+    'entropy.diversification',
+    'entropy.weights',
+  ])
+  await expect(page.getByRole('navigation', { name: 'Calculation steps' })).toContainText('Diversification')
+
+  // A negative value blocks raw-data shares with a message that offers min-max; min-max then computes.
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Data' }).click()
+  await page.locator('#wb-cell-3-1').click()
+  await page.keyboard.type('-5')
+  await page.keyboard.press('Enter')
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Weights' }).click()
+  const error = page.getByRole('button', { name: /^Justiniškės on Population density \(per km²\) is .5\. Raw data \(sum\) needs values of 0 or more; choose Min-max to use negative values\.$/ })
+  await expect(error).toBeVisible()
+  await expect(page.getByText('The decision matrix has problems')).toBeVisible()
+  await page.getByRole('radio', { name: 'Min-max' }).click()
+  await expect(error).toHaveCount(0)
+  await expect(weightCells).toHaveCount(5)
+})
+

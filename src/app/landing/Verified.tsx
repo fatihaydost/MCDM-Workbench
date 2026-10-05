@@ -5,10 +5,11 @@ import { formatNumber, useLang, type Lang } from '../../i18n'
 // Tolerances come straight from the test fixtures, so the page cannot drift from what the tests check.
 import krishnan from '../../../tests/fixtures/critic-krishnan2021.json'
 import xlsx from '../../../tests/fixtures/critic-xlsx.json'
+import zavadskas from '../../../tests/fixtures/entropy-zavadskas2017.json'
 import opricovicF from '../../../tests/fixtures/opricovic-tzeng-2004-f.json'
 import { textLink } from './usePageMeta'
 
-type Row = { method: 'critic' | 'topsis'; citation: Citation; tolerance: number }
+type Row = { method: 'critic' | 'entropy' | 'topsis'; citation: Citation; tolerance: number }
 
 /** ±0.00005 in the active locale, with as many decimals as the tolerance needs. */
 function formatTolerance(tol: number, lang: Lang): string {
@@ -27,7 +28,7 @@ function formatPower(tol: number): string {
 const decimalsOf = (tol: number): number => Math.max(0, Math.round(-Math.log10(tol * 2)))
 
 /**
- * "Checked against published results": a two-row ledger, the claim in words first and the
+ * "Checked against published results": one ledger row per method, the claim in words first and the
  * tolerance as small secondary text. Other checks sit behind a disclosure.
  */
 export function Verified() {
@@ -35,6 +36,7 @@ export function Verified() {
   const [lang] = useLang()
   const rows: Row[] = [
     { method: 'critic', citation: getExample('krishnan-2021-smartphones')!.citation, tolerance: krishnan.expected.tolerance },
+    { method: 'entropy', citation: getExample('zavadskas-2017-vilnius')!.citation, tolerance: zavadskas.expected.tolerance },
     { method: 'topsis', citation: getExample('opricovic-tzeng-2004-f')!.citation, tolerance: opricovicF.expected.tolerance },
   ]
 

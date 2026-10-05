@@ -6,22 +6,22 @@ import { allMethods, FAMILY_ORDER, methodsByFamily } from '../../content/methods
 import { getExample } from '../../data/examples'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { MethodThumb } from '../../features/illustrations/MethodThumb'
-import { argMax, distancePoints, topsisProjection } from '../../features/illustrations/geometry'
+import { argMax, distancePoints, entropyParts, topsisProjection } from '../../features/illustrations/geometry'
 import { useLang } from '../../i18n'
 import { SiteFooter } from '../landing/SiteFooter'
 import { usePageMeta } from '../landing/usePageMeta'
 import { Guide } from './Guide'
 import { pageContainer } from './shared'
 
-type Available = 'critic' | 'topsis' | 'equal'
-const AVAILABLE: readonly Available[] = ['topsis', 'critic', 'equal']
+type Available = 'critic' | 'entropy' | 'topsis' | 'equal'
+const AVAILABLE: readonly Available[] = ['topsis', 'critic', 'entropy', 'equal']
 
 function exampleProblem(id: string): Problem {
   const ex = getExample(id)!
   return { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
 }
 
-/** The pictures on the three available methods' cards, computed from the published examples. */
+/** The pictures on the available methods' cards, computed from the published examples. */
 function useThumbs() {
   return useMemo(() => {
     const phones = exampleProblem('krishnan-2021-smartphones')
@@ -31,16 +31,20 @@ function useThumbs() {
     const proj = topsisProjection(climbing, [0.5, 0.5])
     const plane = proj ? distancePoints(proj) : []
     const n = phones.criteria.length
+    // Entropy on its reference example: the most even criterion's shares next to the most uneven one's.
+    const vilnius = entropyParts(exampleProblem('zavadskas-2017-vilnius'))
+    const sharesOf = (j: number) => vilnius?.shares.map((row) => row[j]!) ?? []
     return {
       critic: { kind: 'bars' as const, values: weights, highlight: argMax(weights) },
       topsis: { kind: 'plane' as const, points: plane, highlight: proj ? argMax(proj.closeness) : undefined },
+      entropy: { kind: 'shares' as const, even: sharesOf(vilnius?.pair[0] ?? 0), uneven: sharesOf(vilnius?.pair[1] ?? 1) },
       equal: { kind: 'bars' as const, values: Array.from({ length: n }, () => 1 / n), highlight: undefined },
     }
   }, [])
 }
 
 /**
- * `/methods`: the three methods that compute here as large cards with a picture and one line,
+ * `/methods`: the methods that compute here as large cards with a picture and one line,
  * the methods in research as names grouped by family, and the method-choice guide.
  */
 export default function Catalog() {
@@ -64,7 +68,7 @@ export default function Catalog() {
               <h2 id="available-title" className="text-20 font-semibold text-text">
                 {t('methods.status.available')}
               </h2>
-              <ul className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
                 {AVAILABLE.map((id) => {
                   const m = available.find((x) => x.id === id)
                   if (!m) return null

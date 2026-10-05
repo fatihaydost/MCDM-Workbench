@@ -3,7 +3,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isStepKey, stepContent } from '../../content/steps'
 import type { Step } from '../../core'
-import { CRITIC_FLOW, StepFlow, TOPSIS_FLOW, type FlowNode } from '../../features/illustrations'
+import { CRITIC_FLOW, ENTROPY_FLOW, ENTROPY_MINMAX_FLOW, StepFlow, TOPSIS_FLOW, type FlowNode } from '../../features/illustrations'
 import { stepToTable, tableToLatex, tableToTsv, type StepTable } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
 import type { DraftProblem } from '../../state/workbench'
@@ -20,6 +20,9 @@ const PLAIN_SYMBOL: Readonly<Record<string, string>> = {
   'critic.information': 'C',
   'critic.informationTotal': 'ΣC',
   'critic.weights': 'w',
+  'entropy.entropy': 'e',
+  'entropy.diversification': 'd',
+  'entropy.weights': 'w',
   'topsis.idealBest': 'A+',
   'topsis.idealWorst': 'A−',
   'topsis.distanceBest': 'D+',
@@ -36,6 +39,9 @@ const TEX_SYMBOL: Readonly<Record<string, string>> = {
   'critic.information': '$C_j$',
   'critic.informationTotal': String.raw`$\sum_k C_k$`,
   'critic.weights': '$w_j$',
+  'entropy.entropy': '$e_j$',
+  'entropy.diversification': '$d_j$',
+  'entropy.weights': '$w_j$',
   'topsis.idealBest': '$A^{+}_j$',
   'topsis.idealWorst': '$A^{-}_j$',
   'topsis.distanceBest': '$D^{+}_i$',
@@ -67,9 +73,9 @@ export type WorkedCalculationProps = {
  * one-line description, its formula, the labelled matrix or vector and copy as TSV or LaTeX.
  * The focused (or last clicked) step carries the accent on its hairline and number.
  */
-const FLOWS: readonly (readonly FlowNode[])[] = [CRITIC_FLOW, TOPSIS_FLOW]
+const FLOWS: readonly (readonly FlowNode[])[] = [CRITIC_FLOW, ENTROPY_FLOW, ENTROPY_MINMAX_FLOW, TOPSIS_FLOW]
 
-/** The step map for a group of steps (CRITIC or TOPSIS), or null for one-step groups. */
+/** The step map for a group of steps (by its first node's key, so each Entropy variant gets its own), or null. */
 const flowFor = (steps: readonly Step[]) => FLOWS.find((f) => steps.some((s) => s.key === f[0]!.key)) ?? null
 
 const stepDomId = (key: string) => `wb-step-${key.replace(/\./g, '-')}`

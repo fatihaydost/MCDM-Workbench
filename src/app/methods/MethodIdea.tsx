@@ -4,6 +4,7 @@ import type { Problem } from '../../core'
 import type { MethodContent } from '../../content/types'
 import { getExample, type ExampleDataset } from '../../data/examples'
 import { CRITIC_IDEA_STEPS, CriticIdea } from '../../features/illustrations/CriticIdea'
+import { EntropyIdea } from '../../features/illustrations/EntropyIdea'
 import { IdeaSteps, useIdeaSteps, type IdeaStepsLabels } from '../../features/illustrations/IdeaSteps'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { TOPSIS_IDEA_STEPS, TopsisGeometry } from '../../features/illustrations/TopsisGeometry'
@@ -14,8 +15,9 @@ function toProblem(ex: ExampleDataset, lang: Lang): Problem {
 }
 
 /**
- * The picture at the top of a method page. TOPSIS and CRITIC draw their idea on their published
+ * The picture at the top of a method page. TOPSIS, CRITIC and Entropy draw their idea on their published
  * example; every other method shows its family glyph (no illustration for methods in research yet).
+ * Entropy's picture is static (no step-through story yet).
  */
 export function MethodIdea({ m }: { m: MethodContent }) {
   const { t } = useTranslation()
@@ -24,10 +26,11 @@ export function MethodIdea({ m }: { m: MethodContent }) {
 
   const topsisEx = m.id === 'topsis' ? getExample('opricovic-tzeng-2004-f') : undefined
   const criticEx = m.id === 'critic' ? getExample('krishnan-2021-smartphones') : undefined
+  const entropyEx = m.id === 'entropy' ? getExample('zavadskas-2017-vilnius') : undefined
   const problem = useMemo(() => {
-    const ex = topsisEx ?? criticEx
+    const ex = topsisEx ?? criticEx ?? entropyEx
     return ex ? toProblem(ex, lang) : null
-  }, [topsisEx, criticEx, lang])
+  }, [topsisEx, criticEx, entropyEx, lang])
 
   // "Step through": one story per method, the picture transforms from step to step (MOTION.md, explain).
   const storyCount = topsisEx ? TOPSIS_IDEA_STEPS : criticEx ? CRITIC_IDEA_STEPS : 0
@@ -103,6 +106,28 @@ export function MethodIdea({ m }: { m: MethodContent }) {
         />
         <IdeaSteps control={steps} sentences={criticSentences} labels={stepLabels} />
         {source(criticEx)}
+      </div>
+    )
+  }
+
+  if (entropyEx && problem) {
+    return (
+      <div className="flex flex-col gap-2">
+        <EntropyIdea
+          problem={problem}
+          format={(v) => format(v, 4)}
+          labels={{
+            title: t('methods.page.idea.entropy.title'),
+            caption: t('methods.page.idea.entropy.caption'),
+            even: t('methods.page.idea.entropy.even'),
+            entropy: t('methods.page.idea.entropy.entropy'),
+            weight: t('methods.page.idea.entropy.weight'),
+            share: t('methods.page.idea.entropy.share'),
+            showTable: t('methods.page.idea.showTable'),
+            alternative: t('methods.page.idea.alternative'),
+          }}
+        />
+        {source(entropyEx)}
       </div>
     )
   }

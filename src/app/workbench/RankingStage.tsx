@@ -8,7 +8,7 @@ import { isEmptyProblem, toProblem, useRanking, useWeights, useWorkbench, type D
 import { Button, cn, EmptyState, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../ui'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
-import { alternativeName, DECIMALS, findStep, weightMethodLabel } from './shared'
+import { alternativeName, DECIMALS, findStep, weightMethodFullLabel } from './shared'
 
 const RANKING_METHODS: readonly RankingMethodId[] = ['topsis']
 
@@ -138,6 +138,7 @@ export function RankingStage() {
   const nf = useNumberFormat(DECIMALS.score)
   const problem = useWorkbench((s) => s.problem)
   const weightMethod = useWorkbench((s) => s.weightMethod)
+  const weightParams = useWorkbench((s) => s.methodParams?.[s.weightMethod])
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
   const setRankingMethod = useWorkbench((s) => s.setRankingMethod)
   const ranking = useRanking()
@@ -173,7 +174,7 @@ export function RankingStage() {
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
-          <span>{t('workbench.ranking.weightsUsed', { method: weightMethodLabel(weightMethod, t) })}</span>
+          <span>{t('workbench.ranking.weightsUsed', { method: weightMethodFullLabel(weightMethod, weightParams, t) })}</span>
           <button type="button" className="text-accent underline underline-offset-2 hover:no-underline" onClick={() => goTo('weights')}>
             {t('workbench.ranking.changeWeights')}
           </button>

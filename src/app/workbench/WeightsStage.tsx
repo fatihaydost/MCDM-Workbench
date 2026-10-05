@@ -1,25 +1,45 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { ValidationIssue, WeightingResult } from '../../core'
+import { getWeightingMethod, type ValidationIssue, type WeightingResult } from '../../core'
+import type { EntropyNormalization } from '../../core/methods/entropy'
 import { getExample, shortCitation } from '../../data/examples'
 import { BarChart, ChartTableModeProvider } from '../../features/charts'
-import { CriticIdea } from '../../features/illustrations'
+import { CriticIdea, EntropyIdea } from '../../features/illustrations'
 import { useNumberFormat } from '../../i18n'
 import {
   computeWeights,
   toProblem,
   isEmptyProblem,
+  useMethodParams,
   useWeights,
   useWorkbench,
   type DraftProblem,
   type WeightMethodId,
 } from '../../state/workbench'
 import { Button, cn, EmptyState, ErrorSummary, NumberInput, SegmentedControl, Table, TBody, Td, Th, THead, Tr, type ErrorSummaryItem } from '../../ui'
+import { MethodParams } from './MethodParams'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
-import { criterionName, DECIMALS, findStep, ids, placeIssue, stepName, sumDecimals, weightMethodLabel } from './shared'
+import { criterionName, DECIMALS, findStep, ids, placeIssue, sumDecimals, tr, weightMethodLabel } from './shared'
 
-const METHODS: readonly WeightMethodId[] = ['critic', 'equal', 'manual']
+const METHODS: readonly WeightMethodId[] = ['critic', 'entropy', 'equal', 'manual']
+
+/** A weighting method that the core computes (everything but manual). */
+type ComputedMethod = Exclude<WeightMethodId, 'manual'>
+
+/** Intermediate results shown as columns next to the weight, per method: step key and column header. */
+const EXTRA_COLUMNS: Partial<Record<ComputedMethod, readonly { step: string; label: string }[]>> = {
+  critic: [
+    { step: 'critic.sigma', label: 'workbench.weights.columns.sigma' },
+    { step: 'critic.conflict', label: 'workbench.weights.columns.conflict' },
+    { step: 'critic.information', label: 'workbench.weights.columns.information' },
+  ],
+  // d next to w: on homogeneous data tiny differences in d decide the weights (docs/research/methods/entropy.md).
+  entropy: [
+    { step: 'entropy.entropy', label: 'workbench.weights.columns.entropy' },
+    { step: 'entropy.diversification', label: 'workbench.weights.columns.diversification' },
+  ],
+}
 
 export function WeightsStage() {
   const { t } = useTranslation()
@@ -71,6 +91,7 @@ export function WeightsStage() {
           {t('workbench.weightMethod.label')}
         </span>
         <p className="max-w-[72ch] text-13 text-text-2">{t(`workbench.weights.methodHint.${weightMethod}`)}</p>
+        <MethodParams methodId={weightMethod} descriptors={getWeightingMethod(weightMethod)?.params} />
       </div>
 
       {weightMethod === 'manual' ? (
@@ -86,14 +107,13 @@ export function WeightsStage() {
   )
 }
 
-function ComputedWeights({ problem, method, result }: { problem: DraftProblem; method: 'critic' | 'equal'; result: WeightingResult }) {
+function ComputedWeights({ problem, method, result }: { problem: DraftProblem; method: ComputedMethod; result: WeightingResult }) {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.weight)
   const format = useCallback((v: number) => nf.format(v), [nf])
   const names = problem.criteria.map((_, j) => criterionName(problem.criteria, j, t))
-  const sigma = findStep(result.steps, 'critic.sigma')?.vector
-  const conflict = findStep(result.steps, 'critic.conflict')?.vector
-  const information = findStep(result.steps, 'critic.information')?.vector
+  const extra = (EXTRA_COLUMNS[method] ?? []).map((c) => ({ ...c, values: findStep(result.steps, c.step)?.vector }))
+  const entropyParams = useMethodParams('entropy')
   const n = problem.criteria.length
 
   return (
@@ -122,6 +142,25 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
           />
         </ChartTableModeProvider>
       )}
+      {method === 'entropy' && (
+        <ChartTableModeProvider value="screen-reader">
+          <EntropyIdea
+            problem={toProblem(problem)}
+            params={{ normalization: entropyParams.normalization as EntropyNormalization }}
+            format={format}
+            labels={{
+              title: t('workbench.visual.entropy.title'),
+              even: t('workbench.visual.entropy.even'),
+              entropy: t('workbench.visual.entropy.entropy'),
+              weight: t('workbench.visual.entropy.weight'),
+              share: t('workbench.visual.entropy.share'),
+              showTable: t('workbench.chart.showTable'),
+              alternative: t('workbench.alternative'),
+            }}
+            className="max-w-[760px]"
+          />
+        </ChartTableModeProvider>
+      )}
       <section className="flex flex-col gap-3">
         <SectionTitle>
           <span id="wb-weights-table">{t('workbench.weights.tableTitle')}</span>
@@ -132,13 +171,11 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
               <Tr>
                 <Th>{t('workbench.weights.columns.criterion')}</Th>
                 <Th>{t('workbench.weights.columns.direction')}</Th>
-                {method === 'critic' && (
-                  <>
-                    <Th numeric>{t('workbench.weights.columns.sigma')}</Th>
-                    <Th numeric>{t('workbench.weights.columns.conflict')}</Th>
-                    <Th numeric>{t('workbench.weights.columns.information')}</Th>
-                  </>
-                )}
+                {extra.map((c) => (
+                  <Th key={c.step} numeric>
+                    {tr(t, c.label)}
+                  </Th>
+                ))}
                 <Th numeric>{t('workbench.weights.columns.weight')}</Th>
               </Tr>
             </THead>
@@ -147,13 +184,11 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
                 <Tr key={j}>
                   <Th scope="row">{names[j]}</Th>
                   <Td className="text-text-2">{t(`workbench.criterionType.${c.type}`)}</Td>
-                  {method === 'critic' && (
-                    <>
-                      <Td numeric>{nf.format(sigma?.[j])}</Td>
-                      <Td numeric>{nf.format(conflict?.[j])}</Td>
-                      <Td numeric>{nf.format(information?.[j])}</Td>
-                    </>
-                  )}
+                  {extra.map((c) => (
+                    <Td key={c.step} numeric>
+                      {nf.format(c.values?.[j])}
+                    </Td>
+                  ))}
                   <Td numeric className="font-medium">
                     {nf.format(result.weights[j])}
                   </Td>
@@ -164,7 +199,7 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
         </div>
       </section>
 
-      {method === 'critic' && <CalculationToggle groups={[{ steps: result.steps }]} problem={problem} />}
+      {getWeightingMethod(method) && <CalculationToggle groups={[{ steps: result.steps }]} problem={problem} />}
     </>
   )
 }

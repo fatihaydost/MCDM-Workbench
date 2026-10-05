@@ -3,6 +3,7 @@
  * picture can never disagree with the worked calculation. No DOM.
  */
 import { critic } from '../../core/methods/critic'
+import { entropy, type EntropyParams } from '../../core/methods/entropy'
 import { topsis } from '../../core/methods/topsis'
 import type { Problem, RankingResult, Step, WeightingResult } from '../../core/types'
 import { scaleLinear, type Domain, type LinearScale } from '../charts/scale'
@@ -264,6 +265,46 @@ export function criticParts(problem: Problem): CriticParts | null {
   }
 }
 
+// ---------------------------------------------------------------------------------------------
+// Entropy parts
+// ---------------------------------------------------------------------------------------------
+
+export type EntropyParts = {
+  result: WeightingResult
+  /** Shares p_ij (the sum or min-max variant's proportions step), alternatives x criteria. */
+  shares: number[][]
+  entropy: number[]
+  diversification: number[]
+  weights: number[]
+  /**
+   * The two criteria the idea picture compares: the most even one (largest e) and the most uneven one (smallest e),
+   * in that order; the first two criteria when every e is the same.
+   */
+  pair: [number, number]
+}
+
+/** Entropy through the core, with the steps the illustration draws. Null when it cannot run. */
+export function entropyParts(problem: Problem, params: EntropyParams = {}): EntropyParts | null {
+  let result: WeightingResult
+  try {
+    result = entropy.compute(problem, params)
+  } catch {
+    return null
+  }
+  const shares = stepMatrix(result.steps, (params.normalization ?? 'sum') === 'sum' ? 'entropy.proportionsSum' : 'entropy.proportionsMinmax')
+  const e = stepVector(result.steps, 'entropy.entropy')
+  const even = argMax(e)
+  const uneven = argMax(e.map((x) => -x))
+  return {
+    result,
+    shares,
+    entropy: e,
+    diversification: stepVector(result.steps, 'entropy.diversification'),
+    weights: result.weights,
+    pair: even === uneven ? [0, 1] : [even, uneven],
+  }
+}
+
 /** Index of the largest value (first on ties), or -1 for an empty list. */
 export function argMax(values: readonly number[]): number {
   let best = -1
@@ -294,6 +335,21 @@ export const CRITIC_FLOW: readonly FlowNode[] = [
   { key: 'critic.correlation', stepKeys: ['critic.correlation', 'critic.conflict'] },
   { key: 'critic.information', stepKeys: ['critic.information', 'critic.informationTotal'] },
   { key: 'critic.weights', stepKeys: ['critic.weights'] },
+]
+
+/** Entropy, raw-data shares (default): Shares, Entropy, Diversification, Weights. */
+export const ENTROPY_FLOW: readonly FlowNode[] = [
+  { key: 'entropy.proportionsSum', stepKeys: ['entropy.proportionsSum'] },
+  { key: 'entropy.entropy', stepKeys: ['entropy.entropy'] },
+  { key: 'entropy.diversification', stepKeys: ['entropy.diversification'] },
+  { key: 'entropy.weights', stepKeys: ['entropy.weights'] },
+]
+
+/** Entropy with the min-max option: Normalize first, then the same four nodes. */
+export const ENTROPY_MINMAX_FLOW: readonly FlowNode[] = [
+  { key: 'entropy.normalized', stepKeys: ['entropy.normalized'] },
+  { key: 'entropy.proportionsMinmax', stepKeys: ['entropy.proportionsMinmax'] },
+  ...ENTROPY_FLOW.slice(1),
 ]
 
 /** The node that holds `stepKey`, or -1. */

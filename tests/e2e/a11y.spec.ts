@@ -213,17 +213,27 @@ test('Results is a summary: no second copy of the closeness bars or the TOPSIS p
   await expect(page.getByRole('table', { name: 'Ranking' }).locator('thead th')).toHaveCount(3)
 })
 
+// The CRITIC example for every stage, and the Entropy example where its card is shown.
+const PANEL_RUNS = [
+  ['krishnan-2021-smartphones', ['data', 'weights', 'ranking', 'results', 'robustness']],
+  ['zavadskas-2017-vilnius', ['weights', 'results']],
+] as const
+
 for (const lang of ['en', 'tr'] as const) {
-  test(`explanation panel stays at 60 words or fewer per stage (${lang})`, async ({ page }) => {
-    await page.addInitScript((l) => localStorage.setItem('kds.lang', l), lang)
-    for (const stage of ['data', 'weights', 'ranking', 'results', 'robustness']) {
-      await page.goto(`/app?example=krishnan-2021-smartphones&stage=${stage}`)
-      const panel = page.locator('aside')
-      await expect(panel).toBeVisible()
-      const words = (await panel.innerText()).split(/\s+/).filter(Boolean).length
-      expect(words, `${lang} ${stage}`).toBeLessThanOrEqual(60)
-    }
-  })
+  for (const [example, stages] of PANEL_RUNS) {
+    test(`explanation panel stays at 60 words or fewer per stage (${lang}, ${example})`, async ({ page }) => {
+      await page.addInitScript((l) => localStorage.setItem('kds.lang', l), lang)
+      for (const stage of stages) {
+        await page.goto(`/app?example=${example}&stage=${stage}`)
+        const panel = page.locator('aside')
+        await expect(panel).toBeVisible()
+        // The method note fills in once its card has loaded.
+        if (stage === 'weights') await expect(panel.getByRole('link', { name: /method page|yöntem sayfası/i })).toBeVisible()
+        const words = (await panel.innerText()).split(/\s+/).filter(Boolean).length
+        expect(words, `${lang} ${stage}`).toBeLessThanOrEqual(60)
+      }
+    })
+  }
 }
 
 test('explanation panel: a pitfall with its own label is not printed after "Watch out:"', async ({ page }) => {

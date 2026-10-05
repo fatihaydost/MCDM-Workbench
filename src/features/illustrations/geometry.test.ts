@@ -8,6 +8,9 @@ import {
   closenessAt,
   criticParts,
   defaultAxes,
+  ENTROPY_FLOW,
+  ENTROPY_MINMAX_FLOW,
+  entropyParts,
   distancePoints,
   fitDistancePlane,
   placeLabels,
@@ -257,5 +260,33 @@ describe('placeLabels', () => {
     const [a] = placeLabels([{ x: 195, y: 50 }], [40], { width: 200, height: 200 })
     expect(a!.anchor).toBe('end')
     expect(a!.box.right).toBeLessThanOrEqual(200)
+  })
+})
+
+describe('entropyParts', () => {
+  const ex = getExample('zavadskas-2017-vilnius')!
+  const problem: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+
+  it('compares the most even and the most uneven criterion, with the core weights', () => {
+    const parts = entropyParts(problem)!
+    // Housing price is the most even column (e = 0.986), jobs per 1000 residents the most uneven (e = 0.862).
+    expect(parts.pair).toEqual([0, 4])
+    expect(parts.weights.map((w) => Number(w.toFixed(4)))).toEqual(ex.published[0]!.values)
+    for (let j = 0; j < 5; j++) expect(parts.shares.reduce((a, row) => a + row[j]!, 0)).toBeCloseTo(1, 12)
+  })
+
+  it('draws the min-max shares when asked, and nothing when Entropy cannot run', () => {
+    const minmax = entropyParts(problem, { normalization: 'minmax' })!
+    expect(minmax.result.steps[0]!.key).toBe('entropy.normalized')
+    expect(minmax.shares.some((row) => row.some((p) => p === 0))).toBe(true)
+    expect(entropyParts({ ...problem, matrix: problem.matrix.map((r, i) => (i === 0 ? [-1, ...r.slice(1)] : r)) })).toBeNull()
+  })
+
+  it('has a step map per variant whose nodes cover every emitted step', () => {
+    for (const [flow, normalization] of [[ENTROPY_FLOW, 'sum'], [ENTROPY_MINMAX_FLOW, 'minmax']] as const) {
+      const keys = entropyParts(problem, { normalization })!.result.steps.map((s) => s.key)
+      expect(flow.flatMap((n) => n.stepKeys)).toEqual(keys)
+      expect(flowIndex(flow, 'entropy.weights')).toBe(flow.length - 1)
+    }
   })
 })

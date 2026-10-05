@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { getExample } from '../../data/examples'
 import { useLang } from '../../i18n'
 import { getRankingMethod } from '../../core'
-import { isEmptyProblem, STAGES, toProblem, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
+import { isEmptyProblem, STAGES, toProblem, useMethodParams, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
 import { Skeleton } from '../../ui'
 import { usePageMeta } from '../landing/usePageMeta'
 import { WorkbenchLayout } from '../shell/WorkbenchLayout'
@@ -14,7 +14,7 @@ import { WorkbenchNavContext, type ImportReport, type WorkbenchNav } from './nav
 import { bestIndex, RankingStage } from './RankingStage'
 import { ResultsStage } from './ResultsStage'
 import { useRobustnessSummary } from './robustnessSummary'
-import { alternativeName, weightMethodLabel } from './shared'
+import { alternativeName, weightMethodFullLabel } from './shared'
 import { WeightsStage } from './WeightsStage'
 
 // The panel's method cards load alongside this chunk, not after the first render.
@@ -101,6 +101,7 @@ export default function WorkbenchPage() {
   const setStage = useWorkbench((s) => s.setStage)
   const problem = useWorkbench((s) => s.problem)
   const weightMethod = useWorkbench((s) => s.weightMethod)
+  const weightParams = useWorkbench((s) => s.methodParams?.[s.weightMethod])
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
   const ranking = useRanking()
   const weights = useWeights()
@@ -177,11 +178,12 @@ export default function WorkbenchPage() {
   )
 
   // How often first place survives the ±5/10/20 % nudges of each weight, once the robustness chunk has loaded.
+  const rankingParams = useMethodParams(rankingMethod)
   const robustness = useMemo(() => {
     const method = getRankingMethod(rankingMethod)
     if (!robustnessSummary || !method || !weights.value || !ranking.value) return null
-    return robustnessSummary(toProblem(problem), weights.value.weights, method)
-  }, [robustnessSummary, rankingMethod, problem, weights.value, ranking.value])
+    return robustnessSummary(toProblem(problem), weights.value.weights, method, rankingParams)
+  }, [robustnessSummary, rankingMethod, rankingParams, problem, weights.value, ranking.value])
 
   const stageMeta: Partial<Record<Stage, ReactNode>> = {}
   if (!isEmptyProblem(problem)) {
@@ -194,11 +196,11 @@ export default function WorkbenchPage() {
       )
     const weightsBroken = weights.value === null && weights.issues.some((x) => x.code.includes('weight'))
     stageMeta.weights = weights.value ? (
-      <StageStatus state="done">{weightMethodLabel(weightMethod, t)}</StageStatus>
+      <StageStatus state="done">{weightMethodFullLabel(weightMethod, weightParams, t)}</StageStatus>
     ) : weightsBroken ? (
       <StageStatus state="attention">{t('workbench.rail.checkWeights')}</StageStatus>
     ) : (
-      <StageStatus state="pending">{weightMethodLabel(weightMethod, t)}</StageStatus>
+      <StageStatus state="pending">{weightMethodFullLabel(weightMethod, weightParams, t)}</StageStatus>
     )
     const rankingLabel = t(`workbench.rankingMethod.${rankingMethod}`)
     stageMeta.ranking = <StageStatus state={ranking.value ? 'done' : 'pending'}>{rankingLabel}</StageStatus>

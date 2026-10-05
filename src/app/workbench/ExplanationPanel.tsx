@@ -8,11 +8,11 @@ import { useLang } from '../../i18n'
 import { useWorkbench, type Stage } from '../../state/workbench'
 
 /** The methods the workbench runs. Their cards are chunks of their own (shared with the method pages). */
-type PanelMethod = 'critic' | 'equal' | 'topsis'
+type PanelMethod = 'critic' | 'entropy' | 'equal' | 'topsis'
 
 /** Starts loading the workbench's method cards (WorkbenchPage calls it when its chunk loads). */
 export function preloadPanelCards(): void {
-  for (const id of ['critic', 'equal', 'topsis'] as const) void loadMethod(id)
+  for (const id of ['critic', 'entropy', 'equal', 'topsis'] as const) void loadMethod(id)
 }
 
 const linkClass = 'text-accent underline underline-offset-2 hover:no-underline'

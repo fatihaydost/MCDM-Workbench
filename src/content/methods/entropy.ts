@@ -6,7 +6,7 @@ export const entropy: MethodContent = {
   name: { en: 'Entropy', tr: 'Entropi' },
   fullName: { en: 'Entropy weighting (Shannon)', tr: 'Entropi ağırlıklandırması (Shannon)' },
   family: 'weighting-objective',
-  status: 'research',
+  status: 'available',
   year: 1981,
   origin: {
     authors: 'Hwang, C.-L.; Yoon, K.',
@@ -25,7 +25,7 @@ export const entropy: MethodContent = {
       tex: String.raw`p_{ij} = \frac{x_{ij}}{\sum_{i=1}^{m} x_{ij}}`,
       note: {
         en: 'Default variant: raw data, criterion type ignored; the min-max option first normalizes with cost inversion, then takes shares.',
-        tr: 'Varsayılan varyant: ham veri, kriter türü dikkate alınmaz; min-maks seçeneği önce maliyeti ters çevirerek normalize eder, sonra payları alır.',
+        tr: 'Varsayılan varyant: ham veri, kriter türü dikkate alınmaz; min-max seçeneği önce maliyeti ters çevirerek normalize eder, sonra payları alır.',
       },
     },
     {
@@ -35,6 +35,10 @@ export const entropy: MethodContent = {
     {
       title: { en: 'Degree of diversification', tr: 'Çeşitlenme derecesi' },
       tex: String.raw`d_j = 1 - e_j`,
+      note: {
+        en: 'A constant column, including an all-zero one, gets d = 0 and weight 0; if every column is constant, the weights are 1/n.',
+        tr: 'Sabit bir sütun, tamamı sıfır olan da, d = 0 ve 0 ağırlık alır; bütün sütunlar sabitse ağırlıklar 1/n olur.',
+      },
     },
     {
       title: { en: 'Weights', tr: 'Ağırlıklar' },
@@ -45,29 +49,36 @@ export const entropy: MethodContent = {
     {
       methodId: 'topsis',
       text: {
-        en: 'Entropy then TOPSIS is the second most common pipeline (4,639 OpenAlex co-mentions) and the standard template of Turkish financial-performance papers, for example Ersoy & Orçun (2022).',
-        tr: "Entropi ardından TOPSIS en yaygın ikinci boru hattıdır (OpenAlex'te 4.639 ortak geçiş) ve Türkçe finansal performans makalelerinin standart kalıbıdır; örneğin Ersoy ve Orçun (2022).",
+        en: 'Entropy only weighs; a ranking method ranks. Published pairings include TOPSIS (Alao et al. 2020) and, with IDOCRIW weights, COPRAS, SAW, TOPSIS and EDAS (Zavadskas et al. 2017).',
+        tr: 'Entropi yalnız ağırlık üretir; sıralamayı başka bir yöntem yapar. Yayımlanmış eşleşmeler arasında TOPSIS (Alao vd. 2020) ve IDOCRIW ağırlıklarıyla COPRAS, SAW, TOPSIS ve EDAS (Zavadskas vd. 2017) var.',
       },
     },
     {
       methodId: 'edas',
       text: {
-        en: 'Entropy then EDAS: a renewable-energy study reviewed by Keshavarz-Ghorabaee et al. (2021), and Turkish studies of BIST insurers and exporters.',
-        tr: 'Entropi ardından EDAS: Keshavarz-Ghorabaee vd. (2021) tarafından incelenen bir yenilenebilir enerji çalışması ve BIST sigorta şirketleri ile ihracatçılar üzerine Türkçe çalışmalar.',
+        en: 'Entropy then EDAS (Yazdani et al. 2020); the review by Keshavarz-Ghorabaee et al. (2021) also lists Entropy with VIKOR and PROMETHEE.',
+        tr: 'Entropi ardından EDAS (Yazdani vd. 2020); Keshavarz-Ghorabaee vd. (2021) incelemesi Entropiyi VIKOR ve PROMETHEE ile de listeler.',
       },
     },
     {
       methodId: 'cilos',
       text: {
-        en: 'Entropy times CILOS gives IDOCRIW, used with EDAS and SAW by Zavadskas et al. (2017).',
-        tr: 'Entropi ile CILOS çarpılınca IDOCRIW elde edilir; Zavadskas vd. (2017) bunu EDAS ve SAW ile kullanır.',
+        en: 'Entropy times CILOS gives IDOCRIW, which Zavadskas et al. (2017) then merge with expert weights.',
+        tr: 'Entropi ile CILOS çarpılınca IDOCRIW elde edilir; Zavadskas vd. (2017) bunu uzman ağırlıklarıyla birleştirir.',
       },
     },
     {
       methodId: 'moora',
       text: {
-        en: 'Entropy then MOORA or SAW for air-conditioner selection, with CRITIC as the alternative weighting (Tehnika 2017; authors and DOI not checked).',
-        tr: 'Klima seçimi için Entropi ardından MOORA ya da SAW, alternatif ağırlıklandırma olarak CRITIC ile (Tehnika 2017; yazarlar ve DOI doğrulanmadı).',
+        en: 'Entropy and CRITIC weights for MOORA and SAW in an air-conditioner selection (Vujičić, Papić & Blagojević 2017).',
+        tr: 'Bir klima seçiminde MOORA ve SAW için Entropi ve CRITIC ağırlıkları (Vujičić, Papić ve Blagojević 2017).',
+      },
+    },
+    {
+      methodId: 'critic',
+      text: {
+        en: 'Compared with CRITIC, CILOS, IDOCRIW and D-CRITIC on one matrix (Krishnan et al. 2021, Table 5).',
+        tr: 'Tek bir matris üzerinde CRITIC, CILOS, IDOCRIW ve D-CRITIC ile karşılaştırılır (Krishnan vd. 2021, Tablo 5).',
       },
     },
   ],
@@ -76,8 +87,8 @@ export const entropy: MethodContent = {
     doi: '10.3390/su9050702',
     match: 'partial',
     note: {
-      en: 'Published example (Table 4 (input, economic block), Table 8 (Entropy)); this method is not computed here yet, only recomputed during research. Twenty-one Vilnius neighbourhoods, five economic criteria. All five published weights are reproduced to 4 decimals, but the paper assigns them to the wrong criteria (a fixed permutation of the rows). Matched after undoing it. The min-max option matches Krishnan et al. (2021), Table 5, with consistent labels.',
-      tr: 'Yayımlanmış örnek (Tablo 4 (girdi, ekonomik blok), Tablo 8 (Entropi)); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Yirmi bir Vilnius mahallesi, beş ekonomik kriter. Yayımlanan beş ağırlığın hepsi 4 basamakta elde ediliyor, ama makale bunları yanlış kriterlere atamış (satırların sabit bir permütasyonu). Permütasyon geri alınınca örtüşüyor. Min-maks seçeneği, etiketleri tutarlı olan Krishnan vd. (2021) Tablo 5 ile örtüşüyor.',
+      en: 'Table 4 (input, economic block) and Table 8 (Entropy). Twenty-one Vilnius neighbourhoods, five criteria. Our weights match all five published values to 4 decimals (largest difference 4.6e-5), but the paper prints them on the wrong rows, a fixed permutation that we undo. The min-max option matches Krishnan et al. (2021), Table 5, to 4 decimals (4.5e-5), and its normalized matrix equals their Table 2.',
+      tr: 'Tablo 4 (girdi, ekonomik blok) ve Tablo 8 (Entropi). Yirmi bir Vilnius mahallesi, beş kriter. Ağırlıklarımız yayımlanan beş değerle 4 basamakta örtüşüyor (en büyük fark 4,6e-5), ama makale bunları yanlış satırlara basmış; bu sabit permütasyonu geri alıyoruz. Min-max seçeneği Krishnan vd. (2021) Tablo 5 ile 4 basamakta örtüşüyor (4,5e-5), normalize matrisi de Tablo 2 ile aynı.',
     },
   },
   sources: [
@@ -86,53 +97,57 @@ export const entropy: MethodContent = {
     { label: 'Zeleny (1982), Multiple Criteria Decision Making, McGraw-Hill' },
     { label: 'Zavadskas, Cavallaro, Podvezko, Ubarte & Kaklauskas (2017), Sustainability 9(5), 702', doi: '10.3390/su9050702' },
     { label: 'Krishnan, Kasim, Hamid & Ghazali (2021), Symmetry 13(6), 973', doi: '10.3390/sym13060973' },
-    { label: 'Mukhametzyanov (2021), DMAME 4(2), 76-105', doi: '10.31181/dmame210402076i' },
+    { label: 'Mukhametzyanov (2021), Decision Making: Applications in Management and Engineering 4(2), 76-105', doi: '10.31181/dmame210402076i' },
+    { label: 'Vujičić, Papić & Blagojević (2017), Tehnika 72(3), 422-429', doi: '10.5937/tehnika1703422V' },
+    { label: 'Zhu, Tian & Yan (2020), Mathematical Problems in Engineering 2020, 3564835', doi: '10.1155/2020/3564835' },
     { label: 'Keshavarz-Ghorabaee et al. (2021), Symmetry 13(4), 525', doi: '10.3390/sym13040525' },
+    { label: 'Yazdani et al. (2020), Sustainable Operations and Computers 1, 35-42', doi: '10.1016/j.susoc.2020.12.002' },
+    { label: 'Alao et al. (2020), Energy 201, 117675', doi: '10.1016/j.energy.2020.117675' },
   ],
   en: {
     summary:
-      'Entropy gives little weight to criteria on which all alternatives score almost the same, and more to criteria with uneven scores. Use it for quick, fully objective weights from a filled matrix.',
+      'Entropy gives little weight to criteria on which all alternatives score almost the same, and more to criteria with uneven scores. It looks only at the data, not at what a criterion means.',
     whenToUse: [
-      'Positive ratio-scale data (counts, prices, rates), dispersion-based weights wanted.',
-      'As a baseline next to CRITIC, SD and MEREC.',
+      'No expert view; measured numbers of 0 or more in every cell.',
+      'A quick, fully objective baseline next to CRITIC, SD or MEREC.',
     ],
     whenNot: [
-      'Negatives or zeros you cannot shift sensibly.',
+      'Many zeros: a nearly empty column can take most weight.',
       'Very homogeneous data: entropies near 1, tiny differences decide.',
-      'Importance is known from the decision context.',
+      'The set of alternatives will change: the weights move a lot.',
     ],
     inputs: [
-      'Decision matrix. The default variant needs values of 0 or more and each column sum above 0.',
-      'Criterion types are not used by the default variant; the min-max option uses them.',
-      'Option: normalization sum (default) or min-max.',
+      'Decision matrix with at least 2 alternatives. Raw data (sum) needs values of 0 or more.',
+      'Criterion types are not used by raw data (sum); min-max uses them to reverse cost criteria.',
+      'Option: normalization, raw data (sum, the default) or min-max, which accepts negative values.',
     ],
     pitfalls: [
-      'Negative values are invalid in the default variant; switch to min-max or shift the data, which changes the weights.',
-      'Homogeneous data amplify noise: entropies of 0.991-0.999 gave weights of 0.024-0.378 in one published study.',
-      'The normalization variant (up to 0.2 per weight on the Vilnius data) and adding a constant (C vs K) both change the weights; multiplying does not.',
+      'Zeros: they make the shares uneven, so a column with one non-zero value can take most of the weight (Zhu et al. 2020).',
+      'Homogeneous data amplify noise: entropies of 0.991 to 0.999 gave weights of 0.024 to 0.378 in one published study.',
+      'The variant matters: raw data and min-max can differ a lot, and adding a constant (C vs K) changes raw-data weights; multiplying does not.',
     ],
   },
   tr: {
     summary:
-      'Entropi, tüm alternatiflerin hemen hemen aynı puanı aldığı kriterlere az, puanları dengesiz dağılan kriterlere daha çok ağırlık verir. Dolu bir matristen hızlı ve tamamen nesnel ağırlık için kullanın.',
+      'Entropi, tüm alternatiflerin hemen hemen aynı puanı aldığı kriterlere az, puanları dengesiz dağılan kriterlere daha çok ağırlık verir. Yalnız veriye bakar, kriterin anlamına bakmaz.',
     whenToUse: [
-      'Pozitif, oran ölçekli veri (adet, fiyat, oran); yayılıma dayalı ağırlık isteniyor.',
-      'CRITIC, SD ve MEREC yanında bir karşılaştırma tabanı olarak.',
+      'Uzman görüşü yok; her hücrede negatif olmayan ölçülmüş sayı var.',
+      'CRITIC, SD ya da MEREC yanında hızlı ve tamamen nesnel bir taban.',
     ],
     whenNot: [
-      'Makul biçimde kaydırılamayan negatif değerler ya da sıfırlar var.',
+      'Çok sayıda sıfır: neredeyse boş bir sütun ağırlığın çoğunu alabilir.',
       "Veri çok homojen: entropiler 1'e yakın, küçük farklar belirleyici olur.",
-      'Önem karar bağlamından biliniyor.',
+      'Alternatif kümesi değişecek: ağırlıklar çok oynar.',
     ],
     inputs: [
-      "Karar matrisi. Varsayılan varyant 0 ya da daha büyük değerler ve toplamı 0'dan büyük sütunlar ister.",
-      'Varsayılan varyant kriter türlerini kullanmaz; min-maks seçeneği kullanır.',
-      'Seçenek: toplam (varsayılan) ya da min-maks normalizasyonu.',
+      'En az 2 alternatifli karar matrisi. Ham veri (toplam) 0 ya da daha büyük değer ister.',
+      'Ham veri (toplam) kriter türlerini kullanmaz; min-max maliyet kriterlerini ters çevirmek için kullanır.',
+      'Seçenek: normalizasyon, ham veri (toplam, varsayılan) ya da negatif değer kabul eden min-max.',
     ],
     pitfalls: [
-      'Varsayılan varyantta negatif değer geçersizdir; min-maks seçeneğine geçin ya da veriyi kaydırın, ama kaydırma ağırlıkları değiştirir.',
-      'Homojen veri gürültüyü büyütür: yayımlanmış bir çalışmada 0,991-0,999 arası entropiler 0,024-0,378 arası ağırlıklar verdi.',
-      "Normalizasyon varyantı (Vilnius verisinde ağırlık başına 0,2'ye kadar) ve sabit eklemek (santigrat ve kelvin) ağırlıkları değiştirir; sabitle çarpmak değiştirmez.",
+      'Sıfırlar: payları dengesizleştirir, tek bir sıfır olmayan değeri olan sütun ağırlığın çoğunu alabilir (Zhu vd. 2020).',
+      'Homojen veri gürültüyü büyütür: yayımlanmış bir çalışmada 0,991 ile 0,999 arası entropiler 0,024 ile 0,378 arası ağırlıklar verdi.',
+      'Varyant önemlidir: ham veri ile min-max çok farklı sonuç verebilir; sabit eklemek (santigrat ve kelvin) ham veri ağırlıklarını değiştirir, çarpmak değiştirmez.',
     ],
   },
 }

@@ -10,7 +10,7 @@ import { Button, EmptyState, Notice } from '../../ui'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, SectionTitle } from './parts'
 import { bestIndex, RankingTable } from './RankingStage'
-import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, stepName, weightMethodLabel } from './shared'
+import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, stepName, weightMethodFullLabel } from './shared'
 import { WeightsChart } from './WeightsStage'
 
 type Busy = 'xlsx' | null
@@ -22,6 +22,7 @@ export function ResultsStage() {
   const format2 = useCallback((v: number) => nf.format(v, DECIMALS.correlation), [nf])
   const problem = useWorkbench((s) => s.problem)
   const weightMethod = useWorkbench((s) => s.weightMethod)
+  const weightParams = useWorkbench((s) => s.methodParams?.[s.weightMethod])
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
   const exampleId = useWorkbench((s) => s.exampleId)
   const importedFrom = useWorkbench((s) => s.importedFrom ?? null)
@@ -55,7 +56,7 @@ export function ResultsStage() {
 
   const best = bestIndex(result)
   const example = exampleId ? getExample(exampleId) : undefined
-  const weightLabel = weightMethodLabel(weightMethod, t)
+  const weightLabel = weightMethodFullLabel(weightMethod, weightParams, t)
   const rankingLabel = t(`workbench.rankingMethod.${rankingMethod}`)
   const correlation = weightMethod === 'critic' ? findStep(w.steps, 'critic.correlation')?.matrix : undefined
 

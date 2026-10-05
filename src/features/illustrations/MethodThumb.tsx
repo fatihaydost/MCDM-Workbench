@@ -10,6 +10,13 @@ export type MethodThumbProps =
       className?: string | undefined
     }
   | {
+      /** Entropy: the shares of an even criterion and of an uneven one, side by side (the second in the accent). */
+      kind: 'shares'
+      even: readonly number[]
+      uneven: readonly number[]
+      className?: string | undefined
+    }
+  | {
       /** TOPSIS distance plane: (D+, D-) points and the rays of constant closeness. */
       kind: 'plane'
       points: readonly Point[]
@@ -47,6 +54,28 @@ export function MethodThumb(props: MethodThumbProps) {
               width={bw}
               height={h}
             />
+          )
+        })}
+      </svg>
+    )
+  }
+  if (props.kind === 'shares') {
+    const groups = [props.even, props.uneven]
+    const max = Math.max(...groups.flat(), 1e-12)
+    const gw = (W - 2 * PAD - 12) / 2
+    return (
+      <svg className={cls} width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        {groups.map((g, k) => {
+          const x0 = PAD + k * (gw + 12)
+          const slot = gw / Math.max(g.length, 1)
+          return (
+            <g key={k}>
+              <line className={s.thumbAxis} x1={x0 - 1} x2={x0 + gw + 1} y1={H - PAD} y2={H - PAD} />
+              {g.map((v, i) => {
+                const h = (v / max) * (H - 2 * PAD - 4)
+                return <rect key={i} className={k === 1 ? s.thumbAccent : s.thumbMark} x={x0 + i * slot + slot * 0.15} y={H - PAD - h} width={slot * 0.7} height={h} />
+              })}
+            </g>
           )
         })}
       </svg>
