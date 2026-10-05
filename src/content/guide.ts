@@ -513,11 +513,11 @@ export const weightingRequirements: readonly WeightingRequirement[] = [
     methodId: 'entropy',
     data: {
       en: 'Raw data (sum): values of 0 or more, with 0 ln 0 = 0; min-max accepts any sign',
-      tr: 'Ham veri (toplam): 0 ya da daha büyük değerler, 0 ln 0 = 0; Min-max her işareti kabul eder',
+      tr: 'Ham veri (toplam): 0 ya da daha büyük değerler, 0 ln 0 = 0; Min-maks her işareti kabul eder',
     },
     normalization: {
       en: 'Unchanged by pure rescaling (sum, vector and max normalization give the same weights); changes under min-max, which also creates zeros.',
-      tr: 'Salt yeniden ölçeklemeden etkilenmez (toplam, vektör ve maks normalizasyonu aynı ağırlığı verir); Min-max altında değişir ve Min-max sıfır da üretir.',
+      tr: 'Salt yeniden ölçeklemeden etkilenmez (toplam, vektör ve maks normalizasyonu aynı ağırlığı verir); Min-maks altında değişir ve Min-maks sıfır da üretir.',
     },
     degenerate: {
       en: 'Constant column, also all zeros: weight 0; every column constant: 1/n',
@@ -666,10 +666,10 @@ export const riskyCombinations: readonly RiskyCombination[] = [
   },
   {
     id: 'minmax-before-entropy',
-    title: { en: 'Min-max normalization before Entropy', tr: 'Entropi öncesinde Min-max normalizasyonu' },
+    title: { en: 'Min-max normalization before Entropy', tr: 'Entropi öncesinde Min-maks normalizasyonu' },
     text: {
       en: 'Min-max creates zeros (the column minimum) and changes the Entropy weights; Chen (2019) advises against it. Use raw non-negative data or sum normalization for Entropy.',
-      tr: 'Min-max sıfırlar üretir (sütun minimumu) ve Entropi ağırlıklarını değiştirir; Chen (2019) bunu önermez. Entropi için ham, negatif olmayan veri ya da toplam normalizasyonu kullanın.',
+      tr: 'Min-maks sıfırlar üretir (sütun minimumu) ve Entropi ağırlıklarını değiştirir; Chen (2019) bunu önermez. Entropi için ham, negatif olmayan veri ya da toplam normalizasyonu kullanın.',
     },
     basis: 'sourced',
     methodIds: ['entropy'],

@@ -25,7 +25,7 @@ export const entropy: MethodContent = {
       tex: String.raw`p_{ij} = \frac{x_{ij}}{\sum_{i=1}^{m} x_{ij}}`,
       note: {
         en: 'Default variant: raw data, criterion type ignored; the min-max option first normalizes with cost inversion, then takes shares.',
-        tr: 'Varsayılan varyant: ham veri, kriter türü dikkate alınmaz; min-max seçeneği önce maliyeti ters çevirerek normalize eder, sonra payları alır.',
+        tr: 'Varsayılan varyant: ham veri, kriter türü dikkate alınmaz; min-maks seçeneği önce maliyeti ters çevirerek normalize eder, sonra payları alır.',
       },
     },
     {
@@ -88,7 +88,7 @@ export const entropy: MethodContent = {
     match: 'match',
     note: {
       en: 'Table 4 (input, economic block) and Table 8 (Entropy). Twenty-one Vilnius neighbourhoods, five criteria. Our weights match all five published values to 4 decimals (largest difference 4.6e-5). The paper prints them on the wrong criterion rows, so we list them in the data\'s column order. The min-max option matches Krishnan et al. (2021), Table 5, to 4 decimals (4.5e-5), and its normalized matrix equals their Table 2.',
-      tr: 'Tablo 4 (girdi, ekonomik blok) ve Tablo 8 (Entropi). Yirmi bir Vilnius mahallesi, beş kriter. Ağırlıklarımız yayımlanan beş değerle 4 basamakta örtüşüyor (en büyük fark 4,6e-5). Makale bunları yanlış kriter satırlarına basmış, bu yüzden veri sütunlarının sırasıyla veriyoruz. Min-max seçeneği Krishnan vd. (2021) Tablo 5 ile 4 basamakta örtüşüyor (4,5e-5), normalize matrisi de Tablo 2 ile aynı.',
+      tr: 'Tablo 4 (girdi, ekonomik blok) ve Tablo 8 (Entropi). Yirmi bir Vilnius mahallesi, beş kriter. Ağırlıklarımız yayımlanan beş değerle 4 basamakta örtüşüyor (en büyük fark 4,6e-5). Makale bunları yanlış kriter satırlarına basmış, bu yüzden veri sütunlarının sırasıyla veriyoruz. Min-maks seçeneği Krishnan vd. (2021) Tablo 5 ile 4 basamakta örtüşüyor (4,5e-5), normalize matrisi de Tablo 2 ile aynı.',
     },
   },
   sources: [

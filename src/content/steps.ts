@@ -84,7 +84,7 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
   },
   'entropy.normalized': {
     en: 'Min-max normalized matrix: each column scaled to 0-1, 1 is best (cost reversed).',
-    tr: 'Min-max normalize matris: her sütun 0-1 aralığına iner, 1 en iyidir (maliyet ters).',
+    tr: 'Min-maks normalize matris: her sütun 0-1 aralığına iner, 1 en iyidir (maliyet ters).',
     tex: String.raw`r_{ij} = \begin{cases} \dfrac{x_{ij} - \min_i x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{+} \\[2ex] \dfrac{\max_i x_{ij} - x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{-} \end{cases}`,
     edgeCase: {
       en: 'A constant column (max = min) is set to 0 and never divided.',

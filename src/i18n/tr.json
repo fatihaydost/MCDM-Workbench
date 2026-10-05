@@ -179,7 +179,7 @@
         "normalization": "Normalizasyon",
         "normalizationOptions": {
           "sum": "Ham veri (toplam)",
-          "minmax": "Min-max"
+          "minmax": "Min-maks"
         },
         "normalizationHints": {
           "sum": "Ham değerlerin payları; kriter türleri kullanılmaz.",
@@ -187,7 +187,7 @@
         },
         "normalizationVariant": {
           "sum": "toplam",
-          "minmax": "min-max"
+          "minmax": "min-maks"
         }
       }
     },
@@ -390,9 +390,9 @@
         "weights": "Ağırlıklar w"
       },
       "entropy": {
-        "normalized": "Normalize matris r (min-max)",
+        "normalized": "Normalize matris r (min-maks)",
         "proportionsSum": "Paylar p (ham veri)",
-        "proportionsMinmax": "Paylar p (min-max)",
+        "proportionsMinmax": "Paylar p (min-maks)",
         "entropy": "Entropi e",
         "diversification": "Çeşitlenme d",
         "weights": "Ağırlıklar w"
@@ -679,7 +679,7 @@
   },
   "steps": {
     "critic": {
-      "normalized": "Min-max normalizasyonu: her sütun 0 ile 1 arasına ölçeklenir, maliyet kriterleri ters çevrilir; böylece 1 her zaman en iyi değerdir.",
+      "normalized": "Min-maks normalizasyonu: her sütun 0 ile 1 arasına ölçeklenir, maliyet kriterleri ters çevrilir; böylece 1 her zaman en iyi değerdir.",
       "sigma": "Kontrast: normalize edilmiş her sütunun örneklem standart sapması.",
       "correlation": "Kriterler arası çatışma: normalize sütun çiftlerinin Pearson korelasyonu.",
       "conflict": "Her kriterin toplam çatışması: diğer kriterlerle korelasyonunun 1'den farklarının toplamı.",
@@ -688,7 +688,7 @@
       "weights": "Ağırlıklar: her kriterin toplam bilgi içeriğindeki payı."
     },
     "entropy": {
-      "normalized": "Min-max normalizasyonu: her sütun 0 ile 1 arasına ölçeklenir, maliyet kriterleri ters çevrilir; böylece 1 her zaman en iyi değerdir.",
+      "normalized": "Min-maks normalizasyonu: her sütun 0 ile 1 arasına ölçeklenir, maliyet kriterleri ters çevrilir; böylece 1 her zaman en iyi değerdir.",
       "proportionsSum": "Paylar: her ham değer kendi sütununun toplamına bölünür. Kriter türleri kullanılmaz.",
       "proportionsMinmax": "Paylar: her normalize değer kendi sütununun toplamına bölünür.",
       "entropy": "Her kriterin entropisi: paylar eşitse 1, dengesizleştikçe daha düşük.",
@@ -725,7 +725,7 @@
       "invalid-criterion-type": "{{criterion}} için fayda ya da maliyet seç.",
       "constant-column": "{{criterion}} kriterinde bütün alternatiflerin değeri aynı, bu yüzden alternatifleri ayırt edemiyor.",
       "non-positive-value": "{{alternative}} için {{criterion}} değeri {{value}}. Bu yöntem 0'dan büyük değerler ister.",
-      "negative-value": "{{alternative}} için {{criterion}} değeri {{value}}. Ham veri (toplam) 0 ya da daha büyük değer ister; negatif değerler için Min-max seçin.",
+      "negative-value": "{{alternative}} için {{criterion}} değeri {{value}}. Ham veri (toplam) 0 ya da daha büyük değer ister; negatif değerler için Min-maks seçin.",
       "weights-length-mismatch": "{{n}} kriter için {{value}} ağırlık var.",
       "invalid-weight": "{{criterion}} ağırlığına bir sayı gir.",
       "negative-weight": "{{criterion}} ağırlığı {{value}}. Ağırlıklar negatif olamaz.",
@@ -741,7 +741,7 @@
     "entropy": {
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden Entropi ağırlığı 0.",
       "zeros-in-column": "{{criterion}} sıfır içeriyor; sıfırlar ağırlığını şişirebilir.",
-      "two-alternatives-minmax": "2 alternatifle min-max, sabit olmayan her kritere aynı ağırlığı verir.",
+      "two-alternatives-minmax": "2 alternatifle min-maks, sabit olmayan her kritere aynı ağırlığı verir.",
       "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; yayılımın gerçek olup olmadığına bakın.",
       "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden bunun yerine eşit ağırlık kullanıldı."
     },
