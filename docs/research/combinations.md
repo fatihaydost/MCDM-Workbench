@@ -53,7 +53,7 @@ Fast-growing "newer" pipelines, relevant because they are what Turkish users now
 
 | Method (origin) | Built-in normalization | Negatives | Zeros | Weights | Extra parameters | Output |
 |---|---|---|---|---|---|---|
-| WSM / SAW | linear max (x/max, min/x) or min–max | no with x/max (sign flips); yes with min–max | cost min/x fails at 0 | yes | – | score |
+| WSM / SAW | linear max (x/max, min/x), or sum ((min/x)/Σ(min/x) for cost); min–max not offered (no fixture; 0/7 published EDAS ranks) | no (values must be > 0, no shifting) | cost min/x fails at 0 | yes | – | score |
 | WPM | ratios / powers x^w | no | no | yes | – | score |
 | WASPAS (Zavadskas et al. 2012, DOI [10.5755/j01.eee.122.6.1810](https://doi.org/10.5755/j01.eee.122.6.1810)) | linear max | no | degenerate (WPM part → 0) | yes | λ ∈ [0,1], default 0.5 | score |
 | TOPSIS (Hwang & Yoon 1981, DOI [10.1007/978-3-642-48318-9](https://doi.org/10.1007/978-3-642-48318-9)) | vector | computable, but vector normalization is not shift-invariant, so results depend on where zero is | all-zero column → 0/0 | yes | distance (Euclidean default) | closeness ∈ [0,1] |
