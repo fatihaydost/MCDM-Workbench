@@ -14,7 +14,11 @@ import { Guide } from './Guide'
 import { pageContainer } from './shared'
 
 type Available = 'critic' | 'entropy' | 'topsis' | 'saw' | 'equal'
-const AVAILABLE: readonly Available[] = ['topsis', 'saw', 'critic', 'entropy', 'equal']
+/** The available methods in two rows, weighting first (the order of the workbench), then ranking. */
+const AVAILABLE: Readonly<Record<'weighting' | 'ranking', readonly Available[]>> = {
+  weighting: ['critic', 'entropy', 'equal'],
+  ranking: ['topsis', 'saw'],
+}
 
 function exampleProblem(id: string): Problem {
   const ex = getExample(id)!
@@ -72,26 +76,33 @@ export default function Catalog() {
               <h2 id="available-title" className="text-20 font-semibold text-text">
                 {t('methods.status.available')}
               </h2>
-              <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-                {AVAILABLE.map((id) => {
-                  const m = available.find((x) => x.id === id)
-                  if (!m) return null
-                  return (
-                    <li key={id} className="min-w-0">
-                      <Link
-                        href={`/methods/${id}`}
-                        className="group flex h-full flex-row items-center gap-4 rounded-control border border-line bg-surface p-4 no-underline transition-colors hover:border-line-strong hover:bg-surface-2 md:flex-col md:items-start"
-                      >
-                        <MethodThumb {...thumbs[id]} />
-                        <span className="flex min-w-0 flex-col gap-1">
-                          <span className="text-20 font-semibold text-text group-hover:underline">{m.name[lang]}</span>
-                          <span className="text-14 text-text-2">{t(`methods.catalog.oneLiner.${id}`)}</span>
-                        </span>
-                      </Link>
-                    </li>
-                  )
-                })}
-              </ul>
+              {(['weighting', 'ranking'] as const).map((group) => (
+                <div key={group} className="flex flex-col gap-2">
+                  <h3 id={`available-${group}`} className="text-13 font-medium text-text-2">
+                    {t(`methods.catalog.groups.${group}`)}
+                  </h3>
+                  <ul aria-labelledby={`available-${group}`} className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+                    {AVAILABLE[group].map((id) => {
+                      const m = available.find((x) => x.id === id)
+                      if (!m) return null
+                      return (
+                        <li key={id} className="min-w-0">
+                          <Link
+                            href={`/methods/${id}`}
+                            className="group flex h-full flex-row items-center gap-4 rounded-control border border-line bg-surface p-4 no-underline transition-colors hover:border-line-strong hover:bg-surface-2 md:flex-col md:items-start"
+                          >
+                            <MethodThumb {...thumbs[id]} />
+                            <span className="flex min-w-0 flex-col gap-1">
+                              <span className="text-20 font-semibold text-text group-hover:underline">{m.name[lang]}</span>
+                              <span className="text-14 text-text-2">{t(`methods.catalog.oneLiner.${id}`)}</span>
+                            </span>
+                          </Link>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              ))}
             </section>
 
             <section aria-labelledby="research-title" className="flex flex-col gap-4">

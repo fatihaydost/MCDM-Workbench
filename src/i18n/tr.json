@@ -622,6 +622,10 @@
         "entropy": "Ağırlığı verinin ne kadar dengesiz dağıldığından bulur.",
         "equal": "Her kritere 1/n verir.",
         "saw": "Ölçeklenmiş değerleri ağırlıklı toplar."
+      },
+      "groups": {
+        "weighting": "Ağırlıklandırma",
+        "ranking": "Sıralama"
       }
     },
     "page": {

@@ -622,6 +622,10 @@
         "entropy": "Weights from how unevenly the data spread.",
         "equal": "Every criterion gets 1/n.",
         "saw": "Adds up weighted, rescaled values."
+      },
+      "groups": {
+        "weighting": "Weighting",
+        "ranking": "Ranking"
       }
     },
     "page": {
