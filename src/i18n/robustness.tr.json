@@ -6,7 +6,7 @@
     "slider": "{{criterion}} ağırlığı",
     "reset": "Sizin ağırlığınıza dönün",
     "yours": "sizin ağırlığınız",
-    "chartTitle": "{{criterion}} ağırlığı değiştikçe yakınlık katsayısı C",
+    "chartTitle": "{{score}}: {{criterion}} ağırlığı değiştikçe",
     "axis": "{{criterion}} ağırlığı",
     "legendTop": "{{name}} birinci kaldığı aralık",
     "legendRanking": "Tüm sıralamanın aynı kaldığı aralık",

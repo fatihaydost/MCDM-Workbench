@@ -56,6 +56,10 @@ export const KNOWN_STEP_AXES: Readonly<Record<string, Axis | readonly [Axis, Axi
   'topsis.distanceBest': 'alternatives',
   'topsis.distanceWorst': 'alternatives',
   'topsis.closeness': 'alternatives',
+  'saw.normalizedLinearMax': ['alternatives', 'criteria'],
+  'saw.normalizedSum': ['alternatives', 'criteria'],
+  'saw.weighted': ['alternatives', 'criteria'],
+  'saw.scores': 'alternatives',
 }
 
 const indexLabels = (k: number): string[] => Array.from({ length: k }, (_, i) => String(i + 1))

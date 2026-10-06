@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next'
 import type { Criterion, MethodParamValue, ParamDescriptor, Step, ValidationIssue } from '../../core'
 import { changedParams, getRankingMethod, getWeightingMethod, MIN_ALTERNATIVES, MIN_CRITERIA } from '../../core'
-import type { DraftProblem, Stage, WeightMethodId } from '../../state/workbench'
+import type { DraftProblem, RankingMethodId, Stage, WeightMethodId } from '../../state/workbench'
 
 /** Fixed decimals per kind of number (DESIGN.md §Type): weights and scores 4, correlation cells 2. */
 export const DECIMALS = { weight: 4, score: 4, step: 4, correlation: 2 } as const
@@ -57,6 +57,24 @@ export function weightMethodFullLabel(m: WeightMethodId, raw: Readonly<Record<st
   const variant = variantLabel(m, raw, t)
   return variant ? `${weightMethodLabel(m, t)} (${variant})` : weightMethodLabel(m, t)
 }
+
+/** The ranking method's name with its variant, where it is named as provenance: "SAW (sum)". */
+export function rankingMethodFullLabel(m: RankingMethodId, raw: Readonly<Record<string, MethodParamValue>> | undefined, t: TFunction): string {
+  const variant = variantLabel(m, raw, t)
+  const name = t(`workbench.rankingMethod.${m}`)
+  return variant ? `${name} (${variant})` : name
+}
+
+/**
+ * How a ranking method's score is named (workbench.ranking.score.<id>): `name` for column headers ("Closeness C",
+ * "Score S"), `title` for chart titles ("Closeness coefficient C"), `symbol` inside sentences ("C = 0.7620").
+ * Typed by the method id, so a new ranking method does not compile without its words.
+ */
+export const scoreWords = (m: RankingMethodId, t: TFunction): { name: string; title: string; symbol: string } => ({
+  name: t(`workbench.ranking.score.${m}.name`),
+  title: t(`workbench.ranking.score.${m}.title`),
+  symbol: t(`workbench.ranking.score.${m}.symbol`),
+})
 
 /** Short name of a step ("Contrast σ"), used as block title, xlsx column header and row label. */
 export const stepName = (key: string, t: TFunction): string => tr(t, `workbench.stepNames.${key}`)

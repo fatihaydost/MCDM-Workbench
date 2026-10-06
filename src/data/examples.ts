@@ -195,6 +195,41 @@ export const examples: readonly ExampleDataset[] = [
       { label: 'topsis.closeness', values: [0.489, 0.612, 0.511], decimals: 3 },
     ],
   },
+  {
+    id: 'podvezko-2011-baltic',
+    name: { en: 'Baltic economies (Podvezko 2011)', tr: 'Baltık ekonomileri (Podvezko 2011)' },
+    summary: {
+      en: 'Four countries on five economic indicators, with expert weights. The paper reports the SAW scores; its Table 2 misprints one value for Lithuania, which changes S in the third decimal, so the scores here are the corrected ones.',
+      tr: "Dört ülke, beş ekonomik gösterge, uzman ağırlıklarıyla. Makale SAW skorlarını veriyor; Tablo 2 Litvanya için bir değeri yanlış basmış, bu S'yi üçüncü basamakta değiştiriyor, bu yüzden buradaki skorlar düzeltilmiş olanlar.",
+    },
+    referenceFor: ['saw'],
+    citation: {
+      authors: 'Podvezko, V.',
+      year: 2011,
+      title: 'The Comparative Analysis of MCDA Methods SAW and COPRAS',
+      venue: 'Inžinerinė ekonomika - Engineering Economics 22(2), 134-146',
+      doi: '10.5755/j01.ee.22.2.310',
+      tables: { en: 'Table 1 (input), Table 2 (weights), Tables 3 and 6 (output)', tr: 'Tablo 1 (girdi), Tablo 2 (ağırlıklar), Tablo 3 ve 6 (çıktı)' },
+    },
+    alternatives: ['Estonia', 'Latvia', 'Lithuania', 'Poland'],
+    criteria: [
+      { name: { en: 'GDP growth (%)', tr: 'GSYH büyümesi (%)' }, type: 'benefit' },
+      { name: { en: 'Production growth (%)', tr: 'Üretim artışı (%)' }, type: 'benefit' },
+      { name: { en: 'Average annual salary (EUR)', tr: 'Ortalama yıllık maaş (EUR)' }, type: 'benefit' },
+      { name: { en: 'Unemployment rate (%)', tr: 'İşsizlik oranı (%)' }, type: 'cost' },
+      { name: { en: 'Export / import ratio', tr: 'İhracat / ithalat oranı' }, type: 'benefit' },
+    ],
+    matrix: [
+      [5.1, 9.8, 430, 9.3, 0.7],
+      [7.5, 6.5, 298, 10.3, 0.55],
+      [9.7, 16.1, 306, 11.6, 0.73],
+      [3.8, 8.4, 501, 19.3, 0.79],
+    ],
+    weights: [0.35, 0.1, 0.17, 0.25, 0.13],
+    // Table 3 prints S(Lithuania) = 0.872 from the misprinted 0.599 in Table 2; 306 / 501 = 0.611 gives 0.874
+    // (docs/research/methods/saw.md, Reference example). Linear max, the default; Table 6 (sum) needs no correction.
+    published: [{ label: 'saw.scores', values: [0.756, 0.728, 0.874, 0.61], decimals: 3 }],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

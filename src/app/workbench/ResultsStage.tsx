@@ -10,7 +10,7 @@ import { Button, EmptyState, Notice } from '../../ui'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, SectionTitle } from './parts'
 import { bestIndex, RankingTable } from './RankingStage'
-import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, stepName, weightMethodFullLabel } from './shared'
+import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, rankingMethodFullLabel, scoreWords, stepName, weightMethodFullLabel } from './shared'
 import { WeightsChart } from './WeightsStage'
 
 type Busy = 'xlsx' | null
@@ -24,6 +24,7 @@ export function ResultsStage() {
   const weightMethod = useWorkbench((s) => s.weightMethod)
   const weightParams = useWorkbench((s) => s.methodParams?.[s.weightMethod])
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
+  const rankingParams = useWorkbench((s) => s.methodParams?.[s.rankingMethod])
   const exampleId = useWorkbench((s) => s.exampleId)
   const importedFrom = useWorkbench((s) => s.importedFrom ?? null)
   const weights = useWeights()
@@ -57,7 +58,8 @@ export function ResultsStage() {
   const best = bestIndex(result)
   const example = exampleId ? getExample(exampleId) : undefined
   const weightLabel = weightMethodFullLabel(weightMethod, weightParams, t)
-  const rankingLabel = t(`workbench.rankingMethod.${rankingMethod}`)
+  const rankingLabel = rankingMethodFullLabel(rankingMethod, rankingParams, t)
+  const score = scoreWords(rankingMethod, t)
   const correlation = weightMethod === 'critic' ? findStep(w.steps, 'critic.correlation')?.matrix : undefined
 
   const workbookLabels = (): Partial<WorkbookLabels> => ({
@@ -73,7 +75,7 @@ export function ResultsStage() {
     typeWords: { benefit: t('workbench.results.workbook.benefit'), cost: t('workbench.results.workbook.cost') },
     method: t('workbench.results.workbook.method'),
     weight: t('workbench.results.workbook.weight'),
-    score: t('workbench.results.workbook.score'),
+    score: score.name,
     rank: t('workbench.results.workbook.rank'),
     step: (key) => stepName(key, t),
   })
@@ -151,7 +153,7 @@ export function ResultsStage() {
       <section aria-labelledby="wb-results-headline" className="flex flex-col gap-5">
         <div className="flex flex-col gap-1">
           <p id="wb-results-headline" className="text-24 font-semibold text-text">
-            {t('workbench.results.headline', { name: alternativeName(problem, best, t), value: nf.format(result.scores[best]) })}
+            {t('workbench.results.headline', { name: alternativeName(problem, best, t), symbol: score.symbol, value: nf.format(result.scores[best]) })}
           </p>
           <p className="text-13 text-text-2">
             {t('workbench.results.byline', {
@@ -181,12 +183,12 @@ export function ResultsStage() {
         )}
       </section>
 
-      {/* Results is the summary: the closeness bars and the TOPSIS picture stay on Ranking. */}
+      {/* Results is the summary: the score bars and the method's picture stay on Ranking. */}
       <section className="flex flex-col gap-3">
         <SectionTitle>
           <span id="wb-results-ranking">{t('workbench.results.rankingTitle')}</span>
         </SectionTitle>
-        <RankingTable problem={problem} result={result} id="wb-results-ranking" compact />
+        <RankingTable problem={problem} result={result} method={rankingMethod} id="wb-results-ranking" compact />
       </section>
 
       <section className="grid grid-cols-1 items-start gap-8 xl:grid-cols-2">

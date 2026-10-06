@@ -6,4 +6,5 @@ export { PipelineDiagram, PIPELINE_LABELS_EN, type PipelineDiagramProps, type Pi
 export { StepFlow, type StepFlowProps, type StepFlowStep } from './StepFlow'
 export { TopsisGeometry, TOPSIS_GEOMETRY_LABELS_EN, type TopsisGeometryLabels, type TopsisGeometryProps, type TopsisGeometryView } from './TopsisGeometry'
 export { EntropyIdea, ENTROPY_IDEA_LABELS_EN, type EntropyIdeaLabels, type EntropyIdeaProps } from './EntropyIdea'
-export { CRITIC_FLOW, ENTROPY_FLOW, ENTROPY_MINMAX_FLOW, TOPSIS_FLOW, criticParts, entropyParts, defaultAxes, distancePoints, topsisProjection, type FlowNode } from './geometry'
+export { SawContributions, SAW_CONTRIBUTIONS_LABELS_EN, type SawContributionsLabels, type SawContributionsProps } from './SawContributions'
+export { CRITIC_FLOW, ENTROPY_FLOW, ENTROPY_MINMAX_FLOW, TOPSIS_FLOW, criticParts, entropyParts, sawParts, stackSegments, defaultAxes, distancePoints, topsisProjection, type FlowNode } from './geometry'

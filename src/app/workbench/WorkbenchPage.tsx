@@ -14,7 +14,7 @@ import { WorkbenchNavContext, type ImportReport, type WorkbenchNav } from './nav
 import { bestIndex, RankingStage } from './RankingStage'
 import { ResultsStage } from './ResultsStage'
 import { useRobustnessSummary } from './robustnessSummary'
-import { alternativeName, weightMethodFullLabel } from './shared'
+import { alternativeName, rankingMethodFullLabel, weightMethodFullLabel } from './shared'
 import { WeightsStage } from './WeightsStage'
 
 // The panel's method cards load alongside this chunk, not after the first render.
@@ -202,7 +202,7 @@ export default function WorkbenchPage() {
     ) : (
       <StageStatus state="pending">{weightMethodFullLabel(weightMethod, weightParams, t)}</StageStatus>
     )
-    const rankingLabel = t(`workbench.rankingMethod.${rankingMethod}`)
+    const rankingLabel = rankingMethodFullLabel(rankingMethod, rankingParams, t)
     stageMeta.ranking = <StageStatus state={ranking.value ? 'done' : 'pending'}>{rankingLabel}</StageStatus>
     if (ranking.value) {
       stageMeta.results = <StageStatus state="done">{alternativeName(problem, bestIndex(ranking.value), t)}</StageStatus>

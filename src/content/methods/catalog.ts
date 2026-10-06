@@ -28,7 +28,7 @@ const ROWS: readonly MethodMeta[] = [
   { id: 'moora', name: { en: 'MOORA', tr: 'MOORA' }, family: 'ranking-ratio', status: 'research', year: 2006 },
   { id: 'promethee-ii', name: { en: 'PROMETHEE II', tr: 'PROMETHEE II' }, family: 'ranking-outranking', status: 'research', year: 1986 },
   { id: 'roc', name: { en: 'ROC', tr: 'ROC' }, family: 'weighting-subjective', status: 'research', year: 1996 },
-  { id: 'saw', name: { en: 'SAW', tr: 'SAW' }, family: 'ranking-utility', status: 'research', year: 1954 },
+  { id: 'saw', name: { en: 'SAW', tr: 'SAW' }, family: 'ranking-utility', status: 'available', year: 1954 },
   { id: 'sd', name: { en: 'SD', tr: 'SD' }, family: 'weighting-objective', status: 'research', year: 1982 },
   { id: 'swara', name: { en: 'SWARA', tr: 'SWARA' }, family: 'weighting-subjective', status: 'research', year: 2010 },
   { id: 'topsis', name: { en: 'TOPSIS', tr: 'TOPSIS' }, family: 'ranking-distance', status: 'available', year: 1981 },

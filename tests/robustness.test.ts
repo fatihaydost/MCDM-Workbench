@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { critic, entropy, equal, rankScores, topsis, type MethodParams, type Problem, type RankingMethod } from '../src/core'
+import { critic, entropy, equal, rankScores, saw, topsis, type MethodParams, type Problem, type RankingMethod } from '../src/core'
 import {
   createRng,
   DEFAULT_DELTAS,
@@ -659,4 +659,32 @@ describe('method options reach the methods', () => {
     expect(seen.length).toBeGreaterThan(10)
     expect(seen.every((x) => x === params)).toBe(true)
   })
+})
+
+describe('sweepWeight with SAW (a second ranking method): Podvezko 2011, both normalizations', () => {
+  const ex = examples.find((e) => e.id === 'podvezko-2011-baltic')!
+  const p: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const w = ex.weights!
+  for (const params of [{}, { normalization: 'sum' }] as const) {
+    it(`${JSON.stringify(params)}: S is linear in w_k, so every switch point is where two straight lines cross`, () => {
+      for (let k = 0; k < w.length; k++) {
+        const sw = sweepWeight(p, w, saw, k, { params })
+        // Scores along the grid are the method's own scores at those weights, with these options.
+        for (const pt of sw.points) expect(pt.scores).toEqual(saw.compute(p, pt.weights, params).scores)
+        // S_i(t) = a_i + b_i t: from the two ends, every crossing of a pair inside (0, 1) is known exactly.
+        const s0 = sw.points[0]!.scores
+        const s1 = sw.points[sw.points.length - 1]!.scores
+        const crossings: number[] = []
+        for (let a = 0; a < s0.length; a++)
+          for (let b = a + 1; b < s0.length; b++) {
+            const d0 = s0[a]! - s0[b]!
+            const d1 = s1[a]! - s1[b]!
+            if (d0 * d1 < 0) crossings.push(d0 / (d0 - d1))
+          }
+        const switches = sw.rankingIntervals.slice(1).map((iv) => iv.from)
+        expect(switches.length, `criterion ${k}`).toBe(new Set(crossings.map((c) => c.toFixed(5))).size)
+        for (const x of switches) expect(Math.min(...crossings.map((c) => Math.abs(c - x))), `criterion ${k}`).toBeLessThan(2e-6)
+      }
+    })
+  }
 })

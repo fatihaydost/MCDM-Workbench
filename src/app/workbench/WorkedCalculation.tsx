@@ -28,6 +28,7 @@ const PLAIN_SYMBOL: Readonly<Record<string, string>> = {
   'topsis.distanceBest': 'D+',
   'topsis.distanceWorst': 'D−',
   'topsis.closeness': 'C',
+  'saw.scores': 'S',
   'equal.weights': 'w',
   'manual.weights': 'w',
 }
@@ -47,6 +48,7 @@ const TEX_SYMBOL: Readonly<Record<string, string>> = {
   'topsis.distanceBest': '$D^{+}_i$',
   'topsis.distanceWorst': '$D^{-}_i$',
   'topsis.closeness': '$C_i$',
+  'saw.scores': '$S_i$',
   'equal.weights': '$w_j$',
   'manual.weights': '$w_j$',
 }

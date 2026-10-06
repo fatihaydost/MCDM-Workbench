@@ -36,6 +36,20 @@
   --data-heat-0: oklch(0.975 0.004 218);
   --data-heat-1: oklch(0.47 0.08 218);
   --data-negative: oklch(0.6 0.09 22);
+  /*
+   * Categorical data colours: one per criterion in fixed order, never cycled (a 9th criterion falls back to
+   * --data-context). Validated as a set on --bg and --surface in both themes (dataviz validate_palette.js): every mark
+   * >= 3:1, OKLCH L inside the band, chroma >= 0.10, adjacent pairs Delta E >= 8.9 under protanopia and deuteranopia
+   * (light; dark 10.2) and >= 17.7 for normal vision. Stacked segments are also split by a 2 px gap in --bg.
+   */
+  --data-cat-1: oklch(0.55 0.14 255);
+  --data-cat-2: oklch(0.62 0.15 45);
+  --data-cat-3: oklch(0.58 0.11 170);
+  --data-cat-4: oklch(0.63 0.13 80);
+  --data-cat-5: oklch(0.58 0.15 350);
+  --data-cat-6: oklch(0.49 0.14 145);
+  --data-cat-7: oklch(0.44 0.15 285);
+  --data-cat-8: oklch(0.53 0.17 25);
 
   --shadow-float: 0 1px 2px oklch(0.3 0.02 250 / 0.08), 0 8px 24px oklch(0.3 0.02 250 / 0.1);
   /* Added by the UI foundation: scrim behind modal dialogs and the bottom sheet. */
@@ -80,6 +94,14 @@
   --data-heat-0: oklch(0.22 0.01 218);
   --data-heat-1: oklch(0.74 0.09 212);
   --data-negative: oklch(0.7 0.1 22);
+  --data-cat-1: oklch(0.64 0.14 255);
+  --data-cat-2: oklch(0.64 0.15 45);
+  --data-cat-3: oklch(0.62 0.11 170);
+  --data-cat-4: oklch(0.665 0.13 80);
+  --data-cat-5: oklch(0.64 0.15 350);
+  --data-cat-6: oklch(0.56 0.14 145);
+  --data-cat-7: oklch(0.66 0.13 285);
+  --data-cat-8: oklch(0.62 0.16 25);
   --shadow-float: 0 1px 2px oklch(0 0 0 / 0.3), 0 8px 24px oklch(0 0 0 / 0.35);
   --overlay: oklch(0 0 0 / 0.5);
 }
@@ -109,6 +131,14 @@
     --data-heat-0: oklch(0.22 0.01 218);
     --data-heat-1: oklch(0.74 0.09 212);
     --data-negative: oklch(0.7 0.1 22);
+    --data-cat-1: oklch(0.64 0.14 255);
+    --data-cat-2: oklch(0.64 0.15 45);
+    --data-cat-3: oklch(0.62 0.11 170);
+    --data-cat-4: oklch(0.665 0.13 80);
+    --data-cat-5: oklch(0.64 0.15 350);
+    --data-cat-6: oklch(0.56 0.14 145);
+    --data-cat-7: oklch(0.66 0.13 285);
+    --data-cat-8: oklch(0.62 0.16 25);
     --shadow-float: 0 1px 2px oklch(0 0 0 / 0.3), 0 8px 24px oklch(0 0 0 / 0.35);
     --overlay: oklch(0 0 0 / 0.5);
   }

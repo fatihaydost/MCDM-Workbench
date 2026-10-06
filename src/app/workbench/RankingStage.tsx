@@ -1,17 +1,56 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getRankingMethod, type RankingResult } from '../../core'
+import { getRankingMethod, type MethodParams as Params, type RankingResult } from '../../core'
+import type { SawNormalization } from '../../core/methods/saw'
 import { BarChart } from '../../features/charts'
-import { TopsisGeometry } from '../../features/illustrations'
+import { SawContributions, TopsisGeometry } from '../../features/illustrations'
 import { useNumberFormat } from '../../i18n'
-import { isEmptyProblem, toProblem, useRanking, useWeights, useWorkbench, type DraftProblem, type RankingMethodId } from '../../state/workbench'
+import {
+  isEmptyProblem,
+  toProblem,
+  useMethodParams,
+  useRanking,
+  useWeights,
+  useWorkbench,
+  type DraftProblem,
+  type RankingMethodId,
+} from '../../state/workbench'
 import { Button, cn, EmptyState, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../ui'
 import { MethodParams } from './MethodParams'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
-import { alternativeName, DECIMALS, findStep, weightMethodFullLabel } from './shared'
+import { alternativeName, DECIMALS, findStep, scoreWords, tr, weightMethodFullLabel } from './shared'
 
-const RANKING_METHODS: readonly RankingMethodId[] = ['topsis']
+const RANKING_METHODS: readonly RankingMethodId[] = ['topsis', 'saw']
+
+type PictureProps = { problem: DraftProblem; weights: readonly number[]; params: Params; className?: string }
+
+/**
+ * What the Ranking stage shows for each ranking method, below the generic parts (score chart, table, calculation).
+ * The score's words come from workbench.ranking.score.<id> (`scoreWords`) and its order from `result.order`, so a
+ * new method only adds an entry here (and its words). A Record, so a new id does not compile without one.
+ */
+const RANKING_VIEWS: Readonly<
+  Record<
+    RankingMethodId,
+    {
+      /** Intermediate results shown as columns before the score in the full ranking table: step key and header key. */
+      columns: readonly { step: string; label: string }[]
+      /** The method's idea drawn on the current problem, next to the score chart. */
+      Picture: (props: PictureProps) => ReactNode
+    }
+  >
+> = {
+  topsis: {
+    columns: [
+      { step: 'topsis.distanceBest', label: 'workbench.ranking.columns.dPlus' },
+      { step: 'topsis.distanceWorst', label: 'workbench.ranking.columns.dMinus' },
+    ],
+    Picture: TopsisPicture,
+  },
+  // No columns: the contributions are the picture, and the full matrix is in the calculation.
+  saw: { columns: [], Picture: SawPicture },
+}
 
 /** Alternatives in rank order (ties keep input order). */
 export function rankOrder(result: RankingResult): number[] {
@@ -22,27 +61,42 @@ export function rankOrder(result: RankingResult): number[] {
 export const bestIndex = (result: RankingResult): number => rankOrder(result)[0] ?? 0
 
 /**
- * The ranking in rank order. `compact` keeps rank, name and C (the Results summary); the full
- * table on the Ranking stage adds D+ and D-.
+ * The ranking in rank order. `compact` keeps rank, name and the score (the Results summary); the full table on the
+ * Ranking stage adds the method's own columns (TOPSIS: D+ and D-).
  */
-export function RankingTable({ problem, result, id, compact = false }: { problem: DraftProblem; result: RankingResult; id?: string; compact?: boolean }) {
+export function RankingTable({
+  problem,
+  result,
+  method,
+  id,
+  compact = false,
+}: {
+  problem: DraftProblem
+  result: RankingResult
+  method: RankingMethodId
+  id?: string
+  compact?: boolean
+}) {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.score)
-  const dPlus = findStep(result.steps, 'topsis.distanceBest')?.vector
-  const dMinus = findStep(result.steps, 'topsis.distanceWorst')?.vector
+  const extra = compact ? [] : RANKING_VIEWS[method].columns.map((c) => ({ ...c, values: findStep(result.steps, c.step)?.vector }))
   const order = rankOrder(result)
+  const wide = extra.length > 0
   return (
     <div className="min-w-0">
-      <Table density="regular" className={cn('w-auto', compact ? 'min-w-[min(100%,360px)]' : 'min-w-[min(100%,560px)]')} aria-labelledby={id} containerClassName={compact ? 'max-w-[560px]' : undefined}>
+      <Table density="regular" className={cn('w-auto', wide ? 'min-w-[min(100%,560px)]' : 'min-w-[min(100%,360px)]')} aria-labelledby={id} containerClassName={compact ? 'max-w-[560px]' : undefined}>
         <THead>
           <Tr>
             <Th numeric className="w-16">
               {t('workbench.ranking.columns.rank')}
             </Th>
             <Th>{t('workbench.ranking.columns.alternative')}</Th>
-            {!compact && <Th numeric>{t('workbench.ranking.columns.dPlus')}</Th>}
-            {!compact && <Th numeric>{t('workbench.ranking.columns.dMinus')}</Th>}
-            <Th numeric>{t('workbench.ranking.columns.closeness')}</Th>
+            {extra.map((c) => (
+              <Th key={c.step} numeric>
+                {tr(t, c.label)}
+              </Th>
+            ))}
+            <Th numeric>{scoreWords(method, t).name}</Th>
           </Tr>
         </THead>
         <TBody>
@@ -56,8 +110,11 @@ export function RankingTable({ problem, result, id, compact = false }: { problem
                 <Th scope="row" className={cn(first && 'font-semibold')}>
                   {alternativeName(problem, i, t)}
                 </Th>
-                {!compact && <Td numeric>{nf.format(dPlus?.[i])}</Td>}
-                {!compact && <Td numeric>{nf.format(dMinus?.[i])}</Td>}
+                {extra.map((c) => (
+                  <Td key={c.step} numeric>
+                    {nf.format(c.values?.[i])}
+                  </Td>
+                ))}
                 <Td numeric data-testid="closeness" className={cn(first ? 'font-semibold' : 'font-medium')}>
                   {nf.format(result.scores[i])}
                 </Td>
@@ -70,23 +127,25 @@ export function RankingTable({ problem, result, id, compact = false }: { problem
   )
 }
 
-export function ClosenessChart({ problem, result, className }: { problem: DraftProblem; result: RankingResult; className?: string }) {
+/** The scores as bars, best first: sorted by the method's own order (a lower-is-better score sorts ascending). */
+export function ScoreChart({ problem, result, method, className }: { problem: DraftProblem; result: RankingResult; method: RankingMethodId; className?: string }) {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.score)
   const format = useCallback((v: number) => nf.format(v), [nf])
   const labels = useMemo(() => problem.alternatives.map((_, i) => alternativeName(problem, i, t)), [problem, t])
+  const words = scoreWords(method, t)
   return (
     <BarChart
-      title={t('workbench.ranking.chartTitle')}
+      title={words.title}
       labels={labels}
       values={result.scores}
       highlight={bestIndex(result)}
-      sort="desc"
+      sort={result.order}
       format={format}
       tableLabels={{
         show: t('workbench.chart.showTable'),
         label: t('workbench.alternative'),
-        value: t('workbench.ranking.columns.closeness'),
+        value: words.name,
       }}
       className={cn('max-w-[640px]', className)}
     />
@@ -94,7 +153,7 @@ export function ClosenessChart({ problem, result, className }: { problem: DraftP
 }
 
 /** TOPSIS as a picture: alternatives, A+ and A- on the two heaviest criteria (features/illustrations). */
-export function TopsisPicture({ problem, weights, className }: { problem: DraftProblem; weights: readonly number[]; className?: string }) {
+export function TopsisPicture({ problem, weights, className }: PictureProps) {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.score)
   const format = useCallback((v: number) => nf.format(v), [nf])
@@ -134,6 +193,34 @@ export function TopsisPicture({ problem, weights, className }: { problem: DraftP
   )
 }
 
+/** SAW as a picture: each alternative's score as a stack of its criteria's contributions (features/illustrations). */
+export function SawPicture({ problem, weights, params, className }: PictureProps) {
+  const { t } = useTranslation()
+  const nf = useNumberFormat(DECIMALS.score)
+  const format = useCallback((v: number) => nf.format(v), [nf])
+  const core = useMemo(() => toProblem(problem), [problem])
+  const normalization = params.normalization as SawNormalization | undefined
+  return (
+    <SawContributions
+      problem={core}
+      weights={weights}
+      params={normalization ? { normalization } : {}}
+      format={format}
+      labels={{
+        title: t('workbench.visual.saw.title'),
+        showTable: t('workbench.chart.showTable'),
+        alternative: t('workbench.alternative'),
+        score: scoreWords('saw', t).name,
+        legend: t('workbench.visual.saw.legend'),
+        others: t('workbench.visual.saw.others'),
+        segment: (alternative, criterion, value, score) => t('workbench.visual.saw.segment', { alternative, criterion, value, score }),
+        readout: (alternative, criterion, value, score) => t('workbench.visual.saw.readout', { alternative, criterion, value, score }),
+      }}
+      className={cn('max-w-[640px]', className)}
+    />
+  )
+}
+
 export function RankingStage() {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.score)
@@ -142,6 +229,7 @@ export function RankingStage() {
   const weightParams = useWorkbench((s) => s.methodParams?.[s.weightMethod])
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
   const setRankingMethod = useWorkbench((s) => s.setRankingMethod)
+  const rankingParams = useMethodParams(rankingMethod)
   const ranking = useRanking()
   const weights = useWeights()
   const { goTo } = useWorkbenchNav()
@@ -158,11 +246,11 @@ export function RankingStage() {
 
   const result = ranking.value
   const best = result ? bestIndex(result) : -1
+  const { Picture } = RANKING_VIEWS[rankingMethod]
 
   return (
     <div className="flex flex-col gap-6 pt-4">
       <div className="flex flex-col gap-2">
-        {/* One method today; the control is where the next ones will appear. */}
         <SegmentedControl<RankingMethodId>
           aria-label={t('workbench.rankingMethod.label')}
           value={rankingMethod}
@@ -174,7 +262,7 @@ export function RankingStage() {
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
-        {/* Nothing today (TOPSIS has no options); SAW, VIKOR and WASPAS will show theirs here. */}
+        {/* TOPSIS has no options; SAW shows its normalization here (and later VIKOR its v, WASPAS its λ). */}
         <MethodParams methodId={rankingMethod} descriptors={getRankingMethod(rankingMethod)?.params} />
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
           <span>{t('workbench.ranking.weightsUsed', { method: weightMethodFullLabel(weightMethod, weightParams, t) })}</span>
@@ -190,17 +278,21 @@ export function RankingStage() {
         <>
           <MethodWarnings warnings={result.warnings} problem={problem} />
           <p className="text-20 font-semibold text-text" data-testid="best-sentence">
-            {t('workbench.ranking.best', { name: alternativeName(problem, best, t), value: nf.format(result.scores[best]) })}
+            {t('workbench.ranking.best', {
+              name: alternativeName(problem, best, t),
+              symbol: scoreWords(rankingMethod, t).symbol,
+              value: nf.format(result.scores[best]),
+            })}
           </p>
           <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-2">
-            <ClosenessChart problem={problem} result={result} className="min-w-0" />
-            {weights.value && <TopsisPicture problem={problem} weights={weights.value.weights} className="min-w-0" />}
+            <ScoreChart problem={problem} result={result} method={rankingMethod} className="min-w-0" />
+            {weights.value && <Picture problem={problem} weights={weights.value.weights} params={rankingParams} className="min-w-0" />}
           </div>
           <section className="flex flex-col gap-3">
             <SectionTitle>
               <span id="wb-ranking-table">{t('workbench.ranking.tableTitle')}</span>
             </SectionTitle>
-            <RankingTable problem={problem} result={result} id="wb-ranking-table" />
+            <RankingTable problem={problem} result={result} method={rankingMethod} id="wb-ranking-table" />
           </section>
           <CalculationToggle groups={[{ steps: result.steps }]} problem={problem} />
         </>

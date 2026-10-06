@@ -15,6 +15,7 @@ import entropyK from './fixtures/entropy-krishnan2021-minmax.json'
 import zavadskas from './fixtures/entropy-zavadskas2017.json'
 import f from './fixtures/opricovic-tzeng-2004-f.json'
 import phi from './fixtures/opricovic-tzeng-2004-phi.json'
+import podvezko from './fixtures/saw-podvezko2011.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -46,6 +47,15 @@ describe('examples match the published fixtures', () => {
       expect(ex.criteria.map((c) => c.type)).toEqual(fx.types)
     })
   }
+  it('Podvezko 2011', () => {
+    const ex = getExample('podvezko-2011-baltic')!
+    expect(ex.matrix).toEqual(podvezko.matrix)
+    expect(ex.alternatives).toEqual(podvezko.alternatives)
+    expect(ex.weights).toEqual(podvezko.weights)
+    expect(ex.criteria.map((c) => c.type)).toEqual(podvezko.types)
+    // The corrected scores (Table 3 misprints Lithuania), rounded as Table 3 prints them.
+    expect(ex.published).toEqual([{ label: 'saw.scores', values: podvezko.linearMax.expected.S.map((v) => Number(v.toFixed(3))), decimals: 3 }])
+  })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
       expect(ex.citation.doi).toMatch(/^10\.\d{4,}\//)
@@ -189,6 +199,42 @@ describe('store actions', () => {
     expectClose(w.value!.weights, zavadskas.expected.weights, zavadskas.expected.tolerance)
     useWorkbench.getState().loadExample('krishnan-2021-smartphones', 'en')
     expect(useWorkbench.getState().weightMethod).toBe('critic')
+  })
+
+  it('loadExample opens a ranking method\'s reference example with that method, its default variant and the paper\'s weights', () => {
+    const st = useWorkbench.getState()
+    st.setMethodParam('saw', 'normalization', 'sum')
+    st.loadExample('podvezko-2011-baltic', 'tr')
+    const s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('saw')
+    expect(s.methodParams?.saw).toEqual({})
+    expect(s.weightMethod).toBe('manual')
+    expect(s.manualWeights).toEqual(podvezko.weights)
+    expect(s.problem.criteria[3]!.name).toBe('İşsizlik oranı (%)')
+    const r = computeRanking(s)
+    expectClose(r.value!.scores, podvezko.linearMax.expected.S, podvezko.linearMax.expected.tolerance)
+    expect(r.value!.ranking).toEqual(podvezko.linearMax.expected.ranking)
+    // Sum normalization through the store: Table 6.
+    st.setMethodParam('saw', 'normalization', 'sum')
+    const sum = computeRanking(useWorkbench.getState())
+    expectClose(sum.value!.scores, podvezko.sum.published_table6.S, podvezko.sum.expected.tolerance)
+    // A TOPSIS reference example switches back; one without a ranking reference keeps the method.
+    st.setRankingMethod('saw')
+    st.loadExample('krishnan-2021-smartphones', 'en')
+    expect(useWorkbench.getState().rankingMethod).toBe('saw')
+    st.loadExample('opricovic-tzeng-2004-f', 'en')
+    expect(useWorkbench.getState().rankingMethod).toBe('topsis')
+  })
+
+  it('SAW blocks a zero or negative cell with its position; TOPSIS on the same data computes', () => {
+    const p = draftOf('podvezko-2011-baltic')
+    const matrix = p.matrix.map((r) => [...r]) as (number | null)[][]
+    matrix[2]![3] = 0
+    const data = { problem: { ...p, matrix }, weightMethod: 'manual' as const, manualWeights: podvezko.weights }
+    const r = computeRanking({ ...data, rankingMethod: 'saw' })
+    expect(r.value).toBeNull()
+    expect(r.issues).toContainEqual({ code: 'non-positive-value', severity: 'error', row: 2, col: 3, value: 0 })
+    expect(computeRanking({ ...data, rankingMethod: 'topsis' }).value).not.toBeNull()
   })
 
   it('setMethodParam keeps other methods and keys', () => {

@@ -4,6 +4,7 @@
  */
 import { critic } from '../../core/methods/critic'
 import { entropy, type EntropyParams } from '../../core/methods/entropy'
+import { saw, type SawParams } from '../../core/methods/saw'
 import { topsis } from '../../core/methods/topsis'
 import type { Problem, RankingResult, Step, WeightingResult } from '../../core/types'
 import { scaleLinear, type Domain, type LinearScale } from '../charts/scale'
@@ -303,6 +304,48 @@ export function entropyParts(problem: Problem, params: EntropyParams = {}): Entr
     weights: result.weights,
     pair: even === uneven ? [0, 1] : [even, uneven],
   }
+}
+
+// ---------------------------------------------------------------------------------------------
+// SAW
+// ---------------------------------------------------------------------------------------------
+
+export type SawParts = {
+  result: RankingResult
+  /** contributions[i][j] = w_j r_ij, the core's 'saw.weighted' step; row i sums to the score S_i. */
+  contributions: number[][]
+  scores: number[]
+  /** Alternatives in rank order (ties keep input order). */
+  order: number[]
+}
+
+/** The core's SAW result for the picture of its contributions, or null when SAW cannot run on the data. */
+export function sawParts(problem: Problem, weights: readonly number[], params: SawParams = {}): SawParts | null {
+  let result: RankingResult
+  try {
+    result = saw.compute(problem, [...weights], params)
+  } catch {
+    return null
+  }
+  const order = result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b)
+  return { result, contributions: stepMatrix(result.steps, 'saw.weighted'), scores: result.scores, order }
+}
+
+/** One stacked segment: criterion j from x to x + width (screen px), in the bar of one alternative. */
+export type StackSegment = { col: number; value: number; x: number; width: number }
+
+/**
+ * The segments of one stacked bar, left to right in criterion order: each starts where the previous one ends, so the
+ * bar ends at x0 + (Σ values) * pxPerUnit. Zero contributions keep a zero-width segment (a criterion never vanishes
+ * from the table or the keyboard order).
+ */
+export function stackSegments(values: readonly number[], x0: number, pxPerUnit: number): StackSegment[] {
+  let acc = 0
+  return values.map((value, col) => {
+    const x = x0 + acc * pxPerUnit
+    acc += value
+    return { col, value, x, width: value * pxPerUnit }
+  })
 }
 
 /** Index of the largest value (first on ties), or -1 for an empty list. */

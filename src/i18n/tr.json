@@ -95,6 +95,9 @@
       "topsis": {
         "claim": "D+, D−, C ve sıralar {{citation}} ile {{decimals}} basamağa kadar aynı."
       },
+      "saw": {
+        "claim": "Skorlar ve sıralar toplam normalizasyonuyla {{citation}} ile {{decimals}} basamağa kadar aynı; doğrusal maks ile de, Tablo 2'deki baskı hatası düzeltilince aynı."
+      },
       "also": "Ayrıca test edilenler: ilk ders projesindeki elle çözülmüş CRITIC tablosu, her ara matris {{tol}} içinde; CRITIC ardından TOPSIS zincirinin ilk Python koduyla eşliği, {{tol}} içinde. Tablo ve Python kodu bağımsız kaynak değildir.",
       "alsoTitle": "Diğer kontroller",
       "tolerance": "Tolerans {{tol}}"
@@ -135,7 +138,7 @@
       },
       "ranking": {
         "title": "Sıralama için geçerli veri ve ağırlık gerekli",
-        "body": "Matris ve ağırlıklar tamamlandığında TOPSIS alternatifleri burada sıralar.",
+        "body": "Matris ve ağırlıklar tamamlandığında seçilen sıralama yöntemi alternatifleri burada sıralar.",
         "action": "Ağırlıklar aşamasına git"
       },
       "results": {
@@ -172,7 +175,8 @@
     },
     "rankingMethod": {
       "label": "Sıralama yöntemi",
-      "topsis": "TOPSIS"
+      "topsis": "TOPSIS",
+      "saw": "SAW"
     },
     "params": {
       "entropy": {
@@ -188,6 +192,21 @@
         "normalizationVariant": {
           "sum": "toplam",
           "minmax": "min-maks"
+        }
+      },
+      "saw": {
+        "normalization": "Normalizasyon",
+        "normalizationOptions": {
+          "linearMax": "Doğrusal (x / maks)",
+          "sum": "Toplam"
+        },
+        "normalizationHints": {
+          "linearMax": "Her kriterin en iyi değeri 1 olur; maliyette min / x kullanılır.",
+          "sum": "Her kriter sütun toplamındaki paylara dönüşür; maliyette 1 / x kullanılır."
+        },
+        "normalizationVariant": {
+          "linearMax": "doğrusal",
+          "sum": "toplam"
         }
       }
     },
@@ -306,20 +325,31 @@
     },
     "ranking": {
       "methodHint": {
-        "topsis": "Alternatifleri ideal ve negatif ideal çözüme olan uzaklıklarına göre sıralar."
+        "topsis": "Alternatifleri ideal ve negatif ideal çözüme olan uzaklıklarına göre sıralar.",
+        "saw": "Her kriteri en iyi değer 1 olacak şekilde ölçekler, ağırlıklandırır ve toplar."
       },
       "columns": {
         "rank": "Sıra",
         "alternative": "Alternatif",
         "dPlus": "D+",
-        "dMinus": "D−",
-        "closeness": "Yakınlık C"
+        "dMinus": "D−"
       },
       "tableTitle": "Sıralama",
-      "chartTitle": "Yakınlık katsayısı C",
+      "score": {
+        "topsis": {
+          "name": "Yakınlık C",
+          "title": "Yakınlık katsayısı C",
+          "symbol": "C"
+        },
+        "saw": {
+          "name": "Skor S",
+          "title": "Skor S, ağırlıklı toplam",
+          "symbol": "S"
+        }
+      },
       "weightsUsed": "Ağırlıklar: {{method}}",
       "changeWeights": "Ağırlıkları değiştir",
-      "best": "İlk sırada {{name}} (C = {{value}})."
+      "best": "İlk sırada {{name}} ({{symbol}} = {{value}})."
     },
     "results": {
       "sourceFile": "{{name}} dosyasından içe aktarıldı",
@@ -346,13 +376,12 @@
         "type": "Yön",
         "method": "Yöntem",
         "weight": "Ağırlık",
-        "score": "Yakınlık C",
         "rank": "Sıra",
         "benefit": "fayda",
         "cost": "maliyet",
         "about": "Hakkında"
       },
-      "headline": "İlk sırada {{name}} (C = {{value}}).",
+      "headline": "İlk sırada {{name}} ({{symbol}} = {{value}}).",
       "byline": "Ağırlık: {{weights}}. Sıralama: {{ranking}}. {{m}} alternatif, {{n}} kriter.",
       "about": {
         "tool": "Araç",
@@ -411,6 +440,12 @@
       },
       "manual": {
         "weights": "Elle girilen ağırlıklar w"
+      },
+      "saw": {
+        "normalizedLinearMax": "Normalize matris r (doğrusal maks)",
+        "normalizedSum": "Normalize matris r (toplam)",
+        "weighted": "Katkılar v = w r",
+        "scores": "Skor S"
       }
     },
     "issues": {
@@ -474,6 +509,13 @@
         "projectionNote": "En ağır iki kriter üzerinde çizildi; D ve C bütün kriterlerle hesaplanır.",
         "select": "Bir alternatif seçin",
         "point": "{{name}}, C {{value}}"
+      },
+      "saw": {
+        "title": "Skorlar nereden geliyor",
+        "legend": "Kriterler",
+        "others": "Diğer kriterler",
+        "segment": "{{alternative}}, {{criterion}}: {{value}} (S = {{score}})",
+        "readout": "{{alternative}}: {{criterion}} katkısı {{value}}, S = {{score}}"
       }
     },
     "flow": {
@@ -510,7 +552,7 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS ile sıralayın ve hesabın her adımını görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS ya da SAW ile sıralayın ve hesabın her adımını görün."
     }
   },
   "methods": {
@@ -525,7 +567,8 @@
       "entropy": "Entropi",
       "topsis": "TOPSIS",
       "equal": "Eşit ağırlık",
-      "manual": "Elle girilen ağırlık"
+      "manual": "Elle girilen ağırlık",
+      "saw": "SAW"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -577,7 +620,8 @@
         "topsis": "En iyiye ve en kötüye uzaklıkla sıralar.",
         "critic": "Ağırlığı verideki kontrast ve çatışmadan bulur.",
         "entropy": "Ağırlığı verinin ne kadar dengesiz dağıldığından bulur.",
-        "equal": "Her kritere 1/n verir."
+        "equal": "Her kritere 1/n verir.",
+        "saw": "Ölçeklenmiş değerleri ağırlıklı toplar."
       }
     },
     "page": {
@@ -665,6 +709,10 @@
           "share": "Pay p",
           "caption": "Her çubuk, bir alternatifin sütun toplamındaki payıdır."
         },
+        "saw": {
+          "title": "Skorun her parçasının bir kriteri var",
+          "caption": "Her parça bir kriterin ağırlığı ile normalize değerinin çarpımı; çubuk S değerinde biter."
+        },
         "steps": {
           "start": "Fikri adım adım izle",
           "group": "Fikri adım adım izleyin",
@@ -709,6 +757,12 @@
     },
     "manual": {
       "weights": "Elle girilen ağırlıklar."
+    },
+    "saw": {
+      "normalizedLinearMax": "Doğrusal maks normalizasyonu: her değer sütun maksimumuna bölünür, maliyet kriterinde sütun minimumu değere bölünür; böylece en iyi değer 1 olur.",
+      "normalizedSum": "Toplam normalizasyonu: her değer sütun toplamına bölünür; maliyet kriterinde önce 1 / x alınır, paylar toplamı 1 olur.",
+      "weighted": "Katkılar: her normalize değer kendi kriter ağırlığıyla çarpılır.",
+      "scores": "Skor S: bir alternatifin katkılarının toplamı. Değer büyüdükçe sıra yükselir."
     }
   },
   "validation": {
@@ -724,7 +778,7 @@
       "invalid-cell": "{{alternative}} için {{criterion}} değerine bir sayı gir.",
       "invalid-criterion-type": "{{criterion}} için fayda ya da maliyet seç.",
       "constant-column": "{{criterion}} kriterinde bütün alternatiflerin değeri aynı, bu yüzden alternatifleri ayırt edemiyor.",
-      "non-positive-value": "{{alternative}} için {{criterion}} değeri {{value}}. Bu yöntem 0'dan büyük değerler ister.",
+      "non-positive-value": "{{alternative}} için {{criterion}} değeri {{value}}. Bu yöntem değerlere böler, bu yüzden her değer 0'dan büyük olmalı.",
       "negative-value": "{{alternative}} için {{criterion}} değeri {{value}}. Ham veri (toplam) 0 ya da daha büyük değer ister; negatif değerler için Min-maks seçin.",
       "weights-length-mismatch": "{{n}} kriter için {{value}} ağırlık var.",
       "invalid-weight": "{{criterion}} ağırlığına bir sayı gir.",

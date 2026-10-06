@@ -1,0 +1,190 @@
+{
+  "id": "saw-podvezko2011",
+  "source": "Podvezko 2011, Engineering Economics 22(2):134-146, doi:10.5755/j01.ee.22.2.310, Table 1 (input), Table 2 (weights, linear max values), Table 3 (S, linear max), Tables 5 and 6 (sum)",
+  "alternatives": [
+    "Estonia",
+    "Latvia",
+    "Lithuania",
+    "Poland"
+  ],
+  "criteria": [
+    "gdp_growth",
+    "production_growth",
+    "average_salary_eur",
+    "unemployment",
+    "export_import"
+  ],
+  "types": [
+    "benefit",
+    "benefit",
+    "benefit",
+    "cost",
+    "benefit"
+  ],
+  "weights": [
+    0.35,
+    0.1,
+    0.17,
+    0.25,
+    0.13
+  ],
+  "matrix": [
+    [
+      5.1,
+      9.8,
+      430.0,
+      9.3,
+      0.7
+    ],
+    [
+      7.5,
+      6.5,
+      298.0,
+      10.3,
+      0.55
+    ],
+    [
+      9.7,
+      16.1,
+      306.0,
+      11.6,
+      0.73
+    ],
+    [
+      3.8,
+      8.4,
+      501.0,
+      19.3,
+      0.79
+    ]
+  ],
+  "linearMax": {
+    "printed_table2_by_criterion": [
+      [
+        0.526,
+        0.773,
+        1.0,
+        0.392
+      ],
+      [
+        0.609,
+        0.404,
+        1.0,
+        0.522
+      ],
+      [
+        0.858,
+        0.595,
+        0.599,
+        1.0
+      ],
+      [
+        1.0,
+        0.903,
+        0.802,
+        0.482
+      ],
+      [
+        0.886,
+        0.696,
+        0.924,
+        1.0
+      ]
+    ],
+    "printed_table2_note": "Lithuania, average salary is printed 0.599; Table 1 gives 306 / 501 = 0.611 (Table 5 uses 306 too). The other 19 cells match to 3 decimals.",
+    "published_table3": {
+      "S": [
+        0.756,
+        0.728,
+        0.872,
+        0.61
+      ],
+      "ranking": [
+        2,
+        3,
+        1,
+        4
+      ],
+      "tolerance": 0.0005,
+      "note": "follows from the printed Table 2, with the 0.599 misprint"
+    },
+    "expected": {
+      "S": [
+        0.755988,
+        0.728343,
+        0.87439,
+        0.609754
+      ],
+      "ranking": [
+        2,
+        3,
+        1,
+        4
+      ],
+      "tolerance": 0.0001,
+      "note": "recomputed from Table 1 (numpy, independent of the code); differs from Table 3 only for Lithuania, by 0.0024"
+    }
+  },
+  "sum": {
+    "published_table5_by_criterion": [
+      [
+        0.195,
+        0.287,
+        0.372,
+        0.146
+      ],
+      [
+        0.24,
+        0.159,
+        0.395,
+        0.206
+      ],
+      [
+        0.28,
+        0.194,
+        0.199,
+        0.326
+      ],
+      [
+        0.314,
+        0.283,
+        0.252,
+        0.151
+      ],
+      [
+        0.253,
+        0.199,
+        0.264,
+        0.285
+      ]
+    ],
+    "published_table6": {
+      "S": [
+        0.251,
+        0.246,
+        0.301,
+        0.202
+      ],
+      "ranking": [
+        2,
+        3,
+        1,
+        4
+      ]
+    },
+    "expected": {
+      "S": [
+        0.25134,
+        0.24616,
+        0.300587,
+        0.201912
+      ],
+      "tolerance": 0.0005,
+      "note": "Table 6 caption says formulas (3) and (5); the text and Table 5 use (6) and (2)"
+    }
+  },
+  "expected": {
+    "tolerance": 0.0005,
+    "note": "printed precision of Tables 3, 5 and 6 (3 decimals): the ledger tolerance"
+  }
+}

@@ -7,7 +7,8 @@ import { SweepChart } from '../../../features/charts/SweepChart'
 import { useElementWidth } from '../../../features/charts/useElementWidth'
 import { useNumberFormat } from '../../../i18n'
 import { Button, SegmentedControl, Select } from '../../../ui'
-import { DECIMALS } from '../shared'
+import type { RankingMethodId } from '../../../state/workbench'
+import { DECIMALS, scoreWords } from '../shared'
 import { LiveRanking } from '../../ranking/LiveRanking'
 import { rankOrder, snapWeight } from '../../ranking/order'
 import { THUMB, WeightRange } from '../../ranking/WeightRange'
@@ -35,7 +36,7 @@ const NO_MARKS: { x: number; y: number }[] = []
 
 /**
  * A: one weight at a time. Pick a criterion, drag its weight (the others keep their proportions); the chart shows
- * every alternative's closeness over the whole range with a cursor at the weight, and the table next to it is the
+ * every alternative's score over the whole range with a cursor at the weight, and the table next to it is the
  * ranking at that weight, its rows sliding to their new places as the order changes. The sweep of a criterion is
  * calculated in a worker (a large matrix takes a few hundred ms); the ranking at the cursor is one calculation, here.
  */
@@ -73,6 +74,8 @@ export function SweepSection({ problem, weights, method, params, baseRanking, na
   const leaders = order.filter((i) => at.ranking[i] === 1)
   const baseLeaders = rankOrder(baseRanking).filter((i) => baseRanking[i] === 1)
   const criterion = criteria[k] ?? ''
+  // The registry method the workbench ranked with, so its id is one of the workbench's ranking methods.
+  const score = scoreWords(method.id as RankingMethodId, tw)
   const shownCriterion = sweep ? (criteria[sweep.k] ?? '') : criterion
   const many = names.length > MANY_ALTERNATIVES || (result?.marks.length ?? 0) > MANY_SWITCHES
   const endLabels = useMemo(
@@ -152,7 +155,7 @@ export function SweepSection({ problem, weights, method, params, baseRanking, na
           {/* One chart from the start (empty axes until the first sweep arrives), so the slider inside it is the same
               element throughout and keeps the focus. */}
           <SweepChart
-            title={t('sweep.chartTitle', { criterion: shownCriterion })}
+            title={t('sweep.chartTitle', { score: score.title, criterion: shownCriterion })}
             labels={names}
             endLabels={sweep ? endLabels : NO_LINES}
             xs={sweep ? xs : EMPTY_XS}
@@ -231,7 +234,7 @@ export function SweepSection({ problem, weights, method, params, baseRanking, na
             columns={{
               rank: tw('workbench.ranking.columns.rank'),
               alternative: tw('workbench.ranking.columns.alternative'),
-              closeness: tw('workbench.ranking.columns.closeness'),
+              closeness: score.name,
             }}
           />
           {/* Said when first place changes; the table itself is not a live region (it changes on every step). */}

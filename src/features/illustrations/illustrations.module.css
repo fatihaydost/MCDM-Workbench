@@ -660,3 +660,100 @@
 .explain .sigma {
   transition: stroke var(--dur-explain) var(--ease);
 }
+
+/* SAW contributions ---------------------------------------------------------------------------- */
+
+.sawRow,
+.sawSeg,
+.sawGap,
+.sawValue {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.sawName {
+  fill: var(--text);
+  font-size: 13px;
+}
+
+.sawValue {
+  fill: var(--text-2);
+  font-size: 13px;
+}
+
+.sawRow[data-highlight] .sawName,
+.sawRow[data-highlight] .sawValue {
+  fill: var(--text);
+  font-weight: 600;
+}
+
+/* One fixed colour per criterion (tokens.css --data-cat-*), never cycled; after the eighth the context grey. */
+.sawSeg {
+  fill: var(--data-context);
+  outline: none;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.sawSeg[data-cat='1'] { fill: var(--data-cat-1); }
+.sawSeg[data-cat='2'] { fill: var(--data-cat-2); }
+.sawSeg[data-cat='3'] { fill: var(--data-cat-3); }
+.sawSeg[data-cat='4'] { fill: var(--data-cat-4); }
+.sawSeg[data-cat='5'] { fill: var(--data-cat-5); }
+.sawSeg[data-cat='6'] { fill: var(--data-cat-6); }
+.sawSeg[data-cat='7'] { fill: var(--data-cat-7); }
+.sawSeg[data-cat='8'] { fill: var(--data-cat-8); }
+
+/* The segment is a unit rect stretched by scale(), so the focus ring is a stroke that does not scale with it. */
+.sawSeg:focus-visible {
+  stroke: var(--accent);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.sawGap {
+  fill: var(--bg);
+}
+
+/* Hovering or focusing a segment follows its criterion through every bar: the other criteria step back. */
+.sawPlot[data-dimmed] .sawSeg:not([data-on]) {
+  opacity: 0.3;
+}
+
+.animate .sawRow,
+.animate .sawGap,
+.animate .sawValue {
+  transition: transform var(--dur-data) var(--ease);
+}
+
+.animate .sawSeg {
+  transition:
+    transform var(--dur-data) var(--ease),
+    opacity var(--dur) var(--ease);
+}
+
+.sawLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.sawLegendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sawLegendItem[data-on] {
+  color: var(--text);
+}
+
+.sawSwatch {
+  flex: none;
+  display: block;
+}

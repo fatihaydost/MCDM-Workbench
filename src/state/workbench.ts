@@ -26,7 +26,7 @@ export const STAGES = ['data', 'weights', 'ranking', 'results', 'robustness'] as
 export type Stage = (typeof STAGES)[number]
 
 export type WeightMethodId = 'critic' | 'entropy' | 'equal' | 'manual'
-export type RankingMethodId = 'topsis'
+export type RankingMethodId = 'topsis' | 'saw'
 
 /**
  * Options chosen per method id (Entropy's normalization, later VIKOR's v ...). A missing method or key means the
@@ -159,10 +159,15 @@ export const useWorkbench = create<WorkbenchState>()(
         const ex = getExample(id)
         if (!ex) return
         // An example published for a weighting method opens with that method in its default variant (the
-        // variant the paper used); otherwise the paper's weights when it gives them, else CRITIC.
+        // variant the paper used); otherwise the paper's weights when it gives them, else CRITIC. An example published
+        // for a ranking method opens with that method, also in its default variant; otherwise the ranking method stays.
         const reference = ex.referenceFor.find((m) => getWeightingMethod(m) !== undefined) as WeightMethodId | undefined
+        const ranking = ex.referenceFor.find((m) => getRankingMethod(m) !== undefined) as RankingMethodId | undefined
         set((s) => ({
-          ...(reference && { methodParams: { ...s.methodParams, [reference]: {} } }),
+          ...((reference || ranking) && {
+            methodParams: { ...s.methodParams, ...(reference && { [reference]: {} }), ...(ranking && { [ranking]: {} }) },
+          }),
+          ...(ranking && { rankingMethod: ranking }),
           problem: {
             alternatives: [...ex.alternatives],
             criteria: ex.criteria.map((c) => ({ name: c.name[lang], type: c.type })),

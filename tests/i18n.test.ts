@@ -67,7 +67,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { critic, entropy, topsis } = await import('../src/core')
+    const { critic, entropy, saw, topsis } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -92,8 +92,10 @@ describe('i18n resources', () => {
       entropy.compute({ ...p, matrix: [[1, 1], [1, 1], [1, 1]] }, {}), // all constant
       entropy.compute({ ...p, matrix: [[10, 0.045], [11, 0], [12, 0]] }, {}), // dominant weight
     ]
-    const steps = [...w.steps, ...r.steps, ...e.flatMap((x) => x.steps)]
-    const warnings = [...(w.warnings ?? []), ...(r.warnings ?? []), ...e.flatMap((x) => x.warnings ?? [])]
+    // SAW: both normalizations (it emits no warnings of its own; its data errors are validation codes).
+    const sw = [saw.compute(p, [0.5, 0.5], {}), saw.compute(p, [0.5, 0.5], { normalization: 'sum' })]
+    const steps = [...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps)]
+    const warnings = [...(w.warnings ?? []), ...(r.warnings ?? []), ...e.flatMap((x) => x.warnings ?? []), ...sw.flatMap((x) => x.warnings ?? [])]
     expect(new Set(warnings.filter((x) => x.code.startsWith('entropy.')).map((x) => x.code))).toEqual(
       new Set(['entropy.constant-column', 'entropy.zeros-in-column', 'entropy.two-alternatives-minmax', 'entropy.all-constant-equal-weights', 'entropy.dominant-weight']),
     )

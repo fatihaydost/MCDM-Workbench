@@ -311,15 +311,15 @@ export const rankingRequirements: readonly RankingRequirement[] = [
   {
     label: 'SAW / WSM',
     methodIds: ['saw'],
-    normalization: { en: 'Linear max (x/max, min/x) or min-max', tr: 'Doğrusal maks (x/maks, min/x) ya da min-maks' },
-    negatives: 'conditional',
-    zeros: 'conditional',
+    normalization: { en: 'Linear max (x/max, min/x) or sum (x/Σx, cost 1/x)', tr: 'Doğrusal maks (x/maks, min/x) ya da toplam (x/Σx, maliyette 1/x)' },
+    negatives: 'no',
+    zeros: 'no',
     note: {
-      en: 'Negatives: no with x/max (the sign flips), yes with min-max. Zeros: min/x fails for a cost criterion at 0.',
-      tr: 'Negatif: x/maks ile hayır (işaret döner), min-maks ile evet. Sıfır: maliyet kriterinde min/x, 0 değerinde bozulur.',
+      en: 'Every value must be above 0: both normalizations are ratios, and a shift would change the result. Zero or negative values are a blocking error here.',
+      tr: 'Her değer 0\'dan büyük olmalı: iki normalizasyon da orandır ve kaydırma sonucu değiştirir. Sıfır ya da negatif değer burada engelleyici hatadır.',
     },
-    params: null,
-    output: { en: 'Score', tr: 'Skor' },
+    params: { en: 'Normalization, linear max by default', tr: 'Normalizasyon, varsayılan doğrusal maks' },
+    output: { en: 'Score S, higher is better', tr: 'Skor S, yüksek olan daha iyi' },
   },
   {
     label: 'WPM',

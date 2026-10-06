@@ -95,6 +95,9 @@
       "topsis": {
         "claim": "D+, D−, C and ranks match {{citation}} to {{decimals}} decimals."
       },
+      "saw": {
+        "claim": "Scores and ranks match {{citation}} to {{decimals}} decimals with sum normalization, and with linear max once a misprint in its Table 2 is corrected."
+      },
       "also": "Also tested: the hand-solved CRITIC spreadsheet from the original coursework, every intermediate matrix within {{tol}}, and parity of CRITIC then TOPSIS with the original Python code within {{tol}}. The spreadsheet and the Python code are not independent references.",
       "alsoTitle": "Other checks",
       "tolerance": "Tolerance {{tol}}"
@@ -135,7 +138,7 @@
       },
       "ranking": {
         "title": "Ranking needs valid data and weights",
-        "body": "When the matrix and the weights are complete, TOPSIS ranks the alternatives here.",
+        "body": "When the matrix and the weights are complete, the ranking method ranks the alternatives here.",
         "action": "Go to Weights"
       },
       "results": {
@@ -172,7 +175,8 @@
     },
     "rankingMethod": {
       "label": "Ranking method",
-      "topsis": "TOPSIS"
+      "topsis": "TOPSIS",
+      "saw": "SAW"
     },
     "params": {
       "entropy": {
@@ -188,6 +192,21 @@
         "normalizationVariant": {
           "sum": "sum",
           "minmax": "min-max"
+        }
+      },
+      "saw": {
+        "normalization": "Normalization",
+        "normalizationOptions": {
+          "linearMax": "Linear (x / max)",
+          "sum": "Sum"
+        },
+        "normalizationHints": {
+          "linearMax": "The best value of each criterion becomes 1; cost uses min / x.",
+          "sum": "Each criterion becomes shares of its column total; cost uses 1 / x."
+        },
+        "normalizationVariant": {
+          "linearMax": "linear",
+          "sum": "sum"
         }
       }
     },
@@ -306,20 +325,31 @@
     },
     "ranking": {
       "methodHint": {
-        "topsis": "Ranks the alternatives by their distance from an ideal and a negative-ideal solution."
+        "topsis": "Ranks the alternatives by their distance from an ideal and a negative-ideal solution.",
+        "saw": "Rescales each criterion so the best value gets 1, weights it and adds up."
       },
       "columns": {
         "rank": "Rank",
         "alternative": "Alternative",
         "dPlus": "D+",
-        "dMinus": "D−",
-        "closeness": "Closeness C"
+        "dMinus": "D−"
       },
       "tableTitle": "Ranking",
-      "chartTitle": "Closeness coefficient C",
+      "score": {
+        "topsis": {
+          "name": "Closeness C",
+          "title": "Closeness coefficient C",
+          "symbol": "C"
+        },
+        "saw": {
+          "name": "Score S",
+          "title": "Score S, the weighted sum",
+          "symbol": "S"
+        }
+      },
       "weightsUsed": "Weights: {{method}}",
       "changeWeights": "Change weights",
-      "best": "{{name}} ranks first (C = {{value}})."
+      "best": "{{name}} ranks first ({{symbol}} = {{value}})."
     },
     "results": {
       "sourceFile": "Imported from {{name}}",
@@ -346,13 +376,12 @@
         "type": "Type",
         "method": "Method",
         "weight": "Weight",
-        "score": "Closeness C",
         "rank": "Rank",
         "benefit": "benefit",
         "cost": "cost",
         "about": "About"
       },
-      "headline": "{{name}} ranks first (C = {{value}}).",
+      "headline": "{{name}} ranks first ({{symbol}} = {{value}}).",
       "byline": "Weights: {{weights}}. Ranking: {{ranking}}. {{m}} alternatives, {{n}} criteria.",
       "about": {
         "tool": "Tool",
@@ -411,6 +440,12 @@
       },
       "manual": {
         "weights": "Manual weights w"
+      },
+      "saw": {
+        "normalizedLinearMax": "Normalized matrix r (linear max)",
+        "normalizedSum": "Normalized matrix r (sum)",
+        "weighted": "Contributions v = w r",
+        "scores": "Score S"
       }
     },
     "issues": {
@@ -474,6 +509,13 @@
         "projectionNote": "Drawn on the two heaviest criteria; D and C use all criteria.",
         "select": "Choose an alternative",
         "point": "{{name}}, C {{value}}"
+      },
+      "saw": {
+        "title": "Where each score comes from",
+        "legend": "Criteria",
+        "others": "Other criteria",
+        "segment": "{{alternative}}, {{criterion}}: {{value}} (S = {{score}})",
+        "readout": "{{alternative}}: {{criterion}} adds {{value}} to S = {{score}}"
       }
     },
     "flow": {
@@ -510,7 +552,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, equal or your own weights, rank the alternatives with TOPSIS and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, equal or your own weights, rank the alternatives with TOPSIS or SAW and see every step of the calculation."
     }
   },
   "methods": {
@@ -525,7 +567,8 @@
       "entropy": "Entropy",
       "topsis": "TOPSIS",
       "equal": "Equal weights",
-      "manual": "Manual weights"
+      "manual": "Manual weights",
+      "saw": "SAW"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -577,7 +620,8 @@
         "topsis": "Ranks by distance to the best and the worst.",
         "critic": "Weights from contrast and conflict in the data.",
         "entropy": "Weights from how unevenly the data spread.",
-        "equal": "Every criterion gets 1/n."
+        "equal": "Every criterion gets 1/n.",
+        "saw": "Adds up weighted, rescaled values."
       }
     },
     "page": {
@@ -665,6 +709,10 @@
           "share": "Share p",
           "caption": "Each bar is one alternative's share of the column total."
         },
+        "saw": {
+          "title": "Every part of the score has a criterion",
+          "caption": "Each segment is one criterion's weight times its normalized value; the bar ends at S."
+        },
         "steps": {
           "start": "Step through the idea",
           "group": "Step through the idea",
@@ -709,6 +757,12 @@
     },
     "manual": {
       "weights": "Weights entered by hand."
+    },
+    "saw": {
+      "normalizedLinearMax": "Linear max normalization: each value divided by the column maximum, or for a cost criterion the column minimum divided by the value, so the best value is 1.",
+      "normalizedSum": "Sum normalization: each value divided by its column total; a cost criterion uses 1 / x first, so the shares add up to 1.",
+      "weighted": "Contributions: each normalized value multiplied by its criterion weight.",
+      "scores": "Score S: the sum of an alternative's contributions. A higher value ranks higher."
     }
   },
   "validation": {
@@ -724,7 +778,7 @@
       "invalid-cell": "Enter a number for {{alternative}} on {{criterion}}.",
       "invalid-criterion-type": "Choose benefit or cost for {{criterion}}.",
       "constant-column": "Every alternative has the same value on {{criterion}}, so it cannot tell them apart.",
-      "non-positive-value": "{{alternative}} on {{criterion}} is {{value}}. This method needs values above 0.",
+      "non-positive-value": "{{alternative}} on {{criterion}} is {{value}}. This method divides by the values, so each must be above 0.",
       "negative-value": "{{alternative}} on {{criterion}} is {{value}}. Raw data (sum) needs values of 0 or more; choose Min-max to use negative values.",
       "weights-length-mismatch": "There are {{value}} weights for {{n}} criteria.",
       "invalid-weight": "Enter a number for the weight of {{criterion}}.",

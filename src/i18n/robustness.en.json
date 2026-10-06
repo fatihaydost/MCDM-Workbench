@@ -6,7 +6,7 @@
     "slider": "Weight of {{criterion}}",
     "reset": "Back to your weight",
     "yours": "your weight",
-    "chartTitle": "Closeness C as the weight of {{criterion}} changes",
+    "chartTitle": "{{score}} as the weight of {{criterion}} changes",
     "axis": "Weight of {{criterion}}",
     "legendTop": "Range where {{name}} stays first",
     "legendRanking": "Range with the same full ranking",
