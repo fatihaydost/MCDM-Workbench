@@ -12,7 +12,7 @@ from `src/i18n`. Number formats come in as `format` (use `useNumberFormat().form
 decimals).
 
 ```ts
-import { PipelineDiagram, TopsisGeometry, CriticIdea, EntropyIdea, StepFlow, TOPSIS_FLOW, CRITIC_FLOW, ENTROPY_FLOW, MethodGlyph, EmptyMatrixHint } from '../features/illustrations'
+import { PipelineDiagram, TopsisGeometry, CriticIdea, EntropyIdea, SawContributions, StepFlow, TOPSIS_FLOW, CRITIC_FLOW, ENTROPY_FLOW, MethodGlyph, EmptyMatrixHint } from '../features/illustrations'
 ```
 
 Preview: `/dev/illustrations` (dev only, `Preview.tsx`), e.g.
@@ -73,7 +73,8 @@ workbench Ranking next to the closeness bars (current problem and weights).
 A small decorative picture (132 x 72, `aria-hidden`, no text) for catalogue cards, drawn from real
 values the page passes in: `kind: 'bars'` (`values`, `highlight`: CRITIC or equal weights),
 `kind: 'shares'` (`even`, `uneven`: Entropy's shares of its most even and most uneven criterion, the second in the
-accent) or `kind: 'plane'` (`points` from `distancePoints`, `highlight`: the TOPSIS distance plane).
+accent) or `kind: 'plane'` (`points` from `distancePoints`, `highlight`: the TOPSIS distance plane) or `kind: 'stack'`
+(`rows`: SAW contributions per alternative in rank order, the first in the accent).
 
 ## CriticIdea
 
@@ -108,6 +109,27 @@ Entropy steps of the chosen variant). Table: the shares per alternative, then ro
 
 Use: `/methods/entropy` "The idea" (Zavadskas et al. 2017 example); workbench Weights stage when the method is
 Entropy (current problem and option).
+
+## SawContributions
+
+SAW as a picture: one horizontal stacked bar per alternative, in rank order. Each segment is one criterion's
+contribution w_j r_ij (the core's `saw.weighted` step) and the bar ends at S_i, printed after it. Criteria keep one
+colour each from `--data-cat-1..8` (tokens.css; validated for contrast and colour-vision deficiency in both themes),
+in fixed order, never cycled: a ninth criterion and later share `--data-context` and one "others" legend entry.
+Neighbouring segments are split by a 2 px gap in `--bg`. Hovering or focusing a segment names it in the readout and
+fades the other criteria, so one criterion can be followed through every bar; segments are a roving tab stop (arrow
+keys, Home / End, Escape). Name beside the bar from 380 px, above it below that. Static at first paint; new numbers
+move rows and segments at `--dur-data`. Table: contributions per criterion and S, in rank order.
+
+| Prop | Type | Notes |
+|---|---|---|
+| `problem` | `Problem` | Renders nothing when SAW cannot run (a value of 0 or less). |
+| `weights` | `number[]` | |
+| `params` | `SawParams` | `{ normalization: 'linearMax' \| 'sum' }`; default linear max. |
+| `format` | `(n) => string` | S, contributions and table (4 decimals). |
+| `labels` | `{ title, caption?, showTable, alternative, score, legend, others, segment(a, c, v, s), readout(a, c, v, s) }` | Translations in `workbench.visual.saw.*` and `methods.page.idea.saw.*`. |
+
+Use: `/methods/saw` "The idea" (Podvezko 2011 example); workbench Ranking stage when the method is SAW.
 
 ## StepFlow
 
@@ -163,7 +185,7 @@ Use: the workbench's empty Data state, above "Load example" / "Start blank".
 `topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale
 screen scales, values growing right and up), `distancePoints(proj)`, `closenessAt(p)`,
 `isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `placeLabels(...)`, `ISO_C_DEFAULT`, `linePath(...)`, `pointCss(...)`,
-`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `argMax`, `flowIndex`, `TOPSIS_FLOW`,
+`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `argMax`, `flowIndex`, `TOPSIS_FLOW`,
 `CRITIC_FLOW`, `ENTROPY_FLOW`, `ENTROPY_MINMAX_FLOW`. The
 tests check that A+ / A- and C equal the core and the published values (Opricovic and Tzeng 2004:
 C = 0.762, 0.722, 0.238; Krishnan et al. 2021: σ and weights), that the distance plane places every

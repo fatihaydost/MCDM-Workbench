@@ -17,7 +17,7 @@ export type MethodThumbProps =
       className?: string | undefined
     }
   | {
-      /** SAW: one stacked bar per alternative (rows of contributions, in rank order), criteria in their data colours. */
+      /** SAW: one stacked bar per alternative (rows of contributions, in rank order), parts split by gaps, the first in the accent. */
       kind: 'stack'
       rows: readonly (readonly number[])[]
       className?: string | undefined
@@ -99,7 +99,7 @@ export function MethodThumb(props: MethodThumbProps) {
           let x = PAD + 1
           return r.map((v, j) => {
             const w = (v / max) * (W - 2 * PAD - 1)
-            const seg = <rect key={`${i}-${j}`} className={s.sawSeg} data-cat={j < 8 ? String(j + 1) : 'other'} x={x} y={PAD + i * (bh + gap)} width={Math.max(w - 1, 0)} height={bh} />
+            const seg = <rect key={`${i}-${j}`} className={i === 0 ? s.thumbAccent : s.thumbMark} x={x} y={PAD + i * (bh + gap)} width={Math.max(w - 2, 0)} height={bh} />
             x += w
             return seg
           })

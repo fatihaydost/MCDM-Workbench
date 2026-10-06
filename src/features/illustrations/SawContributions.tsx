@@ -56,8 +56,8 @@ const FONT = 13
 const BAR = 16
 const ROW = 28
 /** Below this width the name sits on its own line above the bar, so the bar keeps the full width. */
-const STACK_BELOW = 480
-const NAME_LINE = 18
+const STACK_BELOW = 380
+const NAME_LINE = 21
 const STACKED_ROW = NAME_LINE + BAR + 10
 const GAP = 8
 const VALUE_GAP = 6
@@ -172,7 +172,7 @@ export function SawContributions({ problem, weights, params, format = defaultFor
                 data-testid="saw-bar"
                 data-score={scores[i]}
               >
-                <text className={s.sawName} x={0} y={stacked ? 12 : ROW / 2} dominantBaseline="central">
+                <text className={s.sawName} x={0} y={stacked ? 8 : ROW / 2} dominantBaseline="central">
                   {short !== name ? <title>{name}</title> : null}
                   {short}
                 </text>
