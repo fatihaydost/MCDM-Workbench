@@ -6,15 +6,15 @@ import { allMethods, FAMILY_ORDER, methodsByFamily } from '../../content/methods
 import { getExample } from '../../data/examples'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { MethodThumb } from '../../features/illustrations/MethodThumb'
-import { argMax, distancePoints, entropyParts, topsisProjection } from '../../features/illustrations/geometry'
+import { argMax, distancePoints, entropyParts, sawParts, topsisProjection } from '../../features/illustrations/geometry'
 import { useLang } from '../../i18n'
 import { SiteFooter } from '../landing/SiteFooter'
 import { usePageMeta } from '../landing/usePageMeta'
 import { Guide } from './Guide'
 import { pageContainer } from './shared'
 
-type Available = 'critic' | 'entropy' | 'topsis' | 'equal'
-const AVAILABLE: readonly Available[] = ['topsis', 'critic', 'entropy', 'equal']
+type Available = 'critic' | 'entropy' | 'topsis' | 'saw' | 'equal'
+const AVAILABLE: readonly Available[] = ['topsis', 'saw', 'critic', 'entropy', 'equal']
 
 function exampleProblem(id: string): Problem {
   const ex = getExample(id)!
@@ -34,10 +34,14 @@ function useThumbs() {
     // Entropy on its reference example: the most even criterion's shares next to the most uneven one's.
     const vilnius = entropyParts(exampleProblem('zavadskas-2017-vilnius'))
     const sharesOf = (j: number) => vilnius?.shares.map((row) => row[j]!) ?? []
+    // SAW on its reference example: each country's score as a stack of contributions, best first.
+    const baltic = getExample('podvezko-2011-baltic')!
+    const sawP = sawParts(exampleProblem(baltic.id), baltic.weights!)
     return {
       critic: { kind: 'bars' as const, values: weights, highlight: argMax(weights) },
       topsis: { kind: 'plane' as const, points: plane, highlight: proj ? argMax(proj.closeness) : undefined },
       entropy: { kind: 'shares' as const, even: sharesOf(vilnius?.pair[0] ?? 0), uneven: sharesOf(vilnius?.pair[1] ?? 1) },
+      saw: { kind: 'stack' as const, rows: sawP ? sawP.order.map((i) => sawP.contributions[i]!) : [] },
       equal: { kind: 'bars' as const, values: Array.from({ length: n }, () => 1 / n), highlight: undefined },
     }
   }, [])

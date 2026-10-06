@@ -7,6 +7,7 @@ import { CRITIC_IDEA_STEPS, CriticIdea } from '../../features/illustrations/Crit
 import { EntropyIdea } from '../../features/illustrations/EntropyIdea'
 import { IdeaSteps, useIdeaSteps, type IdeaStepsLabels } from '../../features/illustrations/IdeaSteps'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
+import { SawContributions } from '../../features/illustrations/SawContributions'
 import { TOPSIS_IDEA_STEPS, TopsisGeometry } from '../../features/illustrations/TopsisGeometry'
 import { useLang, useNumberFormat, type Lang } from '../../i18n'
 
@@ -15,9 +16,9 @@ function toProblem(ex: ExampleDataset, lang: Lang): Problem {
 }
 
 /**
- * The picture at the top of a method page. TOPSIS, CRITIC and Entropy draw their idea on their published
+ * The picture at the top of a method page. TOPSIS, CRITIC, Entropy and SAW draw their idea on their published
  * example; every other method shows its family glyph (no illustration for methods in research yet).
- * Entropy's picture is static (no step-through story yet).
+ * The Entropy and SAW pictures have no step-through story yet (SAW's answers hover and focus).
  */
 export function MethodIdea({ m }: { m: MethodContent }) {
   const { t } = useTranslation()
@@ -27,10 +28,11 @@ export function MethodIdea({ m }: { m: MethodContent }) {
   const topsisEx = m.id === 'topsis' ? getExample('opricovic-tzeng-2004-f') : undefined
   const criticEx = m.id === 'critic' ? getExample('krishnan-2021-smartphones') : undefined
   const entropyEx = m.id === 'entropy' ? getExample('zavadskas-2017-vilnius') : undefined
+  const sawEx = m.id === 'saw' ? getExample('podvezko-2011-baltic') : undefined
   const problem = useMemo(() => {
-    const ex = topsisEx ?? criticEx ?? entropyEx
+    const ex = topsisEx ?? criticEx ?? entropyEx ?? sawEx
     return ex ? toProblem(ex, lang) : null
-  }, [topsisEx, criticEx, entropyEx, lang])
+  }, [topsisEx, criticEx, entropyEx, sawEx, lang])
 
   // "Step through": one story per method, the picture transforms from step to step (MOTION.md, explain).
   const storyCount = topsisEx ? TOPSIS_IDEA_STEPS : criticEx ? CRITIC_IDEA_STEPS : 0
@@ -128,6 +130,31 @@ export function MethodIdea({ m }: { m: MethodContent }) {
           }}
         />
         {source(entropyEx)}
+      </div>
+    )
+  }
+
+  if (sawEx && problem) {
+    return (
+      <div className="flex flex-col gap-2">
+        <SawContributions
+          problem={problem}
+          weights={sawEx.weights ?? []}
+          format={(v) => format(v, 4)}
+          labels={{
+            title: t('methods.page.idea.saw.title'),
+            caption: t('methods.page.idea.saw.caption'),
+            showTable: t('methods.page.idea.showTable'),
+            alternative: t('methods.page.idea.alternative'),
+            score: t('workbench.ranking.score.saw.name'),
+            legend: t('workbench.visual.saw.legend'),
+            others: t('workbench.visual.saw.others'),
+            segment: (alternative, criterion, value, score) => t('workbench.visual.saw.segment', { alternative, criterion, value, score }),
+            readout: (alternative, criterion, value, score) => t('workbench.visual.saw.readout', { alternative, criterion, value, score }),
+          }}
+          className="max-w-[760px]"
+        />
+        {source(sawEx)}
       </div>
     )
   }

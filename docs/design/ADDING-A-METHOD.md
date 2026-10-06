@@ -102,19 +102,21 @@ Weighting method:
 
 Ranking method:
 
-- [ ] `RankingStage.tsx:13` `RANKING_METHODS`: add the id. i18n `workbench.rankingMethod.<id>` (en.json:169) and
-  `workbench.ranking.methodHint.<id>` (en.json:284) [T].
-- [ ] Everything below the selector is TOPSIS-shaped today. Make each one method-aware:
-  - `RankingTable` (:27): D+ and D− columns read `topsis.distanceBest/Worst` (:30-31) [S] blank columns otherwise;
-    the score column is "Closeness C" (`workbench.ranking.columns.closeness`).
-  - `ClosenessChart` (:72): title "Closeness coefficient C" and `sort="desc"` (:83) [S] wrong for `order: 'asc'`.
-  - `TopsisPicture` is shown for any method (:193) [S] gate it on `rankingMethod === 'topsis'` and put the new
-    method's picture there.
-  - "best" sentence (:188) prints the score as if higher were better; fine for `desc`, reword for `asc`.
-  - `CalculationToggle` (:201) is generic.
-- [ ] `ResultsStage.tsx`: generic except the copy (`workbench.results.headline` with the score, the compact
-  `RankingTable` at :188, `workbench.results.workbook.score` = "Closeness C"). The CRITIC correlation heatmap is
-  gated on CRITIC (:60).
+- [ ] `RankingStage.tsx:24` `RANKING_METHODS`: add the id where it should appear in the segmented control. i18n
+  `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T].
+- [ ] `RankingStage.tsx:33` `RANKING_VIEWS` (a `Record` over `RankingMethodId`, so a missing entry is [T]): the
+  method's extra table `columns` (step key + header key; TOPSIS D+ and D−, SAW none) and its `Picture` (TOPSIS
+  `TopsisPicture`, SAW `SawPicture`; props `problem`, `weights`, `params`). Everything else on the stage is generic:
+  the score chart sorts by `result.order`, `CalculationToggle` takes the steps.
+- [ ] The score's words, `workbench.ranking.score.<id>` in en.json and tr.json [T] (read by `scoreWords`,
+  `shared.ts`): `name` ("Closeness C", "Score S": table column, workbook column, sweep table), `title` ("Closeness
+  coefficient C", "Weighted sum S": score chart, robustness sweep chart `{{score}}`) and `symbol` ("C", "S": the
+  best sentence and the Results headline, `{{symbol}} = {{value}}`). The step line of the score key says which way
+  ranks higher ("A higher value ranks higher").
+- [ ] `ResultsStage.tsx` is generic (compact `RankingTable` with `method`, headline and workbook from `scoreWords`,
+  the byline and the About sheet name the variant through `rankingMethodFullLabel`, e.g. "SAW (sum)"). The CRITIC
+  correlation heatmap is gated on CRITIC.
+- [ ] A `ParamDescriptor` on the method shows its control under the selector by itself (`MethodParams`).
 
 Both:
 
@@ -132,8 +134,8 @@ Both:
 - [ ] `RobustnessStage.tsx:58` offers "Recompute" in criterion removal for CRITIC only. For a new objective weighting
   method use `getWeightingMethod(weightMethod)` (Entropy, SD, MEREC can all be recomputed on the reduced matrix).
   [E] `tests/e2e/robustness.spec.ts:148-154` expects the label "Recompute CRITIC" on the CRITIC example; keep it.
-- [ ] Copy: `src/i18n/robustness.*.json` `chartTitle` says "Closeness C"; the sweep table uses
-  `workbench.ranking.columns.closeness` (`SweepSection.tsx:232`). Fine while TOPSIS is the only ranking method.
+- [ ] Copy: generic. The sweep chart title takes the method's `score.title` and the sweep table its `score.name`
+  (`SweepSection.tsx`, `scoreWords`).
 - [ ] Every call passes `{}` as params (robustness.ts:30, :507; worker :39; `SweepSection.tsx:69`); see §11.
 
 ## 6. Method page and catalogue
@@ -243,10 +245,13 @@ parameter (the URL carries only `?example` and `?stage`, removed after load). En
 
 ## 12. Ranking methods with `order: 'asc'` (VIKOR)
 
-The core supports it (`rankScores`, robustness sorts by the method's own ranking). The UI assumes `desc` and
-"closeness": `ClosenessChart sort="desc"` (`RankingStage.tsx:83`), "Closeness C" labels (ranking table, workbook,
-sweep chart), the best-score sentences. VIKOR also has more than one score (S, R, Q) and acceptance conditions; put
-S and R in `steps` and Q in `scores`, and decide how the table shows them.
+The core supports it (`rankScores`, robustness sorts by the method's own ranking), and so does the Ranking stage since
+SAW: the score chart sorts by `result.order`, the table is in rank order, the score's words come from
+`workbench.ranking.score.<id>` and the best sentences read "ranks first (Q = ...)", which holds for either order.
+Still to decide for VIKOR: it has three scores (S, R, Q) and acceptance conditions. Put S and R in `steps` and Q in
+`scores`; S and R can be the extra `columns` of its `RANKING_VIEWS` entry (their header keys under
+`workbench.ranking.columns`), and the acceptance conditions need a sentence or a notice of their own. Careful: VIKOR's
+group utility is also called S, so its score words must not reuse SAW's "Score S".
 
 ## 13. Warnings and validation errors
 

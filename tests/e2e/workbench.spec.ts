@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { critic, entropy, topsis, type CriterionType } from '../../src/core'
+import { critic, entropy, saw, topsis, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -295,3 +295,87 @@ test('Entropy: the Vilnius example gives the published weights; min-max, a negat
   await expect(weightCells).toHaveCount(5)
 })
 
+
+test('SAW: the Podvezko example ranks with SAW, sum changes the scores, the contributions add up to S, TOPSIS brings back D+ and D−', async ({ page }) => {
+  const ex = getExample('podvezko-2011-baltic')!
+  const p = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const byName = (scores: number[]) => Object.fromEntries(ex.alternatives.map((a, i) => [a, f4(scores[i]!)]))
+  const linear = saw.compute(p, ex.weights!, {})
+  const sum = saw.compute(p, ex.weights!, { normalization: 'sum' })
+
+  await page.goto('/app?example=podvezko-2011-baltic&stage=ranking')
+  await expect(stageHeading(page, 'Ranking')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'SAW' })).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByRole('radio', { name: 'Linear (x / max)' })).toHaveAttribute('aria-checked', 'true')
+  const table = page.getByRole('table', { name: 'Ranking' })
+  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'Score S'])
+
+  // Scores: the core's, and the published ones (corrected Table 3) to 3 decimals.
+  expect(await closenessByName(page)).toEqual(byName(linear.scores))
+  const published = ex.published.find((x) => x.label === 'saw.scores')!.values as number[]
+  const shown = await closenessByName(page)
+  ex.alternatives.forEach((a, i) => expect(Number(shown[a]).toFixed(3), a).toBe(published[i]!.toFixed(3)))
+  await expect(page.getByTestId('best-sentence')).toHaveText(`Lithuania ranks first (S = ${f4(linear.scores[2]!)}).`)
+  await expect(page.locator('figure', { hasText: 'Weighted sum S' })).toBeVisible()
+
+  // The picture: one bar per alternative in rank order, five segments each, adding up to S.
+  const bars = page.getByTestId('saw-bar')
+  await expect(bars).toHaveCount(4)
+  const read = () =>
+    bars.evaluateAll((els) =>
+      els.map((el) => ({
+        score: Number(el.getAttribute('data-score')),
+        parts: [...el.querySelectorAll('[data-testid="saw-segment"]')].map((r) => Number(r.getAttribute('data-value'))),
+        text: el.querySelector('text:last-of-type')?.textContent ?? '',
+      })),
+    )
+  const check = async (scores: number[]) => {
+    const drawn = await read()
+    const order = scores.map((_, i) => i).sort((a, b) => scores[b]! - scores[a]!)
+    expect(drawn.map((d) => d.score)).toEqual(order.map((i) => scores[i]))
+    for (const d of drawn) {
+      expect(d.parts).toHaveLength(5)
+      expect(Math.abs(d.parts.reduce((a, b) => a + b, 0) - d.score)).toBeLessThan(1e-12)
+      expect(d.text).toBe(f4(d.score))
+    }
+  }
+  await check(linear.scores)
+
+  // Hovering a segment names its criterion and contribution.
+  const v = linear.steps.find((x) => x.key === 'saw.weighted')!.matrix!
+  await bars.first().getByTestId('saw-segment').first().hover()
+  await expect(page.getByText(`Lithuania: GDP growth (%) adds ${f4(v[2]![0]!)} to S = ${f4(linear.scores[2]!)}`)).toBeVisible()
+
+  // Sum normalization: other scores, the core's, and the picture follows.
+  await page.getByRole('radio', { name: 'Sum' }).click()
+  expect(await closenessByName(page)).toEqual(byName(sum.scores))
+  expect(byName(sum.scores)).not.toEqual(byName(linear.scores))
+  await check(sum.scores)
+  await expect(page.locator('nav[aria-label="Stages"]:visible')).toContainText('SAW (sum)')
+
+  // Robustness ranks with SAW (sum) and names its score.
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Robustness' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Robustness' })).toBeVisible()
+  await expect(page.locator('figure', { hasText: 'Weighted sum S as the weight of GDP growth (%) changes' })).toBeVisible()
+  await expect(page.getByTestId('live-row').first().locator('th')).toHaveText('Lithuania')
+
+  // TOPSIS: D+ and D− come back with Closeness C, the contributions go.
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await page.getByRole('radio', { name: 'TOPSIS' }).click()
+  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'D+', 'D−', 'Closeness C'])
+  expect(await closenessByName(page)).toEqual(byName(topsis.compute(p, ex.weights!, {}).scores))
+  await expect(page.getByTestId('saw-contributions')).toHaveCount(0)
+  await expect(page.locator('figure', { hasText: 'Closeness coefficient C' })).toBeVisible()
+})
+
+test('SAW: a zero blocks the ranking with a message at its cell', async ({ page }) => {
+  await page.goto('/app?example=podvezko-2011-baltic&stage=data')
+  await page.locator('#wb-cell-2-3').click()
+  await page.keyboard.type('0')
+  await page.keyboard.press('Enter')
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  const error = page.getByRole('button', { name: 'Lithuania on Unemployment rate (%) is 0. This method divides by the values, so each must be above 0.' })
+  await expect(error).toBeVisible()
+  await error.click()
+  await expect(page.locator('#wb-cell-2-3')).toBeFocused()
+})

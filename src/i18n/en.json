@@ -343,7 +343,7 @@
         },
         "saw": {
           "name": "Score S",
-          "title": "Score S, the weighted sum",
+          "title": "Weighted sum S",
           "symbol": "S"
         }
       },

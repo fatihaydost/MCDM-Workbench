@@ -17,6 +17,12 @@ export type MethodThumbProps =
       className?: string | undefined
     }
   | {
+      /** SAW: one stacked bar per alternative (rows of contributions, in rank order), criteria in their data colours. */
+      kind: 'stack'
+      rows: readonly (readonly number[])[]
+      className?: string | undefined
+    }
+  | {
       /** TOPSIS distance plane: (D+, D-) points and the rays of constant closeness. */
       kind: 'plane'
       points: readonly Point[]
@@ -77,6 +83,26 @@ export function MethodThumb(props: MethodThumbProps) {
               })}
             </g>
           )
+        })}
+      </svg>
+    )
+  }
+  if (props.kind === 'stack') {
+    const { rows } = props
+    const max = Math.max(...rows.map((r) => r.reduce((a, b) => a + b, 0)), 1e-12)
+    const gap = 6
+    const bh = (H - 2 * PAD - gap * (rows.length - 1)) / Math.max(rows.length, 1)
+    return (
+      <svg className={cls} width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        <line className={s.thumbAxis} x1={PAD} x2={PAD} y1={PAD - 2} y2={H - PAD + 2} />
+        {rows.map((r, i) => {
+          let x = PAD + 1
+          return r.map((v, j) => {
+            const w = (v / max) * (W - 2 * PAD - 1)
+            const seg = <rect key={`${i}-${j}`} className={s.sawSeg} data-cat={j < 8 ? String(j + 1) : 'other'} x={x} y={PAD + i * (bh + gap)} width={Math.max(w - 1, 0)} height={bh} />
+            x += w
+            return seg
+          })
         })}
       </svg>
     )
