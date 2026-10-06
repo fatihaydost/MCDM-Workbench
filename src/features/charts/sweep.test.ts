@@ -83,3 +83,26 @@ describe('layoutRankIntervals', () => {
     expect(l.ticks).toEqual([1, 2, 3])
   })
 })
+
+describe('layoutSweep: y axis', () => {
+  it('keeps scores inside [0, 1] on a [0, 1] axis and widens it for scores outside', async () => {
+    const { layoutSweep } = await import('./sweep')
+    const base = { width: 600, xs: [0, 0.5, 1], labels: ['A', 'B'] }
+    const inside = layoutSweep({ ...base, series: [[0.1, 0.5, 0.9], [0.2, 0.4, 0.95]] })
+    expect(inside.y.domain[0]).toBeGreaterThanOrEqual(0)
+    expect(inside.y.domain[1]).toBeLessThanOrEqual(1)
+    const outside = layoutSweep({ ...base, series: [[0.4, 1.3, 2.1], [-0.2, 0.5, 0.9]] })
+    expect(outside.y.domain[0]).toBeLessThanOrEqual(-0.2)
+    expect(outside.y.domain[1]).toBeGreaterThanOrEqual(2.1)
+  })
+})
+
+describe('layoutBars: a zero value', () => {
+  it('is still a 2 px mark when highlighted, and the best of an ascending sort comes first', async () => {
+    const { layoutBars } = await import('./layout')
+    const l = layoutBars({ labels: ['A', 'B'], values: [0.4, 0], width: 400, format: String, sort: 'asc', highlight: 1 })
+    expect(l.rows[0]!.index).toBe(1)
+    expect(l.rows[0]!.width).toBe(2)
+    expect(l.rows[0]!.x).toBe(l.zeroX)
+  })
+})

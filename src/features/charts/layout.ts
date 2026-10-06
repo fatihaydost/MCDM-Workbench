@@ -46,7 +46,7 @@ export type BarRow = {
   value: number
   text: string
   y: number
-  /** Left edge and width of the bar (0 width for a zero or non-finite value). */
+  /** Left edge and width of the bar (0 for a zero or non-finite value; at least 2 px when highlighted). */
   x: number
   width: number
   /** Value label position and anchor: after the bar end, on the side the bar grows to. */
@@ -83,6 +83,8 @@ export type BarLayoutInput = {
 
 const GAP = 8
 const VALUE_GAP = 4
+/** Smallest drawn highlighted bar (px), so a highlighted zero value is still a visible mark. */
+const MIN_BAR = 2
 
 export function layoutBars({
   labels,
@@ -118,6 +120,7 @@ export function layoutBars({
     const ok = Number.isFinite(value)
     const end = ok ? x(value) : zeroX
     const negative = ok && value < 0
+    const mark = ok && highlight === index
     return {
       index,
       label: labels[index] ?? '',
@@ -125,8 +128,10 @@ export function layoutBars({
       value,
       text: texts[index]!,
       y: k * rowStep,
-      x: Math.min(zeroX, end),
-      width: Math.abs(end - zeroX),
+      // The highlighted bar at (or next to) zero still gets a 2 px mark, so the best of a lower-is-better score
+      // (VIKOR Q = 0) shows; other zero values stay empty.
+      x: mark && Math.abs(end - zeroX) < MIN_BAR ? (negative ? zeroX - MIN_BAR : zeroX) : Math.min(zeroX, end),
+      width: mark ? Math.max(Math.abs(end - zeroX), MIN_BAR) : Math.abs(end - zeroX),
       textX: negative ? end - VALUE_GAP : end + VALUE_GAP,
       anchor: negative ? 'end' : 'start',
       highlight: highlight === index,

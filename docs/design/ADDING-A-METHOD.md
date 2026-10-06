@@ -250,6 +250,8 @@ parameter (the URL carries only `?example` and `?stage`, removed after load). En
 The core supports it (`rankScores`, robustness sorts by the method's own ranking), and so does the Ranking stage since
 SAW: the score chart sorts by `result.order`, the table is in rank order, the score's words come from
 `workbench.ranking.score.<id>` and the best sentences read "ranks first (Q = ...)", which holds for either order.
+The robustness sweep's y axis stays inside [0, 1] only while the scores do (COPRAS's or a negative score widens it),
+and the highlighted bar of the score chart keeps a 2 px mark at 0, so a best Q = 0 is visible.
 Still to decide for VIKOR: it has three scores (S, R, Q) and acceptance conditions. Put S and R in `steps` and Q in
 `scores`; S and R can be the extra `columns` of its `RANKING_VIEWS` entry (their header keys under
 `workbench.ranking.columns`), and the acceptance conditions need a sentence or a notice of their own. Careful: VIKOR's
