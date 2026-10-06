@@ -61,6 +61,8 @@ const NAME_LINE = 21
 const STACKED_ROW = NAME_LINE + BAR + 10
 const GAP = 8
 const VALUE_GAP = 6
+/** Width (px) of a zero contribution: invisible as a fill, wide enough for the focus ring to draw. */
+const ZERO_WIDTH = 0.01
 const defaultFormat = (v: number) => v.toFixed(4)
 
 type Active = { row: number; col: number }
@@ -193,7 +195,8 @@ export function SawContributions({ problem, weights, params, format = defaultFor
                       y={barY}
                       width={1}
                       height={BAR}
-                      style={{ transform: `translate(${g.x}px, 0px) scale(${Math.max(g.width, 0)}, 1)` }}
+                      // A zero contribution keeps a hairline width, so its non-scaling focus ring still draws.
+                      style={{ transform: `translate(${g.x}px, 0px) scale(${Math.max(g.width, ZERO_WIDTH)}, 1)` }}
                       tabIndex={tabbable ? 0 : -1}
                       role="img"
                       aria-label={l.segment(name, critNames[g.col]!, format(g.value), texts[i]!)}

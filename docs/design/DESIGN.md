@@ -39,7 +39,11 @@ or Tailwind palette names (`bg-blue-500` is a bug). Light and dark are the same 
 - **Data colour is a separate system** (`--data-*`): context grey for the rest, accent for the selected
   or best alternative, a single-hue lightness ramp for unsigned heatmaps (normalized matrix), and a diverging ramp for signed
   data (correlation): muted red for negative, neutral at zero, petrol for positive. The red is kept low in
-  chroma so it reads as data, not as an accent.
+  chroma so it reads as data, not as an accent. A categorical set (`--data-cat-1..8`) gives one colour per
+  criterion, in fixed order and never cycled (a ninth falls back to context grey), only where the parts of a mark
+  carry a criterion's identity (SAW's stacked contributions, always with a legend and a table); single-series charts
+  stay context grey plus the accent. It is validated in both themes for contrast and colour-vision deficiency (values
+  and checks in `tokens.css`).
   No library default palettes.
 
 ## Type
