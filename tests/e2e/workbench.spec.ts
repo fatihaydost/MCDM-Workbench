@@ -316,7 +316,9 @@ test('SAW: the Podvezko example ranks with SAW, sum changes the scores, the cont
   const shown = await closenessByName(page)
   ex.alternatives.forEach((a, i) => expect(Number(shown[a]).toFixed(3), a).toBe(published[i]!.toFixed(3)))
   await expect(page.getByTestId('best-sentence')).toHaveText(`Lithuania ranks first (S = ${f4(linear.scores[2]!)}).`)
-  await expect(page.locator('figure', { hasText: 'Weighted sum S' })).toBeVisible()
+  // The contributions picture takes the score chart's place: each of its bars already ends at S.
+  await expect(page.locator('figure', { hasText: 'Where each score comes from' })).toBeVisible()
+  await expect(page.locator('figure', { hasText: 'Weighted sum S' })).toHaveCount(0)
 
   // The picture: one bar per alternative in rank order, five segments each, adding up to S.
   const bars = page.getByTestId('saw-bar')
@@ -366,6 +368,7 @@ test('SAW: the Podvezko example ranks with SAW, sum changes the scores, the cont
   expect(await closenessByName(page)).toEqual(byName(topsis.compute(p, ex.weights!, {}).scores))
   await expect(page.getByTestId('saw-contributions')).toHaveCount(0)
   await expect(page.locator('figure', { hasText: 'Closeness coefficient C' })).toBeVisible()
+  await expect(page.locator('figure', { hasText: 'Distances to A+ and A−' })).toBeVisible()
 })
 
 test('SAW: a zero blocks the ranking with a message at its cell', async ({ page }) => {

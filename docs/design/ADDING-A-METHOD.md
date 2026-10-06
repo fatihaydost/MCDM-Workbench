@@ -106,7 +106,9 @@ Ranking method:
   `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T].
 - [ ] `RankingStage.tsx:33` `RANKING_VIEWS` (a `Record` over `RankingMethodId`, so a missing entry is [T]): the
   method's extra table `columns` (step key + header key; TOPSIS D+ and D−, SAW none) and its `Picture` (TOPSIS
-  `TopsisPicture`, SAW `SawPicture`; props `problem`, `weights`, `params`). Everything else on the stage is generic:
+  `TopsisPicture`, SAW `SawPicture`; props `problem`, `weights`, `params`) and `pictureShowsScores` (true when the
+  picture already draws every score as a bar in rank order, as SAW's does: it then replaces the score chart).
+  Everything else on the stage is generic:
   the score chart sorts by `result.order`, `CalculationToggle` takes the steps.
 - [ ] The score's words, `workbench.ranking.score.<id>` in en.json and tr.json [T] (read by `scoreWords`,
   `shared.ts`): `name` ("Closeness C", "Score S": table column, workbook column, sweep table), `title` ("Closeness

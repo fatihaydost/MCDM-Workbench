@@ -38,6 +38,11 @@ const RANKING_VIEWS: Readonly<
       columns: readonly { step: string; label: string }[]
       /** The method's idea drawn on the current problem, next to the score chart. */
       Picture: (props: PictureProps) => ReactNode
+      /**
+       * Whether the picture already shows every score as a bar in rank order, so the score chart would repeat it
+       * (SAW: each bar ends at S). Then the picture takes the chart's place.
+       */
+      pictureShowsScores: boolean
     }
   >
 > = {
@@ -47,9 +52,11 @@ const RANKING_VIEWS: Readonly<
       { step: 'topsis.distanceWorst', label: 'workbench.ranking.columns.dMinus' },
     ],
     Picture: TopsisPicture,
+    pictureShowsScores: false,
   },
-  // No columns: the contributions are the picture, and the full matrix is in the calculation.
-  saw: { columns: [], Picture: SawPicture },
+  // No columns: the contributions are the picture (each bar ends at S, so it replaces the score chart), and the full
+  // matrix is in the calculation.
+  saw: { columns: [], Picture: SawPicture, pictureShowsScores: true },
 }
 
 /** Alternatives in rank order (ties keep input order). */
@@ -216,7 +223,7 @@ export function SawPicture({ problem, weights, params, className }: PictureProps
         segment: (alternative, criterion, value, score) => t('workbench.visual.saw.segment', { alternative, criterion, value, score }),
         readout: (alternative, criterion, value, score) => t('workbench.visual.saw.readout', { alternative, criterion, value, score }),
       }}
-      className={cn('max-w-[640px]', className)}
+      className={cn('max-w-[760px]', className)}
     />
   )
 }
@@ -246,7 +253,7 @@ export function RankingStage() {
 
   const result = ranking.value
   const best = result ? bestIndex(result) : -1
-  const { Picture } = RANKING_VIEWS[rankingMethod]
+  const { Picture, pictureShowsScores } = RANKING_VIEWS[rankingMethod]
 
   return (
     <div className="flex flex-col gap-6 pt-4">
@@ -284,8 +291,8 @@ export function RankingStage() {
               value: nf.format(result.scores[best]),
             })}
           </p>
-          <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-2">
-            <ScoreChart problem={problem} result={result} method={rankingMethod} className="min-w-0" />
+          <div className={cn('grid grid-cols-1 items-start gap-8', !pictureShowsScores && 'xl:grid-cols-2')}>
+            {!pictureShowsScores && <ScoreChart problem={problem} result={result} method={rankingMethod} className="min-w-0" />}
             {weights.value && <Picture problem={problem} weights={weights.value.weights} params={rankingParams} className="min-w-0" />}
           </div>
           <section className="flex flex-col gap-3">
