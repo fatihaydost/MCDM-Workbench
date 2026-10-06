@@ -326,7 +326,7 @@
     "ranking": {
       "methodHint": {
         "topsis": "Ranks the alternatives by their distance from an ideal and a negative-ideal solution.",
-        "saw": "Rescales each criterion so the best value gets 1, weights it and adds up."
+        "saw": "Weights the rescaled values of each criterion and adds them up."
       },
       "columns": {
         "rank": "Rank",

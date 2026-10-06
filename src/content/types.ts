@@ -81,9 +81,10 @@ export type Combination = {
 
 /**
  * How our recomputation compares with the published reference example.
- * match: reproduced at the paper's printed precision.
- * partial: reproduced only after a documented correction of the paper (typo, swapped labels)
- *          or only at a looser tolerance than the printed digits imply.
+ * match: every published number is reproduced at the paper's printed precision; numbers printed under the wrong
+ *        label (swapped rows or columns) count, once they are read under the right one.
+ * partial: some published number is not reproduced as printed, e.g. one that follows from a misprinted input
+ *          (documented, with the corrected value), or only at a looser tolerance than the printed digits imply.
  * mismatch: not reproduced.
  */
 export type ReferenceMatch = 'match' | 'partial' | 'mismatch'

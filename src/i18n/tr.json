@@ -326,7 +326,7 @@
     "ranking": {
       "methodHint": {
         "topsis": "Alternatifleri ideal ve negatif ideal çözüme olan uzaklıklarına göre sıralar.",
-        "saw": "Her kriteri en iyi değer 1 olacak şekilde ölçekler, ağırlıklandırır ve toplar."
+        "saw": "Kriterlerin ölçeklenmiş değerlerini ağırlıklandırıp toplar."
       },
       "columns": {
         "rank": "Sıra",

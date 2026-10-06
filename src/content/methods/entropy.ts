@@ -141,13 +141,13 @@ export const entropy: MethodContent = {
     ],
     inputs: [
       'En az 2 alternatifli karar matrisi. Ham veri (toplam) 0 ya da daha büyük değer ister.',
-      'Ham veri (toplam) kriter türlerini kullanmaz; min-max maliyet kriterlerini ters çevirmek için kullanır.',
-      'Seçenek: normalizasyon, ham veri (toplam, varsayılan) ya da negatif değer kabul eden min-max.',
+      'Ham veri (toplam) kriter türlerini kullanmaz; min-maks maliyet kriterlerini ters çevirmek için kullanır.',
+      'Seçenek: normalizasyon, ham veri (toplam, varsayılan) ya da negatif değer kabul eden min-maks.',
     ],
     pitfalls: [
       'Sıfırlar: payları dengesizleştirir, tek bir sıfır olmayan değeri olan sütun ağırlığın çoğunu alabilir (Zhu vd. 2020).',
       'Homojen veri gürültüyü büyütür: yayımlanmış bir çalışmada 0,991 ile 0,999 arası entropiler 0,024 ile 0,378 arası ağırlıklar verdi.',
-      'Varyant önemlidir: ham veri ile min-max çok farklı sonuç verebilir; sabit eklemek (santigrat ve kelvin) ham veri ağırlıklarını değiştirir, çarpmak değiştirmez.',
+      'Varyant önemlidir: ham veri ile min-maks çok farklı sonuç verebilir; sabit eklemek (santigrat ve kelvin) ham veri ağırlıklarını değiştirir, çarpmak değiştirmez.',
     ],
   },
 }

@@ -20,7 +20,7 @@
 - **EN:** Be careful: a very good value on a heavily weighted criterion can hide weak values elsewhere, and another normalization can swap alternatives that score close to each other. *(Podvezko 2011, p. 136–137, SAW disadvantage 3; Vujičić et al. 2017, Tables 8a–8b: SAW ranks change across normalization variants)*
   **TR:** Dikkat: ağırlığı yüksek bir kriterdeki çok iyi bir değer diğer kriterlerdeki zayıflığı gizleyebilir; başka bir normalizasyon da skorları birbirine yakın alternatiflerin yerini değiştirebilir.
 
-**UI labels for the option:** EN "Linear max (default)" / "Sum"; TR "Doğrusal maks (varsayılan)" / "Toplam". Min-maks is not offered (see Variants).
+**UI labels for the option:** EN "Linear (x / max)" (default) / "Sum"; TR "Doğrusal (x / maks)" (varsayılan) / "Toplam"; parameter values `linearMax` / `sum`. Min-maks is not offered (see Variants).
 
 ## When to use / when not
 - **Use when:** values are positive and on ratio scales; you want a transparent baseline or a sanity check next to TOPSIS/VIKOR/EDAS; the decision maker accepts full compensation between criteria.
