@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Problem } from '../../core'
 import type { MethodContent } from '../../content/types'
-import { getExample, type ExampleDataset } from '../../data/examples'
+import { alternativeNames, getExample, type ExampleDataset } from '../../data/examples'
 import { CRITIC_IDEA_STEPS, CriticIdea } from '../../features/illustrations/CriticIdea'
 import { EntropyIdea } from '../../features/illustrations/EntropyIdea'
 import { IdeaSteps, useIdeaSteps, type IdeaStepsLabels } from '../../features/illustrations/IdeaSteps'
@@ -12,7 +12,7 @@ import { TOPSIS_IDEA_STEPS, TopsisGeometry } from '../../features/illustrations/
 import { useLang, useNumberFormat, type Lang } from '../../i18n'
 
 function toProblem(ex: ExampleDataset, lang: Lang): Problem {
-  return { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name[lang], type: c.type })), matrix: ex.matrix }
+  return { alternatives: alternativeNames(ex, lang), criteria: ex.criteria.map((c) => ({ name: c.name[lang], type: c.type })), matrix: ex.matrix }
 }
 
 /**

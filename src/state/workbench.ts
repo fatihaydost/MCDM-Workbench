@@ -18,7 +18,7 @@ import {
   type ValidationIssue,
   type WeightingResult,
 } from '../core'
-import { getExample } from '../data/examples'
+import { alternativeNames, getExample } from '../data/examples'
 import type { Lang } from '../i18n/lang'
 
 /** The workbench stages, in order. Robustness reads the ranking of the stages before it and changes nothing. */
@@ -169,7 +169,7 @@ export const useWorkbench = create<WorkbenchState>()(
           }),
           ...(ranking && { rankingMethod: ranking }),
           problem: {
-            alternatives: [...ex.alternatives],
+            alternatives: [...alternativeNames(ex, lang)],
             criteria: ex.criteria.map((c) => ({ name: c.name[lang], type: c.type })),
             matrix: ex.matrix.map((row) => [...row]),
           },

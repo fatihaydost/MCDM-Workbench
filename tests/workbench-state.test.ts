@@ -58,6 +58,7 @@ describe('examples match the published fixtures', () => {
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
+      for (const names of Object.values(ex.localAlternatives ?? {})) expect(names.length).toBe(ex.alternatives.length)
       expect(ex.citation.doi).toMatch(/^10\.\d{4,}\//)
       expect(ex.citation.tables.en).not.toBe('')
       expect(ex.citation.tables.tr).not.toBe('')
@@ -211,6 +212,7 @@ describe('store actions', () => {
     expect(s.weightMethod).toBe('manual')
     expect(s.manualWeights).toEqual(podvezko.weights)
     expect(s.problem.criteria[3]!.name).toBe('İşsizlik oranı (%)')
+    expect(s.problem.alternatives).toEqual(['Estonya', 'Letonya', 'Litvanya', 'Polonya'])
     const r = computeRanking(s)
     expectClose(r.value!.scores, podvezko.linearMax.expected.S, podvezko.linearMax.expected.tolerance)
     expect(r.value!.ranking).toEqual(podvezko.linearMax.expected.ranking)

@@ -25,7 +25,13 @@ export type ExampleDataset = {
   /** Method ids this dataset is a published reference for (see src/core/registry.ts). */
   referenceFor: string[]
   citation: Citation
+  /** Alternative names as printed in the paper (also the fixture's), used in English. */
   alternatives: string[]
+  /**
+   * The same names in another UI language, where they have one (countries); proper names such as neighbourhoods
+   * or product codes stay as printed. Read through `alternativeNames(ex, lang)`.
+   */
+  localAlternatives?: Partial<Record<Lang, string[]>>
   criteria: { name: Localized; type: CriterionType }[]
   matrix: number[][]
   /** Weights given in the paper, when the example starts from fixed weights. */
@@ -212,6 +218,7 @@ export const examples: readonly ExampleDataset[] = [
       tables: { en: 'Table 1 (input), Table 2 (weights), Tables 3 and 6 (output)', tr: 'Tablo 1 (girdi), Tablo 2 (ağırlıklar), Tablo 3 ve 6 (çıktı)' },
     },
     alternatives: ['Estonia', 'Latvia', 'Lithuania', 'Poland'],
+    localAlternatives: { tr: ['Estonya', 'Letonya', 'Litvanya', 'Polonya'] },
     criteria: [
       { name: { en: 'GDP growth (%)', tr: 'GSYH büyümesi (%)' }, type: 'benefit' },
       { name: { en: 'Production growth (%)', tr: 'Üretim artışı (%)' }, type: 'benefit' },
@@ -233,6 +240,9 @@ export const examples: readonly ExampleDataset[] = [
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)
+
+/** The example's alternative names in `lang`: the localized ones when the example has them, else as printed. */
+export const alternativeNames = (ex: ExampleDataset, lang: Lang): string[] => ex.localAlternatives?.[lang] ?? ex.alternatives
 
 /** "Krishnan, A.R.; Kasim, M.M.; ... (2021). Title. Venue. doi:..." */
 export function formatCitation(c: Citation): string {
