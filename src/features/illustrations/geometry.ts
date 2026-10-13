@@ -3,6 +3,7 @@
  * picture can never disagree with the worked calculation. No DOM.
  */
 import { critic } from '../../core/methods/critic'
+import { maxOf } from '../../core/math'
 import { entropy, type EntropyParams } from '../../core/methods/entropy'
 import { saw, type SawParams } from '../../core/methods/saw'
 import { topsis } from '../../core/methods/topsis'
@@ -176,8 +177,8 @@ export type PlaneFit = PlotFit & { xMax: number; yMax: number }
 export function fitDistancePlane(points: readonly Point[], width: number, opts: FitOptions): PlaneFit {
   const { margin, minPlotHeight = 140, maxPlotHeight = 300, pad = 0.12 } = opts
   let plotW = Math.max(1, width - margin.left - margin.right)
-  const mx = Math.max(...points.map((p) => p.x), 0)
-  const my = Math.max(...points.map((p) => p.y), 0)
+  const mx = Math.max(maxOf(points.map((p) => p.x)), 0)
+  const my = Math.max(maxOf(points.map((p) => p.y)), 0)
   const m = Math.max(mx, my) || 1
   const dx = Math.max(mx, m * 0.25) * (1 + pad)
   const dy = Math.max(my, m * 0.25) * (1 + pad)
@@ -210,7 +211,7 @@ export function fitDistancePlane(points: readonly Point[], width: number, opts: 
  * itself on that axis (zero length). Compared with a relative tolerance, in data units.
  */
 export function referenceGuides(points: readonly Point[], ref: Point): { from: Point; to: Point }[] {
-  const span = Math.max(...points.map((p) => Math.max(Math.abs(p.x), Math.abs(p.y))), Math.abs(ref.x), Math.abs(ref.y), 1e-12)
+  const span = Math.max(maxOf(points.map((p) => Math.max(Math.abs(p.x), Math.abs(p.y)))), Math.abs(ref.x), Math.abs(ref.y), 1e-12)
   const eps = span * 1e-9
   const out: { from: Point; to: Point }[] = []
   for (const axis of ['x', 'y'] as const) {

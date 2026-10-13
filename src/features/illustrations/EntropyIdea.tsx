@@ -1,4 +1,5 @@
 import { useId, useMemo } from 'react'
+import { maxOf } from '../../core/math'
 import type { EntropyParams } from '../../core/methods/entropy'
 import type { Problem } from '../../core/types'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
@@ -73,7 +74,7 @@ export function EntropyIdea({ problem, params, format = defaultFormat, labels, c
   const W = Math.max(width, 280)
   const panelW = (W - GAP) / 2
   const shares = pair.map((j) => parts.shares.map((row) => row[j]!))
-  const yMax = Math.max(...shares.flat(), 1 / m) * 1.08
+  const yMax = Math.max(maxOf(shares.flat()), 1 / m) * 1.08
   const y = (p: number) => PLOT_TOP + PLOT_H - (p / yMax) * PLOT_H
   const base = PLOT_TOP + PLOT_H
   const slot = panelW / m

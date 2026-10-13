@@ -1,4 +1,5 @@
 import { useId, useMemo, useState, type KeyboardEvent } from 'react'
+import { maxOf } from '../../core/math'
 import type { SawParams } from '../../core/methods/saw'
 import type { Problem } from '../../core/types'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
@@ -95,12 +96,12 @@ export function SawContributions({ problem, weights, params, format = defaultFor
   const W = Math.max(width, 240)
   const stacked = W < STACK_BELOW
   const texts = scores.map((v) => format(v))
-  const valueWidth = Math.ceil(Math.max(...texts.map((t) => estimateTextWidth(t, FONT)))) + VALUE_GAP + 2
-  const maxName = Math.max(...names.map((a) => estimateTextWidth(a, FONT)))
+  const valueWidth = Math.ceil(maxOf(texts.map((t) => estimateTextWidth(t, FONT)))) + VALUE_GAP + 2
+  const maxName = maxOf(names.map((a) => estimateTextWidth(a, FONT)))
   const labelWidth = stacked ? 0 : Math.ceil(Math.min(maxName + GAP * 2, Math.max(W * 0.32, 64)))
   const plotLeft = labelWidth
   const plotRight = Math.max(plotLeft + 1, W - valueWidth)
-  const top = Math.max(...scores, 1e-12)
+  const top = Math.max(maxOf(scores), 1e-12)
   const pxPerUnit = (plotRight - plotLeft) / top
   const rowStep = stacked ? STACKED_ROW : ROW
   const barY = stacked ? NAME_LINE : (ROW - BAR) / 2

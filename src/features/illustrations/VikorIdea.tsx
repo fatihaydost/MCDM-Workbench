@@ -1,5 +1,6 @@
 import { Check, X } from '@phosphor-icons/react'
 import { useId, useMemo } from 'react'
+import { maxOf } from '../../core/math'
 import type { VikorParams } from '../../core/methods/vikor'
 import type { Problem } from '../../core/types'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
@@ -155,8 +156,8 @@ export function VikorIdea({ problem, weights, params, format = defaultFormat, la
   const barsTop = wide ? 0 : planeH + 16
   const barsW = wide ? W - barsLeft : W
   const qTexts = Q.map((q) => format(q))
-  const valueWidth = Math.ceil(Math.max(...qTexts.map((t) => estimateTextWidth(t, FONT)))) + VALUE_GAP + 2
-  const maxName = Math.max(...names.map((a) => estimateTextWidth(a, NAME_FONT)))
+  const valueWidth = Math.ceil(maxOf(qTexts.map((t) => estimateTextWidth(t, FONT)))) + VALUE_GAP + 2
+  const maxName = maxOf(names.map((a) => estimateTextWidth(a, NAME_FONT)))
   const nameW = Math.ceil(Math.min(maxName + 12, Math.max(barsW * 0.3, 56)))
   const plotL = barsLeft + nameW
   const plotR = Math.max(plotL + 40, barsLeft + barsW - valueWidth)
