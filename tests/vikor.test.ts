@@ -209,6 +209,28 @@ describe('VIKOR: v, guards and edge cases', () => {
     expect([c.first, c.second, c.tieAtTop, c.c1]).toEqual([0, 2, true, false])
     expect(c.set).toEqual([0, 2])
   })
+  it('every S equal up to rounding (non-dyadic weights): still flat, not rounding noise stretched to [0, 1]', () => {
+    // d = [.1, .2, 0, 0], [0, 0, .3, 0], [.05, .1, .15, 0]: S = .3 for all in exact arithmetic, but the sums come out
+    // as 0.30000000000000004, 0.3, 0.30000000000000004. R = .2, .3, .15.
+    const types: CriterionType[] = ['benefit', 'benefit', 'benefit', 'benefit']
+    const ws = [0.1, 0.2, 0.3, 0.4]
+    const res = vikor.compute(makeProblem([[0, 0, 1, 5], [1, 1, 0, 5], [0.5, 0.5, 0.5, 5]], types), ws, {})
+    const S = vec(res, 'vikor.groupUtility')
+    expect(new Set(S).size).toBeGreaterThan(1) // the noise is really there
+    expectClose(res.scores, [0.5 * (0.05 / 0.15), 0.5, 0], 1e-12)
+    expect(res.ranking).toEqual([2, 3, 1])
+    expect(res.warnings).toContainEqual({ code: 'vikor.equal-group-utility' })
+    // Two alternatives: A1 is better by R, not a tie.
+    const two = vikor.compute(makeProblem([[0, 0, 1, 5], [1, 1, 0, 5]], types), ws, {})
+    expectClose(two.scores, [0, 0.5], 1e-12)
+    expect(two.ranking).toEqual([1, 2])
+  })
+  it('Q values that differ only by rounding are a tie for first, ordered by input index', () => {
+    const c = vikorCompromise([0, 0, 1], [0, 0, 1], [5e-17, 0, 1])
+    expect([c.first, c.second, c.tieAtTop, c.c1]).toEqual([0, 1, true, false])
+    expect(c.order).toEqual([0, 1, 2])
+    expect(c.set).toEqual([0, 1])
+  })
   it('all S and all R equal: Q = 0 for every alternative, one notice, no NaN', () => {
     const res = vikor.compute(makeProblem([[2, 1], [1, 2]], ['benefit', 'benefit']), w, {})
     expect(res.scores).toEqual([0, 0])

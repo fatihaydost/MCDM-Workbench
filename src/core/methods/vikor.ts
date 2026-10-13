@@ -1,5 +1,5 @@
 import { column, sum, zeros } from '../math'
-import { rankScores } from '../rank'
+import { rankScores, tied } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, validateProblem, validateWeights } from '../validate'
 
@@ -11,8 +11,24 @@ export const VIKOR_DEFAULT_V = 0.5
 /** Gaps this close to DQ count as equal to it (C1 holds at Q(a'') - Q(a') = DQ even after rounding). */
 const DQ_TOLERANCE = 1e-12
 
+/** Whether every value is the same up to rounding (the spread is within TIE_TOLERANCE of the largest magnitude). */
+export const vikorFlat = (xs: readonly number[]): boolean => tied(Math.max(...xs), Math.min(...xs))
+
+/**
+ * One term of Q: (x - min) / (max - min), the best 0 and the worst 1. A flat set (`vikorFlat`) gives 0 everywhere, so
+ * rounding noise in S or R (sums of non-dyadic weights) is never stretched to the full [0, 1] range.
+ */
+export function vikorTerm(xs: readonly number[]): number[] {
+  if (vikorFlat(xs)) return xs.map(() => 0)
+  const lo = Math.min(...xs)
+  const span = Math.max(...xs) - lo
+  return xs.map((x) => (x - lo) / span)
+}
+
 /** The acceptance conditions and the compromise solution (Opricovic & Tzeng 2004 §2, steps d and e). */
 export type VikorCompromise = {
+  /** Every alternative in Q order; Q values tied within rounding (as in `rankScores`) keep the input order. */
+  order: number[]
   /** a': first by Q (lowest Q; among equal Q the earlier alternative). */
   first: number
   /** a'': second by Q in the same order. */
@@ -42,18 +58,20 @@ export type VikorCompromise = {
  */
 export function vikorCompromise(S: readonly number[], R: readonly number[], Q: readonly number[]): VikorCompromise {
   const m = Q.length
-  const order = Q.map((_, i) => i).sort((a, b) => Q[a]! - Q[b]! || a - b)
+  // Order by the tolerant rank, so a', a'' and the set agree with tieAtTop and C2 when Q differs only by rounding.
+  const qRank = rankScores([...Q], 'asc')
+  const order = Q.map((_, i) => i).sort((a, b) => qRank[a]! - qRank[b]! || a - b)
   const first = order[0]!
   const second = order[1] ?? first
+  // m = 1 would give DQ = Infinity (C1 never holds, the set is the one alternative); validation requires m >= 2.
   const dq = 1 / (m - 1)
-  const qRank = rankScores([...Q], 'asc')
   const advantage = Q[second]! - Q[first]!
   const c1 = advantage >= dq - DQ_TOLERANCE
   const bestByS = rankScores([...S], 'asc')[first] === 1
   const bestByR = rankScores([...R], 'asc')[first] === 1
   const c2 = bestByS || bestByR
   const set = c1 ? (c2 ? [first] : [first, second]) : order.filter((i) => Q[i]! - Q[first]! < dq - DQ_TOLERANCE)
-  return { first, second, dq, advantage, c1, c2, bestByS, bestByR, tieAtTop: qRank[second] === qRank[first], set }
+  return { order, first, second, dq, advantage, c1, c2, bestByS, bestByR, tieAtTop: qRank[second] === qRank[first], set }
 }
 
 /**
@@ -61,8 +79,8 @@ export function vikorCompromise(S: readonly number[], R: readonly number[], Q: r
  * f*_j / f-_j: best / worst value of criterion j (benefit max / min, cost min / max).
  * d_ij = w_j (f*_j - x_ij) / (f*_j - f-_j), S_i = Σ_j d_ij (group utility), R_i = max_j d_ij (individual regret).
  * Q_i = v (S_i - S*) / (S- - S*) + (1 - v) (R_i - R*) / (R- - R*), lower is better; score = Q, order 'asc'.
- * Guards (card §Pitfalls): a constant column has f* = f-, its d is 0 (notice); if every S is equal the S term of Q is 0
- * (only the R term remains, notice), and the same for R. C1, C2 and the compromise set: `vikorCompromise`.
+ * Guards (card §Pitfalls): a constant column has f* = f-, its d is 0 (notice); if every S is equal (up to rounding,
+ * `vikorFlat`) the S term of Q is 0 (only the R term remains, weighted 1 - v, notice), and the same for R. C1, C2 and the compromise set: `vikorCompromise`.
  * See docs/research/methods/vikor.md.
  */
 export const vikor: RankingMethod<VikorParams> = {
@@ -105,21 +123,16 @@ export const vikor: RankingMethod<VikorParams> = {
     const S = d.map((row) => sum(row))
     const R = d.map((row) => Math.max(...row))
 
-    // 4. Q; a term whose spread is 0 is 0 (every alternative equal on it), so Q never divides by 0.
-    const sStar = Math.min(...S)
-    const sMinus = Math.max(...S)
-    const rStar = Math.min(...R)
-    const rMinus = Math.max(...R)
-    const sFlat = sMinus - sStar === 0
-    const rFlat = rMinus - rStar === 0
+    // 4. Q; a term whose spread is 0 up to rounding is 0 (every alternative equal on it), so Q never divides by 0
+    //    and never stretches rounding noise to [0, 1].
+    const sFlat = vikorFlat(S)
+    const rFlat = vikorFlat(R)
     if (sFlat && rFlat) warnings.push({ code: 'vikor.no-spread' })
     else if (sFlat) warnings.push({ code: 'vikor.equal-group-utility' })
     else if (rFlat) warnings.push({ code: 'vikor.equal-regret' })
-    const Q = S.map((s, i) => {
-      const sTerm = sFlat ? 0 : (s - sStar) / (sMinus - sStar)
-      const rTerm = rFlat ? 0 : (R[i]! - rStar) / (rMinus - rStar)
-      return v * sTerm + (1 - v) * rTerm
-    })
+    const sTerm = vikorTerm(S)
+    const rTerm = vikorTerm(R)
+    const Q = S.map((_, i) => v * sTerm[i]! + (1 - v) * rTerm[i]!)
 
     // 5. Acceptance conditions; a tie for first by Q is reported (the order between the tied is the input order).
     const c = vikorCompromise(S, R, Q)

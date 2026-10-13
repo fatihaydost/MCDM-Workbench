@@ -1,7 +1,7 @@
 /** Scores closer than this (relative to their magnitude, floor 1) count as tied. */
 export const TIE_TOLERANCE = 1e-12
 
-const tied = (a: number, b: number): boolean =>
+export const tied = (a: number, b: number): boolean =>
   Math.abs(a - b) <= TIE_TOLERANCE * Math.max(1, Math.abs(a), Math.abs(b))
 
 /**
