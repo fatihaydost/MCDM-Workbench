@@ -52,7 +52,9 @@ const isStage = (v: string | null): v is Stage => v !== null && (STAGES as reado
 
 /**
  * `?example=<id>&method=<id>&stage=<stage>` loads a published example (with the ranking method asked for, when the
- * example is a reference for several) and opens a stage (links from method pages, screenshots). The query is removed afterwards so a reload keeps the user's edits.
+ * example is a reference for several) and opens a stage (links from method pages, screenshots). A new example with no
+ * stage opens on Data, not on the stage left open last time. The query is removed afterwards so a reload keeps the
+ * user's edits.
  */
 function useQueryBootstrap() {
   const [lang] = useLang()
@@ -66,8 +68,10 @@ function useQueryBootstrap() {
     const example = params.get('example')
     const stage = params.get('stage')
     if (!example && !stage) return
-    if (example && getExample(example)) loadExample(example, lang, params.get('method') ?? undefined)
+    const loaded = example !== null && getExample(example) !== undefined
+    if (loaded) loadExample(example, lang, params.get('method') ?? undefined)
     if (isStage(stage)) setStage(stage)
+    else if (loaded) setStage('data')
     params.delete('example')
     params.delete('method')
     params.delete('stage')

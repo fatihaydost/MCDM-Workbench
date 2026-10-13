@@ -472,3 +472,36 @@ test('SAW: a zero blocks the ranking with a message at its cell', async ({ page 
   await error.click()
   await expect(page.locator('#wb-cell-2-3')).toBeFocused()
 })
+
+test('deleting a criterion in the grid leaves every other weight on its own criterion; undo brings the weight back', async ({ page }) => {
+  await page.goto('/app?example=podvezko-2011-baltic&stage=data')
+  await page.locator('#wb-cell-0-1').click()
+  await page.getByRole('button', { name: /^Delete criterion: Production growth/ }).click()
+  await expect(page.getByRole('grid', { name: 'Decision matrix' })).not.toContainText('Production growth')
+  await page.getByRole('button', { name: 'Continue to weights' }).click()
+  await expect(page.getByRole('radio', { name: 'Manual' })).toHaveAttribute('aria-checked', 'true')
+  const values = ['0.3500', '0.1700', '0.2500', '0.1300']
+  for (const [j, v] of values.entries()) await expect(page.locator(`#wb-weight-${j}`)).toHaveValue(v)
+
+  await page.goto('/app?example=podvezko-2011-baltic&stage=data')
+  await page.locator('#wb-cell-0-1').click()
+  await page.getByRole('button', { name: /^Delete criterion: Production growth/ }).click()
+  await page.locator('#wb-cell-0-0').click()
+  await page.keyboard.press('Control+z')
+  await expect(page.getByRole('grid', { name: 'Decision matrix' })).toContainText('Production growth')
+  await page.getByRole('button', { name: 'Continue to weights' }).click()
+  const all = ['0.3500', '0.1000', '0.1700', '0.2500', '0.1300']
+  for (const [j, v] of all.entries()) await expect(page.locator(`#wb-weight-${j}`)).toHaveValue(v)
+})
+
+test('an example link without a stage opens Data, and an unchanged example follows the language', async ({ page }) => {
+  await page.goto('/app?example=krishnan-2021-smartphones&stage=robustness')
+  await expect(stageHeading(page, 'Robustness')).toBeVisible()
+  await page.goto('/app?example=podvezko-2011-baltic&method=saw')
+  await expect(stageHeading(page, 'Data')).toBeVisible()
+  const grid = page.getByRole('grid') // its name follows the language too
+  await expect(grid).toContainText('Lithuania')
+  await page.getByRole('radio', { name: /^TR/ }).click()
+  await expect(grid).toContainText('Litvanya')
+  await expect(grid).toContainText('İşsizlik oranı')
+})
