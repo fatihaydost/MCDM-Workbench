@@ -7,4 +7,5 @@ export { entropy, ENTROPY_DOMINANT_WEIGHT, type EntropyNormalization, type Entro
 export { equal } from './methods/equal'
 export { saw, type SawNormalization, type SawParams } from './methods/saw'
 export { topsis } from './methods/topsis'
+export { vikor, vikorCompromise, VIKOR_DEFAULT_V, type VikorCompromise, type VikorParams } from './methods/vikor'
 export * from './registry'

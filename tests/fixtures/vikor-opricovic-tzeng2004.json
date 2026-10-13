@@ -1,0 +1,94 @@
+{
+  "id": "vikor-opricovic-tzeng2004",
+  "source": "Opricovic & Tzeng 2004, European Journal of Operational Research 156(2):445-455, doi:10.1016/S0377-2217(03)00020-1, Tables 1-2 (input, problems f and phi), Table 3 (VIKOR S, R, Q), Section 5 (compromise A2)",
+  "alternatives": [
+    "A1",
+    "A2",
+    "A3"
+  ],
+  "criteria": [
+    "risk (1-5)",
+    "altitude (m a.s.l.)"
+  ],
+  "types": [
+    "cost",
+    "benefit"
+  ],
+  "weights": [
+    0.5,
+    0.5
+  ],
+  "params": {
+    "v": 0.5
+  },
+  "matrix": [
+    [
+      1,
+      3000
+    ],
+    [
+      2,
+      3750
+    ],
+    [
+      5,
+      4500
+    ]
+  ],
+  "matrix_phi": [
+    [
+      6,
+      2.0
+    ],
+    [
+      7,
+      2.75
+    ],
+    [
+      10,
+      3.5
+    ]
+  ],
+  "expected": {
+    "S": [
+      0.5,
+      0.375,
+      0.5
+    ],
+    "R": [
+      0.5,
+      0.25,
+      0.5
+    ],
+    "Q": [
+      1.0,
+      0.0,
+      1.0
+    ],
+    "ranking": [
+      2,
+      1,
+      2
+    ],
+    "d_by_criterion": [
+      [
+        0,
+        0.25,
+        1
+      ],
+      [
+        1,
+        0.5,
+        0
+      ]
+    ],
+    "C1": true,
+    "C2": true,
+    "compromise": [
+      "A2"
+    ],
+    "tolerance": 0.0005
+  },
+  "note": "Table 3 prints the unweighted normalized distances d1j, d2j (0, 0.25, 1 and 1, 0.5, 0); our weighted distances are w = 0.5 times these. Problem phi (phi1 = f1 + 5, phi2 = f2 / 1000 - 1) must give identical S, R, Q (Section 5). The paper's step (d) says 'decreasing order', a misprint: the text and Table 3 rank by minimum Q.",
+  "card": "docs/research/methods/vikor.md"
+}
