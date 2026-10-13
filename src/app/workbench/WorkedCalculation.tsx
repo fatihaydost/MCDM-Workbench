@@ -3,7 +3,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isStepKey, stepContent } from '../../content/steps'
 import type { Step } from '../../core'
-import { CRITIC_FLOW, ENTROPY_FLOW, ENTROPY_MINMAX_FLOW, StepFlow, TOPSIS_FLOW, VIKOR_FLOW, type FlowNode } from '../../features/illustrations'
+import { CRITIC_FLOW, ENTROPY_FLOW, ENTROPY_MINMAX_FLOW, StepFlow, TOPSIS_FLOW, VIKOR_FLOW, EDAS_FLOW, type FlowNode } from '../../features/illustrations'
 import { stepToTable, tableToLatex, tableToTsv, type StepTable } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
 import type { DraftProblem } from '../../state/workbench'
@@ -35,6 +35,12 @@ const PLAIN_SYMBOL: Readonly<Record<string, string>> = {
   'vikor.individualRegret': 'R',
   'vikor.q': 'Q',
   'vikor.threshold': 'DQ',
+  'edas.average': 'AV',
+  'edas.sp': 'SP',
+  'edas.sn': 'SN',
+  'edas.nsp': 'NSP',
+  'edas.nsn': 'NSN',
+  'edas.scores': 'AS',
   'equal.weights': 'w',
   'manual.weights': 'w',
 }
@@ -61,6 +67,12 @@ const TEX_SYMBOL: Readonly<Record<string, string>> = {
   'vikor.individualRegret': '$R_i$',
   'vikor.q': '$Q_i$',
   'vikor.threshold': '$DQ$',
+  'edas.average': '$AV_j$',
+  'edas.sp': '$SP_i$',
+  'edas.sn': '$SN_i$',
+  'edas.nsp': '$NSP_i$',
+  'edas.nsn': '$NSN_i$',
+  'edas.scores': '$AS_i$',
   'equal.weights': '$w_j$',
   'manual.weights': '$w_j$',
 }
@@ -87,7 +99,7 @@ export type WorkedCalculationProps = {
  * one-line description, its formula, the labelled matrix or vector and copy as TSV or LaTeX.
  * The focused (or last clicked) step carries the accent on its hairline and number.
  */
-const FLOWS: readonly (readonly FlowNode[])[] = [CRITIC_FLOW, ENTROPY_FLOW, ENTROPY_MINMAX_FLOW, TOPSIS_FLOW, VIKOR_FLOW]
+const FLOWS: readonly (readonly FlowNode[])[] = [CRITIC_FLOW, ENTROPY_FLOW, ENTROPY_MINMAX_FLOW, TOPSIS_FLOW, VIKOR_FLOW, EDAS_FLOW]
 
 /** The step map for a group of steps (by its first node's key, so each Entropy variant gets its own), or null. */
 const flowFor = (steps: readonly Step[]) => FLOWS.find((f) => steps.some((s) => s.key === f[0]!.key)) ?? null

@@ -4,6 +4,7 @@ import type { Problem } from '../../core'
 import type { MethodContent } from '../../content/types'
 import { alternativeNames, getExample, type ExampleDataset } from '../../data/examples'
 import { CRITIC_IDEA_STEPS, CriticIdea } from '../../features/illustrations/CriticIdea'
+import { EdasIdea } from '../../features/illustrations/EdasIdea'
 import { EntropyIdea } from '../../features/illustrations/EntropyIdea'
 import { IdeaSteps, useIdeaSteps, type IdeaStepsLabels } from '../../features/illustrations/IdeaSteps'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
@@ -12,6 +13,7 @@ import { TOPSIS_IDEA_STEPS, TopsisGeometry } from '../../features/illustrations/
 import { VikorIdea } from '../../features/illustrations/VikorIdea'
 import { useLang, useNumberFormat, type Lang } from '../../i18n'
 import { WeightRange } from '../ranking/WeightRange'
+import { useEdasLabels } from '../workbench/edasLabels'
 import { useVikorLabels } from '../workbench/vikorLabels'
 
 function toProblem(ex: ExampleDataset, lang: Lang): Problem {
@@ -19,7 +21,7 @@ function toProblem(ex: ExampleDataset, lang: Lang): Problem {
 }
 
 /**
- * The picture at the top of a method page. TOPSIS, CRITIC, Entropy, SAW and VIKOR draw their idea on their published
+ * The picture at the top of a method page. TOPSIS, CRITIC, Entropy, SAW, VIKOR and EDAS draw their idea on their published
  * example; every other method shows its family glyph (no illustration for methods in research yet).
  * The Entropy and SAW pictures have no step-through story yet (SAW's answers hover and focus); VIKOR's has a v slider
  * instead, since turning the threshold line is its idea.
@@ -35,10 +37,13 @@ export function MethodIdea({ m }: { m: MethodContent }) {
   const sawEx = m.id === 'saw' ? getExample('podvezko-2011-baltic') : undefined
   // VIKOR on ten alternatives, where no leader is clearly ahead, so the compromise set and the DQ line show.
   const vikorEx = m.id === 'vikor' ? getExample('keshavarz-2015-ten-alternatives') : undefined
+  // EDAS on the comparison example of its own paper: ten rows and seven criteria read better than the 47 items.
+  const edasEx = m.id === 'edas' ? getExample('keshavarz-2015-ten-alternatives') : undefined
+  const edasLabels = useEdasLabels('methods.page.idea.edas.title', 'methods.page.idea.edas.caption')
   const problem = useMemo(() => {
-    const ex = topsisEx ?? criticEx ?? entropyEx ?? sawEx ?? vikorEx
+    const ex = topsisEx ?? criticEx ?? entropyEx ?? sawEx ?? vikorEx ?? edasEx
     return ex ? toProblem(ex, lang) : null
-  }, [topsisEx, criticEx, entropyEx, sawEx, vikorEx, lang])
+  }, [topsisEx, criticEx, entropyEx, sawEx, vikorEx, edasEx, lang])
 
   // "Step through": one story per method, the picture transforms from step to step (MOTION.md, explain).
   const storyCount = topsisEx ? TOPSIS_IDEA_STEPS : criticEx ? CRITIC_IDEA_STEPS : 0
@@ -166,6 +171,21 @@ export function MethodIdea({ m }: { m: MethodContent }) {
   }
 
   if (vikorEx && problem) return <VikorPageIdea ex={vikorEx} problem={problem} source={source(vikorEx)} />
+
+  if (edasEx && problem) {
+    return (
+      <div className="flex flex-col gap-2">
+        <EdasIdea
+          problem={problem}
+          weights={edasEx.weights ?? []}
+          format={(v) => format(v, 4)}
+          labels={{ ...edasLabels, showTable: t('methods.page.idea.showTable'), alternative: t('methods.page.idea.alternative') }}
+          className="max-w-[880px]"
+        />
+        {source(edasEx)}
+      </div>
+    )
+  }
 
   return (
     <div className="flex items-center gap-3 text-text-2">

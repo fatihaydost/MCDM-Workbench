@@ -4,7 +4,7 @@ import { getRankingMethod, type MethodParams as Params, type RankingResult } fro
 import type { SawNormalization } from '../../core/methods/saw'
 import { VIKOR_DEFAULT_V } from '../../core/methods/vikor'
 import { BarChart } from '../../features/charts'
-import { SawContributions, TopsisGeometry, VikorIdea } from '../../features/illustrations'
+import { EdasIdea, SawContributions, TopsisGeometry, VikorIdea } from '../../features/illustrations'
 import { useNumberFormat } from '../../i18n'
 import {
   isEmptyProblem,
@@ -18,12 +18,13 @@ import {
 } from '../../state/workbench'
 import { Button, cn, EmptyState, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../ui'
 import { MethodParams } from './MethodParams'
+import { useEdasLabels } from './edasLabels'
 import { useVikorLabels } from './vikorLabels'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
 import { alternativeName, DECIMALS, findStep, scoreWords, tr, weightMethodFullLabel } from './shared'
 
-const RANKING_METHODS: readonly RankingMethodId[] = ['topsis', 'saw', 'vikor']
+const RANKING_METHODS: readonly RankingMethodId[] = ['topsis', 'saw', 'vikor', 'edas']
 
 type PictureProps = { problem: DraftProblem; weights: readonly number[]; params: Params; className?: string }
 
@@ -71,6 +72,17 @@ const RANKING_VIEWS: Readonly<
     // S and R are long numbers in long headers; at phone width the plane's table still has them.
     columnsFromSm: true,
     Picture: VikorPicture,
+    pictureShowsScores: true,
+  },
+  // SP and SN before AS; the picture draws both as one diverging bar per alternative in rank order with AS beside it,
+  // so it takes the score chart's place.
+  edas: {
+    columns: [
+      { step: 'edas.sp', label: 'workbench.ranking.columns.aboveAverage' },
+      { step: 'edas.sn', label: 'workbench.ranking.columns.belowAverage' },
+    ],
+    columnsFromSm: true,
+    Picture: EdasPicture,
     pictureShowsScores: true,
   },
 }
@@ -259,6 +271,14 @@ export function VikorPicture({ problem, weights, params, className }: PicturePro
   return <VikorIdea problem={core} weights={weights} params={{ v }} format={format} labels={labels} className={cn('max-w-[880px]', className)} />
 }
 
+/** EDAS as a picture: each alternative's weighted distance above (right) and below (left) the average, AS beside it. */
+export function EdasPicture({ problem, weights, className }: PictureProps) {
+  const labels = useEdasLabels('workbench.visual.edas.title', 'workbench.visual.edas.caption')
+  const nf = useNumberFormat(DECIMALS.score)
+  const format = useCallback((v: number) => nf.format(v), [nf])
+  const core = useMemo(() => toProblem(problem), [problem])
+  return <EdasIdea problem={core} weights={weights} format={format} labels={labels} className={cn('max-w-[880px]', className)} />
+}
 
 export function RankingStage() {
   const { t } = useTranslation()
@@ -301,7 +321,7 @@ export function RankingStage() {
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
-        {/* TOPSIS has no options; SAW shows its normalization here, VIKOR its v (later WASPAS its λ). */}
+        {/* TOPSIS and EDAS have no options; SAW shows its normalization here, VIKOR its v (later WASPAS its λ). */}
         <MethodParams methodId={rankingMethod} descriptors={getRankingMethod(rankingMethod)?.params} />
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
           <span>{t('workbench.ranking.weightsUsed', { method: weightMethodFullLabel(weightMethod, weightParams, t) })}</span>

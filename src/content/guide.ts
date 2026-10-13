@@ -372,10 +372,13 @@ export const rankingRequirements: readonly RankingRequirement[] = [
     methodIds: ['edas'],
     normalization: { en: 'Distance from the column average, divided by the average', tr: 'Sütun ortalamasından uzaklık, ortalamaya bölünmüş' },
     negatives: 'conditional',
-    zeros: 'conditional',
-    note: { en: 'Only if every column average is above 0.', tr: 'Yalnız her sütun ortalaması 0\'dan büyükse.' },
+    zeros: 'yes',
+    note: {
+      en: 'Divides by the column average: a varying column whose average is 0 or below is a blocking error. Negative values compute with a notice, and a second one when the average is near 0.',
+      tr: 'Sütun ortalamasına böler: ortalaması 0 ya da altında olan değişken bir sütun engelleyici hatadır. Negatif değerler uyarıyla hesaplanır; ortalama 0\'a yakınsa ikinci bir uyarı gelir.',
+    },
     params: null,
-    output: { en: 'Appraisal score in [0, 1]', tr: '[0, 1] aralığında değerlendirme skoru' },
+    output: { en: 'Appraisal score AS in [0, 1], higher is better', tr: '[0, 1] aralığında değerlendirme skoru AS, yüksek olan daha iyi' },
   },
   {
     label: 'CODAS',

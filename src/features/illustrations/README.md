@@ -12,7 +12,7 @@ from `src/i18n`. Number formats come in as `format` (use `useNumberFormat().form
 decimals).
 
 ```ts
-import { PipelineDiagram, TopsisGeometry, CriticIdea, EntropyIdea, SawContributions, VikorIdea, StepFlow, TOPSIS_FLOW, CRITIC_FLOW, ENTROPY_FLOW, VIKOR_FLOW, MethodGlyph, EmptyMatrixHint } from '../features/illustrations'
+import { PipelineDiagram, TopsisGeometry, CriticIdea, EntropyIdea, SawContributions, VikorIdea, EdasIdea, StepFlow, TOPSIS_FLOW, CRITIC_FLOW, ENTROPY_FLOW, VIKOR_FLOW, EDAS_FLOW, MethodGlyph, EmptyMatrixHint } from '../features/illustrations'
 ```
 
 Preview: `/dev/illustrations` (dev only, `Preview.tsx`), e.g.
@@ -75,7 +75,8 @@ values the page passes in: `kind: 'bars'` (`values`, `highlight`: CRITIC or equa
 `kind: 'shares'` (`even`, `uneven`: Entropy's shares of its most even and most uneven criterion, the second in the
 accent) or `kind: 'plane'` (`points` from `distancePoints`, `highlight`: the TOPSIS distance plane), `kind: 'stack'`
 (`rows`: SAW contributions per alternative in rank order, the first in the accent) or `kind: 'compromise'` (`points`,
-`v`, `q`, `inSet`: VIKOR's plane with the DQ line, the compromise set in the accent).
+`v`, `q`, `inSet`: VIKOR's plane with the DQ line, the compromise set in the accent) or `kind: 'diverging'` (`rows` of
+`{ below, above }`: EDAS's SN left and SP right of the average line, in rank order, the first in the accent).
 
 ## CriticIdea
 
@@ -155,13 +156,36 @@ the compromise. Not interactive; table: S, R, Q, in the compromise.
 Use: `/methods/vikor` "The idea" (Keshavarz Ghorabaee et al. 2015, set 1, where C1 fails; the page has its own v
 slider); workbench Ranking stage when the method is VIKOR (it replaces the score chart).
 
+## EdasIdea
+
+EDAS as a picture: one diverging bar per alternative, in rank order, around a vertical line that stands for the
+average solution. Each criterion's weighted distance above the average (w_j PDA_ij, the core's `edas.weightedPda`)
+stacks to the right, its weighted distance below (w_j NDA_ij) to the left, in the criterion's SAW colour
+(`--data-cat-1..8`, then the context grey); a criterion at the average keeps a zero-width segment on the line. One
+scale on both sides, so the right part ends at SP_i and the left part at SN_i; the line sits where the longest SN ends.
+AS closes each row on the right (the best in bold). Heads "← Below average: SN" and "Above average: SP →" sit against
+the line, or shorten to "← SN" and "SP →" when either would be cut. Hover and keyboard as SawContributions (segments
+in criterion order). Name beside the bar from 420 px, above it below that. Table: the signed weighted distance per
+criterion (negative = below the average), SP, SN, AS.
+
+| Prop | Type | Notes |
+|---|---|---|
+| `problem` | `Problem` | Renders nothing when EDAS cannot run (a varying column with an average of 0 or below). |
+| `weights` | `number[]` | |
+| `format` | `(n) => string` | AS, distances and table (4 decimals). |
+| `labels` | `{ title, caption?, above, below, average, showTable, alternative, score, sp, sn, legend, others, segmentAbove/Below(a, c, v, s), segmentAt(a, c, s), readoutAbove/Below(a, c, v), readoutAt(a, c) }` | `useEdasLabels` (`src/app/workbench/edasLabels.ts`) builds them from `workbench.visual.edas.*`. |
+
+Use: `/methods/edas` "The idea" (Keshavarz Ghorabaee et al. 2015, ten alternatives, set 1); workbench Ranking stage
+when the method is EDAS (it replaces the score chart).
+
 ## StepFlow
 
 Map of the worked calculation: numbered square nodes on a hairline, the active one in the accent,
 each a button (`aria-current="step"`), inside a `<nav>`. Scrolls sideways in itself when narrow.
 `TOPSIS_FLOW` (Normalize, Weight, Ideal points, Distances, Closeness), `CRITIC_FLOW` (Normalize,
 Contrast, Correlation, Information, Weights), `ENTROPY_FLOW` (Shares, Entropy, Diversification, Weights) and
-`ENTROPY_MINMAX_FLOW` (Normalize first) give the node keys (the first core step key of each
+`ENTROPY_MINMAX_FLOW` (Normalize first), `VIKOR_FLOW` and `EDAS_FLOW` (Average, Distances, Weighted, SP and SN,
+Normalized, AS) give the node keys (the first core step key of each
 node) and `stepKeys` (all core steps the node covers); add your labels:
 
 ```tsx
@@ -209,7 +233,7 @@ Use: the workbench's empty Data state, above "Load example" / "Start blank".
 `topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale
 screen scales, values growing right and up), `distancePoints(proj)`, `closenessAt(p)`,
 `isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `placeLabels(...)`, `ISO_C_DEFAULT`, `linePath(...)`, `pointCss(...)`,
-`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `VIKOR_FLOW`, `argMax`, `flowIndex`, `TOPSIS_FLOW`,
+`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `edasParts(problem, weights)`, `divergingSegments(above, below, center, px)`, `EDAS_FLOW`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `VIKOR_FLOW`, `argMax`, `flowIndex`, `TOPSIS_FLOW`,
 `CRITIC_FLOW`, `ENTROPY_FLOW`, `ENTROPY_MINMAX_FLOW`. The
 tests check that A+ / A- and C equal the core and the published values (Opricovic and Tzeng 2004:
 C = 0.762, 0.722, 0.238; Krishnan et al. 2021: σ and weights), that the distance plane places every

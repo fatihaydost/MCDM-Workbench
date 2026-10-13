@@ -103,7 +103,10 @@
       },
       "also": "Ayrıca test edilenler: ilk ders projesindeki elle çözülmüş CRITIC tablosu, her ara matris {{tol}} içinde; CRITIC ardından TOPSIS zincirinin ilk Python koduyla eşliği, {{tol}} içinde. Tablo ve Python kodu bağımsız kaynak değildir.",
       "alsoTitle": "Diğer kontroller",
-      "tolerance": "Tolerans {{tol}}"
+      "tolerance": "Tolerans {{tol}}",
+      "edas": {
+        "claim": "47 değerlendirme skoru ve Tablo 2'deki bütün uzaklıklar, makalenin yuvarladığı gibi yuvarlanınca {{citation}} ile {{decimals}} basamağa kadar aynı; 10 alternatifli örneğin sıraları yedi ağırlık setinin hepsinde aynı."
+      }
     },
     "catalogue": {
       "title": "Yöntemler",
@@ -180,7 +183,8 @@
       "label": "Sıralama yöntemi",
       "topsis": "TOPSIS",
       "saw": "SAW",
-      "vikor": "VIKOR"
+      "vikor": "VIKOR",
+      "edas": "EDAS"
     },
     "params": {
       "entropy": {
@@ -339,7 +343,8 @@
       "methodHint": {
         "topsis": "Alternatifleri ideal ve negatif ideal çözüme olan uzaklıklarına göre sıralar.",
         "saw": "Kriterlerin ölçeklenmiş değerlerini ağırlıklandırıp toplar.",
-        "vikor": "En iyi toplam (S) ile en küçük en büyük pişmanlık (R) arasında uzlaşı arar; Q küçüldükçe sıra yükselir."
+        "vikor": "En iyi toplam (S) ile en küçük en büyük pişmanlık (R) arasında uzlaşı arar; Q küçüldükçe sıra yükselir.",
+        "edas": "Her alternatifi, bütün alternatiflerin ortalamasının ne kadar üstünde ve altında kaldığına göre puanlar; AS büyüdükçe sıra yükselir."
       },
       "columns": {
         "rank": "Sıra",
@@ -347,7 +352,9 @@
         "dPlus": "D+",
         "dMinus": "D−",
         "groupUtility": "Grup faydası S",
-        "individualRegret": "Bireysel pişmanlık R"
+        "individualRegret": "Bireysel pişmanlık R",
+        "aboveAverage": "Ortalama üstü SP",
+        "belowAverage": "Ortalama altı SN"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -365,6 +372,11 @@
           "name": "Uzlaşı Q",
           "title": "Uzlaşı indeksi Q",
           "symbol": "Q"
+        },
+        "edas": {
+          "name": "Değerlendirme AS",
+          "title": "Değerlendirme skoru AS",
+          "symbol": "AS"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -481,6 +493,18 @@
         "individualRegret": "Bireysel pişmanlık R",
         "q": "Uzlaşı indeksi Q",
         "threshold": "Avantaj eşiği DQ"
+      },
+      "edas": {
+        "average": "Ortalama çözüm AV",
+        "pda": "Pozitif uzaklık PDA",
+        "nda": "Negatif uzaklık NDA",
+        "weightedPda": "Ağırlıklı PDA",
+        "weightedNda": "Ağırlıklı NDA",
+        "sp": "Ağırlıklı toplam SP",
+        "sn": "Ağırlıklı toplam SN",
+        "nsp": "Normalize NSP",
+        "nsn": "Normalize NSN",
+        "scores": "Değerlendirme skoru AS"
       }
     },
     "issues": {
@@ -569,6 +593,21 @@
         "c2Failed": "Kabul edilebilir kararlılık yok: {{first}} ne S'de ne R'de birinci.",
         "resultOne": "Uzlaşık çözüm: {{name}}",
         "resultSet": "Uzlaşık çözüm kümesi: {{names}}"
+      },
+      "edas": {
+        "title": "Ortalamanın üstünde ve altında",
+        "above": "Ortalamanın üstünde: SP",
+        "below": "Ortalamanın altında: SN",
+        "average": "Ortalama",
+        "legend": "Kriterler",
+        "others": "Diğer kriterler",
+        "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık. AS ikisini en büyük SP ve SN ile tartar.",
+        "segmentAbove": "{{alternative}}, {{criterion}}: ortalamanın {{value}} üstünde (AS = {{score}})",
+        "segmentBelow": "{{alternative}}, {{criterion}}: ortalamanın {{value}} altında (AS = {{score}})",
+        "segmentAt": "{{alternative}}, {{criterion}}: ortalamada (AS = {{score}})",
+        "readoutAbove": "{{alternative}}: {{criterion}} SP'ye {{value}} katıyor",
+        "readoutBelow": "{{alternative}}: {{criterion}} SN'ye {{value}} katıyor",
+        "readoutAt": "{{alternative}}, {{criterion}} kriterinde ortalamada"
       }
     },
     "flow": {
@@ -601,6 +640,14 @@
         "groupUtility": "S ve R",
         "q": "Q",
         "threshold": "Eşik"
+      },
+      "edas": {
+        "average": "Ortalama",
+        "pda": "Uzaklıklar",
+        "weightedPda": "Ağırlıklı",
+        "sp": "SP ve SN",
+        "nsp": "Normalize",
+        "scores": "AS"
       }
     },
     "pipeline": {
@@ -612,7 +659,7 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW ya da VIKOR ile sıralayın ve hesabın her adımını görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR ya da EDAS ile sıralayın ve hesabın her adımını görün."
     }
   },
   "methods": {
@@ -629,7 +676,8 @@
       "equal": "Eşit ağırlık",
       "manual": "Elle girilen ağırlık",
       "saw": "SAW",
-      "vikor": "VIKOR"
+      "vikor": "VIKOR",
+      "edas": "EDAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -683,7 +731,8 @@
         "entropy": "Ağırlığı verinin ne kadar dengesiz dağıldığından bulur.",
         "equal": "Her kritere 1/n verir.",
         "saw": "Ölçeklenmiş değerleri ağırlıklı toplar.",
-        "vikor": "En iyi toplamı en büyük pişmanlıkla dengeler."
+        "vikor": "En iyi toplamı en büyük pişmanlıkla dengeler.",
+        "edas": "Ortalamanın üstündeki ve altındaki uzaklığı ölçer."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -791,6 +840,10 @@
         "vikor": {
           "title": "Grup faydası mı, en büyük pişmanlık mı: dengeyi v kurar",
           "caption": "Kesikli çizginin altında Q, lidere DQ'dan yakın kalır; avantaj kabul edilebilir değilse bu alternatifler uzlaşık kümeyi oluşturur."
+        },
+        "edas": {
+          "title": "Kriter kriter ortalamadan iyi mi, kötü mü",
+          "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık. AS ikisini en büyük SP ve SN ile tartar."
         }
       }
     }
@@ -842,6 +895,18 @@
       "individualRegret": "Bireysel pişmanlık R: bir alternatifin en büyük tek uzaklığı. Küçük olan iyidir.",
       "q": "Uzlaşı indeksi Q: 0 ile 1 arasına ölçeklenen S ve R, v ile karıştırılır. Değer küçüldükçe sıra yükselir.",
       "threshold": "Avantaj eşiği DQ = 1 / (m - 1): birinci alternatifin ikinciye karşı gereken Q farkı."
+    },
+    "edas": {
+      "average": "Ortalama çözüm AV: her kriterin bütün alternatifler üzerinden ortalaması.",
+      "pda": "Pozitif uzaklık PDA: bir alternatifin ortalamadan ne kadar iyi olduğu, ortalamanın oranı olarak.",
+      "nda": "Negatif uzaklık NDA: bir alternatifin ortalamadan ne kadar kötü olduğu, ortalamanın oranı olarak.",
+      "weightedPda": "Ağırlıklı pozitif uzaklıklar w PDA: her kriterin SP'ye kattığı.",
+      "weightedNda": "Ağırlıklı negatif uzaklıklar w NDA: her kriterin SN'ye kattığı.",
+      "sp": "SP: bir alternatifin ağırlıklı pozitif uzaklıklarının toplamı.",
+      "sn": "SN: bir alternatifin ağırlıklı negatif uzaklıklarının toplamı.",
+      "nsp": "NSP = SP / maks SP: ortalamanın en çok üstünde olan alternatife 1.",
+      "nsn": "NSN = 1 - SN / maks SN: ortalamanın en çok altında olan alternatife 0.",
+      "scores": "Değerlendirme skoru AS = (NSP + NSN) / 2. Değer büyüdükçe sıra yükselir."
     }
   },
   "validation": {
@@ -863,7 +928,8 @@
       "weights-length-mismatch": "{{n}} kriter için {{value}} ağırlık var.",
       "invalid-weight": "{{criterion}} ağırlığına bir sayı gir.",
       "negative-weight": "{{criterion}} ağırlığı {{value}}. Ağırlıklar negatif olamaz.",
-      "weights-sum": "Ağırlıkların toplamı {{value}}, toplam 1 olmalı."
+      "weights-sum": "Ağırlıkların toplamı {{value}}, toplam 1 olmalı.",
+      "non-positive-average": "{{criterion}} kriterinin ortalaması {{value}}. EDAS her kriterin ortalamasına böler, bu yüzden ortalama 0'dan büyük olmalı."
     }
   },
   "warnings": {
@@ -890,6 +956,12 @@
       "equal-regret": "Bütün alternatiflerin R değeri aynı; Q yalnız S'den geliyor ve en fazla v olabiliyor; bu, C1'i sağlamayı zorlaştırabilir.",
       "no-spread": "Bütün alternatiflerin S ve R değerleri aynı; hepsi Q = 0 alıyor.",
       "tie-for-first": "Birden fazla alternatif en küçük Q değerini paylaşıyor; girdi sırasıyla listelenir ve hepsi uzlaşık kümededir."
+    },
+    "edas": {
+      "constant-column": "{{criterion}} kriterinin bütün değerleri aynı; SP'ye ve SN'ye bir şey katmıyor.",
+      "negative-values": "{{criterion}} kriterinde negatif değerler var. EDAS uzaklığı ortalamanın oranı olarak ölçer, bu yüzden sonuç sıfırın nerede olduğuna bağlıdır.",
+      "small-average": "{{criterion}} kriterinin ortalaması değerlerine göre 0'a çok yakın; uzaklıkları çok büyür ve küçük bir ağırlıkla bile sıralamayı belirleyebilir.",
+      "no-spread": "Ağırlığı olan hiçbir kriterde ortalamanın üstünde ya da altında alternatif yok, bu yüzden hepsi AS = 0,5 alıyor."
     }
   }
 }

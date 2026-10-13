@@ -6,7 +6,7 @@ export const edas: MethodContent = {
   name: { en: 'EDAS', tr: 'EDAS' },
   fullName: { en: 'Evaluation based on Distance from Average Solution', tr: 'Ortalama çözüme uzaklığa dayalı değerlendirme' },
   family: 'ranking-distance',
-  status: 'research',
+  status: 'available',
   year: 2015,
   origin: {
     authors: 'Keshavarz Ghorabaee, M.; Zavadskas, E.K.; Olfat, L.; Turskis, Z.',
@@ -35,6 +35,10 @@ export const edas: MethodContent = {
     {
       title: { en: 'Normalization', tr: 'Normalizasyon' },
       tex: String.raw`NSP_i = \frac{SP_i}{\max_k SP_k}, \qquad NSN_i = 1 - \frac{SN_i}{\max_k SN_k}`,
+      note: {
+        en: 'If no alternative is away from the average (every SP and SN is 0), every AS is set to 0.5.',
+        tr: 'Hiçbir alternatif ortalamadan uzak değilse (bütün SP ve SN değerleri 0), bütün AS değerleri 0,5 alınır.',
+      },
     },
     {
       title: { en: 'Appraisal score', tr: 'Değerlendirme skoru' },
@@ -49,8 +53,8 @@ export const edas: MethodContent = {
     {
       methodId: 'entropy',
       text: {
-        en: 'Entropy then EDAS appears in Turkish papers, for example Aydın Ünal (2019) on BIST insurers and Sarıhan & Aydın (2023) on exporters. Keshavarz-Ghorabaee et al. (2021) also review an Entropy-EDAS renewable-energy study.',
-        tr: "Entropi ardından EDAS Türkçe makalelerde görülür; örneğin Aydın Ünal (2019) BIST sigorta şirketleri, Sarıhan ve Aydın (2023) ihracatçılar. Keshavarz-Ghorabaee vd. (2021) de Entropi-EDAS kullanan bir yenilenebilir enerji çalışmasını inceler.",
+        en: 'Entropy then EDAS in Turkish papers, for example Aydın Ünal (2019) on BIST insurers and Sarıhan & Aydın (2023) on exporters.',
+        tr: 'Türkçe makalelerde Entropi ardından EDAS; örneğin Aydın Ünal (2019) BIST sigorta şirketleri, Sarıhan ve Aydın (2023) ihracatçılar.',
       },
     },
     {
@@ -58,6 +62,13 @@ export const edas: MethodContent = {
       text: {
         en: 'CRITIC then EDAS, for example Bayram (2021) on participation banks.',
         tr: 'CRITIC ardından EDAS; örneğin Bayram (2021), katılım bankaları.',
+      },
+    },
+    {
+      methodId: 'ahp',
+      text: {
+        en: 'AHP is the weighting method most often mentioned with EDAS in OpenAlex (223 works, an upper bound), for example fuzzy AHP then EDAS in Ecer (2017).',
+        tr: "OpenAlex'te EDAS ile en sık birlikte geçen ağırlıklandırma yöntemi AHP (223 çalışma, bir üst sınır); örneğin Ecer (2017) bulanık AHP ardından EDAS.",
       },
     },
     {
@@ -70,8 +81,15 @@ export const edas: MethodContent = {
     {
       methodId: 'equal',
       text: {
-        en: 'The origin example uses equal weights; a second example uses 7 simulated weight sets.',
-        tr: 'Özgün örnek eşit ağırlık kullanır; ikinci örnekte 7 benzetim ağırlık seti vardır.',
+        en: "The origin's 47-item example uses equal weights; its 10-alternative example uses seven hand-set weight sets.",
+        tr: 'Özgün makalenin 47 kalemli örneği eşit ağırlık, 10 alternatifli örneği elle belirlenmiş yedi ağırlık seti kullanır.',
+      },
+    },
+    {
+      methodId: 'vikor',
+      text: {
+        en: 'The origin compares EDAS with VIKOR, TOPSIS, SAW and COPRAS on one matrix and seven weight sets (Spearman at least 0.867 with each).',
+        tr: "Özgün makale EDAS'ı tek bir matris ve yedi ağırlık setinde VIKOR, TOPSIS, SAW ve COPRAS ile karşılaştırır (her biriyle Spearman en az 0,867).",
       },
     },
   ],
@@ -80,8 +98,8 @@ export const edas: MethodContent = {
     doi: '10.15388/Informatica.2015.57',
     match: 'match',
     note: {
-      en: 'Published example (Tables 1-2 (47 items), Tables 5-7 (10 x 7, seven weight sets)); this method is not computed here yet, only recomputed during research. Inventory classification with 47 items and 3 criteria. AS matches the printed 2 decimals (largest gap 0.0052, at the edge of rounding; the paper rounded intermediate values). In the 10 x 7 example the ranks equal the published EDAS ranks in 7 of 7 weight sets.',
-      tr: "Yayımlanmış örnek (Tablo 1-2 (47 kalem), Tablo 5-7 (10 x 7, yedi ağırlık seti)); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. 47 kalem ve 3 kriterle stok sınıflandırması. AS basılı 2 basamakta örtüşüyor (en büyük fark 0,0052, yuvarlama sınırında; makale ara değerleri yuvarlamış). 10 x 7 örnekte sıralar yayımlanan EDAS sıralarıyla 7 ağırlık setinin 7'sinde aynı.",
+      en: 'Published examples, reproduced by the tests: in the 47-item example (Tables 1-3) the averages and all 517 cells of Table 2 (PDA, NDA, SP, NSP, SN, NSN, AS) match once rounded to 3 and then 2 decimals, as the paper did, and the A and B classes of Table 3 are the same. In the 10 x 7 example (Tables 5-7) the ranks equal the published EDAS ranks in 7 of 7 weight sets. Two Turkish Entropy-EDAS papers are checked too; both print errors, recorded with the corrected values.',
+      tr: "Yayımlanmış örnekler, testlerde yeniden üretiliyor: 47 kalemli örnekte (Tablo 1-3) ortalamalar ve Tablo 2'nin 517 hücresinin tamamı (PDA, NDA, SP, NSP, SN, NSN, AS), makalenin yaptığı gibi önce 3 sonra 2 basamağa yuvarlanınca aynı; Tablo 3'ün A ve B sınıfları da aynı. 10 x 7 örnekte (Tablo 5-7) sıralar yayımlanan EDAS sıralarıyla 7 ağırlık setinin 7'sinde aynı. İki Türkçe Entropi-EDAS makalesi de sınandı; ikisinde de baskı hatası var, düzeltilmiş değerleriyle kayıtlı.",
     },
   },
   sources: [
@@ -89,54 +107,56 @@ export const edas: MethodContent = {
     { label: 'Aydın Ünal (2019), Entropi-EDAS, BIST insurers', doi: '10.29106/fesa.649946' },
     { label: 'Sarıhan & Aydın (2023), Entropi-EDAS, exporters', doi: '10.46928/iticusbe.1263122' },
     { label: 'Bayram (2021), CRITIC-EDAS, participation banks', doi: '10.14784/marufacd.879171' },
+    { label: 'Ecer (2017), fuzzy AHP-EDAS, Technological and Economic Development of Economy', doi: '10.3846/20294913.2016.1213207' },
+    { label: 'Torkayesh, Deveci, Karagöz & Antuchevičienė (2023), EDAS review, Expert Systems with Applications 119724', doi: '10.1016/j.eswa.2023.119724' },
     { label: 'pyDecision 5.1.1, edas_method', url: 'https://github.com/Valdecy/pyDecision' },
   ],
   en: {
     summary:
-      'EDAS scores each alternative by its weighted distance above and below the average alternative. It suits cases where the average is a meaningful benchmark and no natural ideal exists.',
+      'EDAS scores each alternative by how far it is above or below the average of all alternatives on each criterion, weighted by criterion importance.',
     whenToUse: [
+      'Every criterion is a positive measured quantity with a meaningful average.',
       'Many alternatives, for example inventory (ABC) classification.',
-      'No natural ideal point.',
-      'Less sensitivity to one extreme alternative than ideal-point methods.',
+      'No single best or worst alternative should set the scale.',
     ],
     whenNot: [
-      'A criterion average is 0 or below: distances divide by it.',
-      'The average itself has no meaning (ordinal codes).',
+      "A criterion's average is 0 or below: distances divide by it.",
+      'Shifted or interval data (z-scores, °C): the result depends on zero.',
       'The alternative set will change: the average moves with it.',
     ],
     inputs: [
-      'Decision matrix, positive values recommended.',
+      'Decision matrix; zeros are fine, negative values only with a notice and while the column average is above 0.',
       'Criterion type per column, weights summing to 1. Scaling all weights by the same factor does not change AS.',
       'No parameters.',
     ],
     pitfalls: [
-      'AV = 0 divides by zero and a negative AV flips the meaning; use positive data or a declared shift.',
-      'If no alternative is above (max SP = 0) or below (max SN = 0) average, NSP or NSN is undefined.',
-      'Rank reversal when alternatives are added or removed.',
+      'A criterion that varies a lot relative to its own average moves AS more than its weight suggests.',
+      'A column average of 0 or below is a blocking error; with negative values an average near 0 inflates the distances, with a notice.',
+      'Rank reversal when alternatives are added or removed: the average moves.',
     ],
   },
   tr: {
     summary:
-      'EDAS her alternatifi ortalama alternatifin üstündeki ve altındaki ağırlıklı uzaklığıyla puanlar. Ortalama anlamlı bir referanssa ve doğal bir ideal nokta yoksa uygundur.',
+      'EDAS her alternatifi, her kriterde tüm alternatiflerin ortalamasının ne kadar üstünde ya da altında olduğuna göre, kriter ağırlıklarıyla puanlar.',
     whenToUse: [
+      'Her kriter, ortalaması anlamlı, pozitif ve ölçülmüş bir büyüklük.',
       'Alternatif çok, örneğin stok (ABC) sınıflandırması.',
-      'Doğal bir ideal nokta yok.',
-      'Tek bir uç alternatife ideal nokta yöntemlerinden daha az duyarlılık istiyorsunuz.',
+      'Ölçeği tek bir en iyi ya da en kötü alternatif belirlemesin.',
     ],
     whenNot: [
       'Bir kriterin ortalaması 0 ya da altında: uzaklıklar ortalamaya bölünür.',
-      'Ortalamanın kendisi anlamsız (sıralı kodlar).',
+      'Kaydırılmış ya da aralık ölçekli veri (z-skoru, °C): sonuç sıfıra bağlı.',
       'Alternatif kümesi değişecek: ortalama da onunla kayar.',
     ],
     inputs: [
-      'Karar matrisi, pozitif değerler önerilir.',
+      "Karar matrisi; sıfır olabilir, negatif değerler yalnız sütun ortalaması 0'dan büyükken ve uyarıyla.",
       "Her sütun için kriter türü, toplamı 1 olan ağırlıklar. Tüm ağırlıkları aynı çarpanla ölçeklemek AS'yi değiştirmez.",
       'Parametre yok.',
     ],
     pitfalls: [
-      'AV = 0 sıfıra bölme demektir, negatif AV anlamı tersine çevirir; pozitif veri ya da açıkça belirtilen bir kaydırma kullanın.',
-      'Hiçbir alternatif ortalamanın üstünde (maks SP = 0) ya da altında (maks SN = 0) değilse NSP veya NSN tanımsızdır.',
-      'Alternatif eklenip çıkarılınca sıralama tersine dönebilir.',
+      "Kendi ortalamasına göre çok değişken bir kriter, AS'yi ağırlığının gösterdiğinden fazla etkiler.",
+      "Ortalaması 0 ya da altında olan sütun engelleyici hatadır; negatif değerlerle 0'a yakın bir ortalama uzaklıkları şişirir, uyarı verilir.",
+      'Alternatif eklenip çıkarılınca sıralama tersine dönebilir: ortalama kayar.',
     ],
   },
 }

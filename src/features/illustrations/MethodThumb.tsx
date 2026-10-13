@@ -36,6 +36,12 @@ export type MethodThumbProps =
       className?: string | undefined
     }
   | {
+      /** EDAS: one bar per alternative in rank order, SN to the left of the average line and SP to the right; the first in the accent. */
+      kind: 'diverging'
+      rows: readonly { below: number; above: number }[]
+      className?: string | undefined
+    }
+  | {
       /** TOPSIS distance plane: (D+, D-) points and the rays of constant closeness. */
       kind: 'plane'
       points: readonly Point[]
@@ -117,6 +123,27 @@ export function MethodThumb(props: MethodThumbProps) {
             return seg
           })
         })}
+      </svg>
+    )
+  }
+  if (props.kind === 'diverging') {
+    const { rows } = props
+    const left = Math.max(...rows.map((r) => r.below), 0)
+    const right = Math.max(...rows.map((r) => r.above), 0)
+    const span = Math.max(left + right, 1e-12)
+    const unit = (W - 2 * PAD) / span
+    const cx = PAD + left * unit
+    const gap = 3
+    const bh = (H - 2 * PAD - gap * (rows.length - 1)) / Math.max(rows.length, 1)
+    return (
+      <svg className={cls} width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        {rows.map((r, i) => (
+          <g key={i} className={i === 0 ? s.thumbAccent : s.thumbMark}>
+            <rect x={cx - r.below * unit} y={PAD + i * (bh + gap)} width={r.below * unit} height={bh} />
+            <rect x={cx} y={PAD + i * (bh + gap)} width={r.above * unit} height={bh} />
+          </g>
+        ))}
+        <line className={s.thumbAxis} x1={cx} x2={cx} y1={PAD - 3} y2={H - PAD + 3} />
       </svg>
     )
   }

@@ -5,13 +5,14 @@ import { formatNumber, useLang, type Lang } from '../../i18n'
 // Tolerances come straight from the test fixtures, so the page cannot drift from what the tests check.
 import krishnan from '../../../tests/fixtures/critic-krishnan2021.json'
 import xlsx from '../../../tests/fixtures/critic-xlsx.json'
+import edasKG from '../../../tests/fixtures/edas-keshavarz2015.json'
 import zavadskas from '../../../tests/fixtures/entropy-zavadskas2017.json'
 import opricovicF from '../../../tests/fixtures/opricovic-tzeng-2004-f.json'
 import podvezko from '../../../tests/fixtures/saw-podvezko2011.json'
 import vikorOT from '../../../tests/fixtures/vikor-opricovic-tzeng2004.json'
 import { textLink } from './usePageMeta'
 
-type Row = { method: 'critic' | 'entropy' | 'topsis' | 'saw' | 'vikor'; citation: Citation; tolerance: number }
+type Row = { method: 'critic' | 'entropy' | 'topsis' | 'saw' | 'vikor' | 'edas'; citation: Citation; tolerance: number }
 
 /** ±0.00005 in the active locale, with as many decimals as the tolerance needs. */
 function formatTolerance(tol: number, lang: Lang): string {
@@ -42,6 +43,8 @@ export function Verified() {
     { method: 'topsis', citation: getExample('opricovic-tzeng-2004-f')!.citation, tolerance: opricovicF.expected.tolerance },
     { method: 'saw', citation: getExample('podvezko-2011-baltic')!.citation, tolerance: podvezko.expected.tolerance },
     { method: 'vikor', citation: getExample('opricovic-tzeng-2004-f')!.citation, tolerance: vikorOT.expected.tolerance },
+    // The paper rounded to 3 and then 2 decimals, so a printed AS can be 0.0055 from the exact one.
+    { method: 'edas', citation: getExample('keshavarz-2015-inventory')!.citation, tolerance: edasKG.inventory.published.tolerance },
   ]
 
   return (

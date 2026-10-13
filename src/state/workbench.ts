@@ -26,7 +26,7 @@ export const STAGES = ['data', 'weights', 'ranking', 'results', 'robustness'] as
 export type Stage = (typeof STAGES)[number]
 
 export type WeightMethodId = 'critic' | 'entropy' | 'equal' | 'manual'
-export type RankingMethodId = 'topsis' | 'saw' | 'vikor'
+export type RankingMethodId = 'topsis' | 'saw' | 'vikor' | 'edas'
 
 /**
  * Options chosen per method id (Entropy's normalization, later VIKOR's v ...). A missing method or key means the
@@ -264,7 +264,8 @@ export const useWorkbench = create<WorkbenchState>()(
         const ex = getExample(id)
         if (!ex) return
         // An example published for a weighting method opens with that method in its default variant (the
-        // variant the paper used); otherwise the paper's weights when it gives them, else CRITIC. An example published
+        // variant the paper used); otherwise the paper's weights when it gives them, Equal weights when the paper weighs
+        // equally, else CRITIC. An example published
         // for a ranking method opens with that method, also in its default variant; otherwise the ranking method stays.
         // When it is a reference for several ranking methods: the one asked for, else the current one if it is among
         // them, else the first listed.
@@ -287,7 +288,7 @@ export const useWorkbench = create<WorkbenchState>()(
           },
           exampleId: ex.id,
           importedFrom: null,
-          weightMethod: reference ?? (ex.weights ? 'manual' : 'critic'),
+          weightMethod: reference ?? (ex.weights ? 'manual' : ex.equalWeights ? 'equal' : 'critic'),
           manualWeights: ex.weights ? [...ex.weights] : new Array<number | null>(ex.criteria.length).fill(null),
         }))
       },

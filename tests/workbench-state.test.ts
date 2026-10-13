@@ -12,6 +12,7 @@ import {
 import { deleteCriterion, insertCriterion, setType, writeCell } from '../src/features/grid/model'
 import { expectClose } from './helpers'
 import critic2021 from './fixtures/critic-krishnan2021.json'
+import edasKG from './fixtures/edas-keshavarz2015.json'
 import entropyK from './fixtures/entropy-krishnan2021-minmax.json'
 import zavadskas from './fixtures/entropy-zavadskas2017.json'
 import f from './fixtures/opricovic-tzeng-2004-f.json'
@@ -76,7 +77,23 @@ describe('examples match the published fixtures', () => {
     expect(ex.alternatives).toEqual(vikorKG.alternatives)
     expect(ex.criteria.map((c) => c.type)).toEqual(vikorKG.types)
     expect(ex.weights).toEqual(vikorKG.weight_sets[0])
-    expect(ex.published).toEqual([{ label: 'vikor.rank', values: vikorKG.published_ranks[0], decimals: 0 }])
+    expect(ex.published).toEqual([
+      { label: 'vikor.rank', values: vikorKG.published_ranks[0], decimals: 0 },
+      { label: 'edas.rank', values: edasKG.tenAlternatives.published_ranks[0], decimals: 0 },
+    ])
+    expect(ex.matrix).toEqual(edasKG.tenAlternatives.matrix)
+    expect(ex.weights).toEqual(edasKG.tenAlternatives.weight_sets_as_printed[0])
+  })
+  it('Keshavarz Ghorabaee et al. 2015, the 47 items of Tables 1 and 2', () => {
+    const ex = getExample('keshavarz-2015-inventory')!
+    const inv = edasKG.inventory
+    expect(ex.referenceFor).toEqual(['edas'])
+    expect(ex.matrix).toEqual(inv.matrix)
+    expect(ex.alternatives).toEqual(inv.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(inv.types)
+    expect(ex.weights).toBeUndefined()
+    expect(ex.equalWeights).toBe(true)
+    expect(ex.published).toEqual([{ label: 'edas.scores', values: inv.published.AS, decimals: 2 }])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
@@ -281,6 +298,40 @@ describe('store actions', () => {
     expect(useWorkbench.getState().rankingMethod).toBe('topsis')
     st.loadExample('opricovic-tzeng-2004-f', 'en', 'nope')
     expect(useWorkbench.getState().rankingMethod).toBe('topsis')
+  })
+
+  it('EDAS through the store: the 47 items open with EDAS and equal weights, the ten alternatives through the method page link', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.loadExample('keshavarz-2015-inventory', 'en')
+    let s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('edas')
+    expect(s.weightMethod).toBe('equal')
+    const r = computeRanking(s)
+    expect(r.value!.order).toBe('desc')
+    expectClose(r.value!.scores, edasKG.inventory.expected.AS, edasKG.inventory.expected.tolerance)
+    // Shared with VIKOR: the EDAS page asks for EDAS; without it the current method stays because it is listed.
+    st.setRankingMethod('topsis')
+    st.loadExample('keshavarz-2015-ten-alternatives', 'en', 'edas')
+    s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('edas')
+    expect(s.weightMethod).toBe('manual')
+    expect(computeRanking(s).value!.ranking).toEqual(edasKG.tenAlternatives.published_ranks[0])
+    expectClose(computeRanking(s).value!.scores, edasKG.tenAlternatives.derived_AS_renormalized_weights[0]!, 1e-6)
+    st.loadExample('keshavarz-2015-ten-alternatives', 'en')
+    expect(useWorkbench.getState().rankingMethod).toBe('edas')
+  })
+
+  it('EDAS blocks a varying column whose average is 0 or below at its criterion; negative values with a positive average compute with a notice', () => {
+    const p = draftOf('keshavarz-2015-ten-alternatives')
+    const data = { weightMethod: 'manual' as const, manualWeights: edasKG.tenAlternatives.weight_sets_as_printed[0]!, rankingMethod: 'edas' as const }
+    const shifted = p.matrix.map((row) => row.map((x, j) => (j === 0 && x !== null ? x - 30 : x)))
+    const blocked = computeRanking({ ...data, problem: { ...p, matrix: shifted } })
+    expect(blocked.value).toBeNull()
+    expect(blocked.issues.filter((x) => x.severity === 'error').map((x) => [x.code, x.col])).toEqual([['non-positive-average', 0]])
+    const negative = p.matrix.map((row, i) => row.map((x, j) => (j === 0 && i === 9 ? -8 : x)))
+    const r = computeRanking({ ...data, problem: { ...p, matrix: negative } })
+    expect(r.value!.warnings).toEqual([{ code: 'edas.negative-values', col: 0 }])
   })
 
   it('SAW blocks a zero or negative cell with its position; TOPSIS on the same data computes', () => {

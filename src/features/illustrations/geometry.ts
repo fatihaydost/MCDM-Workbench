@@ -3,6 +3,7 @@
  * picture can never disagree with the worked calculation. No DOM.
  */
 import { critic } from '../../core/methods/critic'
+import { edas } from '../../core/methods/edas'
 import { maxOf } from '../../core/math'
 import { entropy, type EntropyParams } from '../../core/methods/entropy'
 import { saw, type SawParams } from '../../core/methods/saw'
@@ -368,6 +369,70 @@ export function vikorParts(problem: Problem, weights: readonly number[], params:
   return { result, S, R, Q, sTerm: vikorTerm(S), rTerm: vikorTerm(R), v: result.diagnostics?.v ?? 0.5, compromise, order: compromise.order }
 }
 
+// ---------------------------------------------------------------------------------------------
+// EDAS
+// ---------------------------------------------------------------------------------------------
+
+export type EdasParts = {
+  result: RankingResult
+  /** above[i][j] = w_j PDA_ij and below[i][j] = w_j NDA_ij, the core's weighted distances (one of them is 0). */
+  above: number[][]
+  below: number[][]
+  /** SP_i and SN_i: the row sums of above and below. */
+  sp: number[]
+  sn: number[]
+  /** Appraisal scores AS_i. */
+  scores: number[]
+  /** Alternatives in rank order (ties keep input order). */
+  order: number[]
+}
+
+/** The core's EDAS result for its picture, or null when EDAS cannot run on the data. */
+export function edasParts(problem: Problem, weights: readonly number[]): EdasParts | null {
+  let result: RankingResult
+  try {
+    result = edas.compute(problem, [...weights], {})
+  } catch {
+    return null
+  }
+  const order = result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b)
+  return {
+    result,
+    above: stepMatrix(result.steps, 'edas.weightedPda'),
+    below: stepMatrix(result.steps, 'edas.weightedNda'),
+    sp: stepVector(result.steps, 'edas.sp'),
+    sn: stepVector(result.steps, 'edas.sn'),
+    scores: result.scores,
+    order,
+  }
+}
+
+/** One segment of a diverging bar: criterion j on the side where its distance is, from x to x + width (px). */
+export type DivergingSegment = { col: number; side: 'above' | 'below' | 'at'; value: number; x: number; width: number }
+
+/**
+ * The segments of one EDAS row around the average line at `center`: distances above the average stack to the right,
+ * distances below it to the left, each side in criterion order outward from the line. A criterion at the average keeps
+ * a zero-width segment on the line, so every criterion stays in the keyboard order and the table.
+ */
+export function divergingSegments(above: readonly number[], below: readonly number[], center: number, pxPerUnit: number): DivergingSegment[] {
+  let right = 0
+  let left = 0
+  return above.map((a, col) => {
+    const b = below[col] ?? 0
+    if (a > 0) {
+      const x = center + right * pxPerUnit
+      right += a
+      return { col, side: 'above', value: a, x, width: a * pxPerUnit }
+    }
+    if (b > 0) {
+      left += b
+      return { col, side: 'below', value: b, x: center - left * pxPerUnit, width: b * pxPerUnit }
+    }
+    return { col, side: 'at', value: 0, x: center, width: 0 }
+  })
+}
+
 /**
  * Where the line of constant Q = q leaves the unit square of the (S term, R term) plane: v x + (1 - v) y = q.
  * Returns the two end points (x, y in [0, 1]), or null when the line misses the square (q > 1 or q < 0).
@@ -487,6 +552,15 @@ export const VIKOR_FLOW: readonly FlowNode[] = [
   { key: 'vikor.groupUtility', stepKeys: ['vikor.groupUtility', 'vikor.individualRegret'] },
   { key: 'vikor.q', stepKeys: ['vikor.q'] },
   { key: 'vikor.threshold', stepKeys: ['vikor.threshold'] },
+]
+
+export const EDAS_FLOW: readonly FlowNode[] = [
+  { key: 'edas.average', stepKeys: ['edas.average'] },
+  { key: 'edas.pda', stepKeys: ['edas.pda', 'edas.nda'] },
+  { key: 'edas.weightedPda', stepKeys: ['edas.weightedPda', 'edas.weightedNda'] },
+  { key: 'edas.sp', stepKeys: ['edas.sp', 'edas.sn'] },
+  { key: 'edas.nsp', stepKeys: ['edas.nsp', 'edas.nsn'] },
+  { key: 'edas.scores', stepKeys: ['edas.scores'] },
 ]
 
 /** The node that holds `stepKey`, or -1. */

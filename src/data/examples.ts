@@ -38,6 +38,8 @@ export type ExampleDataset = {
   matrix: number[][]
   /** Weights given in the paper, when the example starts from fixed weights. */
   weights?: number[]
+  /** The paper weighs every criterion equally: the example opens with Equal weights (not a reference for them). */
+  equalWeights?: true
   /** Published outputs, as printed (rounded as in the paper). */
   published: { label: string; values: number[] | number[][]; decimals: number }[]
 }
@@ -246,21 +248,98 @@ export const examples: readonly ExampleDataset[] = [
     published: [{ label: 'saw.scores', values: [0.756, 0.728, 0.874, 0.61], decimals: 3 }],
   },
   {
-    id: 'keshavarz-2015-ten-alternatives',
-    name: { en: 'Ten alternatives, seven criteria (Keshavarz Ghorabaee et al. 2015)', tr: 'On alternatif, yedi kriter (Keshavarz Ghorabaee vd. 2015)' },
-    buttonLabel: { en: 'Ten alternatives', tr: 'On alternatif' },
+    id: 'keshavarz-2015-inventory',
+    name: { en: 'Inventory of 47 items (Keshavarz Ghorabaee et al. 2015)', tr: '47 kalemlik stok (Keshavarz Ghorabaee vd. 2015)' },
+    buttonLabel: { en: '47 items', tr: '47 kalem' },
     summary: {
-      en: 'A comparison example with three benefit and four cost criteria, weight set 1 of 7. The paper reports the VIKOR ranks; no leader is clearly ahead, so VIKOR returns a compromise set.',
-      tr: 'Üç fayda ve dört maliyet kriterli bir karşılaştırma örneği, 7 ağırlık setinin 1.si. Makale VIKOR sıralarını veriyor; hiçbir alternatif açık ara önde değil, bu yüzden VIKOR bir uzlaşık küme döndürüyor.',
+      en: 'The worked example that introduced EDAS: 47 stock items on unit cost, annual dollar usage and lead time, equal weights. The paper prints every distance and score.',
+      tr: 'EDAS yöntemini tanıtan çözümlü örnek: 47 stok kalemi; birim maliyet, yıllık parasal kullanım ve tedarik süresi, eşit ağırlık. Makale her uzaklığı ve skoru veriyor.',
     },
-    referenceFor: ['vikor'],
+    referenceFor: ['edas'],
     citation: {
       authors: 'Keshavarz Ghorabaee, M.; Zavadskas, E.K.; Olfat, L.; Turskis, Z.',
       year: 2015,
       title: 'Multi-Criteria Inventory Classification Using a New Method of Evaluation Based on Distance from Average Solution (EDAS)',
       venue: 'Informatica 26(3), 435-451',
       doi: '10.15388/Informatica.2015.57',
-      tables: { en: 'Table 5 (input), Table 6 (weight set 1), Table 7 (VIKOR ranks)', tr: 'Tablo 5 (girdi), Tablo 6 (1. ağırlık seti), Tablo 7 (VIKOR sıraları)' },
+      tables: { en: 'Table 1 (input), Table 2 (output)', tr: 'Tablo 1 (girdi), Tablo 2 (çıktı)' },
+    },
+    // The paper numbers the items 1 to 47 (Table 1); all three criteria are benefit (a higher value matters more).
+    alternatives: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47'],
+    criteria: [
+      { name: { en: 'Average unit cost ($)', tr: 'Ortalama birim maliyet ($)' }, type: 'benefit' },
+      { name: { en: 'Annual dollar usage ($)', tr: 'Yıllık parasal kullanım ($)' }, type: 'benefit' },
+      { name: { en: 'Lead time (weeks)', tr: 'Tedarik süresi (hafta)' }, type: 'benefit' },
+    ],
+    matrix: [
+      [49.92, 5840.64, 2],
+      [210, 5670, 5],
+      [23.76, 5037.12, 4],
+      [27.73, 4769.56, 1],
+      [57.98, 3478.8, 3],
+      [31.24, 2936.67, 3],
+      [28.2, 2820, 3],
+      [55, 2640, 4],
+      [73.44, 2423.52, 6],
+      [160.5, 2407.5, 4],
+      [5.12, 1075.2, 2],
+      [20.87, 1043.5, 5],
+      [86.5, 1038, 7],
+      [110.4, 883.2, 5],
+      [71.2, 854.4, 3],
+      [45, 810, 3],
+      [14.66, 703.68, 4],
+      [49.5, 594, 6],
+      [47.5, 570, 5],
+      [58.45, 467.6, 4],
+      [24.4, 463.6, 4],
+      [65, 455, 4],
+      [86.5, 432.5, 4],
+      [33.2, 398.4, 3],
+      [37.05, 370.5, 1],
+      [33.84, 338.4, 3],
+      [84.03, 336.12, 1],
+      [78.4, 313.6, 6],
+      [134.34, 268.68, 7],
+      [56, 224, 1],
+      [72, 216, 5],
+      [53.02, 212.08, 2],
+      [49.48, 197.92, 5],
+      [7.07, 190.89, 7],
+      [60.6, 181.8, 3],
+      [40.82, 163.28, 3],
+      [30, 150, 5],
+      [67.4, 134.8, 3],
+      [59.6, 119.2, 5],
+      [51.68, 103.36, 6],
+      [19.8, 79.2, 2],
+      [37.7, 75.4, 2],
+      [29.89, 59.78, 5],
+      [48.3, 48.3, 3],
+      [34.4, 34.4, 7],
+      [28.8, 28.8, 3],
+      [8.46, 25.38, 5],
+    ],
+    equalWeights: true,
+    // As printed: rounded to 3 and then 2 decimals (docs/research/methods/edas.md, Reference example).
+    published: [{ label: 'edas.scores', values: [0.66, 1, 0.61, 0.43, 0.6, 0.45, 0.43, 0.6, 0.64, 0.72, 0.16, 0.36, 0.58, 0.54, 0.41, 0.34, 0.24, 0.4, 0.37, 0.37, 0.23, 0.37, 0.39, 0.19, 0.08, 0.18, 0.19, 0.39, 0.47, 0.13, 0.35, 0.18, 0.3, 0.14, 0.25, 0.18, 0.2, 0.25, 0.31, 0.3, 0, 0.08, 0.18, 0.18, 0.23, 0.09, 0.08], decimals: 2 }],
+  },
+  {
+    id: 'keshavarz-2015-ten-alternatives',
+    name: { en: 'Ten alternatives, seven criteria (Keshavarz Ghorabaee et al. 2015)', tr: 'On alternatif, yedi kriter (Keshavarz Ghorabaee vd. 2015)' },
+    buttonLabel: { en: 'Ten alternatives', tr: 'On alternatif' },
+    summary: {
+      en: 'A comparison example with three benefit and four cost criteria, weight set 1 of 7. The paper reports the EDAS and VIKOR ranks; no leader is clearly ahead by VIKOR, so it returns a compromise set.',
+      tr: 'Üç fayda ve dört maliyet kriterli bir karşılaştırma örneği, 7 ağırlık setinin 1.si. Makale EDAS ve VIKOR sıralarını veriyor; VIKOR\'a göre hiçbir alternatif açık ara önde değil, bu yüzden VIKOR bir uzlaşık küme döndürüyor.',
+    },
+    referenceFor: ['vikor', 'edas'],
+    citation: {
+      authors: 'Keshavarz Ghorabaee, M.; Zavadskas, E.K.; Olfat, L.; Turskis, Z.',
+      year: 2015,
+      title: 'Multi-Criteria Inventory Classification Using a New Method of Evaluation Based on Distance from Average Solution (EDAS)',
+      venue: 'Informatica 26(3), 435-451',
+      doi: '10.15388/Informatica.2015.57',
+      tables: { en: 'Table 5 (input), Table 6 (weight set 1), Table 7 (EDAS and VIKOR ranks)', tr: 'Tablo 5 (girdi), Tablo 6 (1. ağırlık seti), Tablo 7 (EDAS ve VIKOR sıraları)' },
     },
     // The paper names them A1 to A10 and C1 to C7 (Table 5); C1 to C3 are benefit, C4 to C7 cost.
     alternatives: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10'],
@@ -286,8 +365,11 @@ export const examples: readonly ExampleDataset[] = [
       [8, 218, 1.94, 0.11, 190, 13400, 10.11],
     ],
     weights: [0.25, 0.214, 0.179, 0.143, 0.107, 0.071, 0.036],
-    // Ranks only: the paper prints no Q and does not state v (0.5 reproduces all seven weight sets).
-    published: [{ label: 'vikor.rank', values: [2, 5, 7, 9, 6, 8, 1, 3, 4, 10], decimals: 0 }],
+    // Ranks only: the paper prints no AS or Q and does not state v (0.5 reproduces all seven weight sets).
+    published: [
+      { label: 'vikor.rank', values: [2, 5, 7, 9, 6, 8, 1, 3, 4, 10], decimals: 0 },
+      { label: 'edas.rank', values: [1, 4, 6, 10, 7, 8, 2, 3, 5, 9], decimals: 0 },
+    ],
   },
 ]
 

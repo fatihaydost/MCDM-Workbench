@@ -5,6 +5,8 @@ import type { Problem } from '../../core/types'
 import { getExample } from '../../data/examples'
 import {
   argMax,
+  divergingSegments,
+  edasParts,
   isoQRegion,
   isoQSegment,
   vikorParts,
@@ -353,5 +355,30 @@ describe('VIKOR picture data', () => {
     expect(area(isoQRegion(0.5, 0.25))).toBeCloseTo(0.0625 * 2, 12)
     expect(area(isoQRegion(1, 0.3))).toBeCloseTo(0.3, 12)
     expect(area(isoQRegion(0.5, 2))).toBeCloseTo(1, 12)
+  })
+})
+
+describe('EDAS parts', () => {
+  const ex = getExample('keshavarz-2015-ten-alternatives')!
+  const p: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  it('reads the weighted distances, SP, SN and AS from the core, rows in rank order (Table 7, set 1)', () => {
+    const parts = edasParts(p, ex.weights!)!
+    expect(parts.order.map((i) => ex.alternatives[i])).toEqual(['A1', 'A7', 'A8', 'A2', 'A9', 'A3', 'A5', 'A6', 'A10', 'A4'])
+    parts.above.forEach((row, i) => expect(row.reduce((a, b) => a + b, 0)).toBeCloseTo(parts.sp[i]!, 12))
+    parts.below.forEach((row, i) => expect(row.reduce((a, b) => a + b, 0)).toBeCloseTo(parts.sn[i]!, 12))
+    // A cell is above or below the average, never both.
+    parts.above.forEach((row, i) => row.forEach((a, j) => expect(a > 0 && parts.below[i]![j]! > 0).toBe(false)))
+  })
+  it('is null when EDAS cannot run', () => {
+    expect(edasParts({ ...p, matrix: p.matrix.map((r) => [r[0]! - 30, ...r.slice(1)]) }, ex.weights!)).toBeNull()
+  })
+  it('stacks distances above the line to the right and below it to the left, outward in criterion order', () => {
+    const segs = divergingSegments([0.2, 0, 0, 0.1], [0, 0.3, 0, 0], 100, 10)
+    expect(segs).toEqual([
+      { col: 0, side: 'above', value: 0.2, x: 100, width: 2 },
+      { col: 1, side: 'below', value: 0.3, x: 97, width: 3 },
+      { col: 2, side: 'at', value: 0, x: 100, width: 0 },
+      { col: 3, side: 'above', value: 0.1, x: 102, width: 1 },
+    ])
   })
 })

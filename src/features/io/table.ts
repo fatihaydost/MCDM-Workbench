@@ -66,6 +66,16 @@ export const KNOWN_STEP_AXES: Readonly<Record<string, Axis | readonly [Axis, Axi
   'vikor.groupUtility': 'alternatives',
   'vikor.individualRegret': 'alternatives',
   'vikor.q': 'alternatives',
+  'edas.average': 'criteria',
+  'edas.pda': ['alternatives', 'criteria'],
+  'edas.nda': ['alternatives', 'criteria'],
+  'edas.weightedPda': ['alternatives', 'criteria'],
+  'edas.weightedNda': ['alternatives', 'criteria'],
+  'edas.sp': 'alternatives',
+  'edas.sn': 'alternatives',
+  'edas.nsp': 'alternatives',
+  'edas.nsn': 'alternatives',
+  'edas.scores': 'alternatives',
 }
 
 const indexLabels = (k: number): string[] => Array.from({ length: k }, (_, i) => String(i + 1))

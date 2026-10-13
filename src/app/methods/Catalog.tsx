@@ -6,18 +6,18 @@ import { allMethods, FAMILY_ORDER, methodsByFamily } from '../../content/methods
 import { getExample } from '../../data/examples'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { MethodThumb } from '../../features/illustrations/MethodThumb'
-import { argMax, distancePoints, entropyParts, sawParts, topsisProjection, vikorParts } from '../../features/illustrations/geometry'
+import { argMax, distancePoints, edasParts, entropyParts, sawParts, topsisProjection, vikorParts } from '../../features/illustrations/geometry'
 import { useLang } from '../../i18n'
 import { SiteFooter } from '../landing/SiteFooter'
 import { usePageMeta } from '../landing/usePageMeta'
 import { Guide } from './Guide'
 import { pageContainer } from './shared'
 
-type Available = 'critic' | 'entropy' | 'topsis' | 'saw' | 'vikor' | 'equal'
+type Available = 'critic' | 'entropy' | 'topsis' | 'saw' | 'vikor' | 'edas' | 'equal'
 /** The available methods in two rows, weighting first (the order of the workbench), then ranking. */
 const AVAILABLE: Readonly<Record<'weighting' | 'ranking', readonly Available[]>> = {
   weighting: ['critic', 'entropy', 'equal'],
-  ranking: ['topsis', 'saw', 'vikor'],
+  ranking: ['topsis', 'saw', 'vikor', 'edas'],
 }
 
 function exampleProblem(id: string): Problem {
@@ -44,6 +44,8 @@ function useThumbs() {
     // VIKOR on its ten-alternative example: S against R, the DQ line and the compromise set (C1 fails there).
     const ten = getExample('keshavarz-2015-ten-alternatives')!
     const vk = vikorParts(exampleProblem(ten.id), ten.weights!)
+    // EDAS on the same example: each alternative's SN to the left of the average line and SP to the right, best first.
+    const ed = edasParts(exampleProblem(ten.id), ten.weights!)
     return {
       critic: { kind: 'bars' as const, values: weights, highlight: argMax(weights) },
       topsis: { kind: 'plane' as const, points: plane, highlight: proj ? argMax(proj.closeness) : undefined },
@@ -56,6 +58,7 @@ function useThumbs() {
         q: vk ? vk.Q[vk.compromise.first]! + vk.compromise.dq : 0,
         inSet: vk?.compromise.set ?? [],
       },
+      edas: { kind: 'diverging' as const, rows: ed ? ed.order.map((i) => ({ below: ed.sn[i]!, above: ed.sp[i]! })) : [] },
       equal: { kind: 'bars' as const, values: Array.from({ length: n }, () => 1 / n), highlight: undefined },
     }
   }, [])

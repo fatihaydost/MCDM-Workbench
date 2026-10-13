@@ -766,6 +766,25 @@
   display: block;
 }
 
+/* EDAS idea ----------------------------------------------------------------------------------- */
+
+/* The average solution: the line both sides of every row grow from. */
+.edasAxis {
+  stroke: var(--text);
+  stroke-width: 1.5;
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.animate .edasAxis {
+  transition: transform var(--dur-data) var(--ease);
+}
+
+.edasHead {
+  fill: var(--text-2);
+  font-size: 12px;
+}
+
 /* VIKOR idea ---------------------------------------------------------------------------------- */
 
 /* The alternatives within DQ of the leader: below the threshold line in the plane, between Q(a') and Q(a') + DQ in

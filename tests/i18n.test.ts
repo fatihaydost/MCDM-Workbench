@@ -58,6 +58,7 @@ describe('i18n resources', () => {
       'constant-column',
       'non-positive-value',
       'negative-value',
+      'non-positive-average',
       'weights-length-mismatch',
       'invalid-weight',
       'negative-weight',
@@ -67,7 +68,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { critic, entropy, saw, topsis, vikor } = await import('../src/core')
+    const { critic, edas, entropy, saw, topsis, vikor } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -104,13 +105,23 @@ describe('i18n resources', () => {
     expect(new Set(vk.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
       new Set(['vikor.constant-column', 'vikor.equal-group-utility', 'vikor.equal-regret', 'vikor.tie-for-first', 'vikor.no-spread']),
     )
-    const steps = [...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps)]
+    // EDAS: small problems that trigger each of its notices.
+    const ed = [
+      edas.compute(p, [0.5, 0.5], {}), // constant column
+      edas.compute({ ...p, matrix: [[-100, 5], [100.01, 6], [0, 7]] }, [0.5, 0.5], {}), // negative values, small average
+      edas.compute({ ...p, matrix: [[2, 5], [2, 5], [2, 5]] }, [0.5, 0.5], {}), // nobody away from the average
+    ]
+    expect(new Set(ed.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
+      new Set(['edas.constant-column', 'edas.negative-values', 'edas.small-average', 'edas.no-spread']),
+    )
+    const steps = [...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),
       ...e.flatMap((x) => x.warnings ?? []),
       ...sw.flatMap((x) => x.warnings ?? []),
       ...vk.flatMap((x) => x.warnings ?? []),
+      ...ed.flatMap((x) => x.warnings ?? []),
     ]
     expect(new Set(warnings.filter((x) => x.code.startsWith('entropy.')).map((x) => x.code))).toEqual(
       new Set(['entropy.constant-column', 'entropy.zeros-in-column', 'entropy.two-alternatives-minmax', 'entropy.all-constant-equal-weights', 'entropy.dominant-weight']),

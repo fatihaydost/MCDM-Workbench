@@ -103,7 +103,10 @@
       },
       "also": "Also tested: the hand-solved CRITIC spreadsheet from the original coursework, every intermediate matrix within {{tol}}, and parity of CRITIC then TOPSIS with the original Python code within {{tol}}. The spreadsheet and the Python code are not independent references.",
       "alsoTitle": "Other checks",
-      "tolerance": "Tolerance {{tol}}"
+      "tolerance": "Tolerance {{tol}}",
+      "edas": {
+        "claim": "All 47 appraisal scores and every distance in Table 2 match {{citation}} to {{decimals}} decimals, rounded as the paper did; the ranks of its 10-alternative example match in all seven weight sets."
+      }
     },
     "catalogue": {
       "title": "Methods",
@@ -180,7 +183,8 @@
       "label": "Ranking method",
       "topsis": "TOPSIS",
       "saw": "SAW",
-      "vikor": "VIKOR"
+      "vikor": "VIKOR",
+      "edas": "EDAS"
     },
     "params": {
       "entropy": {
@@ -339,7 +343,8 @@
       "methodHint": {
         "topsis": "Ranks the alternatives by their distance from an ideal and a negative-ideal solution.",
         "saw": "Weights the rescaled values of each criterion and adds them up.",
-        "vikor": "Looks for a compromise between the best total (S) and the smallest worst regret (R); a lower Q is better."
+        "vikor": "Looks for a compromise between the best total (S) and the smallest worst regret (R); a lower Q is better.",
+        "edas": "Scores each alternative by how far it lies above and below the average of all alternatives; a higher AS is better."
       },
       "columns": {
         "rank": "Rank",
@@ -347,7 +352,9 @@
         "dPlus": "D+",
         "dMinus": "D−",
         "groupUtility": "Group utility S",
-        "individualRegret": "Individual regret R"
+        "individualRegret": "Individual regret R",
+        "aboveAverage": "Above average SP",
+        "belowAverage": "Below average SN"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -365,6 +372,11 @@
           "name": "Compromise Q",
           "title": "Compromise index Q",
           "symbol": "Q"
+        },
+        "edas": {
+          "name": "Appraisal AS",
+          "title": "Appraisal score AS",
+          "symbol": "AS"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -481,6 +493,18 @@
         "individualRegret": "Individual regret R",
         "q": "Compromise index Q",
         "threshold": "Advantage threshold DQ"
+      },
+      "edas": {
+        "average": "Average solution AV",
+        "pda": "Positive distance PDA",
+        "nda": "Negative distance NDA",
+        "weightedPda": "Weighted PDA",
+        "weightedNda": "Weighted NDA",
+        "sp": "Weighted sum SP",
+        "sn": "Weighted sum SN",
+        "nsp": "Normalized NSP",
+        "nsn": "Normalized NSN",
+        "scores": "Appraisal score AS"
       }
     },
     "issues": {
@@ -569,6 +593,21 @@
         "c2Failed": "No acceptable stability: {{first}} is first by neither S nor R.",
         "resultOne": "Compromise solution: {{name}}",
         "resultSet": "Compromise set: {{names}}"
+      },
+      "edas": {
+        "title": "Above and below the average",
+        "above": "Above average: SP",
+        "below": "Below average: SN",
+        "average": "Average",
+        "legend": "Criteria",
+        "others": "Other criteria",
+        "caption": "Right of the line: weighted distance above the average; left: below it. AS weighs both against the largest SP and SN.",
+        "segmentAbove": "{{alternative}}, {{criterion}}: {{value}} above the average (AS = {{score}})",
+        "segmentBelow": "{{alternative}}, {{criterion}}: {{value}} below the average (AS = {{score}})",
+        "segmentAt": "{{alternative}}, {{criterion}}: at the average (AS = {{score}})",
+        "readoutAbove": "{{alternative}}: {{criterion}} adds {{value}} to SP",
+        "readoutBelow": "{{alternative}}: {{criterion}} adds {{value}} to SN",
+        "readoutAt": "{{alternative}} is at the average on {{criterion}}"
       }
     },
     "flow": {
@@ -601,6 +640,14 @@
         "groupUtility": "S and R",
         "q": "Q",
         "threshold": "Threshold"
+      },
+      "edas": {
+        "average": "Average",
+        "pda": "Distances",
+        "weightedPda": "Weighted",
+        "sp": "SP and SN",
+        "nsp": "Normalized",
+        "scores": "AS"
       }
     },
     "pipeline": {
@@ -612,7 +659,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, equal or your own weights, rank the alternatives with TOPSIS, SAW or VIKOR and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR or EDAS and see every step of the calculation."
     }
   },
   "methods": {
@@ -629,7 +676,8 @@
       "equal": "Equal weights",
       "manual": "Manual weights",
       "saw": "SAW",
-      "vikor": "VIKOR"
+      "vikor": "VIKOR",
+      "edas": "EDAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -683,7 +731,8 @@
         "entropy": "Weights from how unevenly the data spread.",
         "equal": "Every criterion gets 1/n.",
         "saw": "Adds up weighted, rescaled values.",
-        "vikor": "Balances the best total against the worst regret."
+        "vikor": "Balances the best total against the worst regret.",
+        "edas": "Measures the distance above and below the average."
       },
       "groups": {
         "weighting": "Weighting",
@@ -791,6 +840,10 @@
         "vikor": {
           "title": "Group utility or the largest regret: v sets the balance",
           "caption": "Below the dashed line Q stays within DQ of the leader; without an acceptable advantage those alternatives form the compromise set."
+        },
+        "edas": {
+          "title": "Better or worse than the average, criterion by criterion",
+          "caption": "Right of the line: weighted distance above the average; left: below it. AS weighs both against the largest SP and SN."
         }
       }
     }
@@ -842,6 +895,18 @@
       "individualRegret": "Individual regret R: an alternative's largest single distance. A lower value is better.",
       "q": "Compromise index Q: S and R rescaled to 0 to 1 and mixed by v. A lower value ranks higher.",
       "threshold": "Advantage threshold DQ = 1 / (m - 1): the Q gap the first alternative needs over the second."
+    },
+    "edas": {
+      "average": "Average solution AV: the mean of each criterion over all alternatives.",
+      "pda": "Positive distance PDA: how much better than the average an alternative is, as a share of the average.",
+      "nda": "Negative distance NDA: how much worse than the average an alternative is, as a share of the average.",
+      "weightedPda": "Weighted positive distances w PDA: what each criterion adds to SP.",
+      "weightedNda": "Weighted negative distances w NDA: what each criterion adds to SN.",
+      "sp": "SP: the sum of an alternative's weighted positive distances.",
+      "sn": "SN: the sum of an alternative's weighted negative distances.",
+      "nsp": "NSP = SP / max SP: 1 for the alternative furthest above the average.",
+      "nsn": "NSN = 1 - SN / max SN: 0 for the alternative furthest below the average.",
+      "scores": "Appraisal score AS = (NSP + NSN) / 2. A higher value ranks higher."
     }
   },
   "validation": {
@@ -863,7 +928,8 @@
       "weights-length-mismatch": "There are {{value}} weights for {{n}} criteria.",
       "invalid-weight": "Enter a number for the weight of {{criterion}}.",
       "negative-weight": "The weight of {{criterion}} is {{value}}. Weights cannot be negative.",
-      "weights-sum": "Weights sum to {{value}}, they must sum to 1."
+      "weights-sum": "Weights sum to {{value}}, they must sum to 1.",
+      "non-positive-average": "The average of {{criterion}} is {{value}}. EDAS divides by each criterion's average, so it must be above 0."
     }
   },
   "warnings": {
@@ -890,6 +956,12 @@
       "equal-regret": "Every alternative has the same R, so Q comes from S alone and reaches at most v, which can make C1 harder to meet.",
       "no-spread": "Every alternative has the same S and the same R, so all get Q = 0.",
       "tie-for-first": "More than one alternative has the lowest Q; they are listed in input order and all are in the compromise set."
+    },
+    "edas": {
+      "constant-column": "Every value of {{criterion}} is the same, so it adds nothing to SP or SN.",
+      "negative-values": "{{criterion}} has negative values. EDAS measures distance as a share of the average, so the result depends on where zero is.",
+      "small-average": "The average of {{criterion}} is close to 0 next to its values, so its distances grow very large and it can decide the ranking even with a small weight.",
+      "no-spread": "No alternative is above or below the average on a weighted criterion, so every alternative gets AS = 0.5."
     }
   }
 }
