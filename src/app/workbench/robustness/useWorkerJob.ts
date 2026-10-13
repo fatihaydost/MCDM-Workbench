@@ -22,6 +22,51 @@ function createWorker(): Worker | null {
   }
 }
 
+/** The worker of one hook: whether it is busy, and whether it failed to load (then every job runs on the main thread). */
+export type WorkerSlot = { worker: Worker | null; running: boolean; broken: boolean }
+
+/** Runs `fn` after this frame; returns a cancel function. */
+type Schedule = (fn: () => void) => () => void
+const nextFrame: Schedule = (fn) => {
+  const t = globalThis.setTimeout(fn, 0)
+  return () => globalThis.clearTimeout(t)
+}
+
+/**
+ * Starts one request: in the slot's worker (a busy one is terminated first, its answer is no longer wanted), or on the
+ * main thread after this frame when there is no worker. A worker that fires `error` failed to load (blocked, a chunk
+ * that did not arrive) and would never answer again: it is dropped, this request runs on the main thread, and so do
+ * the later ones. `done` gets every answer; it must ignore answers to older requests. Returns a cancel function for a
+ * main-thread run.
+ */
+export function startJob(
+  slot: WorkerSlot,
+  req: WorkerRequest,
+  done: (res: WorkerResponse) => void,
+  make: () => Worker | null = createWorker,
+  schedule: Schedule = nextFrame,
+): (() => void) | undefined {
+  if (slot.running && slot.worker) {
+    slot.worker.terminate()
+    slot.worker = null
+  }
+  if (!slot.broken) slot.worker ??= make()
+  slot.running = true
+  const onMain = () => schedule(() => done(runRequest(req)))
+  const w = slot.worker
+  if (!w) return onMain()
+  w.onmessage = (e: MessageEvent<WorkerResponse>) => done(e.data)
+  w.onerror = (e) => {
+    e.preventDefault()
+    w.terminate()
+    if (slot.worker === w) slot.worker = null
+    slot.broken = true
+    onMain()
+  }
+  w.postMessage(req)
+  return undefined
+}
+
 /**
  * One robustness calculation in a Web Worker of its own. A new `job` (a new object: memoize it) cancels the running
  * calculation (the worker is terminated and a new one started) and starts the new one; answers to older requests are
@@ -29,8 +74,7 @@ function createWorker(): Worker | null {
  */
 function useWorkerJob<T>(job: Job): JobState<T> {
   const [state, setState] = useState<JobState<T>>({ result: null, busy: true, failed: false })
-  const worker = useRef<Worker | null>(null)
-  const running = useRef(false)
+  const slot = useRef<WorkerSlot>({ worker: null, running: false, broken: false })
   const lastId = useRef(0)
 
   useEffect(() => {
@@ -38,37 +82,19 @@ function useWorkerJob<T>(job: Job): JobState<T> {
     const req = { ...job, id } as WorkerRequest
     const done = (res: WorkerResponse) => {
       if (res.id !== lastId.current) return
-      running.current = false
+      slot.current.running = false
       setState((s) => ('result' in res ? { result: res.result as T, busy: false, failed: false } : { result: s.result, busy: false, failed: true }))
     }
-    // A worker still busy with the previous inputs is stopped: its answer is no longer wanted.
-    if (running.current && worker.current) {
-      worker.current.terminate()
-      worker.current = null
-    }
-    worker.current ??= createWorker()
-    running.current = true
     setState((s) => (s.busy && !s.failed ? s : { ...s, busy: true, failed: false }))
-    const w = worker.current
-    if (!w) {
-      // No workers here: compute after this frame, so the previous result and the status paint first.
-      const t = window.setTimeout(() => done(runRequest(req)), 0)
-      return () => window.clearTimeout(t)
-    }
-    w.onmessage = (e: MessageEvent<WorkerResponse>) => done(e.data)
-    w.onerror = (e) => {
-      e.preventDefault()
-      done({ id, error: e.message })
-    }
-    w.postMessage(req)
-    return undefined
+    // Without a worker the calculation runs after this frame, so the previous result and the status paint first.
+    return startJob(slot.current, req, done)
   }, [job])
 
   useEffect(
     () => () => {
-      worker.current?.terminate()
-      worker.current = null
-      running.current = false
+      slot.current.worker?.terminate()
+      slot.current.worker = null
+      slot.current.running = false
     },
     [],
   )
