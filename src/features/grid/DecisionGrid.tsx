@@ -116,6 +116,11 @@ export type DecisionGridProps = {
   /** Caps the grid height so it scrolls vertically inside its container with sticky headers. */
   maxHeight?: number | string
   className?: string
+  /**
+   * True for an external change that only relabels the table (names rewritten for a language switch): with the same
+   * matrix it replaces the present undo step instead of adding one, so undo never brings the old names back.
+   */
+  isRelabel?: (next: GridProblem) => boolean
 }
 
 type Editing = { pos: Pos; draft: string; original: string; mode: EditMode; invalid: boolean }
@@ -149,6 +154,7 @@ export function DecisionGrid({
   pasteHeaders = 'auto',
   maxHeight,
   className,
+  isRelabel,
 }: DecisionGridProps) {
   const uid = useId()
   const problem = useMemo<GridProblem>(() => ({ alternatives, criteria, matrix }), [alternatives, criteria, matrix])
@@ -183,9 +189,16 @@ export function DecisionGrid({
     [labels],
   )
 
-  // External changes (load example, import) become undoable steps; our own echoes are skipped.
+  // External changes (load example, import) become undoable steps; our own echoes are skipped, and a relabel of the
+  // same data (language switch) replaces the present step.
+  const relabel = useRef(isRelabel)
+  relabel.current = isRelabel
   useEffect(() => {
-    setHistory((h) => (sameProblem(h.present, problem) ? h : pushHistory(h, problem)))
+    setHistory((h) => {
+      if (sameProblem(h.present, problem)) return h
+      if (problem.matrix === h.present.matrix && relabel.current?.(problem)) return { ...h, present: problem }
+      return pushHistory(h, problem)
+    })
   }, [problem])
 
   useLayoutEffect(() => {

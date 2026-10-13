@@ -7,7 +7,7 @@ import { DecisionGrid, type GridError, type GridLabels } from '../../features/gr
 import { EmptyMatrixHint } from '../../features/illustrations'
 import type { ImportIssue } from '../../features/io'
 import { useNumberFormat, type Lang } from '../../i18n'
-import { isEmptyProblem, useValidation, useWorkbench, type DraftProblem } from '../../state/workbench'
+import { isEmptyProblem, isLocalization, useValidation, useWorkbench, type DraftProblem } from '../../state/workbench'
 import {
   Button,
   Dialog,
@@ -362,6 +362,7 @@ export function DataStage() {
           matrix={problem.matrix}
           errors={gridErrors}
           onChange={(next) => setProblem(next)}
+          isRelabel={isLocalization}
           parse={nf.parse}
           format={nf.formatRaw}
           labels={labels}

@@ -80,11 +80,15 @@ function useQueryBootstrap() {
   }, [lang, loadExample, setStage])
 }
 
-/** A loaded example that is still unchanged follows the language: its names are rewritten on a TR/EN switch. */
+/**
+ * A loaded example that is still unchanged follows the language: its names are rewritten on a TR/EN switch, and again
+ * when undo brings back an unchanged example that was on screen in the other language.
+ */
 function useExampleLanguage() {
   const [lang] = useLang()
+  const exampleId = useWorkbench((s) => s.exampleId)
   const localizeExample = useWorkbench((s) => s.localizeExample)
-  useEffect(() => localizeExample(lang), [lang, localizeExample])
+  useEffect(() => localizeExample(lang), [lang, exampleId, localizeExample])
 }
 
 type StageState = 'done' | 'attention' | 'pending'

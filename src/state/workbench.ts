@@ -219,6 +219,18 @@ function remember(s: WorkbenchData, always: boolean): void {
   })
 }
 
+/**
+ * Names written by `localizeExample`, keyed by the alternatives array it made (value: the criteria array it made). A
+ * language switch only relabels the table; the grid asks `isLocalization` so it replaces its present undo step instead
+ * of adding one, and Ctrl+Z never takes the names back to the other language.
+ */
+const localizations = new WeakMap<object, object>()
+
+/** Whether this table is exactly the one a language switch just relabelled (same arrays, not equal copies). */
+export function isLocalization(p: Pick<DraftProblem, 'alternatives' | 'criteria'>): boolean {
+  return localizations.get(p.alternatives) === p.criteria
+}
+
 function recall(p: DraftProblem): Setup | undefined {
   const r = leftSetups.get(p.matrix)
   return r && r.alternatives === p.alternatives && r.criteria === p.criteria ? r.setup : undefined
@@ -290,13 +302,13 @@ export const useWorkbench = create<WorkbenchState>()(
         if (p.alternatives.length !== alternatives.length || p.criteria.length !== names.length) return
         if (p.alternatives.every((a, i) => a === alternatives[i]) && p.criteria.every((c, j) => c.name === names[j])) return
         remember(s, false)
-        set({
-          problem: {
-            alternatives: [...alternatives],
-            criteria: p.criteria.map((c, j) => ({ ...c, name: names[j]! })),
-            matrix: p.matrix,
-          },
-        })
+        const problem = {
+          alternatives: [...alternatives],
+          criteria: p.criteria.map((c, j) => ({ ...c, name: names[j]! })),
+          matrix: p.matrix,
+        }
+        localizations.set(problem.alternatives, problem.criteria)
+        set({ problem })
       },
 
       startBlank: (m = 3, n = 3, names) => {
