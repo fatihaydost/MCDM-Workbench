@@ -157,7 +157,7 @@ type DraftProblem = { alternatives: string[]; criteria: Criterion[]; matrix: (nu
 type WorkbenchData = {
   problem: DraftProblem              // raw input; null cell = empty, never read as 0
   weightMethod: 'critic' | 'equal' | 'manual'
-  manualWeights: (number | null)[]   // one per criterion, kept in length by the actions
+  manualWeights: (number | null)[]   // one per criterion, matched to the criterion (not its column) by the actions
   rankingMethod: 'topsis'
   stage: Stage
   exampleId: string | null           // loaded example, cleared by the first data edit
@@ -170,7 +170,12 @@ type WorkbenchData = {
   `weightMethod: 'manual'` with the paper's weights when the example has them, otherwise `'critic'`),
   `startBlank(m, n, names?)`, `setCell(i, j, v)`, `setAlternativeName`, `setCriterion(j, patch)`,
   `addAlternative(name)`, `removeAlternative(i)`, `addCriterion(criterion)`, `removeCriterion(j)`,
-  `setWeightMethod`, `setManualWeight(j, v)`, `setRankingMethod`, `reset`.
+  `setWeightMethod`, `setManualWeight(j, v)`, `setRankingMethod`, `reset`, `localizeExample(lang)` (an unchanged
+  example's names follow a language switch).
+- Manual weights follow their criterion through `setProblem` (`carryWeights`: same criterion object, one seen
+  before, same name, then the same column only when the count is unchanged), so a grid delete never shifts them.
+  `setProblem` with a table that was on screen as an example or import (the grid's undo) restores the methods
+  and weights it had then. An import matches weights by name only.
 - Derived (pure functions, plus memoized hooks):
   - `computeValidation(problem)` / `useValidation()`: core `validateProblem` issues (empty cells arrive
     as NaN, so they come back as `invalid-cell` with row and col).

@@ -106,7 +106,8 @@ A change tints the cell for a second and is announced with the undo shortcut (`t
   Text that is not a number keeps the editor open with the message.
 - Delete / Backspace clear the selection (values to empty, names to empty; directions stay).
 - Ctrl+Z undo, Ctrl+Y or Ctrl+Shift+Z redo, 100 steps. Changes from outside (load example,
-  import) are undoable steps too.
+  import) are undoable steps too. Undo hands back the earlier table object with its original
+  `criteria` objects; the workbench store relies on that to bring weights and methods back.
 - Copy / cut write TSV. Paste reads TSV (Excel, Sheets), semicolon CSV and comma CSV, quoted
   fields, `\r\n`. The block fills from the focused cell and grows the grid. Pasted on the
   top-left corner it replaces the whole table. A text first row / column becomes names, with a
