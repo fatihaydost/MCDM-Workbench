@@ -1049,10 +1049,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'zeros',
           label: { en: 'Zeros, but no negatives', tr: 'Sıfırlar var, negatif yok' },
           recommend: {
-            methodIds: ['entropy', 'sd'],
+            methodIds: ['sd', 'entropy'],
             reason: {
-              en: 'Entropy accepts zeros (0 ln 0 = 0) as long as no column sums to 0, while MEREC is excluded because it takes the logarithm of every value.',
-              tr: 'Entropi, hiçbir sütunun toplamı 0 olmadıkça sıfırı kabul eder (0 ln 0 = 0); MEREC ise her değerin logaritmasını aldığı için dışarıda kalır.',
+              en: 'SD takes zeros as they are; Entropy computes with them (0 ln 0 = 0) but a column with only a few non-zero values can take most of the weight, and MEREC is excluded because it takes the logarithm of every value.',
+              tr: 'SD sıfırları olduğu gibi alır; Entropi de sıfırlarla hesaplar (0 ln 0 = 0) ama yalnız birkaç değeri sıfırdan farklı olan bir sütun ağırlığın çoğunu alabilir, MEREC ise her değerin logaritmasını aldığı için dışarıda kalır.',
             },
           },
           next: RANKING_START,
