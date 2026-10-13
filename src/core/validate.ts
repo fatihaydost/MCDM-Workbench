@@ -12,6 +12,7 @@ export type ValidationCode =
   | 'constant-column'
   | 'non-positive-value'
   | 'negative-value'
+  | 'non-positive-average'
   | 'weights-length-mismatch'
   | 'invalid-weight'
   | 'negative-weight'

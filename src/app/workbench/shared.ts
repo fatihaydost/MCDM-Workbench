@@ -129,6 +129,7 @@ export function placeIssue(
     case 'invalid-criterion-type':
       return { ...base, stage: 'data', targetId: col !== undefined ? ids.type(col) : ids.corner }
     case 'constant-column':
+    case 'non-positive-average':
       return { ...base, stage: 'data', targetId: col !== undefined ? ids.criterion(col) : ids.corner }
     case 'row-length-mismatch':
       return { ...base, stage: 'data', targetId: row !== undefined ? ids.alternative(row) : ids.corner }

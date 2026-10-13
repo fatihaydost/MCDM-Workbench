@@ -1,4 +1,5 @@
 import { critic } from './methods/critic'
+import { edas } from './methods/edas'
 import { entropy } from './methods/entropy'
 import { equal } from './methods/equal'
 import { saw } from './methods/saw'
@@ -7,7 +8,7 @@ import { vikor } from './methods/vikor'
 import type { Method, RankingMethod, WeightingMethod } from './types'
 
 const weighting: WeightingMethod[] = [critic, entropy, equal]
-const ranking: RankingMethod[] = [topsis, saw, vikor]
+const ranking: RankingMethod[] = [topsis, saw, vikor, edas]
 
 export const weightingMethods: readonly WeightingMethod[] = weighting
 export const rankingMethods: readonly RankingMethod[] = ranking
