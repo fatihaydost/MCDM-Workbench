@@ -13,7 +13,7 @@
 - Avoid / warn: when a criterion scale may be shifted (e.g., °C vs °F, "height above sea" vs "height above foothill") — vector normalization is not invariant to affine transforms and the ranking can change (see the reference example, problem f vs φ). Avoid when non-compensation matters (a very bad value must not be offset) — use an outranking method. Adding/removing an alternative can reverse ranks.
 
 ## Inputs
-- Decision matrix `X` (m alternatives × n criteria), real numbers; vector normalization tolerates zeros but not an all-zero column.
+- Decision matrix `X` (m alternatives × n criteria), real numbers; vector normalization tolerates zeros; an all-zero column has norm 0 and is guarded (r = 0, the column drops out, with a warning; see Pitfalls).
 - Criterion types: `benefit` | `cost`.
 - Weights `w` (n values, ≥ 0; normalize to sum 1 — TOPSIS is invariant to a common scale of `w`, since both distances scale equally).
 - No extra parameters in the default. Optional variants: normalization (`vector` default | `linear-max` | `min-max`), distance (`euclidean` default).

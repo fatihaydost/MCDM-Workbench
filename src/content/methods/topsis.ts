@@ -112,7 +112,7 @@ export const topsis: MethodContent = {
       'Ranks must survive adding or removing alternatives: the ideals move.',
     ],
     inputs: [
-      'Decision matrix with m alternatives and n criteria, real numbers. Zeros are fine, an all-zero column is not.',
+      'Decision matrix with m alternatives and n criteria, real numbers. Zeros are fine; an all-zero column is left out, with a warning.',
       'Criterion type per column: benefit or cost.',
       'Weights, one per criterion, non-negative. Scaling all weights by the same factor does not change the result.',
     ],
@@ -136,7 +136,7 @@ export const topsis: MethodContent = {
       'Alternatif eklenip çıkarılınca sıralar korunmalı: ideal noktalar kayar.',
     ],
     inputs: [
-      'm alternatif ve n kriterden oluşan karar matrisi, gerçek sayılar. Sıfır olabilir, tamamı sıfır olan sütun olamaz.',
+      'm alternatif ve n kriterden oluşan karar matrisi, gerçek sayılar. Sıfır olabilir; tamamı sıfır olan sütun uyarıyla hesaba katılmaz.',
       'Her sütun için kriter türü: fayda ya da maliyet.',
       'Her kriter için negatif olmayan bir ağırlık. Tüm ağırlıkları aynı çarpanla ölçeklemek sonucu değiştirmez.',
     ],
