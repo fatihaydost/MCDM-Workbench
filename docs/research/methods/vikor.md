@@ -29,7 +29,8 @@
    - C1 and C2 → single solution $\{a'\}$.
    - C1 only (C2 fails) → $\{a', a''\}$.
    - C1 fails → $\{a', a'', \dots, a^{(M)}\}$ with M the largest position such that $Q(a^{(M)}) - Q(a') < DQ$.
-   (Rule as stated in Opricovic & Tzeng 2004 §2(e) and repeated in later VIKOR papers; the mirror text of this passage is partly garbled, the C1/C2 definitions and DQ are legible.)
+   (Rule as stated in Opricovic & Tzeng 2004 §2(e), re-read in full on 2026-10-13: "If one of the conditions is not satisfied, then a set of compromise solutions is proposed, which consists of: alternatives a′ and a″ if only condition C2 is not satisfied, or alternatives a′, a″, …, a(M) if condition C1 is not satisfied; a(M) is determined by the relation Q(a(M)) − Q(a′) < DQ for maximum M". C1 is ≥ DQ, the set test is strict <.)
+   **Misprint in the paper:** step (d) says "sorting by the values S, R and Q, in decreasing order"; the same section says "the best alternative, ranked by Q, is the one with the minimum value of Q" and Table 3 ranks ascending. Ascending is correct.
 
 Variants: fixed (user-given) f*/f− instead of set-dependent ones (mentioned in Opricovic & Tzeng 2004 §4.1 as a way to avoid set effects); "extended VIKOR" (Opricovic & Tzeng 2007, EJOR; not opened); fuzzy/interval VIKOR. **We implement the 2004 version** (same as pyDecision `vikor_method` for S, R, Q).
 
@@ -75,7 +76,14 @@ Variants: fixed (user-given) f*/f− instead of set-dependent ones (mentioned in
 - **Second fixture for C1/compromise-set logic (ranks published, sets derived):** Keshavarz Ghorabaee et al. (2015), Informatica 26(3):435–451, doi:10.15388/Informatica.2015.57, Table 5 (matrix), Table 6 (7 weight sets), Table 7 (VIKOR ranks). Matrix/weights JSON in `edas.md`. Our Q-ranks equal the published VIKOR ranks in **7/7 sets (MATCH)** (assuming v = 0.5; the paper does not state v). Derived (not published) C1/C2 with DQ = 1/9: C1 fails in all 7 sets, C2 holds; compromise sets = {A7, A1, A8} (sets 1–3), {A1, A7} (sets 4–6), {A1, A2} (set 7). Use these as regression values for the compromise-set branch, labelled "derived".
   - Set 1 Q (ours): 0.0287, 0.4807, 0.5473, 0.9163, 0.5331, 0.6743, 0.0270, 0.0806, 0.2423, 0.9472.
 
+## Re-verification (2026-10-13, before implementation)
+- Primary text re-read (§2 steps (a)-(e), §5, Table 3; mirror of the EJOR PDF via Exa). Confirmed: S and R (Eqs. 1-2), Q (Eq. 3) with S* = min, S- = max; v = "weight of the strategy of the majority of criteria (or the maximum group utility)", here 0.5; C1 "Acceptable advantage" Q(a″) − Q(a′) ≥ DQ, DQ = 1/(J − 1); C2 "Acceptable stability in decision making": a′ also best ranked by S or/and R, stable within "voting by majority rule" (v > 0.5), "by consensus" (v ≈ 0.5) or "with veto" (v < 0.5); the three-branch compromise rule above; φ = a f + b leaves the VIKOR result unchanged.
+- Found: the step (d) misprint ("decreasing order", see Algorithm). The earlier note that this passage was garbled no longer applies.
+- Not in the paper (our choices, see Implementation notes): the guards for a constant column and for all-equal S or R, and the order of tied Q values.
+
 ## Implementation notes
+- **As implemented (`src/core/methods/vikor.ts`, 2026-10-13):** score = Q, `order: 'asc'`; steps f*, f−, weighted distances d_ij = w_j (f*_j − x_ij)/(f*_j − f−_j), S, R, Q, DQ. A constant column gets d = 0 (notice `vikor.constant-column`); if every S is equal the S term of Q is 0 (only the R term remains, weighted 1 − v), the same for R; both flat gives Q = 0 for all (notices `vikor.equal-group-utility`, `vikor.equal-regret`, `vikor.no-spread`). Q ties for first: a′, a″ by input index, notice `vikor.tie-for-first`, C1 fails and both are in the set. C1 uses ≥ DQ with a 1e-12 tolerance, the set uses < DQ (same tolerance). v is a user parameter (slider, default 0.5).
+- Tests: `tests/vikor.test.ts` (Opricovic & Tzeng 2004 exact, φ and any increasing affine change invariant; Keshavarz Ghorabaee 2015 ranks 7/7, Q set 1 and the compromise sets as derived regression values; each branch of the rule).
 - pyDecision: `vikor_method(dataset, weights, criterion_type, strategy_coefficient=0.5, graph, verbose)` → `(flow_s, flow_r, flow_q, solution)`; each flow is `[alt_no, value]` sorted ascending.
 - pyDecision's `solution` logic deviates from the paper: if C1 **and** C2 hold it returns the whole sorted list (not just a′); if **both** fail it also returns the whole list instead of the {a′…a(M)} set. Implement the three branches explicitly as above.
 - Return S, R, Q, the three rankings, C1, C2, DQ and the compromise set; the site should show the "acceptable advantage" and "stability" checks in words.
