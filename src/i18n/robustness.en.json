@@ -32,6 +32,7 @@
     "ws": "WS",
     "na": "n/a",
     "zeroNote": "Criteria with weight 0 are left out: a percentage of 0 is still 0.",
+    "allOnOne": "All the weight is on one criterion: the others cannot be rescaled, so there is nothing to nudge.",
     "changedAt": "{{criterion}} {{delta}}: {{name}} first"
   },
   "monteCarlo": {

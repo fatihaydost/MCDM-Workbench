@@ -225,7 +225,7 @@ export default function WorkbenchPage() {
       const label = shown.slice(0, 3).map((i) => alternativeName(problem, i, t)).join(', ') + (shown.length > 3 ? ` +${shown.length - 3}` : '')
       stageMeta.results = <StageStatus state="done">{label}</StageStatus>
     }
-    if (robustness) {
+    if (robustness && robustness.total > 0) {
       stageMeta.robustness = <StageStatus state="pending">{t('workbench.rail.robustness', robustness)}</StageStatus>
     } else if (ranking.value) {
       // Until the stage's chunk has loaded: an empty line of the same height, so the rail does not shift.

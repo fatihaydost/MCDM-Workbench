@@ -186,6 +186,16 @@ describe('sweepWeight: Krishnan et al. 2021 smartphones, CRITIC weights, TOPSIS,
   })
 })
 
+describe('sweepWeight: a tie that exists only at w_k = 1 is not an interval', () => {
+  it('Krishnan 2021, k = 2 (pixel density, C and D both 520): the sweep ends on the ranking that holds below 1', () => {
+    const sw = sweepWeight(krishnan, krishnanW, topsis, 2)
+    const last = sw.rankingIntervals[sw.rankingIntervals.length - 1]!
+    expect(last.to).toBe(1)
+    expect(last.from).toBeLessThan(0.9)
+    expect(new Set(last.ranking).size).toBe(last.ranking.length) // no tie in the last interval
+  })
+})
+
 describe('sweepWeight: several switches inside one grid cell (synthetic methods)', () => {
   it('one pair crossing twice inside [0.50, 0.51]: both crossings found (0.503 and 0.507)', () => {
     // B − A = 10 (t − 0.503)(t − 0.507): B ahead at both grid points 0.50 and 0.51, A ahead in between.
@@ -278,6 +288,16 @@ describe('perturbWeights', () => {
 })
 
 // ---------- agreement coefficients ----------
+
+describe('perturbWeights: all the weight on one criterion (combinations.md §C.1, w_k = 1 -> skip)', () => {
+  it('skips that criterion instead of inventing an equal split, so no row repeats the base vector', () => {
+    const p = makeProblem([[10, 1, 1], [9, 9, 9], [8, 5, 9]], ['benefit', 'benefit', 'benefit'])
+    const rows = perturbWeights(p, [1, 0, 0], topsis)
+    expect(rows.some((r) => r.k === 0)).toBe(false)
+    // The zero-weight criteria keep their rows (they equal the base and the stage marks them n/a).
+    expect(rows.every((r) => r.weights[0] === 1)).toBe(true)
+  })
+})
 
 describe('agreement: Sałabun & Urbaniak 2020 (ICCS 2020, LNCS 12138:632), Tables 1–4', () => {
   // Source: https://pmc.ncbi.nlm.nih.gov/articles/PMC7302865/ (open-access copy; the ranking columns and the

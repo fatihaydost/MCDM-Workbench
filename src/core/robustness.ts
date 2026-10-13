@@ -62,6 +62,8 @@ export type Sweep = {
 const SWITCH_TOL = 1e-6
 /** Switch points closer than this are one point (e.g. a tie exactly on a grid point: + -> 0 -> −). */
 const MERGE_TOL = 2 * SWITCH_TOL
+/** An end piece of the sweep at most this wide whose ranking only adds ties is the end point's tie (see sweepWeight). */
+const END_TIE_WIDTH = 1e-4
 
 type Eval = { t: number; weights: number[]; scores: number[]; ranking: number[]; sign: number }
 
@@ -215,6 +217,35 @@ export function sweepWeight(
     else rankingIntervals.push({ from, to, ranking, top: topSet(ranking) })
   }
 
+  // At w_k = 0 or 1 some weights are exactly 0, so alternatives equal on the remaining criteria tie there. Next to
+  // that point their scores differ by less than the tie tolerance of rankScores (1e-12, relative), so the tie
+  // stretches a hair into the sweep (about 2e-6 on Krishnan 2021, k = 2). An end piece that narrow whose ranking only
+  // merges places of its neighbour is that end point, not an interval: it joins the neighbour.
+  const onlyMerges = (piece: readonly number[], next: readonly number[]): boolean => {
+    for (let a = 0; a < piece.length; a++) {
+      for (let b = a + 1; b < piece.length; b++) {
+        const s = Math.sign(piece[a]! - piece[b]!)
+        if (s !== 0 && s !== Math.sign(next[a]! - next[b]!)) return false
+      }
+    }
+    return true
+  }
+  if (rankingIntervals.length > 1) {
+    const first = rankingIntervals[0]!
+    if (first.to - first.from <= END_TIE_WIDTH && onlyMerges(first.ranking, rankingIntervals[1]!.ranking)) {
+      rankingIntervals.shift()
+      rankingIntervals[0]!.from = 0
+    }
+  }
+  if (rankingIntervals.length > 1) {
+    const last = rankingIntervals[rankingIntervals.length - 1]!
+    const prev = rankingIntervals[rankingIntervals.length - 2]!
+    if (last.to - last.from <= END_TIE_WIDTH && onlyMerges(last.ranking, prev.ranking)) {
+      rankingIntervals.pop()
+      prev.to = 1
+    }
+  }
+
   const topIntervals: StableInterval[] = []
   for (const iv of rankingIntervals) {
     const last = topIntervals[topIntervals.length - 1]
@@ -253,13 +284,18 @@ export type PerturbationRow = {
   ws: number
 }
 
+/** The other weights summing to at most this count as 0: criterion k holds all the weight. */
+const ALL_ON_ONE = 1e-12
+
 /** Default grid δ ∈ {−20 %, −10 %, −5 %, +5 %, +10 %, +20 %} for every criterion. */
 export const DEFAULT_DELTAS: readonly number[] = [-0.2, -0.1, -0.05, 0.05, 0.1, 0.2]
 
 /**
  * One row per criterion × δ, criterion-major (k = 0 with every δ, then k = 1, ...). The new weight
  * w_k(1 + δ) is clamped to [0, 1] and the others rescaled by `reweight`. A criterion with weight 0 stays 0
- * (its rows equal the base). Agreement is to the base ranking (x = base, y = perturbed).
+ * (its rows equal the base). A criterion that holds all the weight (w_k = 1, the others 0) is skipped
+ * (combinations.md §C.1): the others cannot be rescaled, and an equal split of the rest would be invented weights.
+ * Agreement is to the base ranking (x = base, y = perturbed).
  */
 export function perturbWeights(
   problem: Problem,
@@ -273,6 +309,9 @@ export function perturbWeights(
   const baseTop = topSet(baseRanking)
   const rows: PerturbationRow[] = []
   for (let k = 0; k < weights.length; k++) {
+    let others = 0
+    for (let j = 0; j < weights.length; j++) if (j !== k) others += weights[j]!
+    if (others <= ALL_ON_ONE) continue
     for (const delta of ds) {
       const w = reweight(weights, k, weights[k]! * (1 + delta))
       const ranking = rankWith(problem, method, w, params).ranking

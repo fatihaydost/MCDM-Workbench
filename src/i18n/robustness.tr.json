@@ -32,6 +32,7 @@
     "ws": "WS",
     "na": "yok",
     "zeroNote": "Ağırlığı 0 olan kriterler sayılmaz: 0'ın yüzdesi yine 0'dır.",
+    "allOnOne": "Bütün ağırlık tek bir kriterde: diğerleri yeniden ölçeklenemez, oynatılacak bir şey yok.",
     "changedAt": "{{criterion}} {{delta}}: birinci {{name}}"
   },
   "monteCarlo": {

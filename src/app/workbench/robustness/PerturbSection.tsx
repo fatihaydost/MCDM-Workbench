@@ -77,7 +77,7 @@ export function PerturbSection({ problem, weights, method, params, names, criter
     <section aria-labelledby={`${uid}-title`} className="flex flex-col gap-4" ref={boxRef}>
       <SectionHead id={`${uid}-title`} title={t('perturb.title')} lead={t('perturb.lead')} />
       <p className="text-16 font-medium text-text" data-testid="perturb-summary">
-        {t('perturb.summary', { held, total })}
+        {total > 0 ? t('perturb.summary', { held, total }) : t('perturb.allOnOne')}
       </p>
       <ChartFigure
         titleId={`${uid}-chart`}
@@ -108,7 +108,7 @@ export function PerturbSection({ problem, weights, method, params, names, criter
               criterion={criteria[j] ?? ''}
               compact={compact}
               na={t('perturb.na')}
-              cells={cells.map((r): Cell => (!r ? null : !applicable(r, weights) ? { kind: 'na' } : r.sameTop ? { kind: 'same' } : { kind: 'changed', leader: leader(r.ranking) }))}
+              cells={cells.map((r): Cell => (!r || !applicable(r, weights) ? { kind: 'na' } : r.sameTop ? { kind: 'same' } : { kind: 'changed', leader: leader(r.ranking) }))}
             />
           ))}
         </div>
