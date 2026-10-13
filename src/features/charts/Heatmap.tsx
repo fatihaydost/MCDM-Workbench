@@ -20,6 +20,8 @@ export type HeatmapProps = {
   domain?: Domain
   /** Formats the value printed in each cell and in the table. */
   format: (value: number) => string
+  /** Printed in a cell whose value is null or not finite (an undefined correlation, say); empty by default. */
+  emptyText?: string
   description?: string
   tableLabels: {
     /** Summary of the disclosure, e.g. "Show as table". */
@@ -40,14 +42,14 @@ export type HeatmapProps = {
  * the active theme; a fill on which neither reaches 4.5:1 moves slightly along the ramp
  * (see `heatPaint`), so every printed value stays readable in light and dark.
  */
-export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, format, description, tableLabels, className, fade = false, columnsTitle }: HeatmapProps) {
+export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, format, emptyText = '', description, tableLabels, className, fade = false, columnsTitle }: HeatmapProps) {
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const tokens = useHeatTokens()
   const layout = useMemo(() => layoutHeatmap({ rowLabels, colLabels, width }), [rowLabels, colLabels, width])
   const { labelWidth, headerHeight, cellWidth, cellHeight } = layout
 
-  const text = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? format(v) : '')
+  const text = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? format(v) : emptyText)
   const top = columnsTitle ? 18 : 0
   const table = {
     corner: tableLabels.corner,

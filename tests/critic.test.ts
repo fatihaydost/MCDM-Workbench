@@ -42,8 +42,15 @@ describe('CRITIC: edge cases', () => {
     expect(res.weights.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 15)
     expect(res.warnings).toContainEqual({ code: 'critic.constant-column', col: 1 })
     expect(res.diagnostics?.constantColumns).toBe(1)
+    // Its correlations are undefined (shown as n/a) and its own conflict is 0, so each row adds up as displayed.
     const rho = step(res.steps, 'critic.correlation').matrix!
-    expect(rho[0]![1]).toBe(0)
+    expect(rho[0]![1]).toBeNaN()
+    expect(rho[1]![2]).toBeNaN()
+    expect(rho[1]![1]).toBe(1)
+    const conflict = step(res.steps, 'critic.conflict').vector!
+    expect(conflict[1]).toBe(0)
+    expect(conflict[0]).toBeCloseTo(1 - rho[0]![2]!, 15)
+    expect(step(res.steps, 'critic.information').vector![1]).toBe(0)
     expect(res.weights.every(Number.isFinite)).toBe(true)
   })
 

@@ -420,6 +420,7 @@
       }
     },
     "calc": {
+      "undefined": "yok",
       "step": "Adım {{n}}",
       "copyTsv": "TSV olarak, tablolar için",
       "copyLatex": "LaTeX tablosu olarak",

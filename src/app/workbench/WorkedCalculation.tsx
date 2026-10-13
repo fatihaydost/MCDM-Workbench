@@ -298,7 +298,8 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, hea
       )}
 
       <div className="min-w-0 sm:pl-8">
-        <StepTableView table={table} format={(v) => nf.format(v)} label={t('workbench.calc.tableLabel', { n: number, name })} />
+        {/* A value the step leaves undefined (a constant column's correlation) says so instead of a blank cell. */}
+        <StepTableView table={table} format={(v) => (Number.isFinite(v) ? nf.format(v) : t('workbench.calc.undefined'))} label={t('workbench.calc.tableLabel', { n: number, name })} />
       </div>
 
       {copied === 'failed' && <p className="text-13 text-danger sm:pl-8">{t('workbench.calc.copyFailed')}</p>}

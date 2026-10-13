@@ -224,6 +224,7 @@ export function ResultsStage() {
             colLabels={names}
             values={correlation}
             format={format2}
+            emptyText={t('workbench.calc.undefined')}
             tableLabels={{ show: t('workbench.chart.showTable'), corner: t('workbench.criterion') }}
             className="min-w-0"
           />

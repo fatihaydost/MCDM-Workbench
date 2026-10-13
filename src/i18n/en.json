@@ -420,6 +420,7 @@
       }
     },
     "calc": {
+      "undefined": "n/a",
       "step": "Step {{n}}",
       "copyTsv": "As TSV, for spreadsheets",
       "copyLatex": "As a LaTeX table",

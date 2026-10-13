@@ -65,8 +65,8 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
     tr: 'Normalize sütunların her çifti arasındaki Pearson korelasyonu.',
     tex: String.raw`\rho_{jk} = \frac{\sum_{i=1}^{m} (r_{ij} - \bar r_j)(r_{ik} - \bar r_k)}{\sqrt{\sum_{i=1}^{m} (r_{ij} - \bar r_j)^2 \sum_{i=1}^{m} (r_{ik} - \bar r_k)^2}}, \qquad \rho_{jj} = 1`,
     edgeCase: {
-      en: 'A pair that involves a constant column gets correlation 0.',
-      tr: 'Sabit bir sütun içeren çiftin korelasyonu 0 alınır.',
+      en: 'A pair with a constant column has no correlation; the table shows n/a.',
+      tr: 'Sabit sütun içeren çiftin korelasyonu tanımsızdır; tabloda yok yazar.',
     },
   },
   'critic.conflict': {
@@ -74,8 +74,8 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
     tr: 'Her kriterin diğerleriyle çatışması: 1 eksi korelasyonlarının toplamı.',
     tex: String.raw`\sum_{k=1}^{n} \left(1 - \rho_{jk}\right)`,
     edgeCase: {
-      en: 'Constant columns are left out, so they do not change the others.',
-      tr: 'Sabit sütunlar toplama katılmaz, diğerlerini değiştirmez.',
+      en: 'Constant columns are left out; their own conflict is 0.',
+      tr: 'Sabit sütunlar toplama katılmaz; kendi çatışmaları 0 olur.',
     },
   },
   'critic.information': {
