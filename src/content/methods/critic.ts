@@ -117,7 +117,7 @@ export const critic: MethodContent = {
       'No parameters.',
     ],
     pitfalls: [
-      'A constant column gets weight 0 with a warning and stays out of the conflict sums, so it does not move the other weights; if every column is constant, the weights fall back to 1/n.',
+      'A constant column gets weight 0 and leaves the others unchanged; if every column is constant, the weights fall back to 1/n.',
       'With fewer than 4 alternatives the correlations jump around; we warn below 4.',
       'Negative correlation raises weight (1 - rho can reach 2); Mukhametzyanov (2021) calls this a flaw and proposes |rho|.',
     ],
@@ -141,7 +141,7 @@ export const critic: MethodContent = {
       'Parametre yok.',
     ],
     pitfalls: [
-      'Sabit sütunun ağırlığı 0 alınır, uyarı gösterilir ve çatışma toplamlarına katılmaz, böylece diğer ağırlıkları kaydırmaz; bütün sütunlar sabitse ağırlıklar 1/n olur.',
+      'Sabit sütunun ağırlığı 0 olur ve diğer ağırlıkları değiştirmez; bütün sütunlar sabitse ağırlıklar 1/n olur.',
       "4'ten az alternatifte korelasyonlar sıçrar; 4'ün altında uyarı gösterilir.",
       "Negatif korelasyon ağırlığı artırır (1 - rho 2'ye kadar çıkar); Mukhametzyanov (2021) bunu kusur sayar ve |rho| önerir.",
     ],
