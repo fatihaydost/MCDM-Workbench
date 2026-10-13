@@ -39,7 +39,7 @@
 
 ## Pitfalls
 - **Constant column** (x_max = x_min): normalization divides by zero. Choose: r = 0 for the column, σ = 0 → C = 0 → weight 0 (repo `critic.py` and pyDecision behave this way; pyDecision via `nan_to_num`). Show a warning.
-- **Correlation undefined** for a constant column: set ρ = 0 for that pair (it does not matter because σ = 0).
+- **Correlation undefined** for a constant column. Setting ρ = 0 for that pair (repo `critic.py`, pyDecision) is harmless for the constant column itself (σ = 0) but adds 1 to the conflict sum Σ(1 − ρ) of every other column, which is not proportional to C_j and so shifts the other weights (Krishnan 2021 plus one constant column: thickness 0.2599 → 0.2491; plus three: 0.2360). **TS choice (audit 13.10):** a constant column is left out of every conflict sum, which gives exactly the weights of the problem without it. A column whose spread is within 1e-12 of its largest magnitude counts as constant (0.3 vs 0.1 + 0.2).
 - **All columns constant:** ΣC = 0; fall back to equal weights and warn (repo behaviour).
 - **Small m:** with m = 2 every correlation is ±1; with m = 3 correlations jump. Warn below m = 4.
 - **Negative correlation raises weight:** 1 − ρ can reach 2, so strongly anti-correlated criteria get large weights. This is by design in the origin method (Mukhametzyanov argues it is a flaw).
@@ -103,7 +103,7 @@
 ## Implementation notes
 - pyDecision: `pyDecision.algorithm.critic_method(dataset, criterion_type)` with `'max'/'min'`.
 - Return intermediates (r, σ, ρ, C) for the step-by-step view; the repo already does this.
-- Edge cases (decide in TS): constant column → r = 0, σ = 0, ρ_jk = 0, weight 0 with warning; all constant → equal weights with warning; m < 2 → error; NaN/empty cells → reject before computing.
+- Edge cases (decided in TS): constant column (relative spread ≤ 1e-12) → r = 0, σ = 0, ρ_jk shown as 0, left out of every conflict sum, weight 0 with warning; all constant → equal weights with warning; varying columns with no conflict at all (only one varies, or ρ = 1 between them) → they share equally, constants 0, with a notice; m < 2 → error; NaN/empty cells → reject before computing.
 - Keep `ddof` fixed to 1 for displayed σ so it matches Excel; weights do not depend on it.
 
 ## Sources

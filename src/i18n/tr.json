@@ -868,7 +868,8 @@
   "warnings": {
     "critic": {
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden CRITIC ağırlığı 0.",
-      "few-alternatives": "4'ten az alternatifle korelasyonlar kararsızdır. CRITIC ağırlıklarını dikkatle yorumla.",
+      "few-alternatives": "4'ten az alternatifle korelasyonlar kararsızdır. CRITIC ağırlıklarını dikkatle yorumlayın.",
+      "no-conflict-equal-weights": "Değişen kriterler arasında çatışma yok (yalnız biri değişiyor ya da birlikte hareket ediyorlar), bu yüzden ağırlığı eşit paylaşıyorlar.",
       "all-constant-equal-weights": "Bütün kriterler sabit, ağırlıklandırılacak bilgi yok. Bunun yerine eşit ağırlık kullanıldı."
     },
     "entropy": {

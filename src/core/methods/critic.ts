@@ -9,6 +9,8 @@ export const CRITIC_SMALL_M = 4
  * CRITIC (Diakoulaki, Mavrotas & Papayannakis 1995), origin variant:
  * min-max normalization, sample SD, Pearson correlation without absolute value,
  * C_j = σ_j Σ_k (1 - ρ_jk), w_j = C_j / Σ C.
+ * A constant column (spread within rounding) carries no information: weight 0, and it is left out of every conflict
+ * sum, so adding one leaves the other weights exactly as they were without it.
  * See docs/research/methods/critic.md.
  */
 export const critic: WeightingMethod = {
@@ -57,15 +59,27 @@ export const critic: WeightingMethod = {
       }
     }
 
-    // 4. Conflict Σ_k (1 - ρ_jk) and information C_j = σ_j · conflict_j.
-    const conflict = rho.map((row) => sum(row.map((v) => 1 - v)))
+    // 4. Conflict Σ_k (1 - ρ_jk) over the columns that are not constant, and information C_j = σ_j · conflict_j.
+    //    A constant column's ρ = 0 would add 1 to every other column's conflict and shift their weights, although the
+    //    column carries no information; leaving it out gives the weights of the problem without it.
+    const conflict = rho.map((row) => sum(row.map((v, k) => (constant[k] ? 0 : 1 - v))))
     const information = sigma.map((s, j) => s * conflict[j]!)
 
-    // 5. Weights; if every column is constant there is no information, fall back to equal weights.
+    // 5. Weights. With no information at all: every column constant -> equal weights; otherwise the columns that vary
+    //    have no conflict with each other (only one varies, or they are perfectly correlated) -> they share equally.
     const total = sum(information)
-    const allConstant = total === 0
-    if (allConstant) warnings.push({ code: 'critic.all-constant-equal-weights' })
-    const weights = allConstant ? new Array<number>(n).fill(1 / n) : information.map((c) => c / total)
+    const allConstant = constant.every(Boolean)
+    const varying = constant.filter((c) => !c).length
+    let weights: number[]
+    if (allConstant) {
+      warnings.push({ code: 'critic.all-constant-equal-weights' })
+      weights = new Array<number>(n).fill(1 / n)
+    } else if (total === 0) {
+      warnings.push({ code: 'critic.no-conflict-equal-weights' })
+      weights = constant.map((c) => (c ? 0 : 1 / varying))
+    } else {
+      weights = information.map((c) => c / total)
+    }
 
     return {
       weights,

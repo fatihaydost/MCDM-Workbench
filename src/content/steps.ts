@@ -73,6 +73,10 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
     en: 'Conflict of each criterion with the others: the sum of 1 minus its correlations.',
     tr: 'Her kriterin diğerleriyle çatışması: 1 eksi korelasyonlarının toplamı.',
     tex: String.raw`\sum_{k=1}^{n} \left(1 - \rho_{jk}\right)`,
+    edgeCase: {
+      en: 'Constant columns are left out, so they do not change the others.',
+      tr: 'Sabit sütunlar toplama katılmaz, diğerlerini değiştirmez.',
+    },
   },
   'critic.information': {
     en: 'Information content: contrast times conflict.',

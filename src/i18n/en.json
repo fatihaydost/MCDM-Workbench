@@ -869,6 +869,7 @@
     "critic": {
       "constant-column": "{{criterion}} has the same value for every alternative, so its CRITIC weight is 0.",
       "few-alternatives": "With fewer than 4 alternatives the correlations are unstable. Read the CRITIC weights with care.",
+      "no-conflict-equal-weights": "The criteria that vary carry no conflict with each other (only one varies, or they move together), so they share the weight equally.",
       "all-constant-equal-weights": "Every criterion is constant, so there is no information to weigh. Equal weights are used instead."
     },
     "entropy": {

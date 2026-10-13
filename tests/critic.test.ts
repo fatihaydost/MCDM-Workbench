@@ -47,6 +47,41 @@ describe('CRITIC: edge cases', () => {
     expect(res.weights.every(Number.isFinite)).toBe(true)
   })
 
+  it('a constant column leaves the other weights as they are without it (Krishnan et al. 2021 plus constant columns)', () => {
+    const types = krishnan.types as CriterionType[]
+    const withConstants = (k: number) =>
+      critic.compute(
+        makeProblem(
+          krishnan.matrix.map((row) => [...row, ...new Array<number>(k).fill(5)]),
+          [...types, ...new Array<CriterionType>(k).fill('benefit')],
+        ),
+        {},
+      )
+    for (const k of [1, 3]) {
+      const res = withConstants(k)
+      expectClose(res.weights, [...krishnan.expected.weights, ...new Array<number>(k).fill(0)], krishnan.expected.tolerance)
+      const n = types.length
+      const alone = critic.compute(makeProblem(krishnan.matrix, types), {})
+      expectClose(res.weights.slice(0, n), alone.weights, 1e-15)
+      expectClose(step(res.steps, 'critic.conflict').vector!.slice(0, n), step(alone.steps, 'critic.conflict').vector!, 1e-12)
+    }
+  })
+
+  it('a column constant up to rounding (0.3 and 0.1 + 0.2) is constant: weight 0, warning, no stretched noise', () => {
+    const noisy = [[1, 0.3], [4, 0.1 + 0.2], [2, 0.3], [8, 0.1 + 0.2], [3, 0.3]]
+    const res = critic.compute(makeProblem(noisy, ['benefit', 'benefit']), {})
+    expect(res.weights).toEqual([1, 0])
+    expect(res.warnings).toContainEqual({ code: 'critic.constant-column', col: 1 })
+    // One varying column has no conflict to measure: it takes the whole weight, with a notice.
+    expect(res.warnings?.map((w) => w.code)).toContain('critic.no-conflict-equal-weights')
+  })
+
+  it('varying columns with no conflict between them share the weight; constant ones keep 0', () => {
+    const res = critic.compute(makeProblem([[1, 2, 5], [2, 4, 5], [3, 6, 5], [4, 8, 5]], ['benefit', 'benefit', 'cost']), {})
+    expect(res.weights).toEqual([0.5, 0.5, 0])
+    expect(res.warnings?.map((w) => w.code)).toContain('critic.no-conflict-equal-weights')
+  })
+
   it('all columns constant falls back to equal weights with a warning', () => {
     const res = critic.compute(makeProblem([[2, 7], [2, 7], [2, 7]], ['benefit', 'cost']), {})
     expect(res.weights).toEqual([0.5, 0.5])
