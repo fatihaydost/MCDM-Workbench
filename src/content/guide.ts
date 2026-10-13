@@ -1016,8 +1016,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['critic'],
             reason: {
-              en: 'CRITIC lowers the weight of criteria that tell the same story but does not merge them: on the Krishnan 2021 data a duplicated criterion still gets 1.3 to 1.5 times its single weight (stable correlations need 4 or more alternatives).',
-              tr: 'CRITIC aynı bilgiyi taşıyan kriterlerin ağırlığını düşürür ama onları birleştirmez: Krishnan 2021 verisinde kopyalanan bir kriter yine tek başına aldığı ağırlığın 1,3-1,5 katını alır (kararlı korelasyon için en az 4 alternatif gerekir).',
+              en: 'CRITIC lowers the weight of criteria that tell the same story but does not merge them: on the Krishnan 2021 data the two copies of a duplicated criterion together still get 1.3 to 1.5 times its single weight (stable correlations need 4 or more alternatives).',
+              tr: 'CRITIC aynı bilgiyi taşıyan kriterlerin ağırlığını düşürür ama onları birleştirmez: Krishnan 2021 verisinde kopyalanan bir kriterin iki kopyası birlikte yine tek başına aldığı ağırlığın 1,3-1,5 katını alır (kararlı korelasyon için en az 4 alternatif gerekir).',
             },
           },
           next: RANKING_START,
