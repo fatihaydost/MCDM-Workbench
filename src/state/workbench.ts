@@ -58,7 +58,11 @@ export type WorkbenchData = {
 
 export type WorkbenchActions = {
   setStage: (stage: Stage) => void
-  /** Replaces the whole problem (import, paste of a full table). Keeps manual weights in length. */
+  /**
+   * Replaces the whole problem (every grid edit, paste, undo and redo). Manual weights follow their criteria (see
+   * `carryWeights`); a problem that was on screen as a loaded example or import brings back the methods and weights
+   * it had then (undo after loading an example).
+   */
   setProblem: (problem: DraftProblem) => void
   /** Replaces the problem with one read from a file and remembers the file name as the source. */
   importProblem: (problem: DraftProblem, fileName: string) => void
@@ -68,6 +72,8 @@ export type WorkbenchActions = {
    * ranking methods opens, e.g. the VIKOR page's link to the Opricovic and Tzeng example that TOPSIS shares.
    */
   loadExample: (id: string, lang: Lang, method?: string) => void
+  /** While a loaded example is unchanged, writes its alternative and criterion names in `lang` (language switch). */
+  localizeExample: (lang: Lang) => void
   /** Empty m x n table with default names (A1.., C1..). */
   startBlank: (m?: number, n?: number, names?: { alternative: (i: number) => string; criterion: (j: number) => string }) => void
   setCell: (row: number, col: number, value: number | null) => void
@@ -136,6 +142,88 @@ export const initialWorkbench = (): WorkbenchData => ({
 const fitWeights = (w: (number | null)[], n: number): (number | null)[] =>
   Array.from({ length: n }, (_, j) => w[j] ?? null)
 
+/**
+ * The last weight of every criterion object that left the table, so a criterion deleted and brought back by undo gets
+ * its weight back. Grid edits keep the objects of the criteria they do not touch, and history keeps the old objects.
+ */
+const weightMemory = new WeakMap<Criterion, number | null>()
+
+function memorize(criteria: readonly Criterion[], weights: readonly (number | null)[]): void {
+  criteria.forEach((c, j) => weightMemory.set(c, weights[j] ?? null))
+}
+
+/**
+ * Manual weights for a new list of criteria, matched to the criterion and not to the column position (deleting the
+ * second criterion must not move the third one's weight onto it). In order: the same criterion object (the grid
+ * keeps the objects it does not change), a criterion seen before (undo of a delete), the same name, and, only when
+ * `byPosition` and the number of criteria is unchanged, the same column (a rename or a direction change creates a
+ * new object in place). Anything else starts empty.
+ */
+export function carryWeights(
+  oldCriteria: readonly Criterion[],
+  oldWeights: readonly (number | null)[],
+  next: readonly Criterion[],
+  byPosition: boolean,
+): (number | null)[] {
+  const old = fitWeights([...oldWeights], oldCriteria.length)
+  memorize(oldCriteria, old)
+  const used = new Set<number>()
+  const take = (j: number) => {
+    used.add(j)
+    return old[j] ?? null
+  }
+  const out: (number | null | undefined)[] = next.map((c) => {
+    const j = oldCriteria.findIndex((o, k) => o === c && !used.has(k))
+    return j >= 0 ? take(j) : undefined
+  })
+  next.forEach((c, i) => {
+    if (out[i] === undefined && weightMemory.has(c)) out[i] = weightMemory.get(c) ?? null
+  })
+  next.forEach((c, i) => {
+    if (out[i] !== undefined) return
+    const j = oldCriteria.findIndex((o, k) => !used.has(k) && o.name === c.name)
+    if (j >= 0) out[i] = take(j)
+  })
+  if (byPosition && next.length === oldCriteria.length) {
+    next.forEach((_, i) => {
+      if (out[i] === undefined && !used.has(i)) out[i] = take(i)
+    })
+  }
+  return out.map((w) => w ?? null)
+}
+
+/** What a loaded example or import brought with it besides the table. */
+type Setup = Pick<WorkbenchData, 'weightMethod' | 'manualWeights' | 'rankingMethod' | 'methodParams' | 'exampleId' | 'importedFrom'>
+
+/**
+ * Setups of tables that were replaced, keyed by the table's matrix (the alternatives and criteria must be the same
+ * objects too). Undo hands the grid's earlier table back to `setProblem`; finding it here restores the methods and
+ * weights it had, so one paper's weights never stay on another paper's data. Kept for every table replaced by
+ * loading an example or importing a file, and for a table that was an unchanged example or import when it was left.
+ */
+const leftSetups = new WeakMap<object, { alternatives: string[]; criteria: Criterion[]; setup: Setup }>()
+
+function remember(s: WorkbenchData, always: boolean): void {
+  if (!always && !s.exampleId && !s.importedFrom) return
+  leftSetups.set(s.problem.matrix, {
+    alternatives: s.problem.alternatives,
+    criteria: s.problem.criteria,
+    setup: {
+      weightMethod: s.weightMethod,
+      manualWeights: [...s.manualWeights],
+      rankingMethod: s.rankingMethod,
+      methodParams: s.methodParams ?? {},
+      exampleId: s.exampleId,
+      importedFrom: s.importedFrom ?? null,
+    },
+  })
+}
+
+function recall(p: DraftProblem): Setup | undefined {
+  const r = leftSetups.get(p.matrix)
+  return r && r.alternatives === p.alternatives && r.criteria === p.criteria ? r.setup : undefined
+}
+
 export const useWorkbench = create<WorkbenchState>()(
   persist(
     (set, get) => ({
@@ -144,20 +232,21 @@ export const useWorkbench = create<WorkbenchState>()(
       setStage: (stage) => set({ stage }),
 
       setProblem: (problem) =>
-        set((s) => ({
-          problem,
-          exampleId: null,
-          importedFrom: null,
-          manualWeights: fitWeights(s.manualWeights, problem.criteria.length),
-        })),
+        set((s) => {
+          const back = recall(problem)
+          const manualWeights = carryWeights(s.problem.criteria, s.manualWeights, problem.criteria, true)
+          remember(s, false)
+          if (back) return { problem, ...back, manualWeights: fitWeights(back.manualWeights, problem.criteria.length) }
+          return { problem, exampleId: null, importedFrom: null, manualWeights }
+        }),
 
       importProblem: (problem, fileName) =>
-        set((s) => ({
-          problem,
-          exampleId: null,
-          importedFrom: fileName,
-          manualWeights: fitWeights(s.manualWeights, problem.criteria.length),
-        })),
+        set((s) => {
+          remember(s, true)
+          // A new file: weights follow criteria of the same name only, never a column position.
+          const manualWeights = carryWeights(s.problem.criteria, s.manualWeights, problem.criteria, false)
+          return { problem, exampleId: null, importedFrom: fileName, manualWeights }
+        }),
 
       loadExample: (id, lang, method) => {
         const ex = getExample(id)
@@ -172,6 +261,8 @@ export const useWorkbench = create<WorkbenchState>()(
         const current = get().rankingMethod
         const ranking =
           rankingRefs.find((m) => m === method) ?? (rankingRefs.includes(current) ? current : undefined) ?? rankingRefs[0]
+        remember(get(), true)
+        memorize(get().problem.criteria, get().manualWeights)
         set((s) => ({
           ...((reference || ranking) && {
             methodParams: { ...s.methodParams, ...(reference && { [reference]: {} }), ...(ranking && { [ranking]: {} }) },
@@ -189,7 +280,28 @@ export const useWorkbench = create<WorkbenchState>()(
         }))
       },
 
-      startBlank: (m = 3, n = 3, names) =>
+      localizeExample: (lang) => {
+        const s = get()
+        const ex = s.exampleId ? getExample(s.exampleId) : undefined
+        if (!ex) return
+        const alternatives = alternativeNames(ex, lang)
+        const names = ex.criteria.map((c) => c.name[lang])
+        const p = s.problem
+        if (p.alternatives.length !== alternatives.length || p.criteria.length !== names.length) return
+        if (p.alternatives.every((a, i) => a === alternatives[i]) && p.criteria.every((c, j) => c.name === names[j])) return
+        remember(s, false)
+        set({
+          problem: {
+            alternatives: [...alternatives],
+            criteria: p.criteria.map((c, j) => ({ ...c, name: names[j]! })),
+            matrix: p.matrix,
+          },
+        })
+      },
+
+      startBlank: (m = 3, n = 3, names) => {
+        remember(get(), true)
+        memorize(get().problem.criteria, get().manualWeights)
         set({
           problem: {
             alternatives: Array.from({ length: m }, (_, i) => names?.alternative(i) ?? `A${i + 1}`),
@@ -199,7 +311,8 @@ export const useWorkbench = create<WorkbenchState>()(
           exampleId: null,
           importedFrom: null,
           manualWeights: new Array<number | null>(n).fill(null),
-        }),
+        })
+      },
 
       setCell: (row, col, value) =>
         set((s) => ({
@@ -281,7 +394,11 @@ export const useWorkbench = create<WorkbenchState>()(
       setMethodParam: (methodId, key, value) =>
         set((s) => ({ methodParams: { ...s.methodParams, [methodId]: { ...s.methodParams?.[methodId], [key]: value } } })),
 
-      reset: () => set(initialWorkbench()),
+      reset: () => {
+        remember(get(), true)
+        memorize(get().problem.criteria, get().manualWeights)
+        set(initialWorkbench())
+      },
     }),
     {
       name: WORKBENCH_STORAGE_KEY,

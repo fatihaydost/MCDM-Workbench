@@ -9,6 +9,7 @@ import {
   WORKBENCH_STORAGE_KEY,
   type DraftProblem,
 } from '../src/state/workbench'
+import { deleteCriterion, insertCriterion, setType, writeCell } from '../src/features/grid/model'
 import { expectClose } from './helpers'
 import critic2021 from './fixtures/critic-krishnan2021.json'
 import entropyK from './fixtures/entropy-krishnan2021-minmax.json'
@@ -312,6 +313,86 @@ describe('store actions', () => {
     expect(s.exampleId).toBe('x')
     expect(s.methodParams).toEqual({})
     expect(computeWeights({ ...s, problem: draftOf('krishnan-2021-smartphones') }).value).not.toBeNull()
+  })
+
+  it('a deleted criterion takes its own weight with it, and undo brings it back (grid delete, Podvezko 2011)', () => {
+    const st = useWorkbench.getState()
+    st.loadExample('podvezko-2011-baltic', 'en')
+    const before = useWorkbench.getState().problem
+    // The grid's Delete criterion on Production growth (column 1), then its undo (the earlier table object).
+    st.setProblem(deleteCriterion(before, 1))
+    let s = useWorkbench.getState()
+    expect(s.problem.criteria.map((c) => c.name)).not.toContain(before.criteria[1]!.name)
+    expect(s.manualWeights).toEqual([0.35, 0.17, 0.25, 0.13])
+    st.setProblem(before)
+    s = useWorkbench.getState()
+    expect(s.manualWeights).toEqual(podvezko.weights)
+    // An inserted criterion starts empty; the others keep theirs.
+    st.setProblem(insertCriterion(useWorkbench.getState().problem, 2, 'New'))
+    expect(useWorkbench.getState().manualWeights).toEqual([0.35, 0.1, null, 0.17, 0.25, 0.13])
+  })
+
+  it('renaming or turning a criterion keeps its weight in place', () => {
+    const st = useWorkbench.getState()
+    st.loadExample('podvezko-2011-baltic', 'en')
+    const p = useWorkbench.getState().problem
+    st.setProblem(writeCell(p, { row: 0, col: 2 }, 'Growth', Number).problem)
+    st.setProblem(setType(useWorkbench.getState().problem, 3, 'benefit'))
+    expect(useWorkbench.getState().manualWeights).toEqual(podvezko.weights)
+  })
+
+  it('undo after loading an example brings back the earlier example\'s methods and weights', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.loadExample('krishnan-2021-smartphones', 'en')
+    const krishnan = useWorkbench.getState().problem
+    st.loadExample('podvezko-2011-baltic', 'en')
+    const baltic = useWorkbench.getState().problem
+    expect(useWorkbench.getState().rankingMethod).toBe('saw')
+    st.setProblem(krishnan) // undo
+    let s = useWorkbench.getState()
+    expect(s.exampleId).toBe('krishnan-2021-smartphones')
+    expect(s.weightMethod).toBe('critic')
+    expect(s.rankingMethod).toBe('topsis')
+    st.setProblem(baltic) // redo
+    s = useWorkbench.getState()
+    expect(s.exampleId).toBe('podvezko-2011-baltic')
+    expect(s.weightMethod).toBe('manual')
+    expect(s.manualWeights).toEqual(podvezko.weights)
+    expect(s.rankingMethod).toBe('saw')
+  })
+
+  it('an import matches weights by criterion name only, and undo restores what was there', () => {
+    const st = useWorkbench.getState()
+    st.loadExample('podvezko-2011-baltic', 'en')
+    const baltic = useWorkbench.getState().problem
+    const file: DraftProblem = {
+      alternatives: ['X', 'Y'],
+      criteria: [{ name: 'a', type: 'benefit' }, { name: baltic.criteria[3]!.name, type: 'cost' }, { name: 'c', type: 'benefit' }, { name: 'd', type: 'benefit' }, { name: 'e', type: 'benefit' }],
+      matrix: [[1, 2, 3, 4, 5], [2, 3, 4, 5, 6]],
+    }
+    st.importProblem(file, 'data.csv')
+    expect(useWorkbench.getState().manualWeights).toEqual([null, 0.25, null, null, null])
+    st.setProblem(baltic) // undo
+    const s = useWorkbench.getState()
+    expect(s.exampleId).toBe('podvezko-2011-baltic')
+    expect(s.manualWeights).toEqual(podvezko.weights)
+  })
+
+  it('an unchanged example follows the language; an edited one keeps its names', () => {
+    const st = useWorkbench.getState()
+    st.loadExample('podvezko-2011-baltic', 'en')
+    expect(useWorkbench.getState().problem.alternatives).toContain('Lithuania')
+    st.localizeExample('tr')
+    let s = useWorkbench.getState()
+    expect(s.problem.alternatives).toEqual(['Estonya', 'Letonya', 'Litvanya', 'Polonya'])
+    expect(s.problem.criteria[3]!.name).toBe('İşsizlik oranı (%)')
+    expect(s.exampleId).toBe('podvezko-2011-baltic')
+    expect(s.manualWeights).toEqual(podvezko.weights)
+    st.setCell(0, 0, 1)
+    st.localizeExample('en')
+    s = useWorkbench.getState()
+    expect(s.problem.alternatives).toContain('Litvanya')
   })
 
   it('startBlank and reset', () => {

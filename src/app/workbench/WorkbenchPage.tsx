@@ -76,6 +76,13 @@ function useQueryBootstrap() {
   }, [lang, loadExample, setStage])
 }
 
+/** A loaded example that is still unchanged follows the language: its names are rewritten on a TR/EN switch. */
+function useExampleLanguage() {
+  const [lang] = useLang()
+  const localizeExample = useWorkbench((s) => s.localizeExample)
+  useEffect(() => localizeExample(lang), [lang, localizeExample])
+}
+
 type StageState = 'done' | 'attention' | 'pending'
 
 /** Rail status under a stage name: an icon and a word for done / needs attention, plain otherwise. */
@@ -99,6 +106,7 @@ export default function WorkbenchPage() {
   const { t } = useTranslation()
   usePageMeta(t('workbench.meta.title'), t('workbench.meta.description'))
   useQueryBootstrap()
+  useExampleLanguage()
   const stage = useWorkbench((s) => s.stage)
   const setStage = useWorkbench((s) => s.setStage)
   const problem = useWorkbench((s) => s.problem)
