@@ -1,6 +1,7 @@
 import type { TFunction } from 'i18next'
 import type { Criterion, MethodParamValue, ParamDescriptor, Step, ValidationIssue } from '../../core'
 import { changedParams, getRankingMethod, getWeightingMethod, MIN_ALTERNATIVES, MIN_CRITERIA } from '../../core'
+import i18n, { formatNumber, isLang } from '../../i18n'
 import type { DraftProblem, RankingMethodId, Stage, WeightMethodId } from '../../state/workbench'
 
 /** Fixed decimals per kind of number (DESIGN.md §Type): weights and scores 4, correlation cells 2. */
@@ -43,12 +44,17 @@ export const paramOptionLabel = (methodId: string, d: ParamDescriptor, option: s
 
 /**
  * The variant a method ran with, when it is not the default: "min-max" for Entropy with min-max normalization, "" for
- * the defaults. A number option reads "label value".
+ * the defaults. A number option reads workbench.params.<id>.<key>Variant with the value in the active locale
+ * ("v = 0,70").
  */
 export function variantLabel(methodId: string, raw: Readonly<Record<string, MethodParamValue>> | undefined, t: TFunction): string {
   const method = getWeightingMethod(methodId) ?? getRankingMethod(methodId)
   return changedParams(method?.params, raw)
-    .map(([d, v]) => (d.kind === 'choice' ? tr(t, `workbench.params.${methodId}.${d.key}Variant.${String(v)}`) : `${paramLabel(methodId, d, t)} ${String(v)}`))
+    .map(([d, v]) =>
+      d.kind === 'choice'
+        ? tr(t, `workbench.params.${methodId}.${d.key}Variant.${String(v)}`)
+        : tr(t, `workbench.params.${methodId}.${d.key}Variant`, { value: formatNumber(Number(v), isLang(i18n.resolvedLanguage) ? i18n.resolvedLanguage : 'en', 2) }),
+    )
     .join(', ')
 }
 

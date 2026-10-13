@@ -6,6 +6,7 @@ import { critic } from '../../core/methods/critic'
 import { entropy, type EntropyParams } from '../../core/methods/entropy'
 import { saw, type SawParams } from '../../core/methods/saw'
 import { topsis } from '../../core/methods/topsis'
+import { vikor, vikorCompromise, type VikorCompromise, type VikorParams } from '../../core/methods/vikor'
 import type { Problem, RankingResult, Step, WeightingResult } from '../../core/types'
 import { scaleLinear, type Domain, type LinearScale } from '../charts/scale'
 
@@ -331,6 +332,94 @@ export function sawParts(problem: Problem, weights: readonly number[], params: S
   return { result, contributions: stepMatrix(result.steps, 'saw.weighted'), scores: result.scores, order }
 }
 
+// ---------------------------------------------------------------------------------------------
+// VIKOR
+// ---------------------------------------------------------------------------------------------
+
+export type VikorParts = {
+  result: RankingResult
+  /** Group utility S_i and individual regret R_i (the core's steps), lower is better. */
+  S: number[]
+  R: number[]
+  Q: number[]
+  /** The two terms of Q before v weighs them: (S - S*) / (S- - S*) and (R - R*) / (R- - R*), 0 when flat. */
+  sTerm: number[]
+  rTerm: number[]
+  v: number
+  compromise: VikorCompromise
+  /** Alternatives in Q order (ties keep input order), the same order as a' and a''. */
+  order: number[]
+}
+
+/** The core's VIKOR result for its picture, or null when VIKOR cannot run on the data. */
+export function vikorParts(problem: Problem, weights: readonly number[], params: VikorParams = {}): VikorParts | null {
+  let result: RankingResult
+  try {
+    result = vikor.compute(problem, [...weights], params)
+  } catch {
+    return null
+  }
+  const S = stepVector(result.steps, 'vikor.groupUtility')
+  const R = stepVector(result.steps, 'vikor.individualRegret')
+  const Q = result.scores
+  const term = (xs: number[]) => {
+    const lo = Math.min(...xs)
+    const span = Math.max(...xs) - lo
+    return xs.map((x) => (span === 0 ? 0 : (x - lo) / span))
+  }
+  const compromise = vikorCompromise(S, R, Q)
+  const order = Q.map((_, i) => i).sort((a, b) => Q[a]! - Q[b]! || a - b)
+  return { result, S, R, Q, sTerm: term(S), rTerm: term(R), v: result.diagnostics?.v ?? 0.5, compromise, order }
+}
+
+/**
+ * Where the line of constant Q = q leaves the unit square of the (S term, R term) plane: v x + (1 - v) y = q.
+ * Returns the two end points (x, y in [0, 1]), or null when the line misses the square (q > 1 or q < 0).
+ */
+export function isoQSegment(v: number, q: number): [Point, Point] | null {
+  if (q < 0 || q > 1 + 1e-12) return null
+  const pts: Point[] = []
+  const push = (p: Point) => {
+    if (p.x < -1e-12 || p.x > 1 + 1e-12 || p.y < -1e-12 || p.y > 1 + 1e-12) return
+    if (pts.some((o) => Math.abs(o.x - p.x) < 1e-9 && Math.abs(o.y - p.y) < 1e-9)) return
+    pts.push({ x: Math.min(1, Math.max(0, p.x)), y: Math.min(1, Math.max(0, p.y)) })
+  }
+  if (v > 0) {
+    push({ x: q / v, y: 0 })
+    push({ x: (q - (1 - v)) / v, y: 1 })
+  }
+  if (v < 1) {
+    push({ x: 0, y: q / (1 - v) })
+    push({ x: 1, y: (q - v) / (1 - v) })
+  }
+  if (pts.length < 2) return pts.length === 1 ? [pts[0]!, pts[0]!] : null
+  pts.sort((a, b) => a.x - b.x || b.y - a.y)
+  return [pts[0]!, pts[pts.length - 1]!]
+}
+
+/** The part of the unit square where v x + (1 - v) y <= q (Sutherland-Hodgman against one half-plane). */
+export function isoQRegion(v: number, q: number): Point[] {
+  const square: Point[] = [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 1, y: 1 },
+    { x: 0, y: 1 },
+  ]
+  const f = (p: Point) => v * p.x + (1 - v) * p.y - q
+  const out: Point[] = []
+  square.forEach((p, k) => {
+    const nxt = square[(k + 1) % 4]!
+    const fp = f(p)
+    const fn = f(nxt)
+    if (fp <= 0) out.push(p)
+    if ((fp < 0 && fn > 0) || (fp > 0 && fn < 0)) {
+      const t = fp / (fp - fn)
+      out.push({ x: p.x + t * (nxt.x - p.x), y: p.y + t * (nxt.y - p.y) })
+    }
+  })
+  return out
+}
+
 /** One stacked segment: criterion j from x to x + width (screen px), in the bar of one alternative. */
 export type StackSegment = { col: number; value: number; x: number; width: number }
 
@@ -393,6 +482,15 @@ export const ENTROPY_MINMAX_FLOW: readonly FlowNode[] = [
   { key: 'entropy.normalized', stepKeys: ['entropy.normalized'] },
   { key: 'entropy.proportionsMinmax', stepKeys: ['entropy.proportionsMinmax'] },
   ...ENTROPY_FLOW.slice(1),
+]
+
+/** VIKOR in five nodes: Best and worst, Distances, S and R, Q, Threshold. */
+export const VIKOR_FLOW: readonly FlowNode[] = [
+  { key: 'vikor.best', stepKeys: ['vikor.best', 'vikor.worst'] },
+  { key: 'vikor.weightedDistance', stepKeys: ['vikor.weightedDistance'] },
+  { key: 'vikor.groupUtility', stepKeys: ['vikor.groupUtility', 'vikor.individualRegret'] },
+  { key: 'vikor.q', stepKeys: ['vikor.q'] },
+  { key: 'vikor.threshold', stepKeys: ['vikor.threshold'] },
 ]
 
 /** The node that holds `stepKey`, or -1. */

@@ -26,7 +26,7 @@ export const STAGES = ['data', 'weights', 'ranking', 'results', 'robustness'] as
 export type Stage = (typeof STAGES)[number]
 
 export type WeightMethodId = 'critic' | 'entropy' | 'equal' | 'manual'
-export type RankingMethodId = 'topsis' | 'saw'
+export type RankingMethodId = 'topsis' | 'saw' | 'vikor'
 
 /**
  * Options chosen per method id (Entropy's normalization, later VIKOR's v ...). A missing method or key means the
@@ -63,7 +63,11 @@ export type WorkbenchActions = {
   /** Replaces the problem with one read from a file and remembers the file name as the source. */
   importProblem: (problem: DraftProblem, fileName: string) => void
   /** Loads a published example; criterion names in `lang`. Sets manual weights when the paper gives them. */
-  loadExample: (id: string, lang: Lang) => void
+  /**
+   * Loads a published example. `method` (a ranking method id the example is a reference for) picks which of its
+   * ranking methods opens, e.g. the VIKOR page's link to the Opricovic and Tzeng example that TOPSIS shares.
+   */
+  loadExample: (id: string, lang: Lang, method?: string) => void
   /** Empty m x n table with default names (A1.., C1..). */
   startBlank: (m?: number, n?: number, names?: { alternative: (i: number) => string; criterion: (j: number) => string }) => void
   setCell: (row: number, col: number, value: number | null) => void
@@ -134,7 +138,7 @@ const fitWeights = (w: (number | null)[], n: number): (number | null)[] =>
 
 export const useWorkbench = create<WorkbenchState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialWorkbench(),
 
       setStage: (stage) => set({ stage }),
@@ -155,14 +159,19 @@ export const useWorkbench = create<WorkbenchState>()(
           manualWeights: fitWeights(s.manualWeights, problem.criteria.length),
         })),
 
-      loadExample: (id, lang) => {
+      loadExample: (id, lang, method) => {
         const ex = getExample(id)
         if (!ex) return
         // An example published for a weighting method opens with that method in its default variant (the
         // variant the paper used); otherwise the paper's weights when it gives them, else CRITIC. An example published
         // for a ranking method opens with that method, also in its default variant; otherwise the ranking method stays.
+        // When it is a reference for several ranking methods: the one asked for, else the current one if it is among
+        // them, else the first listed.
         const reference = ex.referenceFor.find((m) => getWeightingMethod(m) !== undefined) as WeightMethodId | undefined
-        const ranking = ex.referenceFor.find((m) => getRankingMethod(m) !== undefined) as RankingMethodId | undefined
+        const rankingRefs = ex.referenceFor.filter((m) => getRankingMethod(m) !== undefined) as RankingMethodId[]
+        const current = get().rankingMethod
+        const ranking =
+          rankingRefs.find((m) => m === method) ?? (rankingRefs.includes(current) ? current : undefined) ?? rankingRefs[0]
         set((s) => ({
           ...((reference || ranking) && {
             methodParams: { ...s.methodParams, ...(reference && { [reference]: {} }), ...(ranking && { [ranking]: {} }) },

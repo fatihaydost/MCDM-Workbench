@@ -1,4 +1,4 @@
-import { ISO_C_DEFAULT, isoClosenessEnd, type Point } from './geometry'
+import { ISO_C_DEFAULT, isoClosenessEnd, isoQRegion, isoQSegment, type Point } from './geometry'
 import s from './illustrations.module.css'
 
 export type MethodThumbProps =
@@ -20,6 +20,19 @@ export type MethodThumbProps =
       /** SAW: one stacked bar per alternative (rows of contributions, in rank order), parts split by gaps, the first in the accent. */
       kind: 'stack'
       rows: readonly (readonly number[])[]
+      className?: string | undefined
+    }
+  | {
+      /**
+       * VIKOR: alternatives at their (S term, R term) in the unit square, the line Q = Q(a') + DQ and the part below
+       * it tinted; `inSet` (the compromise set) in the accent.
+       */
+      kind: 'compromise'
+      points: readonly Point[]
+      v: number
+      /** Q(a') + DQ. */
+      q: number
+      inSet: readonly number[]
       className?: string | undefined
     }
   | {
@@ -104,6 +117,25 @@ export function MethodThumb(props: MethodThumbProps) {
             return seg
           })
         })}
+      </svg>
+    )
+  }
+  if (props.kind === 'compromise') {
+    const { points, v, q, inSet } = props
+    const side = H - 2 * PAD
+    const x0 = (W - side) / 2
+    const X = (x: number) => x0 + x * side
+    const Y = (y: number) => H - PAD - y * side
+    const region = isoQRegion(v, Math.min(q, 1.0000001))
+    const seg = q <= 1 ? isoQSegment(v, q) : null
+    return (
+      <svg className={cls} width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        {region.length > 2 && <path className={s.vikorBand} d={`M${region.map((p) => `${X(p.x)} ${Y(p.y)}`).join('L')}Z`} />}
+        {seg && <line className={s.vikorLine} x1={X(seg[0].x)} y1={Y(seg[0].y)} x2={X(seg[1].x)} y2={Y(seg[1].y)} />}
+        <path className={s.thumbAxis} d={`M${X(0)} ${Y(1)}V${Y(0)}H${X(1)}`} fill="none" />
+        {points.map((p, i) => (
+          <circle key={i} className={inSet.includes(i) ? s.thumbAccent : s.thumbMark} cx={X(p.x)} cy={Y(p.y)} r={inSet.includes(i) ? 4 : 3.5} />
+        ))}
       </svg>
     )
   }

@@ -50,8 +50,8 @@ function RobustnessSkeleton() {
 const isStage = (v: string | null): v is Stage => v !== null && (STAGES as readonly string[]).includes(v)
 
 /**
- * `?example=<id>&stage=<stage>` loads a published example and opens a stage (links from method
- * pages, screenshots). The query is removed afterwards so a reload keeps the user's edits.
+ * `?example=<id>&method=<id>&stage=<stage>` loads a published example (with the ranking method asked for, when the
+ * example is a reference for several) and opens a stage (links from method pages, screenshots). The query is removed afterwards so a reload keeps the user's edits.
  */
 function useQueryBootstrap() {
   const [lang] = useLang()
@@ -65,9 +65,10 @@ function useQueryBootstrap() {
     const example = params.get('example')
     const stage = params.get('stage')
     if (!example && !stage) return
-    if (example && getExample(example)) loadExample(example, lang)
+    if (example && getExample(example)) loadExample(example, lang, params.get('method') ?? undefined)
     if (isStage(stage)) setStage(stage)
     params.delete('example')
+    params.delete('method')
     params.delete('stage')
     const rest = params.toString()
     window.history.replaceState(window.history.state, '', `${window.location.pathname}${rest ? `?${rest}` : ''}${window.location.hash}`)

@@ -98,6 +98,9 @@
       "saw": {
         "claim": "Scores and ranks match {{citation}} to {{decimals}} decimals with sum normalization, and with linear max once a misprint in its Table 2 is corrected."
       },
+      "vikor": {
+        "claim": "S, R, Q and the compromise A2 match {{citation}} to {{decimals}} decimals, in both unit encodings."
+      },
       "also": "Also tested: the hand-solved CRITIC spreadsheet from the original coursework, every intermediate matrix within {{tol}}, and parity of CRITIC then TOPSIS with the original Python code within {{tol}}. The spreadsheet and the Python code are not independent references.",
       "alsoTitle": "Other checks",
       "tolerance": "Tolerance {{tol}}"
@@ -176,7 +179,8 @@
     "rankingMethod": {
       "label": "Ranking method",
       "topsis": "TOPSIS",
-      "saw": "SAW"
+      "saw": "SAW",
+      "vikor": "VIKOR"
     },
     "params": {
       "entropy": {
@@ -208,6 +212,14 @@
           "linearMax": "linear",
           "sum": "sum"
         }
+      },
+      "vikor": {
+        "v": "Strategy weight v",
+        "vEnds": {
+          "min": "0: largest regret only (veto)",
+          "max": "1: group utility only (majority)"
+        },
+        "vVariant": "v = {{value}}"
       }
     },
     "example": {
@@ -326,13 +338,16 @@
     "ranking": {
       "methodHint": {
         "topsis": "Ranks the alternatives by their distance from an ideal and a negative-ideal solution.",
-        "saw": "Weights the rescaled values of each criterion and adds them up."
+        "saw": "Weights the rescaled values of each criterion and adds them up.",
+        "vikor": "Looks for a compromise between the best total (S) and the smallest worst regret (R); a lower Q is better."
       },
       "columns": {
         "rank": "Rank",
         "alternative": "Alternative",
         "dPlus": "D+",
-        "dMinus": "D−"
+        "dMinus": "D−",
+        "groupUtility": "Group utility S",
+        "individualRegret": "Regret R"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -345,6 +360,11 @@
           "name": "Score S",
           "title": "Weighted sum S",
           "symbol": "S"
+        },
+        "vikor": {
+          "name": "Compromise Q",
+          "title": "Compromise index Q",
+          "symbol": "Q"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -446,6 +466,15 @@
         "normalizedSum": "Normalized matrix r (sum)",
         "weighted": "Contributions v = w r",
         "scores": "Score S"
+      },
+      "vikor": {
+        "best": "Best values f*",
+        "worst": "Worst values f−",
+        "weightedDistance": "Weighted distances d",
+        "groupUtility": "Group utility S",
+        "individualRegret": "Individual regret R",
+        "q": "Compromise index Q",
+        "threshold": "Advantage threshold DQ"
       }
     },
     "issues": {
@@ -516,6 +545,24 @@
         "others": "Other criteria",
         "segment": "{{alternative}}, {{criterion}}: {{value}} (S = {{score}})",
         "readout": "{{alternative}}: {{criterion}} adds {{value}} to S = {{score}}"
+      },
+      "vikor": {
+        "title": "Group utility against the largest regret",
+        "axisS": "S: group utility",
+        "axisR": "R: largest regret",
+        "ideal": "Ideal",
+        "threshold": "Q(a′) + DQ",
+        "inSet": "In the compromise",
+        "yes": "yes",
+        "no": "no",
+        "c1Met": "Acceptable advantage: {{first}} leads {{second}} by {{gap}} in Q, at least DQ = {{dq}}.",
+        "c1Failed": "No acceptable advantage: {{first}} leads {{second}} by only {{gap}} in Q, less than DQ = {{dq}}.",
+        "c2Both": "Acceptable stability: {{first}} is also first by S and by R.",
+        "c2S": "Acceptable stability: {{first}} is also first by S.",
+        "c2R": "Acceptable stability: {{first}} is also first by R.",
+        "c2Failed": "No acceptable stability: {{first}} is first by neither S nor R.",
+        "resultOne": "Compromise solution: {{name}}",
+        "resultSet": "Compromise set: {{names}}"
       }
     },
     "flow": {
@@ -541,6 +588,13 @@
         "idealBest": "Ideal points",
         "distanceBest": "Distances",
         "closeness": "Closeness"
+      },
+      "vikor": {
+        "best": "Best and worst",
+        "weightedDistance": "Distances",
+        "groupUtility": "S and R",
+        "q": "Q",
+        "threshold": "Threshold"
       }
     },
     "pipeline": {
@@ -552,7 +606,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, equal or your own weights, rank the alternatives with TOPSIS or SAW and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, equal or your own weights, rank the alternatives with TOPSIS, SAW or VIKOR and see every step of the calculation."
     }
   },
   "methods": {
@@ -568,7 +622,8 @@
       "topsis": "TOPSIS",
       "equal": "Equal weights",
       "manual": "Manual weights",
-      "saw": "SAW"
+      "saw": "SAW",
+      "vikor": "VIKOR"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -621,7 +676,8 @@
         "critic": "Weights from contrast and conflict in the data.",
         "entropy": "Weights from how unevenly the data spread.",
         "equal": "Every criterion gets 1/n.",
-        "saw": "Adds up weighted, rescaled values."
+        "saw": "Adds up weighted, rescaled values.",
+        "vikor": "Balances the best total against the worst regret."
       },
       "groups": {
         "weighting": "Weighting",
@@ -725,6 +781,10 @@
           "finish": "Finish",
           "close": "Close the steps",
           "progress": "Step {{n}} of {{count}}"
+        },
+        "vikor": {
+          "title": "Group utility or the largest regret: v sets the balance",
+          "caption": "Below the dashed line Q stays within DQ of the leader; without an acceptable advantage those alternatives form the compromise set."
         }
       }
     }
@@ -767,6 +827,15 @@
       "normalizedSum": "Sum normalization: each value divided by its column total; a cost criterion uses 1 / x first, so the shares add up to 1.",
       "weighted": "Contributions: each normalized value multiplied by its criterion weight.",
       "scores": "Score S: the sum of an alternative's contributions. A higher value ranks higher."
+    },
+    "vikor": {
+      "best": "Best value f* of each criterion: the maximum for a benefit, the minimum for a cost.",
+      "worst": "Worst value f− of each criterion: the other end of its column.",
+      "weightedDistance": "Weighted distance d to the best value: 0 at the best, the criterion weight at the worst.",
+      "groupUtility": "Group utility S: the sum of an alternative's distances. A lower value is better.",
+      "individualRegret": "Individual regret R: an alternative's largest single distance. A lower value is better.",
+      "q": "Compromise index Q: S and R rescaled to 0 to 1 and mixed by v. A lower value ranks higher.",
+      "threshold": "Advantage threshold DQ = 1 / (m - 1): the Q gap the first alternative needs over the second."
     }
   },
   "validation": {
@@ -806,6 +875,13 @@
     "topsis": {
       "zero-column": "Every value of {{criterion}} is 0, so it does not affect the ranking.",
       "zero-distance": "Some alternatives coincide with both the ideal and the anti-ideal solution. They get a closeness of 0.5."
+    },
+    "vikor": {
+      "constant-column": "Every value of {{criterion}} is the same, so it adds nothing to S or R.",
+      "equal-group-utility": "Every alternative has the same S, so Q comes from R alone.",
+      "equal-regret": "Every alternative has the same R, so Q comes from S alone.",
+      "no-spread": "Every alternative has the same S and the same R, so all get Q = 0.",
+      "tie-for-first": "More than one alternative has the lowest Q; they are listed in input order and all are in the compromise set."
     }
   }
 }

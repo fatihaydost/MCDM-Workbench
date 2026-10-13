@@ -20,6 +20,8 @@ export type ExampleDataset = {
   id: string
   /** Short name for menus. */
   name: Localized
+  /** Button text where a method page offers several examples ("Ten alternatives"); default "Other units". */
+  buttonLabel?: Localized
   /** One sentence on what the example is and what it shows. */
   summary: Localized
   /** Method ids this dataset is a published reference for (see src/core/registry.ts). */
@@ -144,10 +146,10 @@ export const examples: readonly ExampleDataset[] = [
     id: 'opricovic-tzeng-2004-f',
     name: { en: 'Mountain climbing (Opricovic and Tzeng 2004)', tr: 'Dağ tırmanışı (Opricovic ve Tzeng 2004)' },
     summary: {
-      en: 'Three climbing routes on risk and altitude, with equal weights. The paper reports the TOPSIS distances and closeness.',
-      tr: 'Üç tırmanış rotası; risk ve yükseklik, eşit ağırlıkla. Makale TOPSIS uzaklıklarını ve yakınlık katsayılarını veriyor.',
+      en: 'Three climbing routes on risk and altitude, with equal weights. The paper reports the TOPSIS distances and closeness and the VIKOR S, R and Q.',
+      tr: 'Üç tırmanış rotası; risk ve yükseklik, eşit ağırlıkla. Makale TOPSIS uzaklıklarını ve yakınlık katsayılarını, VIKOR için S, R ve Q değerlerini veriyor.',
     },
-    referenceFor: ['topsis'],
+    referenceFor: ['topsis', 'vikor'],
     citation: {
       ...OPRICOVIC_TZENG_2004,
       tables: { en: 'Tables 1 and 2 (input, problem f), Table 3 (output)', tr: 'Tablo 1 ve 2 (girdi, f problemi), Tablo 3 (çıktı)' },
@@ -167,6 +169,9 @@ export const examples: readonly ExampleDataset[] = [
       { label: 'topsis.distanceBest', values: [0.114, 0.108, 0.365], decimals: 3 },
       { label: 'topsis.distanceWorst', values: [0.365, 0.28, 0.114], decimals: 3 },
       { label: 'topsis.closeness', values: [0.762, 0.722, 0.238], decimals: 3 },
+      { label: 'vikor.groupUtility', values: [0.5, 0.375, 0.5], decimals: 3 },
+      { label: 'vikor.individualRegret', values: [0.5, 0.25, 0.5], decimals: 2 },
+      { label: 'vikor.q', values: [1, 0, 1], decimals: 0 },
     ],
   },
   {
@@ -176,10 +181,10 @@ export const examples: readonly ExampleDataset[] = [
       tr: 'Dağ tırmanışı, başka birimler (Opricovic ve Tzeng 2004)',
     },
     summary: {
-      en: 'The same routes with risk shifted by 5 and altitude in km above the foothill. TOPSIS ranks them differently, which the paper uses to show rank reversal.',
-      tr: 'Aynı rotalar; risk 5 kaydırılmış, yükseklik etekten km cinsinden. TOPSIS bu kez farklı sıralıyor; makale bunu sıra değişimini göstermek için kullanıyor.',
+      en: 'The same routes with risk shifted by 5 and altitude in km above the foothill. TOPSIS ranks them differently, which the paper uses to show rank reversal; VIKOR gives the same S, R and Q.',
+      tr: "Aynı rotalar; risk 5 kaydırılmış, yükseklik etekten km cinsinden. TOPSIS bu kez farklı sıralıyor, makale bunu sıra değişimini göstermek için kullanıyor; VIKOR aynı S, R ve Q'yu veriyor.",
     },
-    referenceFor: ['topsis'],
+    referenceFor: ['topsis', 'vikor'],
     citation: {
       ...OPRICOVIC_TZENG_2004,
       tables: { en: 'Tables 1 and 2 (input, problem φ), Table 3 (output)', tr: 'Tablo 1 ve 2 (girdi, φ problemi), Tablo 3 (çıktı)' },
@@ -199,6 +204,9 @@ export const examples: readonly ExampleDataset[] = [
       { label: 'topsis.distanceBest', values: [0.154, 0.085, 0.147], decimals: 3 },
       { label: 'topsis.distanceWorst', values: [0.147, 0.134, 0.154], decimals: 3 },
       { label: 'topsis.closeness', values: [0.489, 0.612, 0.511], decimals: 3 },
+      { label: 'vikor.groupUtility', values: [0.5, 0.375, 0.5], decimals: 3 },
+      { label: 'vikor.individualRegret', values: [0.5, 0.25, 0.5], decimals: 2 },
+      { label: 'vikor.q', values: [1, 0, 1], decimals: 0 },
     ],
   },
   {
@@ -236,6 +244,50 @@ export const examples: readonly ExampleDataset[] = [
     // Table 3 prints S(Lithuania) = 0.872 from the misprinted 0.599 in Table 2; 306 / 501 = 0.611 gives 0.874
     // (docs/research/methods/saw.md, Reference example). Linear max, the default; Table 6 (sum) needs no correction.
     published: [{ label: 'saw.scores', values: [0.756, 0.728, 0.874, 0.61], decimals: 3 }],
+  },
+  {
+    id: 'keshavarz-2015-ten-alternatives',
+    name: { en: 'Ten alternatives, seven criteria (Keshavarz Ghorabaee et al. 2015)', tr: 'On alternatif, yedi kriter (Keshavarz Ghorabaee vd. 2015)' },
+    buttonLabel: { en: 'Ten alternatives', tr: 'On alternatif' },
+    summary: {
+      en: 'A comparison example with three benefit and four cost criteria, weight set 1 of 7. The paper reports the VIKOR ranks; no leader is clearly ahead, so VIKOR returns a compromise set.',
+      tr: 'Üç fayda ve dört maliyet kriterli bir karşılaştırma örneği, 7 ağırlık setinin 1.si. Makale VIKOR sıralarını veriyor; hiçbir alternatif açık ara önde değil, bu yüzden VIKOR bir uzlaşık küme döndürüyor.',
+    },
+    referenceFor: ['vikor'],
+    citation: {
+      authors: 'Keshavarz Ghorabaee, M.; Zavadskas, E.K.; Olfat, L.; Turskis, Z.',
+      year: 2015,
+      title: 'Multi-Criteria Inventory Classification Using a New Method of Evaluation Based on Distance from Average Solution (EDAS)',
+      venue: 'Informatica 26(3), 435-451',
+      doi: '10.15388/Informatica.2015.57',
+      tables: { en: 'Table 5 (input), Table 6 (weight set 1), Table 7 (VIKOR ranks)', tr: 'Tablo 5 (girdi), Tablo 6 (1. ağırlık seti), Tablo 7 (VIKOR sıraları)' },
+    },
+    // The paper names them A1 to A10 and C1 to C7 (Table 5); C1 to C3 are benefit, C4 to C7 cost.
+    alternatives: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10'],
+    criteria: [
+      { name: { en: 'C1', tr: 'C1' }, type: 'benefit' },
+      { name: { en: 'C2', tr: 'C2' }, type: 'benefit' },
+      { name: { en: 'C3', tr: 'C3' }, type: 'benefit' },
+      { name: { en: 'C4', tr: 'C4' }, type: 'cost' },
+      { name: { en: 'C5', tr: 'C5' }, type: 'cost' },
+      { name: { en: 'C6', tr: 'C6' }, type: 'cost' },
+      { name: { en: 'C7', tr: 'C7' }, type: 'cost' },
+    ],
+    matrix: [
+      [23, 264, 2.37, 0.05, 167, 8900, 8.71],
+      [20, 220, 2.2, 0.04, 171, 9100, 8.23],
+      [17, 231, 1.98, 0.15, 192, 10800, 9.91],
+      [12, 210, 1.73, 0.2, 195, 12300, 10.21],
+      [15, 243, 2, 0.14, 187, 12600, 9.34],
+      [14, 222, 1.89, 0.13, 180, 13200, 9.22],
+      [21, 262, 2.43, 0.06, 160, 10300, 8.93],
+      [20, 256, 2.6, 0.07, 163, 11400, 8.44],
+      [19, 266, 2.1, 0.06, 157, 11200, 9.04],
+      [8, 218, 1.94, 0.11, 190, 13400, 10.11],
+    ],
+    weights: [0.25, 0.214, 0.179, 0.143, 0.107, 0.071, 0.036],
+    // Ranks only: the paper prints no Q and does not state v (0.5 reproduces all seven weight sets).
+    published: [{ label: 'vikor.rank', values: [2, 5, 7, 9, 6, 8, 1, 3, 4, 10], decimals: 0 }],
   },
 ]
 

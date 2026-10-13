@@ -5,6 +5,9 @@ import type { Problem } from '../../core/types'
 import { getExample } from '../../data/examples'
 import {
   argMax,
+  isoQRegion,
+  isoQSegment,
+  vikorParts,
   closenessAt,
   criticParts,
   defaultAxes,
@@ -288,5 +291,50 @@ describe('entropyParts', () => {
       expect(flow.flatMap((n) => n.stepKeys)).toEqual(keys)
       expect(flowIndex(flow, 'entropy.weights')).toBe(flow.length - 1)
     }
+  })
+})
+
+describe('VIKOR picture data', () => {
+  const ex = getExample('keshavarz-2015-ten-alternatives')!
+  const problem: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+
+  it('places every alternative at its two Q terms, so v x + (1 - v) y is the core Q', () => {
+    for (const v of [0, 0.3, 0.5, 1]) {
+      const p = vikorParts(problem, ex.weights!, { v })!
+      p.Q.forEach((q, i) => expect(v * p.sTerm[i]! + (1 - v) * p.rTerm[i]!).toBeCloseTo(q, 14))
+      expect(Math.min(...p.sTerm)).toBe(0)
+      expect(Math.max(...p.rTerm)).toBe(1)
+    }
+  })
+  it('returns the compromise of the core: A7, A1, A8 within DQ = 1/9 at v = 0.5', () => {
+    const p = vikorParts(problem, ex.weights!)!
+    expect(p.compromise.set.map((i) => ex.alternatives[i])).toEqual(['A7', 'A1', 'A8'])
+    expect(p.order[0]).toBe(6)
+  })
+  it('returns null when VIKOR cannot run', () => {
+    expect(vikorParts({ ...problem, matrix: problem.matrix.slice(0, 1), alternatives: ['A1'] }, ex.weights!)).toBeNull()
+  })
+  it('draws the line of constant Q inside the unit square, for every v', () => {
+    for (const v of [0, 0.25, 0.5, 0.9, 1]) {
+      for (const q of [0, 0.2, 0.5, 0.99]) {
+        const seg = isoQSegment(v, q)!
+        for (const pt of seg) {
+          expect(v * pt.x + (1 - v) * pt.y).toBeCloseTo(q, 12)
+          expect(pt.x).toBeGreaterThanOrEqual(0)
+          expect(pt.y).toBeLessThanOrEqual(1)
+        }
+      }
+    }
+    // v = 1: vertical at x = q; v = 0: horizontal at y = q.
+    expect(isoQSegment(1, 0.3)).toEqual([{ x: 0.3, y: 1 }, { x: 0.3, y: 0 }])
+    expect(isoQSegment(0, 0.3)).toEqual([{ x: 0, y: 0.3 }, { x: 1, y: 0.3 }])
+    expect(isoQSegment(0.5, 1.5)).toBeNull()
+  })
+  it('tints exactly the part of the square below the line', () => {
+    const area = (pts: { x: number; y: number }[]) => Math.abs(pts.reduce((a, p, k) => a + p.x * pts[(k + 1) % pts.length]!.y - pts[(k + 1) % pts.length]!.x * p.y, 0)) / 2
+    expect(area(isoQRegion(0.5, 0.5))).toBeCloseTo(0.5, 12)
+    expect(area(isoQRegion(0.5, 0.25))).toBeCloseTo(0.0625 * 2, 12)
+    expect(area(isoQRegion(1, 0.3))).toBeCloseTo(0.3, 12)
+    expect(area(isoQRegion(0.5, 2))).toBeCloseTo(1, 12)
   })
 })

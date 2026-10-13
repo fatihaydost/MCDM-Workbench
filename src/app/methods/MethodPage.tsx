@@ -214,22 +214,25 @@ function MethodArticle({ m }: { m: MethodContent }) {
                 </div>
                 {workbenchExamples.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {workbenchExamples.map((e, i) => (
-                      <Link
-                        key={e.id}
-                        href={`/app?example=${e.id}`}
-                        // The visible text starts the accessible name (WCAG 2.5.3, Label in Name).
-                        aria-label={
-                          i === 0
-                            ? `${t('methods.page.reference.open')}: ${e.name[lang]}`
-                            : `${t('methods.page.reference.openOther')}: ${t('methods.page.reference.open')}, ${e.name[lang]}`
-                        }
-                        title={e.name[lang]}
-                        className={buttonClasses({ variant: i === 0 ? 'primary' : 'secondary' })}
-                      >
-                        {i === 0 ? t('methods.page.reference.open') : t('methods.page.reference.openOther')}
-                      </Link>
-                    ))}
+                    {workbenchExamples.map((e, i) => {
+                      const other = e.buttonLabel?.[lang] ?? t('methods.page.reference.openOther')
+                      return (
+                        <Link
+                          key={e.id}
+                          href={`/app?example=${e.id}&method=${m.id}`}
+                          // The visible text starts the accessible name (WCAG 2.5.3, Label in Name).
+                          aria-label={
+                            i === 0
+                              ? `${t('methods.page.reference.open')}: ${e.name[lang]}`
+                              : `${other}: ${t('methods.page.reference.open')}, ${e.name[lang]}`
+                          }
+                          title={e.name[lang]}
+                          className={buttonClasses({ variant: i === 0 ? 'primary' : 'secondary' })}
+                        >
+                          {i === 0 ? t('methods.page.reference.open') : other}
+                        </Link>
+                      )
+                    })}
                   </div>
                 )}
                 <details>

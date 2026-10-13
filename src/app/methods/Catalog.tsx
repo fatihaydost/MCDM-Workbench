@@ -6,18 +6,18 @@ import { allMethods, FAMILY_ORDER, methodsByFamily } from '../../content/methods
 import { getExample } from '../../data/examples'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { MethodThumb } from '../../features/illustrations/MethodThumb'
-import { argMax, distancePoints, entropyParts, sawParts, topsisProjection } from '../../features/illustrations/geometry'
+import { argMax, distancePoints, entropyParts, sawParts, topsisProjection, vikorParts } from '../../features/illustrations/geometry'
 import { useLang } from '../../i18n'
 import { SiteFooter } from '../landing/SiteFooter'
 import { usePageMeta } from '../landing/usePageMeta'
 import { Guide } from './Guide'
 import { pageContainer } from './shared'
 
-type Available = 'critic' | 'entropy' | 'topsis' | 'saw' | 'equal'
+type Available = 'critic' | 'entropy' | 'topsis' | 'saw' | 'vikor' | 'equal'
 /** The available methods in two rows, weighting first (the order of the workbench), then ranking. */
 const AVAILABLE: Readonly<Record<'weighting' | 'ranking', readonly Available[]>> = {
   weighting: ['critic', 'entropy', 'equal'],
-  ranking: ['topsis', 'saw'],
+  ranking: ['topsis', 'saw', 'vikor'],
 }
 
 function exampleProblem(id: string): Problem {
@@ -41,11 +41,21 @@ function useThumbs() {
     // SAW on its reference example: each country's score as a stack of contributions, best first.
     const baltic = getExample('podvezko-2011-baltic')!
     const sawP = sawParts(exampleProblem(baltic.id), baltic.weights!)
+    // VIKOR on its ten-alternative example: S against R, the DQ line and the compromise set (C1 fails there).
+    const ten = getExample('keshavarz-2015-ten-alternatives')!
+    const vk = vikorParts(exampleProblem(ten.id), ten.weights!)
     return {
       critic: { kind: 'bars' as const, values: weights, highlight: argMax(weights) },
       topsis: { kind: 'plane' as const, points: plane, highlight: proj ? argMax(proj.closeness) : undefined },
       entropy: { kind: 'shares' as const, even: sharesOf(vilnius?.pair[0] ?? 0), uneven: sharesOf(vilnius?.pair[1] ?? 1) },
       saw: { kind: 'stack' as const, rows: sawP ? sawP.order.map((i) => sawP.contributions[i]!) : [] },
+      vikor: {
+        kind: 'compromise' as const,
+        points: vk ? vk.sTerm.map((x, i) => ({ x, y: vk.rTerm[i]! })) : [],
+        v: vk?.v ?? 0.5,
+        q: vk ? vk.Q[vk.compromise.first]! + vk.compromise.dq : 0,
+        inSet: vk?.compromise.set ?? [],
+      },
       equal: { kind: 'bars' as const, values: Array.from({ length: n }, () => 1 / n), highlight: undefined },
     }
   }, [])

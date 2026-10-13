@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { critic, entropy, saw, topsis, type CriterionType } from '../../src/core'
+import { critic, entropy, saw, topsis, vikor, vikorCompromise, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -369,6 +369,79 @@ test('SAW: the Podvezko example ranks with SAW, sum changes the scores, the cont
   await expect(page.getByTestId('saw-contributions')).toHaveCount(0)
   await expect(page.locator('figure', { hasText: 'Closeness coefficient C' })).toBeVisible()
   await expect(page.locator('figure', { hasText: 'Distances to A+ and A−' })).toBeVisible()
+})
+
+test('VIKOR: the ten-alternative example ranks by Q, shows S and R, the DQ verdict and the compromise set; v moves Q live', async ({ page }) => {
+  const ex = getExample('keshavarz-2015-ten-alternatives')!
+  const p = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const byName = (scores: number[]) => Object.fromEntries(ex.alternatives.map((a, i) => [a, f4(scores[i]!)]))
+  const at = (v: number) => {
+    const r = vikor.compute(p, ex.weights!, { v })
+    const vec = (k: string) => r.steps.find((x) => x.key === k)!.vector!
+    return { r, c: vikorCompromise(vec('vikor.groupUtility'), vec('vikor.individualRegret'), r.scores) }
+  }
+  const half = at(0.5)
+
+  await page.goto('/app?example=keshavarz-2015-ten-alternatives&stage=ranking')
+  await expect(stageHeading(page, 'Ranking')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'VIKOR' })).toHaveAttribute('aria-checked', 'true')
+  const table = page.getByRole('table', { name: 'Ranking' })
+  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'Group utility S', 'Regret R', 'Compromise Q'])
+  expect(await closenessByName(page)).toEqual(byName(half.r.scores))
+  // Rank column equals the published VIKOR ranks (Table 7, set 1); rows are in rank order, lowest Q first.
+  const published = ex.published.find((x) => x.label === 'vikor.rank')!.values as number[]
+  const rows = await table.getByTestId('ranking-row').evaluateAll((els) => els.map((el) => [el.querySelector('th')!.textContent!.trim(), Number(el.querySelector('td')!.textContent)] as const))
+  for (const [name, rank] of rows) expect(rank, name).toBe(published[ex.alternatives.indexOf(name)])
+  await expect(page.getByTestId('best-sentence')).toHaveText(`A7 ranks first (Q = ${f4(half.r.scores[6]!)}).`)
+
+  // The picture replaces the score chart: ten Q bars in rank order, the compromise set in the accent.
+  await expect(page.getByTestId('vikor-idea')).toBeVisible()
+  const bars = page.getByTestId('vikor-bar')
+  await expect(bars).toHaveCount(10)
+  const drawn = await bars.evaluateAll((els) => els.map((el) => Number(el.getAttribute('data-q'))))
+  expect(drawn).toEqual([...half.r.scores].sort((a, b) => a - b))
+  await expect(page.locator('[data-testid="vikor-bar"][data-in-set]')).toHaveCount(3)
+  await expect(page.getByTestId('vikor-c1')).toHaveText(`No acceptable advantage: A7 leads A1 by only ${f4(half.c.advantage)} in Q, less than DQ = 0.1111.`)
+  await expect(page.getByTestId('vikor-c2')).toHaveText('Acceptable stability: A7 is also first by R.')
+  await expect(page.getByTestId('vikor-result')).toHaveText('Compromise set: A7, A1, A8')
+
+  // v to 1 with the keyboard (End): Q is S alone, the table, the picture and the verdict follow.
+  const slider = page.getByRole('slider', { name: 'Strategy weight v' })
+  await slider.focus()
+  await page.keyboard.press('End')
+  await expect(page.getByTestId('param-value')).toHaveText('1.00')
+  const one = at(1)
+  await expect.poll(() => closenessByName(page)).toEqual(byName(one.r.scores))
+  await expect(page.getByTestId('vikor-idea')).toHaveAttribute('data-v', '1')
+  await expect(page.getByTestId('vikor-result')).toHaveText(
+    one.c.set.length === 1 ? `Compromise solution: ${ex.alternatives[one.c.set[0]!]}` : `Compromise set: ${one.c.set.map((i) => ex.alternatives[i]).join(', ')}`,
+  )
+  await expect(page.locator('nav[aria-label="Stages"]:visible')).toContainText('VIKOR (v = 1.00)')
+  // One step left: 0.99 on the 0.01 grid.
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByTestId('param-value')).toHaveText('0.99')
+
+  // Robustness ranks with VIKOR and names its score.
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Robustness' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Robustness' })).toBeVisible()
+  await expect(page.locator('figure', { hasText: 'Compromise index Q as the weight of C1 changes' })).toBeVisible()
+})
+
+test('VIKOR: the method page opens the shared Opricovic and Tzeng example with VIKOR, and its own v slider turns the line', async ({ page }) => {
+  await page.goto('/methods/vikor')
+  await expect(page.getByTestId('vikor-idea')).toBeVisible()
+  const line = page.getByTestId('vikor-threshold-line')
+  const before = await line.getAttribute('d')
+  await page.getByRole('slider', { name: 'Strategy weight v' }).focus()
+  await page.keyboard.press('Home')
+  await expect(page.getByTestId('idea-v')).toHaveText('0.00')
+  expect(await line.getAttribute('d')).not.toBe(before)
+  await page.getByRole('link', { name: /^Open in workbench: Mountain climbing \(Opricovic/ }).click()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(page.getByRole('radio', { name: 'VIKOR' })).toHaveAttribute('aria-checked', 'true')
+  expect(await closenessByName(page)).toEqual({ A1: '1.0000', A2: '0.0000', A3: '1.0000' })
+  await expect(page.getByTestId('vikor-result')).toHaveText('Compromise solution: A2')
+  await expect(page.getByTestId('vikor-c1')).toHaveText('Acceptable advantage: A2 leads A1 by 1.0000 in Q, at least DQ = 0.5000.')
 })
 
 test('SAW: a zero blocks the ranking with a message at its cell', async ({ page }) => {

@@ -12,7 +12,7 @@ from `src/i18n`. Number formats come in as `format` (use `useNumberFormat().form
 decimals).
 
 ```ts
-import { PipelineDiagram, TopsisGeometry, CriticIdea, EntropyIdea, SawContributions, StepFlow, TOPSIS_FLOW, CRITIC_FLOW, ENTROPY_FLOW, MethodGlyph, EmptyMatrixHint } from '../features/illustrations'
+import { PipelineDiagram, TopsisGeometry, CriticIdea, EntropyIdea, SawContributions, VikorIdea, StepFlow, TOPSIS_FLOW, CRITIC_FLOW, ENTROPY_FLOW, VIKOR_FLOW, MethodGlyph, EmptyMatrixHint } from '../features/illustrations'
 ```
 
 Preview: `/dev/illustrations` (dev only, `Preview.tsx`), e.g.
@@ -73,8 +73,9 @@ workbench Ranking next to the closeness bars (current problem and weights).
 A small decorative picture (132 x 72, `aria-hidden`, no text) for catalogue cards, drawn from real
 values the page passes in: `kind: 'bars'` (`values`, `highlight`: CRITIC or equal weights),
 `kind: 'shares'` (`even`, `uneven`: Entropy's shares of its most even and most uneven criterion, the second in the
-accent) or `kind: 'plane'` (`points` from `distancePoints`, `highlight`: the TOPSIS distance plane) or `kind: 'stack'`
-(`rows`: SAW contributions per alternative in rank order, the first in the accent).
+accent) or `kind: 'plane'` (`points` from `distancePoints`, `highlight`: the TOPSIS distance plane), `kind: 'stack'`
+(`rows`: SAW contributions per alternative in rank order, the first in the accent) or `kind: 'compromise'` (`points`,
+`v`, `q`, `inSet`: VIKOR's plane with the DQ line, the compromise set in the accent).
 
 ## CriticIdea
 
@@ -131,6 +132,29 @@ move rows and segments at `--dur-data`. Table: contributions per criterion and S
 
 Use: `/methods/saw` "The idea" (Podvezko 2011 example); workbench Ranking stage when the method is SAW.
 
+## VikorIdea
+
+VIKOR as a picture, two panels side by side from 600 px, stacked below. Left, the plane of Q's two terms: x =
+(S − S*)/(S− − S*) (group utility), y = (R − R*)/(R− − R*) (largest regret), 0 best on both, so the ideal is the bottom
+left corner (marked, named outside the square). Q = v x + (1 − v) y is constant along straight lines; the dashed accent
+line is Q = Q(a′) + DQ and the `--accent-bg` tint below it holds the alternatives within DQ of the leader. A new v turns
+the line (CSS `d`, `--dur-data`); the points do not move (S and R do not depend on v). Right, Q in rank order on a fixed
+[0, 1] axis with the same band from Q(a′) to Q(a′) + DQ (its label under the bars); a Q of 0 keeps a 2 px bar. The
+compromise set is in the accent, the rest context grey; names in the plane for up to 12 alternatives, else only the
+set. Under both: C1 (acceptable advantage) and C2 (acceptable stability) as sentences with a check or a cross, then
+the compromise. Not interactive; table: S, R, Q, in the compromise.
+
+| Prop | Type | Notes |
+|---|---|---|
+| `problem` | `Problem` | Renders nothing when VIKOR cannot run. |
+| `weights` | `number[]` | |
+| `params` | `VikorParams` | `{ v }`, default 0.5. |
+| `format` | `(n) => string` | S, R, Q, gap and DQ (4 decimals). |
+| `labels` | `{ title, caption?, showTable, alternative, axisS, axisR, ideal, barsTitle, threshold, s, r, q, inSet, yes, no, c1(ok, a, b, gap, dq), c2(ok, a, byS, byR), result(names) }` | `useVikorLabels` (`src/app/workbench/vikorLabels.ts`) builds them from `workbench.visual.vikor.*`. |
+
+Use: `/methods/vikor` "The idea" (Keshavarz Ghorabaee et al. 2015, set 1, where C1 fails; the page has its own v
+slider); workbench Ranking stage when the method is VIKOR (it replaces the score chart).
+
 ## StepFlow
 
 Map of the worked calculation: numbered square nodes on a hairline, the active one in the accent,
@@ -185,7 +209,7 @@ Use: the workbench's empty Data state, above "Load example" / "Start blank".
 `topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale
 screen scales, values growing right and up), `distancePoints(proj)`, `closenessAt(p)`,
 `isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `placeLabels(...)`, `ISO_C_DEFAULT`, `linePath(...)`, `pointCss(...)`,
-`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `argMax`, `flowIndex`, `TOPSIS_FLOW`,
+`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `VIKOR_FLOW`, `argMax`, `flowIndex`, `TOPSIS_FLOW`,
 `CRITIC_FLOW`, `ENTROPY_FLOW`, `ENTROPY_MINMAX_FLOW`. The
 tests check that A+ / A- and C equal the core and the published values (Opricovic and Tzeng 2004:
 C = 0.762, 0.722, 0.238; Krishnan et al. 2021: σ and weights), that the distance plane places every

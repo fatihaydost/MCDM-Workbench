@@ -67,7 +67,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { critic, entropy, saw, topsis } = await import('../src/core')
+    const { critic, entropy, saw, topsis, vikor } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -94,8 +94,24 @@ describe('i18n resources', () => {
     ]
     // SAW: both normalizations (it emits no warnings of its own; its data errors are validation codes).
     const sw = [saw.compute(p, [0.5, 0.5], {}), saw.compute(p, [0.5, 0.5], { normalization: 'sum' })]
-    const steps = [...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps)]
-    const warnings = [...(w.warnings ?? []), ...(r.warnings ?? []), ...e.flatMap((x) => x.warnings ?? []), ...sw.flatMap((x) => x.warnings ?? [])]
+    // VIKOR: small problems that trigger each of its notices.
+    const vk = [
+      vikor.compute(p, [0.5, 0.5], {}), // constant column
+      vikor.compute({ ...p, matrix: [[1, 0], [0, 1], [0.5, 0.5]], criteria: [p.criteria[0]!, { ...p.criteria[0]!, name: 'y' }] }, [0.5, 0.5], {}), // equal S
+      vikor.compute({ ...p, matrix: [[0, 1], [0, 0], [1, 0]], criteria: [p.criteria[0]!, { ...p.criteria[0]!, name: 'y' }] }, [0.5, 0.5], {}), // equal R, tie
+      vikor.compute({ ...p, alternatives: ['A', 'B'], matrix: [[2, 2], [1, 1]] }, [0.5, 0.5], {}), // all S and R equal
+    ]
+    expect(new Set(vk.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
+      new Set(['vikor.constant-column', 'vikor.equal-group-utility', 'vikor.equal-regret', 'vikor.tie-for-first', 'vikor.no-spread']),
+    )
+    const steps = [...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps)]
+    const warnings = [
+      ...(w.warnings ?? []),
+      ...(r.warnings ?? []),
+      ...e.flatMap((x) => x.warnings ?? []),
+      ...sw.flatMap((x) => x.warnings ?? []),
+      ...vk.flatMap((x) => x.warnings ?? []),
+    ]
     expect(new Set(warnings.filter((x) => x.code.startsWith('entropy.')).map((x) => x.code))).toEqual(
       new Set(['entropy.constant-column', 'entropy.zeros-in-column', 'entropy.two-alternatives-minmax', 'entropy.all-constant-equal-weights', 'entropy.dominant-weight']),
     )
@@ -112,7 +128,11 @@ describe('i18n resources', () => {
     expect(declared.length).toBeGreaterThan(0)
     for (const [id, d] of declared) {
       expect(flatEn[`workbench.params.${id}.${d.key}`], `${id}.${d.key}`).toBeTypeOf('string')
-      if (d.kind !== 'choice') continue
+      if (d.kind !== 'choice') {
+        // A number option names its value in the variant label ("v = 0,70").
+        expect(flatEn[`workbench.params.${id}.${d.key}Variant`], `${id}.${d.key} variant`).toMatch(/\{\{value\}\}/)
+        continue
+      }
       for (const o of d.options) {
         expect(flatEn[`workbench.params.${id}.${d.key}Options.${o}`], `${id}.${d.key}.${o}`).toBeTypeOf('string')
         expect(flatEn[`workbench.params.${id}.${d.key}Variant.${o}`], `${id}.${d.key}.${o} variant`).toBeTypeOf('string')

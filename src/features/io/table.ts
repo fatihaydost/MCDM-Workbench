@@ -60,6 +60,12 @@ export const KNOWN_STEP_AXES: Readonly<Record<string, Axis | readonly [Axis, Axi
   'saw.normalizedSum': ['alternatives', 'criteria'],
   'saw.weighted': ['alternatives', 'criteria'],
   'saw.scores': 'alternatives',
+  'vikor.best': 'criteria',
+  'vikor.worst': 'criteria',
+  'vikor.weightedDistance': ['alternatives', 'criteria'],
+  'vikor.groupUtility': 'alternatives',
+  'vikor.individualRegret': 'alternatives',
+  'vikor.q': 'alternatives',
 }
 
 const indexLabels = (k: number): string[] => Array.from({ length: k }, (_, i) => String(i + 1))

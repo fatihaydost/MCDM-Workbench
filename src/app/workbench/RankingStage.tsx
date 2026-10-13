@@ -2,8 +2,9 @@ import { useCallback, useMemo, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRankingMethod, type MethodParams as Params, type RankingResult } from '../../core'
 import type { SawNormalization } from '../../core/methods/saw'
+import { VIKOR_DEFAULT_V } from '../../core/methods/vikor'
 import { BarChart } from '../../features/charts'
-import { SawContributions, TopsisGeometry } from '../../features/illustrations'
+import { SawContributions, TopsisGeometry, VikorIdea } from '../../features/illustrations'
 import { useNumberFormat } from '../../i18n'
 import {
   isEmptyProblem,
@@ -17,11 +18,12 @@ import {
 } from '../../state/workbench'
 import { Button, cn, EmptyState, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../ui'
 import { MethodParams } from './MethodParams'
+import { useVikorLabels } from './vikorLabels'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
 import { alternativeName, DECIMALS, findStep, scoreWords, tr, weightMethodFullLabel } from './shared'
 
-const RANKING_METHODS: readonly RankingMethodId[] = ['topsis', 'saw']
+const RANKING_METHODS: readonly RankingMethodId[] = ['topsis', 'saw', 'vikor']
 
 type PictureProps = { problem: DraftProblem; weights: readonly number[]; params: Params; className?: string }
 
@@ -57,6 +59,16 @@ const RANKING_VIEWS: Readonly<
   // No columns: the contributions are the picture (each bar ends at S, so it replaces the score chart), and the full
   // matrix is in the calculation.
   saw: { columns: [], Picture: SawPicture, pictureShowsScores: true },
+  // S and R before Q in the table; the picture draws every Q as a bar in rank order (with the DQ band), so it takes
+  // the score chart's place.
+  vikor: {
+    columns: [
+      { step: 'vikor.groupUtility', label: 'workbench.ranking.columns.groupUtility' },
+      { step: 'vikor.individualRegret', label: 'workbench.ranking.columns.individualRegret' },
+    ],
+    Picture: VikorPicture,
+    pictureShowsScores: true,
+  },
 }
 
 /** Alternatives in rank order (ties keep input order). */
@@ -228,6 +240,17 @@ export function SawPicture({ problem, weights, params, className }: PictureProps
   )
 }
 
+/** VIKOR as a picture: S against R with the DQ threshold line, Q with the DQ band, C1 and C2 in words. */
+export function VikorPicture({ problem, weights, params, className }: PictureProps) {
+  const labels = useVikorLabels('workbench.visual.vikor.title')
+  const nf = useNumberFormat(DECIMALS.score)
+  const format = useCallback((v: number) => nf.format(v), [nf])
+  const core = useMemo(() => toProblem(problem), [problem])
+  const v = typeof params.v === 'number' ? params.v : VIKOR_DEFAULT_V
+  return <VikorIdea problem={core} weights={weights} params={{ v }} format={format} labels={labels} className={cn('max-w-[880px]', className)} />
+}
+
+
 export function RankingStage() {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.score)
@@ -269,7 +292,7 @@ export function RankingStage() {
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
-        {/* TOPSIS has no options; SAW shows its normalization here (and later VIKOR its v, WASPAS its λ). */}
+        {/* TOPSIS has no options; SAW shows its normalization here, VIKOR its v (later WASPAS its λ). */}
         <MethodParams methodId={rankingMethod} descriptors={getRankingMethod(rankingMethod)?.params} />
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
           <span>{t('workbench.ranking.weightsUsed', { method: weightMethodFullLabel(weightMethod, weightParams, t) })}</span>

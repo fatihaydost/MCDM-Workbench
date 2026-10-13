@@ -6,7 +6,7 @@ export const vikor: MethodContent = {
   name: { en: 'VIKOR', tr: 'VIKOR' },
   fullName: { en: 'VIseKriterijumska Optimizacija I Kompromisno Resenje', tr: 'Çok kriterli optimizasyon ve uzlaşık çözüm' },
   family: 'ranking-distance',
-  status: 'research',
+  status: 'available',
   year: 1998,
   origin: {
     authors: 'Opricovic, S.',
@@ -36,7 +36,7 @@ export const vikor: MethodContent = {
       },
     },
     {
-      title: { en: 'Acceptable advantage and stability', tr: 'Kabul edilebilir üstünlük ve kararlılık' },
+      title: { en: 'Acceptable advantage and stability', tr: 'Kabul edilebilir avantaj ve kararlılık' },
       tex: String.raw`C1:\ Q(a'') - Q(a') \ge DQ, \qquad DQ = \frac{1}{m - 1}`,
       note: {
         en: "With a' first and a'' second by Q, and C2 meaning a' also leads by S or R, the compromise set is a' alone if both hold, a' and a'' if only C1 holds, and every alternative within DQ of a' if C1 fails.",
@@ -72,8 +72,8 @@ export const vikor: MethodContent = {
     doi: '10.1016/S0377-2217(03)00020-1',
     match: 'match',
     note: {
-      en: 'Published example (Tables 1-3); this method is not computed here yet, only recomputed during research. Mountain-climber example: S, R and Q match exactly, C1 and C2 hold, the compromise is A2, and the result is the same in both unit encodings. Q ranks also match Keshavarz Ghorabaee et al. (2015) in 7 of 7 weight sets, assuming v = 0.5 (the paper does not state v).',
-      tr: "Yayımlanmış örnek (Tablo 1-3); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Dağcı örneği: S, R ve Q birebir örtüşüyor, C1 ve C2 sağlanıyor, uzlaşık çözüm A2 ve sonuç iki birim gösteriminde de aynı. Q sıraları Keshavarz Ghorabaee vd. (2015) ile 7 ağırlık setinin 7'sinde aynı; bunun için v = 0,5 varsayıldı (makale v'yi belirtmiyor).",
+      en: 'Published example (Tables 1-3), reproduced by the tests: in the mountain-climbing example S, R and Q match Table 3 exactly, C1 and C2 hold, the compromise is A2, and the other unit encoding (problem φ) gives the same numbers. The Q ranks also equal the published VIKOR ranks of Keshavarz Ghorabaee et al. (2015) in 7 of 7 weight sets with v = 0.5 (the paper does not state v).',
+      tr: "Yayımlanmış örnek (Tablo 1-3), testlerde yeniden üretiliyor: dağ tırmanışı örneğinde S, R ve Q Tablo 3 ile birebir aynı, C1 ve C2 sağlanıyor, uzlaşık çözüm A2 ve öbür birim gösterimi (φ problemi) aynı sayıları veriyor. Q sıraları Keshavarz Ghorabaee vd. (2015) makalesinin yayımlanmış VIKOR sıralarıyla 7 ağırlık setinin 7'sinde aynı; v = 0,5 ile (makale v'yi belirtmiyor).",
     },
   },
   sources: [
@@ -97,11 +97,11 @@ export const vikor: MethodContent = {
     ],
     inputs: [
       'Decision matrix, criterion type per column, weights summing to 1.',
-      'Parameter v between 0 and 1, default 0.5 (weight of the "majority of criteria" strategy). Above 0.5 leans to majority, below to veto.',
+      'Parameter v between 0 and 1, default 0.5 (weight of the "majority of criteria" strategy). Above 0.5 leans to majority, below to veto; set it with the slider.',
       'Output: S, R, Q (lower is better), three rankings, conditions C1 and C2, and the compromise set.',
     ],
     pitfalls: [
-      'If all S (or all R) are equal, Q is undefined; use only the other term and warn.',
+      'If all S (or all R) are equal, that term of Q is undefined; it is set to 0, with a notice.',
       'With 2 alternatives DQ = 1, so C1 needs a Q gap of 1.',
       'Q is relative to this alternative set (0 best, 1 worst); do not compare it across problems.',
     ],
@@ -120,11 +120,11 @@ export const vikor: MethodContent = {
     ],
     inputs: [
       'Karar matrisi, her sütun için kriter türü, toplamı 1 olan ağırlıklar.',
-      '0 ile 1 arasında v parametresi, varsayılan 0,5 ("kriterlerin çoğunluğu" stratejisinin ağırlığı). 0,5\'in üstü çoğunluğa, altı vetoya yaklaşır.',
+      '0 ile 1 arasında v parametresi, varsayılan 0,5 ("kriterlerin çoğunluğu" stratejisinin ağırlığı). 0,5\'in üstü çoğunluğa, altı vetoya yaklaşır; kaydırıcıyla ayarlanır.',
       'Çıktı: S, R, Q (küçük olan iyi), üç sıralama, C1 ve C2 koşulları ve uzlaşık çözüm kümesi.',
     ],
     pitfalls: [
-      'Bütün S (ya da bütün R) değerleri eşitse Q tanımsızdır; yalnız diğer terim kullanılır ve uyarı gösterilir.',
+      'Bütün S (ya da bütün R) değerleri eşitse Q\'nun o terimi tanımsızdır; 0 alınır ve uyarı gösterilir.',
       '2 alternatifte DQ = 1 olur; C1 için Q farkının 1 olması gerekir.',
       'Q bu alternatif kümesine göredir (0 en iyi, 1 en kötü); problemler arasında karşılaştırmayın.',
     ],

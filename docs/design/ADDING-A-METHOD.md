@@ -214,14 +214,20 @@ done (Kurallar: show the visual result).
 
 ## 11. Method parameters (current state and proposal)
 
-**Today.** The interfaces already carry a params argument: `WeightingMethod<P = {}>` with `compute(problem, params: P)`
+**Before 2026-10-05 (history).** The interfaces already carry a params argument: `WeightingMethod<P = {}>` with `compute(problem, params: P)`
 and `RankingMethod<P = {}>` with `compute(problem, weights, params: P)` (`src/core/types.ts:39-61`). No method uses it;
 every caller passes `{}` (store `workbench.ts:315,336`; robustness `robustness.ts:30,507`, worker `:39`,
 `SweepSection.tsx:69`; landing, catalogue, tests). There is no params state in the store, no UI control, no URL
 parameter (the URL carries only `?example` and `?stage`, removed after load). Entropy (normalization), SAW
 (normalization), VIKOR (v) and WASPAS (λ) all need one, so it is worth one small generic path.
 
-**Proposal, smallest change that works** (not implemented):
+**Status (2026-10-13):** implemented for Entropy and SAW (choices) and VIKOR (number). A number option in [0, 1]
+renders as a slider on the 0.01 grid (`MethodParams.tsx` `UnitSlider`, reusing `WeightRange`; tick at the default,
+optional end words `workbench.params.<id>.<key>Ends.min/.max`); any other range as a number input. A number option's
+variant label is `workbench.params.<id>.<key>Variant` with `{{value}}` ("VIKOR (v = 0,70)"), checked by
+`tests/i18n.test.ts`.
+
+**Proposal, smallest change that works** (the original plan, now built):
 
 1. Core: a params type per method with optional fields and a default inside `compute`, e.g.
    `type EntropyParams = { normalization?: 'sum' | 'minmax' }`, `params.normalization ?? 'sum'`. Callers that pass
@@ -252,10 +258,12 @@ SAW: the score chart sorts by `result.order`, the table is in rank order, the sc
 `workbench.ranking.score.<id>` and the best sentences read "ranks first (Q = ...)", which holds for either order.
 The robustness sweep's y axis stays inside [0, 1] only while the scores do (COPRAS's or a negative score widens it),
 and the highlighted bar of the score chart keeps a 2 px mark at 0, so a best Q = 0 is visible.
-Still to decide for VIKOR: it has three scores (S, R, Q) and acceptance conditions. Put S and R in `steps` and Q in
-`scores`; S and R can be the extra `columns` of its `RANKING_VIEWS` entry (their header keys under
-`workbench.ranking.columns`), and the acceptance conditions need a sentence or a notice of their own. Careful: VIKOR's
-group utility is also called S, so its score words must not reuse SAW's "Score S".
+VIKOR (2026-10-13) settled it: S and R are steps and the extra `columns` (`workbench.ranking.columns.groupUtility`,
+`.individualRegret`), Q is the score ("Compromise Q", not SAW's "Score S"). C1, C2 and the compromise set are not part of
+`RankingResult`: `vikorCompromise(S, R, Q)` (core) derives them, the picture (`VikorIdea`) states them in words and
+`diagnostics` carries c1, c2, dq and the set size. An example that is a reference for two ranking methods (Opricovic and
+Tzeng 2004: TOPSIS and VIKOR) opens with the one the link asks for (`/app?example=<id>&method=<id>`, set by the method
+page), else the current one if listed, else the first; `ExampleDataset.buttonLabel` names a third button.
 
 ## 13. Warnings and validation errors
 

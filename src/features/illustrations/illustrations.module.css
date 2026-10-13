@@ -757,3 +757,133 @@
   flex: none;
   display: block;
 }
+
+/* VIKOR idea ---------------------------------------------------------------------------------- */
+
+/* The alternatives within DQ of the leader: below the threshold line in the plane, between Q(a') and Q(a') + DQ in
+   the bars. A tint, not a mark: the dots and bars on it carry the data. */
+.vikorBand {
+  fill: var(--accent-bg);
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.vikorFrame {
+  stroke: var(--line);
+  stroke-width: 1;
+  fill: none;
+}
+
+/* Q = Q(a') + DQ. */
+.vikorLine {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  fill: none;
+}
+
+.vikorThrLabel {
+  fill: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.vikorDot {
+  fill: var(--data-context);
+  stroke: var(--bg);
+  stroke-width: 1.5;
+  transition: fill var(--dur) var(--ease);
+}
+
+.vikorDot[data-on] {
+  fill: var(--data-accent);
+}
+
+.pointLabel[data-on] {
+  fill: var(--text);
+  font-weight: 600;
+}
+
+.vikorBar {
+  fill: var(--data-context);
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transition: fill var(--dur) var(--ease);
+}
+
+.vikorBar[data-on] {
+  fill: var(--data-accent);
+}
+
+.sawName[data-on] {
+  font-weight: 600;
+}
+
+.vikorMove {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+/* A new v or new data: the line turns, the band and bars change length, rows move to their new rank. */
+@supports (d: path('M0 0')) {
+  .animate .vikorLine,
+  .animate path.vikorBand {
+    transition: d var(--dur-data) var(--ease);
+  }
+}
+
+.animate .vikorMove,
+.animate .vikorBar,
+.animate rect.vikorBand,
+.animate .vikorMove .barValue {
+  transition: transform var(--dur-data) var(--ease);
+}
+
+.vikorVerdict {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--text-2);
+}
+
+.vikorVerdict li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.vikorIcon {
+  flex: none;
+  width: 16px;
+  height: 20px;
+  color: var(--text-3);
+}
+
+.vikorVerdict li[data-ok] {
+  color: var(--text);
+}
+
+.vikorVerdict li[data-ok] .vikorIcon {
+  color: var(--ok);
+}
+
+.vikorResult {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* A value printed over the dashed DQ line keeps a halo in the page colour. */
+.vikorMove .barValue {
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}

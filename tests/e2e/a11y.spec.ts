@@ -225,11 +225,12 @@ test('Results is a summary: no second copy of the closeness bars or the TOPSIS p
   await expect(page.getByRole('table', { name: 'Ranking' }).locator('thead th')).toHaveCount(3)
 })
 
-// The CRITIC example for every stage, and the Entropy and SAW examples where their cards are shown.
+// The CRITIC example for every stage, and the Entropy, SAW and VIKOR examples where their cards are shown.
 const PANEL_RUNS = [
   ['krishnan-2021-smartphones', ['data', 'weights', 'ranking', 'results', 'robustness']],
   ['zavadskas-2017-vilnius', ['weights', 'results']],
   ['podvezko-2011-baltic', ['ranking', 'results']],
+  ['keshavarz-2015-ten-alternatives', ['ranking']],
 ] as const
 
 for (const lang of ['en', 'tr'] as const) {

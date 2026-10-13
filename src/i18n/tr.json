@@ -98,6 +98,9 @@
       "saw": {
         "claim": "Skorlar ve sıralar toplam normalizasyonuyla {{citation}} ile {{decimals}} basamağa kadar aynı; doğrusal maks ile de, Tablo 2'deki baskı hatası düzeltilince aynı."
       },
+      "vikor": {
+        "claim": "S, R, Q ve uzlaşık çözüm A2 {{citation}} ile {{decimals}} basamağa kadar aynı; iki birim gösteriminde de."
+      },
       "also": "Ayrıca test edilenler: ilk ders projesindeki elle çözülmüş CRITIC tablosu, her ara matris {{tol}} içinde; CRITIC ardından TOPSIS zincirinin ilk Python koduyla eşliği, {{tol}} içinde. Tablo ve Python kodu bağımsız kaynak değildir.",
       "alsoTitle": "Diğer kontroller",
       "tolerance": "Tolerans {{tol}}"
@@ -176,7 +179,8 @@
     "rankingMethod": {
       "label": "Sıralama yöntemi",
       "topsis": "TOPSIS",
-      "saw": "SAW"
+      "saw": "SAW",
+      "vikor": "VIKOR"
     },
     "params": {
       "entropy": {
@@ -208,6 +212,14 @@
           "linearMax": "doğrusal",
           "sum": "toplam"
         }
+      },
+      "vikor": {
+        "v": "Strateji ağırlığı v",
+        "vEnds": {
+          "min": "0: yalnız en büyük pişmanlık (veto)",
+          "max": "1: yalnız grup faydası (çoğunluk)"
+        },
+        "vVariant": "v = {{value}}"
       }
     },
     "example": {
@@ -326,13 +338,16 @@
     "ranking": {
       "methodHint": {
         "topsis": "Alternatifleri ideal ve negatif ideal çözüme olan uzaklıklarına göre sıralar.",
-        "saw": "Kriterlerin ölçeklenmiş değerlerini ağırlıklandırıp toplar."
+        "saw": "Kriterlerin ölçeklenmiş değerlerini ağırlıklandırıp toplar.",
+        "vikor": "En iyi toplam (S) ile en küçük en büyük pişmanlık (R) arasında uzlaşı arar; Q küçüldükçe sıra yükselir."
       },
       "columns": {
         "rank": "Sıra",
         "alternative": "Alternatif",
         "dPlus": "D+",
-        "dMinus": "D−"
+        "dMinus": "D−",
+        "groupUtility": "Grup faydası S",
+        "individualRegret": "Pişmanlık R"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -345,6 +360,11 @@
           "name": "Skor S",
           "title": "Ağırlıklı toplam S",
           "symbol": "S"
+        },
+        "vikor": {
+          "name": "Uzlaşı Q",
+          "title": "Uzlaşı indeksi Q",
+          "symbol": "Q"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -446,6 +466,15 @@
         "normalizedSum": "Normalize matris r (toplam)",
         "weighted": "Katkılar v = w r",
         "scores": "Skor S"
+      },
+      "vikor": {
+        "best": "En iyi değerler f*",
+        "worst": "En kötü değerler f−",
+        "weightedDistance": "Ağırlıklı uzaklıklar d",
+        "groupUtility": "Grup faydası S",
+        "individualRegret": "Bireysel pişmanlık R",
+        "q": "Uzlaşı indeksi Q",
+        "threshold": "Avantaj eşiği DQ"
       }
     },
     "issues": {
@@ -516,6 +545,24 @@
         "others": "Diğer kriterler",
         "segment": "{{alternative}}, {{criterion}}: {{value}} (S = {{score}})",
         "readout": "{{alternative}}: {{criterion}} katkısı {{value}}, S = {{score}}"
+      },
+      "vikor": {
+        "title": "Grup faydası ve en büyük pişmanlık",
+        "axisS": "S: grup faydası",
+        "axisR": "R: en büyük pişmanlık",
+        "ideal": "İdeal",
+        "threshold": "Q(a′) + DQ",
+        "inSet": "Uzlaşıda",
+        "yes": "evet",
+        "no": "hayır",
+        "c1Met": "Kabul edilebilir avantaj: birinci ({{first}}) ile ikinci ({{second}}) arasındaki Q farkı {{gap}}, en az DQ = {{dq}}.",
+        "c1Failed": "Kabul edilebilir avantaj yok: birinci ({{first}}) ile ikinci ({{second}}) arasındaki Q farkı {{gap}}, DQ = {{dq}} eşiğinin altında.",
+        "c2Both": "Kabul edilebilir kararlılık: {{first}} S'de ve R'de de birinci.",
+        "c2S": "Kabul edilebilir kararlılık: {{first}} S'de de birinci.",
+        "c2R": "Kabul edilebilir kararlılık: {{first}} R'de de birinci.",
+        "c2Failed": "Kabul edilebilir kararlılık yok: {{first}} ne S'de ne R'de birinci.",
+        "resultOne": "Uzlaşık çözüm: {{name}}",
+        "resultSet": "Uzlaşık çözüm kümesi: {{names}}"
       }
     },
     "flow": {
@@ -541,6 +588,13 @@
         "idealBest": "İdeal noktalar",
         "distanceBest": "Uzaklıklar",
         "closeness": "Yakınlık"
+      },
+      "vikor": {
+        "best": "En iyi ve en kötü",
+        "weightedDistance": "Uzaklıklar",
+        "groupUtility": "S ve R",
+        "q": "Q",
+        "threshold": "Eşik"
       }
     },
     "pipeline": {
@@ -552,7 +606,7 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS ya da SAW ile sıralayın ve hesabın her adımını görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW ya da VIKOR ile sıralayın ve hesabın her adımını görün."
     }
   },
   "methods": {
@@ -568,7 +622,8 @@
       "topsis": "TOPSIS",
       "equal": "Eşit ağırlık",
       "manual": "Elle girilen ağırlık",
-      "saw": "SAW"
+      "saw": "SAW",
+      "vikor": "VIKOR"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -621,7 +676,8 @@
         "critic": "Ağırlığı verideki kontrast ve çatışmadan bulur.",
         "entropy": "Ağırlığı verinin ne kadar dengesiz dağıldığından bulur.",
         "equal": "Her kritere 1/n verir.",
-        "saw": "Ölçeklenmiş değerleri ağırlıklı toplar."
+        "saw": "Ölçeklenmiş değerleri ağırlıklı toplar.",
+        "vikor": "En iyi toplamı en büyük pişmanlıkla dengeler."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -725,6 +781,10 @@
           "finish": "Bitir",
           "close": "Adımları kapat",
           "progress": "Adım {{n}} / {{count}}"
+        },
+        "vikor": {
+          "title": "Grup faydası mı, en büyük pişmanlık mı: dengeyi v kurar",
+          "caption": "Kesikli çizginin altında Q, lidere DQ'dan yakın kalır; avantaj kabul edilebilir değilse bu alternatifler uzlaşık kümeyi oluşturur."
         }
       }
     }
@@ -767,6 +827,15 @@
       "normalizedSum": "Toplam normalizasyonu: her değer sütun toplamına bölünür; maliyet kriterinde önce 1 / x alınır, paylar toplamı 1 olur.",
       "weighted": "Katkılar: her normalize değer kendi kriter ağırlığıyla çarpılır.",
       "scores": "Skor S: bir alternatifin katkılarının toplamı. Değer büyüdükçe sıra yükselir."
+    },
+    "vikor": {
+      "best": "Her kriterin en iyi değeri f*: fayda için en büyük, maliyet için en küçük.",
+      "worst": "Her kriterin en kötü değeri f−: sütununun öbür ucu.",
+      "weightedDistance": "En iyi değere ağırlıklı uzaklık d: en iyide 0, en kötüde kriterin ağırlığı.",
+      "groupUtility": "Grup faydası S: bir alternatifin uzaklıklarının toplamı. Küçük olan iyidir.",
+      "individualRegret": "Bireysel pişmanlık R: bir alternatifin en büyük tek uzaklığı. Küçük olan iyidir.",
+      "q": "Uzlaşı indeksi Q: 0 ile 1 arasına ölçeklenen S ve R, v ile karıştırılır. Değer küçüldükçe sıra yükselir.",
+      "threshold": "Avantaj eşiği DQ = 1 / (m - 1): birinci alternatifin ikinciye karşı gereken Q farkı."
     }
   },
   "validation": {
@@ -806,6 +875,13 @@
     "topsis": {
       "zero-column": "{{criterion}} kriterinin bütün değerleri 0, bu yüzden sıralamayı etkilemiyor.",
       "zero-distance": "Bazı alternatifler hem ideal hem negatif ideal çözümle çakışıyor. Bunların yakınlık katsayısı 0,5."
+    },
+    "vikor": {
+      "constant-column": "{{criterion}} kriterinin bütün değerleri aynı; S'ye ve R'ye bir şey katmıyor.",
+      "equal-group-utility": "Bütün alternatiflerin S değeri aynı; Q yalnız R'den geliyor.",
+      "equal-regret": "Bütün alternatiflerin R değeri aynı; Q yalnız S'den geliyor.",
+      "no-spread": "Bütün alternatiflerin S ve R değerleri aynı; hepsi Q = 0 alıyor.",
+      "tie-for-first": "Birden fazla alternatif en küçük Q değerini paylaşıyor; girdi sırasıyla listelenir ve hepsi uzlaşık kümededir."
     }
   }
 }

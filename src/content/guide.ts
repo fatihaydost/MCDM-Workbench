@@ -360,9 +360,12 @@ export const rankingRequirements: readonly RankingRequirement[] = [
     normalization: { en: 'Linear (f* - f) / (f* - f-)', tr: 'Doğrusal (f* - f) / (f* - f-)' },
     negatives: 'yes',
     zeros: 'yes',
-    note: { en: 'Divides by the column range: a constant column needs a guard.', tr: 'Sütun aralığına böler: sabit sütun için önlem gerekir.' },
-    params: { en: 'v in [0, 1], default 0.5; conditions C1 and C2', tr: 'v [0, 1] aralığında, varsayılan 0,5; C1 ve C2 koşulları' },
-    output: { en: 'S, R, Q and a compromise set', tr: 'S, R, Q ve uzlaşık çözüm kümesi' },
+    note: {
+      en: 'Divides by the column range, so any sign works; a constant column adds 0 to S and R here, with a notice.',
+      tr: 'Sütun aralığına böler, bu yüzden her işaret olur; sabit bir sütun burada S ve R\'ye 0 ekler, uyarıyla.',
+    },
+    params: { en: 'v in [0, 1], default 0.5 (a slider); conditions C1 and C2', tr: 'v [0, 1] aralığında, varsayılan 0,5 (kaydırıcı); C1 ve C2 koşulları' },
+    output: { en: 'S, R, Q (lower is better) and a compromise set', tr: 'S, R, Q (küçük olan daha iyi) ve uzlaşık çözüm kümesi' },
   },
   {
     label: 'EDAS',

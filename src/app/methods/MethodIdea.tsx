@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useId, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Problem } from '../../core'
 import type { MethodContent } from '../../content/types'
@@ -9,16 +9,20 @@ import { IdeaSteps, useIdeaSteps, type IdeaStepsLabels } from '../../features/il
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { SawContributions } from '../../features/illustrations/SawContributions'
 import { TOPSIS_IDEA_STEPS, TopsisGeometry } from '../../features/illustrations/TopsisGeometry'
+import { VikorIdea } from '../../features/illustrations/VikorIdea'
 import { useLang, useNumberFormat, type Lang } from '../../i18n'
+import { WeightRange } from '../ranking/WeightRange'
+import { useVikorLabels } from '../workbench/vikorLabels'
 
 function toProblem(ex: ExampleDataset, lang: Lang): Problem {
   return { alternatives: alternativeNames(ex, lang), criteria: ex.criteria.map((c) => ({ name: c.name[lang], type: c.type })), matrix: ex.matrix }
 }
 
 /**
- * The picture at the top of a method page. TOPSIS, CRITIC, Entropy and SAW draw their idea on their published
+ * The picture at the top of a method page. TOPSIS, CRITIC, Entropy, SAW and VIKOR draw their idea on their published
  * example; every other method shows its family glyph (no illustration for methods in research yet).
- * The Entropy and SAW pictures have no step-through story yet (SAW's answers hover and focus).
+ * The Entropy and SAW pictures have no step-through story yet (SAW's answers hover and focus); VIKOR's has a v slider
+ * instead, since turning the threshold line is its idea.
  */
 export function MethodIdea({ m }: { m: MethodContent }) {
   const { t } = useTranslation()
@@ -29,10 +33,12 @@ export function MethodIdea({ m }: { m: MethodContent }) {
   const criticEx = m.id === 'critic' ? getExample('krishnan-2021-smartphones') : undefined
   const entropyEx = m.id === 'entropy' ? getExample('zavadskas-2017-vilnius') : undefined
   const sawEx = m.id === 'saw' ? getExample('podvezko-2011-baltic') : undefined
+  // VIKOR on ten alternatives, where no leader is clearly ahead, so the compromise set and the DQ line show.
+  const vikorEx = m.id === 'vikor' ? getExample('keshavarz-2015-ten-alternatives') : undefined
   const problem = useMemo(() => {
-    const ex = topsisEx ?? criticEx ?? entropyEx ?? sawEx
+    const ex = topsisEx ?? criticEx ?? entropyEx ?? sawEx ?? vikorEx
     return ex ? toProblem(ex, lang) : null
-  }, [topsisEx, criticEx, entropyEx, sawEx, lang])
+  }, [topsisEx, criticEx, entropyEx, sawEx, vikorEx, lang])
 
   // "Step through": one story per method, the picture transforms from step to step (MOTION.md, explain).
   const storyCount = topsisEx ? TOPSIS_IDEA_STEPS : criticEx ? CRITIC_IDEA_STEPS : 0
@@ -159,10 +165,50 @@ export function MethodIdea({ m }: { m: MethodContent }) {
     )
   }
 
+  if (vikorEx && problem) return <VikorPageIdea ex={vikorEx} problem={problem} source={source(vikorEx)} />
+
   return (
     <div className="flex items-center gap-3 text-text-2">
       <MethodGlyph family={m.family} size={40} />
       <span className="text-14">{t(`methods.families.${m.family}`)}</span>
+    </div>
+  )
+}
+
+/** VIKOR on the method page: the picture with its own v slider (the page's state, not the workbench's). */
+function VikorPageIdea({ ex, problem, source }: { ex: ExampleDataset; problem: Problem; source: ReactNode }) {
+  const { t } = useTranslation()
+  const { format } = useNumberFormat(4)
+  const [v, setV] = useState(0.5)
+  const id = useId()
+  const labels = useVikorLabels('methods.page.idea.vikor.title')
+  const vText = format(v, 2)
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex w-full max-w-[360px] flex-col gap-1">
+        <div className="flex items-baseline justify-between gap-4">
+          <label htmlFor={id} className="text-13 font-medium text-text-2">
+            {t('workbench.params.vikor.v')}
+          </label>
+          <output htmlFor={id} className="text-14 font-semibold text-text tabular-nums" data-testid="idea-v">
+            {vText}
+          </output>
+        </div>
+        <WeightRange id={id} value={v} base={0.5} valueText={vText} onChange={setV} />
+        <div className="flex justify-between gap-4 text-12 text-text-3">
+          <span>{t('workbench.params.vikor.vEnds.min')}</span>
+          <span className="text-right">{t('workbench.params.vikor.vEnds.max')}</span>
+        </div>
+      </div>
+      <VikorIdea
+        problem={problem}
+        weights={ex.weights ?? []}
+        params={{ v }}
+        format={(x) => format(x, 4)}
+        labels={{ ...labels, caption: t('methods.page.idea.vikor.caption'), showTable: t('methods.page.idea.showTable'), alternative: t('methods.page.idea.alternative') }}
+        className="max-w-[880px]"
+      />
+      {source}
     </div>
   )
 }

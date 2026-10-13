@@ -16,6 +16,8 @@ import zavadskas from './fixtures/entropy-zavadskas2017.json'
 import f from './fixtures/opricovic-tzeng-2004-f.json'
 import phi from './fixtures/opricovic-tzeng-2004-phi.json'
 import podvezko from './fixtures/saw-podvezko2011.json'
+import vikorKG from './fixtures/vikor-keshavarz2015.json'
+import vikorOT from './fixtures/vikor-opricovic-tzeng2004.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -55,6 +57,25 @@ describe('examples match the published fixtures', () => {
     expect(ex.criteria.map((c) => c.type)).toEqual(podvezko.types)
     // The corrected scores (Table 3 misprints Lithuania), rounded as Table 3 prints them.
     expect(ex.published).toEqual([{ label: 'saw.scores', values: podvezko.linearMax.expected.S.map((v) => Number(v.toFixed(3))), decimals: 3 }])
+  })
+  it('Opricovic and Tzeng 2004: the VIKOR outputs printed in Table 3', () => {
+    for (const id of ['opricovic-tzeng-2004-f', 'opricovic-tzeng-2004-phi']) {
+      const ex = getExample(id)!
+      expect(ex.referenceFor).toEqual(['topsis', 'vikor'])
+      const pub = Object.fromEntries(ex.published.map((x) => [x.label, x.values]))
+      expect(pub['vikor.groupUtility']).toEqual(vikorOT.expected.S)
+      expect(pub['vikor.individualRegret']).toEqual(vikorOT.expected.R)
+      expect(pub['vikor.q']).toEqual(vikorOT.expected.Q)
+    }
+    expect(getExample('opricovic-tzeng-2004-phi')!.matrix).toEqual(vikorOT.matrix_phi)
+  })
+  it('Keshavarz Ghorabaee et al. 2015, weight set 1', () => {
+    const ex = getExample('keshavarz-2015-ten-alternatives')!
+    expect(ex.matrix).toEqual(vikorKG.matrix)
+    expect(ex.alternatives).toEqual(vikorKG.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(vikorKG.types)
+    expect(ex.weights).toEqual(vikorKG.weight_sets[0])
+    expect(ex.published).toEqual([{ label: 'vikor.rank', values: vikorKG.published_ranks[0], decimals: 0 }])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
@@ -225,6 +246,39 @@ describe('store actions', () => {
     st.loadExample('krishnan-2021-smartphones', 'en')
     expect(useWorkbench.getState().rankingMethod).toBe('saw')
     st.loadExample('opricovic-tzeng-2004-f', 'en')
+    expect(useWorkbench.getState().rankingMethod).toBe('topsis')
+  })
+
+  it('VIKOR through the store: its example, its v from the slider state, and the method page link', () => {
+    const st = useWorkbench.getState()
+    st.setMethodParam('vikor', 'v', 0.8)
+    st.loadExample('keshavarz-2015-ten-alternatives', 'en')
+    let s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('vikor')
+    expect(s.methodParams?.vikor).toEqual({})
+    const r = computeRanking(s)
+    expect(r.value!.order).toBe('asc')
+    expect(r.value!.ranking).toEqual(vikorKG.published_ranks[0])
+    expectClose(r.value!.scores, vikorKG.derived.Q_set1, vikorKG.derived.tolerance)
+    // v from the store reaches the method; S and R stay, Q changes.
+    st.setMethodParam('vikor', 'v', 1)
+    const r1 = computeRanking(useWorkbench.getState())
+    expect(r1.value!.diagnostics?.v).toBe(1)
+    expect(r1.value!.scores).not.toEqual(r.value!.scores)
+    // An out-of-range v (old or hand-edited state) falls back to the default.
+    st.setMethodParam('vikor', 'v', 7)
+    expect(computeRanking(useWorkbench.getState()).value!.scores).toEqual(r.value!.scores)
+    // An example shared with TOPSIS: the link asks for VIKOR; without it, the current method stays if it is listed.
+    st.loadExample('opricovic-tzeng-2004-f', 'en', 'vikor')
+    s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('vikor')
+    expectClose(computeRanking(s).value!.scores, vikorOT.expected.Q, vikorOT.expected.tolerance)
+    st.loadExample('opricovic-tzeng-2004-phi', 'en')
+    expect(useWorkbench.getState().rankingMethod).toBe('vikor')
+    st.setRankingMethod('saw')
+    st.loadExample('opricovic-tzeng-2004-f', 'en')
+    expect(useWorkbench.getState().rankingMethod).toBe('topsis')
+    st.loadExample('opricovic-tzeng-2004-f', 'en', 'nope')
     expect(useWorkbench.getState().rankingMethod).toBe('topsis')
   })
 
