@@ -70,8 +70,8 @@ export const pipelines: readonly Pipeline[] = [
     coMentions: 4639,
     tier: 'top',
     evidence: {
-      en: 'Entropy is the second partner of AHP in crisp studies (Çebi et al. 2022), and Entropy then TOPSIS is the standard template of Turkish financial-performance papers.',
-      tr: 'Entropi, klasik çalışmalarda AHP\'nin ikinci ortağıdır (Çebi vd. 2022); Entropi ardından TOPSIS, Türkçe finansal performans makalelerinin standart kalıbıdır.',
+      en: 'Entropy is the second partner of AHP in crisp studies (Çebi et al. 2022), and Entropy then TOPSIS recurs in the Turkish financial-performance papers we found (our reading of examples, not a count).',
+      tr: 'Entropi, klasik çalışmalarda AHP\'nin ikinci ortağıdır (Çebi vd. 2022); Entropi ardından TOPSIS, bulduğumuz Türkçe finansal performans makalelerinde tekrar eder (örneklerden okumamız, sayım değil).',
     },
     examples: [
       { label: 'Deng, Yeh & Willis (2000), Computers & Operations Research 27, 963-973', doi: '10.1016/S0305-0548(99)00069-6' },
@@ -172,8 +172,8 @@ export const pipelines: readonly Pipeline[] = [
     coMentions: 104,
     tier: 'growing',
     evidence: {
-      en: 'Common in recent Turkish papers. EDAS is also an ordinary word or other acronym, so this count is an upper bound.',
-      tr: 'Son dönem Türkçe makalelerde yaygın. EDAS başka bir sözcük ya da kısaltma olarak da geçtiği için bu sayı bir üst sınırdır.',
+      en: 'Seen in recent Turkish papers (the examples below, not a count). EDAS is also an ordinary word or other acronym, so this count is an upper bound.',
+      tr: 'Son dönem Türkçe makalelerde görülüyor (aşağıdaki örnekler, sayım değil). EDAS başka bir sözcük ya da kısaltma olarak da geçtiği için bu sayı bir üst sınırdır.',
     },
     examples: [
       { label: 'Aydın Ünal (2019), Entropi-EDAS, BIST insurers', doi: '10.29106/fesa.649946' },

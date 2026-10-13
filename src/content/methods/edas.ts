@@ -49,8 +49,8 @@ export const edas: MethodContent = {
     {
       methodId: 'entropy',
       text: {
-        en: 'Entropy then EDAS is a common Turkish pipeline, for example Aydın Ünal (2019) on BIST insurers and Sarıhan & Aydın (2023) on exporters. Keshavarz-Ghorabaee et al. (2021) also review an Entropy-EDAS renewable-energy study.',
-        tr: "Entropi ardından EDAS yaygın bir Türkçe boru hattıdır; örneğin Aydın Ünal (2019) BIST sigorta şirketleri, Sarıhan ve Aydın (2023) ihracatçılar. Keshavarz-Ghorabaee vd. (2021) de Entropi-EDAS kullanan bir yenilenebilir enerji çalışmasını inceler.",
+        en: 'Entropy then EDAS appears in Turkish papers, for example Aydın Ünal (2019) on BIST insurers and Sarıhan & Aydın (2023) on exporters. Keshavarz-Ghorabaee et al. (2021) also review an Entropy-EDAS renewable-energy study.',
+        tr: "Entropi ardından EDAS Türkçe makalelerde görülür; örneğin Aydın Ünal (2019) BIST sigorta şirketleri, Sarıhan ve Aydın (2023) ihracatçılar. Keshavarz-Ghorabaee vd. (2021) de Entropi-EDAS kullanan bir yenilenebilir enerji çalışmasını inceler.",
       },
     },
     {

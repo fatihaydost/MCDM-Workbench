@@ -71,8 +71,8 @@ export const topsis: MethodContent = {
     {
       methodId: 'entropy',
       text: {
-        en: 'Entropy then TOPSIS is the standard template of Turkish financial-performance papers (for example Ersoy & Orçun 2022, BIST).',
-        tr: 'Entropi ardından TOPSIS, Türkçe finansal performans makalelerinin standart kalıbıdır (örneğin Ersoy ve Orçun 2022, BIST).',
+        en: 'Entropy then TOPSIS recurs in Turkish financial-performance papers, for example Ersoy & Orçun 2022 (BIST); no source counts how often.',
+        tr: 'Entropi ardından TOPSIS Türkçe finansal performans makalelerinde tekrar eder, örneğin Ersoy ve Orçun 2022 (BIST); ne sıklıkta olduğunu sayan bir kaynak yok.',
       },
     },
     {

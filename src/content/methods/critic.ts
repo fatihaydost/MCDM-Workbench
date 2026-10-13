@@ -78,8 +78,8 @@ export const critic: MethodContent = {
     {
       methodId: 'edas',
       text: {
-        en: 'CRITIC then EDAS is common in Turkish financial-performance studies, for example Bayram (2021) on participation banks.',
-        tr: 'CRITIC ardından EDAS, Türkçe finansal performans çalışmalarında yaygındır; örneğin Bayram (2021) katılım bankaları üzerine.',
+        en: 'CRITIC then EDAS appears in Turkish financial-performance studies, for example Bayram (2021) on participation banks.',
+        tr: 'CRITIC ardından EDAS Türkçe finansal performans çalışmalarında da görülür; örneğin Bayram (2021) katılım bankaları üzerine.',
       },
     },
   ],
