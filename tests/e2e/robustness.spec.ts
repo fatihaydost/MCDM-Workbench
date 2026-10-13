@@ -109,6 +109,22 @@ test('a criterion with weight 0 is not perturbed: n/a, left out of the count, wi
   await expect(page.getByText('Criteria with weight 0 are left out: a percentage of 0 is still 0.')).toBeVisible()
 })
 
+test('all the weight on one criterion: the small changes say there is nothing to nudge and draw no empty grid', async ({ page }) => {
+  await page.goto('/app?example=krishnan-2021-smartphones&stage=weights')
+  await page.getByRole('radio', { name: 'Manual' }).click()
+  for (const [j, v] of [1, 0, 0, 0, 0].entries()) {
+    await page.locator(`#wb-weight-${j}`).fill(String(v))
+    await page.locator(`#wb-weight-${j}`).blur()
+  }
+  await expect(page.getByText('Weights sum to 1.')).toBeVisible()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Robustness' }).click()
+  await expect(page.getByTestId('perturb-summary')).toHaveText(
+    'All the weight is on one criterion: the others cannot be rescaled, so there is nothing to nudge.',
+  )
+  await expect(page.locator('[data-testid="perturb-cell"]')).toHaveCount(0)
+  await expect(page.getByText('Criteria with weight 0 are left out: a percentage of 0 is still 0.')).toHaveCount(0)
+})
+
 test('small changes: the grid and the summary match perturbWeights', async ({ page }) => {
   await open(page)
   const rows = perturbWeights(problem, weights, topsis)

@@ -79,40 +79,43 @@ export function PerturbSection({ problem, weights, method, params, names, criter
       <p className="text-16 font-medium text-text" data-testid="perturb-summary">
         {total > 0 ? t('perturb.summary', { held, total }) : t('perturb.allOnOne')}
       </p>
-      <ChartFigure
-        titleId={`${uid}-chart`}
-        tableId={`${uid}-table`}
-        title={t('perturb.chartTitle')}
-        showTable={tw('workbench.chart.showTable')}
-        table={table}
-        plotRef={null}
-        className="max-w-[720px]"
-      >
-        <div
-          role="img"
-          aria-labelledby={`${uid}-chart`}
-          aria-describedby={`${uid}-table`}
-          className={s.pgrid}
-          data-compact={compact || undefined}
-          style={{ gridTemplateColumns: `minmax(0, ${labelWidth}px) repeat(${DEFAULT_DELTAS.length}, minmax(${compact ? CELL_COMPACT : CELL}px, auto))` }}
+      {/* All the weight on one criterion: nothing can be nudged, so no grid of n/a cells and no note about weight 0. */}
+      {total > 0 && (
+        <ChartFigure
+          titleId={`${uid}-chart`}
+          tableId={`${uid}-table`}
+          title={t('perturb.chartTitle')}
+          showTable={tw('workbench.chart.showTable')}
+          table={table}
+          plotRef={null}
+          className="max-w-[720px]"
         >
-          <span />
-          {deltaText.map((d) => (
-            <span key={d} className={s.pcol}>
-              {d}
-            </span>
-          ))}
-          {grid.map((cells, j) => (
-            <PerturbRow
-              key={j}
-              criterion={criteria[j] ?? ''}
-              compact={compact}
-              na={t('perturb.na')}
-              cells={cells.map((r): Cell => (!r || !applicable(r, weights) ? { kind: 'na' } : r.sameTop ? { kind: 'same' } : { kind: 'changed', leader: leader(r.ranking) }))}
-            />
-          ))}
-        </div>
-      </ChartFigure>
+          <div
+            role="img"
+            aria-labelledby={`${uid}-chart`}
+            aria-describedby={`${uid}-table`}
+            className={s.pgrid}
+            data-compact={compact || undefined}
+            style={{ gridTemplateColumns: `minmax(0, ${labelWidth}px) repeat(${DEFAULT_DELTAS.length}, minmax(${compact ? CELL_COMPACT : CELL}px, auto))` }}
+          >
+            <span />
+            {deltaText.map((d) => (
+              <span key={d} className={s.pcol}>
+                {d}
+              </span>
+            ))}
+            {grid.map((cells, j) => (
+              <PerturbRow
+                key={j}
+                criterion={criteria[j] ?? ''}
+                compact={compact}
+                na={t('perturb.na')}
+                cells={cells.map((r): Cell => (!r || !applicable(r, weights) ? { kind: 'na' } : r.sameTop ? { kind: 'same' } : { kind: 'changed', leader: leader(r.ranking) }))}
+              />
+            ))}
+          </div>
+        </ChartFigure>
+      )}
       {compact && changes.length > 0 && (
         <ul className="flex flex-col gap-1 text-13 text-text" data-testid="perturb-changes">
           {changes.map((r) => (
@@ -123,7 +126,7 @@ export function PerturbSection({ problem, weights, method, params, names, criter
           ))}
         </ul>
       )}
-      {anyZero && <p className="text-13 text-text-2">{t('perturb.zeroNote')}</p>}
+      {anyZero && total > 0 && <p className="text-13 text-text-2">{t('perturb.zeroNote')}</p>}
       <SourcesDisclosure part="perturb" />
     </section>
   )
