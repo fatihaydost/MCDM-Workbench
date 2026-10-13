@@ -1,4 +1,4 @@
-import { column, sum, zeros } from '../math'
+import { column, isConstant, maxOf, minOf, sum, zeros } from '../math'
 import type { MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
 import { assertValid, validateProblem, type ValidationIssue } from '../validate'
 
@@ -18,7 +18,7 @@ export const ENTROPY_NO_INFORMATION = 1e-12
  *   Vujičić et al. 2017 Eqs. 15-19). Any x < 0 is a blocking 'negative-value' error.
  * - normalization 'minmax': benefit r = (x - min) / (max - min), cost r = (max - x) / (max - min)
  *   (Mukhametzyanov 2021 Eqs. 1-4); any sign is accepted.
- * A constant column (all-zero included) gets p = 1/m, e = 1 and d = 0 without dividing (weight 0, notice).
+ * A constant column (all-zero included, spread within rounding) gets p = 1/m, e = 1 and d = 0 without dividing (weight 0, notice).
  * See docs/research/methods/entropy.md.
  */
 export const entropy: WeightingMethod<EntropyParams> = {
@@ -46,10 +46,8 @@ export const entropy: WeightingMethod<EntropyParams> = {
     const n = criteria.length
     const k = 1 / Math.log(m)
     const warnings: MethodWarning[] = []
-    const constant = Array.from({ length: n }, (_, j) => {
-      const col = column(matrix, j)
-      return col.every((v) => v === col[0])
-    })
+    // Constant up to rounding (0.3 and 0.1 + 0.2 are the same value), so min-max never stretches noise to [0, 1].
+    const constant = Array.from({ length: n }, (_, j) => isConstant(column(matrix, j)))
 
     // 1. (minmax only) r in [0, 1], 1 = best; a constant column (max = min) stays 0 and is never divided.
     let r: number[][] | undefined
@@ -58,8 +56,8 @@ export const entropy: WeightingMethod<EntropyParams> = {
       for (let j = 0; j < n; j++) {
         if (constant[j]) continue
         const col = column(matrix, j)
-        const lo = Math.min(...col)
-        const hi = Math.max(...col)
+        const lo = minOf(col)
+        const hi = maxOf(col)
         const isCost = criteria[j]!.type === 'cost'
         for (let i = 0; i < m; i++) r[i]![j] = isCost ? (hi - col[i]!) / (hi - lo) : (col[i]! - lo) / (hi - lo)
       }

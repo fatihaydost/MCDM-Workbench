@@ -854,6 +854,7 @@
       "alternatives-count-mismatch": "Alternatif adlarının sayısı satır sayısıyla eşleşmiyor.",
       "row-length-mismatch": "{{alternative}} satırında {{value}} değer var, her satırda {{n}} değer olmalı.",
       "invalid-cell": "{{alternative}} için {{criterion}} değerine bir sayı gir.",
+      "value-out-of-range": "{{alternative}} için {{criterion}} değeri hesap için çok büyük ya da çok küçük. {{criterion}} kriterini başka bir birime çevirin; değerler 10⁻¹⁰⁰ ile 10¹⁰⁰ arasında olmalı.",
       "invalid-criterion-type": "{{criterion}} için fayda ya da maliyet seç.",
       "constant-column": "{{criterion}} kriterinde bütün alternatiflerin değeri aynı, bu yüzden alternatifleri ayırt edemiyor.",
       "non-positive-value": "{{alternative}} için {{criterion}} değeri {{value}}. Bu yöntem değerlere böler, bu yüzden her değer 0'dan büyük olmalı.",

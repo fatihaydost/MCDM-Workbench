@@ -854,6 +854,7 @@
       "alternatives-count-mismatch": "The number of alternative names does not match the number of rows.",
       "row-length-mismatch": "{{alternative}} has {{value}} values, every row needs {{n}}.",
       "invalid-cell": "Enter a number for {{alternative}} on {{criterion}}.",
+      "value-out-of-range": "{{alternative}} on {{criterion}} is too large or too small to compute with. Rescale {{criterion}} (another unit) so its values lie between 10⁻¹⁰⁰ and 10¹⁰⁰.",
       "invalid-criterion-type": "Choose benefit or cost for {{criterion}}.",
       "constant-column": "Every alternative has the same value on {{criterion}}, so it cannot tell them apart.",
       "non-positive-value": "{{alternative}} on {{criterion}} is {{value}}. This method divides by the values, so each must be above 0.",

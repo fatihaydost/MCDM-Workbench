@@ -1,4 +1,4 @@
-import { column, sum, zeros } from '../math'
+import { column, maxOf, minOf, sum, zeros } from '../math'
 import { rankScores } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, validateProblem, validateWeights } from '../validate'
@@ -36,8 +36,8 @@ export const topsis: RankingMethod = {
     const worst = new Array<number>(n)
     for (let j = 0; j < n; j++) {
       const col = column(v, j)
-      const hi = Math.max(...col)
-      const lo = Math.min(...col)
+      const hi = maxOf(col)
+      const lo = minOf(col)
       const isCost = criteria[j]!.type === 'cost'
       best[j] = isCost ? lo : hi
       worst[j] = isCost ? hi : lo

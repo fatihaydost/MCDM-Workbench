@@ -1,4 +1,4 @@
-import { column, sum, zeros } from '../math'
+import { column, maxOf, minOf, sum, zeros } from '../math'
 import { rankScores } from '../rank'
 import type { Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, hasErrors, validateProblem, validateRequirements, validateWeights } from '../validate'
@@ -38,8 +38,8 @@ export const saw: RankingMethod<SawParams> = {
       const col = column(matrix, j)
       const isCost = criteria[j]!.type === 'cost'
       if (variant === 'linearMax') {
-        const hi = Math.max(...col)
-        const lo = Math.min(...col)
+        const hi = maxOf(col)
+        const lo = minOf(col)
         for (let i = 0; i < m; i++) r[i]![j] = isCost ? lo / col[i]! : col[i]! / hi
       } else {
         // Cost: min / x first (Podvezko Eq. 2); the constant min cancels in the share, so 1 / x gives the same r.

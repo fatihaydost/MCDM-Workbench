@@ -1,4 +1,4 @@
-import { column, pearson, sampleStd, sum, zeros } from '../math'
+import { column, isConstant, maxOf, minOf, pearson, sampleStd, sum, zeros } from '../math'
 import type { MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
 import { assertValid, validateProblem } from '../validate'
 
@@ -29,13 +29,13 @@ export const critic: WeightingMethod = {
     const constant = new Array<boolean>(n).fill(false)
     for (let j = 0; j < n; j++) {
       const col = column(matrix, j)
-      const lo = Math.min(...col)
-      const hi = Math.max(...col)
-      const range = hi - lo
-      if (range === 0) {
+      if (isConstant(col)) {
         constant[j] = true
         continue
       }
+      const lo = minOf(col)
+      const hi = maxOf(col)
+      const range = hi - lo
       const isCost = criteria[j]!.type === 'cost'
       for (let i = 0; i < m; i++) {
         const x = col[i]!

@@ -1,3 +1,4 @@
+import { isConstant } from './math'
 import type { Problem, RankingMethod } from './types'
 
 export type ValidationCode =
@@ -6,6 +7,7 @@ export type ValidationCode =
   | 'alternatives-count-mismatch'
   | 'row-length-mismatch'
   | 'invalid-cell'
+  | 'value-out-of-range'
   | 'invalid-criterion-type'
   | 'constant-column'
   | 'non-positive-value'
@@ -29,6 +31,15 @@ export const MIN_ALTERNATIVES = 2
 export const MIN_CRITERIA = 2
 /** Allowed |sum(weights) - 1|. */
 export const WEIGHT_SUM_TOLERANCE = 1e-6
+
+/**
+ * Magnitudes the methods compute with safely: a value above 1e100 (or a non-zero one below 1e-100) can overflow or
+ * underflow inside a method (TOPSIS squares the values, SAW and Entropy add a column up, SAW inverts cost values), which
+ * would silently zero a column. Such a cell is a blocking 'value-out-of-range' error instead; rescaling the criterion
+ * (a unit change) brings it back in range.
+ */
+export const MAX_MAGNITUDE = 1e100
+export const MIN_MAGNITUDE = 1e-100
 
 const isFiniteNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 
@@ -64,6 +75,9 @@ export function validateProblem(problem: Problem): ValidationIssue[] {
     }
     row.forEach((v, j) => {
       if (!isFiniteNumber(v)) issues.push({ code: 'invalid-cell', severity: 'error', row: i, col: j })
+      else if (v !== 0 && (Math.abs(v) > MAX_MAGNITUDE || Math.abs(v) < MIN_MAGNITUDE)) {
+        issues.push({ code: 'value-out-of-range', severity: 'error', row: i, col: j, value: v })
+      }
     })
   })
 
@@ -71,7 +85,7 @@ export function validateProblem(problem: Problem): ValidationIssue[] {
     for (let j = 0; j < n; j++) {
       const col = matrix.map((row) => row[j])
       if (!col.every(isFiniteNumber)) continue
-      if (col.every((v) => v === col[0])) issues.push({ code: 'constant-column', severity: 'warning', col: j })
+      if (isConstant(col)) issues.push({ code: 'constant-column', severity: 'warning', col: j })
     }
   }
 

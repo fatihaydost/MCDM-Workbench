@@ -122,6 +122,7 @@ export function placeIssue(
     case 'too-few-criteria':
       return { ...base, stage: 'data', targetId: ids.addCriterion }
     case 'invalid-cell':
+    case 'value-out-of-range':
     case 'non-positive-value':
     case 'negative-value':
       return { ...base, stage: 'data', targetId: row !== undefined && col !== undefined ? ids.cell(row, col) : ids.corner }

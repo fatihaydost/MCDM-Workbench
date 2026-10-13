@@ -1,4 +1,4 @@
-import { column, sum, zeros } from '../math'
+import { column, isConstant, maxOf, minOf, sum, zeros } from '../math'
 import { rankScores, tied } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, validateProblem, validateWeights } from '../validate'
@@ -12,7 +12,7 @@ export const VIKOR_DEFAULT_V = 0.5
 const DQ_TOLERANCE = 1e-12
 
 /** Whether every value is the same up to rounding (the spread is within TIE_TOLERANCE of the largest magnitude). */
-export const vikorFlat = (xs: readonly number[]): boolean => tied(Math.max(...xs), Math.min(...xs))
+export const vikorFlat = (xs: readonly number[]): boolean => tied(maxOf(xs), minOf(xs))
 
 /**
  * One term of Q: (x - min) / (max - min), the best 0 and the worst 1. A flat set (`vikorFlat`) gives 0 everywhere, so
@@ -20,8 +20,8 @@ export const vikorFlat = (xs: readonly number[]): boolean => tied(Math.max(...xs
  */
 export function vikorTerm(xs: readonly number[]): number[] {
   if (vikorFlat(xs)) return xs.map(() => 0)
-  const lo = Math.min(...xs)
-  const span = Math.max(...xs) - lo
+  const lo = minOf(xs)
+  const span = maxOf(xs) - lo
   return xs.map((x) => (x - lo) / span)
 }
 
@@ -101,8 +101,8 @@ export const vikor: RankingMethod<VikorParams> = {
     const worst = new Array<number>(n)
     for (let j = 0; j < n; j++) {
       const col = column(matrix, j)
-      const hi = Math.max(...col)
-      const lo = Math.min(...col)
+      const hi = maxOf(col)
+      const lo = minOf(col)
       const isCost = criteria[j]!.type === 'cost'
       best[j] = isCost ? lo : hi
       worst[j] = isCost ? hi : lo
@@ -112,7 +112,8 @@ export const vikor: RankingMethod<VikorParams> = {
     const d = zeros(m, n)
     for (let j = 0; j < n; j++) {
       const span = best[j]! - worst[j]!
-      if (span === 0) {
+      // Constant up to rounding (as in validateProblem): a spread of one ulp is not stretched to the full [0, 1].
+      if (isConstant(column(matrix, j))) {
         warnings.push({ code: 'vikor.constant-column', col: j })
         continue
       }
@@ -121,7 +122,7 @@ export const vikor: RankingMethod<VikorParams> = {
 
     // 3. Group utility S (L1) and individual regret R (L∞).
     const S = d.map((row) => sum(row))
-    const R = d.map((row) => Math.max(...row))
+    const R = d.map((row) => maxOf(row))
 
     // 4. Q; a term whose spread is 0 up to rounding is 0 (every alternative equal on it), so Q never divides by 0
     //    and never stretches rounding noise to [0, 1].
