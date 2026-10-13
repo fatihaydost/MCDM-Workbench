@@ -73,14 +73,14 @@ export const lopcow: MethodContent = {
     doi: '10.25287/ohuiibf.1239201',
     match: 'match',
     note: {
-      en: 'Published example (Tables 6, 7 and 8); this method is not computed here yet, only recomputed during research. Fifteen cities, three criteria sets (6, 8 and 14 criteria). Weights match the printed 3 decimals in all three tables with the sample standard deviation; the population form misses by up to 0.0045. LOPCOW weights published by Trung et al. (2024) could not be reproduced with either form.',
-      tr: "Yayımlanmış örnek (Tablo 6, 7 ve 8); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. On beş şehir, üç kriter kümesi (6, 8 ve 14 kriter). Örneklem standart sapmasıyla ağırlıklar üç tabloda da basılı 3 basamakta örtüşüyor; anakütle biçimi 0,0045'e kadar sapıyor. Trung vd. (2024) tarafından yayımlanan LOPCOW ağırlıkları iki biçimle de elde edilemedi.",
+      en: 'Published example (Tables 6, 7 and 8); this method is not computed here yet, only recomputed during research. Fifteen cities, three criteria sets (6, 8 and 14 criteria). Weights match the printed 3 decimals in all three tables with the sample standard deviation; the population form misses by up to 0.0045. LOPCOW weights published by Dua et al. (2024) could not be reproduced with either form.',
+      tr: "Yayımlanmış örnek (Tablo 6, 7 ve 8); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. On beş şehir, üç kriter kümesi (6, 8 ve 14 kriter). Örneklem standart sapmasıyla ağırlıklar üç tabloda da basılı 3 basamakta örtüşüyor; anakütle biçimi 0,0045'e kadar sapıyor. Dua vd. (2024) tarafından yayımlanan LOPCOW ağırlıkları iki biçimle de elde edilemedi.",
     },
   },
   sources: [
     { label: 'Ecer & Pamucar (2022), Omega 112, 102690', doi: '10.1016/j.omega.2022.102690' },
     { label: 'Keleş (2023), Ömer Halisdemir Üniversitesi İİBF Dergisi 16(3), 727-747', doi: '10.25287/ohuiibf.1239201' },
-    { label: 'Trung et al. (2024), EUREKA: Physics and Engineering', doi: '10.21303/2461-4262.2024.003171' },
+    { label: 'Dua, Duc, Bao & Trung (2024), EUREKA: Physics and Engineering', doi: '10.21303/2461-4262.2024.003171' },
     { label: 'Yılmaz Özekenci (2024), LOPCOW-CRITIC-CoCoSo, BIST energy', doi: '10.29249/selcuksbmyd.1400056' },
   ],
   en: {

@@ -48,8 +48,8 @@ export const merec: MethodContent = {
   combinedWith: [
     {
       text: {
-        en: 'MEREC with other objective weightings, then MARA, RAM and PIV for material selection: Trung et al. (2024), whose MEREC weights were reproduced exactly during research.',
-        tr: 'Malzeme seçimi için diğer nesnel ağırlıklandırmalarla birlikte MEREC, ardından MARA, RAM ve PIV: Trung vd. (2024); onların MEREC ağırlıkları araştırmada birebir yeniden hesaplandı.',
+        en: 'MEREC with other objective weightings, then MARA, RAM and PIV for material selection: Dua et al. (2024), whose MEREC weights were reproduced exactly during research.',
+        tr: 'Malzeme seçimi için diğer nesnel ağırlıklandırmalarla birlikte MEREC, ardından MARA, RAM ve PIV: Dua vd. (2024); onların MEREC ağırlıkları araştırmada birebir yeniden hesaplandı.',
       },
     },
     {
@@ -78,7 +78,7 @@ export const merec: MethodContent = {
   },
   sources: [
     { label: 'Keshavarz-Ghorabaee, Amiri, Zavadskas, Turskis & Antucheviciene (2021), Symmetry 13(4), 525', doi: '10.3390/sym13040525' },
-    { label: 'Trung et al. (2024), EUREKA: Physics and Engineering', doi: '10.21303/2461-4262.2024.003171' },
+    { label: 'Dua, Duc, Bao & Trung (2024), EUREKA: Physics and Engineering', doi: '10.21303/2461-4262.2024.003171' },
     { label: 'Keleş (2023), Ömer Halisdemir Üniversitesi İİBF Dergisi 16(3), 727-747', doi: '10.25287/ohuiibf.1239201' },
   ],
   en: {

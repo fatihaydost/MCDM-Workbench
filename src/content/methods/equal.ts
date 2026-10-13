@@ -29,8 +29,8 @@ export const equal: MethodContent = {
     {
       methodId: 'lopcow',
       text: {
-        en: 'Any ranking method, as the "no weighting" scenario: Trung et al. (2024) run MARA, RAM and PIV with mean weights next to Entropy, MEREC, LOPCOW and CRITIC.',
-        tr: 'Herhangi bir sıralama yöntemiyle, "ağırlıksız" senaryo olarak: Trung vd. (2024) MARA, RAM ve PIV yöntemlerini Entropi, MEREC, LOPCOW ve CRITIC yanında ortalama ağırlıklarla da çalıştırır.',
+        en: 'Any ranking method, as the "no weighting" scenario: Dua et al. (2024) run MARA, RAM and PIV with mean weights next to Entropy, MEREC, LOPCOW and CRITIC.',
+        tr: 'Herhangi bir sıralama yöntemiyle, "ağırlıksız" senaryo olarak: Dua vd. (2024) MARA, RAM ve PIV yöntemlerini Entropi, MEREC, LOPCOW ve CRITIC yanında ortalama ağırlıklarla da çalıştırır.',
       },
     },
     {
@@ -53,7 +53,7 @@ export const equal: MethodContent = {
   sources: [
     { label: 'Dawes & Corrigan (1974), Psychological Bulletin 81(2), 95-106', doi: '10.1037/h0037613' },
     { label: 'Roszkowska (2013), Optimum. Studia Ekonomiczne 5(65), 14-33', doi: '10.15290/ose.2013.05.65.02' },
-    { label: 'Trung et al. (2024), EUREKA: Physics and Engineering', doi: '10.21303/2461-4262.2024.003171' },
+    { label: 'Dua, Duc, Bao & Trung (2024), EUREKA: Physics and Engineering', doi: '10.21303/2461-4262.2024.003171' },
     { label: 'Keshavarz-Ghorabaee et al. (2021), Symmetry 13(4), 525', doi: '10.3390/sym13040525' },
   ],
   en: {

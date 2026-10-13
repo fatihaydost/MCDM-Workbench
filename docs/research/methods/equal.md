@@ -2,7 +2,7 @@
 
 - **Family:** weighting (objective; data-free baseline)
 - **Origin:** No inventor; the classic justification is Dawes, R.M. & Corrigan, B. (1974). Linear models in decision making. *Psychological Bulletin* 81(2), 95–106. DOI [10.1037/h0037613](https://doi.org/10.1037/h0037613) (Crossref verified; not read — cited as the usual "unit weights" reference). Listed as "EW" in Roszkowska (2013), *Optimum. Studia Ekonomiczne* 5(65), 14–33, DOI [10.15290/ose.2013.05.65.02](https://doi.org/10.15290/ose.2013.05.65.02), Table 4.
-- **Popularity:** used as the reference scenario in weighting comparisons (e.g., "MEAN" weights in Trung et al. 2024; "Equal Weights" in 2 of the 30 studies of Keshavarz-Ghorabaee et al. 2021, Table 1, plus Ramasamy et al. in their Sec. 2 text).
+- **Popularity:** used as the reference scenario in weighting comparisons (e.g., "MEAN" weights in Dua et al. 2024; "Equal Weights" in 2 of the 30 studies of Keshavarz-Ghorabaee et al. 2021, Table 1, plus Ramasamy et al. in their Sec. 2 text).
 
 ## For users (site copy)
 - **EN:** Every criterion gets the same weight, 1/n. Use it when you have no reason to prefer one criterion, or as a neutral baseline to see how much another weighting changes the ranking.
@@ -19,7 +19,7 @@
 1. $w_j = 1/n$ for all j.
 
 ## Commonly combined with
-- Any ranking method, as the "no-weighting" scenario: Trung et al. (2024) run MARA/RAM/PIV with MEAN weights next to Entropy/MEREC/LOPCOW/CRITIC, DOI [10.21303/2461-4262.2024.003171](https://doi.org/10.21303/2461-4262.2024.003171).
+- Any ranking method, as the "no-weighting" scenario: Dua et al. (2024) run MARA/RAM/PIV with MEAN weights next to Entropy/MEREC/LOPCOW/CRITIC, DOI [10.21303/2461-4262.2024.003171](https://doi.org/10.21303/2461-4262.2024.003171).
 
 ## Pitfalls
 - Hidden weighting through criterion count (see above).

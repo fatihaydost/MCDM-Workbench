@@ -28,7 +28,7 @@
 **Variants.** The paper gives one form. pyDecision `merec_method` is the same algorithm with 1e-9 guards (matches to 8e-12). Fuzzy/intuitionistic MEREC extensions exist but are out of scope.
 
 ## Commonly combined with
-- MEREC with other objective weightings, then MARA / RAM / PIV (material selection): Trung et al. (2024), *EUREKA: Physics and Engineering*, DOI [10.21303/2461-4262.2024.003171](https://doi.org/10.21303/2461-4262.2024.003171) (their MEREC weights for Case 2 are reproduced exactly by our code: [0.0758, 0.2002, 0.1602, 0.0953, 0.2747, 0.1938]).
+- MEREC with other objective weightings, then MARA / RAM / PIV (material selection): Dua et al. (2024), *EUREKA: Physics and Engineering*, DOI [10.21303/2461-4262.2024.003171](https://doi.org/10.21303/2461-4262.2024.003171) (their MEREC weights for Case 2 are reproduced exactly by our code: [0.0758, 0.2002, 0.1602, 0.0953, 0.2747, 0.1938]).
 - LOPCOW/MEREC → CoCoSo / EDAS (insurance sector, Bektaş 2022) as listed in Keleş (2023) Table 1, DOI [10.25287/ohuiibf.1239201](https://doi.org/10.25287/ohuiibf.1239201).
 - MEREC compared with CRITIC, Entropy, SD: origin paper Sec. 4.2.
 
@@ -81,5 +81,5 @@
 
 ## Sources
 - Keshavarz-Ghorabaee et al. (2021), DOI 10.3390/sym13040525 — full PDF (gs.elaba.lt), Sec. 3–4, Tables 2–6.
-- Trung et al. (2024), DOI 10.21303/2461-4262.2024.003171 — full text (journal.eu-jr.eu), Tables 8–9.
+- Dua et al. (2024), DOI 10.21303/2461-4262.2024.003171 — full text (journal.eu-jr.eu), Tables 8–9.
 - Keleş (2023), DOI 10.25287/ohuiibf.1239201 — Table 1 (literature list).

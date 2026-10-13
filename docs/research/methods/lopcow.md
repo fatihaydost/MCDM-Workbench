@@ -1,7 +1,7 @@
 # LOPCOW — LOgarithmic Percentage Change-driven Objective Weighting (lopcow)
 
 - **Family:** weighting (objective)
-- **Origin:** Ecer, F. & Pamucar, D. (2022). A novel LOPCOW-DOBI multi-criteria sustainability performance assessment methodology: An application in developing country banking sector. *Omega* 112, 102690. DOI [10.1016/j.omega.2022.102690](https://doi.org/10.1016/j.omega.2022.102690) (Crossref verified; **full text not accessible** — paywalled). The formulas below are taken from four open-access papers that quote Ecer & Pamucar (2022, pp. 4–5) identically (Keleş 2023; Ayçın & Bektaş 2024; isarder LOPCOW-RAM 2024; Trung et al. 2024), and confirmed numerically on Keleş (2023).
+- **Origin:** Ecer, F. & Pamucar, D. (2022). A novel LOPCOW-DOBI multi-criteria sustainability performance assessment methodology: An application in developing country banking sector. *Omega* 112, 102690. DOI [10.1016/j.omega.2022.102690](https://doi.org/10.1016/j.omega.2022.102690) (Crossref verified; **full text not accessible** — paywalled). The formulas below are taken from four open-access papers that quote Ecer & Pamucar (2022, pp. 4–5) identically (Keleş 2023; Ayçın & Bektaş 2024; isarder LOPCOW-RAM 2024; Dua et al. 2024), and confirmed numerically on Keleş (2023).
 - **Popularity:** Crossref cited-by 310 for the origin paper (2026-09-29). Keleş (2023) Table 1 lists 8 LOPCOW applications within the first year (mostly with EDAS).
 
 ## For users (site copy)
@@ -25,14 +25,14 @@
 **Variants.**
 - **σ with m vs m − 1 matters here** (unlike CRITIC/SD): Keleş (2023) is reproduced only with m − 1 (see Recomputed; population σ misses by up to 0.0045). The origin paper's definition could not be read; we implement m − 1 and record this as an assumption backed by one reproduction.
 - **Why the absolute value:** with population σ, RMS ≥ σ always, so ln ≥ 0; with sample σ the ratio can drop below 1 and the |·| folds it back. Near ratio = 1 the weight goes to 0 and then rises again — a kink the site should not hide.
-- **Non-standard "LOPCOW" in the wild:** some papers normalize with $x_{ij}/(m + \sum x_{ij}^2)$ (e.g., Indonesian applications seen in search results) — a different method; do not use them as fixtures. Trung et al. (2024) publish LOPCOW weights we could not reproduce with either σ (see Recomputed).
+- **Non-standard "LOPCOW" in the wild:** some papers normalize with $x_{ij}/(m + \sum x_{ij}^2)$ (e.g., Indonesian applications seen in search results) — a different method; do not use them as fixtures. Dua et al. (2024) publish LOPCOW weights we could not reproduce with either σ (see Recomputed).
 - pyDecision v5.1.1 has **no LOPCOW** function.
 
 ## Commonly combined with
 - LOPCOW → DOBI (Dombi–Bonferroni): Ecer & Pamucar (2022), DOI [10.1016/j.omega.2022.102690](https://doi.org/10.1016/j.omega.2022.102690).
 - LOPCOW → CRADIS: Keleş (2023), DOI [10.25287/ohuiibf.1239201](https://doi.org/10.25287/ohuiibf.1239201).
 - LOPCOW → EDAS (Biswas et al. 2022a–e, Niu et al. 2022) and LOPCOW + MEREC → CoCoSo/EDAS (Bektaş 2022), as listed in Keleş (2023) Table 1.
-- LOPCOW → MARA / RAM / PIV: Trung et al. (2024), DOI [10.21303/2461-4262.2024.003171](https://doi.org/10.21303/2461-4262.2024.003171).
+- LOPCOW → MARA / RAM / PIV: Dua et al. (2024), DOI [10.21303/2461-4262.2024.003171](https://doi.org/10.21303/2461-4262.2024.003171).
 
 ## Pitfalls
 - **Constant column:** σ = 0 → PV undefined. Choose: weight 0 with warning (not in any source; our decision).
@@ -74,7 +74,7 @@
   - Table 7: sample σ → **MATCH** (4.4e-4); population σ → MISMATCH (3.0e-3).
   - Table 8: sample σ → **MATCH** (5.0e-4, at the rounding limit; w12 = 0.09969 printed as 0.100); population σ → MISMATCH (2.0e-3).
   - pyDecision: **not run** (no LOPCOW in v5.1.1).
-  - Checked, not usable: Trung et al. (2024) Case 1/2 LOPCOW weights (e.g., Case 2 [0.2831, 0.1700, 0.1818, 0.1068, 0.1244, 0.1339]) are not reproduced by either σ (ours: [0.0753, 0.1849, 0.1687, 0.1484, 0.2527, 0.1700] with sample σ). Their MEREC weights on the same data are reproduced exactly, so the input transcription is right; their LOPCOW computation differs from the published formula (cause unknown).
+  - Checked, not usable: Dua et al. (2024) Case 1/2 LOPCOW weights (e.g., Case 2 [0.2831, 0.1700, 0.1818, 0.1068, 0.1244, 0.1339]) are not reproduced by either σ (ours: [0.0753, 0.1849, 0.1687, 0.1484, 0.2527, 0.1700] with sample σ). Their MEREC weights on the same data are reproduced exactly, so the input transcription is right; their LOPCOW computation differs from the published formula (cause unknown).
 
 ## Implementation notes
 - TS: compute r, then `rms = sqrt(sum(r^2)/m)`, `sd = sqrt(sum((r-mean)^2)/(m-1))`, `pv = 100*abs(log(rms/sd))`.
@@ -84,5 +84,5 @@
 ## Sources
 - Ecer & Pamucar (2022) — Crossref metadata only; formulas as quoted in the open-access papers below.
 - Keleş (2023), DOI 10.25287/ohuiibf.1239201 — full PDF (DergiPark), Tables 1, 3, 4, 6, 7, 8.
-- Trung et al. (2024), DOI 10.21303/2461-4262.2024.003171 — full text, Eqs. (10)–(13), Tables 1, 2, 8, 9.
+- Dua et al. (2024), DOI 10.21303/2461-4262.2024.003171 — full text, Eqs. (10)–(13), Tables 1, 2, 8, 9.
 - Ayçın & Bektaş (2024), BIST Kocaeli LOPCOW–OPARA (DergiPark; seen only as a search snippet) and "Bankaların Finansal Performansının LOPCOW-RAM Yöntemiyle Değerlendirilmesi" (isarder.org, 2024) — used only to cross-check the formula text (the latter's Table 6 row "Kareler Toplamı" is actually √(Σr²/m): ln(0.6807/0.3763)·100 = 59.28 = its PV for C1).
