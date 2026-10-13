@@ -259,6 +259,12 @@ describe('placeLabels', () => {
     expect(d(centre(c!), pts[1]!)).toBeLessThanOrEqual(0.7 * d(centre(c!), pts[0]!))
   })
 
+  it('keeps clear of an obstacle such as an axis title', () => {
+    const title = { left: 40, right: 160, top: 40, bottom: 54 }
+    const [a] = placeLabels([{ x: 45, y: 40 }], [W], { width: 200, height: 200 }, [0], { obstacles: [title] })
+    expect(overlaps(a!, { box: title })).toBe(false)
+  })
+
   it('stays inside the drawing at the right edge', () => {
     const [a] = placeLabels([{ x: 195, y: 50 }], [40], { width: 200, height: 200 })
     expect(a!.anchor).toBe('end')
@@ -310,6 +316,17 @@ describe('VIKOR picture data', () => {
     const p = vikorParts(problem, ex.weights!)!
     expect(p.compromise.set.map((i) => ex.alternatives[i])).toEqual(['A7', 'A1', 'A8'])
     expect(p.order[0]).toBe(6)
+  })
+  it('puts a flat S at x = 0 when S differs only by rounding (non-dyadic weights), as the core does', () => {
+    const flat: Problem = {
+      alternatives: ['A', 'B', 'C'],
+      criteria: ['C1', 'C2', 'C3', 'C4'].map((name) => ({ name, type: 'benefit' as const })),
+      matrix: [[0, 0, 1, 5], [1, 1, 0, 5], [0.5, 0.5, 0.5, 5]],
+    }
+    const p = vikorParts(flat, [0.1, 0.2, 0.3, 0.4])!
+    expect(p.sTerm).toEqual([0, 0, 0])
+    p.Q.forEach((q, i) => expect(0.5 * p.sTerm[i]! + 0.5 * p.rTerm[i]!).toBeCloseTo(q, 14))
+    expect(p.order).toEqual([2, 0, 1])
   })
   it('returns null when VIKOR cannot run', () => {
     expect(vikorParts({ ...problem, matrix: problem.matrix.slice(0, 1), alternatives: ['A1'] }, ex.weights!)).toBeNull()

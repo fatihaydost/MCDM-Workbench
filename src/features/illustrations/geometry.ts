@@ -6,7 +6,7 @@ import { critic } from '../../core/methods/critic'
 import { entropy, type EntropyParams } from '../../core/methods/entropy'
 import { saw, type SawParams } from '../../core/methods/saw'
 import { topsis } from '../../core/methods/topsis'
-import { vikor, vikorCompromise, type VikorCompromise, type VikorParams } from '../../core/methods/vikor'
+import { vikor, vikorCompromise, vikorTerm, type VikorCompromise, type VikorParams } from '../../core/methods/vikor'
 import type { Problem, RankingResult, Step, WeightingResult } from '../../core/types'
 import { scaleLinear, type Domain, type LinearScale } from '../charts/scale'
 
@@ -362,14 +362,9 @@ export function vikorParts(problem: Problem, weights: readonly number[], params:
   const S = stepVector(result.steps, 'vikor.groupUtility')
   const R = stepVector(result.steps, 'vikor.individualRegret')
   const Q = result.scores
-  const term = (xs: number[]) => {
-    const lo = Math.min(...xs)
-    const span = Math.max(...xs) - lo
-    return xs.map((x) => (span === 0 ? 0 : (x - lo) / span))
-  }
   const compromise = vikorCompromise(S, R, Q)
-  const order = Q.map((_, i) => i).sort((a, b) => Q[a]! - Q[b]! || a - b)
-  return { result, S, R, Q, sTerm: term(S), rTerm: term(R), v: result.diagnostics?.v ?? 0.5, compromise, order }
+  // The core's own terms and order, so the picture agrees with Q when S or R is flat only up to rounding.
+  return { result, S, R, Q, sTerm: vikorTerm(S), rTerm: vikorTerm(R), v: result.diagnostics?.v ?? 0.5, compromise, order: compromise.order }
 }
 
 /**
@@ -523,19 +518,20 @@ const overlap = (a: PlotBox, b: PlotBox): number =>
  * nearer to its own dot than to any other (review P2-5: two alternatives 0.002 apart put "C" next
  * to A). Greedy, in the order given: each label takes the first free spot around its own dot, or
  * the least bad one.
- * `widths` are the text widths; the text is `fontSize` high with its baseline at y.
+ * `widths` are the text widths; the text is `fontSize` high with its baseline at y. `obstacles`: boxes already taken
+ * by other text of the drawing (axis titles), avoided like a placed label.
  */
 export function placeLabels(
   points: readonly Point[],
   widths: readonly number[],
   bounds: { width: number; height: number },
   order: readonly number[] = points.map((_, i) => i),
-  opts: { fontSize?: number; dotRadius?: number } = {},
+  opts: { fontSize?: number; dotRadius?: number; obstacles?: readonly PlotBox[] } = {},
 ): LabelPlacement[] {
   const fontSize = opts.fontSize ?? 12
   const r = opts.dotRadius ?? 6
   const dots: PlotBox[] = points.map((p) => ({ left: p.x - r, right: p.x + r, top: p.y - r, bottom: p.y + r }))
-  const placed: PlotBox[] = []
+  const placed: PlotBox[] = [...(opts.obstacles ?? [])]
   const out: LabelPlacement[] = new Array(points.length)
   for (const i of order) {
     const p = points[i]!

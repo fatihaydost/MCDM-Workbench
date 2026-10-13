@@ -359,6 +359,14 @@
   font-size: 13px;
 }
 
+/* Text that a dashed guide may cross (VIKOR's Q values and the Q(a') + DQ line): the line stops at the letters. */
+.halo {
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
 .barValue[data-highlight] {
   fill: var(--text);
   font-weight: 600;

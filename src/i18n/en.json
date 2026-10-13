@@ -347,7 +347,7 @@
         "dPlus": "D+",
         "dMinus": "D−",
         "groupUtility": "Group utility S",
-        "individualRegret": "Regret R"
+        "individualRegret": "Individual regret R"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -369,7 +369,8 @@
       },
       "weightsUsed": "Weights: {{method}}",
       "changeWeights": "Change weights",
-      "best": "{{name}} ranks first ({{symbol}} = {{value}})."
+      "best": "{{name}} ranks first ({{symbol}} = {{value}}).",
+      "bestTied": "{{names}} share first place ({{symbol}} = {{value}})."
     },
     "results": {
       "sourceFile": "Imported from {{name}}",
@@ -402,6 +403,7 @@
         "about": "About"
       },
       "headline": "{{name}} ranks first ({{symbol}} = {{value}}).",
+      "headlineTied": "{{names}} share first place ({{symbol}} = {{value}}).",
       "byline": "Weights: {{weights}}. Ranking: {{ranking}}. {{m}} alternatives, {{n}} criteria.",
       "about": {
         "tool": "Tool",
@@ -411,7 +413,10 @@
         "weighting": "Weighting",
         "ranking": "Ranking",
         "precision": "Numbers",
-        "precisionNote": "Stored at full precision, shown with 4 decimals."
+        "precisionNote": "Stored at full precision, shown with 4 decimals.",
+        "vikorC1": "Acceptable advantage (C1)",
+        "vikorC2": "Acceptable stability (C2)",
+        "vikorSet": "Compromise set"
       }
     },
     "calc": {
@@ -547,9 +552,9 @@
         "readout": "{{alternative}}: {{criterion}} adds {{value}} to S = {{score}}"
       },
       "vikor": {
-        "title": "Group utility against the largest regret",
+        "title": "Group utility against individual regret",
         "axisS": "S: group utility",
-        "axisR": "R: largest regret",
+        "axisR": "R: individual regret",
         "ideal": "Ideal",
         "threshold": "Q(a′) + DQ",
         "inSet": "In the compromise",
@@ -878,8 +883,8 @@
     },
     "vikor": {
       "constant-column": "Every value of {{criterion}} is the same, so it adds nothing to S or R.",
-      "equal-group-utility": "Every alternative has the same S, so Q comes from R alone.",
-      "equal-regret": "Every alternative has the same R, so Q comes from S alone.",
+      "equal-group-utility": "Every alternative has the same S, so Q comes from R alone and reaches at most 1 − v, which can make C1 harder to meet.",
+      "equal-regret": "Every alternative has the same R, so Q comes from S alone and reaches at most v, which can make C1 harder to meet.",
       "no-spread": "Every alternative has the same S and the same R, so all get Q = 0.",
       "tie-for-first": "More than one alternative has the lowest Q; they are listed in input order and all are in the compromise set."
     }

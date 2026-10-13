@@ -41,11 +41,11 @@ export type VikorIdeaLabels = {
 
 /** Development defaults only: the pages pass translated labels. */
 export const VIKOR_IDEA_LABELS_EN: VikorIdeaLabels = {
-  title: 'Group utility against the largest regret',
+  title: 'Group utility against individual regret',
   showTable: 'Show as table',
   alternative: 'Alternative',
   axisS: 'S, group utility',
-  axisR: 'R, largest regret',
+  axisR: 'R, individual regret',
   ideal: 'Ideal',
   barsTitle: 'Compromise index Q',
   threshold: "Q(a') + DQ",
@@ -117,7 +117,7 @@ export function VikorIdea({ problem, weights, params, format = defaultFormat, la
   const plane = Math.min(PLANE_MAX, wide ? Math.floor((W - GAP) * 0.45) : W - 24)
   const padL = 40
   const padT = 22
-  const padB = 34
+  const padB = 38
   const side = Math.max(120, plane - padL - 8)
   const planeH = padT + side + padB
   const px = (x: number) => padL + x * side
@@ -125,12 +125,25 @@ export function VikorIdea({ problem, weights, params, format = defaultFormat, la
   const screen: Point[] = names.map((_, i) => ({ x: px(sTerm[i]!), y: py(rTerm[i]!) }))
   const named = names.map((_, i) => m <= NAME_ALL_UP_TO || inSet.has(i))
   const labelText = names.map((n, i) => (named[i] ? truncate(n, 120, FONT) : ''))
+  // The axis titles and the ideal's name are text too: point labels keep off them.
+  const textBox = (x: number, y: number, text: string, anchor: 'start' | 'end') => {
+    const w = estimateTextWidth(text, FONT)
+    const left = anchor === 'start' ? x : x - w
+    return { left, right: left + w, top: y - FONT * 0.8, bottom: y + FONT * 0.25 }
+  }
+  const obstacles = [
+    textBox(px(0), padT - 10, l.axisR, 'start'),
+    textBox(px(1), py(0) + 32, l.axisS, 'end'),
+    textBox(px(0) - 8, py(0) + 18, l.ideal, 'end'),
+    textBox(px(0) - 6, py(1) + 4, `${l.r}−`, 'end'),
+    textBox(px(1) - 8, py(0) + 18, `${l.s}−`, 'start'),
+  ]
   const placements = placeLabels(
     screen,
     labelText.map((t) => (t ? estimateTextWidth(t, FONT) : 0)),
     { width: padL + side + 8, height: planeH },
     order,
-    { fontSize: FONT, dotRadius: 5 },
+    { fontSize: FONT, dotRadius: 5, obstacles },
   )
   const seg = isoQSegment(parts.v, Math.min(thr, 1))
   const region = thr >= 1 ? isoQRegion(parts.v, 1.0000001) : isoQRegion(parts.v, thr)
@@ -195,16 +208,17 @@ export function VikorIdea({ problem, weights, params, format = defaultFormat, la
           <path className={s.axis} d={`M${px(0)} ${py(1)}V${py(0)}H${px(1)}`} />
           <path className={s.vikorFrame} d={`M${px(0)} ${py(1)}H${px(1)}V${py(0)}`} />
           {linePathD && <path className={s.vikorLine} d={linePathD} style={{ d: `path('${linePathD}')` }} data-testid="vikor-threshold-line" />}
+          {/* The plane is the rescaled terms: the far ends are the worst S and R (S-, R-), the corner the ideal. */}
           <text className={s.isoLabel} x={px(0) - 6} y={py(1)} textAnchor="end" dominantBaseline="central">
-            1
+            {l.r}−
           </text>
           <text className={s.isoLabel} x={px(1)} y={py(0) + 14} textAnchor="middle" dominantBaseline="central">
-            1
+            {l.s}−
           </text>
           <text className={s.axisName} x={px(0)} y={padT - 10}>
             {l.axisR}
           </text>
-          <text className={s.axisName} x={px(1)} y={py(0) + 28} textAnchor="end">
+          <text className={s.axisName} x={px(1)} y={py(0) + 32} textAnchor="end">
             {l.axisS}
           </text>
           {/* The ideal corner, named outside the square so no point label can sit on it. */}
@@ -273,7 +287,7 @@ export function VikorIdea({ problem, weights, params, format = defaultFormat, la
                   height={BAR}
                   style={{ transform: `translate(${plotL}px, 0px) scale(${w}, 1)` }}
                 />
-                <text className={s.barValue} data-highlight={on || undefined} x={0} y={ROW / 2} dominantBaseline="central" style={{ transform: `translate(${plotL + w + VALUE_GAP}px, 0px)` }}>
+                <text className={`${s.barValue} ${s.halo}`} data-highlight={on || undefined} x={0} y={ROW / 2} dominantBaseline="central" style={{ transform: `translate(${plotL + w + VALUE_GAP}px, 0px)` }}>
                   {qTexts[i]}
                 </text>
               </g>

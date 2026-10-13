@@ -9,8 +9,9 @@ import { isEmptyProblem, useRanking, useWeights, useWorkbench } from '../../stat
 import { Button, EmptyState, Notice } from '../../ui'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, SectionTitle } from './parts'
-import { bestIndex, RankingTable } from './RankingStage'
+import { bestIndex, leaders, RankingTable } from './RankingStage'
 import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, rankingMethodFullLabel, scoreWords, stepName, weightMethodFullLabel } from './shared'
+import { useVikorLabels, vikorVerdict } from './vikorLabels'
 import { WeightsChart } from './WeightsStage'
 
 type Busy = 'xlsx' | null
@@ -33,6 +34,7 @@ export function ResultsStage() {
   const [busy, setBusy] = useState<Busy>(null)
   const [failed, setFailed] = useState(false)
   const names = useMemo(() => problem.criteria.map((_, j) => criterionName(problem.criteria, j, t)), [problem, t])
+  const vikorLabels = useVikorLabels('workbench.visual.vikor.title')
 
   const result = ranking.value
   const w = weights.value
@@ -60,6 +62,10 @@ export function ResultsStage() {
   const weightLabel = weightMethodFullLabel(weightMethod, weightParams, t)
   const rankingLabel = rankingMethodFullLabel(rankingMethod, rankingParams, t)
   const score = scoreWords(rankingMethod, t)
+  const altNames = problem.alternatives.map((_, i) => alternativeName(problem, i, t))
+  const firsts = leaders(result)
+  // VIKOR answers with a compromise set when C1 or C2 fails: the summary and the file say so, not just the first by Q.
+  const verdict = rankingMethod === 'vikor' ? vikorVerdict(result, altNames, vikorLabels, format4) : null
   const correlation = weightMethod === 'critic' ? findStep(w.steps, 'critic.correlation')?.matrix : undefined
 
   const workbookLabels = (): Partial<WorkbookLabels> => ({
@@ -98,6 +104,15 @@ export function ResultsStage() {
       [t('workbench.results.about.ranking'), rankingLabel],
       [t('workbench.results.about.precision'), t('workbench.results.about.precisionNote')],
     ]
+    if (verdict) {
+      const c = verdict.compromise
+      const first = altNames[c.first]!
+      rows.push(
+        [t('workbench.results.about.vikorC1'), vikorLabels.c1(c.c1, first, altNames[c.second]!, format4(c.advantage), format4(c.dq))],
+        [t('workbench.results.about.vikorC2'), vikorLabels.c2(c.c2, first, c.bestByS, c.bestByR)],
+        [t('workbench.results.about.vikorSet'), verdict.names.join(', ')],
+      )
+    }
     return rows
   }
 
@@ -153,8 +168,15 @@ export function ResultsStage() {
       <section aria-labelledby="wb-results-headline" className="flex flex-col gap-5">
         <div className="flex flex-col gap-1">
           <p id="wb-results-headline" className="text-24 font-semibold text-text">
-            {t('workbench.results.headline', { name: alternativeName(problem, best, t), symbol: score.symbol, value: nf.format(result.scores[best]) })}
+            {firsts.length > 1
+              ? t('workbench.results.headlineTied', { names: firsts.map((i) => altNames[i]).join(', '), symbol: score.symbol, value: nf.format(result.scores[best]) })
+              : t('workbench.results.headline', { name: altNames[best], symbol: score.symbol, value: nf.format(result.scores[best]) })}
           </p>
+          {verdict && verdict.failed.length > 0 && (
+            <p className="max-w-[70ch] text-16 text-text" data-testid="results-vikor-verdict">
+              {verdict.failed.join(' ')} <span className="font-semibold">{verdict.result}.</span>
+            </p>
+          )}
           <p className="text-13 text-text-2">
             {t('workbench.results.byline', {
               weights: weightLabel,

@@ -386,7 +386,7 @@ test('VIKOR: the ten-alternative example ranks by Q, shows S and R, the DQ verdi
   await expect(stageHeading(page, 'Ranking')).toBeVisible()
   await expect(page.getByRole('radio', { name: 'VIKOR' })).toHaveAttribute('aria-checked', 'true')
   const table = page.getByRole('table', { name: 'Ranking' })
-  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'Group utility S', 'Regret R', 'Compromise Q'])
+  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'Group utility S', 'Individual regret R', 'Compromise Q'])
   expect(await closenessByName(page)).toEqual(byName(half.r.scores))
   // Rank column equals the published VIKOR ranks (Table 7, set 1); rows are in rank order, lowest Q first.
   const published = ex.published.find((x) => x.label === 'vikor.rank')!.values as number[]
@@ -404,6 +404,23 @@ test('VIKOR: the ten-alternative example ranks by Q, shows S and R, the DQ verdi
   await expect(page.getByTestId('vikor-c1')).toHaveText(`No acceptable advantage: A7 leads A1 by only ${f4(half.c.advantage)} in Q, less than DQ = 0.1111.`)
   await expect(page.getByTestId('vikor-c2')).toHaveText('Acceptable stability: A7 is also first by R.')
   await expect(page.getByTestId('vikor-result')).toHaveText('Compromise set: A7, A1, A8')
+
+  // Results, the rail and the downloaded workbook give the same answer as the method: a set, not one winner.
+  const rail = page.locator('nav[aria-label="Stages"]:visible')
+  await expect(rail).toContainText('A7, A1, A8')
+  await rail.locator('button', { hasText: 'Results' }).click()
+  const c1 = `No acceptable advantage: A7 leads A1 by only ${f4(half.c.advantage)} in Q, less than DQ = 0.1111.`
+  await expect(page.getByTestId('results-vikor-verdict')).toHaveText(`${c1} Compromise set: A7, A1, A8.`)
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Download full calculation (.xlsx)' }).click(),
+  ])
+  const about = XLSX.utils.sheet_to_json<string[]>(XLSX.read(readFileSync(await download.path())).Sheets['About']!, { header: 1 })
+  expect(about.find((r) => r[0] === 'Acceptable advantage (C1)')?.[1]).toBe(c1)
+  expect(about.find((r) => r[0] === 'Acceptable stability (C2)')?.[1]).toBe('Acceptable stability: A7 is also first by R.')
+  expect(about.find((r) => r[0] === 'Compromise set')?.[1]).toBe('A7, A1, A8')
+  await rail.locator('button', { hasText: 'Ranking' }).click()
+  await expect(stageHeading(page, 'Ranking')).toBeVisible()
 
   // v to 1 with the keyboard (End): Q is S alone, the table, the picture and the verdict follow.
   const slider = page.getByRole('slider', { name: 'Strategy weight v' })

@@ -38,6 +38,8 @@ const RANKING_VIEWS: Readonly<
     {
       /** Intermediate results shown as columns before the score in the full ranking table: step key and header key. */
       columns: readonly { step: string; label: string }[]
+      /** Hide those columns below 640 px, so the score that decides the rank is never the one scrolled off. */
+      columnsFromSm?: boolean
       /** The method's idea drawn on the current problem, next to the score chart. */
       Picture: (props: PictureProps) => ReactNode
       /**
@@ -66,6 +68,8 @@ const RANKING_VIEWS: Readonly<
       { step: 'vikor.groupUtility', label: 'workbench.ranking.columns.groupUtility' },
       { step: 'vikor.individualRegret', label: 'workbench.ranking.columns.individualRegret' },
     ],
+    // S and R are long numbers in long headers; at phone width the plane's table still has them.
+    columnsFromSm: true,
     Picture: VikorPicture,
     pictureShowsScores: true,
   },
@@ -78,6 +82,9 @@ export function rankOrder(result: RankingResult): number[] {
 
 /** Index of the first-ranked alternative. */
 export const bestIndex = (result: RankingResult): number => rankOrder(result)[0] ?? 0
+
+/** Every alternative ranked first, in input order (more than one when the best score is tied). */
+export const leaders = (result: RankingResult): number[] => rankOrder(result).filter((i) => result.ranking[i] === 1)
 
 /**
  * The ranking in rank order. `compact` keeps rank, name and the score (the Results summary); the full table on the
@@ -100,10 +107,12 @@ export function RankingTable({
   const nf = useNumberFormat(DECIMALS.score)
   const extra = compact ? [] : RANKING_VIEWS[method].columns.map((c) => ({ ...c, values: findStep(result.steps, c.step)?.vector }))
   const order = rankOrder(result)
+  const narrowHidden = !compact && RANKING_VIEWS[method].columnsFromSm === true
+  const extraClass = narrowHidden ? 'max-sm:hidden' : undefined
   const wide = extra.length > 0
   return (
     <div className="min-w-0">
-      <Table density="regular" className={cn('w-auto', wide ? 'min-w-[min(100%,560px)]' : 'min-w-[min(100%,360px)]')} aria-labelledby={id} containerClassName={compact ? 'max-w-[560px]' : undefined}>
+      <Table density="regular" className={cn('w-auto', !wide ? 'min-w-[min(100%,360px)]' : narrowHidden ? 'min-w-[min(100%,360px)] sm:min-w-[min(100%,560px)]' : 'min-w-[min(100%,560px)]')} aria-labelledby={id} containerClassName={compact ? 'max-w-[560px]' : undefined}>
         <THead>
           <Tr>
             <Th numeric className="w-16">
@@ -111,7 +120,7 @@ export function RankingTable({
             </Th>
             <Th>{t('workbench.ranking.columns.alternative')}</Th>
             {extra.map((c) => (
-              <Th key={c.step} numeric>
+              <Th key={c.step} numeric className={extraClass}>
                 {tr(t, c.label)}
               </Th>
             ))}
@@ -130,7 +139,7 @@ export function RankingTable({
                   {alternativeName(problem, i, t)}
                 </Th>
                 {extra.map((c) => (
-                  <Td key={c.step} numeric>
+                  <Td key={c.step} numeric className={extraClass}>
                     {nf.format(c.values?.[i])}
                   </Td>
                 ))}
@@ -308,11 +317,17 @@ export function RankingStage() {
         <>
           <MethodWarnings warnings={result.warnings} problem={problem} />
           <p className="text-20 font-semibold text-text" data-testid="best-sentence">
-            {t('workbench.ranking.best', {
-              name: alternativeName(problem, best, t),
-              symbol: scoreWords(rankingMethod, t).symbol,
-              value: nf.format(result.scores[best]),
-            })}
+            {leaders(result).length > 1
+              ? t('workbench.ranking.bestTied', {
+                  names: leaders(result).map((i) => alternativeName(problem, i, t)).join(', '),
+                  symbol: scoreWords(rankingMethod, t).symbol,
+                  value: nf.format(result.scores[best]),
+                })
+              : t('workbench.ranking.best', {
+                  name: alternativeName(problem, best, t),
+                  symbol: scoreWords(rankingMethod, t).symbol,
+                  value: nf.format(result.scores[best]),
+                })}
           </p>
           <div className={cn('grid grid-cols-1 items-start gap-8', !pictureShowsScores && 'xl:grid-cols-2')}>
             {!pictureShowsScores && <ScoreChart problem={problem} result={result} method={rankingMethod} className="min-w-0" />}

@@ -15,6 +15,7 @@ import { bestIndex, RankingStage } from './RankingStage'
 import { ResultsStage } from './ResultsStage'
 import { useRobustnessSummary } from './robustnessSummary'
 import { alternativeName, rankingMethodFullLabel, weightMethodFullLabel } from './shared'
+import { vikorCompromiseOf } from './vikorLabels'
 import { WeightsStage } from './WeightsStage'
 
 // The panel's method cards load alongside this chunk, not after the first render.
@@ -206,7 +207,11 @@ export default function WorkbenchPage() {
     const rankingLabel = rankingMethodFullLabel(rankingMethod, rankingParams, t)
     stageMeta.ranking = <StageStatus state={ranking.value ? 'done' : 'pending'}>{rankingLabel}</StageStatus>
     if (ranking.value) {
-      stageMeta.results = <StageStatus state="done">{alternativeName(problem, bestIndex(ranking.value), t)}</StageStatus>
+      // VIKOR's answer can be a compromise set: name it (at most three, then a count), not only the first by Q.
+      const set = rankingMethod === 'vikor' ? vikorCompromiseOf(ranking.value)?.set : undefined
+      const shown = set && set.length > 1 ? set : [bestIndex(ranking.value)]
+      const label = shown.slice(0, 3).map((i) => alternativeName(problem, i, t)).join(', ') + (shown.length > 3 ? ` +${shown.length - 3}` : '')
+      stageMeta.results = <StageStatus state="done">{label}</StageStatus>
     }
     if (robustness) {
       stageMeta.robustness = <StageStatus state="pending">{t('workbench.rail.robustness', robustness)}</StageStatus>

@@ -347,7 +347,7 @@
         "dPlus": "D+",
         "dMinus": "D−",
         "groupUtility": "Grup faydası S",
-        "individualRegret": "Pişmanlık R"
+        "individualRegret": "Bireysel pişmanlık R"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -369,7 +369,8 @@
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
       "changeWeights": "Ağırlıkları değiştir",
-      "best": "İlk sırada {{name}} ({{symbol}} = {{value}})."
+      "best": "İlk sırada {{name}} ({{symbol}} = {{value}}).",
+      "bestTied": "İlk sırayı {{names}} paylaşıyor ({{symbol}} = {{value}})."
     },
     "results": {
       "sourceFile": "{{name}} dosyasından içe aktarıldı",
@@ -402,6 +403,7 @@
         "about": "Hakkında"
       },
       "headline": "İlk sırada {{name}} ({{symbol}} = {{value}}).",
+      "headlineTied": "İlk sırayı {{names}} paylaşıyor ({{symbol}} = {{value}}).",
       "byline": "Ağırlık: {{weights}}. Sıralama: {{ranking}}. {{m}} alternatif, {{n}} kriter.",
       "about": {
         "tool": "Araç",
@@ -411,7 +413,10 @@
         "weighting": "Ağırlıklandırma",
         "ranking": "Sıralama",
         "precision": "Sayılar",
-        "precisionNote": "Tam hassasiyetle saklanır, 4 ondalıkla gösterilir."
+        "precisionNote": "Tam hassasiyetle saklanır, 4 ondalıkla gösterilir.",
+        "vikorC1": "Kabul edilebilir avantaj (C1)",
+        "vikorC2": "Kabul edilebilir kararlılık (C2)",
+        "vikorSet": "Uzlaşık çözüm kümesi"
       }
     },
     "calc": {
@@ -547,9 +552,9 @@
         "readout": "{{alternative}}: {{criterion}} katkısı {{value}}, S = {{score}}"
       },
       "vikor": {
-        "title": "Grup faydası ve en büyük pişmanlık",
+        "title": "Grup faydası ve bireysel pişmanlık",
         "axisS": "S: grup faydası",
-        "axisR": "R: en büyük pişmanlık",
+        "axisR": "R: bireysel pişmanlık",
         "ideal": "İdeal",
         "threshold": "Q(a′) + DQ",
         "inSet": "Uzlaşıda",
@@ -878,8 +883,8 @@
     },
     "vikor": {
       "constant-column": "{{criterion}} kriterinin bütün değerleri aynı; S'ye ve R'ye bir şey katmıyor.",
-      "equal-group-utility": "Bütün alternatiflerin S değeri aynı; Q yalnız R'den geliyor.",
-      "equal-regret": "Bütün alternatiflerin R değeri aynı; Q yalnız S'den geliyor.",
+      "equal-group-utility": "Bütün alternatiflerin S değeri aynı; Q yalnız R'den geliyor ve en fazla 1 − v olabiliyor; bu, C1'i sağlamayı zorlaştırabilir.",
+      "equal-regret": "Bütün alternatiflerin R değeri aynı; Q yalnız S'den geliyor ve en fazla v olabiliyor; bu, C1'i sağlamayı zorlaştırabilir.",
       "no-spread": "Bütün alternatiflerin S ve R değerleri aynı; hepsi Q = 0 alıyor.",
       "tie-for-first": "Birden fazla alternatif en küçük Q değerini paylaşıyor; girdi sırasıyla listelenir ve hepsi uzlaşık kümededir."
     }
