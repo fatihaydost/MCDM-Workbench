@@ -103,7 +103,7 @@ export const critic: MethodContent = {
       'CRITIC gives more weight to criteria whose values vary a lot (contrast) and disagree with the other criteria (conflict). Use it when you have a filled decision matrix and no expert view on importance.',
     whenToUse: [
       'Weights must come from the data, not from people.',
-      'Correlated criteria (financial ratios, specifications) should share weight, not count twice.',
+      'Correlated criteria (financial ratios, specifications) should weigh less.',
       'You want steps that are easy to show: deviation, correlation, information.',
     ],
     whenNot: [
@@ -127,7 +127,7 @@ export const critic: MethodContent = {
       'CRITIC, değerleri çok değişen (kontrast) ve diğer kriterlerle çelişen (çatışma) kriterlere daha çok ağırlık verir. Dolu bir karar matrisiniz varsa ve önem konusunda uzman görüşü yoksa kullanın.',
     whenToUse: [
       'Ağırlıklar kişilerden değil, veriden gelmeli.',
-      'İlişkili kriterler (finansal oranlar, teknik özellikler) ağırlığı paylaşmalı, iki kez sayılmamalı.',
+      'İlişkili kriterler (finansal oranlar, teknik özellikler) daha az ağırlık almalı.',
       'Adımları kolay gösterilen bir yöntem istiyorsunuz: sapma, korelasyon, bilgi.',
     ],
     whenNot: [

@@ -5,8 +5,8 @@
 - **Popularity:** Crossref "cited-by" 3,094 for the origin paper (queried 2026-09-29). In the 30-study review table of Keshavarz-Ghorabaee et al. (2021, Symmetry 13:525, Table 1; 2020–2021) CRITIC is used in 13 studies (Entropy 12, SD 8).
 
 ## For users (site copy)
-- **EN:** CRITIC gives more weight to a criterion when its values vary a lot across alternatives (contrast) and when it disagrees with the other criteria (conflict). Two criteria that tell the same story share weight instead of double-counting. Use it when you have a filled decision matrix and no expert opinion about importance.
-- **TR:** CRITIC, bir kriterin değerleri alternatifler arasında çok değişiyorsa (kontrast) ve diğer kriterlerle çelişiyorsa (çatışma) o kritere daha çok ağırlık verir. Aynı şeyi söyleyen iki kriter ağırlığı paylaşır, iki kez sayılmaz. Dolu bir karar matrisiniz varsa ve önem konusunda uzman görüşü yoksa kullanın.
+- **EN:** CRITIC gives more weight to a criterion when its values vary a lot across alternatives (contrast) and when it disagrees with the other criteria (conflict). Agreeing with the other criteria lowers a weight, so two criteria that tell the same story are damped (not fully merged: a duplicated column still gets 1.3–1.5× its single weight on the Krishnan et al. 2021 data, our check). Use it when you have a filled decision matrix and no expert opinion about importance.
+- **TR:** CRITIC, bir kriterin değerleri alternatifler arasında çok değişiyorsa (kontrast) ve diğer kriterlerle çelişiyorsa (çatışma) o kritere daha çok ağırlık verir. Diğer kriterlerle uyum ağırlığı düşürür; aynı şeyi söyleyen iki kriter bastırılır ama tümüyle birleşmez (Krishnan vd. 2021 verisinde kopyalanan sütun tek başına aldığının 1,3–1,5 katını alır, bizim denetimimiz). Dolu bir karar matrisiniz varsa ve önem konusunda uzman görüşü yoksa kullanın.
 
 ## When to use / when not
 - **Use when:** weights must come from the data; criteria may be correlated (financial ratios, technical specs) and you want redundancy penalised; you want a method whose steps (σ, r, C) are easy to show.
