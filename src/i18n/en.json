@@ -105,7 +105,7 @@
       "alsoTitle": "Other checks",
       "tolerance": "Tolerance {{tol}}",
       "edas": {
-        "claim": "All 47 appraisal scores and every distance in Table 2 match {{citation}} to {{decimals}} decimals, rounded as the paper did; the ranks of its 10-alternative example match in all seven weight sets."
+        "claim": "All 47 appraisal scores and every cell of Table 2 match {{citation}} to {{decimals}} decimals, rounded as the paper did."
       }
     },
     "catalogue": {
@@ -601,7 +601,7 @@
         "average": "Average",
         "legend": "Criteria",
         "others": "Other criteria",
-        "caption": "Right of the line: weighted distance above the average; left: below it. AS weighs both against the largest SP and SN.",
+        "caption": "Right of the line: weighted distance above the average; left: below it; AS divides each by the largest SP or SN.",
         "segmentAbove": "{{alternative}}, {{criterion}}: {{value}} above the average (AS = {{score}})",
         "segmentBelow": "{{alternative}}, {{criterion}}: {{value}} below the average (AS = {{score}})",
         "segmentAt": "{{alternative}}, {{criterion}}: at the average (AS = {{score}})",
@@ -843,7 +843,7 @@
         },
         "edas": {
           "title": "Better or worse than the average, criterion by criterion",
-          "caption": "Right of the line: weighted distance above the average; left: below it. AS weighs both against the largest SP and SN."
+          "caption": "Right of the line: weighted distance above the average; left: below it; AS divides each by the largest SP or SN."
         }
       }
     }

@@ -266,7 +266,7 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
   'edas.average': {
     en: 'Average solution: the mean of each criterion over all alternatives.',
     tr: 'Ortalama çözüm: her kriterin bütün alternatifler üzerinden ortalaması.',
-    tex: String.raw`AV_j = \frac{1}{m} \sum_{i=1}^{m} x_{ij}, \qquad AV_j > 0`,
+    tex: String.raw`AV_j = \frac{1}{m} \sum_{i=1}^{m} x_{ij}`,
     edgeCase: {
       en: 'A varying column with an average of 0 or below is a blocking error.',
       tr: 'Ortalaması 0 ya da altında olan değişken bir sütun engelleyici hatadır.',

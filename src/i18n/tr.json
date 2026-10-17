@@ -105,7 +105,7 @@
       "alsoTitle": "Diğer kontroller",
       "tolerance": "Tolerans {{tol}}",
       "edas": {
-        "claim": "47 değerlendirme skoru ve Tablo 2'deki bütün uzaklıklar, makalenin yuvarladığı gibi yuvarlanınca {{citation}} ile {{decimals}} basamağa kadar aynı; 10 alternatifli örneğin sıraları yedi ağırlık setinin hepsinde aynı."
+        "claim": "47 değerlendirme skoru ve Tablo 2'nin bütün hücreleri, makalenin yuvarladığı gibi yuvarlanınca {{citation}} ile {{decimals}} basamağa kadar aynı."
       }
     },
     "catalogue": {
@@ -344,7 +344,7 @@
         "topsis": "Alternatifleri ideal ve negatif ideal çözüme olan uzaklıklarına göre sıralar.",
         "saw": "Kriterlerin ölçeklenmiş değerlerini ağırlıklandırıp toplar.",
         "vikor": "En iyi toplam (S) ile en küçük en büyük pişmanlık (R) arasında uzlaşı arar; Q küçüldükçe sıra yükselir.",
-        "edas": "Her alternatifi, bütün alternatiflerin ortalamasının ne kadar üstünde ve altında kaldığına göre puanlar; AS büyüdükçe sıra yükselir."
+        "edas": "Her alternatifi, bütün alternatiflerin ortalamasının ne kadar üstünde ya da altında olduğuna göre puanlar; AS büyüdükçe sıra yükselir."
       },
       "columns": {
         "rank": "Sıra",
@@ -601,7 +601,7 @@
         "average": "Ortalama",
         "legend": "Kriterler",
         "others": "Diğer kriterler",
-        "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık. AS ikisini en büyük SP ve SN ile tartar.",
+        "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık; AS her birini en büyük SP ya da SN'ye böler.",
         "segmentAbove": "{{alternative}}, {{criterion}}: ortalamanın {{value}} üstünde (AS = {{score}})",
         "segmentBelow": "{{alternative}}, {{criterion}}: ortalamanın {{value}} altında (AS = {{score}})",
         "segmentAt": "{{alternative}}, {{criterion}}: ortalamada (AS = {{score}})",
@@ -843,7 +843,7 @@
         },
         "edas": {
           "title": "Kriter kriter ortalamadan iyi mi, kötü mü",
-          "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık. AS ikisini en büyük SP ve SN ile tartar."
+          "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık; AS her birini en büyük SP ya da SN'ye böler."
         }
       }
     }

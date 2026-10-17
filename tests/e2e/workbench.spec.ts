@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { critic, entropy, saw, topsis, vikor, vikorCompromise, type CriterionType } from '../../src/core'
+import { critic, edas, entropy, saw, topsis, vikor, vikorCompromise, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -459,6 +459,53 @@ test('VIKOR: the method page opens the shared Opricovic and Tzeng example with V
   expect(await closenessByName(page)).toEqual({ A1: '1.0000', A2: '0.0000', A3: '1.0000' })
   await expect(page.getByTestId('vikor-result')).toHaveText('Compromise solution: A2')
   await expect(page.getByTestId('vikor-c1')).toHaveText('Acceptable advantage: A2 leads A1 by 1.0000 in Q, at least DQ = 0.5000.')
+})
+
+test('EDAS: the method page opens the ten-alternative example with EDAS; AS, SP and SN match the core, the ranks match Table 7', async ({ page }) => {
+  const ex = getExample('keshavarz-2015-ten-alternatives')!
+  const p = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const r = edas.compute(p, ex.weights!, {})
+
+  await page.goto('/methods/edas')
+  await expect(page.getByTestId('edas-idea')).toBeVisible()
+  await page.getByRole('link', { name: /^Ten alternatives: Open in workbench/ }).click()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(page.getByRole('radio', { name: 'EDAS' })).toHaveAttribute('aria-checked', 'true')
+  const table = page.getByRole('table', { name: 'Ranking' })
+  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'Above average SP', 'Below average SN', 'Appraisal AS'])
+  expect(await closenessByName(page)).toEqual(Object.fromEntries(ex.alternatives.map((a, i) => [a, f4(r.scores[i]!)])))
+  const published = ex.published.find((x) => x.label === 'edas.rank')!.values as number[]
+  const rows = await table.getByTestId('ranking-row').evaluateAll((els) => els.map((el) => [el.querySelector('th')!.textContent!.trim(), Number(el.querySelector('td')!.textContent)] as const))
+  for (const [name, rank] of rows) expect(rank, name).toBe(published[ex.alternatives.indexOf(name)])
+  await expect(page.getByTestId('best-sentence')).toHaveText(`A1 ranks first (AS = ${f4(r.scores[0]!)}).`)
+
+  // The diverging picture: one row per alternative in rank order, the highest AS first.
+  const drawn = await page.getByTestId('edas-row').evaluateAll((els) => els.map((el) => Number(el.getAttribute('data-score'))))
+  expect(drawn).toEqual([...r.scores].sort((a, b) => b - a))
+  await expect(page.getByTestId('edas-average-line')).toHaveCount(1) // a vertical line has no width, so not 'visible' to Playwright
+})
+
+test('EDAS: a negative value computes with a notice; a criterion whose average drops to 0 or below blocks the ranking', async ({ page }) => {
+  await page.goto('/app?example=keshavarz-2015-ten-alternatives&method=edas&stage=data')
+  const setCell = async (value: string) => {
+    await page.locator('#wb-cell-0-3').click()
+    await page.keyboard.type(value)
+    await page.keyboard.press('Enter')
+  }
+  const toRanking = () => page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+
+  // C4 averages 0.101; -0.5 at A1 keeps it above 0.
+  await setCell('-0.5')
+  await toRanking()
+  await expect(page.getByText('C4 has negative values. EDAS measures distance as a share of the average')).toBeVisible()
+  await expect(page.getByTestId('ranking-row')).toHaveCount(10)
+
+  // -2 at A1 takes the average of C4 below 0.
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Data' }).click()
+  await setCell('-2')
+  await toRanking()
+  await expect(page.getByRole('button', { name: /^The average of C4 is .+ EDAS divides by each criterion's average, so it must be above 0\.$/ })).toBeVisible()
+  await expect(page.getByTestId('ranking-row')).toHaveCount(0)
 })
 
 test('SAW: a zero blocks the ranking with a message at its cell', async ({ page }) => {
