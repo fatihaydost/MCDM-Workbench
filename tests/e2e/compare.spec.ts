@@ -22,7 +22,7 @@ test('compare: four method columns, VIKOR\'s A7 first, Borda at the end', async 
   await expect(page.locator('[data-testid="borda-rank"][data-name="A1"]')).toHaveText('1')
   const summary = page.getByTestId('compare-summary')
   await expect(summary).toContainText("Agreement (Kendall's W): 0.97")
-  await expect(summary).toContainText('First place is the same in 3 of 4 methods')
+  await expect(summary).toContainText('A1 is first in 3 of 4 methods')
   await expect(summary).not.toContainText('methods ranked')
 
   // The top two (A1, A7) are selected at first; clicking another crossing selects that pair, arrows move focus.
@@ -49,6 +49,7 @@ test('compare: the why panel opens on A1 and A7, and a crossing changes the pair
   // The better-ranked alternative comes first, so only the pair is fixed, not the order.
   const title = panel.getByRole('heading')
   await expect(title).toHaveText(new RegExp(`^(${i} or ${k}|${k} or ${i})\\?$`))
+  await expect(title).not.toHaveText('A1 or A7?')
 })
 
 test('compare: a zero cell leaves SAW out with its reason', async ({ page }) => {

@@ -43,7 +43,7 @@ export function whySentences(f: PairFacts, ctx: WhyContext): string[] {
 
   if (f.unanimous && f.methods[0]?.higher !== 'tie') {
     const [hi, lo] = f.methods[0]!.higher === 'a' ? [a, b] : [b, a]
-    return [t('why.unanimous', { n, a: hi, b: lo }), ...criteria, t('why.crossings')]
+    return [t('why.unanimous', { n, a: hi, b: lo }), t('why.crossings')]
   }
 
   const groups = (['a', 'b'] as const).flatMap((s) => {
@@ -65,7 +65,7 @@ export function whySentences(f: PairFacts, ctx: WhyContext): string[] {
     .map((id) => t(CHARACTER[id as keyof typeof CHARACTER]))
     .slice(0, Math.max(0, MAX_SENTENCES - head.length))
   const v = shown.includes('vikor') ? f.vikorRegret : null
-  const regret = !v ? [] : v.ra === v.rb || Math.abs(v.ra - v.rb) < 1e-12
+  const regret = !v ? [] : Math.abs(v.ra - v.rb) < 1e-12
     ? [t('why.vikorRegretEqual', { a, b })]
     : [
         v.a === v.b

@@ -114,7 +114,7 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
       />
       <p className="flex flex-wrap gap-x-4 gap-y-1 text-13 text-text-2" data-testid="compare-summary">
         {kendallW !== null && <span>{tc('summary.w', { w: nf.format(kendallW, 2) })}</span>}
-        {firstPlace && <span>{tc('summary.first', { n: firstPlace.methods, of: firstPlace.of })}</span>}
+        {firstPlace && <span>{tc('summary.first', { name: names[firstPlace.alternative]!, n: firstPlace.methods, of: firstPlace.of })}</span>}
         {ranked.length < runs.length && <span>{tc('summary.ranked', { n: ranked.length, of: runs.length })}</span>}
       </p>
       {selected && <WhyPanel comparison={comparison} weights={weights} pair={selected} names={names} />}

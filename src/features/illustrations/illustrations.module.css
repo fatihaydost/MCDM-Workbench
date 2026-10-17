@@ -931,14 +931,14 @@
 .rankName {
   fill: var(--text);
   font-size: 13px;
-  transition: opacity var(--dur) var(--ease);
+  transition: fill var(--dur) var(--ease);
 }
 
 /* One fixed colour per alternative (the --data-cat-* set), after the eighth the context grey. */
 .rankLine,
 .rankPoint {
   --c: var(--data-context);
-  transition: opacity var(--dur) var(--ease);
+  transition: stroke var(--dur) var(--ease), fill var(--dur) var(--ease), stroke-width var(--dur) var(--ease);
 }
 
 .rankLine[data-cat='1'], .rankPoint[data-cat='1'] { --c: var(--data-cat-1); }
@@ -975,14 +975,19 @@
   fill: var(--text-3);
 }
 
-/* A selected pair keeps its colour; the other lines, points and names step back (a state change, MOTION.md). */
+/* A selected pair keeps its colour; the other lines and points step back to the context grey at full opacity (a
+   faded line fell to ~1.4:1, the chart marks bar is 3:1), thinner; their names go to the quiet text tone. */
 .rankPlot[data-dimmed] .rankLine:not([data-on]),
 .rankPlot[data-dimmed] .rankPoint:not([data-on]) {
-  opacity: 0.25;
+  --c: var(--data-context);
+}
+
+.rankPlot[data-dimmed] .rankLine:not([data-on]) {
+  stroke-width: 1.25;
 }
 
 .rankPlot[data-dimmed] .rankName:not([data-on]) {
-  opacity: 0.5;
+  fill: var(--text-3);
 }
 
 .rankPlot[data-dimmed] .rankName[data-on] {

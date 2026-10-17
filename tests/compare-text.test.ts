@@ -55,8 +55,8 @@ describe('whySentences', () => {
     const f = pairFacts(p, ex.weights!, c, 0, 6)
     expect(whySentences(f, await ctx('tr', p))).toEqual([
       'A1, özellikle C1 ve C6 kriterlerinde önde ama C5 kriterinde geride.',
-      'TOPSIS, SAW ve EDAS için A1, A7 alternatifinden önde.',
-      'VIKOR için A7, A1 alternatifinden önde.',
+      'TOPSIS, SAW ve EDAS için A1 alternatifi A7 alternatifinden önde.',
+      'VIKOR için A7 alternatifi A1 alternatifinden önde.',
       'VIKOR toplamı tek bir en büyük pişmanlıkla tartar, bu yüzden tek büyük zayıflık ağır basar.',
       "VIKOR'un en büyük pişmanlığı hem A1 hem A7 için C3 kriterinde, daha büyüğü A1 için.",
     ])
@@ -66,7 +66,7 @@ describe('whySentences', () => {
     const f = pairFacts(p, ex.weights!, c, 0, 6)
     const regret = (vikorRegret: PairFacts['vikorRegret'], lang: 'en' | 'tr') =>
       ctxAndRun(lang, { ...f, vikorRegret })
-    const ctxAndRun = async (lang: 'en' | 'tr', x: PairFacts) => (await whySentences(x, await ctx(lang, p))).at(-1)
+    const ctxAndRun = async (lang: 'en' | 'tr', x: PairFacts) => whySentences(x, await ctx(lang, p)).at(-1)
     expect(await regret({ a: 2, b: 0, ra: 0.03, rb: 0.04 }, 'en')).toBe(
       "VIKOR's largest regret for A1 is on C3, for A7 on C1, and A7's is larger.",
     )
@@ -96,8 +96,8 @@ describe('whySentences', () => {
     expect(f.unanimous).toBe(true)
     const s = whySentences(f, await ctx('en', p))
     expect(s[0]).toBe('All 4 methods put A1 above A2.')
-    expect((await whySentences(f, await ctx('tr', p)))[0]).toBe('4 yöntemin hepsi A1 alternatifini A2 alternatifinin üstüne koyuyor.')
-    expect(s.at(-1)).toBe('Select a crossing in the chart to see another pair.')
+    expect(whySentences(f, await ctx('tr', p))[0]).toBe('4 yöntemin hepsi A1 alternatifini A2 alternatifinin üstüne koyuyor.')
+    expect(s).toEqual(['All 4 methods put A1 above A2.', 'Select a crossing in the chart to see another pair.'])
   })
 
   it('identical rankings: exactly one sentence', async () => {

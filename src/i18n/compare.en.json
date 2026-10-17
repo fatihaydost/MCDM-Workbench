@@ -11,7 +11,7 @@
   "vikorNote": "VIKOR's own rule: compromise set {{list}}",
   "summary": {
     "w": "Agreement (Kendall's W): {{w}}",
-    "first": "First place is the same in {{n}} of {{of}} methods",
+    "first": "{{name}} is first in {{n}} of {{of}} methods",
     "ranked": "{{n}} of {{of}} methods ranked"
   },
   "why": {

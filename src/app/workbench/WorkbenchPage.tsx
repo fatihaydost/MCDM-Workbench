@@ -276,7 +276,7 @@ export default function WorkbenchPage() {
     if (comparison?.comparable && comparison.firstPlace) {
       const { alternative, methods, of } = comparison.firstPlace
       stageMeta.compare = (
-        <StageStatus state={methods === of ? 'done' : 'attention'}>
+        <StageStatus state={methods === of ? 'done' : 'pending'}>
           {t('workbench.rail.compare', { name: alternativeName(problem, alternative, t), n: methods, of })}
         </StageStatus>
       )

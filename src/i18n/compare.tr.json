@@ -1,5 +1,5 @@
 {
-  "blocked": "İkiden az yöntem bu veriyi sıralayabiliyor, bu yüzden karşılaştıracak bir şey yok.",
+  "blocked": "Bu veriyi henüz en fazla bir yöntem sıralayabiliyor; karşılaştırma için en az iki yöntem gerekir.",
   "weightsBlocked": "Ağırlıklar henüz tamam değil, bu yüzden hiçbir yöntem sıralayamıyor.",
   "chart": {
     "title": "Her yöntemde sıra",
@@ -11,7 +11,7 @@
   "vikorNote": "VIKOR'un kendi kuralı: uzlaşık küme {{list}}",
   "summary": {
     "w": "Uyum (Kendall W): {{w}}",
-    "first": "Birinci sıra {{of}} yöntemin {{n}} tanesinde aynı",
+    "first": "{{name}}, {{of}} yöntemin {{n}} tanesinde birinci",
     "ranked": "{{of}} yöntemden {{n}} tanesi sıraladı"
   },
   "why": {
@@ -32,8 +32,8 @@
     "criteria": "{{a}}, özellikle {{ahead}} önde ama {{behind}} geride.",
     "criteriaAhead": "{{a}}, özellikle {{list}} önde.",
     "criteriaBehind": "{{a}}, özellikle {{list}} geride.",
-    "group_one": "{{methods}} için {{name}}, {{other}} alternatifinden önde.",
-    "group_other": "{{methods}} için {{name}}, {{other}} alternatifinden önde.",
+    "group_one": "{{methods}} için {{name}} alternatifi {{other}} alternatifinden önde.",
+    "group_other": "{{methods}} için {{name}} alternatifi {{other}} alternatifinden önde.",
     "vikorRegret": "VIKOR'un en büyük pişmanlığı {{a}} için {{ca}}, {{b}} için {{cb}} kriterinde, daha büyüğü {{larger}} için.",
     "vikorRegretSame": "VIKOR'un en büyük pişmanlığı hem {{a}} hem {{b}} için {{c}} kriterinde, daha büyüğü {{larger}} için.",
     "vikorRegretEqual": "VIKOR'un en büyük pişmanlıkları {{a}} ve {{b}} için eşit."
