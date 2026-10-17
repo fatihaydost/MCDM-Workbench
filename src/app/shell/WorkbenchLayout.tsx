@@ -1,5 +1,5 @@
 import { SidebarSimple } from '@phosphor-icons/react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { STAGES, type Stage } from '../../state/workbench'
 import { Button, cn, Dialog, DialogContent, DialogTrigger, SegmentedControl } from '../../ui'
@@ -42,6 +42,14 @@ export function WorkbenchLayout({ stage, onStageChange, stageMeta, explanation, 
   const { t } = useTranslation()
   const wide = useWide()
   const [sheetOpen, setSheetOpen] = useState(false)
+  // Six stages do not fit a phone: the switcher scrolls inside its bar, and the open stage is kept in view.
+  const switcher = useRef<HTMLElement>(null)
+  useEffect(() => {
+    // scrollLeft, not scrollIntoView: that would move the keyboard's starting point away from the skip link.
+    const nav = switcher.current
+    const on = nav?.querySelector<HTMLElement>('[data-state="on"]')
+    if (nav && on) nav.scrollLeft = on.offsetLeft + on.offsetWidth - nav.clientWidth + 16
+  }, [stage])
   // The sheet only exists below 1280 px; widening the window closes it.
   useEffect(() => {
     if (wide) setSheetOpen(false)
@@ -81,13 +89,14 @@ export function WorkbenchLayout({ stage, onStageChange, stageMeta, explanation, 
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Stage switcher, under md */}
-        <nav aria-label={t('workbench.stagesLabel')} className="border-b border-line px-4 py-2 md:hidden">
+        <nav ref={switcher} aria-label={t('workbench.stagesLabel')} className="overflow-x-auto border-b border-line px-4 py-2 md:hidden">
           <SegmentedControl<Stage>
             aria-label={t('workbench.stagesLabel')}
             value={stage}
             onValueChange={onStageChange}
             options={STAGES.map((s) => ({ value: s, label: stageLabel(s) }))}
             fullWidth
+            className="min-w-max"
           />
         </nav>
 

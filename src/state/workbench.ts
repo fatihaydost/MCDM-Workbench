@@ -24,7 +24,7 @@ import { alternativeNames, getExample } from '../data/examples'
 import type { Lang } from '../i18n/lang'
 
 /** The workbench stages, in order. Robustness reads the ranking of the stages before it and changes nothing. */
-export const STAGES = ['data', 'weights', 'ranking', 'results', 'robustness'] as const
+export const STAGES = ['data', 'weights', 'ranking', 'results', 'robustness', 'compare'] as const
 export type Stage = (typeof STAGES)[number]
 
 export type WeightMethodId = 'critic' | 'entropy' | 'equal' | 'manual'

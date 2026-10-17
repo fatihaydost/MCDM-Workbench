@@ -6,7 +6,7 @@ import { rankerFor, type RankingRun } from '../../../core/run'
 import { isEmptyProblem, toProblem, useMethodParams, useRanking, useWeights, useWorkbench } from '../../../state/workbench'
 import { Button, EmptyState } from '../../../ui'
 import { useWorkbenchNav } from '../nav'
-import { BlockedByIssues } from '../parts'
+import { BlockedByIssues, ContinueBar } from '../parts'
 import { registerRobustnessSummary } from '../robustnessSummary'
 import { alternativeName, criterionName, weightMethodFullLabel } from '../shared'
 import { heldCount } from './helpers'
@@ -80,6 +80,7 @@ export default function RobustnessStage() {
         names={names}
         criteria={criteria}
       />
+      <ContinueBar to="compare" onContinue={() => goTo('compare')} />
     </div>
   )
 }

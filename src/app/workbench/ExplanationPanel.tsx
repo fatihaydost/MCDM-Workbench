@@ -110,6 +110,16 @@ function ManualNotes() {
   )
 }
 
+function CompareNotes() {
+  const { t } = useTranslation()
+  return (
+    <section className="flex flex-col gap-1">
+      <h3 className="text-14 font-semibold text-text">{t('workbench.panel.compare.title')}</h3>
+      <p>{t('workbench.panel.compare.body')}</p>
+    </section>
+  )
+}
+
 function RobustnessNotes() {
   const { t } = useTranslation()
   return (
@@ -130,6 +140,7 @@ export function ExplanationPanel({ stage }: { stage: Stage }) {
   if (stage === 'weights') return weightMethod === 'manual' ? <ManualNotes /> : <MethodNote id={weightMethod} />
   if (stage === 'ranking') return <MethodNote id={rankingMethod} />
   if (stage === 'robustness') return <RobustnessNotes />
+  if (stage === 'compare') return <CompareNotes />
   // Results: one line per method and the links; the details are on the stages before.
   return (
     <div className="flex flex-col gap-5">

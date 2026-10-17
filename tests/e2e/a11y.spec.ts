@@ -227,7 +227,7 @@ test('Results is a summary: no second copy of the closeness bars or the TOPSIS p
 
 // The CRITIC example for every stage, and the Entropy, SAW, VIKOR and EDAS examples where their cards are shown.
 const PANEL_RUNS = [
-  ['krishnan-2021-smartphones', ['data', 'weights', 'ranking', 'results', 'robustness']],
+  ['krishnan-2021-smartphones', ['data', 'weights', 'ranking', 'results', 'robustness', 'compare']],
   ['zavadskas-2017-vilnius', ['weights', 'results']],
   ['podvezko-2011-baltic', ['ranking', 'results']],
   ['keshavarz-2015-ten-alternatives', ['ranking']],

@@ -128,7 +128,8 @@
       "weights": "Ağırlıklar",
       "ranking": "Sıralama",
       "results": "Sonuçlar",
-      "robustness": "Sağlamlık"
+      "robustness": "Sağlamlık",
+      "compare": "Karşılaştır"
     },
     "empty": {
       "data": {
@@ -155,6 +156,10 @@
       "robustness": {
         "title": "Sağlamlık için bir sıralama gerekli",
         "body": "Sıralama hesaplanabildiğinde bu adım, sonucun ağırlıklara ne kadar bağlı olduğunu sınar."
+      },
+      "compare": {
+        "title": "Karşılaştırma için sıralamalar gerekli",
+        "description": "En az iki yöntem verinizi sıralayabildiğinde bu adım sıralamaları yan yana koyar."
       }
     },
     "explanation": {
@@ -235,10 +240,12 @@
       "weights": "Ağırlıklara geç",
       "ranking": "Sıralamaya geç",
       "results": "Sonuçlara geç",
-      "robustness": "Sağlamlığı sınayın"
+      "robustness": "Sağlamlığı sınayın",
+      "compare": "Yöntemleri karşılaştırın"
     },
     "loadingStage": "Çalışma alanı yükleniyor",
     "loadingRobustness": "Sağlamlık sınamaları yükleniyor",
+    "loadingCompare": "Karşılaştırma yükleniyor",
     "grid": {
       "name": "Karar matrisi",
       "corner": "Alternatif",
@@ -536,6 +543,10 @@
         "title": "Sağlamlık",
         "body": "Başka makul ağırlıklarla sıralama değişir mi? Bir ağırlığı kaydırın, her ağırlığı yüzde birkaç oynatın, rastgele ağırlıklar çekin ya da bir kriteri çıkarın.",
         "readOnly": "Buradaki hiçbir şey ağırlıklarınızı değiştirmez."
+      },
+      "compare": {
+        "title": "Karşılaştır",
+        "body": "Her sıralama yöntemi sizin verinizle ve ağırlıklarınızla çalışır. Sıralamada anlaştıklarını ve ayrıldıkları yeri görün."
       }
     },
     "rail": {
@@ -544,7 +555,8 @@
       "toFix_one": "{{count}} sorun",
       "toFix_other": "{{count}} sorun",
       "checkWeights": "Ağırlıkları kontrol edin",
-      "robustness": "Birinci aynı: {{held}}/{{total}}"
+      "robustness": "Birinci aynı: {{held}}/{{total}}",
+      "compare": "Birinci: {{name}}, {{n}}/{{of}} yöntemde"
     },
     "visual": {
       "emptyMatrix": "Boş bir karar matrisi: satırlarda alternatifler, sütunlarda kriterler",

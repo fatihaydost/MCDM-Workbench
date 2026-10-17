@@ -128,7 +128,8 @@
       "weights": "Weights",
       "ranking": "Ranking",
       "results": "Results",
-      "robustness": "Robustness"
+      "robustness": "Robustness",
+      "compare": "Compare"
     },
     "empty": {
       "data": {
@@ -155,6 +156,10 @@
       "robustness": {
         "title": "Robustness needs a ranking",
         "body": "When the ranking can be calculated, this stage checks how much it depends on the weights."
+      },
+      "compare": {
+        "title": "Compare needs rankings",
+        "description": "When at least two methods can rank your data, this stage puts their rankings side by side."
       }
     },
     "explanation": {
@@ -235,10 +240,12 @@
       "weights": "Continue to weights",
       "ranking": "Continue to ranking",
       "results": "Continue to results",
-      "robustness": "Check robustness"
+      "robustness": "Check robustness",
+      "compare": "Compare the methods"
     },
     "loadingStage": "Loading the workbench",
     "loadingRobustness": "Loading the robustness checks",
+    "loadingCompare": "Loading the comparison",
     "grid": {
       "name": "Decision matrix",
       "corner": "Alternative",
@@ -536,6 +543,10 @@
         "title": "Robustness",
         "body": "Would the ranking change under other reasonable weights? Move one weight, nudge each weight by a few percent, draw random weights, or drop a criterion.",
         "readOnly": "Nothing here changes your weights."
+      },
+      "compare": {
+        "title": "Compare",
+        "body": "Every ranking method runs on your data and weights. See whether they agree on the order and where they part."
       }
     },
     "rail": {
@@ -544,7 +555,8 @@
       "toFix_one": "{{count}} to fix",
       "toFix_other": "{{count}} to fix",
       "checkWeights": "Check weights",
-      "robustness": "First place held: {{held}}/{{total}}"
+      "robustness": "First place held: {{held}}/{{total}}",
+      "compare": "First place: {{name}} in {{n}} of {{of}}"
     },
     "visual": {
       "emptyMatrix": "An empty decision matrix: alternatives in rows, criteria in columns",

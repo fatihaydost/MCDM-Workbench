@@ -3,8 +3,8 @@ import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRe
 import { useTranslation } from 'react-i18next'
 import { getExample } from '../../data/examples'
 import { useLang } from '../../i18n'
-import { getRankingMethod } from '../../core'
-import { isEmptyProblem, STAGES, toProblem, useMethodParams, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
+import { compareRankings, getRankingMethod, rankingMethods } from '../../core'
+import { isEmptyProblem, paramsFor, STAGES, toProblem, useMethodParams, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
 import { Skeleton } from '../../ui'
 import { usePageMeta } from '../landing/usePageMeta'
 import { WorkbenchLayout } from '../shell/WorkbenchLayout'
@@ -32,6 +32,27 @@ const loadRobustness = () =>
     return m
   })
 const RobustnessStage = lazy(loadRobustness)
+
+// Compare is a chunk of its own too (its chart and texts); the rail line below needs only the core.
+type CompareComponent = (typeof import('./compare/CompareStage'))['default']
+let LoadedCompare: CompareComponent | null = null
+const loadCompare = () =>
+  import('./compare/CompareStage').then((m) => {
+    LoadedCompare = m.default
+    return m
+  })
+const CompareStage = lazy(loadCompare)
+
+/** Layout-shaped placeholder while the compare chunk loads: a chart and a text block. */
+function CompareSkeleton() {
+  const { t } = useTranslation()
+  return (
+    <div role="status" aria-label={t('workbench.loadingCompare')} className="flex flex-col gap-4 pt-4">
+      <Skeleton width={180} height={20} />
+      <Skeleton height={320} />
+    </div>
+  )
+}
 
 /** Layout-shaped placeholder while the robustness chunk loads: a control row, a chart and a table. */
 function RobustnessSkeleton() {
@@ -108,7 +129,7 @@ function StageStatus({ state, children }: { state: StageState; children: ReactNo
   )
 }
 
-const NO_ATTEMPTS: Record<Stage, boolean> = { data: false, weights: false, ranking: false, results: false, robustness: false }
+const NO_ATTEMPTS: Record<Stage, boolean> = { data: false, weights: false, ranking: false, results: false, robustness: false, compare: false }
 
 export default function WorkbenchPage() {
   const { t } = useTranslation()
@@ -140,6 +161,7 @@ export default function WorkbenchPage() {
       }
       // Robustness opens once its chunk is here, so the stage the focus moves to is never an empty placeholder.
       if (next === 'robustness' && !LoadedRobustness) loadRobustness().then(go, go)
+      else if (next === 'compare' && !LoadedCompare) loadCompare().then(go, go)
       else go()
     },
     [setStage],
@@ -148,6 +170,7 @@ export default function WorkbenchPage() {
   // Results leads to Robustness: fetch it now rather than when the browser is idle.
   useEffect(() => {
     if (stage === 'results') void loadRobustness()
+    if (stage === 'robustness') void loadCompare()
   }, [stage])
 
   // After a stage change the user asked for: focus the target control, or the stage itself,
@@ -175,6 +198,7 @@ export default function WorkbenchPage() {
     const load = () => {
       void import('./WorkedCalculation')
       void loadRobustness()
+      void loadCompare()
     }
     if ('requestIdleCallback' in window) {
       const id = window.requestIdleCallback(load, { timeout: 2000 })
@@ -201,6 +225,21 @@ export default function WorkbenchPage() {
     if (!robustnessSummary || !getRankingMethod(rankingMethod) || !weights.value || !ranking.value) return null
     return robustnessSummary(toProblem(problem), weights.value.weights, { methodId: rankingMethod, params: rankingParams })
   }, [robustnessSummary, rankingMethod, rankingParams, problem, weights.value, ranking.value])
+
+  // The rail line: the alternative most methods put first, from every ranking method on the same weights.
+  const methodParams = useWorkbench((s) => s.methodParams)
+  const weightValues = weights.value?.weights
+  const comparison = useMemo(
+    () =>
+      weightValues && !isEmptyProblem(problem)
+        ? compareRankings(
+            toProblem(problem),
+            weightValues,
+            rankingMethods.map((m) => ({ methodId: m.id, params: paramsFor({ methodParams }, m.id) })),
+          )
+        : null,
+    [problem, weightValues, methodParams],
+  )
 
   const stageMeta: Partial<Record<Stage, ReactNode>> = {}
   if (!isEmptyProblem(problem)) {
@@ -234,6 +273,14 @@ export default function WorkbenchPage() {
       // Until the stage's chunk has loaded: an empty line of the same height, so the rail does not shift.
       stageMeta.robustness = <span aria-hidden className="invisible">0</span>
     }
+    if (comparison?.comparable && comparison.firstPlace) {
+      const { alternative, methods, of } = comparison.firstPlace
+      stageMeta.compare = (
+        <StageStatus state={methods === of ? 'done' : 'attention'}>
+          {t('workbench.rail.compare', { name: alternativeName(problem, alternative, t), n: methods, of })}
+        </StageStatus>
+      )
+    }
   }
 
   let content: ReactNode
@@ -241,13 +288,23 @@ export default function WorkbenchPage() {
   else if (stage === 'weights') content = <WeightsStage />
   else if (stage === 'ranking') content = <RankingStage />
   else if (stage === 'results') content = <ResultsStage />
-  else if (LoadedRobustness) content = <LoadedRobustness />
-  else
-    content = (
+  else if (stage === 'robustness') {
+    content = LoadedRobustness ? (
+      <LoadedRobustness />
+    ) : (
       <Suspense fallback={<RobustnessSkeleton />}>
         <RobustnessStage />
       </Suspense>
     )
+  } else {
+    content = LoadedCompare ? (
+      <LoadedCompare />
+    ) : (
+      <Suspense fallback={<CompareSkeleton />}>
+        <CompareStage />
+      </Suspense>
+    )
+  }
 
   return (
     <WorkbenchNavContext.Provider value={nav}>
