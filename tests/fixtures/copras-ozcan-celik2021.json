@@ -1,0 +1,43 @@
+{
+  "id": "copras-ozcan-celik-2021",
+  "source": "Ozcan & Celik 2021, Int. J. Prod. Manag. Eng. 9(2):81-92, DOI 10.4995/ijpme.2021.14734, Tables 1, 2, 10, 11",
+  "alternatives": ["A1", "A2", "A3", "A4", "A5", "A6", "A7"],
+  "criteria": ["separation performance", "drum discharge volume", "drum turnover", "energy consumption", "weight", "price", "number of separators"],
+  "types": ["benefit", "benefit", "benefit", "cost", "cost", "cost", "cost"],
+  "weights_printed_table2": [0.1186, 0.3442, 0.0323, 0.086, 0.0368, 0.2148, 0.1672],
+  "weights_note": "sum 0.9999; renormalized to 1 before compute (validateWeights tolerance 1e-6), or Entropy on the matrix",
+  "matrix": [
+    [10, 3.5, 7.7, 15, 1.3, 39, 2],
+    [20, 6, 6.8, 20, 1.6, 65, 1],
+    [15, 9, 5.05, 30, 1.6, 60, 2],
+    [18, 15, 6.2, 18.5, 1.3, 68, 1],
+    [10, 15, 5.7, 18.5, 1.5, 87, 2],
+    [20, 18, 6.2, 18.5, 1.8, 120, 1],
+    [12.5, 15, 5.1, 15, 1.1, 42, 2]
+  ],
+  "published": {
+    "D_table10": [
+      [0.0112, 0.0148, 0.0058, 0.0095, 0.0047, 0.0174, 0.0304],
+      [0.0225, 0.0253, 0.0051, 0.0127, 0.0058, 0.029, 0.0152],
+      [0.0169, 0.038, 0.0038, 0.019, 0.0058, 0.0268, 0.0304],
+      [0.0202, 0.0633, 0.0047, 0.0117, 0.0047, 0.0304, 0.0152],
+      [0.0112, 0.0633, 0.0043, 0.0117, 0.0054, 0.0389, 0.0304],
+      [0.0225, 0.076, 0.0047, 0.0117, 0.0065, 0.0536, 0.0152],
+      [0.0141, 0.0633, 0.0039, 0.0095, 0.004, 0.0188, 0.0304]
+    ],
+    "Q_table11": [0.1137, 0.134, 0.1206, 0.1702, 0.1377, 0.1615, 0.1623],
+    "ranking_table11_misprinted": [7, 6, 5, 1, 4, 3, 2],
+    "ranking_note": "the printed rank row copies the TOPSIS column; the printed Q implies 7, 5, 6, 1, 4, 3, 2"
+  },
+  "expected": {
+    "note": "renormalized printed weights",
+    "S_plus": [0.031844, 0.052966, 0.058694, 0.088278, 0.078906, 0.103198, 0.081263],
+    "S_minus": [0.062033, 0.0627, 0.082016, 0.062005, 0.086414, 0.087033, 0.062651],
+    "Q": [0.113709, 0.13396, 0.120612, 0.170179, 0.137673, 0.161547, 0.16232],
+    "N_percent": [66.8169, 78.7171, 70.8736, 100.0, 80.8988, 94.9274, 95.3816],
+    "ranking": [7, 5, 6, 1, 4, 3, 2],
+    "tolerance": 0.0001,
+    "tolerance_D": 0.00005,
+    "tolerance_recomputed": 0.000001
+  }
+}

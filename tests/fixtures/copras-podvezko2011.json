@@ -1,0 +1,22 @@
+{
+  "id": "copras-podvezko-2011-variant2",
+  "source": "Podvezko 2011, Engineering Economics 22(2):134-146, DOI 10.5755/j01.ee.22.2.310, Table 7 (Variants I and II), Table 8",
+  "alternatives": ["A1", "A2", "A3"],
+  "types": ["benefit", "benefit", "cost", "cost"],
+  "weights": [0.26, 0.23, 0.24, 0.27],
+  "matrix": [[42, 19, 13, 110], [71, 18, 11, 200], [53, 20, 12, 149]],
+  "published": { "S_plus": [0.142, 0.184, 0.164], "S_minus": [0.151, 0.191, 0.168], "Q": [0.332, 0.334, 0.335], "ranking": [3, 2, 1] },
+  "expected": {
+    "S_plus": [0.14245, 0.183836, 0.163714],
+    "S_minus": [0.151373, 0.19098, 0.167647],
+    "Q": [0.331652, 0.333799, 0.334549],
+    "N_percent": [99.13405, 99.77598, 100.0],
+    "ranking": [3, 2, 1],
+    "tolerance": 0.0005
+  },
+  "variant1": {
+    "note": "Table 7 Variant I: R4 of A1 is 105 and of A2 is 215 (p. 139); recomputed, the printed Q row of Variant I repeats Variant II",
+    "matrix": [[42, 19, 13, 105], [71, 18, 11, 215], [53, 20, 12, 149]],
+    "expected": { "Q": [0.336088, 0.328361, 0.335551], "ranking": [1, 3, 2] }
+  }
+}
