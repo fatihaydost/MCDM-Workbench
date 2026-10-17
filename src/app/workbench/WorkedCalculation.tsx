@@ -1,9 +1,9 @@
 import { CaretDown, Check, Copy, Info } from '@phosphor-icons/react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { isStepKey, stepContent } from '../../content/steps'
+import { isStepKey, stepContent, stepFlow } from '../../content/steps'
 import type { Step } from '../../core'
-import { CRITIC_FLOW, ENTROPY_FLOW, ENTROPY_MINMAX_FLOW, SD_FLOW, MEREC_FLOW, StepFlow, TOPSIS_FLOW, VIKOR_FLOW, EDAS_FLOW, type FlowNode } from '../../features/illustrations'
+import { StepFlow } from '../../features/illustrations'
 import { stepToTable, tableToLatex, tableToTsv, type StepTable } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
 import type { DraftProblem } from '../../state/workbench'
@@ -12,88 +12,6 @@ import { Button, cn, DropdownMenu, DropdownMenuContent, DropdownMenuItem, Dropdo
 import { Formula } from '../../ui/Formula'
 import type { CalcGroup } from './parts'
 import { DECIMALS, stepAxisLabels, stepName, tr } from './shared'
-
-/** Row label of a vector or scalar step in the table and in TSV (plain text). */
-const PLAIN_SYMBOL: Readonly<Record<string, string>> = {
-  'critic.sigma': 'σ',
-  'critic.conflict': 'Σ(1 − ρ)',
-  'critic.information': 'C',
-  'critic.informationTotal': 'ΣC',
-  'critic.weights': 'w',
-  'entropy.entropy': 'e',
-  'entropy.diversification': 'd',
-  'entropy.weights': 'w',
-  'sd.sigma': 'σ',
-  'sd.sigmaTotal': 'Σσ',
-  'sd.weights': 'w',
-  'merec.performance': 'S',
-  'merec.removalEffect': 'E',
-  'merec.weights': 'w',
-  'topsis.idealBest': 'A+',
-  'topsis.idealWorst': 'A−',
-  'topsis.distanceBest': 'D+',
-  'topsis.distanceWorst': 'D−',
-  'topsis.closeness': 'C',
-  'saw.scores': 'S',
-  'vikor.best': 'f*',
-  'vikor.worst': 'f−',
-  'vikor.groupUtility': 'S',
-  'vikor.individualRegret': 'R',
-  'vikor.q': 'Q',
-  'vikor.threshold': 'DQ',
-  'edas.average': 'AV',
-  'edas.sp': 'SP',
-  'edas.sn': 'SN',
-  'edas.nsp': 'NSP',
-  'edas.nsn': 'NSN',
-  'edas.scores': 'AS',
-  'equal.weights': 'w',
-  'manual.weights': 'w',
-}
-
-/** The same labels in TeX math for the LaTeX copy (pdfLaTeX has no σ in text mode). */
-const TEX_SYMBOL: Readonly<Record<string, string>> = {
-  'critic.sigma': String.raw`$\sigma_j$`,
-  'critic.conflict': String.raw`$\sum_k (1 - \rho_{jk})$`,
-  'critic.information': '$C_j$',
-  'critic.informationTotal': String.raw`$\sum_k C_k$`,
-  'critic.weights': '$w_j$',
-  'entropy.entropy': '$e_j$',
-  'entropy.diversification': '$d_j$',
-  'entropy.weights': '$w_j$',
-  'sd.sigma': String.raw`$\sigma_j$`,
-  'sd.sigmaTotal': String.raw`$\sum_k \sigma_k$`,
-  'sd.weights': '$w_j$',
-  'merec.performance': '$S_i$',
-  'merec.removalEffect': '$E_j$',
-  'merec.weights': '$w_j$',
-  'topsis.idealBest': '$A^{+}_j$',
-  'topsis.idealWorst': '$A^{-}_j$',
-  'topsis.distanceBest': '$D^{+}_i$',
-  'topsis.distanceWorst': '$D^{-}_i$',
-  'topsis.closeness': '$C_i$',
-  'saw.scores': '$S_i$',
-  'vikor.best': '$f^{*}_j$',
-  'vikor.worst': '$f^{-}_j$',
-  'vikor.groupUtility': '$S_i$',
-  'vikor.individualRegret': '$R_i$',
-  'vikor.q': '$Q_i$',
-  'vikor.threshold': '$DQ$',
-  'edas.average': '$AV_j$',
-  'edas.sp': '$SP_i$',
-  'edas.sn': '$SN_i$',
-  'edas.nsp': '$NSP_i$',
-  'edas.nsn': '$NSN_i$',
-  'edas.scores': '$AS_i$',
-  'equal.weights': '$w_j$',
-  'manual.weights': '$w_j$',
-}
-
-/** Steps the workbench adds itself (src/state/workbench.ts); their text lives in i18n steps.*. */
-const LOCAL_TEX: Readonly<Record<string, string>> = {
-  'equal.weights': String.raw`w_j = \frac{1}{n}, \qquad j = 1, \dots, n`,
-  'manual.weights': String.raw`w_j \ge 0, \qquad \sum_{j=1}^{n} w_j = 1`,
-}
 
 const PLACEHOLDER = 'KDSSYMBOLPLACEHOLDER'
 
@@ -106,18 +24,16 @@ export type WorkedCalculationProps = {
   headingLevel?: 'h3' | 'h4' | undefined
 }
 
+/** The step map for a group of steps: its method is the prefix of the step keys (`<id>.<step>`). */
+const flowFor = (steps: readonly Step[]) => stepFlow(steps[0]?.key.split('.')[0] ?? '', steps.map((s) => s.key))
+
+const stepDomId = (key: string) => `wb-step-${key.replace(/\./g, '-')}`
+
 /**
  * The signature element (DESIGN.md §Signature element): every step of a result as a block with a
  * one-line description, its formula, the labelled matrix or vector and copy as TSV or LaTeX.
  * The focused (or last clicked) step carries the accent on its hairline and number.
  */
-const FLOWS: readonly (readonly FlowNode[])[] = [CRITIC_FLOW, ENTROPY_FLOW, ENTROPY_MINMAX_FLOW, SD_FLOW, MEREC_FLOW, TOPSIS_FLOW, VIKOR_FLOW, EDAS_FLOW]
-
-/** The step map for a group of steps (by its first node's key, so each Entropy variant gets its own), or null. */
-const flowFor = (steps: readonly Step[]) => FLOWS.find((f) => steps.some((s) => s.key === f[0]!.key)) ?? null
-
-const stepDomId = (key: string) => `wb-step-${key.replace(/\./g, '-')}`
-
 export default function WorkedCalculation({ groups, problem, headingLevel = 'h3' }: WorkedCalculationProps) {
   const { t } = useTranslation()
   const [current, setCurrent] = useState(0)
@@ -220,14 +136,15 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, hea
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => () => clearTimeout(timer.current), [])
 
+  const content = isStepKey(step.key) ? stepContent[step.key] : undefined
   const table = useMemo(
-    () => stepToTable(step, labels, { valueLabel: PLAIN_SYMBOL[step.key] ?? name }),
-    [step, labels, name],
+    () => stepToTable(step, labels, { valueLabel: content?.symbol ?? name }),
+    [step, labels, name, content],
   )
 
-  const content = isStepKey(step.key) ? stepContent[step.key] : null
-  const description = content ? content[lang] : i18n.exists(`steps.${step.key}`) ? tr(t, `steps.${step.key}`) : ''
-  const tex = content?.tex ?? LOCAL_TEX[step.key] ?? ''
+  // equal and manual have no one-liner in their module; their text lives in i18n steps.*.
+  const description = content?.[lang] ?? (i18n.exists(`steps.${step.key}`) ? tr(t, `steps.${step.key}`) : '')
+  const tex = content?.tex ?? ''
   const edgeCase = content?.edgeCase?.[lang]
 
   const copy = async (format: 'tsv' | 'latex') => {
@@ -237,7 +154,7 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, hea
       text = tableToTsv(table, { decimal: lang === 'tr' ? ',' : '.' })
     } else {
       const withPlaceholder = stepToTable(step, labels, { valueLabel: PLACEHOLDER })
-      const symbol = TEX_SYMBOL[step.key]
+      const symbol = content?.texSymbol
       const body = tableToLatex(withPlaceholder, { digits: DECIMALS.step })
       text = `% ${name}\n${symbol ? body.replace(PLACEHOLDER, symbol) : body.replace(PLACEHOLDER, name)}`
     }

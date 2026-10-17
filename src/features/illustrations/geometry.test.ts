@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { critic } from '../../core/methods/critic'
 import { topsis } from '../../core/methods/topsis'
 import type { Problem } from '../../core/types'
+import { topsis as topsisSteps } from '../../content/steps/topsis'
 import { getExample } from '../../data/examples'
 import {
   argMax,
@@ -13,12 +14,8 @@ import {
   closenessAt,
   criticParts,
   defaultAxes,
-  ENTROPY_FLOW,
-  SD_FLOW,
   sdParts,
-  MEREC_FLOW,
   merecParts,
-  ENTROPY_MINMAX_FLOW,
   entropyParts,
   distancePoints,
   fitDistancePlane,
@@ -31,7 +28,6 @@ import {
   linePath,
   referenceGuides,
   pointCss,
-  TOPSIS_FLOW,
   topsisProjection,
 } from './geometry'
 
@@ -229,10 +225,10 @@ describe('criticParts', () => {
 
 describe('flowIndex', () => {
   it('finds the node of a core step key', () => {
-    expect(flowIndex(TOPSIS_FLOW, 'topsis.idealWorst')).toBe(2)
-    expect(flowIndex(TOPSIS_FLOW, 'topsis.closeness')).toBe(4)
-    expect(flowIndex(TOPSIS_FLOW, 'nope')).toBe(-1)
-    expect(flowIndex(TOPSIS_FLOW, undefined)).toBe(-1)
+    expect(flowIndex(topsisSteps.flow, 'topsis.idealWorst')).toBe(2)
+    expect(flowIndex(topsisSteps.flow, 'topsis.closeness')).toBe(4)
+    expect(flowIndex(topsisSteps.flow, 'nope')).toBe(-1)
+    expect(flowIndex(topsisSteps.flow, undefined)).toBe(-1)
   })
 })
 
@@ -296,25 +292,16 @@ describe('entropyParts', () => {
     expect(minmax.shares.some((row) => row.some((p) => p === 0))).toBe(true)
     expect(entropyParts({ ...problem, matrix: problem.matrix.map((r, i) => (i === 0 ? [-1, ...r.slice(1)] : r)) })).toBeNull()
   })
-
-  it('has a step map per variant whose nodes cover every emitted step', () => {
-    for (const [flow, normalization] of [[ENTROPY_FLOW, 'sum'], [ENTROPY_MINMAX_FLOW, 'minmax']] as const) {
-      const keys = entropyParts(problem, { normalization })!.result.steps.map((s) => s.key)
-      expect(flow.flatMap((n) => n.stepKeys)).toEqual(keys)
-      expect(flowIndex(flow, 'entropy.weights')).toBe(flow.length - 1)
-    }
-  })
 })
 
 describe('sdParts', () => {
   const ex = getExample('diakoulaki-1995-pharma')!
   const problem: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
 
-  it('carries the core steps, and its step map covers every emitted step', () => {
+  it('carries the core steps', () => {
     const parts = sdParts(problem)!
     expect(parts.weights).toEqual(parts.result.weights)
     expect(parts.normalized).toHaveLength(8)
-    expect(SD_FLOW.flatMap((n) => n.stepKeys)).toEqual(parts.result.steps.map((s) => s.key))
   })
   it('is null when SD cannot run', () => {
     expect(sdParts({ ...problem, matrix: [[1, 2, 3]] })).toBeNull()
@@ -325,11 +312,10 @@ describe('merecParts', () => {
   const ex = getExample('keshavarz-2021-merec')!
   const problem: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
 
-  it('stacks per-alternative drops that add up to E, and its step map covers every emitted step', () => {
+  it('stacks per-alternative drops that add up to E', () => {
     const parts = merecParts(problem)!
     expect(parts.weights).toEqual(parts.result.weights)
     parts.drops.forEach((d, j) => expect(d.reduce((a, b) => a + b, 0)).toBeCloseTo(parts.effect[j]!, 12))
-    expect(MEREC_FLOW.flatMap((n) => n.stepKeys)).toEqual(parts.result.steps.map((s) => s.key))
   })
   it('is null when MEREC cannot run (a zero cell)', () => {
     expect(merecParts({ ...problem, matrix: problem.matrix.map((r, i) => (i === 0 ? [0, ...r.slice(1)] : r)) })).toBeNull()

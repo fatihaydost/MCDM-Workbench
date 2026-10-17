@@ -12,7 +12,7 @@ from `src/i18n`. Number formats come in as `format` (use `useNumberFormat().form
 decimals).
 
 ```ts
-import { PipelineDiagram, TopsisGeometry, CriticIdea, EntropyIdea, SawContributions, VikorIdea, EdasIdea, StepFlow, TOPSIS_FLOW, CRITIC_FLOW, ENTROPY_FLOW, VIKOR_FLOW, EDAS_FLOW, MethodGlyph, EmptyMatrixHint } from '../features/illustrations'
+import { PipelineDiagram, TopsisGeometry, CriticIdea, EntropyIdea, SawContributions, VikorIdea, EdasIdea, StepFlow, MethodGlyph, EmptyMatrixHint } from '../features/illustrations'
 ```
 
 Preview: `/dev/illustrations` (dev only, `Preview.tsx`), e.g.
@@ -213,15 +213,13 @@ when the method is EDAS (it replaces the score chart).
 
 Map of the worked calculation: numbered square nodes on a hairline, the active one in the accent,
 each a button (`aria-current="step"`), inside a `<nav>`. Scrolls sideways in itself when narrow.
-`TOPSIS_FLOW` (Normalize, Weight, Ideal points, Distances, Closeness), `CRITIC_FLOW` (Normalize,
-Contrast, Correlation, Information, Weights), `ENTROPY_FLOW` (Shares, Entropy, Diversification, Weights) and
-`ENTROPY_MINMAX_FLOW` (Normalize first), `VIKOR_FLOW` and `EDAS_FLOW` (Average, Distances, Weighted, SP and SN,
-Normalized, AS) give the node keys (the first core step key of each
+The node lists live with each method's step content (`flow` in `src/content/steps/<id>.ts`, read with
+`stepFlow(methodId, stepKeys)` from `src/content/steps`). They give the node keys (the first core step key of each
 node) and `stepKeys` (all core steps the node covers); add your labels:
 
 ```tsx
 <StepFlow
-  steps={TOPSIS_FLOW.map((n) => ({ ...n, label: t(`flow.${n.key}`) }))}
+  steps={topsis.flow.map((n) => ({ ...n, label: t(`flow.${n.key}`) }))}
   active={currentStepKey}                // any core step key, e.g. 'topsis.idealWorst' marks node 3
   onSelect={(key) => scrollToStep(key)}   // key = node key = first core step key
   labels={{ nav: t('calc.steps') }}
@@ -283,8 +281,7 @@ readable; the width follows the container. Table: alternatives by Borda rank, me
 `topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale
 screen scales, values growing right and up), `distancePoints(proj)`, `closenessAt(p)`,
 `isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `placeLabels(...)`, `ISO_C_DEFAULT`, `linePath(...)`, `pointCss(...)`,
-`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sdParts(problem)`, `merecParts(problem)`, `MEREC_FLOW`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `edasParts(problem, weights)`, `divergingSegments(above, below, center, px)`, `EDAS_FLOW`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `VIKOR_FLOW`, `argMax`, `flowIndex`, `TOPSIS_FLOW`,
-`CRITIC_FLOW`, `ENTROPY_FLOW`, `ENTROPY_MINMAX_FLOW`. The
+`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sdParts(problem)`, `merecParts(problem)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `edasParts(problem, weights)`, `divergingSegments(above, below, center, px)`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `argMax`, `flowIndex`. The
 tests check that A+ / A- and C equal the core and the published values (Opricovic and Tzeng 2004:
 C = 0.762, 0.722, 0.238; Krishnan et al. 2021: σ and weights), that the distance plane places every
 alternative at the core's (D+, D-) with C = y / (x + y) and the core's order, that each ray keeps its

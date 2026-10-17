@@ -3,16 +3,8 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import katex from 'katex'
 import { describe, expect, it } from 'vitest'
-import { critic as criticCore } from '../core/methods/critic'
-import { edas as edasCore } from '../core/methods/edas'
-import { entropy as entropyCore } from '../core/methods/entropy'
-import { merec as merecCore } from '../core/methods/merec'
-import { saw as sawCore } from '../core/methods/saw'
-import { sd as sdCore } from '../core/methods/sd'
-import { vikor as vikorCore } from '../core/methods/vikor'
-import { topsis as topsisCore } from '../core/methods/topsis'
 import { listMethods } from '../core/registry'
-import type { Problem } from '../core/types'
+import type { Method, Problem, Step } from '../core/types'
 import {
   coMentionTable,
   decisionTree,
@@ -24,7 +16,7 @@ import {
 } from './guide'
 import * as guide from './guide'
 import { allMethods, isMethodId, methodContent } from './methods'
-import { STEP_KEYS, stepContent } from './steps'
+import { STEP_KEYS, stepContent, stepFlow } from './steps'
 import { localizeMethod, type LocalizedText, type MethodContent } from './types'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -195,34 +187,54 @@ describe('method content', () => {
   })
 })
 
+/** The step lists a method emits: one run with the defaults plus one per option of each choice parameter. */
+function runsOf(method: Method): Step[][] {
+  const variants: Record<string, string>[] = [{}]
+  for (const p of method.params ?? []) if (p.kind === 'choice') for (const o of p.options) variants.push({ [p.key]: o })
+  return variants.map((params) =>
+    method.kind === 'weighting' ? method.compute(problem, params).steps : method.compute(problem, [0.4, 0.3, 0.3], params).steps,
+  )
+}
+
+/** Steps the store builds itself (src/state/workbench.ts) rather than a registry method. */
+const STORE_STEP_KEYS = ['manual.weights']
+
 describe('step content', () => {
   it('covers exactly the step keys the core emits', () => {
-    const emitted = [
-      ...criticCore.compute(problem, {}).steps.map((s) => s.key),
-      ...entropyCore.compute(problem, {}).steps.map((s) => s.key),
-      ...entropyCore.compute(problem, { normalization: 'minmax' }).steps.map((s) => s.key),
-      ...sdCore.compute(problem, {}).steps.map((s) => s.key),
-      ...merecCore.compute(problem, {}).steps.map((s) => s.key),
-      ...topsisCore.compute(problem, [0.4, 0.3, 0.3], {}).steps.map((s) => s.key),
-      ...sawCore.compute(problem, [0.4, 0.3, 0.3], {}).steps.map((s) => s.key),
-      ...sawCore.compute(problem, [0.4, 0.3, 0.3], { normalization: 'sum' }).steps.map((s) => s.key),
-      ...vikorCore.compute(problem, [0.4, 0.3, 0.3], {}).steps.map((s) => s.key),
-      ...edasCore.compute(problem, [0.4, 0.3, 0.3], {}).steps.map((s) => s.key),
-    ]
+    const emitted = [...listMethods().flatMap((m) => runsOf(m).flatMap((steps) => steps.map((s) => s.key))), ...STORE_STEP_KEYS]
     expect([...STEP_KEYS].sort()).toEqual([...new Set(emitted)].sort())
+  })
+
+  it('has a step map, where a method has one, that covers exactly the steps of each run in order', () => {
+    for (const m of listMethods()) {
+      for (const steps of runsOf(m)) {
+        const keys = steps.map((s) => s.key)
+        const flow = stepFlow(m.id, keys)
+        if (flow) expect(flow.flatMap((n) => n.stepKeys), m.id).toEqual(keys)
+      }
+    }
+    expect(stepFlow('topsis', ['topsis.normalized'])?.map((n) => n.key)).toEqual(['topsis.normalized'])
+    expect(stepFlow('saw', ['saw.scores'])).toBeNull()
+    expect(stepFlow('constructor', [])).toBeNull()
   })
 
   it('has both languages for every key', () => {
     for (const k of STEP_KEYS) {
-      expect(stepContent[k].en.trim(), k).not.toBe('')
-      expect(stepContent[k].tr.trim(), k).not.toBe('')
+      const c = stepContent[k]
+      // Without en / tr the text comes from i18n steps.* (equal, manual).
+      if (c.en === undefined) {
+        expect(c.tr, k).toBeUndefined()
+        continue
+      }
+      expect(c.en.trim(), k).not.toBe('')
+      expect(c.tr.trim(), k).not.toBe('')
     }
   })
 
   it('explains every step in one short line', () => {
     for (const k of STEP_KEYS) {
       const c = stepContent[k]
-      for (const text of [c.en, c.tr, ...(c.edgeCase ? [c.edgeCase.en, c.edgeCase.tr] : [])]) {
+      for (const text of [c.en, c.tr, c.edgeCase?.en, c.edgeCase?.tr].filter((x) => x !== undefined)) {
         expect(wordCount(text), `${k}: ${text}`).toBeLessThanOrEqual(14)
         expect(sentencesOf(text), `${k}: ${text}`).toHaveLength(1)
       }
@@ -311,7 +323,7 @@ describe('guide', () => {
 describe('copy rules', () => {
   const visible = [
     ...strings(methodContent, 'methods'),
-    ...strings(stepContent, 'steps').filter((s) => !s.path.endsWith('.tex')),
+    ...strings(stepContent, 'steps').filter((s) => !s.path.endsWith('.tex') && !s.path.endsWith('.texSymbol')),
     ...strings(guide, 'guide'),
   ]
 

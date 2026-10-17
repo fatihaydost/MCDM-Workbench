@@ -14,7 +14,7 @@ Order per method (Kurallar): review the card with Fatih, re-research it, then wo
 | Card section | Goes to |
 |---|---|
 | For users, When to use / not, Inputs, Pitfalls, Commonly combined with, Sources | already in `src/content/methods/<id>.ts` (draft); recheck after re-research |
-| Algorithm | `steps` of the content card (method page) and `src/content/steps.ts` (worked calculation, per core step) |
+| Algorithm | `steps` of the content card (method page) and `src/content/steps/<id>.ts` (worked calculation, per core step) |
 | Reference example (JSON) | `tests/fixtures/<id>-<author><year>.json`, optionally a dataset in `src/data/examples.ts` |
 | Implementation notes, edge cases | the core function, its `MethodWarning`s and validation |
 
@@ -50,26 +50,24 @@ a typo, keep both the printed and the corrected values (card rule) and test agai
 
 ## 2. Step content (worked calculation)
 
-- [ ] `src/content/steps.ts`: add every emitted key to the `StepKey` union (steps.ts:15) and an entry to
-  `stepContent` (steps.ts:31): `en`, `tr` (one sentence, at most 14 words), `tex` (no words inside TeX, no `--`),
-  `edgeCase?` when the code deviates from the plain formula. [T] a union member without an entry.
-  [U] `src/content/content.test.ts:193-199` compares `STEP_KEYS` with the keys emitted by critic and topsis:
-  **add your method's `compute` call to the `emitted` list there**, otherwise your new entries fail the test.
-  Without entries at all nothing fails [S]: the block shows no formula.
+- [ ] **Step module** `src/content/steps/<id>.ts`, the one place per method (copy `sd.ts`): `export const <id> = {
+  flow?, steps } satisfies MethodSteps`, then add it to `modules` in `src/content/steps/index.ts`. `StepKey` is
+  derived from these records. Per emitted key: `en`, `tr` (one sentence, at most 14 words), `tex` (no words inside
+  TeX, no `--`), `edgeCase?` when the code deviates from the plain formula, `symbol?` / `texSymbol?` for the row
+  label of a vector or scalar step (`'σ'`, `` String.raw`$\sigma_j$` ``; without them the step name is used).
+  `flow?` is the step map (optional, recommended for 4+ steps): nodes `{ key, stepKeys }`, node key = first step
+  key of the node; nodes a variant does not emit drop out (Entropy).
+  [U] `src/content/content.test.ts` (step content) runs every registry method, once per option of each choice
+  parameter, and compares the emitted keys with the modules; it also checks that a `flow` covers each run in
+  order. A store-built step (like `manual.weights`) goes in `STORE_STEP_KEYS` there. Not loaded by the main chunk:
+  import the index only from lazy code (`WorkedCalculation`).
 - [ ] `src/i18n/en.json` and `tr.json`:
   - `steps.<id>.<key>` (en.json:623): one line per step. [U] `tests/i18n.test.ts:68-86` checks this for the steps
     critic and topsis emit: **add your method's `compute` to that test** so it is checked too.
   - `workbench.stepNames.<id>.<key>` (en.json:358): short block title, also the xlsx header and row label.
     [S] untested: a missing one prints the raw key in the calculation and in the downloaded workbook.
-  - `workbench.flow.<id>.<nodeKey>` (en.json:440): only if you add a step map (below).
+  - `workbench.flow.<id>.<nodeKey>` (en.json:440): only if the module has a `flow`.
   - Both files must have the same keys and `{{vars}}`, no em or en dash, no emoji [U] `tests/i18n.test.ts:22-48`.
-- [ ] `src/app/workbench/WorkedCalculation.tsx`: `PLAIN_SYMBOL` (:17) and `TEX_SYMBOL` (:33) give the row label of a
-  vector or scalar step ("σ", `$\sigma_j$`). Optional; without it the step name is used.
-  `LOCAL_TEX` (:49) is only for steps the store makes itself (equal, manual).
-- [ ] Step map (optional, recommended for 4+ steps): a `<ID>_FLOW: FlowNode[]` next to `CRITIC_FLOW` in
-  `src/features/illustrations/geometry.ts:291` (node key = first step key of the node, `stepKeys` = the steps it
-  covers), export it from `src/features/illustrations/index.ts`, add it to `FLOWS` (`WorkedCalculation.tsx:70`),
-  plus the `workbench.flow.*` labels.
 
 ## 3. Workbench state (`src/state/workbench.ts`)
 

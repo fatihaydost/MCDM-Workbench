@@ -9,7 +9,8 @@ import { examples } from '../../data/examples'
 import type { MethodFamily } from '../../content/types'
 import { CriticIdea } from './CriticIdea'
 import { EmptyMatrixHint } from './EmptyMatrixHint'
-import { CRITIC_FLOW, TOPSIS_FLOW } from './geometry'
+import { critic as criticSteps } from '../../content/steps/critic'
+import { topsis as topsisSteps } from '../../content/steps/topsis'
 import { MethodGlyph } from './MethodGlyph'
 import { PipelineDiagram, type PipelineStage } from './PipelineDiagram'
 import { StepFlow } from './StepFlow'
@@ -96,8 +97,8 @@ export default function IllustrationsPreview() {
 
       <Section title="StepFlow">
         <div className="flex max-w-[760px] flex-col gap-8">
-          <StepFlow steps={TOPSIS_FLOW.map((n, i) => ({ ...n, label: TOPSIS_LABELS[i]! }))} active={topsisStep} onSelect={setTopsisStep} />
-          <StepFlow steps={CRITIC_FLOW.map((n, i) => ({ ...n, label: CRITIC_LABELS[i]! }))} active={criticStep} onSelect={setCriticStep} />
+          <StepFlow steps={topsisSteps.flow.map((n, i) => ({ ...n, label: TOPSIS_LABELS[i]! }))} active={topsisStep} onSelect={setTopsisStep} />
+          <StepFlow steps={criticSteps.flow.map((n, i) => ({ ...n, label: CRITIC_LABELS[i]! }))} active={criticStep} onSelect={setCriticStep} />
         </div>
       </Section>
 

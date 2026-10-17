@@ -2,7 +2,7 @@ import { flowIndex } from './geometry'
 import s from './illustrations.module.css'
 
 export type StepFlowStep = {
-  /** Returned by `onSelect`; use the first core step key of the node (see TOPSIS_FLOW). */
+  /** Returned by `onSelect`; use the first core step key of the node (see the flow in src/content/steps/topsis.ts). */
   key: string
   label: string
   /** Core step keys this node stands for; `active` may be any of them. */
