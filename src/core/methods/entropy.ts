@@ -1,4 +1,4 @@
-import { column, isConstant, maxOf, minOf, sum, zeros } from '../math'
+import { column, isConstant, minMaxNormalize, sum, zeros } from '../math'
 import type { MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
 import { assertValid, validateProblem, type ValidationIssue } from '../validate'
 
@@ -50,18 +50,7 @@ export const entropy: WeightingMethod<EntropyParams> = {
     const constant = Array.from({ length: n }, (_, j) => isConstant(column(matrix, j)))
 
     // 1. (minmax only) r in [0, 1], 1 = best; a constant column (max = min) stays 0 and is never divided.
-    let r: number[][] | undefined
-    if (variant === 'minmax') {
-      r = zeros(m, n)
-      for (let j = 0; j < n; j++) {
-        if (constant[j]) continue
-        const col = column(matrix, j)
-        const lo = minOf(col)
-        const hi = maxOf(col)
-        const isCost = criteria[j]!.type === 'cost'
-        for (let i = 0; i < m; i++) r[i]![j] = isCost ? (hi - col[i]!) / (hi - lo) : (col[i]! - lo) / (hi - lo)
-      }
-    }
+    const r = variant === 'minmax' ? minMaxNormalize(problem).r : undefined
     const base = r ?? matrix
 
     // 2-4. Proportions, entropy and diversification per column.

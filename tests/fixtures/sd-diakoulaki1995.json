@@ -1,0 +1,171 @@
+{
+  "id": "sd-diakoulaki1995",
+  "variant": "minmax (Eq. 2), w = sigma / sum sigma (Eq. 7)",
+  "source": "Diakoulaki, Mavrotas & Papayannakis 1995, Computers & OR 22(7):763-770, Table 1 (input), Sec. 5 sigma and Table 3 SD (output)",
+  "criteria": [
+    "profitability_pct",
+    "market_share_pct",
+    "productivity_musd"
+  ],
+  "types": [
+    "benefit",
+    "benefit",
+    "benefit"
+  ],
+  "alternatives": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+  ],
+  "matrix": [
+    [
+      61.0,
+      1.08,
+      4.33
+    ],
+    [
+      20.7,
+      0.26,
+      4.34
+    ],
+    [
+      16.3,
+      1.98,
+      2.53
+    ],
+    [
+      9.0,
+      3.29,
+      1.65
+    ],
+    [
+      5.4,
+      2.77,
+      2.33
+    ],
+    [
+      4.0,
+      4.12,
+      1.21
+    ],
+    [
+      -6.1,
+      3.52,
+      2.1
+    ],
+    [
+      -34.6,
+      3.31,
+      0.98
+    ]
+  ],
+  "published": {
+    "sigma_population": [
+      0.263,
+      0.321,
+      0.358
+    ],
+    "weights": [
+      0.279,
+      0.341,
+      0.38
+    ]
+  },
+  "expected": {
+    "weights": [
+      0.27908,
+      0.34093,
+      0.37999
+    ],
+    "sigma_population": [
+      0.26306,
+      0.32135,
+      0.35817
+    ],
+    "sigma_sample": [
+      0.28122,
+      0.34353,
+      0.3829
+    ],
+    "tolerance_vs_published": 0.0005,
+    "tolerance": 0.0005
+  },
+  "misprints": {
+    "table2_C_profitability": {
+      "printed": 0.524,
+      "corrected": 0.5324
+    },
+    "table4_sd_ranking": {
+      "printed": [
+        1,
+        2,
+        7,
+        5,
+        6,
+        3,
+        4,
+        8
+      ],
+      "corrected": [
+        1,
+        2,
+        6,
+        7,
+        4,
+        5,
+        3,
+        8
+      ],
+      "evidence": "printed column is the inverse permutation (firm at each rank position); Table 5 SD row (0.571, -0.476, 0.762) matches the corrected ranks"
+    },
+    "table4_critic_ranking": {
+      "printed": [
+        1,
+        6,
+        7,
+        4,
+        5,
+        3,
+        2,
+        8
+      ],
+      "corrected": [
+        1,
+        7,
+        6,
+        4,
+        5,
+        2,
+        3,
+        8
+      ]
+    },
+    "table8_rho_vs_pca": {
+      "printed": {
+        "CRITIC": 0.9524,
+        "SD": 0.6429,
+        "MW": 0.5952
+      },
+      "corrected": {
+        "CRITIC": 1.0,
+        "SD": 0.4762,
+        "MW": 0.5952
+      },
+      "evidence": "printed values follow from the printed Table 4 columns read as ranks"
+    },
+    "table5_mw_profitability": {
+      "printed": 0.525,
+      "corrected": 0.5238
+    },
+    "table7_F_normalized_pc1": {
+      "printed": 0.236,
+      "corrected": 0.2058
+    }
+  },
+  "card": "docs/research/methods/sd.md"
+}

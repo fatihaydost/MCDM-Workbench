@@ -1,4 +1,5 @@
 // Small numeric helpers. Callers pass validated, rectangular, finite matrices.
+import type { Problem } from './types'
 
 export const column = (matrix: number[][], j: number): number[] => matrix.map((row) => row[j]!)
 
@@ -31,6 +32,49 @@ export function isConstant(xs: readonly number[]): boolean {
   const hi = maxOf(xs)
   const lo = minOf(xs)
   return hi - lo <= CONSTANT_TOLERANCE * Math.max(Math.abs(hi), Math.abs(lo))
+}
+
+/**
+ * Above the constant band but still this small relative to its magnitude, a spread is almost surely noise (a unit
+ * conversion or rounding residue): min-max stretches it to [0, 1] and gives it a full weight, so methods warn.
+ */
+export const NEAR_CONSTANT_TOLERANCE = 1e-9
+
+/** Not constant (isConstant), but max - min <= 1e-9 * max(|max|, |min|). */
+export function isNearConstant(xs: readonly number[]): boolean {
+  const hi = maxOf(xs)
+  const lo = minOf(xs)
+  return !isConstant(xs) && hi - lo <= NEAR_CONSTANT_TOLERANCE * Math.max(Math.abs(hi), Math.abs(lo))
+}
+
+/**
+ * Min-max normalization with cost inversion, r in [0, 1] and 1 = best: benefit (x - min) / (max - min), cost
+ * (max - x) / (max - min). A constant column (isConstant) is never divided and stays all zeros.
+ */
+export function minMaxNormalize(problem: Problem): { r: number[][]; constant: boolean[]; nearConstant: boolean[] } {
+  const { matrix, criteria } = problem
+  const m = matrix.length
+  const n = criteria.length
+  const r = zeros(m, n)
+  const constant = new Array<boolean>(n).fill(false)
+  const nearConstant = new Array<boolean>(n).fill(false)
+  for (let j = 0; j < n; j++) {
+    const col = column(matrix, j)
+    if (isConstant(col)) {
+      constant[j] = true
+      continue
+    }
+    nearConstant[j] = isNearConstant(col)
+    const lo = minOf(col)
+    const hi = maxOf(col)
+    const range = hi - lo
+    const isCost = criteria[j]!.type === 'cost'
+    for (let i = 0; i < m; i++) {
+      const x = col[i]!
+      r[i]![j] = isCost ? (hi - x) / range : (x - lo) / range
+    }
+  }
+  return { r, constant, nearConstant }
 }
 
 /** Sample standard deviation (n - 1 denominator, Excel STDEV / STDEV.S). */

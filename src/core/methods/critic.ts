@@ -1,4 +1,4 @@
-import { column, isConstant, maxOf, minOf, pearson, sampleStd, sum, zeros } from '../math'
+import { column, minMaxNormalize, pearson, sampleStd, sum, zeros } from '../math'
 import { tied } from '../rank'
 import type { MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
 import { assertValid, validateProblem } from '../validate'
@@ -20,32 +20,16 @@ export const critic: WeightingMethod = {
   kind: 'weighting',
   compute(problem: Problem): WeightingResult {
     const issues = assertValid(validateProblem(problem))
-    const { matrix, criteria } = problem
-    const m = matrix.length
-    const n = criteria.length
+    const m = problem.matrix.length
+    const n = problem.criteria.length
     const warnings: MethodWarning[] = issues
       .filter((x) => x.code === 'constant-column')
       .map((x) => ({ code: 'critic.constant-column', ...(x.col !== undefined && { col: x.col }) }))
     if (m < CRITIC_SMALL_M) warnings.push({ code: 'critic.few-alternatives' })
 
     // 1. Min-max normalization; a constant column becomes all zeros (sigma 0 -> weight 0).
-    const r = zeros(m, n)
-    const constant = new Array<boolean>(n).fill(false)
-    for (let j = 0; j < n; j++) {
-      const col = column(matrix, j)
-      if (isConstant(col)) {
-        constant[j] = true
-        continue
-      }
-      const lo = minOf(col)
-      const hi = maxOf(col)
-      const range = hi - lo
-      const isCost = criteria[j]!.type === 'cost'
-      for (let i = 0; i < m; i++) {
-        const x = col[i]!
-        r[i]![j] = isCost ? (hi - x) / range : (x - lo) / range
-      }
-    }
+    const { r, constant, nearConstant } = minMaxNormalize(problem)
+    nearConstant.forEach((near, j) => near && warnings.push({ code: 'critic.near-constant-column', col: j }))
 
     // 2. Contrast: sample standard deviation per column.
     const sigma = Array.from({ length: n }, (_, j) => sampleStd(column(r, j)))
