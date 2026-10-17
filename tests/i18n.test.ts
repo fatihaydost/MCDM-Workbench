@@ -110,9 +110,10 @@ describe('i18n resources', () => {
       merec.compute(p, {}),
       merec.compute({ ...p, matrix: [[1, 1], [1, 1], [1, 1]] }, {}),
       merec.compute({ ...p, matrix: [[450, 5], [5, 6], [100, 5.5]] }, {}),
+      merec.compute({ ...p, matrix: [[1, 150], [2, 150 + 1e-9], [3, 150 + 2e-9]] }, {}), // near-constant
     ]
     expect(new Set(mr.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
-      new Set(['merec.constant-column', 'merec.all-constant-equal-weights', 'merec.dominant-weight']),
+      new Set(['merec.constant-column', 'merec.all-constant-equal-weights', 'merec.dominant-weight', 'merec.near-constant-column']),
     )
     // SAW: both normalizations (it emits no warnings of its own; its data errors are validation codes).
     const sw = [saw.compute(p, [0.5, 0.5], {}), saw.compute(p, [0.5, 0.5], { normalization: 'sum' })]

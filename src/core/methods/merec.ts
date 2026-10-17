@@ -1,4 +1,4 @@
-import { column, isConstant, maxOf, minOf, zeros } from '../math'
+import { column, isConstant, isNearConstant, maxOf, minOf, zeros } from '../math'
 import type { MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
 import { assertValid, validateProblem, type ValidationIssue } from '../validate'
 
@@ -47,6 +47,7 @@ export const merec: WeightingMethod = {
         warnings.push({ code: 'merec.constant-column', col: j })
         continue
       }
+      if (isNearConstant(col)) warnings.push({ code: 'merec.near-constant-column', col: j })
       const lo = minOf(col)
       const hi = maxOf(col)
       const isCost = criteria[j]!.type === 'cost'
@@ -74,6 +75,7 @@ export const merec: WeightingMethod = {
 
     // 4. Weights; with nothing removed by any criterion (every column constant, or the 0/0 guard) use 1/n.
     const total = effect.reduce((a, b) => a + b, 0)
+    // total === 0 is defensive only: isConstant already catches every column whose min/x rounds to 1.
     const allConstant = constant.every(Boolean) || total === 0
     if (allConstant) warnings.push({ code: 'merec.all-constant-equal-weights' })
     const weights = allConstant ? new Array<number>(n).fill(1 / n) : effect.map((e) => e / total)

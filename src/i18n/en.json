@@ -1017,7 +1017,7 @@
       "value-out-of-range": "{{alternative}} on {{criterion}} is too large or too small to compute with. Rescale {{criterion}} (another unit) so its values lie between 10⁻¹⁰⁰ and 10¹⁰⁰.",
       "invalid-criterion-type": "Choose benefit or cost for {{criterion}}.",
       "constant-column": "Every alternative has the same value on {{criterion}}, so it cannot tell them apart.",
-      "non-positive-value": "{{alternative}} on {{criterion}} is {{value}}. This method divides by the values, so each must be above 0.",
+      "non-positive-value": "{{alternative}} on {{criterion}} is {{value}}. This method divides by the values or takes their logarithm, so each must be above 0.",
       "negative-value": "{{alternative}} on {{criterion}} is {{value}}. Raw data (sum) needs values of 0 or more; choose Min-max to use negative values.",
       "weights-length-mismatch": "There are {{value}} weights for {{n}} criteria.",
       "invalid-weight": "Enter a number for the weight of {{criterion}}.",
@@ -1067,7 +1067,8 @@
     "merec": {
       "constant-column": "{{criterion}} has the same value for every alternative, so removing it changes nothing and its MEREC weight is 0.",
       "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead.",
-      "dominant-weight": "{{criterion}} takes more than half of the weight. MEREC favours a criterion whose largest value is many times its smallest; check that its range is real."
+      "dominant-weight": "{{criterion}} takes more than half of the weight, so check that its range is real.",
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet MEREC gives it a removal effect. Check whether the difference is real."
     }
   }
 }

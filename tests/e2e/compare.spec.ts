@@ -59,7 +59,7 @@ test('compare: a zero cell leaves SAW out with its reason', async ({ page }) => 
   await page.keyboard.press('Enter')
   await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Compare' }).click()
   const saw = page.locator('[data-testid="rank-column"][data-method="saw"]')
-  await expect(saw).toContainText('This method divides by the values, so each must be above 0.')
+  await expect(saw).toContainText('This method divides by the values or takes their logarithm, so each must be above 0.')
   await expect(saw.locator('[data-rank]')).toHaveCount(0)
   await expect(page.getByTestId('compare-summary')).toContainText('3 of 4 methods ranked')
 })

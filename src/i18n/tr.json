@@ -329,7 +329,7 @@
         "equal": "Her kriter aynı ağırlığı alır.",
         "manual": "Ağırlıkları kendiniz girin. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli.",
         "sd": "Her kriterin değerlerinin alternatifler arasında ne kadar yayıldığına bakan nesnel ağırlıklar.",
-        "merec": "Her kriter çıkarıldığında alternatiflerin genel performansının ne kadar düştüğüne bakan nesnel ağırlıklar. Her değer 0'dan büyük olmalı."
+        "merec": "Ağırlığı, kriteri çıkarmanın neyi değiştirdiğinden bulur. Her değer 0'dan büyük olmalı."
       },
       "columns": {
         "criterion": "Kriter",
@@ -995,7 +995,7 @@
       "weights": "Ağırlıklar: her kriterin toplam yayılım içindeki payı."
     },
     "merec": {
-      "normalized": "Küçük olan iyi olacak biçimde normalizasyon: fayda min / x, maliyet x / maks; her sütunun en kötü değeri 1, en iyisi en küçük olur.",
+      "normalized": "Küçüğün iyi sayıldığı normalizasyon: fayda min / x, maliyet x / maks; her sütunun en kötü değeri 1, en iyisi en küçük olur.",
       "absLog": "Her normalize değerin mutlak logaritması: en kötü değer için 0, değer iyileştikçe daha büyük.",
       "performance": "Her alternatifin genel performansı: ln(1 + tüm kriterlerdeki mutlak logaritmalarının ortalaması).",
       "performanceRemoved": "Bir kriter çıkarılınca performans: o kriter olmadan aynı toplam, yine kriter sayısına bölünür.",
@@ -1017,7 +1017,7 @@
       "value-out-of-range": "{{alternative}} için {{criterion}} değeri hesap için çok büyük ya da çok küçük. {{criterion}} kriterini başka bir birime çevirin; değerler 10⁻¹⁰⁰ ile 10¹⁰⁰ arasında olmalı.",
       "invalid-criterion-type": "{{criterion}} için fayda ya da maliyet seç.",
       "constant-column": "{{criterion}} kriterinde bütün alternatiflerin değeri aynı, bu yüzden alternatifleri ayırt edemiyor.",
-      "non-positive-value": "{{alternative}} için {{criterion}} değeri {{value}}. Bu yöntem değerlere böler, bu yüzden her değer 0'dan büyük olmalı.",
+      "non-positive-value": "{{alternative}} için {{criterion}} değeri {{value}}. Bu yöntem değerlere böler ya da logaritmalarını alır, bu yüzden her değer 0'dan büyük olmalı.",
       "negative-value": "{{alternative}} için {{criterion}} değeri {{value}}. Ham veri (toplam) 0 ya da daha büyük değer ister; negatif değerler için Min-maks seçin.",
       "weights-length-mismatch": "{{n}} kriter için {{value}} ağırlık var.",
       "invalid-weight": "{{criterion}} ağırlığına bir sayı gir.",
@@ -1067,7 +1067,8 @@
     "merec": {
       "constant-column": "{{criterion}} her alternatifte aynı değerde; çıkarılması hiçbir şeyi değiştirmez, MEREC ağırlığı 0 olur.",
       "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanılıyor.",
-      "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor. MEREC, en büyük değeri en küçüğünün kat kat üstünde olan kriteri öne çıkarır; bu aralığın gerçek olup olmadığına bakın."
+      "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; aralığın gerçek olup olmadığına bakın.",
+      "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, yine de MEREC ona bir çıkarma etkisi veriyor. Farkın gerçek olup olmadığına bakın."
     }
   }
 }

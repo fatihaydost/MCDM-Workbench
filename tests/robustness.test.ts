@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { critic, entropy, equal, rankScores, saw, topsis, type MethodParams, type Problem, type RankingMethod } from '../src/core'
+import { critic, entropy, equal, merec, rankScores, saw, topsis, type MethodParams, type Problem, type RankingMethod } from '../src/core'
 import {
   createRng,
   DEFAULT_DELTAS,
@@ -644,6 +644,15 @@ describe('removeCriteria', () => {
   it('recompute with equal weights gives 1 / (n − 1)', () => {
     const rows = removeCriteria(krishnan, krishnanW, rankerOf(topsis), equal).filter((r) => r.mode === 'recompute')
     for (const r of rows) expectClose(r.weights.filter((_, k) => k !== r.j), [0.25, 0.25, 0.25, 0.25], 1e-15)
+  })
+
+  it('recompute with MEREC: a column left constant gets weight 0; an all-constant reduced matrix gets 1 / n', () => {
+    const p = makeProblem([[1, 5, 3], [2, 5, 1], [4, 5, 2]], ['benefit', 'benefit', 'benefit'])
+    const r0 = removeCriteria(p, [0.4, 0.2, 0.4], rankerOf(topsis), merec).find((r) => r.j === 0 && r.mode === 'recompute')!
+    expect(r0.weights).toEqual([0, 0, 1])
+    const q = makeProblem([[1, 5, 3], [2, 5, 3], [4, 5, 3]], ['benefit', 'benefit', 'cost'])
+    const q0 = removeCriteria(q, [0.4, 0.3, 0.3], rankerOf(topsis), merec).find((r) => r.j === 0 && r.mode === 'recompute')!
+    expect(q0.weights.filter((_, k) => k !== 0)).toEqual([0.5, 0.5])
   })
 
   it('n ≤ 2 → no rows; a criterion carrying all the weight → the others share equally', () => {

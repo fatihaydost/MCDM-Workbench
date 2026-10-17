@@ -87,11 +87,12 @@ describe('MEREC: properties and edge cases', () => {
     expect(codes(res)).toContain('merec.all-constant-equal-weights')
   })
   it('a near-but-not-constant column gives finite weights summing to 1, without the all-constant warning', () => {
-    const res = run([[0.3, 1, 2], [0.3 * (1 + 1e-9), 1, 2]], ['benefit', 'cost', 'benefit'])
+    const res = run([[0.3, 1, 2], [0.3 * (1 + 5e-10), 1, 2]], ['benefit', 'cost', 'benefit'])
     expect(res.weights.every(Number.isFinite)).toBe(true)
     expect(Math.abs(sumOf(res.weights) - 1)).toBeLessThan(1e-15)
     expect(res.weights).toEqual([1, 0, 0])
     expect(codes(res)).not.toContain('merec.all-constant-equal-weights')
+    expect(res.warnings).toContainEqual({ code: 'merec.near-constant-column', col: 0 })
   })
   it('multiplying a column by 1000 leaves the weights unchanged', () => {
     expectClose(run(ill.matrix.map((row) => row.map((x, j) => (j === 1 ? x * 1000 : x))), illTypes).weights, base, 1e-12)

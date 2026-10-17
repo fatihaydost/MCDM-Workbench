@@ -4,7 +4,7 @@ import type { MethodContent } from '../types'
 export const merec: MethodContent = {
   id: 'merec',
   name: { en: 'MEREC', tr: 'MEREC' },
-  fullName: { en: 'MEthod based on the Removal Effects of Criteria', tr: 'Kriter çıkarma etkisine dayalı yöntem' },
+  fullName: { en: 'Method based on the Removal Effects of Criteria', tr: 'Kriter çıkarma etkisine dayalı yöntem' },
   family: 'weighting-objective',
   status: 'available',
   year: 2021,
@@ -17,7 +17,7 @@ export const merec: MethodContent = {
   },
   steps: [
     {
-      title: { en: 'Normalize so that smaller is better', tr: 'Küçük olan iyi olacak biçimde normalizasyon' },
+      title: { en: 'Normalize so that smaller is better', tr: 'Küçüğün iyi sayıldığı normalizasyon' },
       tex: String.raw`n_{ij} = \begin{cases} \dfrac{\min_k x_{kj}}{x_{ij}} & j \in J^{+} \\[2ex] \dfrac{x_{ij}}{\max_k x_{kj}} & j \in J^{-} \end{cases} \qquad 0 < n_{ij} \le 1`,
       note: {
         en: 'The best value maps to the smallest n; this is the reverse of the WASPAS normalization.',
