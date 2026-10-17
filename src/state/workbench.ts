@@ -15,9 +15,11 @@ import {
   type MethodParams,
   type MethodParamValue,
   type Problem,
+  type RankingId,
   type RankingResult,
   type RankingRun,
   type ValidationIssue,
+  type WeightingId,
   type WeightingResult,
 } from '../core'
 import { alternativeNames, getExample } from '../data/examples'
@@ -27,8 +29,9 @@ import type { Lang } from '../i18n/lang'
 export const STAGES = ['data', 'weights', 'ranking', 'results', 'robustness', 'compare'] as const
 export type Stage = (typeof STAGES)[number]
 
-export type WeightMethodId = 'critic' | 'entropy' | 'sd' | 'merec' | 'equal' | 'manual'
-export type RankingMethodId = 'topsis' | 'saw' | 'vikor' | 'edas'
+/** The core's weighting methods plus 'manual' (the user's own weights, which only the store knows). */
+export type WeightMethodId = WeightingId | 'manual'
+export type RankingMethodId = RankingId
 
 /**
  * Options chosen per method id (Entropy's normalization, later VIKOR's v ...). A missing method or key means the
