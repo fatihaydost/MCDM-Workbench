@@ -32,6 +32,13 @@ test('compare: one column per ranking method, VIKOR\'s A7 first, Borda at the en
 
   // The top two (A1, A7) are selected at first; clicking another crossing selects that pair, arrows move focus.
   await expect(page.locator('[data-testid="crossing"][data-pair="0-6"]').first()).toHaveAttribute('aria-pressed', 'true')
+  // The selected pair is coloured by slot with two fixed tokens, never by alternative index.
+  const lineA = page.locator('[data-testid="rank-line"][data-pair="a"]')
+  const lineB = page.locator('[data-testid="rank-line"][data-pair="b"]')
+  await expect(lineA).toHaveCount(1)
+  await expect(lineB).toHaveCount(1)
+  const stroke = (l: typeof lineA) => l.evaluate((el) => getComputedStyle(el).stroke)
+  expect(await stroke(lineA)).not.toBe(await stroke(lineB))
   const other = page.locator('[data-testid="crossing"]:not([data-pair="0-6"])').first()
   await other.click()
   await expect(other).toHaveAttribute('aria-pressed', 'true')

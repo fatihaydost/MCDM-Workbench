@@ -959,6 +959,10 @@
 .rankLine[data-cat='6'], .rankPoint[data-cat='6'] { --c: var(--data-cat-6); }
 .rankLine[data-cat='7'], .rankPoint[data-cat='7'] { --c: var(--data-cat-7); }
 .rankLine[data-cat='8'], .rankPoint[data-cat='8'] { --c: var(--data-cat-8); }
+/* The selected pair by slot, after the category rules so it wins: blue and ochre differ in hue and lightness for every
+   colour-vision type, and each keeps 3:1 against --bg in both themes. */
+.rankLine[data-pair='a'], .rankPoint[data-pair='a'] { --c: var(--data-cat-1); }
+.rankLine[data-pair='b'], .rankPoint[data-pair='b'] { --c: var(--data-cat-5); }
 
 .rankLine {
   fill: none;

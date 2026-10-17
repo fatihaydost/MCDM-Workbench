@@ -66,7 +66,7 @@ type Crossing = { i: number; k: number; from: number; to: number; x: number; y: 
  * Rank lines: one column per method, one line per alternative across them, y = its rank in that method (ties share a
  * y). Where two lines cross, two methods order that pair differently; each crossing is a button that selects the pair
  * (click, Enter or Space; arrow keys move between crossings). The Borda rank closes each line on the right, next to the
- * individual rankings, never instead of them. A selected pair keeps its colour, the other lines step back.
+ * individual rankings, never instead of them. The selected pair takes two fixed contrasting colours (a blue, b ochre), the other lines step back.
  */
 export function RankLines({ columns, borda, names, selected, onSelectPair, labels, className }: RankLinesProps) {
   const l = { ...RANK_LINES_LABELS_EN, ...labels }
@@ -81,6 +81,8 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
   const yOf = (rank: number) => HEAD + (rank - 1) * ROW + ROW / 2
   const colour = (i: number) => (i < SAW_CATEGORY_COLOURS ? String(i + 1) : 'other')
   const on = (i: number) => selected !== null && (selected[0] === i || selected[1] === i)
+  // The selected pair is coloured by slot, not by alternative (two category colours can be near twins): a and b.
+  const pair = (i: number) => (selected === null ? undefined : selected[0] === i ? 'a' : selected[1] === i ? 'b' : undefined)
 
   // Names that share a rank share one label, so tied alternatives never print over each other.
   const groups = (ranking: number[]) => {
@@ -185,7 +187,7 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
               const pts = ranked.map((j) => `${xOf(j)},${yOf(columns[j]!.ranking![i]!)}`).join(' ')
               const last = ranked.at(-1)
               return (
-                <g key={i} className={s.rankLine} data-cat={colour(i)} data-on={on(i) || undefined}>
+                <g key={i} className={s.rankLine} data-cat={colour(i)} data-on={on(i) || undefined} data-pair={pair(i)} data-testid="rank-line">
                   <polyline points={pts} />
                   {borda && last !== undefined && (
                     <line
@@ -212,6 +214,7 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
                       className={s.rankPoint}
                       data-cat={colour(i)}
                       data-on={on(i) || undefined}
+                      data-pair={pair(i)}
                       data-rank={r}
                       data-name={names[i]}
                       cx={xOf(j)}
