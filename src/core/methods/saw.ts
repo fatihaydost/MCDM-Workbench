@@ -1,4 +1,4 @@
-import { column, maxOf, minOf, sum, zeros } from '../math'
+import { column, linearMaxNormalize, sum, zeros } from '../math'
 import { rankScores } from '../rank'
 import type { Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, hasErrors, validateProblem, validateRequirements, validateWeights } from '../validate'
@@ -33,17 +33,12 @@ export const saw: RankingMethod<SawParams> = {
     const m = matrix.length
 
     // 1. Normalize; every x > 0, so no division below can be by 0.
-    const r = zeros(m, n)
-    for (let j = 0; j < n; j++) {
-      const col = column(matrix, j)
-      const isCost = criteria[j]!.type === 'cost'
-      if (variant === 'linearMax') {
-        const hi = maxOf(col)
-        const lo = minOf(col)
-        for (let i = 0; i < m; i++) r[i]![j] = isCost ? lo / col[i]! : col[i]! / hi
-      } else {
+    const r = variant === 'linearMax' ? linearMaxNormalize(problem) : zeros(m, n)
+    if (variant === 'sum') {
+      for (let j = 0; j < n; j++) {
+        const col = column(matrix, j)
         // Cost: min / x first (Podvezko Eq. 2); the constant min cancels in the share, so 1 / x gives the same r.
-        const base = isCost ? col.map((x) => 1 / x) : col
+        const base = criteria[j]!.type === 'cost' ? col.map((x) => 1 / x) : col
         const total = sum(base)
         for (let i = 0; i < m; i++) r[i]![j] = base[i]! / total
       }

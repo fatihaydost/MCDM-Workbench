@@ -575,6 +575,16 @@
   fill: var(--data-accent);
 }
 
+.thumbLine {
+  stroke: var(--data-context);
+  stroke-width: 1.5;
+}
+
+.thumbLineAccent {
+  stroke: var(--data-accent);
+  stroke-width: 2;
+}
+
 /* Step through the idea (IdeaSteps) ----------------------------------------------------------- */
 
 /* A part of the picture that a step has not reached yet: drawn, invisible, out of the accessibility tree. */
@@ -1017,4 +1027,30 @@
   font-size: 12px;
   line-height: 16px;
   text-align: center;
+}
+
+/* WASPAS λ chart (WaspasLambda) ----------------------------------------------------------------- */
+
+/* The hovered or focused alternative's line steps forward. */
+.lambdaLine[data-on] {
+  stroke: var(--text);
+  stroke-width: 2.25;
+}
+
+/* A grid point: invisible until hovered or focused, then a dot with a focus ring for the keyboard. */
+.lambdaHit {
+  fill: transparent;
+  outline: none;
+  cursor: default;
+}
+
+.lambdaHit[data-on] {
+  fill: var(--data-accent);
+  stroke: var(--bg);
+  stroke-width: 1.5;
+}
+
+.lambdaHit:focus-visible {
+  stroke: var(--accent);
+  stroke-width: 2;
 }

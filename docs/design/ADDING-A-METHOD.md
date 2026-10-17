@@ -238,8 +238,8 @@ every caller passes `{}` (store `workbench.ts:315,336`; robustness `robustness.t
 parameter (the URL carries only `?example` and `?stage`, removed after load). Entropy (normalization), SAW
 (normalization), VIKOR (v) and WASPAS (λ) all need one, so it is worth one small generic path.
 
-**Status (2026-10-13):** implemented for Entropy and SAW (choices) and VIKOR (number). A number option in [0, 1]
-renders as a slider on the 0.01 grid (`MethodParams.tsx` `UnitSlider`, reusing `WeightRange`; tick at the default,
+**Status (2026-10-18):** implemented for Entropy and SAW (choices), VIKOR and WASPAS (numbers). A number option in [0, 1]
+renders as a slider on its descriptor's `step` grid (VIKOR 0.01, WASPAS 0.1) (`MethodParams.tsx` `UnitSlider`, reusing `WeightRange`; tick at the default,
 optional end words `workbench.params.<id>.<key>Ends.min/.max`); any other range as a number input. A number option's
 variant label is `workbench.params.<id>.<key>Variant` with `{{value}}` ("VIKOR (v = 0,70)"), checked by
 `tests/i18n.test.ts`.

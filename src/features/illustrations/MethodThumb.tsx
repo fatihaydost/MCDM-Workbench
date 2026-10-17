@@ -42,6 +42,13 @@ export type MethodThumbProps =
       className?: string | undefined
     }
   | {
+      /** WASPAS: one straight line per alternative from its weighted product (left) to its weighted sum (right); the first at λ = 0.5 in the accent. */
+      kind: 'lines'
+      rows: readonly { product: number; sum: number }[]
+      highlight?: number | undefined
+      className?: string | undefined
+    }
+  | {
       /** TOPSIS distance plane: (D+, D-) points and the rays of constant closeness. */
       kind: 'plane'
       points: readonly Point[]
@@ -144,6 +151,21 @@ export function MethodThumb(props: MethodThumbProps) {
           </g>
         ))}
         <line className={s.thumbAxis} x1={cx} x2={cx} y1={PAD - 3} y2={H - PAD + 3} />
+      </svg>
+    )
+  }
+  if (props.kind === 'lines') {
+    const { rows, highlight } = props
+    const lo = Math.min(...rows.map((r) => r.product))
+    const hi = Math.max(...rows.map((r) => r.sum))
+    const Y = (v: number) => H - PAD - ((v - lo) / Math.max(hi - lo, 1e-12)) * (H - 2 * PAD)
+    const order = rows.map((_, i) => i).sort((a, b) => Number(a === highlight) - Number(b === highlight))
+    return (
+      <svg className={cls} width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        <path className={s.thumbAxis} d={`M${PAD} ${PAD - 2}V${H - PAD}H${W - PAD + 2}`} fill="none" />
+        {order.map((i) => (
+          <line key={i} className={i === highlight ? s.thumbLineAccent : s.thumbLine} x1={PAD + 2} x2={W - PAD} y1={Y(rows[i]!.product)} y2={Y(rows[i]!.sum)} />
+        ))}
       </svg>
     )
   }

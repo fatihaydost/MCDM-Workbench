@@ -50,7 +50,7 @@ describe('kendallW', () => {
 })
 
 describe('compareRankings', () => {
-  it('reference example: four rankings, Borda, W, first place', () => {
+  it('reference example: five rankings, Borda, W, first place', () => {
     const c = compareRankings(problem(), ex.weights!, allRuns)
     const rankings = c.runs.map((r) => r.result!.ranking)
     expect(c.comparable).toBe(true)
@@ -59,12 +59,13 @@ describe('compareRankings', () => {
       [1, 3, 6, 9, 7, 8, 2, 4, 5, 10],
       [2, 5, 7, 9, 6, 8, 1, 3, 4, 10],
       [1, 4, 6, 10, 7, 8, 2, 3, 5, 9],
+      [1, 3, 6, 10, 7, 8, 2, 4, 5, 9],
     ])
-    expect(c.borda!.points[0]).toBe(35)
-    expect(c.borda!.points[6]).toBe(33)
+    expect(c.borda!.points[0]).toBe(44)
+    expect(c.borda!.points[6]).toBe(41)
     expect(c.borda!.ranking[0]).toBe(1)
     expect(c.borda!.ranking[6]).toBe(2)
-    expect(c.firstPlace).toEqual({ alternative: 0, methods: 3, of: 4 })
+    expect(c.firstPlace).toEqual({ alternative: 0, methods: 4, of: 5 })
     expect(c.kendallW).toBe(kendallW(rankings))
     expect(c.kendallW!).toBeGreaterThan(0.9)
     expect(c.kendallW!).toBeLessThanOrEqual(1)
@@ -76,6 +77,8 @@ describe('compareRankings', () => {
     const saw = c.runs.find((r) => r.methodId === 'saw')!
     expect(saw.result).toBeNull()
     expect(saw.issues.some((i) => i.code === 'non-positive-value')).toBe(true)
+    // SAW and WASPAS both need positive values.
+    expect(c.runs.find((r) => r.methodId === 'waspas')!.result).toBeNull()
     expect(c.ranked).toHaveLength(3)
     expect(c.firstPlace!.of).toBe(3)
   })
@@ -111,6 +114,7 @@ describe('pair facts', () => {
       { methodId: 'saw', higher: 'a' },
       { methodId: 'vikor', higher: 'b' },
       { methodId: 'edas', higher: 'a' },
+      { methodId: 'waspas', higher: 'a' },
     ])
     expect(f.unanimous).toBe(false)
     expect(f.criteria.length).toBeGreaterThanOrEqual(1)

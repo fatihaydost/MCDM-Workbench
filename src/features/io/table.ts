@@ -2,7 +2,12 @@ import type { Axis, Step } from '../../core'
 
 export type { Axis }
 
-export type StepLabels = { alternatives: readonly string[]; criteria: readonly string[] }
+/** `lambda`: labels of the λ grid; defaults to 'λ = 0', 'λ = 0.1', ... (the UI passes localized ones). */
+export type StepLabels = { alternatives: readonly string[]; criteria: readonly string[]; lambda?: readonly string[] }
+
+const LAMBDA_LABELS = Array.from({ length: 11 }, (_, k) => `λ = ${k / 10}`)
+const axisLabels = (labels: StepLabels, axis: Axis): string[] =>
+  [...(axis === 'lambda' ? (labels.lambda ?? LAMBDA_LABELS) : labels[axis])]
 
 /**
  * A step laid out as a labelled table. Criterion vectors are one row (they line up with the
@@ -36,8 +41,8 @@ export function stepToTable(step: Step, labels: StepLabels, opts: StepTableOptio
       kind: 'matrix',
       rowAxis,
       colAxis,
-      rowLabels: [...labels[rowAxis]],
-      colLabels: [...labels[colAxis]],
+      rowLabels: axisLabels(labels, rowAxis),
+      colLabels: axisLabels(labels, colAxis),
       values: step.matrix.map((row) => [...row]),
     }
   }

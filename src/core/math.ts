@@ -77,6 +77,25 @@ export function minMaxNormalize(problem: Problem): { r: number[][]; constant: bo
   return { r, constant, nearConstant }
 }
 
+/**
+ * Linear (max) normalization, the best value of each criterion 1: benefit x / max_i x, cost min_i x / x. Every value
+ * must be above 0 (callers check `requires.positiveValues`). Shared by SAW 'linearMax' and WASPAS.
+ */
+export function linearMaxNormalize(problem: Problem): number[][] {
+  const { matrix, criteria } = problem
+  const m = matrix.length
+  const n = criteria.length
+  const r = zeros(m, n)
+  for (let j = 0; j < n; j++) {
+    const col = column(matrix, j)
+    const isCost = criteria[j]!.type === 'cost'
+    const hi = maxOf(col)
+    const lo = minOf(col)
+    for (let i = 0; i < m; i++) r[i]![j] = isCost ? lo / col[i]! : col[i]! / hi
+  }
+  return r
+}
+
 /** Sample standard deviation (n - 1 denominator, Excel STDEV / STDEV.S). */
 export function sampleStd(xs: number[]): number {
   if (xs.length < 2) return NaN

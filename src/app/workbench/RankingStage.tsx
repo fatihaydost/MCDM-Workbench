@@ -170,7 +170,7 @@ export function RankingStage() {
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
-        {/* TOPSIS and EDAS have no options; SAW shows its normalization here, VIKOR its v (later WASPAS its λ). */}
+        {/* TOPSIS and EDAS have no options; SAW shows its normalization here, VIKOR its v, WASPAS its λ. */}
         <MethodParams methodId={rankingMethod} descriptors={getRankingMethod(rankingMethod)?.params} />
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
           <span>{t('workbench.ranking.weightsUsed', { method: weightMethodFullLabel(weightMethod, weightParams, t) })}</span>

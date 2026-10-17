@@ -1,0 +1,25 @@
+{
+  "id": "waspas-chakraborty-zavadskas-2014-robot",
+  "source": "Chakraborty & Zavadskas 2014, Informatica 25(1):1-20, DOI 10.15388/Informatica.2014.01, Tables 13-15",
+  "alternatives": ["Robot 1", "Robot 2", "Robot 3", "Robot 4", "Robot 5", "Robot 6", "Robot 7"],
+  "criteria": ["LC kg", "RE mm", "MTS mm/s", "MC steps", "MR mm"],
+  "types": ["benefit", "cost", "benefit", "benefit", "benefit"],
+  "weights": [0.036, 0.192, 0.326, 0.326, 0.12],
+  "matrix": [
+    [60, 0.4, 2540, 500, 990],
+    [6.35, 0.15, 1016, 3000, 1041],
+    [6.8, 0.1, 1727.2, 1500, 1676],
+    [10, 0.2, 1000, 2000, 965],
+    [2.5, 0.1, 560, 500, 915],
+    [4.5, 0.08, 1016, 350, 508],
+    [3, 0.1, 1778, 1000, 920]
+  ],
+  "expected": {
+    "Q1": [0.5256, 0.6371, 0.6624, 0.4976, 0.3468, 0.3995, 0.5581],
+    "Q2": [0.3843, 0.5727, 0.6232, 0.4758, 0.2706, 0.2907, 0.498],
+    "Q_lambda_0.5": [0.455, 0.6049, 0.6428, 0.4867, 0.3087, 0.3451, 0.5281],
+    "ranking_lambda_0_to_0.7": [5, 2, 1, 4, 7, 6, 3],
+    "ranking_lambda_0.8_to_1": [4, 2, 1, 5, 7, 6, 3],
+    "tolerance": 0.0003
+  }
+}

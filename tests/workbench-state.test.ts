@@ -22,6 +22,7 @@ import diak from './fixtures/sd-diakoulaki1995.json'
 import merecK from './fixtures/merec-keshavarz2021-illustrative.json'
 import vikorKG from './fixtures/vikor-keshavarz2015.json'
 import vikorOT from './fixtures/vikor-opricovic-tzeng2004.json'
+import waspasA from './fixtures/waspas-adali2017.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -114,6 +115,15 @@ describe('examples match the published fixtures', () => {
     expect(ex.weights).toBeUndefined()
     expect(ex.equalWeights).toBe(true)
     expect(ex.published).toEqual([{ label: 'edas.scores', values: inv.published.AS, decimals: 2 }])
+  })
+  it('Aytaç Adalı and Tuş Işık 2017 (WASPAS)', () => {
+    const ex = getExample('adali-2017-suppliers')!
+    expect(ex.referenceFor).toEqual(['waspas'])
+    expect(ex.matrix).toEqual(waspasA.matrix)
+    expect(ex.alternatives).toEqual(waspasA.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(waspasA.types)
+    expect(ex.weights).toEqual(waspasA.weights)
+    expect(ex.published).toEqual([{ label: 'waspas.scores', values: waspasA.expected.Q_table7.map((row) => row[5]), decimals: 4 }])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
@@ -336,6 +346,25 @@ describe('store actions', () => {
     expect(useWorkbench.getState().rankingMethod).toBe('topsis')
     st.loadExample('opricovic-tzeng-2004-f', 'en', 'nope')
     expect(useWorkbench.getState().rankingMethod).toBe('topsis')
+  })
+
+  it('WASPAS through the store: its example opens with WASPAS and the SWARA weights, λ from the slider state', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.setMethodParam('waspas', 'lambda', 0.9)
+    st.loadExample('adali-2017-suppliers', 'en')
+    const s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('waspas')
+    expect(s.weightMethod).toBe('manual')
+    expect(s.methodParams?.waspas).toEqual({})
+    const at = (k: number) => waspasA.expected.Q_table7.map((row) => row[k]!)
+    const r = computeRanking(s)
+    expectClose(r.value!.scores, at(5), waspasA.expected.tolerance.Q)
+    expect(r.value!.ranking).toEqual(waspasA.expected.ranking['lambda_0.4_to_0.8'])
+    st.setMethodParam('waspas', 'lambda', 1)
+    const r1 = computeRanking(useWorkbench.getState())
+    expectClose(r1.value!.scores, at(10), waspasA.expected.tolerance.Q)
+    expect(r1.value!.ranking).toEqual(waspasA.expected.ranking['lambda_0.9_to_1'])
   })
 
   it('EDAS through the store: the 47 items open with EDAS and equal weights, the ten alternatives through the method page link', () => {

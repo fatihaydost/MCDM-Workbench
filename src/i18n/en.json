@@ -112,6 +112,9 @@
       },
       "merec": {
         "claim": "Weights match {{citation}} to {{decimals}} decimals, and the normalized matrix, S, S' and the removal effects match every printed value."
+      },
+      "waspas": {
+        "claim": "All 55 scores of Table 7, λ from 0 to 1, match {{citation}} to {{decimals}} decimals, with the three rank orders the paper reports."
       }
     },
     "catalogue": {
@@ -197,7 +200,8 @@
       "topsis": "TOPSIS",
       "saw": "SAW",
       "vikor": "VIKOR",
-      "edas": "EDAS"
+      "edas": "EDAS",
+      "waspas": "WASPAS"
     },
     "params": {
       "entropy": {
@@ -237,6 +241,14 @@
           "max": "1: group utility only (majority)"
         },
         "vVariant": "v = {{value}}"
+      },
+      "waspas": {
+        "lambda": "Blend λ",
+        "lambdaEnds": {
+          "min": "0: product only",
+          "max": "1: sum only"
+        },
+        "lambdaVariant": "λ = {{value}}"
       }
     },
     "example": {
@@ -363,7 +375,8 @@
         "topsis": "Ranks the alternatives by their distance from an ideal and a negative-ideal solution.",
         "saw": "Weights the rescaled values of each criterion and adds them up.",
         "vikor": "Looks for a compromise between the best total (S) and the smallest worst regret (R); a lower Q is better.",
-        "edas": "Scores each alternative by how far it lies above and below the average of all alternatives; a higher AS is better."
+        "edas": "Scores each alternative by how far it lies above and below the average of all alternatives; a higher AS is better.",
+        "waspas": "Blends a weighted sum with a weighted product, which punishes a very weak value harder; a higher Q is better."
       },
       "columns": {
         "rank": "Rank",
@@ -373,7 +386,9 @@
         "groupUtility": "Group utility S",
         "individualRegret": "Individual regret R",
         "aboveAverage": "Above average SP",
-        "belowAverage": "Below average SN"
+        "belowAverage": "Below average SN",
+        "wsm": "Sum Q1",
+        "wpm": "Product Q2"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -396,6 +411,11 @@
           "name": "Appraisal AS",
           "title": "Appraisal score AS",
           "symbol": "AS"
+        },
+        "waspas": {
+          "name": "Score Q",
+          "title": "WASPAS score Q",
+          "symbol": "Q"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -538,6 +558,13 @@
         "performanceRemoved": "Performance without criterion j, S'",
         "removalEffect": "Removal effect E",
         "weights": "Weights w"
+      },
+      "waspas": {
+        "normalized": "Normalized matrix x̄",
+        "wsm": "Weighted sum Q1",
+        "wpm": "Weighted product Q2",
+        "scores": "Score Q",
+        "lambdaSweep": "Q at every λ"
       }
     },
     "issues": {
@@ -657,6 +684,15 @@
         "drop": "Drops in S, sum E",
         "effect": "Removal effect E",
         "weight": "Weight"
+      },
+      "waspas": {
+        "title": "Score Q as λ moves",
+        "axis": "λ: share of the weighted sum",
+        "current": "Your λ",
+        "caption": "Each line is one alternative; where two lines cross, they swap places. The vertical line is your λ.",
+        "noSwaps": "No two lines cross: the order is the same at every λ.",
+        "point": "{{alternative}}, λ = {{lambda}}: Q = {{value}}, rank {{rank}}",
+        "readout": "At λ = {{lambda}}: {{order}}"
       }
     },
     "flow": {
@@ -709,6 +745,12 @@
         "performanceRemoved": "Without j",
         "removalEffect": "Removal effect",
         "weights": "Weights"
+      },
+      "waspas": {
+        "normalized": "Normalize",
+        "wsm": "Sum and product",
+        "scores": "Q",
+        "lambdaSweep": "λ sweep"
       }
     },
     "pipeline": {
@@ -720,7 +762,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR or EDAS and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR, EDAS or WASPAS and see every step of the calculation."
     }
   },
   "methods": {
@@ -740,7 +782,8 @@
       "vikor": "VIKOR",
       "edas": "EDAS",
       "sd": "SD",
-      "merec": "MEREC"
+      "merec": "MEREC",
+      "waspas": "WASPAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -797,7 +840,8 @@
         "vikor": "Balances the best total against the worst regret.",
         "edas": "Measures the distance above and below the average.",
         "sd": "Weights from how widely the data spread.",
-        "merec": "Weights from what removing a criterion changes."
+        "merec": "Weights from what removing a criterion changes.",
+        "waspas": "Blends a weighted sum with a weighted product."
       },
       "groups": {
         "weighting": "Weighting",
@@ -924,6 +968,10 @@
           "weight": "Weight",
           "caption": "Each segment is one alternative's drop in overall performance when the criterion is removed; together they make E.",
           "weightHead": "Weight = E / {{total}}"
+        },
+        "waspas": {
+          "title": "Sum or product: λ sets the blend",
+          "caption": "Each line is one alternative; where two lines cross, they swap places. The vertical line marks λ = 0.5."
         }
       }
     }
@@ -1001,6 +1049,13 @@
       "performanceRemoved": "Performance with one criterion removed: the same sum without that criterion, still divided by the number of criteria.",
       "removalEffect": "Removal effect: the total drop in performance over all alternatives when the criterion is removed.",
       "weights": "MEREC weights: each criterion's share of the total removal effect."
+    },
+    "waspas": {
+      "normalized": "Linear max normalization: each value divided by the column maximum, or for a cost criterion the column minimum divided by the value, so the best value is 1.",
+      "wsm": "Weighted sum Q1: each normalized value times its criterion weight, added up.",
+      "wpm": "Weighted product Q2: each normalized value raised to its criterion weight, multiplied together. It is never above Q1.",
+      "scores": "Score Q = λ Q1 + (1 - λ) Q2. A higher value ranks higher.",
+      "lambdaSweep": "Q at λ = 0, 0.1, ..., 1: where two alternatives swap places as λ moves."
     }
   },
   "validation": {

@@ -10,6 +10,7 @@ import { sd } from './sd'
 import { topsis } from './topsis'
 import type { MethodView } from './types'
 import { vikor } from './vikor'
+import { waspas } from './waspas'
 
 export type { IdeaPictureProps, MethodView, StagePictureProps, ThumbKit, Verdict } from './types'
 
@@ -34,6 +35,7 @@ export const methodViews: Readonly<Views> = {
   saw,
   vikor,
   edas,
+  waspas,
 }
 
 const ids = Object.keys(methodViews) as ViewId[]

@@ -1,28 +1,33 @@
 import { expect, test } from '@playwright/test'
+import { compareRankings, RANKING_IDS } from '../../src/core'
+import { getExample } from '../../src/data/examples'
 
-test('compare: four method columns, VIKOR\'s A7 first, Borda at the end', async ({ page }) => {
+// Every registry ranking method is a column; the counts and firsts come from the core on the same example.
+const N = RANKING_IDS.length
+const ex = getExample('keshavarz-2015-ten-alternatives')!
+const core = compareRankings(
+  { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix },
+  ex.weights!,
+  RANKING_IDS.map((methodId) => ({ methodId, params: {} })),
+)
+const firsts = core.runs.map((r) => ex.alternatives[r.result!.ranking.indexOf(1)])
+
+test('compare: one column per ranking method, VIKOR\'s A7 first, Borda at the end', async ({ page }) => {
   await page.goto('/app?example=keshavarz-2015-ten-alternatives&stage=compare')
   await expect(page.getByRole('heading', { level: 1, name: 'Compare' })).toBeVisible()
 
   const columns = page.getByTestId('rank-column')
-  await expect(columns).toHaveCount(4)
-  expect(await columns.evaluateAll((els) => els.map((el) => el.getAttribute('data-label')))).toEqual([
-    'TOPSIS',
-    'SAW',
-    'VIKOR',
-    'EDAS',
-  ])
+  await expect(columns).toHaveCount(N)
+  expect(await columns.evaluateAll((els) => els.map((el) => el.getAttribute('data-label')))).toEqual(RANKING_IDS.map((id) => id.toUpperCase()))
   const firstOf = async (k: number) => columns.nth(k).locator('[data-rank="1"]').first().getAttribute('data-name')
-  expect(await firstOf(0)).toBe('A1')
-  expect(await firstOf(1)).toBe('A1')
-  expect(await firstOf(2)).toBe('A7')
-  expect(await firstOf(3)).toBe('A1')
+  for (let k = 0; k < N; k++) expect(await firstOf(k)).toBe(firsts[k])
+  expect(firsts[RANKING_IDS.indexOf('vikor')]).toBe('A7')
 
   await expect(page.getByTestId('vikor-note')).toHaveText("VIKOR's own rule: compromise set A7, A1, A8")
   await expect(page.locator('[data-testid="borda-rank"][data-name="A1"]')).toHaveText('1')
   const summary = page.getByTestId('compare-summary')
   await expect(summary).toContainText("Agreement (Kendall's W): 0.97")
-  await expect(summary).toContainText('A1 is first in 3 of 4 methods')
+  await expect(summary).toContainText(`A1 is first in ${core.firstPlace!.methods} of ${N} methods`)
   await expect(summary).not.toContainText('methods ranked')
 
   // The top two (A1, A7) are selected at first; clicking another crossing selects that pair, arrows move focus.
@@ -52,7 +57,7 @@ test('compare: the why panel opens on A1 and A7, and a crossing changes the pair
   await expect(title).not.toHaveText('A1 or A7?')
 })
 
-test('compare: a zero cell leaves SAW out with its reason', async ({ page }) => {
+test('compare: a zero cell leaves SAW and WASPAS out with their reason', async ({ page }) => {
   await page.goto('/app?example=keshavarz-2015-ten-alternatives&stage=data')
   await page.locator('#wb-cell-0-0').click()
   await page.keyboard.type('0')
@@ -61,7 +66,8 @@ test('compare: a zero cell leaves SAW out with its reason', async ({ page }) => 
   const saw = page.locator('[data-testid="rank-column"][data-method="saw"]')
   await expect(saw).toContainText('This method divides by the values or takes their logarithm, so each must be above 0.')
   await expect(saw.locator('[data-rank]')).toHaveCount(0)
-  await expect(page.getByTestId('compare-summary')).toContainText('3 of 4 methods ranked')
+  await expect(page.locator('[data-testid="rank-column"][data-method="waspas"] [data-rank]')).toHaveCount(0)
+  await expect(page.getByTestId('compare-summary')).toContainText(`${N - 2} of ${N} methods ranked`)
 })
 
 test('compare: Turkish', async ({ page }) => {
@@ -81,6 +87,6 @@ test('compare: no sideways scroll at 390 px with 47 items', async ({ page }) => 
 
 test('compare: no VIKOR note when its compromise set has one member', async ({ page }) => {
   await page.goto('/app?example=podvezko-2011-baltic&stage=compare')
-  await expect(page.getByTestId('rank-column')).toHaveCount(4)
+  await expect(page.getByTestId('rank-column')).toHaveCount(N)
   await expect(page.getByTestId('vikor-note')).toHaveCount(0)
 })

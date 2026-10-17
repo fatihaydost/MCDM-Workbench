@@ -445,6 +445,43 @@ export const examples: readonly ExampleDataset[] = [
       { label: 'edas.rank', values: [1, 4, 6, 10, 7, 8, 2, 3, 5, 9], decimals: 0 },
     ],
   },
+  {
+    id: 'adali-2017-suppliers',
+    name: { en: 'Textile suppliers (Aytaç Adalı and Tuş Işık 2017)', tr: 'Tekstil tedarikçileri (Aytaç Adalı ve Tuş Işık 2017)' },
+    summary: {
+      en: 'Five suppliers of a textile firm in Denizli on six criteria, three of them cost, with SWARA weights. The paper reports the WASPAS score at every λ from 0 to 1; the order changes twice as λ moves.',
+      tr: "Denizli'deki bir tekstil işletmesinin beş tedarikçisi, üçü maliyet olmak üzere altı kriter, SWARA ağırlıklarıyla. Makale WASPAS skorunu 0'dan 1'e her λ için veriyor; λ değiştikçe sıralama iki kez değişiyor.",
+    },
+    referenceFor: ['waspas'],
+    citation: {
+      authors: 'Aytaç Adalı, E.; Tuş Işık, A.',
+      year: 2017,
+      title: 'Bir Tedarikçi Seçim Problemi İçin SWARA ve WASPAS Yöntemlerine Dayanan Karar Verme Yaklaşımı',
+      venue: 'International Review of Economics and Management 5(4), 56-77',
+      doi: '10.18825/iremjournal.335408',
+      tables: { en: 'Table 5 (input), Table 4 (SWARA weights), Tables 6 and 7 (output)', tr: 'Tablo 5 (girdi), Tablo 4 (SWARA ağırlıkları), Tablo 6 ve 7 (çıktı)' },
+    },
+    // The paper names them A1 to A5 (Table 5); quality and reliability are scored 1 to 5 (5: excellent).
+    alternatives: ['A1', 'A2', 'A3', 'A4', 'A5'],
+    criteria: [
+      { name: { en: 'Product quality (1-5)', tr: 'Ürün kalitesi (1-5)' }, type: 'benefit' },
+      { name: { en: 'Product cost (YTL)', tr: 'Ürün maliyeti (YTL)' }, type: 'cost' },
+      { name: { en: 'Delivery time (days)', tr: 'Teslimat süresi (gün)' }, type: 'cost' },
+      { name: { en: 'Production capacity (units/day)', tr: 'Üretim kapasitesi (adet/gün)' }, type: 'benefit' },
+      { name: { en: 'Geographic location (km)', tr: 'Coğrafi konum (km)' }, type: 'cost' },
+      { name: { en: 'Reliability (1-5)', tr: 'Güvenilirlik (1-5)' }, type: 'benefit' },
+    ],
+    matrix: [
+      [3, 12.5, 2, 120, 14, 3],
+      [5, 15, 3, 110, 38, 4],
+      [3, 13, 2, 120, 19, 3],
+      [4, 14, 2, 100, 31, 4],
+      [3, 15, 1.5, 125, 40, 4],
+    ],
+    weights: [0.221, 0.159, 0.175, 0.127, 0.117, 0.201],
+    // Table 7 at λ = 0.5, the slider's default; the paper prints every λ from 0 to 1 (tests/fixtures/waspas-adali2017.json).
+    published: [{ label: 'waspas.scores', values: [0.805, 0.7751, 0.7702, 0.7964, 0.7882], decimals: 4 }],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

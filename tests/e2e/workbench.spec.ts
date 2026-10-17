@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { critic, edas, entropy, merec, saw, sd, topsis, vikor, vikorCompromise, type CriterionType } from '../../src/core'
+import { critic, edas, entropy, merec, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -522,6 +522,50 @@ test('VIKOR: the ten-alternative example ranks by Q, shows S and R, the DQ verdi
   await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Robustness' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Robustness' })).toBeVisible()
   await expect(page.locator('figure', { hasText: 'Compromise index Q as the weight of C1 changes' })).toBeVisible()
+})
+
+test('WASPAS: the method page opens the supplier example with WASPAS; published Q, the λ chart, and λ moves Q and the label live', async ({ page }) => {
+  const ex = getExample('adali-2017-suppliers')!
+  const p = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const byName = (scores: number[]) => Object.fromEntries(ex.alternatives.map((a, i) => [a, f4(scores[i]!)]))
+  const at = (lambda: number) => waspas.compute(p, ex.weights!, { lambda })
+
+  await page.goto('/methods/waspas')
+  await expect(page.getByTestId('waspas-lambda')).toBeVisible()
+  await page.getByRole('link', { name: /Open in workbench/ }).first().click()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(stageHeading(page, 'Ranking')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'WASPAS' })).toHaveAttribute('aria-checked', 'true')
+  const table = page.getByRole('table', { name: 'Ranking' })
+  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'Sum Q1', 'Product Q2', 'Score Q'])
+  // Q at λ = 0.5 equals the core and Table 7 to the printed 4 decimals.
+  const half = at(0.5)
+  expect(await closenessByName(page)).toEqual(byName(half.scores))
+  const published = ex.published.find((x) => x.label === 'waspas.scores')!.values as number[]
+  expect(Object.values(byName(half.scores)).map(Number)).toEqual(published)
+  await expect(page.getByTestId('best-sentence')).toHaveText(`A1 ranks first (Q = ${f4(half.scores[0]!)}).`)
+
+  // The λ chart: one line per supplier, two rank swaps between λ = 0 and 1, the cursor at 0.5.
+  await expect(page.getByTestId('waspas-lambda')).toBeVisible()
+  await expect(page.getByTestId('waspas-line')).toHaveCount(5)
+  await expect(page.getByTestId('waspas-swap')).toHaveCount(2)
+  await expect(page.getByTestId('waspas-cursor')).toHaveAttribute('data-lambda', '0.5')
+
+  // λ to 0.9 with the keyboard (step 0.1): A5 passes A4, Q and the variant label follow.
+  const slider = page.getByRole('slider', { name: 'Blend λ' })
+  await slider.focus()
+  for (let k = 0; k < 4; k++) await page.keyboard.press('ArrowRight')
+  await expect(page.getByTestId('param-value')).toHaveText('0.90')
+  await expect.poll(() => closenessByName(page)).toEqual(byName(at(0.9).scores))
+  await expect(page.getByTestId('waspas-cursor')).toHaveAttribute('data-lambda', '0.9')
+  const order = await table.getByTestId('ranking-row').evaluateAll((els) => els.map((el) => el.querySelector('th')!.textContent!.trim()))
+  expect(order).toEqual(['A1', 'A5', 'A4', 'A2', 'A3'])
+  await expect(page.locator('nav[aria-label="Stages"]:visible')).toContainText('WASPAS (λ = 0.90)')
+
+  // Keyboard on the chart: a grid point reads its λ, Q and rank; arrows move along λ.
+  await page.locator('[data-testid="waspas-lambda"] circle[tabindex="0"]').focus()
+  await page.keyboard.press('Home')
+  expect(await focusedLabel(page)).toMatch(/, λ = 0\.0: Q = 0\.\d{4}, rank \d/)
 })
 
 test('VIKOR: the method page opens the shared Opricovic and Tzeng example with VIKOR, and its own v slider turns the line', async ({ page }) => {

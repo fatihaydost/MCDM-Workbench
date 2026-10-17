@@ -68,7 +68,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { critic, edas, entropy, merec, saw, sd, topsis, vikor } = await import('../src/core')
+    const { critic, edas, entropy, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -136,7 +136,10 @@ describe('i18n resources', () => {
     expect(new Set(ed.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
       new Set(['edas.constant-column', 'edas.negative-values', 'edas.small-average', 'edas.no-spread']),
     )
-    const steps = [...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
+    // WASPAS: no warnings of its own (zeros and negatives are validation codes, as for SAW).
+    const wp = waspas.compute(p, [0.5, 0.5], { lambda: 0.3 })
+    expect(wp.warnings).toEqual([])
+    const steps = [...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),

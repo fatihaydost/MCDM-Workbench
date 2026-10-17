@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next'
 import type { Criterion, MethodParamValue, ParamDescriptor, Step, ValidationIssue } from '../../core'
-import { changedParams, getRankingMethod, getWeightingMethod, MIN_ALTERNATIVES, MIN_CRITERIA } from '../../core'
+import { changedParams, getRankingMethod, getWeightingMethod, MIN_ALTERNATIVES, MIN_CRITERIA, WASPAS_LAMBDA_GRID } from '../../core'
 import i18n, { formatNumber, isLang } from '../../i18n'
 import type { DraftProblem, RankingMethodId, Stage, WeightMethodId } from '../../state/workbench'
 
@@ -155,6 +155,7 @@ export function stepAxisLabels(problem: DraftProblem, t: TFunction) {
   return {
     alternatives: problem.alternatives.map((_, i) => alternativeName(problem, i, t)),
     criteria: problem.criteria.map((_, j) => criterionName(problem.criteria, j, t)),
+    lambda: WASPAS_LAMBDA_GRID.map((v) => `λ = ${formatNumber(v, isLang(i18n.resolvedLanguage) ? i18n.resolvedLanguage : 'en', 1)}`),
   }
 }
 

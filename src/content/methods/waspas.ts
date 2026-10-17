@@ -6,7 +6,7 @@ export const waspas: MethodContent = {
   name: { en: 'WASPAS', tr: 'WASPAS' },
   fullName: { en: 'Weighted Aggregated Sum Product ASsessment', tr: 'Ağırlıklı toplam ve çarpım birleşik değerlendirmesi' },
   family: 'ranking-utility',
-  status: 'research',
+  status: 'available',
   year: 2012,
   origin: {
     authors: 'Zavadskas, E.K.; Turskis, Z.; Antucheviciene, J.; Zakarevicius, A.',
@@ -28,8 +28,8 @@ export const waspas: MethodContent = {
       title: { en: 'Blend', tr: 'Karışım' },
       tex: String.raw`Q_i = \lambda\, Q_i^{(1)} + (1 - \lambda)\, Q_i^{(2)}, \qquad \lambda \in [0, 1]`,
       note: {
-        en: 'Rank by decreasing Q; lambda = 1 is SAW and lambda = 0 the weighted product model.',
-        tr: 'Q değerine göre büyükten küçüğe sıralanır; lambda = 1 SAW, lambda = 0 ağırlıklı çarpım modelidir.',
+        en: 'Rank by decreasing Q; λ = 1 is SAW and λ = 0 the weighted product model.',
+        tr: 'Q değerine göre büyükten küçüğe sıralanır; λ = 1 SAW, λ = 0 ağırlıklı çarpım modelidir.',
       },
     },
   ],
@@ -37,82 +37,93 @@ export const waspas: MethodContent = {
     {
       methodId: 'entropy',
       text: {
-        en: 'The origin example uses entropy weights.',
-        tr: 'Özgün örnek entropi ağırlıkları kullanır.',
+        en: 'The origin example takes its weights from Entropy (Zavadskas et al. 2012).',
+        tr: 'Özgün örnek ağırlıklarını Entropi yönteminden alır (Zavadskas vd. 2012).',
+      },
+    },
+    {
+      methodId: 'ahp',
+      text: {
+        en: 'Chakraborty & Zavadskas (2014) use AHP weights in their cutting-fluid and industrial-robot examples.',
+        tr: 'Chakraborty ve Zavadskas (2014), kesme sıvısı ve endüstriyel robot örneklerinde AHP ağırlıkları kullanır.',
       },
     },
     {
       methodId: 'swara',
       text: {
-        en: 'SWARA then WASPAS: 224 OpenAlex co-mentions, a Lithuanian-school pattern. CRITIC then WASPAS: 93.',
-        tr: "SWARA ardından WASPAS: OpenAlex'te 224 ortak geçiş, Litvanya okuluna özgü bir kalıp. CRITIC ardından WASPAS: 93.",
+        en: 'SWARA then WASPAS for supplier selection in Aytaç Adalı & Tuş Işık (2017), the example used here.',
+        tr: 'Aytaç Adalı ve Tuş Işık (2017) tedarikçi seçiminde SWARA ardından WASPAS kullanır; buradaki örnek budur.',
       },
     },
     {
+      methodId: 'saw',
       text: {
-        en: 'Chakraborty & Zavadskas (2014) apply WASPAS in manufacturing; their industrial-robot data is reused in the CODAS and CoCoSo papers.',
-        tr: "Chakraborty ve Zavadskas (2014) WASPAS'ı imalatta uygular; onların endüstriyel robot verisi CODAS ve CoCoSo makalelerinde yeniden kullanılır.",
+        en: 'At λ = 1 WASPAS is SAW with linear max normalization; at λ = 0 it is the weighted product model.',
+        tr: 'λ = 1 iken WASPAS doğrusal maks normalizasyonlu SAW, λ = 0 iken ağırlıklı çarpım modelidir.',
       },
     },
   ],
   reference: {
-    source: 'Zavadskas, E.K.; Turskis, Z.; Antucheviciene, J.; Zakarevicius, A. (2012). Optimization of Weighted Aggregated Sum Product Assessment. Elektronika ir Elektrotechnika 122(6), 3-6',
-    doi: '10.5755/j01.eee.122.6.1810',
-    match: 'partial',
+    source: 'Aytaç Adalı, E.; Tuş Işık, A. (2017). Bir Tedarikçi Seçim Problemi İçin SWARA ve WASPAS Yöntemlerine Dayanan Karar Verme Yaklaşımı. International Review of Economics and Management 5(4), 56-77',
+    doi: '10.18825/iremjournal.335408',
+    match: 'match',
     note: {
-      en: 'Published example (Tables 1, 2 and 4); this method is not computed here yet, only recomputed during research. Four alternatives, twelve criteria, lambda from 0 to 1. Table 1 prints one value of alternative a1 as 1.0000; every published result for a1 is reproduced only with 0.1000. With that fix all 44 values of Table 2 match. pyDecision uses a different normalization and does not match.',
-      tr: "Yayımlanmış örnek (Tablo 1, 2 ve 4); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Dört alternatif, on iki kriter, lambda 0'dan 1'e. Tablo 1, a1 alternatifinin bir değerini 1,0000 basmış; a1 için yayımlanan tüm sonuçlar ancak 0,1000 ile elde ediliyor. Bu düzeltmeyle Tablo 2'nin 44 değerinin hepsi örtüşüyor. pyDecision farklı bir normalizasyon kullanır ve örtüşmez.",
+      en: "Published example, reproduced by the tests: five suppliers, six criteria (three of them cost), SWARA weights (Tables 4-7). The normalized matrix of Table 6 matches to 3 decimals and all 55 scores of Table 7 (λ = 0, 0.1, ..., 1) to 4 decimals; the three rank orders the paper reports over λ are the same. Two more examples are tested: Chakraborty & Zavadskas (2014), industrial robots (Tables 13-15), and the origin (Zavadskas et al. 2012, Table 2), whose Table 1 prints one value of a1 as 1.0000 where every result needs 0.1000; its Table 4 also prints a1's optimal λ as 0.32 for 0.34, and its last column header reads λ = 10 for 1.",
+      tr: "Yayımlanmış örnek, testlerde yeniden üretiliyor: beş tedarikçi, altı kriter (üçü maliyet), SWARA ağırlıkları (Tablo 4-7). Tablo 6'nın normalize matrisi 3 basamağa, Tablo 7'nin 55 skorunun tamamı (λ = 0; 0,1; ...; 1) 4 basamağa kadar aynı; makalenin λ boyunca bildirdiği üç sıralama da aynı. İki örnek daha sınanıyor: Chakraborty ve Zavadskas (2014), endüstriyel robotlar (Tablo 13-15) ve özgün makale (Zavadskas vd. 2012, Tablo 2); özgün makalenin Tablo 1'i a1'in bir değerini 1,0000 basmış, bütün sonuçlar 0,1000 gerektiriyor; Tablo 4 a1'in optimal λ değerini 0,34 yerine 0,32, son sütun başlığını da 1 yerine λ = 10 basmış.",
     },
   },
   sources: [
     { label: 'Zavadskas, Turskis, Antucheviciene & Zakarevicius (2012), Elektronika ir Elektrotechnika 122(6), 3-6', doi: '10.5755/j01.eee.122.6.1810' },
-    { label: 'Chakraborty & Zavadskas (2014), Applications of WASPAS method in manufacturing decision making, Informatica 25(1), 1-20' },
-    { label: 'pyDecision 5.1.1, waspas_method', url: 'https://github.com/Valdecy/pyDecision' },
+    { label: 'Chakraborty & Zavadskas (2014), Applications of WASPAS method in manufacturing decision making, Informatica 25(1), 1-20', doi: '10.15388/Informatica.2014.01' },
+    { label: 'Aytaç Adalı & Tuş Işık (2017), SWARA-WASPAS supplier selection, International Review of Economics and Management 5(4), 56-77', doi: '10.18825/iremjournal.335408' },
+    { label: 'pyDecision 5.1.1, waspas_method (1 + min-max normalization; not the origin)', url: 'https://github.com/Valdecy/pyDecision' },
   ],
   en: {
     summary:
-      'WASPAS blends the weighted sum with the weighted product, which punishes very weak values harder. The parameter lambda sets the mix: 1 is the pure sum, 0 the pure product.',
+      'WASPAS scores each alternative as a weighted sum and as a weighted product, then blends the two with λ (1 = sum only, 0 = product only). The product punishes a very weak value harder.',
     whenToUse: [
-      'Positive ratio-scale data.',
-      'A result between additive and multiplicative aggregation.',
-      'A simple sensitivity analysis over lambda is useful.',
+      'Every value is a positive measurement or score.',
+      'You want a blend of compensating and weakness-sensitive scoring.',
+      'You want to see whether the order holds as λ moves.',
     ],
     whenNot: [
-      'Zeros in the data: the product term becomes 0 for that alternative.',
-      'You need one fixed answer: lambda changes rankings.',
+      'Zeros or negative values in the data (blocked, no shift).',
+      'Interval data where zero is arbitrary: x / max depends on it.',
+      'You need one parameter-free answer and will not show λ.',
     ],
     inputs: [
-      'Decision matrix, strictly positive recommended.',
+      'Decision matrix, every value above 0.',
       'Criterion type per column, weights summing to 1.',
-      'Parameter lambda between 0 and 1, default 0.5.',
+      'Parameter λ between 0 and 1 in steps of 0.1, default 0.5.',
     ],
     pitfalls: [
-      'A zero benefit value sets the product term to 0; a zero cost value divides by zero.',
-      'Report rankings for lambda = 0, 0.5 and 1 at least.',
-      'Very small weights push each product factor close to 1, so the product part loses discrimination.',
+      'Close alternatives swap places as λ moves; check the λ chart before trusting the order.',
+      'A zero would make the product 0 (benefit) or divide 0 by 0 (cost), so values of 0 or below are blocked.',
+      'Max and min come from the current alternatives, so adding or removing one can reverse ranks.',
     ],
   },
   tr: {
     summary:
-      'WASPAS ağırlıklı toplamı, çok zayıf değerleri daha sert cezalandıran ağırlıklı çarpımla harmanlar. Karışımı lambda parametresi belirler: 1 saf toplam, 0 saf çarpımdır.',
+      'WASPAS her alternatifi ağırlıklı toplamla ve ağırlıklı çarpımla puanlar, ikisini λ ile karıştırır (1 = yalnız toplam, 0 = yalnız çarpım). Çarpım çok zayıf bir değeri daha sert cezalandırır.',
     whenToUse: [
-      'Pozitif, oran ölçekli veri.',
-      'Toplamsal ile çarpımsal birleştirme arasında bir sonuç istiyorsunuz.',
-      'lambda üzerinden basit bir duyarlılık analizi işe yarar.',
+      'Tüm değerler pozitif bir ölçüm ya da puan.',
+      'Telafi eden ile zayıflığa duyarlı puanlama arasında bir karışım istiyorsunuz.',
+      'λ değiştikçe sıralamanın korunup korunmadığını görmek istiyorsunuz.',
     ],
     whenNot: [
-      'Veride sıfır var: o alternatifin çarpım terimi 0 olur.',
-      'Tek ve sabit bir cevap gerekiyor: lambda sıralamayı değiştirir.',
+      'Veride sıfır ya da negatif değer var (engellenir, kaydırma yok).',
+      'Sıfırın keyfi olduğu aralık verisi: x / maks ona bağlı.',
+      'Parametresiz tek bir cevap gerekiyor ve λ gösterilmeyecek.',
     ],
     inputs: [
-      'Karar matrisi, kesinlikle pozitif olması önerilir.',
+      "Karar matrisi, her değer 0'dan büyük.",
       'Her sütun için kriter türü, toplamı 1 olan ağırlıklar.',
-      '0 ile 1 arasında lambda parametresi, varsayılan 0,5.',
+      '0 ile 1 arasında, 0,1 adımlı λ parametresi, varsayılan 0,5.',
     ],
     pitfalls: [
-      'Sıfır bir fayda değeri çarpım terimini 0 yapar; sıfır bir maliyet değeri sıfıra böler.',
-      'Sıralamaları en az lambda = 0; 0,5 ve 1 için raporlayın.',
-      "Çok küçük ağırlıklar çarpımın her çarpanını 1'e yaklaştırır; çarpım kısmı ayırt ediciliğini yitirir.",
+      'Birbirine yakın alternatifler λ değiştikçe yer değiştirir; sıralamaya güvenmeden önce λ grafiğine bakın.',
+      'Sıfır, çarpımı 0 yapar (fayda) ya da 0 / 0 verir (maliyet); bu yüzden 0 ve altındaki değerler engellenir.',
+      'Maks ve min mevcut alternatiflerden gelir; bir alternatif eklemek ya da çıkarmak sıralamayı tersine çevirebilir.',
     ],
   },
 }

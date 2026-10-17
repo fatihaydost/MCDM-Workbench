@@ -22,7 +22,8 @@
       "topsis": "TOPSIS measures the distance to the ideal and to the anti-ideal, so strengths can make up for a weakness.",
       "saw": "SAW adds up the weighted values, so strengths make up for a weakness fully.",
       "vikor": "VIKOR weighs the total against the single largest regret, so one big weakness weighs heavily.",
-      "edas": "EDAS measures the distance above and below the average, so strengths can make up for a weakness."
+      "edas": "EDAS measures the distance above and below the average, so strengths can make up for a weakness.",
+      "waspas": "WASPAS blends a sum with a product, so a very weak value counts more than in a plain sum."
     },
     "unanimous": "All {{n}} methods put {{a}} above {{b}}.",
     "crossings": "Select a crossing in the chart to see another pair.",

@@ -9,8 +9,8 @@ export type Problem = {
   matrix: number[][]
 }
 
-/** What a dimension of a step runs over. */
-export type Axis = 'alternatives' | 'criteria'
+/** What a dimension of a step runs over ('lambda': the WASPAS λ grid 0, 0.1, ..., 1). */
+export type Axis = 'alternatives' | 'criteria' | 'lambda'
 
 /**
  * One intermediate result for the step-by-step view.
