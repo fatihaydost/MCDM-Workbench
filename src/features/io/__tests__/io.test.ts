@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { critic, topsis, type Problem } from '../../../core'
+import { critic, topsis, type Problem, type Step } from '../../../core'
 import {
   cellsToTsv,
   detectDecimal,
@@ -196,18 +196,24 @@ describe('step tables, TSV and LaTeX', () => {
     expect(tableToCells(total)).toEqual([['ΣC', w.steps.find((s) => s.key === 'critic.informationTotal')!.scalar!]])
   })
 
-  it('uses the key or a hint when m = n', () => {
-    const sq = { alternatives: ['A1', 'A2'], criteria: ['C1', 'C2'] }
-    expect(stepToTable({ key: 'topsis.closeness', vector: [0.1, 0.9] }, sq).rowAxis).toBe('alternatives')
-    expect(stepToTable({ key: 'critic.weights', vector: [0.4, 0.6] }, sq).colAxis).toBe('criteria')
-    const unknown = stepToTable({ key: 'x.custom', vector: [1, 2] }, sq)
-    expect(unknown.ambiguous).toBe(true)
-    const hinted = stepToTable({ key: 'x.custom', vector: [1, 2] }, sq, { rows: 'alternatives' })
-    expect([hinted.rowAxis, hinted.ambiguous]).toEqual(['alternatives', false])
+  it('follows the axes the core step carries when m = n', () => {
+    const sq: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [{ name: 'C1', type: 'benefit' }, { name: 'C2', type: 'cost' }, { name: 'C3', type: 'benefit' }],
+      matrix: [[1, 5, 3], [4, 2, 6], [7, 8, 2]],
+    }
+    const sqLabels = { alternatives: sq.alternatives, criteria: sq.criteria.map((c) => c.name) }
+    const sw = critic.compute(sq, {})
+    const st = topsis.compute(sq, sw.weights, {})
+    const table = (steps: Step[], key: string) => stepToTable(steps.find((s) => s.key === key)!, sqLabels)
+    expect(table(st.steps, 'topsis.closeness')).toMatchObject({ rowAxis: 'alternatives', colAxis: null })
+    expect(table(sw.steps, 'critic.weights')).toMatchObject({ rowAxis: null, colAxis: 'criteria' })
+    expect(table(sw.steps, 'critic.correlation')).toMatchObject({ rowAxis: 'criteria', colAxis: 'criteria' })
+    expect(table(sw.steps, 'critic.normalized')).toMatchObject({ rowAxis: 'alternatives', colAxis: 'criteria', rowLabels: ['A1', 'A2', 'A3'] })
   })
 
   it('writes TSV with the chosen decimal separator', () => {
-    const table = stepToTable({ key: 'k', matrix: [[0.25, -1.5], [3, 1234.5]] }, { alternatives: ['A1', 'A2'], criteria: ['C1', 'C2'] }, { rows: 'alternatives', cols: 'criteria' })
+    const table = stepToTable({ key: 'k', matrix: [[0.25, -1.5], [3, 1234.5]], axes: ['alternatives', 'criteria'] }, { alternatives: ['A1', 'A2'], criteria: ['C1', 'C2'] })
     expect(tableToTsv(table, { decimal: ',' })).toBe('\tC1\tC2\nA1\t0,25\t-1,5\nA2\t3\t1234,5')
     expect(tableToTsv(table, { decimal: '.', digits: 2 })).toBe('\tC1\tC2\nA1\t0.25\t-1.50\nA2\t3.00\t1234.50')
     expect(cellsToTsv([['a\tb', 'say "hi"', null, -0.00001]], { digits: 3 })).toBe('"a\tb"\t"say ""hi"""\t\t0.000')

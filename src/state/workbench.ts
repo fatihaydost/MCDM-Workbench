@@ -477,14 +477,14 @@ export function computeWeights(
     const weights = fitWeights(data.manualWeights, n).map((w) => (w === null ? Number.NaN : w))
     const wIssues = validateWeights(weights, n)
     if (hasErrors(wIssues)) return { value: null, issues: wIssues }
-    return { value: { weights, steps: [{ key: 'manual.weights', vector: weights }] }, issues: wIssues }
+    return { value: { weights, steps: [{ key: 'manual.weights', vector: weights, axes: 'criteria' }] }, issues: wIssues }
   }
 
   if (data.weightMethod === 'equal') {
     // Equal weights only need the number of criteria; the matrix is not read.
     if (n < 1) return { value: null, issues: issues.filter((x) => x.code === 'too-few-criteria') }
     const weights = new Array<number>(n).fill(1 / n)
-    return { value: { weights, steps: [{ key: 'equal.weights', vector: weights }] }, issues: [] }
+    return { value: { weights, steps: [{ key: 'equal.weights', vector: weights, axes: 'criteria' }] }, issues: [] }
   }
 
   if (hasErrors(issues)) return { value: null, issues }

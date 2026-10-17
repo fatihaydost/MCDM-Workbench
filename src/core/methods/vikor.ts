@@ -144,12 +144,12 @@ export const vikor: RankingMethod<VikorParams> = {
       order: 'asc',
       ranking: rankScores(Q, 'asc'),
       steps: [
-        { key: 'vikor.best', vector: best },
-        { key: 'vikor.worst', vector: worst },
-        { key: 'vikor.weightedDistance', matrix: d },
-        { key: 'vikor.groupUtility', vector: S },
-        { key: 'vikor.individualRegret', vector: R },
-        { key: 'vikor.q', vector: Q },
+        { key: 'vikor.best', vector: best, axes: 'criteria' },
+        { key: 'vikor.worst', vector: worst, axes: 'criteria' },
+        { key: 'vikor.weightedDistance', matrix: d, axes: ['alternatives', 'criteria'] },
+        { key: 'vikor.groupUtility', vector: S, axes: 'alternatives' },
+        { key: 'vikor.individualRegret', vector: R, axes: 'alternatives' },
+        { key: 'vikor.q', vector: Q, axes: 'alternatives' },
         { key: 'vikor.threshold', scalar: c.dq },
       ],
       diagnostics: {

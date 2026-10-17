@@ -9,16 +9,19 @@ export type Problem = {
   matrix: number[][]
 }
 
+/** What a dimension of a step runs over. */
+export type Axis = 'alternatives' | 'criteria'
+
 /**
  * One intermediate result for the step-by-step view.
  * `key` is a stable id (later an i18n key), e.g. 'topsis.normalized'.
+ * `axes` says what the rows and columns of a matrix ([rows, cols]) or the entries of a vector run over,
+ * so a square problem (m = n) is still laid out correctly.
  */
-export type Step = {
-  key: string
-  matrix?: number[][]
-  vector?: number[]
-  scalar?: number
-}
+export type Step =
+  | { key: string; matrix: number[][]; axes: readonly [Axis, Axis]; vector?: never; scalar?: never }
+  | { key: string; vector: number[]; axes: Axis; matrix?: never; scalar?: never }
+  | { key: string; scalar: number; matrix?: never; vector?: never; axes?: never }
 
 /** A non-fatal note produced while computing (the result is still usable). */
 export type MethodWarning = {

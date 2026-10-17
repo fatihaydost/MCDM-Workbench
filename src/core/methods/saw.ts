@@ -58,9 +58,9 @@ export const saw: RankingMethod<SawParams> = {
       order: 'desc',
       ranking: rankScores(scores, 'desc'),
       steps: [
-        { key: variant === 'linearMax' ? 'saw.normalizedLinearMax' : 'saw.normalizedSum', matrix: r },
-        { key: 'saw.weighted', matrix: v },
-        { key: 'saw.scores', vector: scores },
+        { key: variant === 'linearMax' ? 'saw.normalizedLinearMax' : 'saw.normalizedSum', matrix: r, axes: ['alternatives', 'criteria'] },
+        { key: 'saw.weighted', matrix: v, axes: ['alternatives', 'criteria'] },
+        { key: 'saw.scores', vector: scores, axes: 'alternatives' },
       ],
       warnings: [],
     }

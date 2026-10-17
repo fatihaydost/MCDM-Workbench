@@ -33,7 +33,9 @@ a typo, keep both the printed and the corrected values (card rule) and test agai
   - Start with `assertValid(validateProblem(problem))` (critic.ts:18); a ranking method also validates the weights
     (`topsis.ts:15`). Never read an empty cell as 0.
   - Emit one `Step` per intermediate result with a stable key `<id>.<camelCase>` (`critic.ts:72-80`). Use `matrix`
-    (m x n or n x n), `vector` (length m or n) or `scalar`. Every key you emit drives §2 and §3.
+    (m x n or n x n) with `axes: [rows, cols]`, `vector` (length m or n) with `axes: 'alternatives' | 'criteria'`, or
+    `scalar`. [T] a matrix or vector without `axes`; the table, TSV, LaTeX and xlsx lay it out by them, also when
+    m = n. Every key you emit drives §2 and §3.
   - Header comment: variant chosen, source, `See docs/research/methods/<id>.md`.
   - Min-max with cost inversion: reuse `minMaxNormalize(problem)` (`src/core/math.ts`, used by CRITIC, SD and
     Entropy min-max); it also flags near-constant columns (`isNearConstant`) for a `<id>.near-constant-column` warning.
@@ -68,9 +70,6 @@ a typo, keep both the printed and the corrected values (card rule) and test agai
   `src/features/illustrations/geometry.ts:291` (node key = first step key of the node, `stepKeys` = the steps it
   covers), export it from `src/features/illustrations/index.ts`, add it to `FLOWS` (`WorkedCalculation.tsx:70`),
   plus the `workbench.flow.*` labels.
-- [ ] `src/features/io/table.ts:39` `KNOWN_STEP_AXES`: the axes of every step (`'alternatives'`, `'criteria'`, or a
-  pair for matrices). [S] without it a square problem (m = n) guesses the axis and marks the table ambiguous in
-  the TSV / LaTeX copy and the xlsx. The xlsx export itself (`src/features/io/xlsx.ts`) is generic.
 
 ## 3. Workbench state (`src/state/workbench.ts`)
 

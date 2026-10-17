@@ -1,5 +1,5 @@
 import { column, isConstant, minMaxNormalize, sum, zeros } from '../math'
-import type { MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
+import type { MethodWarning, Problem, Step, WeightingMethod, WeightingResult } from '../types'
 import { assertValid, validateProblem, type ValidationIssue } from '../validate'
 
 /** 'sum': shares of the raw values (types ignored). 'minmax': min-max normalization with cost inversion first. */
@@ -90,11 +90,11 @@ export const entropy: WeightingMethod<EntropyParams> = {
     return {
       weights,
       steps: [
-        ...(r ? [{ key: 'entropy.normalized', matrix: r }] : []),
-        { key: variant === 'sum' ? 'entropy.proportionsSum' : 'entropy.proportionsMinmax', matrix: p },
-        { key: 'entropy.entropy', vector: e },
-        { key: 'entropy.diversification', vector: d },
-        { key: 'entropy.weights', vector: weights },
+        ...(r ? [{ key: 'entropy.normalized', matrix: r, axes: ['alternatives', 'criteria'] } satisfies Step] : []),
+        { key: variant === 'sum' ? 'entropy.proportionsSum' : 'entropy.proportionsMinmax', matrix: p, axes: ['alternatives', 'criteria'] },
+        { key: 'entropy.entropy', vector: e, axes: 'criteria' },
+        { key: 'entropy.diversification', vector: d, axes: 'criteria' },
+        { key: 'entropy.weights', vector: weights, axes: 'criteria' },
       ],
       diagnostics: {
         constantColumns: constant.filter(Boolean).length,

@@ -1,7 +1,6 @@
-import type { Step } from '../../core'
+import type { Axis, Step } from '../../core'
 
-/** What a table dimension runs over. */
-export type Axis = 'alternatives' | 'criteria'
+export type { Axis }
 
 export type StepLabels = { alternatives: readonly string[]; criteria: readonly string[] }
 
@@ -19,126 +18,33 @@ export type StepTable = {
   /** null means the table has no header row (a scalar). */
   colLabels: string[] | null
   values: number[][]
-  /** True when the axis could not be told apart (m = n) and neither a hint nor the key decided it. */
-  ambiguous: boolean
 }
 
 export type StepTableOptions = {
-  /** Axis override for a vector, or for the rows of a matrix. */
-  rows?: Axis
-  /** Axis override for the columns of a matrix. */
-  cols?: Axis
   /** Label of the single row / column of a vector, or of a scalar. Defaults to the step key. */
   valueLabel?: string
 }
 
-/**
- * Axes of the known step keys, used when the lengths alone cannot decide (m = n).
- * Vectors: one axis. Matrices: [rows, cols].
- */
-export const KNOWN_STEP_AXES: Readonly<Record<string, Axis | readonly [Axis, Axis]>> = {
-  'critic.normalized': ['alternatives', 'criteria'],
-  'critic.sigma': 'criteria',
-  'critic.correlation': ['criteria', 'criteria'],
-  'critic.conflict': 'criteria',
-  'critic.information': 'criteria',
-  'critic.weights': 'criteria',
-  'entropy.normalized': ['alternatives', 'criteria'],
-  'entropy.proportionsSum': ['alternatives', 'criteria'],
-  'entropy.proportionsMinmax': ['alternatives', 'criteria'],
-  'entropy.entropy': 'criteria',
-  'entropy.diversification': 'criteria',
-  'entropy.weights': 'criteria',
-  'sd.normalized': ['alternatives', 'criteria'],
-  'sd.sigma': 'criteria',
-  'sd.weights': 'criteria',
-  'merec.normalized': ['alternatives', 'criteria'],
-  'merec.absLog': ['alternatives', 'criteria'],
-  'merec.performance': 'alternatives',
-  'merec.performanceRemoved': ['alternatives', 'criteria'],
-  'merec.removalEffect': 'criteria',
-  'merec.weights': 'criteria',
-  'topsis.normalized': ['alternatives', 'criteria'],
-  'topsis.weighted': ['alternatives', 'criteria'],
-  'topsis.idealBest': 'criteria',
-  'topsis.idealWorst': 'criteria',
-  'topsis.distanceBest': 'alternatives',
-  'topsis.distanceWorst': 'alternatives',
-  'topsis.closeness': 'alternatives',
-  'saw.normalizedLinearMax': ['alternatives', 'criteria'],
-  'saw.normalizedSum': ['alternatives', 'criteria'],
-  'saw.weighted': ['alternatives', 'criteria'],
-  'saw.scores': 'alternatives',
-  'vikor.best': 'criteria',
-  'vikor.worst': 'criteria',
-  'vikor.weightedDistance': ['alternatives', 'criteria'],
-  'vikor.groupUtility': 'alternatives',
-  'vikor.individualRegret': 'alternatives',
-  'vikor.q': 'alternatives',
-  'edas.average': 'criteria',
-  'edas.pda': ['alternatives', 'criteria'],
-  'edas.nda': ['alternatives', 'criteria'],
-  'edas.weightedPda': ['alternatives', 'criteria'],
-  'edas.weightedNda': ['alternatives', 'criteria'],
-  'edas.sp': 'alternatives',
-  'edas.sn': 'alternatives',
-  'edas.nsp': 'alternatives',
-  'edas.nsn': 'alternatives',
-  'edas.scores': 'alternatives',
-}
-
-const indexLabels = (k: number): string[] => Array.from({ length: k }, (_, i) => String(i + 1))
-
-function axisFor(
-  length: number,
-  labels: StepLabels,
-  hint: Axis | undefined,
-): { axis: Axis | null; ambiguous: boolean } {
-  const m = labels.alternatives.length
-  const n = labels.criteria.length
-  const fitsAlt = length === m
-  const fitsCrit = length === n
-  if (hint && ((hint === 'alternatives' && fitsAlt) || (hint === 'criteria' && fitsCrit))) {
-    return { axis: hint, ambiguous: false }
-  }
-  if (fitsAlt && !fitsCrit) return { axis: 'alternatives', ambiguous: false }
-  if (fitsCrit && !fitsAlt) return { axis: 'criteria', ambiguous: false }
-  if (fitsAlt && fitsCrit) return { axis: 'criteria', ambiguous: true }
-  return { axis: null, ambiguous: false }
-}
-
-const labelsOf = (axis: Axis | null, labels: StepLabels, length: number): string[] =>
-  axis === null ? indexLabels(length) : [...labels[axis]]
-
-/** Lays out one step with the problem's row and column labels. */
+/** Lays out one step with the problem's row and column labels, along the axes the step carries. */
 export function stepToTable(step: Step, labels: StepLabels, opts: StepTableOptions = {}): StepTable {
-  const known = KNOWN_STEP_AXES[step.key]
   const valueLabel = opts.valueLabel ?? step.key
 
   if (step.matrix) {
-    const values = step.matrix.map((row) => [...row])
-    const rows = values.length
-    const cols = values[0]?.length ?? 0
-    const knownPair = Array.isArray(known) ? (known as readonly [Axis, Axis]) : undefined
-    const r = axisFor(rows, labels, opts.rows ?? knownPair?.[0])
-    const c = axisFor(cols, labels, opts.cols ?? knownPair?.[1])
+    const [rowAxis, colAxis] = step.axes
     return {
       key: step.key,
       kind: 'matrix',
-      rowAxis: r.axis,
-      colAxis: c.axis,
-      rowLabels: labelsOf(r.axis, labels, rows),
-      colLabels: labelsOf(c.axis, labels, cols),
-      values,
-      ambiguous: r.ambiguous || c.ambiguous,
+      rowAxis,
+      colAxis,
+      rowLabels: [...labels[rowAxis]],
+      colLabels: [...labels[colAxis]],
+      values: step.matrix.map((row) => [...row]),
     }
   }
 
   if (step.vector) {
     const v = [...step.vector]
-    const knownAxis = typeof known === 'string' ? (known as Axis) : undefined
-    const { axis, ambiguous } = axisFor(v.length, labels, opts.rows ?? knownAxis)
-    if (axis === 'alternatives') {
+    if (step.axes === 'alternatives') {
       return {
         key: step.key,
         kind: 'vector',
@@ -147,18 +53,16 @@ export function stepToTable(step: Step, labels: StepLabels, opts: StepTableOptio
         rowLabels: [...labels.alternatives],
         colLabels: [valueLabel],
         values: v.map((x) => [x]),
-        ambiguous,
       }
     }
     return {
       key: step.key,
       kind: 'vector',
       rowAxis: null,
-      colAxis: axis,
+      colAxis: 'criteria',
       rowLabels: [valueLabel],
-      colLabels: labelsOf(axis, labels, v.length),
+      colLabels: [...labels.criteria],
       values: [v],
-      ambiguous,
     }
   }
 
@@ -170,7 +74,6 @@ export function stepToTable(step: Step, labels: StepLabels, opts: StepTableOptio
     rowLabels: [valueLabel],
     colLabels: null,
     values: [[step.scalar ?? NaN]],
-    ambiguous: false,
   }
 }
 

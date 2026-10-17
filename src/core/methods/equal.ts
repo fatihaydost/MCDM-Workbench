@@ -11,6 +11,6 @@ export const equal: WeightingMethod = {
     const n = problem.criteria.length
     if (n < 1) throw new RangeError('Equal weights need at least one criterion')
     const weights = new Array<number>(n).fill(1 / n)
-    return { weights, steps: [{ key: 'equal.weights', vector: weights }] }
+    return { weights, steps: [{ key: 'equal.weights', vector: weights, axes: 'criteria' }] }
   },
 }

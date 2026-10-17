@@ -37,10 +37,10 @@ export const sd: WeightingMethod = {
     return {
       weights,
       steps: [
-        { key: 'sd.normalized', matrix: r },
-        { key: 'sd.sigma', vector: sigma },
+        { key: 'sd.normalized', matrix: r, axes: ['alternatives', 'criteria'] },
+        { key: 'sd.sigma', vector: sigma, axes: 'criteria' },
         { key: 'sd.sigmaTotal', scalar: total },
-        { key: 'sd.weights', vector: weights },
+        { key: 'sd.weights', vector: weights, axes: 'criteria' },
       ],
       diagnostics: {
         constantColumns: constant.filter(Boolean).length,

@@ -86,12 +86,12 @@ export const merec: WeightingMethod = {
     return {
       weights,
       steps: [
-        { key: 'merec.normalized', matrix: norm },
-        { key: 'merec.absLog', matrix: absLog },
-        { key: 'merec.performance', vector: performance },
-        { key: 'merec.performanceRemoved', matrix: removed },
-        { key: 'merec.removalEffect', vector: effect },
-        { key: 'merec.weights', vector: weights },
+        { key: 'merec.normalized', matrix: norm, axes: ['alternatives', 'criteria'] },
+        { key: 'merec.absLog', matrix: absLog, axes: ['alternatives', 'criteria'] },
+        { key: 'merec.performance', vector: performance, axes: 'alternatives' },
+        { key: 'merec.performanceRemoved', matrix: removed, axes: ['alternatives', 'criteria'] },
+        { key: 'merec.removalEffect', vector: effect, axes: 'criteria' },
+        { key: 'merec.weights', vector: weights, axes: 'criteria' },
       ],
       diagnostics: {
         constantColumns: constant.filter(Boolean).length,

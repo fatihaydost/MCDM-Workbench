@@ -73,13 +73,13 @@ export const critic: WeightingMethod = {
     return {
       weights,
       steps: [
-        { key: 'critic.normalized', matrix: r },
-        { key: 'critic.sigma', vector: sigma },
-        { key: 'critic.correlation', matrix: rho },
-        { key: 'critic.conflict', vector: conflict },
-        { key: 'critic.information', vector: information },
+        { key: 'critic.normalized', matrix: r, axes: ['alternatives', 'criteria'] },
+        { key: 'critic.sigma', vector: sigma, axes: 'criteria' },
+        { key: 'critic.correlation', matrix: rho, axes: ['criteria', 'criteria'] },
+        { key: 'critic.conflict', vector: conflict, axes: 'criteria' },
+        { key: 'critic.information', vector: information, axes: 'criteria' },
         { key: 'critic.informationTotal', scalar: total },
-        { key: 'critic.weights', vector: weights },
+        { key: 'critic.weights', vector: weights, axes: 'criteria' },
       ],
       diagnostics: {
         constantColumns: constant.filter(Boolean).length,
