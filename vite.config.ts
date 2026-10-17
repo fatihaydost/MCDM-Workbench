@@ -252,7 +252,7 @@ function pagesPreview(): Plugin {
 
 export default defineConfig(({ command, isPreview }) => ({
   // GitHub Pages project site for the build and `vite preview`, root in dev.
-  base: command === 'build' || isPreview ? '/kds-topsis-critic/' : '/',
+  base: command === 'build' || isPreview ? '/MCDM-Workbench/' : '/',
   plugins: [react(), tailwindcss(), criticalPreloads(), spaFallback(), pagesPreview()],
   test: {
     include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],

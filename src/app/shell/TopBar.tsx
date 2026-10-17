@@ -17,7 +17,7 @@ import {
 } from '../../ui'
 import { LogoMark } from './LogoMark'
 
-export const REPO_URL = 'https://github.com/fatihaydost/kds-topsis-critic'
+export const REPO_URL = 'https://github.com/fatihaydost/MCDM-Workbench'
 
 const themeIcons: Record<ThemeMode, typeof Sun> = { system: Desktop, light: Sun, dark: Moon }
 

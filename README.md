@@ -7,7 +7,7 @@
 
 A browser tool for multi-criteria decision analysis: weight criteria with CRITIC, Entropy, SD or MEREC, rank alternatives with TOPSIS, SAW, VIKOR or EDAS and read every intermediate step, in English or Turkish.
 
-**Live demo:** https://fatihaydost.github.io/kds-topsis-critic/
+**Live demo:** https://fatihaydost.github.io/MCDM-Workbench/ (published once ten methods compute)
 
 ![Landing page with a live TOPSIS ranking of five smartphones and its CRITIC weights](docs/screenshots/landing.png)
 
@@ -39,7 +39,7 @@ CRITIC is also checked against the hand-solved spreadsheet from the original cou
 
 ## Methods
 
-9 methods compute today (CRITIC, Entropy, SD, MEREC, equal weights, TOPSIS, SAW, VIKOR, EDAS) and 17 more are researched and documented, each with its own page: [methods catalogue](https://fatihaydost.github.io/kds-topsis-critic/methods).
+9 methods compute today (CRITIC, Entropy, SD, MEREC, equal weights, TOPSIS, SAW, VIKOR, EDAS) and 17 more are researched and documented, each with its own page: [methods catalogue](https://fatihaydost.github.io/MCDM-Workbench/methods).
 
 ![TOPSIS method page: an interactive distance diagram, when to use it and the algorithm](docs/screenshots/method-topsis.png)
 

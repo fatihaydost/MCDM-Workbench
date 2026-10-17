@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "Multi-criteria decision analysis in the browser: CRITIC, Entropy, SD and MEREC weights, TOPSIS, SAW, VIKOR and EDAS ranking and the full worked calculation, in English and Turkish.",
-  "homepage": "https://fatihaydost.github.io/kds-topsis-critic/",
+  "homepage": "https://fatihaydost.github.io/MCDM-Workbench/",
   "license": "MIT",
   "engines": {
     "node": ">=24"

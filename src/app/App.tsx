@@ -9,7 +9,7 @@ import { loadMethod } from '../content/methods/load'
 import { preloadable } from './preloadable'
 import { TopBar } from './shell/TopBar'
 
-/** Router base without the trailing slash: '' in dev, '/kds-topsis-critic' on GitHub Pages. */
+/** Router base without the trailing slash: '' in dev, '/MCDM-Workbench' on GitHub Pages. */
 export const ROUTER_BASE = import.meta.env.BASE_URL.replace(/\/$/, '')
 
 // Landing and method pages load on demand; each method page loads its own card (content/methods/load.ts).

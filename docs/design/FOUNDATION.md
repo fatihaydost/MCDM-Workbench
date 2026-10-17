@@ -90,7 +90,7 @@ empty, disabled) and both table densities.
 - Routes (`src/app/App.tsx`, wouter, base `import.meta.env.BASE_URL` without the trailing slash):
   `/` Landing, `/app` Workbench, `/methods`, `/methods/:id`, `/dev/ui` (dev only), anything else 404.
   Route components are stubs to be replaced.
-- GitHub Pages: `base` is `/kds-topsis-critic/` for `build` and `preview`, `/` for dev. The build writes
+- GitHub Pages: `base` is `/MCDM-Workbench/` for `build` and `preview`, `/` for dev. The build writes
   one `index.html` per static route (`/`, `/app/`, `/methods/`, `/methods/<id>/`) with its own title,
   description, canonical and og tags, so a deep link is an HTTP 200 page; `404.html` (bare app,
   "not found" title, `noindex`) is left for unknown addresses, plus `sitemap.xml`. The home page,
@@ -212,7 +212,7 @@ pnpm shot <route...> [--theme light|dark|both] [--width 1440[,390]] [--lang en|t
 pnpm shot /app                                     # .shots/app-light-1440.png
 pnpm shot / /app /dev/ui --theme both --width 1440,390
 pnpm shot /app --lang tr --width 390 --viewport --out .shots/app-tr.png
-pnpm build && pnpm shot /methods --preview         # the production build under /kds-topsis-critic/
+pnpm build && pnpm shot /methods --preview         # the production build under /MCDM-Workbench/
 ```
 
 It starts a Vite dev server (or `vite preview` with `--preview`) on a free port, sets the theme and
