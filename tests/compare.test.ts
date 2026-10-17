@@ -123,7 +123,9 @@ describe('pair facts', () => {
     }
     // Row maxima of w_j (best_j - x_ij) / (best_j - worst_j), worked out by hand: A1 max 0.0473 at C3 (index 2),
     // A7 max 0.0350 at C3 (index 2); next largest: A1 C5 0.0282, A7 C1 0.0333.
-    expect(f.vikorRegret).toEqual({ a: 2, b: 2 })
+    expect(f.vikorRegret).toMatchObject({ a: 2, b: 2 })
+    expect(f.vikorRegret!.ra).toBeCloseTo(0.0473, 4)
+    expect(f.vikorRegret!.rb).toBeCloseTo(0.035, 4)
   })
 
   it('swaps so that a is the Borda-higher alternative', () => {

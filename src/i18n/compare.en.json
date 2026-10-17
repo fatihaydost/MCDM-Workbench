@@ -16,11 +16,6 @@
   },
   "why": {
     "title": "{{a}} or {{b}}?",
-    "criteria": "{{a}} is ahead on {{ahead}} but behind on {{behind}}.",
-    "criteriaAhead": "{{a}} is ahead on {{list}}.",
-    "criteriaBehind": "{{a}} is behind on {{list}}.",
-    "group_one": "{{methods}} puts {{name}} first.",
-    "group_other": "{{methods}} put {{name}} first.",
     "tie_one": "{{methods}} ranks {{a}} and {{b}} equal.",
     "tie_other": "{{methods}} rank {{a}} and {{b}} equal.",
     "character": {
@@ -29,10 +24,18 @@
       "vikor": "VIKOR weighs the total against the single largest regret, so one big weakness weighs heavily.",
       "edas": "EDAS measures the distance above and below the average, so strengths can make up for a weakness."
     },
-    "vikorRegret": "VIKOR's largest regret for {{a}} is on {{ca}}, for {{b}} on {{cb}}.",
-    "vikorRegretSame": "VIKOR's largest regret for both {{a}} and {{b}} is on {{c}}.",
     "unanimous": "All {{n}} methods put {{a}} above {{b}}.",
     "crossings": "Select a crossing in the chart to see another pair.",
-    "identical": "All {{n}} methods give the same ranking."
+    "identical": "All {{n}} methods give the same ranking.",
+    "on_one": "on {{list}}",
+    "on_other": "on {{list}}",
+    "criteria": "{{a}} is mainly ahead {{ahead}} but behind {{behind}}.",
+    "criteriaAhead": "{{a}} is mainly ahead {{list}}.",
+    "criteriaBehind": "{{a}} is mainly behind {{list}}.",
+    "group_one": "{{methods}} ranks {{name}} above {{other}}.",
+    "group_other": "{{methods}} rank {{name}} above {{other}}.",
+    "vikorRegret": "VIKOR's largest regret for {{a}} is on {{ca}}, for {{b}} on {{cb}}, and {{larger}}'s is larger.",
+    "vikorRegretSame": "VIKOR's largest regret for both {{a}} and {{b}} is on {{c}}, and {{larger}}'s is larger.",
+    "vikorRegretEqual": "VIKOR's largest regrets for {{a}} and {{b}} are equal."
   }
 }

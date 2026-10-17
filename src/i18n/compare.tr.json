@@ -16,23 +16,26 @@
   },
   "why": {
     "title": "{{a}} ya da {{b}}?",
-    "criteria": "{{a}}, {{ahead}} kriterlerinde önde ama {{behind}} kriterlerinde geride.",
-    "criteriaAhead": "{{a}}, {{list}} kriterlerinde önde.",
-    "criteriaBehind": "{{a}}, {{list}} kriterlerinde geride.",
-    "group_one": "{{methods}} için {{name}} önde.",
-    "group_other": "{{methods}} için {{name}} önde.",
     "tie_one": "{{methods}} için {{a}} ve {{b}} eşit sırada.",
     "tie_other": "{{methods}} için {{a}} ve {{b}} eşit sırada.",
     "character": {
       "topsis": "TOPSIS ideale ve negatif ideale uzaklığa bakar, bu yüzden güçlü yanlar bir zayıflığı telafi edebilir.",
       "saw": "SAW ağırlıklı değerleri toplar, bu yüzden güçlü yanlar bir zayıflığı tamamen telafi eder.",
-      "vikor": "VIKOR toplam faydayı tek bir en büyük pişmanlıkla tartar, bu yüzden tek büyük zayıflık ağır basar.",
+      "vikor": "VIKOR toplamı tek bir en büyük pişmanlıkla tartar, bu yüzden tek büyük zayıflık ağır basar.",
       "edas": "EDAS ortalamanın üstündeki ve altındaki uzaklığa bakar, bu yüzden güçlü yanlar bir zayıflığı telafi edebilir."
     },
-    "vikorRegret": "VIKOR'un en büyük pişmanlığı {{a}} için {{ca}}, {{b}} için {{cb}} kriterinde.",
-    "vikorRegretSame": "VIKOR'un en büyük pişmanlığı hem {{a}} hem {{b}} için {{c}} kriterinde.",
     "unanimous": "{{n}} yöntemin hepsi {{a}} alternatifini {{b}} alternatifinin üstüne koyuyor.",
     "crossings": "Başka bir çifti görmek için grafikte bir kesişim seçin.",
-    "identical": "{{n}} yöntemin hepsi aynı sıralamayı veriyor."
+    "identical": "{{n}} yöntemin hepsi aynı sıralamayı veriyor.",
+    "on_one": "{{list}} kriterinde",
+    "on_other": "{{list}} kriterlerinde",
+    "criteria": "{{a}}, özellikle {{ahead}} önde ama {{behind}} geride.",
+    "criteriaAhead": "{{a}}, özellikle {{list}} önde.",
+    "criteriaBehind": "{{a}}, özellikle {{list}} geride.",
+    "group_one": "{{methods}} için {{name}}, {{other}} alternatifinden önde.",
+    "group_other": "{{methods}} için {{name}}, {{other}} alternatifinden önde.",
+    "vikorRegret": "VIKOR'un en büyük pişmanlığı {{a}} için {{ca}}, {{b}} için {{cb}} kriterinde, daha büyüğü {{larger}} için.",
+    "vikorRegretSame": "VIKOR'un en büyük pişmanlığı hem {{a}} hem {{b}} için {{c}} kriterinde, daha büyüğü {{larger}} için.",
+    "vikorRegretEqual": "VIKOR'un en büyük pişmanlıkları {{a}} ve {{b}} için eşit."
   }
 }

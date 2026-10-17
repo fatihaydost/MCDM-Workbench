@@ -29,7 +29,10 @@ export function whySentences(f: PairFacts, ctx: WhyContext): string[] {
 
   const side = (s: 'a' | 'b' | 'tie') => f.methods.filter((m) => m.higher === s).map((m) => m.methodId)
   const label = (ids: string[]) => list(ids.map(ctx.methodLabel))
-  const crit = (better: 'a' | 'b') => list(f.criteria.filter((c) => c.better === better).map((c) => ctx.criteria[c.col]!))
+  const crit = (better: 'a' | 'b') => {
+    const xs = f.criteria.filter((c) => c.better === better).map((c) => ctx.criteria[c.col]!)
+    return xs.length ? t('why.on', { count: xs.length, list: list(xs) }) : ''
+  }
   const ahead = crit('a')
   const behind = crit('b')
   const criteria = !ahead && !behind ? [] : [
@@ -45,26 +48,31 @@ export function whySentences(f: PairFacts, ctx: WhyContext): string[] {
 
   const groups = (['a', 'b'] as const).flatMap((s) => {
     const ids = side(s)
-    return ids.length ? [t('why.group', { count: ids.length, methods: label(ids), name: s === 'a' ? a : b })] : []
+    return ids.length ? [t('why.group', { count: ids.length, methods: label(ids), name: s === 'a' ? a : b, other: s === 'a' ? b : a })] : []
   })
   const tied = side('tie')
   const ties = tied.length ? [t('why.tie', { count: tied.length, methods: label(tied), a, b })] : []
 
   const na = side('a').length
   const nb = side('b').length
-  const shown = na === nb ? [...side('a'), ...side('b')] : na < nb ? side('a') : side('b')
-  const vikor = shown.includes('vikor') && f.vikorRegret ? f.vikorRegret : null
-  const regret = vikor
-    ? vikor.a === vikor.b
-      ? [t('why.vikorRegretSame', { a, b, c: ctx.criteria[vikor.a]! })]
-      : [t('why.vikorRegret', { a, b, ca: ctx.criteria[vikor.a]!, cb: ctx.criteria[vikor.b]! })]
-    : []
+  // Methods whose character is explained: the minority side; on a 2-2 split one per side (VIKOR first), so both
+  // sides get a sentence within the limit.
+  const rep = (ids: string[]) => [ids.includes('vikor') ? 'vikor' : ids[0]!]
+  const shown = na === nb ? [...(na ? rep(side('a')) : []), ...(nb ? rep(side('b')) : [])] : na < nb ? side('a') : side('b')
   const head = [...criteria, ...groups, ...ties]
   const characters = shown
     .filter((id) => id in CHARACTER)
     .map((id) => t(CHARACTER[id as keyof typeof CHARACTER]))
-    .slice(0, Math.max(0, MAX_SENTENCES - head.length - regret.length))
-  return [...head, ...characters, ...regret]
+    .slice(0, Math.max(0, MAX_SENTENCES - head.length))
+  const v = shown.includes('vikor') ? f.vikorRegret : null
+  const regret = !v ? [] : v.ra === v.rb || Math.abs(v.ra - v.rb) < 1e-12
+    ? [t('why.vikorRegretEqual', { a, b })]
+    : [
+        v.a === v.b
+          ? t('why.vikorRegretSame', { a, b, c: ctx.criteria[v.a]!, larger: v.ra > v.rb ? a : b })
+          : t('why.vikorRegret', { a, b, ca: ctx.criteria[v.a]!, cb: ctx.criteria[v.b]!, larger: v.ra > v.rb ? a : b }),
+      ]
+  return [...head, ...characters, ...regret].slice(0, MAX_SENTENCES)
 }
 
 const CHARACTER = {

@@ -88,8 +88,8 @@ export type PairFacts = {
   criteria: { col: number; better: 'a' | 'b' }[]
   /** Ranked methods only, from their own ranking. */
   methods: { methodId: string; higher: 'a' | 'b' | 'tie' }[]
-  /** The criterion that sets each one's R in VIKOR (argmax of its regret row); null if VIKOR did not rank. */
-  vikorRegret: { a: number; b: number } | null
+  /** The criterion that sets each one's R in VIKOR (argmax of its regret row), with the R values (the row maxima); null if VIKOR did not rank. */
+  vikorRegret: { a: number; b: number; ra: number; rb: number } | null
   /** Every ranked method orders a and b the same way. */
   unanimous: boolean
 }
@@ -139,7 +139,9 @@ export function pairFacts(problem: Problem, weights: number[], c: Comparison, i:
     b,
     criteria: decisive,
     methods,
-    vikorRegret: d?.matrix ? { a: argmax(d.matrix[a]!), b: argmax(d.matrix[b]!) } : null,
+    vikorRegret: d?.matrix
+      ? { a: argmax(d.matrix[a]!), b: argmax(d.matrix[b]!), ra: Math.max(...d.matrix[a]!), rb: Math.max(...d.matrix[b]!) }
+      : null,
     unanimous: methods.every((m) => m.higher === methods[0]!.higher),
   }
 }
