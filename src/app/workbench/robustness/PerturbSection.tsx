@@ -2,7 +2,8 @@ import { ArrowsDownUp, Check } from '@phosphor-icons/react'
 import { useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DEFAULT_DELTAS, perturbWeights } from '../../../core/robustness'
-import type { MethodParams, Problem, RankingMethod } from '../../../core/types'
+import { rankerFor, type RankingRun } from '../../../core/run'
+import type { Problem } from '../../../core/types'
 import { ChartFigure } from '../../../features/charts/ChartFigure'
 import { estimateTextWidth } from '../../../features/charts/layout'
 import { useElementWidth } from '../../../features/charts/useElementWidth'
@@ -15,9 +16,8 @@ import { useRobustnessText } from './text'
 type Props = {
   problem: Problem
   weights: readonly number[]
-  method: RankingMethod
-  /** The ranking method's options, the same the workbench ranked with. */
-  params: MethodParams
+  /** The ranking method and options, the same the workbench ranked with. */
+  run: RankingRun
   names: string[]
   criteria: string[]
 }
@@ -36,13 +36,13 @@ type Cell = { kind: 'same' } | { kind: 'changed'; leader: string } | { kind: 'na
  * their icon and the changes are listed under the grid, so nothing hides behind a sideways scroll. WS and ρ are in
  * the table behind "Show as table".
  */
-export function PerturbSection({ problem, weights, method, params, names, criteria }: Props) {
+export function PerturbSection({ problem, weights, run, names, criteria }: Props) {
   const { t } = useRobustnessText()
   const { t: tw } = useTranslation()
   const nf = useNumberFormat(4)
   const uid = useId()
   const [boxRef, boxWidth] = useElementWidth<HTMLElement>()
-  const rows = useMemo(() => perturbWeights(problem, weights, method, DEFAULT_DELTAS, params), [problem, weights, method, params])
+  const rows = useMemo(() => perturbWeights(problem, weights, rankerFor(run), DEFAULT_DELTAS), [problem, weights, run])
   const grid = useMemo(() => perturbGrid(rows, criteria.length, DEFAULT_DELTAS), [rows, criteria.length])
   const { held, total } = heldCount(rows, weights)
   const anyZero = rows.some((r) => !applicable(r, weights))

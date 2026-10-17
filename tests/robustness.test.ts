@@ -16,7 +16,7 @@ import {
   type Sweep,
 } from '../src/core/robustness'
 import { examples } from '../src/data/examples'
-import { expectClose, makeProblem } from './helpers'
+import { expectClose, makeProblem, rankerOf } from './helpers'
 
 const sum = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0)
 
@@ -130,7 +130,7 @@ describe('sweepWeight: Krishnan et al. 2021 smartphones, CRITIC weights, TOPSIS,
   let totalSwitches = 0
   for (let k = 0; k < krishnan.criteria.length; k++) {
     it(`criterion ${k} (${krishnan.criteria[k]!.name}): switch points and rankings match the dense scan`, () => {
-      const sw = sweepWeight(krishnan, krishnanW, topsis, k)
+      const sw = sweepWeight(krishnan, krishnanW, rankerOf(topsis), k)
       expect(sw.k).toBe(k)
       expect(sw.points).toHaveLength(101)
       expectContiguous(sw)
@@ -179,7 +179,7 @@ describe('sweepWeight: Krishnan et al. 2021 smartphones, CRITIC weights, TOPSIS,
   it('the example is not trivial: the ranking switches somewhere', () => expect(totalSwitches).toBeGreaterThan(0))
 
   it('w_screen = 1 exactly: price, thickness and mass weigh 0, equal screens tie on the grid end point only', () => {
-    const sw = sweepWeight(krishnan, krishnanW, topsis, 1)
+    const sw = sweepWeight(krishnan, krishnanW, rankerOf(topsis), 1)
     // screen sizes 4.7, 5.5, 5.7, 5.7, 5.5 → (5, 3, 1, 1, 3) at w = 1; just below 1 the other criteria break the ties
     expect(sw.points[100]!.ranking).toEqual([5, 3, 1, 1, 3])
     expect(sw.rankingIntervals[sw.rankingIntervals.length - 1]!.ranking).not.toEqual([5, 3, 1, 1, 3])
@@ -188,7 +188,7 @@ describe('sweepWeight: Krishnan et al. 2021 smartphones, CRITIC weights, TOPSIS,
 
 describe('sweepWeight: a tie that exists only at w_k = 1 is not an interval', () => {
   it('Krishnan 2021, k = 2 (pixel density, C and D both 520): the sweep ends on the ranking that holds below 1', () => {
-    const sw = sweepWeight(krishnan, krishnanW, topsis, 2)
+    const sw = sweepWeight(krishnan, krishnanW, rankerOf(topsis), 2)
     const last = sw.rankingIntervals[sw.rankingIntervals.length - 1]!
     expect(last.to).toBe(1)
     expect(last.from).toBeLessThan(0.9)
@@ -200,7 +200,7 @@ describe('sweepWeight: several switches inside one grid cell (synthetic methods)
   it('one pair crossing twice inside [0.50, 0.51]: both crossings found (0.503 and 0.507)', () => {
     // B − A = 10 (t − 0.503)(t − 0.507): B ahead at both grid points 0.50 and 0.51, A ahead in between.
     const m = fakeMethod((w) => [0.5, 0.5 + 10 * (w[0]! - 0.503) * (w[0]! - 0.507)])
-    const sw = sweepWeight(dummy2, [0.3, 0.7], m, 0)
+    const sw = sweepWeight(dummy2, [0.3, 0.7], rankerOf(m), 0)
     expectContiguous(sw)
     expect(sw.rankingIntervals.map((iv) => iv.ranking)).toEqual([[2, 1], [1, 2], [2, 1]])
     expectClose(sw.rankingIntervals.map((iv) => [iv.from, iv.to]), [[0, 0.503], [0.503, 0.507], [0.507, 1]], 1e-6)
@@ -211,7 +211,7 @@ describe('sweepWeight: several switches inside one grid cell (synthetic methods)
 
   it('two different pairs switching inside [0.50, 0.51] (A passes B at 0.5023, C at 0.5067)', () => {
     const m = fakeMethod((w) => [w[0]!, 0.5023, 0.5067])
-    const sw = sweepWeight(dummy3, [0.3, 0.7], m, 0)
+    const sw = sweepWeight(dummy3, [0.3, 0.7], rankerOf(m), 0)
     expect(sw.rankingIntervals.map((iv) => iv.ranking)).toEqual([[3, 2, 1], [2, 3, 1], [1, 3, 2]])
     expectClose(sw.rankingIntervals.slice(1).map((iv) => iv.from), [0.5023, 0.5067], 1e-6)
     expect(sw.topIntervals.map((iv) => iv.top)).toEqual([[2], [0]])
@@ -222,14 +222,14 @@ describe('sweepWeight: several switches inside one grid cell (synthetic methods)
 
   it('a near-touch that never crosses gives no switch', () => {
     const m = fakeMethod((w) => [0.5, 0.5 + 10 * (w[0]! - 0.505) ** 2 + 1e-9])
-    const sw = sweepWeight(dummy2, [0.3, 0.7], m, 0)
+    const sw = sweepWeight(dummy2, [0.3, 0.7], rankerOf(m), 0)
     expect(sw.rankingIntervals).toHaveLength(1)
     expect(sw.topIntervals).toHaveLength(1)
   })
 
   it('a crossing exactly on a grid point is one switch, not a sliver interval', () => {
     const m = fakeMethod((w) => [w[0]!, 0.5])
-    const sw = sweepWeight(dummy2, [0.3, 0.7], m, 0)
+    const sw = sweepWeight(dummy2, [0.3, 0.7], rankerOf(m), 0)
     expect(sw.rankingIntervals.map((iv) => iv.ranking)).toEqual([[2, 1], [1, 2]])
     expectClose(sw.rankingIntervals[1]!.from, 0.5, 1e-6)
     expect(sw.points[50]!.ranking).toEqual([1, 1]) // the tie itself is visible on the grid
@@ -237,7 +237,7 @@ describe('sweepWeight: several switches inside one grid cell (synthetic methods)
 
   it('switch points are bisected, not grid values; steps option sets the grid', () => {
     const m = fakeMethod((w) => [w[0]!, 0.123456])
-    const sw = sweepWeight(dummy2, [0.3, 0.7], m, 0, { steps: 10 })
+    const sw = sweepWeight(dummy2, [0.3, 0.7], rankerOf(m), 0, { steps: 10 })
     expect(sw.points).toHaveLength(11)
     expect(sw.points.map((p) => p.wk)).toEqual(Array.from({ length: 11 }, (_, i) => i / 10))
     expect(Math.abs(sw.rankingIntervals[1]!.from - 0.123456)).toBeLessThanOrEqual(5e-7)
@@ -246,14 +246,14 @@ describe('sweepWeight: several switches inside one grid cell (synthetic methods)
 
   it('base weight exactly on a switch point picks the interval with the base ranking', () => {
     const m = fakeMethod((w) => [w[0]! >= 0.25 ? 1 : 0, 0.5])
-    const sw = sweepWeight(dummy2, [0.25, 0.75], m, 0)
+    const sw = sweepWeight(dummy2, [0.25, 0.75], rankerOf(m), 0)
     expect(sw.rankingIntervals).toHaveLength(2)
     expect(sw.baseRankingInterval.ranking).toEqual([1, 2])
   })
 
   it('rejects a bad criterion index or step count', () => {
-    expect(() => sweepWeight(krishnan, krishnanW, topsis, 5)).toThrow(RangeError)
-    expect(() => sweepWeight(krishnan, krishnanW, topsis, 0, { steps: 0 })).toThrow(RangeError)
+    expect(() => sweepWeight(krishnan, krishnanW, rankerOf(topsis), 5)).toThrow(RangeError)
+    expect(() => sweepWeight(krishnan, krishnanW, rankerOf(topsis), 0, { steps: 0 })).toThrow(RangeError)
   })
 })
 
@@ -261,7 +261,7 @@ describe('sweepWeight: several switches inside one grid cell (synthetic methods)
 
 describe('perturbWeights', () => {
   it('one row per criterion × δ, criterion-major, weights from reweight', () => {
-    const rows = perturbWeights(krishnan, krishnanW, topsis)
+    const rows = perturbWeights(krishnan, krishnanW, rankerOf(topsis))
     expect(rows).toHaveLength(krishnan.criteria.length * DEFAULT_DELTAS.length)
     expect(rows.map((r) => [r.k, r.delta])).toEqual(
       krishnan.criteria.flatMap((_, k) => DEFAULT_DELTAS.map((d) => [k, d])),
@@ -279,7 +279,7 @@ describe('perturbWeights', () => {
 
   it('clamps: w_k (1 + δ) above 1 becomes 1, below 0 becomes 0', () => {
     const p = makeProblem([[1, 2], [2, 1], [3, 3]], ['benefit', 'benefit'])
-    const rows = perturbWeights(p, [0.9, 0.1], topsis, [0.5, -2])
+    const rows = perturbWeights(p, [0.9, 0.1], rankerOf(topsis), [0.5, -2])
     expect(rows[0]!.weights).toEqual([1, 0])
     expect(rows[1]!.weights).toEqual([0, 1])
     expectClose(rows[2]!.weights, [0.85, 0.15], 1e-15)
@@ -292,7 +292,7 @@ describe('perturbWeights', () => {
 describe('perturbWeights: all the weight on one criterion (combinations.md §C.1, w_k = 1 -> skip)', () => {
   it('skips that criterion instead of inventing an equal split, so no row repeats the base vector', () => {
     const p = makeProblem([[10, 1, 1], [9, 9, 9], [8, 5, 9]], ['benefit', 'benefit', 'benefit'])
-    const rows = perturbWeights(p, [1, 0, 0], topsis)
+    const rows = perturbWeights(p, [1, 0, 0], rankerOf(topsis))
     expect(rows.some((r) => r.k === 0)).toBe(false)
     // The zero-weight criteria keep their rows (they equal the base and the stage marks them n/a).
     expect(rows.every((r) => r.weights[0] === 1)).toBe(true)
@@ -497,21 +497,21 @@ describe('sampleDirichlet', () => {
 
 describe('monteCarlo', () => {
   it('is deterministic for a seed and changes with the seed', () => {
-    const a = monteCarlo(krishnan, krishnanW, topsis, { concentration: 'uniform', n: 2000, seed: 9 })
-    const b = monteCarlo(krishnan, krishnanW, topsis, { concentration: 'uniform', n: 2000, seed: 9 })
-    const c = monteCarlo(krishnan, krishnanW, topsis, { concentration: 'uniform', n: 2000, seed: 10 })
+    const a = monteCarlo(krishnan, krishnanW, rankerOf(topsis), { concentration: 'uniform', n: 2000, seed: 9 })
+    const b = monteCarlo(krishnan, krishnanW, rankerOf(topsis), { concentration: 'uniform', n: 2000, seed: 9 })
+    const c = monteCarlo(krishnan, krishnanW, rankerOf(topsis), { concentration: 'uniform', n: 2000, seed: 10 })
     expect(b).toEqual(a)
     expect(c).not.toEqual(a)
   })
 
   it('defaults: n = 10 000, seed = 1', () => {
-    const d = monteCarlo(krishnan, krishnanW, topsis, { concentration: 20 })
+    const d = monteCarlo(krishnan, krishnanW, rankerOf(topsis), { concentration: 20 })
     expect(d.n).toBe(10000)
-    expect(monteCarlo(krishnan, krishnanW, topsis, { concentration: 20, n: 10000, seed: 1 })).toEqual(d)
+    expect(monteCarlo(krishnan, krishnanW, rankerOf(topsis), { concentration: 20, n: 10000, seed: 1 })).toEqual(d)
   })
 
   it('uniform: acceptability rows sum to 1, mean ranks sum to m(m+1)/2, intervals bracket the mean', () => {
-    const r = monteCarlo(krishnan, krishnanW, topsis, { concentration: 'uniform', n: 4000, seed: 2 })
+    const r = monteCarlo(krishnan, krishnanW, rankerOf(topsis), { concentration: 'uniform', n: 4000, seed: 2 })
     const m = krishnan.alternatives.length
     expect(r.acceptability).toHaveLength(m)
     for (const row of r.acceptability) {
@@ -535,7 +535,7 @@ describe('monteCarlo', () => {
 
   it('very large κ: almost every run reproduces the base ranking', () => {
     const base = topsis.compute(krishnan, krishnanW, {}).ranking
-    const r = monteCarlo(krishnan, krishnanW, topsis, { concentration: 1e7, n: 2000, seed: 4 })
+    const r = monteCarlo(krishnan, krishnanW, rankerOf(topsis), { concentration: 1e7, n: 2000, seed: 4 })
     expect(r.sameTop).toBeGreaterThan(0.99)
     expect(r.meanSpearman).toBeGreaterThan(0.99)
     expect(r.meanWs).toBeGreaterThan(0.99)
@@ -544,7 +544,7 @@ describe('monteCarlo', () => {
       expect(r.rankInterval[i]).toEqual([b, b])
       expect(r.meanRank[i]).toBeCloseTo(b, 1)
     })
-    const u = monteCarlo(krishnan, krishnanW, topsis, { concentration: 'uniform', n: 2000, seed: 4 })
+    const u = monteCarlo(krishnan, krishnanW, rankerOf(topsis), { concentration: 'uniform', n: 2000, seed: 4 })
     expect(u.sameTop).toBeLessThan(r.sameTop)
   })
 
@@ -552,7 +552,7 @@ describe('monteCarlo', () => {
     // A = (3, 1), B = (1, 3), both benefit: A is first iff w1 > w2, and w1 ~ U(0, 1) under Dirichlet(1, 1).
     // SE of a share at N = 10 000 is ≤ 0.005; tolerance 4 SE.
     const p = makeProblem([[3, 1], [1, 3]], ['benefit', 'benefit'])
-    const r = monteCarlo(p, [0.5, 0.5], topsis, { concentration: 'uniform' })
+    const r = monteCarlo(p, [0.5, 0.5], rankerOf(topsis), { concentration: 'uniform' })
     expect(Math.abs(r.acceptability[0]![0]! - 0.5)).toBeLessThan(0.02)
     expect(r.rankInterval).toEqual([[1, 2], [1, 2]])
     expectClose(r.meanRank, [1.5, 1.5], 0.02)
@@ -560,7 +560,7 @@ describe('monteCarlo', () => {
 
   it('uniform: an alternative dominated on every criterion is never first', () => {
     const p = makeProblem([[5, 1, 4], [1, 5, 4], [0.5, 0.5, 3]], ['benefit', 'benefit', 'benefit'])
-    const r = monteCarlo(p, [1 / 3, 1 / 3, 1 / 3], topsis, { concentration: 'uniform', n: 3000 })
+    const r = monteCarlo(p, [1 / 3, 1 / 3, 1 / 3], rankerOf(topsis), { concentration: 'uniform', n: 3000 })
     expect(r.acceptability[2]![0]).toBe(0)
     expect(r.acceptability[2]![2]).toBe(1)
     expect(r.rankInterval[2]).toEqual([3, 3])
@@ -570,7 +570,7 @@ describe('monteCarlo', () => {
     // alternatives 0 and 1 identical → always tied: ranks (1, 1, 3) or (2, 2, 1). So 0 and 1 are never 3rd
     // and alternative 2 is never 2nd.
     const p = makeProblem([[3, 1], [3, 1], [1, 3]], ['benefit', 'benefit'])
-    const r = monteCarlo(p, [0.5, 0.5], topsis, { concentration: 'uniform', n: 1000 })
+    const r = monteCarlo(p, [0.5, 0.5], rankerOf(topsis), { concentration: 'uniform', n: 1000 })
     expect(r.acceptability[0]![2]).toBe(0)
     expect(r.acceptability[2]![1]).toBe(0)
     expect(r.acceptability[0]![0]! + r.acceptability[0]![1]!).toBe(1)
@@ -582,13 +582,13 @@ describe('monteCarlo', () => {
   it('a zero base weight stays 0 under κ (no Gamma(0) draw)', () => {
     const calls: number[][] = []
     const spy: RankingMethod = { ...topsis, compute: (p, w, x) => (calls.push(w), topsis.compute(p, w, x)) }
-    monteCarlo(krishnan, [0.4, 0, 0.2, 0.2, 0.2], spy, { concentration: 30, n: 200 })
+    monteCarlo(krishnan, [0.4, 0, 0.2, 0.2, 0.2], rankerOf(spy), { concentration: 30, n: 200 })
     expect(calls.slice(1).every((w) => w[1] === 0)).toBe(true)
   })
 
   it('rejects a non-positive concentration or n', () => {
-    expect(() => monteCarlo(krishnan, krishnanW, topsis, { concentration: 0 })).toThrow(RangeError)
-    expect(() => monteCarlo(krishnan, krishnanW, topsis, { concentration: 'uniform', n: 0 })).toThrow(RangeError)
+    expect(() => monteCarlo(krishnan, krishnanW, rankerOf(topsis), { concentration: 0 })).toThrow(RangeError)
+    expect(() => monteCarlo(krishnan, krishnanW, rankerOf(topsis), { concentration: 'uniform', n: 0 })).toThrow(RangeError)
   })
 })
 
@@ -604,7 +604,7 @@ describe('removeCriteria', () => {
   const base = topsis.compute(krishnan, krishnanW, {}).ranking
 
   it('renormalize: w_k / (1 − w_j), ranking = TOPSIS on the reduced matrix', () => {
-    const rows = removeCriteria(krishnan, krishnanW, topsis)
+    const rows = removeCriteria(krishnan, krishnanW, rankerOf(topsis))
     expect(rows).toHaveLength(5)
     rows.forEach((r, j) => {
       expect(r.j).toBe(j)
@@ -622,7 +622,7 @@ describe('removeCriteria', () => {
   })
 
   it('recompute with CRITIC: weights are exactly critic.compute on the reduced matrix', () => {
-    const rows = removeCriteria(krishnan, krishnanW, topsis, critic)
+    const rows = removeCriteria(krishnan, krishnanW, rankerOf(topsis), critic)
     expect(rows.map((r) => [r.j, r.mode])).toEqual(
       [0, 1, 2, 3, 4].flatMap((j) => [
         [j, 'renormalize'],
@@ -642,14 +642,14 @@ describe('removeCriteria', () => {
   })
 
   it('recompute with equal weights gives 1 / (n − 1)', () => {
-    const rows = removeCriteria(krishnan, krishnanW, topsis, equal).filter((r) => r.mode === 'recompute')
+    const rows = removeCriteria(krishnan, krishnanW, rankerOf(topsis), equal).filter((r) => r.mode === 'recompute')
     for (const r of rows) expectClose(r.weights.filter((_, k) => k !== r.j), [0.25, 0.25, 0.25, 0.25], 1e-15)
   })
 
   it('n ≤ 2 → no rows; a criterion carrying all the weight → the others share equally', () => {
-    expect(removeCriteria(dummy2, [0.5, 0.5], topsis, critic)).toEqual([])
+    expect(removeCriteria(dummy2, [0.5, 0.5], rankerOf(topsis), critic)).toEqual([])
     const p = makeProblem([[1, 2, 3], [3, 1, 2], [2, 3, 1]], ['benefit', 'benefit', 'benefit'])
-    const rows = removeCriteria(p, [1, 0, 0], topsis)
+    const rows = removeCriteria(p, [1, 0, 0], rankerOf(topsis))
     expectClose(rows[0]!.weights, [0, 0.5, 0.5], 1e-15)
   })
 })
@@ -658,7 +658,7 @@ describe('method options reach the methods', () => {
   it('removeCriteria recomputes with the weighting options it is given', () => {
     const minmax = { normalization: 'minmax' } as const
     const w = entropy.compute(krishnan, minmax).weights
-    const rows = removeCriteria(krishnan, w, topsis, entropy, { weightingParams: minmax }).filter((r) => r.mode === 'recompute')
+    const rows = removeCriteria(krishnan, w, rankerOf(topsis), entropy, { weightingParams: minmax }).filter((r) => r.mode === 'recompute')
     const reduced: Problem = {
       alternatives: krishnan.alternatives,
       criteria: krishnan.criteria.slice(1),
@@ -666,18 +666,6 @@ describe('method options reach the methods', () => {
     }
     expectClose(rows[0]!.weights.slice(1), entropy.compute(reduced, minmax).weights, 1e-15)
     expect(Math.abs(rows[0]!.weights[1]! - entropy.compute(reduced, {}).weights[0]!)).toBeGreaterThan(1e-3)
-  })
-
-  it('sweep, nudges and Monte Carlo pass the ranking options on', () => {
-    const seen: MethodParams[] = []
-    const spy: RankingMethod = { ...topsis, compute: (p, w, params) => (seen.push(params), topsis.compute(p, w, {})) }
-    const params = { probe: 'x' }
-    sweepWeight(krishnan, krishnanW, spy, 0, { steps: 4, params })
-    perturbWeights(krishnan, krishnanW, spy, [0.1], params)
-    monteCarlo(krishnan, krishnanW, spy, { concentration: 'uniform', n: 3, params })
-    removeCriteria(krishnan, krishnanW, spy, undefined, { rankingParams: params })
-    expect(seen.length).toBeGreaterThan(10)
-    expect(seen.every((x) => x === params)).toBe(true)
   })
 })
 
@@ -688,7 +676,7 @@ describe('sweepWeight with SAW (a second ranking method): Podvezko 2011, both no
   for (const params of [{}, { normalization: 'sum' }] as const) {
     it(`${JSON.stringify(params)}: S is linear in w_k, so every switch point is where two straight lines cross`, () => {
       for (let k = 0; k < w.length; k++) {
-        const sw = sweepWeight(p, w, saw, k, { params })
+        const sw = sweepWeight(p, w, rankerOf(saw, params), k)
         // Scores along the grid are the method's own scores at those weights, with these options.
         for (const pt of sw.points) expect(pt.scores).toEqual(saw.compute(p, pt.weights, params).scores)
         // S_i(t) = a_i + b_i t: from the two ends, every crossing of a pair inside (0, 1) is known exactly.

@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DEFAULT_DELTAS, perturbWeights } from '../../../core/robustness'
 import { getRankingMethod, getWeightingMethod } from '../../../core/registry'
+import { rankerFor, type RankingRun } from '../../../core/run'
 import { isEmptyProblem, toProblem, useMethodParams, useRanking, useWeights, useWorkbench } from '../../../state/workbench'
 import { Button, EmptyState } from '../../../ui'
 import { useWorkbenchNav } from '../nav'
@@ -15,8 +16,8 @@ import { RemovalSection } from './RemovalSection'
 import { SweepSection } from './SweepSection'
 
 // The rail's status line for this stage: first place held in how many of the ±5/10/20 % nudges.
-registerRobustnessSummary((problem, weights, method, params) =>
-  heldCount(perturbWeights(problem, weights, method, DEFAULT_DELTAS, params), weights),
+registerRobustnessSummary((problem, weights, run) =>
+  heldCount(perturbWeights(problem, weights, rankerFor(run), DEFAULT_DELTAS), weights),
 )
 
 /**
@@ -40,6 +41,8 @@ export default function RobustnessStage() {
   const names = useMemo(() => draft.alternatives.map((_, i) => alternativeName(draft, i, t)), [draft, t])
   const criteria = useMemo(() => draft.criteria.map((_, j) => criterionName(draft.criteria, j, t)), [draft, t])
   const method = getRankingMethod(rankingMethod)
+  // One run for the four checks below, built once from the store.
+  const run = useMemo((): RankingRun => ({ methodId: rankingMethod, params: rankingParams }), [rankingMethod, rankingParams])
   const w = weights.value?.weights
 
   if (isEmptyProblem(draft)) {
@@ -64,14 +67,13 @@ export default function RobustnessStage() {
   const weighting = weightMethod === 'equal' ? undefined : getWeightingMethod(weightMethod)
   return (
     <div className="flex flex-col gap-12 pt-4">
-      <SweepSection problem={problem} weights={w} method={method} params={rankingParams} baseRanking={ranking.value.ranking} names={names} criteria={criteria} />
-      <PerturbSection problem={problem} weights={w} method={method} params={rankingParams} names={names} criteria={criteria} />
-      <MonteCarloSection problem={problem} weights={w} method={rankingMethod} params={rankingParams} names={names} baseRanking={ranking.value.ranking} />
+      <SweepSection problem={problem} weights={w} run={run} baseRanking={ranking.value.ranking} names={names} criteria={criteria} />
+      <PerturbSection problem={problem} weights={w} run={run} names={names} criteria={criteria} />
+      <MonteCarloSection problem={problem} weights={w} run={run} names={names} baseRanking={ranking.value.ranking} />
       <RemovalSection
         problem={problem}
         weights={w}
-        method={method}
-        params={rankingParams}
+        run={run}
         weighting={weighting}
         weightingParams={weightingParams}
         weightingName={weightMethodFullLabel(weightMethod, weightRaw, t)}

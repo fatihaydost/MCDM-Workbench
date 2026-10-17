@@ -1,9 +1,11 @@
 import { expect, test, type Page } from '@playwright/test'
-import { critic, topsis } from '../../src/core'
+import { critic, rankerFor, topsis } from '../../src/core'
 import { monteCarlo, perturbWeights, removeCriteria, reweight, sweepWeight } from '../../src/core/robustness'
 import { rankOrder, stepWeight } from '../../src/app/ranking/order'
 import { largestWeight } from '../../src/app/workbench/robustness/helpers'
 import { getExample } from '../../src/data/examples'
+
+const topsisFor = rankerFor({ methodId: 'topsis', params: {} })
 
 const ex = getExample('krishnan-2021-smartphones')!
 const problem = {
@@ -70,7 +72,7 @@ test('another criterion: the sentence gives the core\'s stability interval, the 
   await open(page)
   for (const j of [0, largestWeight(weights)]) {
     await page.getByRole('radio', { name: criteria[j]! }).click()
-    const sweep = sweepWeight(problem, weights, topsis, j)
+    const sweep = sweepWeight(problem, weights, topsisFor, j)
     const top = sweep.baseTopInterval
     const leader = top.top.map((i) => names[i]).join(', ')
     const sentence = page.getByTestId('holds-sentence')
@@ -101,7 +103,7 @@ test('a criterion with weight 0 is not perturbed: n/a, left out of the count, wi
   }
   await expect(page.getByText('Weights sum to 1.')).toBeVisible()
   await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Robustness' }).click()
-  const rows = perturbWeights(problem, manual, topsis).filter((r) => r.k !== 0)
+  const rows = perturbWeights(problem, manual, topsisFor).filter((r) => r.k !== 0)
   await expect(page.getByTestId('perturb-summary')).toHaveText(
     `First place holds in ${rows.filter((r) => r.sameTop).length} of ${rows.length} changes.`,
   )
@@ -127,7 +129,7 @@ test('all the weight on one criterion: the small changes say there is nothing to
 
 test('small changes: the grid and the summary match perturbWeights', async ({ page }) => {
   await open(page)
-  const rows = perturbWeights(problem, weights, topsis)
+  const rows = perturbWeights(problem, weights, topsisFor)
   const held = rows.filter((r) => r.sameTop).length
   await expect(page.getByTestId('perturb-summary')).toHaveText(`First place holds in ${held} of ${rows.length} changes.`)
   await expect(page.getByTestId('perturb-cell')).toHaveCount(rows.length)
@@ -139,7 +141,7 @@ test('random weights: the worker gives the core\'s numbers for the seed, and a n
   await expect(page.getByTestId('mc-note')).toHaveText('N = 10,000 · seed 1')
   const result = page.getByTestId('mc-result')
   const check = async (concentration: 'uniform' | number) => {
-    const mc = monteCarlo(problem, weights, topsis, { concentration, n: 10_000, seed: 1 })
+    const mc = monteCarlo(problem, weights, topsisFor, { concentration, n: 10_000, seed: 1 })
     const base = topsis.compute(problem, weights, {}).ranking
     const first = names[base.indexOf(1)]
     await expect(result).toHaveAttribute('aria-busy', 'false', { timeout: 20_000 })
@@ -168,7 +170,7 @@ test('drop a criterion: one row each, first-place changes marked, CRITIC can be 
     ['Recompute CRITIC', 'recompute'],
   ] as const) {
     await page.getByRole('radio', { name: label }).click()
-    const rows = removeCriteria(problem, weights, topsis, critic).filter((r) => r.mode === mode)
+    const rows = removeCriteria(problem, weights, topsisFor, critic).filter((r) => r.mode === mode)
     const dom = page.getByTestId('removal-row')
     await expect(dom).toHaveCount(criteria.length)
     for (const [k, r] of rows.entries()) {
@@ -186,7 +188,7 @@ test('drop a criterion: one row each, first-place changes marked, CRITIC can be 
 
 test('Results leads here by keyboard, and the rail says how often first place holds', async ({ page }) => {
   await page.goto('/app?example=krishnan-2021-smartphones&stage=results')
-  const rows = perturbWeights(problem, weights, topsis)
+  const rows = perturbWeights(problem, weights, topsisFor)
   const rail = page.locator('nav[aria-label="Stages"]:visible')
   await expect(rail.getByRole('button', { name: /Robustness/ })).toContainText(
     `First place held: ${rows.filter((r) => r.sameTop).length}/${rows.length}`,
@@ -237,7 +239,7 @@ test('390 px: the change grid fits the screen and lists what changed under it', 
   await expect(grid).toBeVisible()
   const fits = await grid.evaluate((el) => el.scrollWidth <= el.parentElement!.clientWidth)
   expect(fits).toBe(true)
-  const changed = perturbWeights(problem, weights, topsis).filter((r) => !r.sameTop)
+  const changed = perturbWeights(problem, weights, topsisFor).filter((r) => !r.sameTop)
   await expect(page.getByTestId('perturb-changes').locator('li')).toHaveCount(changed.length)
 })
 

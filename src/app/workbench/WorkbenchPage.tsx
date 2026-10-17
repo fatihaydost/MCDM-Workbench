@@ -198,9 +198,8 @@ export default function WorkbenchPage() {
   // How often first place survives the ±5/10/20 % nudges of each weight, once the robustness chunk has loaded.
   const rankingParams = useMethodParams(rankingMethod)
   const robustness = useMemo(() => {
-    const method = getRankingMethod(rankingMethod)
-    if (!robustnessSummary || !method || !weights.value || !ranking.value) return null
-    return robustnessSummary(toProblem(problem), weights.value.weights, method, rankingParams)
+    if (!robustnessSummary || !getRankingMethod(rankingMethod) || !weights.value || !ranking.value) return null
+    return robustnessSummary(toProblem(problem), weights.value.weights, { methodId: rankingMethod, params: rankingParams })
   }, [robustnessSummary, rankingMethod, rankingParams, problem, weights.value, ranking.value])
 
   const stageMeta: Partial<Record<Stage, ReactNode>> = {}

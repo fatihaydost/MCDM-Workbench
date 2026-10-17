@@ -5,16 +5,18 @@ import {
   getRankingMethod,
   getWeightingMethod,
   hasErrors,
+  prepareRanking,
   ProblemValidationError,
   resolveParams,
   validateProblem,
-  validateRequirements,
   validateWeights,
+  type Computed,
   type Criterion,
   type MethodParams,
   type MethodParamValue,
   type Problem,
   type RankingResult,
+  type RankingRun,
   type ValidationIssue,
   type WeightingResult,
 } from '../core'
@@ -436,7 +438,7 @@ export const useWorkbench = create<WorkbenchState>()(
 // ---------------------------------------------------------------------------------------------
 
 /** A computed value, or null with the issues that blocked it. Warnings may accompany a value. */
-export type Computed<T> = { value: T; issues: ValidationIssue[] } | { value: null; issues: ValidationIssue[] }
+export type { Computed }
 
 /** Draft to core Problem: empty cells become NaN so validateProblem reports their position. */
 export function toProblem(draft: DraftProblem): Problem {
@@ -456,6 +458,11 @@ export function computeValidation(draft: DraftProblem): ValidationIssue[] {
 export function paramsFor(data: Pick<WorkbenchData, 'methodParams'>, methodId: string): MethodParams {
   const method = getWeightingMethod(methodId) ?? getRankingMethod(methodId)
   return resolveParams(method?.params, data.methodParams?.[methodId])
+}
+
+/** The run the workbench ranks with: the selected ranking method and its resolved options. */
+export function rankingRunFor(data: Pick<WorkbenchData, 'rankingMethod' | 'methodParams'>): RankingRun {
+  return { methodId: data.rankingMethod, params: paramsFor(data, data.rankingMethod) }
 }
 
 /** Weights for the selected method, or null plus the blocking issues. */
@@ -497,19 +504,12 @@ export function computeRanking(
   weights: Computed<WeightingResult> = computeWeights(data),
 ): Computed<RankingResult> {
   const problem = toProblem(data.problem)
-  const method = getRankingMethod(data.rankingMethod)
-  const issues = [...validateProblem(problem), ...(method ? validateRequirements(problem, method) : [])]
+  const { issues, rank } = prepareRanking(problem, rankingRunFor(data))
   if (weights.value === null) {
     const seen = new Set(issues.map((x) => JSON.stringify(x)))
     return { value: null, issues: [...issues, ...weights.issues.filter((x) => !seen.has(JSON.stringify(x)))] }
   }
-  if (!method || hasErrors(issues)) return { value: null, issues }
-  try {
-    return { value: method.compute(problem, weights.value.weights, paramsFor(data, method.id)), issues }
-  } catch (err) {
-    if (err instanceof ProblemValidationError) return { value: null, issues: err.issues }
-    throw err
-  }
+  return rank ? rank(weights.value.weights) : { value: null, issues }
 }
 
 /** Validation issues of the current matrix (errors and warnings). */

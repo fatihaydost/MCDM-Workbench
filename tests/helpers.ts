@@ -1,5 +1,5 @@
 import { expect } from 'vitest'
-import type { CriterionType, Problem, Step } from '../src/core'
+import type { CriterionType, MethodParams, Problem, RankerFor, RankingMethod, Step } from '../src/core'
 
 type Nested = number | Nested[]
 
@@ -29,3 +29,10 @@ export function makeProblem(matrix: number[][], types: CriterionType[], alternat
     matrix,
   }
 }
+
+/** A RankerFor over a method object (also a synthetic one that is not in the registry), with fixed options. */
+export const rankerOf =
+  (method: RankingMethod<any>, params: MethodParams = {}): RankerFor =>
+  (problem) =>
+  (weights) =>
+    method.compute(problem, weights, params)

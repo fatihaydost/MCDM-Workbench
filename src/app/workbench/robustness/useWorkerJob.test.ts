@@ -22,8 +22,7 @@ const sweepReq = (id: number): WorkerRequest => ({
   id,
   problem: { alternatives: ['A', 'B'], criteria: [{ name: 'x', type: 'benefit' }, { name: 'y', type: 'benefit' }], matrix: [[1, 2], [2, 1]] },
   weights: [0.5, 0.5],
-  method: 'topsis',
-  params: {},
+  run: { methodId: 'topsis', params: {} },
   k: 0,
 })
 

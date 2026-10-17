@@ -3,7 +3,7 @@ import { edas, ProblemValidationError, rankScores, type CriterionType, type Prob
 import { monteCarlo, sweepWeight } from '../src/core/robustness'
 import kg from './fixtures/edas-keshavarz2015.json'
 import sec from './fixtures/edas-secondary.json'
-import { expectClose, makeProblem, step } from './helpers'
+import { expectClose, makeProblem, rankerOf, step } from './helpers'
 
 const sumOf = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0)
 const vec = (res: ReturnType<typeof edas.compute>, key: string) => step(res.steps, key).vector!
@@ -139,12 +139,12 @@ describe('EDAS: Keshavarz Ghorabaee et al. 2015, Tables 5-7 (10 x 7, seven weigh
   })
   it('runs inside the robustness tools with a higher-is-better score', () => {
     const w = renormalize(f.weight_sets_as_printed[0]!)
-    const sw = sweepWeight(p, w, edas, 0, { steps: 10 })
+    const sw = sweepWeight(p, w, rankerOf(edas), 0, { steps: 10 })
     for (const pt of sw.points) {
       expect(pt.scores).toEqual(edas.compute(p, pt.weights, {}).scores)
       expect(pt.ranking).toEqual(rankScores(pt.scores, 'desc'))
     }
-    const mc = monteCarlo(p, w, edas, { concentration: 500, n: 200, seed: 1, params: {} })
+    const mc = monteCarlo(p, w, rankerOf(edas), { concentration: 500, n: 200, seed: 1 })
     // A1 leads every weight set of the paper; near set 1 it stays first, and A4 stays last.
     expect(mc.acceptability[0]![0]!).toBeGreaterThan(0.95)
     expect(mc.meanRank[3]!).toBeGreaterThan(9.5)

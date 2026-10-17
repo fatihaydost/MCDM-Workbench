@@ -1,13 +1,12 @@
 import { useSyncExternalStore } from 'react'
-import type { MethodParams, Problem, RankingMethod } from '../../core'
+import type { Problem, RankingRun } from '../../core'
 
 /** First place kept in `held` of `total` one-at-a-time weight nudges. */
 export type RobustnessSummary = { held: number; total: number }
 export type SummarizeRobustness = (
   problem: Problem,
   weights: readonly number[],
-  method: RankingMethod,
-  params: MethodParams,
+  run: RankingRun,
 ) => RobustnessSummary | null
 
 let summarize: SummarizeRobustness | null = null

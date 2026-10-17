@@ -131,14 +131,15 @@ Both:
 
 ## 5. Robustness (`src/app/workbench/robustness`, `src/core/robustness.ts`)
 
-- [ ] Nothing to register: every function takes a `RankingMethod` (robustness.ts:6) and the worker resolves the id
-  through the registry (`robustness.worker.ts:31`). It honours `order` (`robustness.ts:97`).
-- [ ] `RobustnessStage.tsx:58` offers "Recompute" in criterion removal for CRITIC only. For a new objective weighting
-  method use `getWeightingMethod(weightMethod)` (Entropy, SD, MEREC can all be recomputed on the reduced matrix).
+- [ ] Nothing to register: every analysis takes a `RankerFor` built from a `RankingRun` (`{ methodId, params }`, plain
+  data, `src/core/run.ts`); the worker request carries the run and the registry resolves the id. No consumer calls
+  `method.compute` itself. It honours `order`.
+- [ ] `RobustnessStage.tsx` offers "Recompute" in criterion removal for every weighting method except equal
+  (`getWeightingMethod(weightMethod)`), so a new objective weighting method (SD, MEREC) gets it by itself.
   [E] `tests/e2e/robustness.spec.ts:148-154` expects the label "Recompute CRITIC" on the CRITIC example; keep it.
 - [ ] Copy: generic. The sweep chart title takes the method's `score.title` and the sweep table its `score.name`
   (`SweepSection.tsx`, `scoreWords`).
-- [ ] Every call passes `{}` as params (robustness.ts:30, :507; worker :39; `SweepSection.tsx:69`); see §11.
+- [ ] Options travel inside the `RankingRun` (built once in `RobustnessStage` from the store); nothing to thread per call, see §11.
 
 ## 6. Method page and catalogue
 
@@ -242,9 +243,10 @@ variant label is `workbench.params.<id>.<key>Variant` with `{{value}}` ("VIKOR (
    (persist merges missing fields from the initial state).
 4. UI: a `SegmentedControl` (choice) or `NumberInput` (number) under the method selector, in `WeightsStage` /
    `RankingStage`, with i18n labels `workbench.params.<id>.<key>` and `.<option>`.
-5. Robustness must use the same params, or it silently analyses the default variant: thread them through
-   `rankWith` (robustness.ts:30), the removal recompute (:507), the worker request `Common` type (`robustness.worker.ts:19`)
-   and `useMonteCarlo` / `useSweep` (`useWorkerJob.ts:80,96`), `SweepSection.tsx:69`.
+5. Robustness uses the same params through `RankingRun` (`src/core/run.ts`): `prepareRanking(problem, run)` fills the
+   defaults, validates once and returns the ranker; `rankerFor(run)` is its throwing form for sweep, nudges, Monte
+   Carlo (no extra validation per draw), the worker request and criterion removal (re-prepared on the reduced problem).
+   `computeRanking` uses the same function.
 6. Calculation and provenance: emit variant-specific step keys (`entropy.normalizedSum`, `entropy.normalizedMinmax`)
    so `stepContent` stays one static formula per key; name the variant in the method label used by the Results
    byline and the xlsx About sheet ("Entropy (min-max)").
@@ -300,7 +302,7 @@ page), else the current one if listed, else the first; `ExampleDataset.buttonLab
 ## 14. Two or more ranking methods: what exists today
 
 - Selection is single: `rankingMethod: RankingMethodId` in the store, a `SegmentedControl` on the Ranking stage
-  (`RankingStage.tsx:164`), one ranking on Results, one method in Robustness (`RobustnessStage.tsx:37`). Adding a second
+  (`RankingStage.tsx:164`), one ranking on Results, one `RankingRun` in Robustness (built once in `RobustnessStage`). Adding a second
   method gives a choice between them, not a comparison.
 - Agreement statistics in `src/core/robustness.ts` §C.6: `midRanks` (:522), `spearman` (:540), `kendallTauB` (:566),
   `wsCoefficient` (:598), all tested (`tests/robustness.test.ts`). Spearman and WS are used by criterion removal;

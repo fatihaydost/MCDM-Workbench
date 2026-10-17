@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Concentration, MonteCarloResult } from '../../../core/robustness'
-import type { MethodParams, Problem } from '../../../core/types'
+import type { RankingRun } from '../../../core/run'
+import type { Problem } from '../../../core/types'
 import { runRequest, type SweepResult, type WorkerRequest, type WorkerResponse } from './robustness.worker'
 
 export type JobState<T> = {
@@ -102,28 +103,27 @@ function useWorkerJob<T>(job: Job): JobState<T> {
   return state
 }
 
-/** Monte Carlo weights (core monteCarlo) in a worker; `params` are the ranking method's options (memoize them). */
+/** Monte Carlo weights (core monteCarlo) in a worker; `run` is the ranking method and options (memoize it). */
 export function useMonteCarlo(
   problem: Problem,
   weights: readonly number[],
-  method: string,
-  params: MethodParams,
+  run: RankingRun,
   concentration: Concentration,
   n: number,
   seed: number,
 ): JobState<MonteCarloResult> {
   const job = useMemo(
-    (): Job => ({ kind: 'monteCarlo', problem, weights: [...weights], method, params, concentration, n, seed }),
-    [problem, weights, method, params, concentration, n, seed],
+    (): Job => ({ kind: 'monteCarlo', problem, weights: [...weights], run, concentration, n, seed }),
+    [problem, weights, run, concentration, n, seed],
   )
   return useWorkerJob<MonteCarloResult>(job)
 }
 
-/** The sweep of criterion k (core sweepWeight) and its crossing marks, in a worker; `params` as in useMonteCarlo. */
-export function useSweep(problem: Problem, weights: readonly number[], method: string, params: MethodParams, k: number): JobState<SweepResult> {
+/** The sweep of criterion k (core sweepWeight) and its crossing marks, in a worker; `run` as in useMonteCarlo. */
+export function useSweep(problem: Problem, weights: readonly number[], run: RankingRun, k: number): JobState<SweepResult> {
   const job = useMemo(
-    (): Job => ({ kind: 'sweep', problem, weights: [...weights], method, params, k }),
-    [problem, weights, method, params, k],
+    (): Job => ({ kind: 'sweep', problem, weights: [...weights], run, k }),
+    [problem, weights, run, k],
   )
   return useWorkerJob<SweepResult>(job)
 }

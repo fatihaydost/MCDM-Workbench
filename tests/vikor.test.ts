@@ -3,7 +3,7 @@ import { ProblemValidationError, rankScores, vikor, vikorCompromise, type Criter
 import { monteCarlo, sweepWeight } from '../src/core/robustness'
 import ot from './fixtures/vikor-opricovic-tzeng2004.json'
 import kg from './fixtures/vikor-keshavarz2015.json'
-import { expectClose, makeProblem, step } from './helpers'
+import { expectClose, makeProblem, rankerOf, step } from './helpers'
 
 const sumOf = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0)
 const vec = (res: ReturnType<typeof vikor.compute>, key: string) => step(res.steps, key).vector!
@@ -265,14 +265,14 @@ describe('VIKOR in the robustness tools (an ascending score)', () => {
   const p = makeProblem(kg.matrix, kg.types as CriterionType[], kg.alternatives)
   const w = kg.weight_sets[0]!
   it('the sweep evaluates VIKOR with its v and keeps lower Q ahead', () => {
-    const sw = sweepWeight(p, w, vikor, 0, { steps: 10, params: { v: 0.3 } })
+    const sw = sweepWeight(p, w, rankerOf(vikor, { v: 0.3 }), 0, { steps: 10 })
     for (const pt of sw.points) {
       expect(pt.scores).toEqual(vikor.compute(p, pt.weights, { v: 0.3 }).scores)
       expect(pt.ranking).toEqual(rankScores(pt.scores, 'asc'))
     }
   })
   it('Monte Carlo counts first places by the lowest Q: with weights close to set 1, A7 or A1 leads (Q 0.027 and 0.029)', () => {
-    const mc = monteCarlo(p, w, vikor, { concentration: 500, n: 200, seed: 1, params: {} })
+    const mc = monteCarlo(p, w, rankerOf(vikor), { concentration: 500, n: 200, seed: 1 })
     const first = mc.acceptability.map((row) => row[0]!)
     expect(first[6]! + first[0]!).toBeGreaterThan(0.95)
     expect(mc.meanRank[3]!).toBeGreaterThan(8)
