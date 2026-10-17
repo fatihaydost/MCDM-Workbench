@@ -6,6 +6,7 @@ import { critic } from '../../core/methods/critic'
 import { edas } from '../../core/methods/edas'
 import { maxOf } from '../../core/math'
 import { entropy, type EntropyParams } from '../../core/methods/entropy'
+import { sd } from '../../core/methods/sd'
 import { saw, type SawParams } from '../../core/methods/saw'
 import { topsis } from '../../core/methods/topsis'
 import { vikor, vikorCompromise, vikorTerm, type VikorCompromise, type VikorParams } from '../../core/methods/vikor'
@@ -265,6 +266,34 @@ export function criticParts(problem: Problem): CriticParts | null {
     sigma: stepVector(result.steps, 'critic.sigma'),
     conflict: stepVector(result.steps, 'critic.conflict'),
     information: stepVector(result.steps, 'critic.information'),
+    weights: result.weights,
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// SD parts
+// ---------------------------------------------------------------------------------------------
+
+export type SdParts = {
+  result: WeightingResult
+  /** Min-max normalized matrix r_ij (1 = best). */
+  normalized: number[][]
+  sigma: number[]
+  weights: number[]
+}
+
+/** SD through the core, with the steps the illustration draws. Null when it cannot run. */
+export function sdParts(problem: Problem): SdParts | null {
+  let result: WeightingResult
+  try {
+    result = sd.compute(problem, {})
+  } catch {
+    return null
+  }
+  return {
+    result,
+    normalized: stepMatrix(result.steps, 'sd.normalized'),
+    sigma: stepVector(result.steps, 'sd.sigma'),
     weights: result.weights,
   }
 }
@@ -543,6 +572,13 @@ export const ENTROPY_MINMAX_FLOW: readonly FlowNode[] = [
   { key: 'entropy.normalized', stepKeys: ['entropy.normalized'] },
   { key: 'entropy.proportionsMinmax', stepKeys: ['entropy.proportionsMinmax'] },
   ...ENTROPY_FLOW.slice(1),
+]
+
+/** SD in three nodes: Normalize, Spread, Weights. */
+export const SD_FLOW: readonly FlowNode[] = [
+  { key: 'sd.normalized', stepKeys: ['sd.normalized'] },
+  { key: 'sd.sigma', stepKeys: ['sd.sigma'] },
+  { key: 'sd.weights', stepKeys: ['sd.sigmaTotal', 'sd.weights'] },
 ]
 
 /** VIKOR in five nodes: Best and worst, Distances, S and R, Q, Threshold. */

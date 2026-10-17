@@ -106,6 +106,9 @@
       "tolerance": "Tolerans {{tol}}",
       "edas": {
         "claim": "47 değerlendirme skoru ve Tablo 2'nin bütün hücreleri, makalenin yuvarladığı gibi yuvarlanınca {{citation}} ile {{decimals}} basamağa kadar aynı."
+      },
+      "sd": {
+        "claim": "Ağırlıklar {{citation}} ile {{decimals}} basamağa kadar aynı; makalenin anakütle standart sapması dönüştürülünce standart sapmalar da."
       }
     },
     "catalogue": {
@@ -182,7 +185,8 @@
       "critic": "CRITIC",
       "entropy": "Entropi",
       "equal": "Eşit ağırlık",
-      "manual": "Elle"
+      "manual": "Elle",
+      "sd": "SD"
     },
     "rankingMethod": {
       "label": "Sıralama yöntemi",
@@ -319,7 +323,8 @@
         "critic": "Her kriterin ne kadar değiştiğine ve diğerleriyle ne kadar çeliştiğine bakan nesnel ağırlıklar.",
         "entropy": "Her kriterin değerlerinin alternatifler arasında ne kadar dengesiz dağıldığına bakan nesnel ağırlıklar.",
         "equal": "Her kriter aynı ağırlığı alır.",
-        "manual": "Ağırlıkları kendiniz girin. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli."
+        "manual": "Ağırlıkları kendiniz girin. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli.",
+        "sd": "Her kriterin değerlerinin alternatifler arasında ne kadar yayıldığına bakan nesnel ağırlıklar."
       },
       "columns": {
         "criterion": "Kriter",
@@ -329,7 +334,8 @@
         "information": "Bilgi miktarı C",
         "entropy": "Entropi e",
         "diversification": "Çeşitlenme d",
-        "weight": "Ağırlık w"
+        "weight": "Ağırlık w",
+        "spread": "Yayılım σ"
       },
       "tableTitle": "Kriter ağırlıkları",
       "chartTitle": "Kriter ağırlıkları",
@@ -512,6 +518,12 @@
         "nsp": "Normalize NSP",
         "nsn": "Normalize NSN",
         "scores": "Değerlendirme skoru AS"
+      },
+      "sd": {
+        "normalized": "Normalize matris r (min-maks)",
+        "sigma": "Yayılım σ",
+        "sigmaTotal": "Toplam yayılım Σσ",
+        "weights": "Ağırlıklar w"
       }
     },
     "issues": {
@@ -620,6 +632,11 @@
         "readoutAbove": "{{alternative}}: {{criterion}} SP'ye {{value}} katıyor",
         "readoutBelow": "{{alternative}}: {{criterion}} SN'ye {{value}} katıyor",
         "readoutAt": "{{alternative}}, {{criterion}} kriterinde ortalamada"
+      },
+      "sd": {
+        "title": "Geniş yayılım, çok ağırlık",
+        "spread": "Yayılım (σ)",
+        "weight": "Ağırlık"
       }
     },
     "flow": {
@@ -660,6 +677,11 @@
         "sp": "SP ve SN",
         "nsp": "Normalize",
         "scores": "AS"
+      },
+      "sd": {
+        "normalized": "Normalize et",
+        "sigma": "Yayılım",
+        "weights": "Ağırlıklar"
       }
     },
     "pipeline": {
@@ -671,7 +693,7 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR ya da EDAS ile sıralayın ve hesabın her adımını görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR ya da EDAS ile sıralayın ve hesabın her adımını görün."
     }
   },
   "methods": {
@@ -689,7 +711,8 @@
       "manual": "Elle girilen ağırlık",
       "saw": "SAW",
       "vikor": "VIKOR",
-      "edas": "EDAS"
+      "edas": "EDAS",
+      "sd": "SD"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -744,7 +767,8 @@
         "equal": "Her kritere 1/n verir.",
         "saw": "Ölçeklenmiş değerleri ağırlıklı toplar.",
         "vikor": "En iyi toplamı en büyük pişmanlıkla dengeler.",
-        "edas": "Ortalamanın üstündeki ve altındaki uzaklığı ölçer."
+        "edas": "Ortalamanın üstündeki ve altındaki uzaklığı ölçer.",
+        "sd": "Ağırlığı verinin ne kadar geniş yayıldığından bulur."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -856,6 +880,13 @@
         "edas": {
           "title": "Kriter kriter ortalamadan iyi mi, kötü mü",
           "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık; AS her birini en büyük SP ya da SN'ye böler."
+        },
+        "sd": {
+          "title": "Geniş yayılım, çok ağırlık",
+          "spread": "Yayılım (σ)",
+          "weight": "Ağırlık",
+          "caption": "Her nokta 0 ile 1 ölçeğinde bir alternatif; noktaların altındaki cetvel σ.",
+          "weightHead": "Ağırlık = σ / {{total}}"
         }
       }
     }
@@ -919,6 +950,12 @@
       "nsp": "NSP = SP / maks SP: ortalamanın en çok üstünde olan alternatife 1.",
       "nsn": "NSN = 1 - SN / maks SN: ortalamanın en çok altında olan alternatife 0.",
       "scores": "Değerlendirme skoru AS = (NSP + NSN) / 2. Değer büyüdükçe sıra yükselir."
+    },
+    "sd": {
+      "normalized": "Min-maks normalizasyonu: her sütun 0 ile 1 arasına ölçeklenir, maliyet kriterleri ters çevrilir; böylece 1 her zaman en iyi değerdir.",
+      "sigma": "Yayılım: normalize edilmiş her sütunun örneklem standart sapması. Kriter türü bunu değiştirmez.",
+      "sigmaTotal": "Tüm kriterlerin toplam yayılımı.",
+      "weights": "Ağırlıklar: her kriterin toplam yayılım içindeki payı."
     }
   },
   "validation": {
@@ -949,7 +986,8 @@
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden CRITIC ağırlığı 0.",
       "few-alternatives": "4'ten az alternatifle korelasyonlar kararsızdır. CRITIC ağırlıklarını dikkatle yorumlayın.",
       "no-conflict-equal-weights": "Değişen kriterler arasında çatışma yok (yalnız biri değişiyor ya da birlikte hareket ediyorlar), bu yüzden ağırlığı eşit paylaşıyorlar.",
-      "all-constant-equal-weights": "Bütün kriterler sabit, ağırlıklandırılacak bilgi yok. Bunun yerine eşit ağırlık kullanıldı."
+      "all-constant-equal-weights": "Bütün kriterler sabit, ağırlıklandırılacak bilgi yok. Bunun yerine eşit ağırlık kullanıldı.",
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin."
     },
     "entropy": {
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden Entropi ağırlığı 0.",
@@ -974,6 +1012,12 @@
       "negative-values": "{{criterion}} kriterinde negatif değerler var. EDAS uzaklığı ortalamanın oranı olarak ölçer, bu yüzden sonuç sıfırın nerede olduğuna bağlıdır.",
       "small-average": "{{criterion}} kriterinin ortalaması değerlerine göre 0'a çok yakın; uzaklıkları çok büyür ve küçük bir ağırlıkla bile sıralamayı belirleyebilir.",
       "no-spread": "Ağırlığı olan hiçbir kriterde ortalamanın üstünde ya da altında alternatif yok, bu yüzden hepsi AS = 0,5 alıyor."
+    },
+    "sd": {
+      "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden SD ağırlığı 0.",
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
+      "two-alternatives": "2 alternatifle, sabit olmayan her kriter aynı SD ağırlığını alır.",
+      "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı."
     }
   }
 }

@@ -106,6 +106,9 @@
       "tolerance": "Tolerance {{tol}}",
       "edas": {
         "claim": "All 47 appraisal scores and every cell of Table 2 match {{citation}} to {{decimals}} decimals, rounded as the paper did."
+      },
+      "sd": {
+        "claim": "Weights match {{citation}} to {{decimals}} decimals, and standard deviations once the paper's population SD is converted."
       }
     },
     "catalogue": {
@@ -182,7 +185,8 @@
       "critic": "CRITIC",
       "entropy": "Entropy",
       "equal": "Equal weights",
-      "manual": "Manual"
+      "manual": "Manual",
+      "sd": "SD"
     },
     "rankingMethod": {
       "label": "Ranking method",
@@ -319,7 +323,8 @@
         "critic": "Objective weights from how much each criterion varies and how much it disagrees with the others.",
         "entropy": "Objective weights from how unevenly each criterion's values are spread over the alternatives.",
         "equal": "Every criterion gets the same weight.",
-        "manual": "Enter your own weights. They must be 0 or more and sum to 1."
+        "manual": "Enter your own weights. They must be 0 or more and sum to 1.",
+        "sd": "Objective weights from how widely each criterion's values spread over the alternatives."
       },
       "columns": {
         "criterion": "Criterion",
@@ -329,7 +334,8 @@
         "information": "Information C",
         "entropy": "Entropy e",
         "diversification": "Diversification d",
-        "weight": "Weight w"
+        "weight": "Weight w",
+        "spread": "Spread σ"
       },
       "tableTitle": "Weights by criterion",
       "chartTitle": "Criterion weights",
@@ -512,6 +518,12 @@
         "nsp": "Normalized NSP",
         "nsn": "Normalized NSN",
         "scores": "Appraisal score AS"
+      },
+      "sd": {
+        "normalized": "Normalized matrix r (min-max)",
+        "sigma": "Spread σ",
+        "sigmaTotal": "Total spread Σσ",
+        "weights": "Weights w"
       }
     },
     "issues": {
@@ -620,6 +632,11 @@
         "readoutAbove": "{{alternative}}: {{criterion}} adds {{value}} to SP",
         "readoutBelow": "{{alternative}}: {{criterion}} adds {{value}} to SN",
         "readoutAt": "{{alternative}} is at the average on {{criterion}}"
+      },
+      "sd": {
+        "title": "Wider spread, more weight",
+        "spread": "Spread (σ)",
+        "weight": "Weight"
       }
     },
     "flow": {
@@ -660,6 +677,11 @@
         "sp": "SP and SN",
         "nsp": "Normalized",
         "scores": "AS"
+      },
+      "sd": {
+        "normalized": "Normalize",
+        "sigma": "Spread",
+        "weights": "Weights"
       }
     },
     "pipeline": {
@@ -671,7 +693,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR or EDAS and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR or EDAS and see every step of the calculation."
     }
   },
   "methods": {
@@ -689,7 +711,8 @@
       "manual": "Manual weights",
       "saw": "SAW",
       "vikor": "VIKOR",
-      "edas": "EDAS"
+      "edas": "EDAS",
+      "sd": "SD"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -744,7 +767,8 @@
         "equal": "Every criterion gets 1/n.",
         "saw": "Adds up weighted, rescaled values.",
         "vikor": "Balances the best total against the worst regret.",
-        "edas": "Measures the distance above and below the average."
+        "edas": "Measures the distance above and below the average.",
+        "sd": "Weights from how widely the data spread."
       },
       "groups": {
         "weighting": "Weighting",
@@ -856,6 +880,13 @@
         "edas": {
           "title": "Better or worse than the average, criterion by criterion",
           "caption": "Right of the line: weighted distance above the average; left: below it; AS divides each by the largest SP or SN."
+        },
+        "sd": {
+          "title": "Wider spread, more weight",
+          "spread": "Spread (σ)",
+          "weight": "Weight",
+          "caption": "Each dot is one alternative on the 0 to 1 scale; the ruler under the dots is σ.",
+          "weightHead": "Weight = σ / {{total}}"
         }
       }
     }
@@ -919,6 +950,12 @@
       "nsp": "NSP = SP / max SP: 1 for the alternative furthest above the average.",
       "nsn": "NSN = 1 - SN / max SN: 0 for the alternative furthest below the average.",
       "scores": "Appraisal score AS = (NSP + NSN) / 2. A higher value ranks higher."
+    },
+    "sd": {
+      "normalized": "Min-max normalization: each column is rescaled to the range 0 to 1, with cost criteria reversed so that 1 is always the best value.",
+      "sigma": "Spread: the sample standard deviation of each normalized column. Criterion types do not change it.",
+      "sigmaTotal": "Total spread over all criteria.",
+      "weights": "Weights: each criterion's share of the total spread."
     }
   },
   "validation": {
@@ -949,7 +986,8 @@
       "constant-column": "{{criterion}} has the same value for every alternative, so its CRITIC weight is 0.",
       "few-alternatives": "With fewer than 4 alternatives the correlations are unstable. Read the CRITIC weights with care.",
       "no-conflict-equal-weights": "The criteria that vary carry no conflict with each other (only one varies, or they move together), so they share the weight equally.",
-      "all-constant-equal-weights": "Every criterion is constant, so there is no information to weigh. Equal weights are used instead."
+      "all-constant-equal-weights": "Every criterion is constant, so there is no information to weigh. Equal weights are used instead.",
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real."
     },
     "entropy": {
       "constant-column": "{{criterion}} has the same value for every alternative, so its Entropy weight is 0.",
@@ -974,6 +1012,12 @@
       "negative-values": "{{criterion}} has negative values. EDAS measures distance as a share of the average, so the result depends on where zero is.",
       "small-average": "The average of {{criterion}} is close to 0 next to its values, so its distances grow very large and it can decide the ranking even with a small weight.",
       "no-spread": "No alternative is above or below the average on a weighted criterion, so every alternative gets AS = 0.5."
+    },
+    "sd": {
+      "constant-column": "{{criterion}} has the same value for every alternative, so its SD weight is 0.",
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",
+      "two-alternatives": "With 2 alternatives, every criterion that is not constant gets the same SD weight.",
+      "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead."
     }
   }
 }

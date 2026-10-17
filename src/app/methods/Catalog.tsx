@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
-import { critic, type Problem } from '../../core'
+import { critic, sd, type Problem } from '../../core'
 import { allMethods, FAMILY_ORDER, methodsByFamily } from '../../content/methods/catalog'
 import { getExample } from '../../data/examples'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
@@ -13,10 +13,10 @@ import { usePageMeta } from '../landing/usePageMeta'
 import { Guide } from './Guide'
 import { pageContainer } from './shared'
 
-type Available = 'critic' | 'entropy' | 'topsis' | 'saw' | 'vikor' | 'edas' | 'equal'
+type Available = 'critic' | 'entropy' | 'sd' | 'topsis' | 'saw' | 'vikor' | 'edas' | 'equal'
 /** The available methods in two rows, weighting first (the order of the workbench), then ranking. */
 const AVAILABLE: Readonly<Record<'weighting' | 'ranking', readonly Available[]>> = {
-  weighting: ['critic', 'entropy', 'equal'],
+  weighting: ['critic', 'entropy', 'sd', 'equal'],
   ranking: ['topsis', 'saw', 'vikor', 'edas'],
 }
 
@@ -38,6 +38,8 @@ function useThumbs() {
     // Entropy on its reference example: the most even criterion's shares next to the most uneven one's.
     const vilnius = entropyParts(exampleProblem('zavadskas-2017-vilnius'))
     const sharesOf = (j: number) => vilnius?.shares.map((row) => row[j]!) ?? []
+    // SD on its reference example: the weights as bars, the largest in the accent.
+    const sdWeights = sd.compute(exampleProblem('diakoulaki-1995-pharma'), {}).weights
     // SAW on its reference example: each country's score as a stack of contributions, best first.
     const baltic = getExample('podvezko-2011-baltic')!
     const sawP = sawParts(exampleProblem(baltic.id), baltic.weights!)
@@ -50,6 +52,7 @@ function useThumbs() {
       critic: { kind: 'bars' as const, values: weights, highlight: argMax(weights) },
       topsis: { kind: 'plane' as const, points: plane, highlight: proj ? argMax(proj.closeness) : undefined },
       entropy: { kind: 'shares' as const, even: sharesOf(vilnius?.pair[0] ?? 0), uneven: sharesOf(vilnius?.pair[1] ?? 1) },
+      sd: { kind: 'bars' as const, values: sdWeights, highlight: argMax(sdWeights) },
       saw: { kind: 'stack' as const, rows: sawP ? sawP.order.map((i) => sawP.contributions[i]!) : [] },
       vikor: {
         kind: 'compromise' as const,

@@ -112,6 +112,21 @@ Entropy steps of the chosen variant). Table: the shares per alternative, then ro
 Use: `/methods/entropy` "The idea" (Zavadskas et al. 2017 example); workbench Weights stage when the method is
 Entropy (current problem and option).
 
+## SdIdea
+
+One row per criterion, CriticIdea without the conflict column: the min-max values as dots on 0..1 with σ under them as
+a ruler from 0 on the same scale, then `→` and the weight w = σ / Σσ as a bar (relative to the largest, so the bars
+compare like the rulers) with its value; the largest weight in the accent. Static: no motion. Numbers from
+`sdParts(problem)` (the core's SD steps). Table: σ and w per criterion.
+
+| Prop | Type | Notes |
+|---|---|---|
+| `problem` | `Problem` | Renders nothing when SD cannot run. |
+| `format` | `(n) => string` | w and the table (4 decimals). |
+| `labels` | `{ title, caption?, spread, weight, weightHead?, showTable, criterion }` | Translations in `workbench.visual.sd.*` and `methods.page.idea.sd.*`. |
+
+Use: `/methods/sd` "The idea" (Diakoulaki et al. 1995 example); workbench Weights stage when the method is SD.
+
 ## SawContributions
 
 SAW as a picture: one horizontal stacked bar per alternative, in rank order. Each segment is one criterion's
@@ -252,7 +267,7 @@ readable; the width follows the container. Table: alternatives by Borda rank, me
 `topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale
 screen scales, values growing right and up), `distancePoints(proj)`, `closenessAt(p)`,
 `isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `placeLabels(...)`, `ISO_C_DEFAULT`, `linePath(...)`, `pointCss(...)`,
-`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `edasParts(problem, weights)`, `divergingSegments(above, below, center, px)`, `EDAS_FLOW`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `VIKOR_FLOW`, `argMax`, `flowIndex`, `TOPSIS_FLOW`,
+`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sdParts(problem)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `edasParts(problem, weights)`, `divergingSegments(above, below, center, px)`, `EDAS_FLOW`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `VIKOR_FLOW`, `argMax`, `flowIndex`, `TOPSIS_FLOW`,
 `CRITIC_FLOW`, `ENTROPY_FLOW`, `ENTROPY_MINMAX_FLOW`. The
 tests check that A+ / A- and C equal the core and the published values (Opricovic and Tzeng 2004:
 C = 0.762, 0.722, 0.238; Krishnan et al. 2021: σ and weights), that the distance plane places every

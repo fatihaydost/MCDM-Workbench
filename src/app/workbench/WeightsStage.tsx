@@ -4,7 +4,7 @@ import { getWeightingMethod, type ValidationIssue, type WeightingResult } from '
 import type { EntropyNormalization } from '../../core/methods/entropy'
 import { getExample, shortCitation } from '../../data/examples'
 import { BarChart, ChartTableModeProvider } from '../../features/charts'
-import { CriticIdea, EntropyIdea } from '../../features/illustrations'
+import { CriticIdea, EntropyIdea, SdIdea } from '../../features/illustrations'
 import { useNumberFormat } from '../../i18n'
 import {
   computeWeights,
@@ -22,7 +22,7 @@ import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
 import { criterionName, DECIMALS, findStep, ids, placeIssue, sumDecimals, tr, weightMethodLabel } from './shared'
 
-const METHODS: readonly WeightMethodId[] = ['critic', 'entropy', 'equal', 'manual']
+const METHODS: readonly WeightMethodId[] = ['critic', 'entropy', 'sd', 'equal', 'manual']
 
 /** A weighting method that the core computes (everything but manual). */
 type ComputedMethod = Exclude<WeightMethodId, 'manual'>
@@ -39,6 +39,7 @@ const EXTRA_COLUMNS: Partial<Record<ComputedMethod, readonly { step: string; lab
     { step: 'entropy.entropy', label: 'workbench.weights.columns.entropy' },
     { step: 'entropy.diversification', label: 'workbench.weights.columns.diversification' },
   ],
+  sd: [{ step: 'sd.sigma', label: 'workbench.weights.columns.spread' }],
 }
 
 export function WeightsStage() {
@@ -85,7 +86,8 @@ export function WeightsStage() {
           onValueChange={setWeightMethod}
           options={METHODS.map((m) => ({ value: m, label: weightMethodLabel(m, t) }))}
           size="md"
-          className="self-start"
+          // Five methods: below sm the segments tighten so the control fits 390 px without a sideways scroll.
+          className="self-start max-sm:[&>*]:px-2.5 max-sm:[&>*]:text-13"
         />
         <span id={ids.weightMethod} tabIndex={-1} className="sr-only">
           {t('workbench.weightMethod.label')}
@@ -156,6 +158,22 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
               share: t('workbench.visual.entropy.share'),
               showTable: t('workbench.chart.showTable'),
               alternative: t('workbench.alternative'),
+            }}
+            className="max-w-[760px]"
+          />
+        </ChartTableModeProvider>
+      )}
+      {method === 'sd' && (
+        <ChartTableModeProvider value="screen-reader">
+          <SdIdea
+            problem={toProblem(problem)}
+            format={format}
+            labels={{
+              title: t('workbench.visual.sd.title'),
+              spread: t('workbench.visual.sd.spread'),
+              weight: t('workbench.visual.sd.weight'),
+              showTable: t('workbench.chart.showTable'),
+              criterion: t('workbench.criterion'),
             }}
             className="max-w-[760px]"
           />

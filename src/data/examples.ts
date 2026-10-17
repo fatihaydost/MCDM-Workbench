@@ -145,6 +145,41 @@ export const examples: readonly ExampleDataset[] = [
     published: [{ label: 'entropy.weights', values: [0.0308, 0.2196, 0.1879, 0.2648, 0.297], decimals: 4 }],
   },
   {
+    id: 'diakoulaki-1995-pharma',
+    name: { en: 'Greek pharmaceutical firms (Diakoulaki et al. 1995)', tr: 'Yunan ilaç firmaları (Diakoulaki vd. 1995)' },
+    summary: {
+      en: 'Eight firms on three criteria, with negative profitability values. The paper that introduced CRITIC computes SD weights on the same data as its baseline.',
+      tr: 'Sekiz firma, üç kriter; kârlılıkta negatif değerler var. CRITIC yöntemini tanıtan makale, aynı veride karşılaştırma tabanı olarak SD ağırlıklarını hesaplar.',
+    },
+    referenceFor: ['sd'],
+    citation: {
+      authors: 'Diakoulaki, D.; Mavrotas, G.; Papayannakis, L.',
+      year: 1995,
+      title: 'Determining objective weights in multiple criteria problems: The CRITIC method',
+      venue: 'Computers & Operations Research 22(7), 763-770',
+      doi: '10.1016/0305-0548(94)00059-H',
+      tables: { en: 'Table 1 (input), Table 3 (output, row SD)', tr: 'Tablo 1 (girdi), Tablo 3 (çıktı, SD satırı)' },
+    },
+    alternatives: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
+    criteria: [
+      { name: { en: 'Profitability (%)', tr: 'Kârlılık (%)' }, type: 'benefit' },
+      { name: { en: 'Market share (%)', tr: 'Pazar payı (%)' }, type: 'benefit' },
+      { name: { en: 'Productivity (million $)', tr: 'Verimlilik (milyon $)' }, type: 'benefit' },
+    ],
+    matrix: [
+      [61.0, 1.08, 4.33],
+      [20.7, 0.26, 4.34],
+      [16.3, 1.98, 2.53],
+      [9.0, 3.29, 1.65],
+      [5.4, 2.77, 2.33],
+      [4.0, 4.12, 1.21],
+      [-6.1, 3.52, 2.1],
+      [-34.6, 3.31, 0.98],
+    ],
+    // Sec. 5 also prints σ = 0.263, 0.321, 0.358, the population SD; the workbench shows the sample SD (n - 1).
+    published: [{ label: 'sd.weights', values: [0.279, 0.341, 0.38], decimals: 3 }],
+  },
+  {
     id: 'opricovic-tzeng-2004-f',
     name: { en: 'Mountain climbing (Opricovic and Tzeng 2004)', tr: 'Dağ tırmanışı (Opricovic ve Tzeng 2004)' },
     summary: {

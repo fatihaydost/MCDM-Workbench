@@ -18,6 +18,7 @@ import zavadskas from './fixtures/entropy-zavadskas2017.json'
 import f from './fixtures/opricovic-tzeng-2004-f.json'
 import phi from './fixtures/opricovic-tzeng-2004-phi.json'
 import podvezko from './fixtures/saw-podvezko2011.json'
+import diak from './fixtures/sd-diakoulaki1995.json'
 import vikorKG from './fixtures/vikor-keshavarz2015.json'
 import vikorOT from './fixtures/vikor-opricovic-tzeng2004.json'
 
@@ -42,6 +43,13 @@ describe('examples match the published fixtures', () => {
     expect(ex.alternatives).toEqual(zavadskas.alternatives)
     expect(ex.criteria.map((c) => c.type)).toEqual(zavadskas.types)
     expect(ex.published).toEqual([{ label: 'entropy.weights', values: zavadskas.expected.weights, decimals: 4 }])
+  })
+  it('Diakoulaki et al. 1995', () => {
+    const ex = getExample('diakoulaki-1995-pharma')!
+    expect(ex.matrix).toEqual(diak.matrix)
+    expect(ex.alternatives).toEqual(diak.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(diak.types)
+    expect(ex.published).toEqual([{ label: 'sd.weights', values: diak.published.weights, decimals: 3 }])
   })
   for (const [id, fx] of [['opricovic-tzeng-2004-f', f], ['opricovic-tzeng-2004-phi', phi]] as const) {
     it(id, () => {
@@ -136,6 +144,11 @@ describe('derived results', () => {
       methodParams: { entropy: { normalization: 'minmax' } },
     })
     expectClose(k.value!.weights, entropyK.expected.weights, entropyK.expected.tolerance)
+  })
+
+  it('SD weights reproduce Diakoulaki et al. 1995 through the store', () => {
+    const w = computeWeights({ problem: draftOf('diakoulaki-1995-pharma'), weightMethod: 'sd', manualWeights: [] })
+    expectClose(w.value!.weights, diak.published.weights, diak.expected.tolerance)
   })
 
   it('ignores a saved option the method does not declare', () => {

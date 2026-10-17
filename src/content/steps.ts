@@ -3,7 +3,7 @@ import type { Bilingual } from './types'
 /**
  * One-line explanation and formula for every intermediate step the core returns
  * (Step.key in src/core/methods/*.ts). Formulas follow the code, including its edge cases:
- * src/core/methods/critic.ts, entropy.ts, topsis.ts, saw.ts, vikor.ts and edas.ts.
+ * src/core/methods/critic.ts, entropy.ts, sd.ts, topsis.ts, saw.ts, vikor.ts and edas.ts.
  * Notation: i = alternative (1..m), j, k = criterion (1..n), J+ benefit and J- cost criteria.
  */
 export type StepContent = Bilingual & {
@@ -26,6 +26,10 @@ export type StepKey =
   | 'entropy.entropy'
   | 'entropy.diversification'
   | 'entropy.weights'
+  | 'sd.normalized'
+  | 'sd.sigma'
+  | 'sd.sigmaTotal'
+  | 'sd.weights'
   | 'topsis.normalized'
   | 'topsis.weighted'
   | 'topsis.idealBest'
@@ -152,6 +156,38 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
     en: "Entropy weights: each criterion's share of the total diversification.",
     tr: 'Entropi ağırlıkları: her kriterin toplam çeşitlenme içindeki payı.',
     tex: String.raw`w_j = \frac{d_j}{\sum_{k=1}^{n} d_k}`,
+    edgeCase: {
+      en: 'If the total is 0 (every column constant), every weight is 1/n.',
+      tr: 'Toplam 0 ise (bütün sütunlar sabit) her ağırlık 1/n olur.',
+    },
+  },
+  'sd.normalized': {
+    en: 'Min-max normalized matrix: each column scaled to 0-1, 1 is best (cost reversed).',
+    tr: 'Min-maks normalize matris: her sütun 0-1 aralığına iner, 1 en iyidir (maliyet ters).',
+    tex: String.raw`r_{ij} = \begin{cases} \dfrac{x_{ij} - \min_i x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{+} \\[2ex] \dfrac{\max_i x_{ij} - x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{-} \end{cases}`,
+    edgeCase: {
+      en: 'A constant column (max = min) is set to 0 in every row.',
+      tr: 'Sabit bir sütun (maks = min) her satırda 0 alınır.',
+    },
+  },
+  'sd.sigma': {
+    en: 'Spread of each criterion: sample standard deviation of its normalized column.',
+    tr: 'Her kriterin yayılımı: normalize sütununun örneklem standart sapması.',
+    tex: String.raw`\sigma_j = \sqrt{\frac{1}{m-1}\sum_{i=1}^{m} \left(r_{ij} - \bar r_j\right)^2}, \qquad \bar r_j = \frac{1}{m}\sum_{i=1}^{m} r_{ij}`,
+    edgeCase: {
+      en: 'Diakoulaki et al. (1995) print the population value (1/m); the weights are the same.',
+      tr: 'Diakoulaki vd. (1995) anakütle değerini (1/m) basar; ağırlıklar aynıdır.',
+    },
+  },
+  'sd.sigmaTotal': {
+    en: 'Total spread over all criteria, the denominator of the weights.',
+    tr: 'Tüm kriterlerin toplam yayılımı: ağırlıkların paydası.',
+    tex: String.raw`\sum_{k=1}^{n} \sigma_k`,
+  },
+  'sd.weights': {
+    en: "SD weights: each criterion's share of the total spread.",
+    tr: 'SD ağırlıkları: her kriterin toplam yayılım içindeki payı.',
+    tex: String.raw`w_j = \frac{\sigma_j}{\sum_{k=1}^{n} \sigma_k}`,
     edgeCase: {
       en: 'If the total is 0 (every column constant), every weight is 1/n.',
       tr: 'Toplam 0 ise (bütün sütunlar sabit) her ağırlık 1/n olur.',

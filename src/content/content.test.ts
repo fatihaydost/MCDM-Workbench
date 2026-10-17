@@ -7,6 +7,7 @@ import { critic as criticCore } from '../core/methods/critic'
 import { edas as edasCore } from '../core/methods/edas'
 import { entropy as entropyCore } from '../core/methods/entropy'
 import { saw as sawCore } from '../core/methods/saw'
+import { sd as sdCore } from '../core/methods/sd'
 import { vikor as vikorCore } from '../core/methods/vikor'
 import { topsis as topsisCore } from '../core/methods/topsis'
 import { listMethods } from '../core/registry'
@@ -112,7 +113,7 @@ describe('method content', () => {
     const available = allMethods.filter((m) => m.status === 'available').map((m) => m.id).sort()
     const registry = listMethods().map((m) => m.id).sort()
     expect(available).toEqual(registry)
-    expect(available).toEqual(['critic', 'edas', 'entropy', 'equal', 'saw', 'topsis', 'vikor'])
+    expect(available).toEqual(['critic', 'edas', 'entropy', 'equal', 'saw', 'sd', 'topsis', 'vikor'])
   })
 
   it('gives each registry method the matching kind of family', () => {
@@ -199,6 +200,7 @@ describe('step content', () => {
       ...criticCore.compute(problem, {}).steps.map((s) => s.key),
       ...entropyCore.compute(problem, {}).steps.map((s) => s.key),
       ...entropyCore.compute(problem, { normalization: 'minmax' }).steps.map((s) => s.key),
+      ...sdCore.compute(problem, {}).steps.map((s) => s.key),
       ...topsisCore.compute(problem, [0.4, 0.3, 0.3], {}).steps.map((s) => s.key),
       ...sawCore.compute(problem, [0.4, 0.3, 0.3], {}).steps.map((s) => s.key),
       ...sawCore.compute(problem, [0.4, 0.3, 0.3], { normalization: 'sum' }).steps.map((s) => s.key),

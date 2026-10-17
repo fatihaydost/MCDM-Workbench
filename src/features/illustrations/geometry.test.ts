@@ -14,6 +14,8 @@ import {
   criticParts,
   defaultAxes,
   ENTROPY_FLOW,
+  SD_FLOW,
+  sdParts,
   ENTROPY_MINMAX_FLOW,
   entropyParts,
   distancePoints,
@@ -299,6 +301,21 @@ describe('entropyParts', () => {
       expect(flow.flatMap((n) => n.stepKeys)).toEqual(keys)
       expect(flowIndex(flow, 'entropy.weights')).toBe(flow.length - 1)
     }
+  })
+})
+
+describe('sdParts', () => {
+  const ex = getExample('diakoulaki-1995-pharma')!
+  const problem: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+
+  it('carries the core steps, and its step map covers every emitted step', () => {
+    const parts = sdParts(problem)!
+    expect(parts.weights).toEqual(parts.result.weights)
+    expect(parts.normalized).toHaveLength(8)
+    expect(SD_FLOW.flatMap((n) => n.stepKeys)).toEqual(parts.result.steps.map((s) => s.key))
+  })
+  it('is null when SD cannot run', () => {
+    expect(sdParts({ ...problem, matrix: [[1, 2, 3]] })).toBeNull()
   })
 })
 

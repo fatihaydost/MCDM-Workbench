@@ -5,7 +5,7 @@
   </picture>
 </h1>
 
-A browser tool for multi-criteria decision analysis: weight criteria with CRITIC or Entropy, rank alternatives with TOPSIS, SAW, VIKOR or EDAS and read every intermediate step, in English or Turkish.
+A browser tool for multi-criteria decision analysis: weight criteria with CRITIC, Entropy or SD, rank alternatives with TOPSIS, SAW, VIKOR or EDAS and read every intermediate step, in English or Turkish.
 
 **Live demo:** https://fatihaydost.github.io/kds-topsis-critic/
 
@@ -14,7 +14,7 @@ A browser tool for multi-criteria decision analysis: weight criteria with CRITIC
 ## What it does
 
 - Enter a decision matrix in a spreadsheet-like grid, paste it from Excel or import `.xlsx` / `.csv`, and mark each criterion as benefit or cost.
-- Weights from CRITIC, Entropy (raw-data shares or min-max), equal weights or your own; ranking by TOPSIS (closeness C), SAW (weighted sum S, linear max or sum normalization, with each score drawn as its criteria's contributions) or VIKOR (compromise index Q with a v slider, group utility S against the largest regret R, the acceptable advantage and stability conditions and the compromise set) or EDAS (appraisal score AS from the weighted distance above and below the average solution, drawn as one diverging bar per alternative).
+- Weights from CRITIC, Entropy (raw-data shares or min-max), SD (standard deviation of the min-max columns), equal weights or your own; ranking by TOPSIS (closeness C), SAW (weighted sum S, linear max or sum normalization, with each score drawn as its criteria's contributions) or VIKOR (compromise index Q with a v slider, group utility S against the largest regret R, the acceptable advantage and stability conditions and the compromise set) or EDAS (appraisal score AS from the weighted distance above and below the average solution, drawn as one diverging bar per alternative).
 - Shows the worked calculation step by step, with formulas and labelled matrices; copy any step as TSV or LaTeX, or download the whole calculation as `.xlsx`.
 - Runs entirely in the browser: no sign-up, no server, nothing uploaded.
 
@@ -28,6 +28,7 @@ The test suite recomputes published examples and compares every printed digit:
 |---|---|---|---|
 | CRITIC | Krishnan et al. (2021), Symmetry 13(6):973, Tables 1, 2 and 5 | standard deviations and weights | ±0.00005 |
 | Entropy | Zavadskas et al. (2017), Sustainability 9(5):702, Tables 4 and 8 (the paper prints the weights on permuted rows); min-max option: Krishnan et al. (2021), Tables 1, 2 and 5 | weights (min-max: also the normalized matrix) | ±0.0001 (min-max ±0.00005) |
+| SD | Diakoulaki et al. (1995), Computers & OR 22(7):763, Table 1, Section 5 and Table 3 (the printed σ is the population SD); Mukhametzyanov (2021), DMAME 4(2):76, Tables 1, 2 and 4, four matrices with cost criteria | weights and standard deviations | ±0.0005 |
 | TOPSIS | Opricovic and Tzeng (2004), EJOR 156(2):445, Table 3, two unit variants | D+, D−, closeness and ranks | ±0.0005 |
 | SAW | Podvezko (2011), Engineering Economics 22(2):134, Tables 1-3 (linear max; Table 2 misprints one Lithuania value, Table 3 follows the misprint) and 5-6 (sum); ranks of Keshavarz Ghorabaee et al. (2015) Table 7, Zavadskas et al. (2012) Table 2 and Vujičić et al. (2017) Tables 8a-8b | normalized matrices, scores and ranks | ±0.0005 |
 | VIKOR | Opricovic and Tzeng (2004), EJOR 156(2):445, Table 3, two unit variants; ranks of Keshavarz Ghorabaee et al. (2015) Table 7, all seven weight sets (v = 0.5) | S, R, Q, ranks, C1, C2 and the compromise | ±0.0005 |
@@ -37,7 +38,7 @@ CRITIC is also checked against the hand-solved spreadsheet from the original cou
 
 ## Methods
 
-7 methods compute today (CRITIC, Entropy, equal weights, TOPSIS, SAW, VIKOR, EDAS) and 19 more are researched and documented, each with its own page: [methods catalogue](https://fatihaydost.github.io/kds-topsis-critic/methods).
+8 methods compute today (CRITIC, Entropy, SD, equal weights, TOPSIS, SAW, VIKOR, EDAS) and 18 more are researched and documented, each with its own page: [methods catalogue](https://fatihaydost.github.io/kds-topsis-critic/methods).
 
 ![TOPSIS method page: an interactive distance diagram, when to use it and the algorithm](docs/screenshots/method-topsis.png)
 

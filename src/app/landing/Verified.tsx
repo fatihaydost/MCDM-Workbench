@@ -9,10 +9,11 @@ import edasKG from '../../../tests/fixtures/edas-keshavarz2015.json'
 import zavadskas from '../../../tests/fixtures/entropy-zavadskas2017.json'
 import opricovicF from '../../../tests/fixtures/opricovic-tzeng-2004-f.json'
 import podvezko from '../../../tests/fixtures/saw-podvezko2011.json'
+import diakoulaki from '../../../tests/fixtures/sd-diakoulaki1995.json'
 import vikorOT from '../../../tests/fixtures/vikor-opricovic-tzeng2004.json'
 import { textLink } from './usePageMeta'
 
-type Row = { method: 'critic' | 'entropy' | 'topsis' | 'saw' | 'vikor' | 'edas'; citation: Citation; tolerance: number }
+type Row = { method: 'critic' | 'entropy' | 'sd' | 'topsis' | 'saw' | 'vikor' | 'edas'; citation: Citation; tolerance: number }
 
 /** ±0.00005 in the active locale, with as many decimals as the tolerance needs. */
 function formatTolerance(tol: number, lang: Lang): string {
@@ -40,6 +41,7 @@ export function Verified() {
   const rows: Row[] = [
     { method: 'critic', citation: getExample('krishnan-2021-smartphones')!.citation, tolerance: krishnan.expected.tolerance },
     { method: 'entropy', citation: getExample('zavadskas-2017-vilnius')!.citation, tolerance: zavadskas.expected.tolerance },
+    { method: 'sd', citation: getExample('diakoulaki-1995-pharma')!.citation, tolerance: diakoulaki.expected.tolerance },
     { method: 'topsis', citation: getExample('opricovic-tzeng-2004-f')!.citation, tolerance: opricovicF.expected.tolerance },
     { method: 'saw', citation: getExample('podvezko-2011-baltic')!.citation, tolerance: podvezko.expected.tolerance },
     { method: 'vikor', citation: getExample('opricovic-tzeng-2004-f')!.citation, tolerance: vikorOT.expected.tolerance },

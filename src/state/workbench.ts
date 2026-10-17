@@ -27,7 +27,7 @@ import type { Lang } from '../i18n/lang'
 export const STAGES = ['data', 'weights', 'ranking', 'results', 'robustness', 'compare'] as const
 export type Stage = (typeof STAGES)[number]
 
-export type WeightMethodId = 'critic' | 'entropy' | 'equal' | 'manual'
+export type WeightMethodId = 'critic' | 'entropy' | 'sd' | 'equal' | 'manual'
 export type RankingMethodId = 'topsis' | 'saw' | 'vikor' | 'edas'
 
 /**
