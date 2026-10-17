@@ -35,6 +35,8 @@ a typo, keep both the printed and the corrected values (card rule) and test agai
   - Emit one `Step` per intermediate result with a stable key `<id>.<camelCase>` (`critic.ts:72-80`). Use `matrix`
     (m x n or n x n), `vector` (length m or n) or `scalar`. Every key you emit drives §2 and §3.
   - Header comment: variant chosen, source, `See docs/research/methods/<id>.md`.
+  - Min-max with cost inversion: reuse `minMaxNormalize(problem)` (`src/core/math.ts`, used by CRITIC, SD and
+    Entropy min-max); it also flags near-constant columns (`isNearConstant`) for a `<id>.near-constant-column` warning.
 - [ ] **Registry** `src/core/registry.ts:6-7`: add to `weighting` or `ranking`. [S] without it the workbench computes
   nothing (`computeWeights` / `computeRanking` look methods up by id, `src/state/workbench.ts:312,328`) and the
   robustness worker answers "unknown ranking method" (`robustness.worker.ts:31`).

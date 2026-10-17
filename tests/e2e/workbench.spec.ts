@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { critic, edas, entropy, saw, topsis, vikor, vikorCompromise, type CriterionType } from '../../src/core'
+import { critic, edas, entropy, saw, sd, topsis, vikor, vikorCompromise, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -203,14 +203,16 @@ test('the whole flow works with the keyboard alone', async ({ page }) => {
   // item. Each arrow therefore waits for the focus it produces, as a person would see it move.
   const arrow = async (key: 'ArrowRight' | 'ArrowLeft', to: string) => {
     await page.keyboard.press(key)
-    await expect(page.getByRole('radio', { name: to })).toBeFocused()
+    await expect(page.getByRole('radio', { name: to, exact: true })).toBeFocused()
   }
   await arrow('ArrowRight', 'Entropy')
+  await arrow('ArrowRight', 'SD')
   await arrow('ArrowRight', 'Equal weights')
   await arrow('ArrowRight', 'Manual')
   await page.keyboard.press('Space')
   await expect(page.getByRole('radio', { name: 'Manual' })).toHaveAttribute('aria-checked', 'true')
   await arrow('ArrowLeft', 'Equal weights')
+  await arrow('ArrowLeft', 'SD')
   await arrow('ArrowLeft', 'Entropy')
   await arrow('ArrowLeft', 'CRITIC')
   await page.keyboard.press('Space')
@@ -295,6 +297,25 @@ test('Entropy: the Vilnius example gives the published weights; min-max, a negat
   await expect(weightCells).toHaveCount(5)
 })
 
+test('SD: the Diakoulaki example gives the published weights, the picture and the calculation', async ({ page }) => {
+  const d = fixture('sd-diakoulaki1995') as { matrix: number[][]; types: CriterionType[]; published: { weights: number[] } }
+  await page.goto('/app?example=diakoulaki-1995-pharma&stage=weights')
+  await expect(stageHeading(page, 'Weights')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'SD', exact: true })).toHaveAttribute('aria-checked', 'true')
+  const weightCells = page.getByRole('table', { name: 'Weights by criterion' }).locator('tbody tr td:last-child')
+  // The core's weights at 4 decimals, which round to the paper's 3.
+  const p = { alternatives: d.matrix.map((_, i) => `A${i}`), criteria: d.types.map((type, j) => ({ name: `C${j}`, type })), matrix: d.matrix }
+  const core = sd.compute(p, {}).weights
+  await expect(weightCells).toHaveText(core.map(f4))
+  expect(core.map((w) => w.toFixed(3))).toEqual(d.published.weights.map((w) => w.toFixed(3)))
+  await expect(page.locator('figure', { hasText: 'Wider spread, more weight' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Show the calculation' }).click()
+  const steps = page.locator('section[data-step]')
+  await expect(steps).toHaveCount(4)
+  expect(await steps.evaluateAll((els) => els.map((e) => e.getAttribute('data-step')))).toEqual(['sd.normalized', 'sd.sigma', 'sd.sigmaTotal', 'sd.weights'])
+  await expect(page.getByRole('navigation', { name: 'Calculation steps' })).toContainText('Spread')
+})
 
 test('SAW: the Podvezko example ranks with SAW, sum changes the scores, the contributions add up to S, TOPSIS brings back D+ and D−', async ({ page }) => {
   const ex = getExample('podvezko-2011-baltic')!
