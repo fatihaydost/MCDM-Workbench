@@ -9,6 +9,7 @@ import { useWorkbenchNav } from '../nav'
 import { BlockedByIssues } from '../parts'
 import { alternativeName, findStep, placeIssue, tr } from '../shared'
 import { useCompareText } from './text'
+import { WhyPanel } from './WhyPanel'
 
 /**
  * Compare: every ranking method on the same data and weights, each with its own saved options. Read only: nothing
@@ -61,11 +62,11 @@ export default function CompareStage() {
     )
   }
 
-  return <CompareReady comparison={comparison} />
+  return <CompareReady comparison={comparison} weights={w!} />
 }
 
-/** The chart and its summary line; Task 5 adds the "why" panel for the selected pair. */
-function CompareReady({ comparison }: { comparison: Comparison }) {
+/** The chart, its summary line and the "why" panel for the selected pair. */
+function CompareReady({ comparison, weights }: { comparison: Comparison; weights: number[] }) {
   const { t } = useTranslation()
   const { t: tc } = useCompareText()
   const draft = useWorkbench((s) => s.problem)
@@ -116,6 +117,7 @@ function CompareReady({ comparison }: { comparison: Comparison }) {
         {firstPlace && <span>{tc('summary.first', { n: firstPlace.methods, of: firstPlace.of })}</span>}
         {ranked.length < runs.length && <span>{tc('summary.ranked', { n: ranked.length, of: runs.length })}</span>}
       </p>
+      {selected && <WhyPanel comparison={comparison} weights={weights} pair={selected} names={names} />}
     </div>
   )
 }
