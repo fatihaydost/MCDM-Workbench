@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { copras, entropy, ProblemValidationError, saw, type CriterionType } from '../src/core'
+import { sweepWeight } from '../src/core/robustness'
 import ozcan from './fixtures/copras-ozcan-celik2021.json'
 import podvezko from './fixtures/copras-podvezko2011.json'
 import zavadskas from './fixtures/copras-zavadskas2007.json'
-import { expectClose, makeProblem, step } from './helpers'
+import { expectClose, makeProblem, rankerOf, step } from './helpers'
 
 const sumOf = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0)
 const vec = (steps: Parameters<typeof step>[0], key: string) => step(steps, key).vector!
@@ -87,7 +88,7 @@ describe('COPRAS: Podvezko 2011 (Engineering Economics 22(2):134, Tables 7-8)', 
     expectClose(vec(res.steps, 'copras.utility'), podvezko.expected.N_percent, 1e-4)
     expect(res.ranking).toEqual(podvezko.published.ranking)
   })
-  it('two small cost changes (R4: A1 105 -> 110, A2 215 -> 200) turn ranks 1-3-2 into 3-2-1 (the instability Podvezko shows)', () => {
+  it('Variant I (R4: A1 105, A2 215; our recomputed Q, the printed Variant I row repeats Variant II) ranks 1-3-2; the two cost changes to Variant II turn it into 3-2-1', () => {
     const v1 = copras.compute(makeProblem(podvezko.variant1.matrix, podvezko.types as CriterionType[]), podvezko.weights, {})
     expectClose(v1.scores, podvezko.variant1.expected.Q, 1e-6)
     expect(v1.ranking).toEqual(podvezko.variant1.expected.ranking)
@@ -198,6 +199,20 @@ describe('COPRAS properties', () => {
     const after = copras.compute(makeProblem([[1, 1, 1], [4, 6, 1], [6, 4, 1]], ['benefit', 'cost', 'cost']), [0.25, 0.25, 0.5], {})
     expectClose(after.scores, [0.3405, 0.2895, 0.37], 5e-5)
     expect(after.ranking).toEqual([2, 3, 1])
+  })
+  it('only cost criteria: S+ = 0, Q is the cost weight shared by 1 / S-, no notice', () => {
+    const p = makeProblem(podvezko.matrix, ['cost', 'cost', 'cost', 'cost'])
+    const res = copras.compute(p, podvezko.weights, {})
+    const sm = vec(res.steps, 'copras.sMinus')
+    expect(vec(res.steps, 'copras.sPlus').every((x) => x === 0)).toBe(true)
+    const inv = sm.map((x) => 1 / x)
+    expectClose(res.scores, inv.map((x) => x / sumOf(inv)), 1e-15)
+    expect(sumOf(res.scores)).toBeCloseTo(1, 12)
+    expect(res.warnings).toEqual([])
+  })
+  it('runs in the robustness sweep (Özcan and Çelik, weight of price from 0 to 1): finite scores everywhere', () => {
+    const sw = sweepWeight(f6, f6Weights, rankerOf(copras), 5, { steps: 20 })
+    expect(sw.points.every((pt) => pt.scores.every(Number.isFinite))).toBe(true)
   })
   it('ties share a rank', () => {
     const res = copras.compute(makeProblem([[2, 3], [2, 3], [1, 4]], ['benefit', 'cost']), [0.5, 0.5], {})

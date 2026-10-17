@@ -715,7 +715,7 @@
       },
       "copras": {
         "title": "Fayda payı artı maliyet puanı",
-        "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır; maliyet payı S- küçüldükçe puan büyür. Çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir.",
+        "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır, maliyet payı S- küçüldükçe puan büyür; çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir.",
         "legend": "Q'nun parçaları",
         "benefit": "Fayda payı S+",
         "bonus": "Maliyet puanı",
@@ -1012,7 +1012,7 @@
         },
         "copras": {
           "title": "Fayda payı artı düşük maliyet puanı",
-          "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır; maliyet payı S- küçüldükçe puan büyür. Çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir."
+          "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır, maliyet payı S- küçüldükçe puan büyür; çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir."
         }
       }
     }
@@ -1102,8 +1102,8 @@
       "normalizedSum": "Paylar r: her değer sütun toplamına bölünür; fayda ve maliyet kriterinde aynı.",
       "weighted": "Ağırlıklı paylar d = w r: her sütunun toplamı artık kriter ağırlığına eşit.",
       "sPlus": "Fayda toplamı S+: fayda kriterlerinin ağırlıklı payları toplanır.",
-      "sMinus": "Maliyet toplamı S-: maliyet kriterlerinin ağırlıklı payları toplanır. S- küçüldükçe iyidir.",
-      "significance": "Göreli önem Q = S+ artı 1 / S- oranında paylaştırılan maliyet ağırlığı. Değer büyüdükçe sıra yükselir; Q değerlerinin toplamı 1 eder.",
+      "sMinus": "Maliyet toplamı S-: maliyet kriterlerinin ağırlıklı payları toplanır; S- küçüldükçe iyidir.",
+      "significance": "Göreli önem Q = S+ artı maliyet ağırlığı, 1 / S- ile orantılı olarak paylaştırılır; değer büyüdükçe sıra yükselir ve Q değerlerinin toplamı 1 eder.",
       "utility": "Fayda derecesi N: Q, en büyük Q'nun yüzdesi olarak; en iyi alternatif 100 alır."
     }
   },

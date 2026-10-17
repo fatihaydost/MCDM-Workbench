@@ -658,10 +658,10 @@ test('COPRAS: the method page opens the cream separators with Entropy and COPRAS
   await expect(page.getByTestId('best-sentence')).toHaveText(`A4 ranks first (Q = ${f4(res.scores[3]!)}).`)
   // The picture replaces the score chart: one two-part bar per alternative in rank order, N at the end.
   await expect(page.getByTestId('copras-bar')).toHaveCount(7)
-  await expect(page.getByTestId('copras-utility').first()).toHaveText('100.00 %')
+  await expect(page.getByTestId('copras-utility').first()).toHaveText('100.00%')
   await page.locator('[data-testid="copras-segment"][tabindex="0"]').focus()
   await page.keyboard.press('ArrowRight')
-  expect(await focusedLabel(page)).toMatch(/^A4, Cost bonus: 0\.\d{4} \(Q = 0\.1702, N = 100\.00 %\)/)
+  expect(await focusedLabel(page)).toMatch(/^A4, Cost bonus: 0\.\d{4} \(Q = 0\.1702, N = 100\.00%\)/)
 
   // A zero in a benefit column: Entropy still weighs, COPRAS blocks with the message at the cell.
   await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Data' }).click()

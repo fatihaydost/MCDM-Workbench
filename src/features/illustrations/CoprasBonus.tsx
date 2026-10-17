@@ -65,7 +65,7 @@ const GAP = 8
 const VALUE_GAP = 6
 const ZERO_WIDTH = 0.01
 const defaultFormat = (v: number) => v.toFixed(4)
-const defaultPercent = (v: number) => `${v.toFixed(2)} %`
+const defaultPercent = (v: number) => `${v.toFixed(2)}%`
 
 /** Benefit share in --data-cat-1 (blue), cost bonus in --data-cat-5 (ochre): apart for every colour-vision type, and not red. */
 const PART_COLOURS = ['1', '5'] as const

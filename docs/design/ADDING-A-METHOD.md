@@ -275,7 +275,7 @@ variant label is `workbench.params.<id>.<key>Variant` with `{{value}}` ("VIKOR (
 The core supports it (`rankScores`, robustness sorts by the method's own ranking), and so does the Ranking stage since
 SAW: the score chart sorts by `result.order`, the table is in rank order, the score's words come from
 `workbench.ranking.score.<id>` and the best sentences read "ranks first (Q = ...)", which holds for either order.
-The robustness sweep's y axis stays inside [0, 1] only while the scores do (COPRAS's or a negative score widens it),
+The robustness sweep's y axis stays inside [0, 1] only while the scores do (a negative score or one above 1 widens it; COPRAS's Q stays inside, since ΣQ = 1),
 and the highlighted bar of the score chart keeps a 2 px mark at 0, so a best Q = 0 is visible.
 VIKOR (2026-10-13) settled it: S and R are steps and the extra `columns` (`workbench.ranking.columns.groupUtility`,
 `.individualRegret`), Q is the score ("Compromise Q", not SAW's "Score S"). C1, C2 and the compromise set are not part of

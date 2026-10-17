@@ -92,8 +92,8 @@ export function layoutSweep({ width, labelled, plotHeight = 240, xs, series, ext
   const all = [...series.flat(), ...extra]
   const e = extent(all) ?? [0, 1]
   const pad = Math.max((e[1] - e[0]) * 0.06, 0.01)
-  // Scores in [0, 1] (closeness, SAW, VIKOR Q) keep the axis inside [0, 1]; a method whose scores leave it (COPRAS,
-  // a score below 0) gets the axis its data need, so no line is cut off.
+  // Scores in [0, 1] (closeness, SAW, VIKOR Q, COPRAS Q, which add up to 1) keep the axis inside [0, 1]; a method whose
+  // scores leave it (a score below 0 or above 1) gets the axis its data need, so no line is cut off.
   const lo = e[0] >= 0 ? Math.max(0, e[0] - pad) : e[0] - pad
   const hi = e[1] <= 1 ? Math.min(1, e[1] + pad) : e[1] + pad
   const yDomain: Domain = niceDomain(lo, hi, 4)
