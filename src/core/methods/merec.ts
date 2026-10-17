@@ -1,0 +1,101 @@
+import { column, isConstant, maxOf, minOf, zeros } from '../math'
+import type { MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
+import { assertValid, validateProblem, type ValidationIssue } from '../validate'
+
+/** A weight above this share gets a notice: one criterion decides most of the result (as Entropy). */
+export const MEREC_DOMINANT_WEIGHT = 0.5
+
+/**
+ * MEREC weighting (Keshavarz-Ghorabaee, Amiri, Zavadskas, Turskis & Antucheviciene 2021, Symmetry 13:525, Sec. 3,
+ * Eqs. 1-6), origin form only, no parameters:
+ * n_ij = min_k x_kj / x_ij (benefit) or x_ij / max_k x_kj (cost), so the best value gets the smallest n;
+ * S_i = ln(1 + (1/n) Σ_j |ln n_ij|), S'_ij = the same sum without criterion j and the divisor still n (criteria);
+ * E_j = Σ_i |S'_ij - S_i|, w_j = E_j / Σ E. Every x must be above 0 (blocking 'non-positive-value', no shift).
+ * A constant column (isConstant) gets |ln n| = 0 exactly, so E = 0 and weight 0; with every column constant the
+ * weights fall back to 1/n. See docs/research/methods/merec.md.
+ */
+export const merec: WeightingMethod = {
+  id: 'merec',
+  kind: 'weighting',
+  compute(problem: Problem): WeightingResult {
+    const own: ValidationIssue[] = []
+    problem.matrix.forEach((row, i) => {
+      if (!Array.isArray(row)) return
+      row.forEach((v, j) => {
+        if (typeof v === 'number' && Number.isFinite(v) && v <= 0) {
+          own.push({ code: 'non-positive-value', severity: 'error', row: i, col: j, value: v })
+        }
+      })
+    })
+    assertValid([...validateProblem(problem), ...own])
+
+    const { matrix, criteria } = problem
+    const m = matrix.length
+    const n = criteria.length
+    const warnings: MethodWarning[] = []
+
+    // 1. Normalization to "smaller is better" and L = |ln n| = -ln n (n <= 1). A constant column (up to rounding)
+    //    is set to n = 1, L = 0 exactly, so its removal effect is exactly 0.
+    const norm = zeros(m, n)
+    const absLog = zeros(m, n)
+    const constant = new Array<boolean>(n).fill(false)
+    for (let j = 0; j < n; j++) {
+      const col = column(matrix, j)
+      if (isConstant(col)) {
+        constant[j] = true
+        for (let i = 0; i < m; i++) norm[i]![j] = 1
+        warnings.push({ code: 'merec.constant-column', col: j })
+        continue
+      }
+      const lo = minOf(col)
+      const hi = maxOf(col)
+      const isCost = criteria[j]!.type === 'cost'
+      for (let i = 0; i < m; i++) {
+        const v = isCost ? col[i]! / hi : lo / col[i]!
+        norm[i]![j] = v
+        absLog[i]![j] = -Math.log(v)
+      }
+    }
+
+    // 2. Overall performance S_i and performance with criterion j removed S'_ij (divisor n either way).
+    const rowTotal = absLog.map((row) => row.reduce((a, b) => a + b, 0))
+    const performance = rowTotal.map((r) => Math.log1p(r / n))
+    const removed = absLog.map((row, i) => row.map((l) => Math.log1p((rowTotal[i]! - l) / n)))
+
+    // 3. Removal effect, cancellation-free: S_i - S'_ij = ln((n + R_i) / (n + R_i - L_ij)) = log1p(L / (n + R - L)).
+    const effect = Array.from({ length: n }, (_, j) => {
+      let e = 0
+      for (let i = 0; i < m; i++) {
+        const l = absLog[i]![j]!
+        e += Math.log1p(l / (n + rowTotal[i]! - l))
+      }
+      return e
+    })
+
+    // 4. Weights; with nothing removed by any criterion (every column constant, or the 0/0 guard) use 1/n.
+    const total = effect.reduce((a, b) => a + b, 0)
+    const allConstant = constant.every(Boolean) || total === 0
+    if (allConstant) warnings.push({ code: 'merec.all-constant-equal-weights' })
+    const weights = allConstant ? new Array<number>(n).fill(1 / n) : effect.map((e) => e / total)
+
+    const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
+    if (weights[top]! > MEREC_DOMINANT_WEIGHT) warnings.push({ code: 'merec.dominant-weight', col: top })
+
+    return {
+      weights,
+      steps: [
+        { key: 'merec.normalized', matrix: norm },
+        { key: 'merec.absLog', matrix: absLog },
+        { key: 'merec.performance', vector: performance },
+        { key: 'merec.performanceRemoved', matrix: removed },
+        { key: 'merec.removalEffect', vector: effect },
+        { key: 'merec.weights', vector: weights },
+      ],
+      diagnostics: {
+        constantColumns: constant.filter(Boolean).length,
+        allConstant: allConstant ? 1 : 0,
+      },
+      warnings,
+    }
+  },
+}

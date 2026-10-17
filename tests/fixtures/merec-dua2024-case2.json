@@ -1,0 +1,89 @@
+{
+  "id": "merec-dua2024-case2",
+  "source": "Dua, Duc, Bao & Trung 2024, EUREKA: Physics and Engineering (2), doi:10.21303/2461-4262.2024.003171, Table 8 (input), Table 9 row MEREC (output)",
+  "alternatives": [
+    "C35",
+    "C45",
+    "C50",
+    "42CrMoS4",
+    "C15",
+    "C10"
+  ],
+  "criteria": [
+    "hardness_HB",
+    "tensile_strength",
+    "yield_limit",
+    "relative_elongation",
+    "relative_contraction",
+    "impact_toughness"
+  ],
+  "types": [
+    "benefit",
+    "benefit",
+    "benefit",
+    "benefit",
+    "benefit",
+    "benefit"
+  ],
+  "matrix": [
+    [
+      242,
+      55.9,
+      94.9,
+      42,
+      41,
+      44
+    ],
+    [
+      232,
+      65.7,
+      33.9,
+      42,
+      12,
+      14
+    ],
+    [
+      234,
+      39.4,
+      68.2,
+      23,
+      44,
+      43
+    ],
+    [
+      213,
+      77.6,
+      61.4,
+      32,
+      33,
+      34
+    ],
+    [
+      321,
+      37.4,
+      38.1,
+      31,
+      43,
+      34
+    ],
+    [
+      431,
+      24.3,
+      76.8,
+      24,
+      24,
+      14
+    ]
+  ],
+  "expected": {
+    "weights": [
+      0.0758,
+      0.2002,
+      0.1602,
+      0.0953,
+      0.2747,
+      0.1938
+    ],
+    "tolerance": 5e-05
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "id": "merec-dua2024-case3",
+  "source": "Dua, Duc, Bao & Trung 2024, EUREKA: Physics and Engineering (2), doi:10.21303/2461-4262.2024.003171, p. 143: Table 12 (input), Table 13 row MEREC (output)",
+  "alternatives": [
+    "MG1",
+    "MG2",
+    "MG3",
+    "MG4",
+    "MG5",
+    "MG6",
+    "MG7",
+    "MG8"
+  ],
+  "criteria": [
+    "tensile_strength",
+    "elongation",
+    "reduction_in_area",
+    "C4",
+    "hardness_HB",
+    "impact_strength",
+    "cost"
+  ],
+  "types": [
+    "benefit",
+    "benefit",
+    "benefit",
+    "benefit",
+    "benefit",
+    "benefit",
+    "cost"
+  ],
+  "matrix": [
+    [
+      780,
+      18,
+      55,
+      635,
+      229,
+      880,
+      22000
+    ],
+    [
+      880,
+      15,
+      50,
+      735,
+      225,
+      390,
+      30000
+    ],
+    [
+      930,
+      13,
+      45,
+      785,
+      269,
+      590,
+      31000
+    ],
+    [
+      980,
+      15,
+      45,
+      785,
+      217,
+      600,
+      22000
+    ],
+    [
+      980,
+      12,
+      45,
+      835,
+      250,
+      950,
+      24000
+    ],
+    [
+      1080,
+      12,
+      50,
+      930,
+      220,
+      960,
+      22000
+    ],
+    [
+      885,
+      12,
+      40,
+      685,
+      195,
+      970,
+      21000
+    ],
+    [
+      750,
+      12,
+      45,
+      400,
+      179,
+      940,
+      20000
+    ]
+  ],
+  "expected": {
+    "weights": [
+      0.0837,
+      0.0536,
+      0.0705,
+      0.264,
+      0.0972,
+      0.3077,
+      0.1233
+    ],
+    "tolerance": 5e-05
+  }
+}
