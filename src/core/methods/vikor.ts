@@ -86,7 +86,7 @@ export function vikorCompromise(S: readonly number[], R: readonly number[], Q: r
 export const vikor: RankingMethod<VikorParams> = {
   id: 'vikor',
   kind: 'ranking',
-  params: [{ key: 'v', kind: 'number', min: 0, max: 1, step: 0.05, default: VIKOR_DEFAULT_V }],
+  params: [{ key: 'v', kind: 'number', min: 0, max: 1, step: 0.01, default: VIKOR_DEFAULT_V }],
   compute(problem: Problem, weights: number[], params: VikorParams = {}): RankingResult {
     const v = params.v ?? VIKOR_DEFAULT_V
     if (typeof v !== 'number' || !Number.isFinite(v) || v < 0 || v > 1) throw new RangeError(`VIKOR v must be in [0, 1], got ${String(v)}`)

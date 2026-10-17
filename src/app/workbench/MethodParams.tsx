@@ -10,7 +10,7 @@ import { paramLabel, paramOptionLabel, tr } from './shared'
 
 /**
  * The options of the selected method, rendered from its descriptor (ADDING-A-METHOD.md §11): a choice of two to four
- * options as a segmented control, a number in [0, 1] as a slider on the 0.01 grid (VIKOR v; the tick marks the
+ * options as a segmented control, a number in [0, 1] as a slider on the descriptor's grid (VIKOR v 0.01, WASPAS λ 0.1; the tick marks the
  * default, the optional words under its ends come from workbench.params.<id>.<key>Ends.min / .max), any other number
  * as a number input. Labels come from workbench.params.<id>.<key>; an
  * optional one-line hint per choice from workbench.params.<id>.<key>Hints.<option>. Renders nothing for a method
@@ -106,7 +106,7 @@ function UnitSlider({
           {text}
         </output>
       </div>
-      <WeightRange id={id} value={value} base={d.default} valueText={text} onChange={(v) => onChange(snapWeight(v))} />
+      <WeightRange id={id} value={value} base={d.default} valueText={text} step={d.step} onChange={(v) => onChange(snapWeight(v, d.step))} />
       {i18n.exists(`${ends}.min`) && (
         <div className="flex justify-between gap-4 text-12 text-text-3">
           <span>{tr(t, `${ends}.min`)}</span>

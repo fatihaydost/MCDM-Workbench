@@ -90,7 +90,7 @@ describe('VIKOR: Opricovic and Tzeng 2004 (EJOR 156:445, Tables 1-3)', () => {
   })
   it('is the default: {} and { v: 0.5 } agree', () => {
     expect(vikor.compute(f, ot.weights, {}).scores).toEqual(res.scores)
-    expect(vikor.params).toEqual([{ key: 'v', kind: 'number', min: 0, max: 1, step: 0.05, default: 0.5 }])
+    expect(vikor.params).toEqual([{ key: 'v', kind: 'number', min: 0, max: 1, step: 0.01, default: 0.5 }])
   })
 })
 

@@ -14,7 +14,9 @@ export type WeightRangeProps = {
   base: number
   /** The exact value for assistive technology (aria-valuetext). */
   valueText: string
-  /** Called with the weight on the 0.01 grid; `repeat` is true for a held-down key (key repeat). */
+  /** Grid of the slider (default 0.01; WASPAS λ 0.1). */
+  step?: number
+  /** Called with the weight on the grid; `repeat` is true for a held-down key (key repeat). */
   onChange: (v: number, repeat: boolean) => void
   /** Name, when no `<label htmlFor>` points at the input. */
   label?: string
@@ -23,14 +25,14 @@ export type WeightRangeProps = {
 }
 
 /**
- * A weight as a native range input, 0..1 in 0.01 steps, with a tick at the starting weight. Keys step from a value
+ * A weight as a native range input, 0..1 in 0.01 steps (or `step`), with a tick at the starting weight. Keys step from a value
  * off the grid onto the next grid point first (stepWeight), so the starting weight 0.1872 goes to 0.19 or 0.18.
  */
-export function WeightRange({ id, value, base, valueText, onChange, label, className, style }: WeightRangeProps) {
+export function WeightRange({ id, value, base, valueText, step = 0.01, onChange, label, className, style }: WeightRangeProps) {
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key in KEY_STEPS) {
       e.preventDefault()
-      onChange(stepWeight(value, KEY_STEPS[e.key]!), e.repeat)
+      onChange(stepWeight(value, KEY_STEPS[e.key]!, step), e.repeat)
     } else if (e.key === 'Home' || e.key === 'End') {
       e.preventDefault()
       onChange(e.key === 'Home' ? 0 : 1, e.repeat)
@@ -45,11 +47,11 @@ export function WeightRange({ id, value, base, valueText, onChange, label, class
         className={s.range}
         min={0}
         max={1}
-        step={0.01}
+        step={step}
         value={value}
         aria-label={label}
         aria-valuetext={valueText}
-        onChange={(e) => onChange(snapWeight(Number(e.target.value)), false)}
+        onChange={(e) => onChange(snapWeight(Number(e.target.value), step), false)}
         onKeyDown={onKeyDown}
       />
       <span aria-hidden className={s.baseTick} style={{ left: `calc(${THUMB / 2}px + ${base} * (100% - ${THUMB}px))` }} />
