@@ -79,3 +79,67 @@ export function compareRankings(problem: Problem, weights: number[], runs: Ranki
     firstPlace,
   }
 }
+
+export type PairFacts = {
+  /** Alternative indices; a is the Borda-higher one (the lower index on a Borda tie). */
+  a: number
+  b: number
+  /** The 1 to 3 criteria that separate the pair most, most decisive first; `better` is relative to a and b. */
+  criteria: { col: number; better: 'a' | 'b' }[]
+  /** Ranked methods only, from their own ranking. */
+  methods: { methodId: string; higher: 'a' | 'b' | 'tie' }[]
+  /** The criterion that sets each one's R in VIKOR (argmax of its regret row); null if VIKOR did not rank. */
+  vikorRegret: { a: number; b: number } | null
+  /** Every ranked method orders a and b the same way. */
+  unanimous: boolean
+}
+
+/** Borda rank 1 and the next alternative by Borda order (lower index on ties); null when not comparable. */
+export function defaultPair(c: Comparison): [number, number] | null {
+  if (!c.borda) return null
+  const order = c.borda.ranking.map((rank, i) => [rank, i] as const).sort((x, y) => x[0] - y[0] || x[1] - y[1])
+  return [order[0]![1], order[1]![1]]
+}
+
+/** True when every ranked method gives the same ranking (nothing crosses in the chart). */
+export function identicalRankings(c: Comparison): boolean {
+  const rs = c.runs.flatMap((r) => (r.result ? [r.result.ranking] : []))
+  return rs.every((r) => r.every((x, i) => x === rs[0]![i]))
+}
+
+const argmax = (row: number[]) => row.reduce((best, x, j) => (x > row[best]! ? j : best), 0)
+
+export function pairFacts(problem: Problem, weights: number[], c: Comparison, i: number, k: number): PairFacts {
+  const br = c.borda?.ranking
+  const kFirst = br && br[k]! !== br[i]! ? br[k]! < br[i]! : k < i // Borda order, else lower index
+  const [a, b] = kFirst ? [k, i] : [i, k]
+  const rows = problem.matrix
+  const decisive = problem.criteria
+    .map((crit, col) => {
+      const column = rows.map((r) => r[col]!)
+      const range = Math.max(...column) - Math.min(...column)
+      const diff = rows[a]![col]! - rows[b]![col]!
+      const value = range === 0 ? 0 : (weights[col]! * Math.abs(diff)) / range
+      const aWins = crit.type === 'benefit' ? diff > 0 : diff < 0
+      return { col, value, better: aWins ? ('a' as const) : ('b' as const) }
+    })
+    .filter((x) => x.value > 0)
+    .sort((x, y) => y.value - x.value)
+    .slice(0, 3)
+    .map(({ col, better }) => ({ col, better }))
+  const methods = c.runs.flatMap((r) => {
+    if (!r.result) return []
+    const { ranking } = r.result
+    const higher = ranking[a]! === ranking[b]! ? 'tie' : ranking[a]! < ranking[b]! ? 'a' : 'b'
+    return [{ methodId: r.methodId, higher } as const]
+  })
+  const d = c.runs.find((r) => r.methodId === 'vikor')?.result?.steps.find((s) => s.key === 'vikor.weightedDistance')
+  return {
+    a,
+    b,
+    criteria: decisive,
+    methods,
+    vikorRegret: d?.matrix ? { a: argmax(d.matrix[a]!), b: argmax(d.matrix[b]!) } : null,
+    unanimous: methods.every((m) => m.higher === methods[0]!.higher),
+  }
+}

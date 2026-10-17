@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { bordaCount, compareRankings, kendallW, rankingMethods, type Problem } from '../src/core'
+import {
+  bordaCount,
+  compareRankings,
+  defaultPair,
+  identicalRankings,
+  kendallW,
+  pairFacts,
+  rankingMethods,
+  type Comparison,
+  type Problem,
+} from '../src/core'
 import { getExample } from '../src/data/examples'
 
 const ex = getExample('keshavarz-2015-ten-alternatives')!
@@ -80,5 +90,107 @@ describe('compareRankings', () => {
     expect(c.comparable).toBe(false)
     expect(c.borda).toBeNull()
     expect(c.kendallW).toBeNull()
+  })
+})
+
+describe('pair facts', () => {
+  const c = () => compareRankings(problem(), ex.weights!, allRuns)
+
+  it('defaultPair is Borda rank 1 and the next', () => {
+    expect(defaultPair(c())).toEqual([0, 6])
+    const p = problem()
+    p.matrix[0]![0] = 0
+    expect(defaultPair(compareRankings(p, ex.weights!, [{ methodId: 'saw', params: {} }]))).toBeNull()
+  })
+
+  it('reference pair A1 vs A7: each method side, criteria, VIKOR regret', () => {
+    const f = pairFacts(problem(), ex.weights!, c(), 0, 6)
+    expect([f.a, f.b]).toEqual([0, 6])
+    expect(f.methods).toEqual([
+      { methodId: 'topsis', higher: 'a' },
+      { methodId: 'saw', higher: 'a' },
+      { methodId: 'vikor', higher: 'b' },
+      { methodId: 'edas', higher: 'a' },
+    ])
+    expect(f.unanimous).toBe(false)
+    expect(f.criteria.length).toBeGreaterThanOrEqual(1)
+    expect(f.criteria.length).toBeLessThanOrEqual(3)
+    const m = ex.matrix
+    for (const { col, better } of f.criteria) {
+      const diff = m[0]![col]! - m[6]![col]!
+      const aWins = ex.criteria[col]!.type === 'benefit' ? diff > 0 : diff < 0
+      expect(better).toBe(aWins ? 'a' : 'b')
+    }
+    // Row maxima of w_j (best_j - x_ij) / (best_j - worst_j), worked out by hand: A1 max 0.0473 at C3 (index 2),
+    // A7 max 0.0350 at C3 (index 2); next largest: A1 C5 0.0282, A7 C1 0.0333.
+    expect(f.vikorRegret).toEqual({ a: 2, b: 2 })
+  })
+
+  it('swaps so that a is the Borda-higher alternative', () => {
+    const f = pairFacts(problem(), ex.weights!, c(), 6, 0)
+    expect([f.a, f.b]).toEqual([0, 6])
+  })
+
+  it('orders criteria by weight times normalised difference', () => {
+    // ranges: col0 10, col1 4, col2 0 (constant, never listed). A vs B: col0 0.2, col1 0.25
+    const p: Problem = {
+      alternatives: ['A', 'B', 'C'],
+      criteria: [
+        { name: 'x', type: 'benefit' },
+        { name: 'y', type: 'cost' },
+        { name: 'z', type: 'benefit' },
+      ],
+      matrix: [[10, 4, 5], [0, 2, 5], [5, 6, 5]],
+    }
+    const w = [0.2, 0.5, 0.3]
+    const cmp = compareRankings(p, w, [{ methodId: 'topsis', params: {} }, { methodId: 'saw', params: {} }])
+    const f = pairFacts(p, w, cmp, 0, 1)
+    const aIsA = f.a === 0
+    expect(f.criteria).toEqual([
+      { col: 1, better: aIsA ? 'b' : 'a' },
+      { col: 0, better: aIsA ? 'a' : 'b' },
+    ])
+  })
+
+  const fake = (rankings: Record<string, number[]>): Comparison => ({
+    runs: Object.entries(rankings).map(([methodId, ranking]) => ({
+      methodId,
+      result: { ranking } as never,
+      issues: [],
+    })),
+    ranked: Object.keys(rankings),
+    comparable: true,
+    borda: bordaCount(Object.values(rankings)),
+    kendallW: null,
+    firstPlace: null,
+  })
+  const p3: Problem = {
+    alternatives: ['A', 'B', 'C'],
+    criteria: [{ name: 'x', type: 'benefit' }],
+    matrix: [[3], [2], [1]],
+  }
+
+  it('reports a tie as tie and not unanimous when another method disagrees', () => {
+    const f = pairFacts(p3, [1], fake({ x: [1, 1, 3], y: [1, 2, 3] }), 0, 1)
+    expect(f.methods).toEqual([
+      { methodId: 'x', higher: 'tie' },
+      { methodId: 'y', higher: 'a' },
+    ])
+    expect(f.unanimous).toBe(false)
+  })
+
+  it('is unanimous when every method ties the pair', () => {
+    const f = pairFacts(p3, [1], fake({ x: [1, 1, 3], y: [2, 2, 1] }), 0, 1)
+    expect(f.unanimous).toBe(true)
+  })
+
+  it('identicalRankings', () => {
+    const p: Problem = {
+      alternatives: ['A', 'B', 'C'],
+      criteria: [{ name: 'x', type: 'benefit' }, { name: 'y', type: 'benefit' }],
+      matrix: [[3, 3], [2, 2], [1, 1]],
+    }
+    expect(identicalRankings(compareRankings(p, [0.5, 0.5], allRuns))).toBe(true)
+    expect(identicalRankings(c())).toBe(false)
   })
 })
