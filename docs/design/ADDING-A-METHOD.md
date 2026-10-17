@@ -299,15 +299,18 @@ page), else the current one if listed, else the first; `ExampleDataset.buttonLab
   `tests/i18n.test.ts:51-64` [U only once listed]. Prefer making a check depend on the params (Entropy min-max
   accepts any sign) by doing it inside `compute`.
 
-## 14. Two or more ranking methods: what exists today
+## 14. Two or more ranking methods: the Compare stage
 
-- Selection is single: `rankingMethod: RankingMethodId` in the store, a `SegmentedControl` on the Ranking stage
-  (`RankingStage.tsx:164`), one ranking on Results, one `RankingRun` in Robustness (built once in `RobustnessStage`). Adding a second
-  method gives a choice between them, not a comparison.
-- Agreement statistics in `src/core/robustness.ts` §C.6: `midRanks` (:522), `spearman` (:540), `kendallTauB` (:566),
-  `wsCoefficient` (:598), all tested (`tests/robustness.test.ts`). Spearman and WS are used by criterion removal;
-  `kendallTauB` is not used by any UI. Not present: Kendall's W, Borda (or Copeland) merge, any "compare methods" view
-  or store field for a set of ranking methods. The guide copy for them exists (`src/content/guide.ts:826-846`).
-- What the PLAN.md §Next 3 item would need: a set of ranking methods in the store (or "compare with" on Results /
-  Robustness), each run with the same weights; τ_b per pair and W over all; Borda on the competition ranks;
-  shown next to the individual rankings, never instead of them (guide.ts:845).
+- Selection is still single: `rankingMethod: RankingMethodId` in the store, a `SegmentedControl` on the Ranking stage
+  (`RankingStage.tsx`), one ranking on Results, one `RankingRun` in Robustness.
+- The Compare stage (`src/app/workbench/compare/`, core `src/core/compare.ts`, chart
+  `src/features/illustrations/RankLines.tsx`, text `src/i18n/compare.{en,tr}.json`) runs every method in
+  `rankingMethods` on the same weights, each with its own saved options (`paramsFor`). It shows one rank column per
+  method, the Borda merge next to them (never instead of them), Kendall's W over the methods that ranked, and a
+  "why" panel for the selected pair. A method that cannot rank (SAW with a 0 cell) shows its issue and is left out of
+  Borda and W; with fewer than two methods ranking, the stage is blocked.
+- A new ranking method appears in Compare by itself. It only needs `why.character.<id>` (one sentence on how the
+  method treats a weakness) in both `compare.en.json` and `compare.tr.json`, and its entry in the character map in
+  `compare/why.ts` (a `Record` over `RankingMethodId`, so a miss is a type error).
+- Agreement statistics in `src/core/robustness.ts` §C.6 (`midRanks`, `spearman`, `kendallTauB`, `wsCoefficient`) are
+  used by criterion removal; Kendall's W and Borda live in `compare.ts`.

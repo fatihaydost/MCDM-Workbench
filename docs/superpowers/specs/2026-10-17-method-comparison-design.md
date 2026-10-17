@@ -1,6 +1,6 @@
 # Method comparison stage: design
 
-Status: draft for owner approval, 2026-10-17. Builds on `RankingRun` (`src/core/run.ts`, commit 0e3a892).
+Status: implemented 2026-10-17. Builds on `RankingRun` (`src/core/run.ts`, commit 0e3a892).
 Read `docs/design/DESIGN.md` (copy and layout rules), `MOTION.md` and `ADDING-A-METHOD.md` §14 first.
 
 ## Intent
