@@ -71,6 +71,8 @@ export type WorkbookLabels = {
   weight: string
   score: string
   rank: string
+  /** Labels of the WASPAS λ grid (`lambdaLabels` in the UI's number format); default 'λ = 0.0' ... */
+  lambda?: readonly string[]
   /** Title of a step block (usually the i18n label of the step key). */
   step: (key: string) => string
 }
@@ -159,7 +161,7 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
     sheets: { ...DEFAULT_WORKBOOK_LABELS.sheets, ...input.labels?.sheets },
   }
   const { problem } = input
-  const axisLabels: StepLabels = { alternatives: problem.alternatives, criteria: problem.criteria.map((c) => c.name) }
+  const axisLabels: StepLabels = { alternatives: problem.alternatives, criteria: problem.criteria.map((c) => c.name), ...(L.lambda ? { lambda: L.lambda } : {}) }
   const wb = X.utils.book_new()
   const taken = new Set<string>()
   const add = (rows: Cell[][], name: string, numFmt?: string, countColumns?: readonly number[]) =>

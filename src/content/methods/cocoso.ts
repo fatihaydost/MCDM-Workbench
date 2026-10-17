@@ -92,7 +92,7 @@ export const cocoso: MethodContent = {
     ],
     inputs: [
       'Decision matrix, criterion type per column, weights summing to 1.',
-      'Parameter lambda between 0 and 1, default 0.5.',
+      'Parameter λ between 0 and 1, default 0.5.',
     ],
     pitfalls: [
       'min S = 0 or min P = 0 breaks k_b; pyDecision silently adds 1 to all S or P, which also changes k_a and k_c.',
@@ -113,7 +113,7 @@ export const cocoso: MethodContent = {
     ],
     inputs: [
       'Karar matrisi, her sütun için kriter türü, toplamı 1 olan ağırlıklar.',
-      '0 ile 1 arasında lambda parametresi, varsayılan 0,5.',
+      '0 ile 1 arasında λ parametresi, varsayılan 0,5.',
     ],
     pitfalls: [
       "min S = 0 ya da min P = 0 olursa k_b bozulur; pyDecision sessizce tüm S ya da P değerlerine 1 ekler, bu da k_a ve k_c'yi değiştirir.",

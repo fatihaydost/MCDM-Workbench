@@ -338,7 +338,7 @@ export const rankingRequirements: readonly RankingRequirement[] = [
     negatives: 'no',
     zeros: 'conditional',
     note: { en: 'A zero makes the product part 0 for that alternative.', tr: 'Sıfır, o alternatif için çarpım kısmını 0 yapar.' },
-    params: { en: 'lambda in [0, 1], default 0.5', tr: 'lambda [0, 1] aralığında, varsayılan 0,5' },
+    params: { en: 'λ in [0, 1], default 0.5', tr: 'λ [0, 1] aralığında, varsayılan 0,5' },
     output: { en: 'Score', tr: 'Skor' },
   },
   {
@@ -446,7 +446,7 @@ export const rankingRequirements: readonly RankingRequirement[] = [
       en: 'Fails when one alternative is worst on every criterion (min S = 0, so k_b divides by zero).',
       tr: 'Bir alternatif her kriterde en kötüyse bozulur (min S = 0 olur, k_b sıfıra böler).',
     },
-    params: { en: 'lambda, default 0.5', tr: 'lambda, varsayılan 0,5' },
+    params: { en: 'λ, default 0.5', tr: 'λ, varsayılan 0,5' },
     output: { en: 'Score', tr: 'Skor' },
   },
   {
@@ -493,8 +493,8 @@ export const rankingRequirements: readonly RankingRequirement[] = [
     zeros: 'yes',
     note: { en: 'Weights act as voting powers.', tr: 'Ağırlıklar oy gücü işlevi görür.' },
     params: {
-      en: 'ELECTRE I: thresholds c and d. ELECTRE III: q, p, v per criterion and s(lambda)',
-      tr: 'ELECTRE I: c ve d eşikleri. ELECTRE III: kriter başına q, p, v ve s(lambda)',
+      en: 'ELECTRE I: thresholds c and d. ELECTRE III: q, p, v per criterion and s(λ)',
+      tr: 'ELECTRE I: c ve d eşikleri. ELECTRE III: kriter başına q, p, v ve s(λ)',
     },
     output: { en: 'Kernel (I) or partial pre-order (III)', tr: 'Çekirdek (I) ya da kısmi ön sıralama (III)' },
   },
@@ -828,8 +828,8 @@ export const robustnessTechniques: readonly RobustnessTechnique[] = [
     id: 'parameters',
     title: { en: 'Parameter sensitivity', tr: 'Parametre duyarlılığı' },
     summary: {
-      en: 'One slider per method parameter with the same outputs as the weight change: PROMETHEE q, p and s; VIKOR v; WASPAS and CoCoSo lambda; ELECTRE thresholds; TOPSIS normalization and distance.',
-      tr: 'Her yöntem parametresi için bir kaydırıcı, ağırlık değişimiyle aynı çıktılar: PROMETHEE q, p ve s; VIKOR v; WASPAS ve CoCoSo lambda; ELECTRE eşikleri; TOPSIS normalizasyonu ve uzaklığı.',
+      en: 'One slider per method parameter with the same outputs as the weight change: PROMETHEE q, p and s; VIKOR v; WASPAS and CoCoSo λ; ELECTRE thresholds; TOPSIS normalization and distance.',
+      tr: 'Her yöntem parametresi için bir kaydırıcı, ağırlık değişimiyle aynı çıktılar: PROMETHEE q, p ve s; VIKOR v; WASPAS ve CoCoSo λ; ELECTRE eşikleri; TOPSIS normalizasyonu ve uzaklığı.',
     },
     tex: [],
     sources: [{ label: 'Więckowski & Sałabun (2023), Applied Soft Computing 148, 110915', doi: '10.1016/j.asoc.2023.110915' }],

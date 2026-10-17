@@ -20,7 +20,7 @@ export type Axis = 'alternatives' | 'criteria' | 'lambda'
  */
 export type Step =
   | { key: string; matrix: number[][]; axes: readonly [Axis, Axis]; vector?: never; scalar?: never }
-  | { key: string; vector: number[]; axes: Axis; matrix?: never; scalar?: never }
+  | { key: string; vector: number[]; axes: Exclude<Axis, 'lambda'>; matrix?: never; scalar?: never }
   | { key: string; scalar: number; matrix?: never; vector?: never; axes?: never }
 
 /** A non-fatal note produced while computing (the result is still usable). */

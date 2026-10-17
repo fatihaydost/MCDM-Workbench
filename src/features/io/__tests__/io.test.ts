@@ -360,3 +360,34 @@ describe.skipIf(!X)('xlsx (real SheetJS)', () => {
     expect(r.issues).toEqual([{ row: 10, col: 0, code: 'trailing-content-ignored' }])
   })
 })
+
+describe('the WASPAS λ sweep step in TSV and LaTeX', () => {
+  it('lays out alternatives by λ, with the λ grid as column headers (default and localized)', async () => {
+    const { waspas, WASPAS_LAMBDA_GRID } = await import('../../../core')
+    const { lambdaLabels } = await import('..')
+    const p: Problem = {
+      alternatives: ['A1', 'A2'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'cost' },
+      ],
+      matrix: [
+        [3, 12.5],
+        [5, 15],
+      ],
+    }
+    const sweep = waspas.compute(p, [0.5, 0.5], {}).steps.find((s) => s.key === 'waspas.lambdaSweep')!
+    const labels = { alternatives: p.alternatives, criteria: ['C1', 'C2'] }
+    const table = stepToTable(sweep, labels)
+    expect([table.rowAxis, table.colAxis]).toEqual(['alternatives', 'lambda'])
+    expect(table.colLabels).toEqual(WASPAS_LAMBDA_GRID.map((v) => `λ = ${v.toFixed(1)}`))
+    const tsv = tableToTsv(table, { decimal: ',' }).split('\n')
+    expect(tsv[0]).toBe(`\t${WASPAS_LAMBDA_GRID.map((v) => `λ = ${v.toFixed(1)}`).join('\t')}`)
+    expect(tsv).toHaveLength(3)
+    const tr = stepToTable(sweep, { ...labels, lambda: lambdaLabels((v) => v.toFixed(1).replace('.', ',')) })
+    expect(tableToTsv(tr, { decimal: ',' }).split('\n')[0]!.split('\t')[2]).toBe('λ = 0,1')
+    const tex = tableToLatex(table, { digits: 4 })
+    expect(tex).toContain('\\begin{tabular}{l' + 'r'.repeat(11) + '}')
+    expect(tex.split('\n').some((l) => l.includes('A2'))).toBe(true)
+  })
+})

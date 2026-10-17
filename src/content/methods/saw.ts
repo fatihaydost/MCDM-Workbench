@@ -50,8 +50,8 @@ export const saw: MethodContent = {
     {
       methodId: 'waspas',
       text: {
-        en: 'SAW is WASPAS with lambda = 1, and COPRAS with only benefit criteria is SAW with sum normalization.',
-        tr: "SAW, lambda = 1 olan WASPAS'tır; yalnız fayda kriterli COPRAS da toplam normalizasyonlu SAW'dır.",
+        en: 'SAW is WASPAS with λ = 1, and COPRAS with only benefit criteria is SAW with sum normalization.',
+        tr: "SAW, λ = 1 olan WASPAS'tır; yalnız fayda kriterli COPRAS da toplam normalizasyonlu SAW'dır.",
       },
     },
     {

@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { doiUrl, formatCitation, getExample, shortCitation } from '../../data/examples'
 import { Heatmap } from '../../features/charts'
-import { buildWorkbook, exportCsv, writeWorkbook, type WorkbookLabels } from '../../features/io'
+import { buildWorkbook, exportCsv, lambdaLabels, writeWorkbook, type WorkbookLabels } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
 import { isEmptyProblem, useRanking, useWeights, useWorkbench } from '../../state/workbench'
 import { Button, EmptyState, Notice } from '../../ui'
@@ -83,6 +83,7 @@ export function ResultsStage() {
     score: score.name,
     rank: t('workbench.results.workbook.rank'),
     step: (key) => stepName(key, t),
+    lambda: lambdaLabels((v) => nf.format(v, 1)),
   })
 
   /** Provenance for the About sheet: a downloaded file on its own still says where it came from. */

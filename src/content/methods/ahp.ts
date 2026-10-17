@@ -123,7 +123,7 @@ export const ahp: MethodContent = {
     inputs: [
       "Positive reciprocal n x n matrix: 1 on the diagonal, a_ji = 1/a_ij, values from Saaty's 1-9 scale and their reciprocals.",
       'Method option: eigenvector (default), geometric mean or column-average approximation.',
-      'Output: weights, lambda max, CI and CR.',
+      'Output: weights, λmax, CI and CR.',
     ],
     pitfalls: [
       'A non-reciprocal matrix (a typo) still gives an eigenvector, but CR is meaningless; the input should enforce reciprocity.',
@@ -147,7 +147,7 @@ export const ahp: MethodContent = {
     inputs: [
       "Pozitif, karşılıklı n x n matris: köşegende 1, a_ji = 1/a_ij, değerler Saaty'nin 1-9 ölçeğinden ve bunların tersleri.",
       'Yöntem seçeneği: özvektör (varsayılan), geometrik ortalama ya da sütun ortalaması yaklaşımı.',
-      'Çıktı: ağırlıklar, lambda maks, CI ve CR.',
+      'Çıktı: ağırlıklar, λmaks, CI ve CR.',
     ],
     pitfalls: [
       'Karşılıklı olmayan matris (yazım hatası) yine özvektör verir ama CR anlamsızlaşır; giriş karşılıklılığı zorunlu kılmalı.',

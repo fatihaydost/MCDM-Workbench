@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useEffect, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ParamDescriptor } from '../../core'
 import { useNumberFormat } from '../../i18n'
@@ -95,7 +95,13 @@ function UnitSlider({
   const { format } = useNumberFormat(2)
   const id = useId()
   const ends = `workbench.params.${methodId}.${d.key}Ends`
-  const text = format(value, 2)
+  // An off-grid saved value (older state, a hand-edited one) is shown on the grid and written back, so the readout, the
+  // ranking and the pictures all use the same value.
+  const snapped = snapWeight(value, d.step)
+  useEffect(() => {
+    if (snapped !== value) onChange(snapped)
+  }, [snapped, value, onChange])
+  const text = format(snapped, 2)
   return (
     <div className="flex w-full max-w-[360px] flex-col gap-1" data-testid={`param-${methodId}-${d.key}`}>
       <div className="flex items-baseline justify-between gap-4">
@@ -106,7 +112,7 @@ function UnitSlider({
           {text}
         </output>
       </div>
-      <WeightRange id={id} value={value} base={d.default} valueText={text} step={d.step} onChange={(v) => onChange(snapWeight(v, d.step))} />
+      <WeightRange id={id} value={snapped} base={d.default} valueText={text} step={d.step} onChange={(v) => onChange(snapWeight(v, d.step))} />
       {i18n.exists(`${ends}.min`) && (
         <div className="flex justify-between gap-4 text-12 text-text-3">
           <span>{tr(t, `${ends}.min`)}</span>

@@ -1,11 +1,14 @@
-import type { Axis, Step } from '../../core'
+import { WASPAS_LAMBDA_GRID, type Axis, type Step } from '../../core'
 
 export type { Axis }
 
-/** `lambda`: labels of the λ grid; defaults to 'λ = 0', 'λ = 0.1', ... (the UI passes localized ones). */
+/** `lambda`: labels of the λ grid (`lambdaLabels`); defaults to 'λ = 0.0' ... 'λ = 1.0' (the UI passes localized ones). */
 export type StepLabels = { alternatives: readonly string[]; criteria: readonly string[]; lambda?: readonly string[] }
 
-const LAMBDA_LABELS = Array.from({ length: 11 }, (_, k) => `λ = ${k / 10}`)
+/** The λ grid's labels with one decimal in the given format ('λ = 0,1'): one formatter for screen, TSV, LaTeX and xlsx. */
+export const lambdaLabels = (format: (v: number) => string = (v) => v.toFixed(1)): string[] => WASPAS_LAMBDA_GRID.map((v) => `λ = ${format(v)}`)
+
+const LAMBDA_LABELS = lambdaLabels()
 const axisLabels = (labels: StepLabels, axis: Axis): string[] =>
   [...(axis === 'lambda' ? (labels.lambda ?? LAMBDA_LABELS) : labels[axis])]
 

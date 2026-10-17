@@ -96,6 +96,15 @@ describe('compareRankings', () => {
   })
 })
 
+describe('compareRankings with method options', () => {
+  it('runs WASPAS with the λ it is given, not the default', () => {
+    const w = (lambda: number) =>
+      compareRankings(problem(), ex.weights!, [{ methodId: 'topsis', params: {} }, { methodId: 'waspas', params: { lambda } }]).runs[1]!.result!
+    expect(w(0).scores).toEqual(rankingMethods.find((m) => m.id === 'waspas')!.compute(problem(), ex.weights!, { lambda: 0 }).scores)
+    expect(w(0).scores).not.toEqual(w(0.5).scores)
+  })
+})
+
 describe('pair facts', () => {
   const c = () => compareRankings(problem(), ex.weights!, allRuns)
 
