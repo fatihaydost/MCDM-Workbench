@@ -914,3 +914,102 @@
   stroke-width: 3px;
   stroke-linejoin: round;
 }
+
+/* Rank lines ---------------------------------------------------------------------------------- */
+
+.rankAxis {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.rankHead {
+  fill: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rankName {
+  fill: var(--text);
+  font-size: 13px;
+  transition: opacity var(--dur) var(--ease);
+}
+
+/* One fixed colour per alternative (the --data-cat-* set), after the eighth the context grey. */
+.rankLine,
+.rankPoint {
+  --c: var(--data-context);
+  transition: opacity var(--dur) var(--ease);
+}
+
+.rankLine[data-cat='1'], .rankPoint[data-cat='1'] { --c: var(--data-cat-1); }
+.rankLine[data-cat='2'], .rankPoint[data-cat='2'] { --c: var(--data-cat-2); }
+.rankLine[data-cat='3'], .rankPoint[data-cat='3'] { --c: var(--data-cat-3); }
+.rankLine[data-cat='4'], .rankPoint[data-cat='4'] { --c: var(--data-cat-4); }
+.rankLine[data-cat='5'], .rankPoint[data-cat='5'] { --c: var(--data-cat-5); }
+.rankLine[data-cat='6'], .rankPoint[data-cat='6'] { --c: var(--data-cat-6); }
+.rankLine[data-cat='7'], .rankPoint[data-cat='7'] { --c: var(--data-cat-7); }
+.rankLine[data-cat='8'], .rankPoint[data-cat='8'] { --c: var(--data-cat-8); }
+
+.rankLine {
+  fill: none;
+  stroke: var(--c);
+  stroke-width: 1.75;
+  stroke-linejoin: round;
+}
+
+.rankLine[data-on] {
+  stroke-width: 2.5;
+}
+
+/* The step to Borda is a summary of the lines, not another method: dashed. */
+.rankToBorda {
+  stroke-dasharray: 3 3;
+}
+
+.rankPoint {
+  fill: var(--c);
+}
+
+/* The Borda rank in a quieter tone than the name beside it (names can be numbers too). */
+.rankNum {
+  fill: var(--text-3);
+}
+
+/* A selected pair keeps its colour; the other lines, points and names step back (a state change, MOTION.md). */
+.rankPlot[data-dimmed] .rankLine:not([data-on]),
+.rankPlot[data-dimmed] .rankPoint:not([data-on]) {
+  opacity: 0.25;
+}
+
+.rankPlot[data-dimmed] .rankName:not([data-on]) {
+  opacity: 0.5;
+}
+
+.rankPlot[data-dimmed] .rankName[data-on] {
+  font-weight: 600;
+}
+
+.rankHit {
+  fill: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+.rankHit[aria-pressed='true'] {
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.rankHit:hover,
+.rankHit:focus-visible {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.rankReason {
+  margin: 0;
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
+}

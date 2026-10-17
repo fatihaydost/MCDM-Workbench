@@ -228,6 +228,25 @@ the accent with a caret. `role="img"`.
 
 Use: the workbench's empty Data state, above "Load example" / "Start blank".
 
+## RankLines
+
+The Compare stage's chart: one column per method, one line per alternative across them (y = its
+competition rank, ties share a y), the Borda rank at the right end after a dashed step. Where two
+lines cross, two neighbouring methods order that pair differently; each crossing is a button
+(`data-testid="crossing"`, `data-pair="i-k"`, roving tabindex, arrow keys / Home / End, Enter,
+Space or click call `onSelectPair`). The selected pair keeps its colour, the rest step back.
+A column with `ranking: null` shows its `reason` instead of points; a column `note` is a line
+under the chart (`data-testid="<methodId>-note"`). Rows are 22 px, so 47 alternatives stay
+readable; the width follows the container. Table: alternatives by Borda rank, methods + Borda.
+
+| Prop | Type | Notes |
+|---|---|---|
+| `columns` | `{ methodId, label, ranking: number[] \| null, note?, reason? }[]` | In the method order. |
+| `borda` | `number[] \| null` | Borda ranks per alternative. |
+| `names` | `string[]` | Alternative names. |
+| `selected` / `onSelectPair` | `[number, number] \| null` / `(pair) => void` | Controlled. |
+| `labels` | `Partial<RankLinesLabels>` | `title`, `description`, `showTable`, `alternative`, `borda`, `notRanked`, `crossing(a, b, from, to)`. |
+
 ## Pure helpers (`geometry.ts`, tested in `geometry.test.ts`)
 
 `topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale

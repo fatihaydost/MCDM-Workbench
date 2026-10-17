@@ -1,4 +1,17 @@
 {
   "blocked": "Fewer than two methods can rank this data, so there is nothing to compare yet.",
-  "weightsBlocked": "The weights are not complete yet, so no method can rank."
+  "weightsBlocked": "The weights are not complete yet, so no method can rank.",
+  "chart": {
+    "title": "Rank under each method",
+    "description": "Each line is one alternative; where two lines cross, the methods disagree on that pair.",
+    "borda": "Borda",
+    "notRanked": "Not ranked",
+    "crossing": "{{a}} and {{b}} swap places between {{from}} and {{to}}"
+  },
+  "vikorNote": "VIKOR's own rule: compromise set {{list}}",
+  "summary": {
+    "w": "Agreement (Kendall's W): {{w}}",
+    "first": "First place is the same in {{n}} of {{of}} methods",
+    "ranked": "{{n}} of {{of}} methods ranked"
+  }
 }

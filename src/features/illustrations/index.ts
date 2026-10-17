@@ -10,3 +10,4 @@ export { SawContributions, SAW_CONTRIBUTIONS_LABELS_EN, type SawContributionsLab
 export { CRITIC_FLOW, ENTROPY_FLOW, ENTROPY_MINMAX_FLOW, TOPSIS_FLOW, VIKOR_FLOW, EDAS_FLOW, criticParts, edasParts, divergingSegments, entropyParts, sawParts, vikorParts, isoQSegment, stackSegments, defaultAxes, distancePoints, topsisProjection, type FlowNode } from './geometry'
 export { VikorIdea, VIKOR_IDEA_LABELS_EN, type VikorIdeaLabels, type VikorIdeaProps } from './VikorIdea'
 export { EdasIdea, EDAS_IDEA_LABELS_EN, type EdasIdeaLabels, type EdasIdeaProps } from './EdasIdea'
+export { RankLines, RANK_LINES_LABELS_EN, type RankLinesColumn, type RankLinesLabels, type RankLinesProps } from './RankLines'

@@ -1,4 +1,17 @@
 {
   "blocked": "İkiden az yöntem bu veriyi sıralayabiliyor, bu yüzden karşılaştıracak bir şey yok.",
-  "weightsBlocked": "Ağırlıklar henüz tamam değil, bu yüzden hiçbir yöntem sıralayamıyor."
+  "weightsBlocked": "Ağırlıklar henüz tamam değil, bu yüzden hiçbir yöntem sıralayamıyor.",
+  "chart": {
+    "title": "Her yöntemde sıra",
+    "description": "Her çizgi bir alternatif; iki çizginin kesiştiği yerde yöntemler o çift için ayrışır.",
+    "borda": "Borda",
+    "notRanked": "Sıralanmadı",
+    "crossing": "{{a}} ile {{b}}, {{from}} ve {{to}} arasında yer değiştirir"
+  },
+  "vikorNote": "VIKOR'un kendi kuralı: uzlaşık küme {{list}}",
+  "summary": {
+    "w": "Uyum (Kendall W): {{w}}",
+    "first": "Birinci sıra {{of}} yöntemin {{n}} tanesinde aynı",
+    "ranked": "{{of}} yöntemden {{n}} tanesi sıraladı"
+  }
 }
