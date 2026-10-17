@@ -13,6 +13,9 @@ import { textLink, usePageMeta } from '../landing/usePageMeta'
 import { MethodIdea } from './MethodIdea'
 import { doiHref, pageContainer, shortOrigin, SourceItem, splitSentences, StatusLabel } from './shared'
 
+// App's preloadRoute loads the idea picture through this chunk (it is the page's, not the main chunk's).
+export { preloadIdea } from './MethodIdea'
+
 const SECTIONS = ['idea', 'details', 'algorithm', 'combined', 'reference', 'sources'] as const
 type SectionId = (typeof SECTIONS)[number]
 const DETAIL_TABS = ['when', 'whenNot', 'inputs', 'pitfalls'] as const

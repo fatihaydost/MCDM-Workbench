@@ -39,7 +39,8 @@ a typo, keep both the printed and the corrected values (card rule) and test agai
   - Header comment: variant chosen, source, `See docs/research/methods/<id>.md`.
   - Min-max with cost inversion: reuse `minMaxNormalize(problem)` (`src/core/math.ts`, used by CRITIC, SD and
     Entropy min-max); it also flags near-constant columns (`isNearConstant`) for a `<id>.near-constant-column` warning.
-- [ ] **Registry** `src/core/registry.ts:6-7`: add to `weighting` or `ranking`. [S] without it the workbench computes
+- [ ] **Registry** `src/core/registry.ts`: add the id to `WEIGHTING_IDS` or `RANKING_IDS` and the method to the
+  `weightingById` / `rankingById` record next to it [T] (the store's id types derive from these arrays, §3). [S] without it the workbench computes
   nothing (`computeWeights` / `computeRanking` look methods up by id, `src/state/workbench.ts:312,328`) and the
   robustness worker answers "unknown ranking method" (`robustness.worker.ts:31`).
   [U] `tests/validate.test.ts:78-79` hard-codes the registry lists; update them.
@@ -71,8 +72,9 @@ a typo, keep both the printed and the corrected values (card rule) and test agai
 
 ## 3. Workbench state (`src/state/workbench.ts`)
 
-- [ ] `WeightMethodId` / `RankingMethodId` (:25-26): add the id. This is what makes §4 fail the typecheck until it is
-  done, which is useful.
+- [ ] Nothing to add for the id: `WeightMethodId` (core weighting ids + `'manual'`) and `RankingMethodId` derive from
+  `WEIGHTING_IDS` / `RANKING_IDS` (§1). The new id then fails the typecheck in `methodViews` (§4) until the method
+  has its view, which is useful.
 - [ ] `computeWeights` (:290) and `computeRanking` (:323) need no change for a registry method; equal and manual
   are the only special cases.
 - [ ] `loadExample` (:144-158) sets `weightMethod` to `'manual'` when the example has weights, otherwise `'critic'`,
@@ -84,50 +86,59 @@ a typo, keep both the printed and the corrected values (card rule) and test agai
 - [ ] `tests/workbench-state.test.ts`: add a "through the store" case like `:48-60` (example or fixture in,
   published numbers out).
 
-## 4. Workbench UI (`src/app/workbench`)
+## 4. Method view (`src/app/methods/views`) and workbench UI (`src/app/workbench`)
+
+Everything the UI shows per method lives in **one view module per method**: `src/app/methods/views/<id>.ts` (copy
+`sd.ts` for weighting, `edas.ts` for ranking), its pictures in `<id>.pictures.tsx`, the entry in `methodViews` in
+`views/index.ts`. `methodViews` is keyed by every store id [T], and its entry order is the order of the segmented
+controls, the catalogue cards and the landing ledger. Fields (`views/types.ts`, all optional but `kind`):
+
+| Field | Used by |
+|---|---|
+| `kind` | which segmented control and catalogue row |
+| `columns` (step key + header key), `columnsFromSm` | extra table columns before the weight (Weights) or the score (Ranking); `columnsFromSm` hides them below 640 px |
+| `stage` | the picture on the Weights / Ranking stage (`StagePictureProps`: core `problem`, `weights`, `params`, `className?`) |
+| `pictureShowsScores` | ranking: the stage picture draws every score in rank order, so it replaces the score chart (SAW, VIKOR, EDAS) |
+| `idea` (`example` + `Picture`) | the method page picture (§6) |
+| `thumb(kit)` | the catalogue card picture (§6) |
+| `verdict` | ranking: the method's own answer when it is not just the first by score (VIKOR's compromise set): Results headline and workbook, the rail, Compare's note |
+| `ledger` | the landing row (§8) |
+
+Pictures are lazy: each slot is `preloadable(() => import('./<id>.pictures').then((m) => ({ default: m.Stage })))`,
+so no illustration enters the catalogue, landing or main chunk. Import illustrations by their own path inside the
+pictures module, never through `features/illustrations/index.ts` (a barrel import pulls them all into the importer's
+chunk). The view module itself stays light: data, loaders, core calls.
 
 Weighting method:
 
-- [ ] `WeightsStage.tsx:22` `METHODS`: add the id where it should appear in the segmented control.
+- [ ] Its position in `methodViews` places it in the segmented control.
   [E] `tests/e2e/workbench.spec.ts:201-213` walks CRITIC → Equal weights → Manual with the arrow keys; inserting
   between them changes the sequence. Update the test or append after Manual (decide with the design).
   Six methods (since MEREC) do not fit one row at 390 px: below `sm` the control is a 3 x 2 grid (`WeightsStage.tsx`
   className); a seventh needs another layout decision.
-- [ ] i18n `workbench.weightMethod.<id>` (en.json:163) and `workbench.weights.methodHint.<id>` (en.json:255).
-  [T] both keys are built from the typed id (`shared.ts:37`, `WeightsStage.tsx:73`).
-- [ ] `ComputedWeights` (`WeightsStage.tsx:89`) is typed `method: 'critic' | 'equal'` [T]. Widen it, then decide what
-  the stage shows: the method's own columns (CRITIC adds σ, conflict, information at :135-155 from its steps), its
-  picture (CRITIC's `CriticIdea` at :105), and **the "Show the calculation" toggle, which is CRITIC-only at :167**
-  [S] (a new method would have no worked calculation on the Weights stage).
-- [ ] Optional: a "Fill with <method> weights" button in `ManualWeights` (CRITIC's at :253-257, `startCritic` key).
+- [ ] i18n `workbench.weightMethod.<id>` and `workbench.weights.methodHint.<id>` [T].
+- [ ] Optional: a "Fill with <method> weights" button in `ManualWeights` (CRITIC's, `startCritic` key).
 
 Ranking method:
 
-- [ ] `RankingStage.tsx:24` `RANKING_METHODS`: add the id where it should appear in the segmented control. i18n
-  `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T].
-- [ ] `RankingStage.tsx:33` `RANKING_VIEWS` (a `Record` over `RankingMethodId`, so a missing entry is [T]): the
-  method's extra table `columns` (step key + header key; TOPSIS D+ and D−, SAW none) and its `Picture` (TOPSIS
-  `TopsisPicture`, SAW `SawPicture`; props `problem`, `weights`, `params`) and `pictureShowsScores` (true when the
-  picture already draws every score as a bar in rank order, as SAW's does: it then replaces the score chart).
-  Everything else on the stage is generic:
-  the score chart sorts by `result.order`, `CalculationToggle` takes the steps.
+- [ ] i18n `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T].
 - [ ] The score's words, `workbench.ranking.score.<id>` in en.json and tr.json [T] (read by `scoreWords`,
   `shared.ts`): `name` ("Closeness C", "Score S": table column, workbook column, sweep table), `title` ("Closeness
   coefficient C", "Weighted sum S": score chart, robustness sweep chart `{{score}}`) and `symbol` ("C", "S": the
   best sentence and the Results headline, `{{symbol}} = {{value}}`). The step line of the score key says which way
   ranks higher ("A higher value ranks higher").
-- [ ] `ResultsStage.tsx` is generic (compact `RankingTable` with `method`, headline and workbook from `scoreWords`,
-  the byline and the About sheet name the variant through `rankingMethodFullLabel`, e.g. "SAW (sum)"). The CRITIC
-  correlation heatmap is gated on CRITIC.
+- [ ] Everything else on the stages is generic: the score chart sorts by `result.order`, `CalculationToggle` takes the
+  steps, Results names the variant through `rankingMethodFullLabel` ("SAW (sum)"). The CRITIC correlation heatmap
+  on Results is gated on CRITIC.
 - [ ] A `ParamDescriptor` on the method shows its control under the selector by itself (`MethodParams`).
 
 Both:
 
-- [ ] `ExplanationPanel.tsx:11` `PanelMethod` and `preloadPanelCards` (:14-16): add the id [T] (`MethodNote id=` at
-  :130-138 takes the store's id). The panel shows the card's first summary sentence and first pitfall; keep a stage
-  under 60 words [E] `tests/e2e/a11y.spec.ts:224` (checked for the example's methods).
-- [ ] `MethodWarnings` (`parts.tsx:146`) renders `warnings.<code>` generically (§13).
-- [ ] `WorkbenchPage.tsx:195`: the rail treats any blocking issue whose code contains "weight" as a weights problem; keep new code names honest.
+- [ ] The explanation panel needs nothing: it takes the core ids (`ExplanationPanel.tsx` `preloadPanelCards`). It
+  shows the card's first summary sentence and first pitfall; keep a stage under 60 words [E]
+  `tests/e2e/a11y.spec.ts:224` (checked for the example's methods).
+- [ ] `MethodWarnings` (`parts.tsx`) renders `warnings.<code>` generically (§13).
+- [ ] `WorkbenchPage.tsx`: the rail treats any blocking issue whose code contains "weight" as a weights problem; keep new code names honest.
 - [ ] Ranking method: add `why.character.<id>` for the Compare stage (§14).
 
 ## 5. Robustness (`src/app/workbench/robustness`, `src/core/robustness.ts`)
@@ -151,17 +162,20 @@ Both:
 - [ ] [U] `content.test.ts:171-178`: the card's `reference.note` must drop "not computed here yet" / "henüz
   hesaplanmıyor" once available. Rewrite the note as a test result (what matched, to how many decimals), set
   `reference.match` from your own test.
-- [ ] `src/app/methods/Catalog.tsx:16-17` `Available` type and `AVAILABLE` list, a thumbnail in `useThumbs()` (:25-39,
-  `MethodThumb` kinds `bars` or `plane`), and i18n `methods.catalog.oneLiner.<id>` (en.json:528).
-  [S] **without this the method disappears from `/methods`**: the research section filters `status === 'research'`
-  and the available section only renders `AVAILABLE`.
+- [ ] The view's `thumb(kit)` (§4: computed from a published example with `kit.problem`, `kit.weights` and
+  `kit.geometry`; a `MethodThumb` kind) and i18n `methods.catalog.oneLiner.<id>`.
+  [S] **without a `thumb` the method disappears from `/methods`**: the research section filters
+  `status === 'research'` and the available section renders the views that have a thumbnail.
 - [ ] `MethodPage.tsx` is generic: status label, the reference block's wording (`available` at :112) and the "Open in
   workbench" buttons (examples whose `referenceFor` includes the id, :113) switch by themselves.
-- [ ] `MethodIdea.tsx`: the picture at the top. TOPSIS and CRITIC have one (`:25-105`); any other method falls back to
-  its family glyph (:110-116). DESIGN.md §Copy asks for the idea as a picture first. Add an illustration in
-  `src/features/illustrations/<Name>Idea.tsx` (numbers from the core, labels as props, tokens only; README there),
-  optionally a step-through story (`IdeaSteps`, `<ID>_IDEA_STEPS`, sentences in `methods.page.idea.<id>.steps.s*`,
-  MOTION.md "Explain" rules), and a branch in `MethodIdea`. Reuse it on the workbench stage.
+- [ ] The picture at the top is the view's `idea`: the published example's id and `Idea` from `<id>.pictures.tsx`
+  (`IdeaPictureProps`: the example and its problem; it renders its own source line, `IdeaSource`). Without one the
+  page shows the family glyph (`MethodIdea.tsx`). DESIGN.md §Copy asks for the idea as a picture first. Add an
+  illustration in `src/features/illustrations/<Name>Idea.tsx` (numbers from the core, labels as props, tokens only;
+  README there), optionally a step-through story (`IdeaSteps`, `<ID>_IDEA_STEPS`, sentences in
+  `methods.page.idea.<id>.steps.s*`, MOTION.md "Explain" rules; see `topsis.pictures.tsx`). Reuse it as the view's
+  `stage` picture. The prerender and `main.tsx` preload the idea's chunk (`preloadIdea` in `App.tsx` `preloadRoute`),
+  so nothing to wire.
 - [ ] Prerender and sitemap need nothing: every card already has a route (`src/app/prerender.tsx:23-35`,
   `vite.config.ts:93-114`).
 - [ ] Guide (`src/content/guide.ts`, `Guide.tsx`) needs nothing: it links every method and reads the status from
@@ -179,10 +193,11 @@ Both:
 ## 8. Landing
 
 - [ ] `CataloguePreview.tsx` counts and groups by status: automatic.
-- [ ] `Verified.tsx:11,36-39` "checked against published results" ledger: rows are hard-coded; the tolerance comes from
-  the fixture's `expected.tolerance`, the citation from `examples.ts`. Add a row (widen `Row.method`, import the
-  fixture) with i18n `landing.verified.<id>.claim` (en.json:85) and `methods.names.<id>` (en.json:476). Optional, but
-  DESIGN.md §Layout says the ledger lists each method.
+- [ ] "Checked against published results" ledger (`Verified.tsx`): one row per view with a `ledger` (§4): the example
+  (citation from `examples.ts`), the fixture with the path of its tolerance (`'<file>.json#expected.tolerance'`) and
+  that tolerance as a number (repeated so the landing chunk does not bundle the fixture;
+  `src/app/methods/views/views.test.ts` keeps them equal [U]). i18n `landing.verified.<id>.claim` and
+  `methods.names.<id>`. Optional, but DESIGN.md §Layout says the ledger lists each method.
 - [ ] `Pipeline.tsx`, `HeroResult.tsx`: stay CRITIC → TOPSIS (the hero example).
 - [ ] Copy that names only CRITIC and TOPSIS: `landing.lead`, `landing.meta.description`, `workbench.meta.*`,
   `workbench.empty.ranking.body`, `index.html` meta, `README.md` (method table, "3 methods compute today"),
@@ -311,7 +326,7 @@ page), else the current one if listed, else the first; `ExampleDataset.buttonLab
   "why" panel for the selected pair. A method that cannot rank (SAW with a 0 cell) shows its issue and is left out of
   Borda and W; with fewer than two methods ranking, the stage is blocked.
 - A new ranking method appears in Compare by itself. It only needs `why.character.<id>` (one sentence on how the
-  method treats a weakness) in both `compare.en.json` and `compare.tr.json`, and its entry in the character map in
-  `compare/why.ts`.
+  method treats a weakness) in both `compare.en.json` and `compare.tr.json`; `compare/why.ts` reads the key by id.
+  A method whose answer can be a set gives its view a `verdict` (§4) and Compare's column gets its one-line note.
 - Agreement statistics in `src/core/robustness.ts` §C.6 (`midRanks`, `spearman`, `kendallTauB`, `wsCoefficient`) are
   used by criterion removal; Kendall's W and Borda live in `compare.ts`.

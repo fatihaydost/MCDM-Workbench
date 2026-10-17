@@ -1,18 +1,19 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
 import { Suspense, use } from 'react'
+import { RANKING_IDS, WEIGHTING_IDS, type RankingId, type WeightingId } from '../../core'
 import { loadMethod } from '../../content/methods/load'
 import { localizeMethod } from '../../content/types'
 import { doiUrl, getExample, shortCitation } from '../../data/examples'
 import { useLang } from '../../i18n'
 import { useWorkbench, type Stage } from '../../state/workbench'
 
-/** The methods the workbench runs. Their cards are chunks of their own (shared with the method pages). */
-type PanelMethod = 'critic' | 'entropy' | 'sd' | 'merec' | 'equal' | 'topsis' | 'saw' | 'vikor' | 'edas'
+/** The methods the workbench runs (the core registry's). Their cards are chunks of their own (shared with method pages). */
+type PanelMethod = WeightingId | RankingId
 
 /** Starts loading the workbench's method cards (WorkbenchPage calls it when its chunk loads). */
 export function preloadPanelCards(): void {
-  for (const id of ['critic', 'entropy', 'sd', 'merec', 'equal', 'topsis', 'saw', 'vikor', 'edas'] as const) void loadMethod(id)
+  for (const id of [...WEIGHTING_IDS, ...RANKING_IDS]) void loadMethod(id)
 }
 
 const linkClass = 'text-accent underline underline-offset-2 hover:no-underline'

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useLayoutEffect, useRef, type ComponentType } from 'react'
+import { lazy, Suspense, useLayoutEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Route, Router, Switch, useLocation } from 'wouter'
 import { TooltipProvider } from '../ui'
@@ -6,27 +6,11 @@ import { NotFound } from './routes/NotFound'
 import { Workbench } from './routes/Workbench'
 import { isMethodId } from '../content/methods/catalog'
 import { loadMethod } from '../content/methods/load'
+import { preloadable } from './preloadable'
 import { TopBar } from './shell/TopBar'
 
 /** Router base without the trailing slash: '' in dev, '/kds-topsis-critic' on GitHub Pages. */
 export const ROUTER_BASE = import.meta.env.BASE_URL.replace(/\/$/, '')
-
-type PageModule<P> = { default: ComponentType<P> }
-
-/**
- * `lazy()` for a page chunk that can also be loaded ahead (`preload`). Once loaded, lazy() gets a
- * thenable that resolves synchronously, so React renders the page in its first commit instead of a
- * fallback. main.tsx relies on it to replace a prerendered page (vite.config.ts) without a blank
- * frame; the build-time prerender relies on it to render at all.
- */
-function preloadable<P>(load: () => Promise<PageModule<P>>) {
-  let mod: PageModule<P> | undefined
-  const preload = (): Promise<PageModule<P>> => load().then((m) => (mod = m))
-  const Component = lazy(() =>
-    mod ? ({ then: (resolve: (m: PageModule<P>) => void) => resolve(mod!) } as unknown as Promise<PageModule<P>>) : preload(),
-  )
-  return { Component, preload }
-}
 
 // Landing and method pages load on demand; each method page loads its own card (content/methods/load.ts).
 const LandingPage = preloadable(() => import('./landing/Landing'))
@@ -48,7 +32,11 @@ export async function preloadRoute(path: string): Promise<boolean> {
   if (p === '/' || p === '') return LandingPage.preload().then(() => true)
   if (p === '/methods') return CatalogPage.preload().then(() => true)
   const id = METHOD_PATH.exec(p)?.[1]
-  if (id && isMethodId(id)) return Promise.all([MethodPagePage.preload(), loadMethod(id)]).then(() => true)
+  // The page, the card and the method's idea picture (a chunk of its own, src/app/methods/views).
+  if (id && isMethodId(id)) {
+    const page = MethodPagePage.preload().then((m) => (m as typeof import('./methods/MethodPage')).preloadIdea(id))
+    return Promise.all([page, loadMethod(id)]).then(() => true)
+  }
   return false
 }
 

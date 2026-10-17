@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next'
-import type { PairFacts } from '../../../core'
+import { RANKING_IDS, type PairFacts, type RankingId } from '../../../core'
 
 export type WhyContext = {
   names: string[]
@@ -13,6 +13,8 @@ export type WhyContext = {
 }
 
 const MAX_SENTENCES = 5
+
+const isRankingId = (id: string): id is RankingId => (RANKING_IDS as readonly string[]).includes(id)
 
 /**
  * The "why" text for one pair, from the pair facts only. Character sentences are kept to the methods on the side that
@@ -60,9 +62,10 @@ export function whySentences(f: PairFacts, ctx: WhyContext): string[] {
   const rep = (ids: string[]) => [ids.includes('vikor') ? 'vikor' : ids[0]!]
   const shown = na === nb ? [...(na ? rep(side('a')) : []), ...(nb ? rep(side('b')) : [])] : na < nb ? side('a') : side('b')
   const head = [...criteria, ...groups, ...ties]
+  // Every ranking method has its sentence at why.character.<id>.
   const characters = shown
-    .filter((id) => id in CHARACTER)
-    .map((id) => t(CHARACTER[id as keyof typeof CHARACTER]))
+    .filter(isRankingId)
+    .map((id) => t(`why.character.${id}`))
     .slice(0, Math.max(0, MAX_SENTENCES - head.length))
   const v = shown.includes('vikor') ? f.vikorRegret : null
   const regret = !v ? [] : Math.abs(v.ra - v.rb) < 1e-12
@@ -74,10 +77,3 @@ export function whySentences(f: PairFacts, ctx: WhyContext): string[] {
       ]
   return [...head, ...characters, ...regret].slice(0, MAX_SENTENCES)
 }
-
-const CHARACTER = {
-  topsis: 'why.character.topsis',
-  saw: 'why.character.saw',
-  vikor: 'why.character.vikor',
-  edas: 'why.character.edas',
-} as const

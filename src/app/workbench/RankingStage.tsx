@@ -1,10 +1,7 @@
-import { useCallback, useMemo, type ReactNode } from 'react'
+import { Suspense, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getRankingMethod, type MethodParams as Params, type RankingResult } from '../../core'
-import type { SawNormalization } from '../../core/methods/saw'
-import { VIKOR_DEFAULT_V } from '../../core/methods/vikor'
+import { getRankingMethod, type RankingResult } from '../../core'
 import { BarChart } from '../../features/charts'
-import { EdasIdea, SawContributions, TopsisGeometry, VikorIdea } from '../../features/illustrations'
 import { useNumberFormat } from '../../i18n'
 import {
   isEmptyProblem,
@@ -17,75 +14,11 @@ import {
   type RankingMethodId,
 } from '../../state/workbench'
 import { Button, cn, EmptyState, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../ui'
+import { methodViews, RANKING_VIEW_IDS } from '../methods/views'
 import { MethodParams } from './MethodParams'
-import { useEdasLabels } from './edasLabels'
-import { useVikorLabels } from './vikorLabels'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
 import { alternativeName, DECIMALS, findStep, scoreWords, tr, weightMethodFullLabel } from './shared'
-
-const RANKING_METHODS: readonly RankingMethodId[] = ['topsis', 'saw', 'vikor', 'edas']
-
-type PictureProps = { problem: DraftProblem; weights: readonly number[]; params: Params; className?: string }
-
-/**
- * What the Ranking stage shows for each ranking method, below the generic parts (score chart, table, calculation).
- * The score's words come from workbench.ranking.score.<id> (`scoreWords`) and its order from `result.order`, so a
- * new method only adds an entry here (and its words). A Record, so a new id does not compile without one.
- */
-const RANKING_VIEWS: Readonly<
-  Record<
-    RankingMethodId,
-    {
-      /** Intermediate results shown as columns before the score in the full ranking table: step key and header key. */
-      columns: readonly { step: string; label: string }[]
-      /** Hide those columns below 640 px, so the score that decides the rank is never the one scrolled off. */
-      columnsFromSm?: boolean
-      /** The method's idea drawn on the current problem, next to the score chart. */
-      Picture: (props: PictureProps) => ReactNode
-      /**
-       * Whether the picture already shows every score as a bar in rank order, so the score chart would repeat it
-       * (SAW: each bar ends at S). Then the picture takes the chart's place.
-       */
-      pictureShowsScores: boolean
-    }
-  >
-> = {
-  topsis: {
-    columns: [
-      { step: 'topsis.distanceBest', label: 'workbench.ranking.columns.dPlus' },
-      { step: 'topsis.distanceWorst', label: 'workbench.ranking.columns.dMinus' },
-    ],
-    Picture: TopsisPicture,
-    pictureShowsScores: false,
-  },
-  // No columns: the contributions are the picture (each bar ends at S, so it replaces the score chart), and the full
-  // matrix is in the calculation.
-  saw: { columns: [], Picture: SawPicture, pictureShowsScores: true },
-  // S and R before Q in the table; the picture draws every Q as a bar in rank order (with the DQ band), so it takes
-  // the score chart's place.
-  vikor: {
-    columns: [
-      { step: 'vikor.groupUtility', label: 'workbench.ranking.columns.groupUtility' },
-      { step: 'vikor.individualRegret', label: 'workbench.ranking.columns.individualRegret' },
-    ],
-    // S and R are long numbers in long headers; at phone width the plane's table still has them.
-    columnsFromSm: true,
-    Picture: VikorPicture,
-    pictureShowsScores: true,
-  },
-  // SP and SN before AS; the picture draws both as one diverging bar per alternative in rank order with AS beside it,
-  // so it takes the score chart's place.
-  edas: {
-    columns: [
-      { step: 'edas.sp', label: 'workbench.ranking.columns.aboveAverage' },
-      { step: 'edas.sn', label: 'workbench.ranking.columns.belowAverage' },
-    ],
-    columnsFromSm: true,
-    Picture: EdasPicture,
-    pictureShowsScores: true,
-  },
-}
 
 /** Alternatives in rank order (ties keep input order). */
 export function rankOrder(result: RankingResult): number[] {
@@ -117,9 +50,10 @@ export function RankingTable({
 }) {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.score)
-  const extra = compact ? [] : RANKING_VIEWS[method].columns.map((c) => ({ ...c, values: findStep(result.steps, c.step)?.vector }))
+  const view = methodViews[method]
+  const extra = compact ? [] : (view.columns ?? []).map((c) => ({ ...c, values: findStep(result.steps, c.step)?.vector }))
   const order = rankOrder(result)
-  const narrowHidden = !compact && RANKING_VIEWS[method].columnsFromSm === true
+  const narrowHidden = !compact && view.columnsFromSm === true
   const extraClass = narrowHidden ? 'max-sm:hidden' : undefined
   const wide = extra.length > 0
   return (
@@ -192,94 +126,6 @@ export function ScoreChart({ problem, result, method, className }: { problem: Dr
   )
 }
 
-/** TOPSIS as a picture: alternatives, A+ and A- on the two heaviest criteria (features/illustrations). */
-export function TopsisPicture({ problem, weights, className }: PictureProps) {
-  const { t } = useTranslation()
-  const nf = useNumberFormat(DECIMALS.score)
-  const format = useCallback((v: number) => nf.format(v), [nf])
-  const core = useMemo(() => toProblem(problem), [problem])
-  return (
-    <TopsisGeometry
-      problem={core}
-      weights={weights}
-      format={format}
-      labels={{
-        title: t('workbench.visual.topsis.title'),
-        caption: t('workbench.visual.topsis.caption'),
-        projectionNote: t('workbench.visual.topsis.projectionNote'),
-        ideal: 'A+',
-        antiIdeal: 'A−',
-        dPlus: 'D+',
-        dMinus: 'D−',
-        formula: 'C = D− / (D+ + D−)',
-        select: t('workbench.visual.topsis.select'),
-        point: (name, value) => t('workbench.visual.topsis.point', { name, value }),
-        // The picture's own words are shared with the TOPSIS method page.
-        viewLabel: t('methods.page.idea.topsis.view'),
-        viewDistances: t('methods.page.idea.topsis.viewDistances'),
-        viewCriteria: t('methods.page.idea.topsis.viewCriteria'),
-        axisDPlus: t('methods.page.idea.topsis.axisDPlus'),
-        axisDMinus: t('methods.page.idea.topsis.axisDMinus'),
-        isoC: (c) => t('methods.page.idea.topsis.iso', { c }),
-        planeCaption: t('methods.page.idea.topsis.planeCaption'),
-        higherBetter: (name) => t('methods.page.idea.topsis.higherBetter', { name }),
-        lowerBetter: (name) => t('methods.page.idea.topsis.lowerBetter', { name }),
-        showTable: t('workbench.chart.showTable'),
-        alternative: t('workbench.alternative'),
-        closeness: 'C',
-      }}
-      className={cn('max-w-[640px]', className)}
-    />
-  )
-}
-
-/** SAW as a picture: each alternative's score as a stack of its criteria's contributions (features/illustrations). */
-export function SawPicture({ problem, weights, params, className }: PictureProps) {
-  const { t } = useTranslation()
-  const nf = useNumberFormat(DECIMALS.score)
-  const format = useCallback((v: number) => nf.format(v), [nf])
-  const core = useMemo(() => toProblem(problem), [problem])
-  const normalization = params.normalization as SawNormalization | undefined
-  return (
-    <SawContributions
-      problem={core}
-      weights={weights}
-      params={normalization ? { normalization } : {}}
-      format={format}
-      labels={{
-        title: t('workbench.visual.saw.title'),
-        showTable: t('workbench.chart.showTable'),
-        alternative: t('workbench.alternative'),
-        score: scoreWords('saw', t).name,
-        legend: t('workbench.visual.saw.legend'),
-        others: t('workbench.visual.saw.others'),
-        segment: (alternative, criterion, value, score) => t('workbench.visual.saw.segment', { alternative, criterion, value, score }),
-        readout: (alternative, criterion, value, score) => t('workbench.visual.saw.readout', { alternative, criterion, value, score }),
-      }}
-      className={cn('max-w-[760px]', className)}
-    />
-  )
-}
-
-/** VIKOR as a picture: S against R with the DQ threshold line, Q with the DQ band, C1 and C2 in words. */
-export function VikorPicture({ problem, weights, params, className }: PictureProps) {
-  const labels = useVikorLabels('workbench.visual.vikor.title')
-  const nf = useNumberFormat(DECIMALS.score)
-  const format = useCallback((v: number) => nf.format(v), [nf])
-  const core = useMemo(() => toProblem(problem), [problem])
-  const v = typeof params.v === 'number' ? params.v : VIKOR_DEFAULT_V
-  return <VikorIdea problem={core} weights={weights} params={{ v }} format={format} labels={labels} className={cn('max-w-[880px]', className)} />
-}
-
-/** EDAS as a picture: each alternative's weighted distance above (right) and below (left) the average, AS beside it. */
-export function EdasPicture({ problem, weights, className }: PictureProps) {
-  const labels = useEdasLabels('workbench.visual.edas.title', 'workbench.visual.edas.caption')
-  const nf = useNumberFormat(DECIMALS.score)
-  const format = useCallback((v: number) => nf.format(v), [nf])
-  const core = useMemo(() => toProblem(problem), [problem])
-  return <EdasIdea problem={core} weights={weights} format={format} labels={labels} className={cn('max-w-[880px]', className)} />
-}
-
 export function RankingStage() {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.score)
@@ -292,6 +138,7 @@ export function RankingStage() {
   const ranking = useRanking()
   const weights = useWeights()
   const { goTo } = useWorkbenchNav()
+  const core = useMemo(() => toProblem(problem), [problem])
 
   if (isEmptyProblem(problem)) {
     return (
@@ -305,7 +152,9 @@ export function RankingStage() {
 
   const result = ranking.value
   const best = result ? bestIndex(result) : -1
-  const { Picture, pictureShowsScores } = RANKING_VIEWS[rankingMethod]
+  const view = methodViews[rankingMethod]
+  const Picture = view.stage?.Component
+  const pictureShowsScores = view.pictureShowsScores === true
 
   return (
     <div className="flex flex-col gap-6 pt-4">
@@ -314,7 +163,7 @@ export function RankingStage() {
           aria-label={t('workbench.rankingMethod.label')}
           value={rankingMethod}
           onValueChange={setRankingMethod}
-          options={RANKING_METHODS.map((m) => ({ value: m, label: t(`workbench.rankingMethod.${m}`) }))}
+          options={RANKING_VIEW_IDS.map((m) => ({ value: m, label: t(`workbench.rankingMethod.${m}`) }))}
           size="md"
           className="self-start"
         />
@@ -351,7 +200,11 @@ export function RankingStage() {
           </p>
           <div className={cn('grid grid-cols-1 items-start gap-8', !pictureShowsScores && 'xl:grid-cols-2')}>
             {!pictureShowsScores && <ScoreChart problem={problem} result={result} method={rankingMethod} className="min-w-0" />}
-            {weights.value && <Picture problem={problem} weights={weights.value.weights} params={rankingParams} className="min-w-0" />}
+            {weights.value && Picture && (
+              <Suspense fallback={null}>
+                <Picture problem={core} weights={weights.value.weights} params={rankingParams} className="min-w-0" />
+              </Suspense>
+            )}
           </div>
           <section className="flex flex-col gap-3">
             <SectionTitle>

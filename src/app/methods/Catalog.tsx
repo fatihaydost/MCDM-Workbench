@@ -1,73 +1,39 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
-import { critic, sd, type Problem } from '../../core'
+import type { Problem, WeightingId } from '../../core'
 import { allMethods, FAMILY_ORDER, methodsByFamily } from '../../content/methods/catalog'
 import { getExample } from '../../data/examples'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
-import { MethodThumb } from '../../features/illustrations/MethodThumb'
-import { argMax, distancePoints, edasParts, entropyParts, merecParts, sawParts, topsisProjection, vikorParts } from '../../features/illustrations/geometry'
+import * as geometry from '../../features/illustrations/geometry'
+import { MethodThumb, type MethodThumbProps } from '../../features/illustrations/MethodThumb'
 import { useLang } from '../../i18n'
 import { SiteFooter } from '../landing/SiteFooter'
 import { usePageMeta } from '../landing/usePageMeta'
 import { Guide } from './Guide'
 import { pageContainer } from './shared'
-
-type Available = 'critic' | 'entropy' | 'sd' | 'merec' | 'topsis' | 'saw' | 'vikor' | 'edas' | 'equal'
-/** The available methods in two rows, weighting first (the order of the workbench), then ranking. */
-const AVAILABLE: Readonly<Record<'weighting' | 'ranking', readonly Available[]>> = {
-  weighting: ['critic', 'entropy', 'sd', 'merec', 'equal'],
-  ranking: ['topsis', 'saw', 'vikor', 'edas'],
-}
+import { methodViews, RANKING_VIEW_IDS, WEIGHTING_VIEW_IDS, type ThumbKit } from './views'
 
 function exampleProblem(id: string): Problem {
   const ex = getExample(id)!
   return { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
 }
 
-/** The pictures on the available methods' cards, computed from the published examples. */
+/**
+ * The available methods in two rows, weighting first (the order of the workbench), then ranking: a card per view with a
+ * thumbnail (every core method; not the store's manual weights).
+ */
+const AVAILABLE = {
+  weighting: WEIGHTING_VIEW_IDS.filter((id): id is WeightingId => methodViews[id].thumb !== undefined),
+  ranking: RANKING_VIEW_IDS.filter((id) => methodViews[id].thumb !== undefined),
+}
+
+/** The pictures on the available methods' cards, computed from the published examples (each view's `thumb`). */
 function useThumbs() {
   return useMemo(() => {
-    const phones = exampleProblem('krishnan-2021-smartphones')
-    const weights = critic.compute(phones, {}).weights
-    // TOPSIS on its own reference example: three well spread points (Opricovic and Tzeng 2004).
-    const climbing = exampleProblem('opricovic-tzeng-2004-f')
-    const proj = topsisProjection(climbing, [0.5, 0.5])
-    const plane = proj ? distancePoints(proj) : []
-    const n = phones.criteria.length
-    // Entropy on its reference example: the most even criterion's shares next to the most uneven one's.
-    const vilnius = entropyParts(exampleProblem('zavadskas-2017-vilnius'))
-    const sharesOf = (j: number) => vilnius?.shares.map((row) => row[j]!) ?? []
-    // SD on its reference example: the weights as bars, the largest in the accent.
-    const sdWeights = sd.compute(exampleProblem('diakoulaki-1995-pharma'), {}).weights
-    // MEREC on its reference example: per criterion the drops its removal causes, stacked (the bar is E), largest first.
-    const mr = merecParts(exampleProblem('keshavarz-2021-merec'))
-    const merecRows = mr ? mr.effect.map((_, j) => j).sort((a, b) => mr.effect[b]! - mr.effect[a]!).map((j) => mr.drops[j]!) : []
-    // SAW on its reference example: each country's score as a stack of contributions, best first.
-    const baltic = getExample('podvezko-2011-baltic')!
-    const sawP = sawParts(exampleProblem(baltic.id), baltic.weights!)
-    // VIKOR on its ten-alternative example: S against R, the DQ line and the compromise set (C1 fails there).
-    const ten = getExample('keshavarz-2015-ten-alternatives')!
-    const vk = vikorParts(exampleProblem(ten.id), ten.weights!)
-    // EDAS on the same example: each alternative's SN to the left of the average line and SP to the right, best first.
-    const ed = edasParts(exampleProblem(ten.id), ten.weights!)
-    return {
-      critic: { kind: 'bars' as const, values: weights, highlight: argMax(weights) },
-      topsis: { kind: 'plane' as const, points: plane, highlight: proj ? argMax(proj.closeness) : undefined },
-      entropy: { kind: 'shares' as const, even: sharesOf(vilnius?.pair[0] ?? 0), uneven: sharesOf(vilnius?.pair[1] ?? 1) },
-      sd: { kind: 'bars' as const, values: sdWeights, highlight: argMax(sdWeights) },
-      merec: { kind: 'stack' as const, rows: merecRows },
-      saw: { kind: 'stack' as const, rows: sawP ? sawP.order.map((i) => sawP.contributions[i]!) : [] },
-      vikor: {
-        kind: 'compromise' as const,
-        points: vk ? vk.sTerm.map((x, i) => ({ x, y: vk.rTerm[i]! })) : [],
-        v: vk?.v ?? 0.5,
-        q: vk ? vk.Q[vk.compromise.first]! + vk.compromise.dq : 0,
-        inSet: vk?.compromise.set ?? [],
-      },
-      edas: { kind: 'diverging' as const, rows: ed ? ed.order.map((i) => ({ below: ed.sn[i]!, above: ed.sp[i]! })) : [] },
-      equal: { kind: 'bars' as const, values: Array.from({ length: n }, () => 1 / n), highlight: undefined },
-    }
+    const kit: ThumbKit = { problem: exampleProblem, weights: (id) => getExample(id)!.weights!, geometry }
+    const ids = [...AVAILABLE.weighting, ...AVAILABLE.ranking]
+    return Object.fromEntries(ids.map((id) => [id, methodViews[id].thumb!(kit)])) as Record<(typeof ids)[number], MethodThumbProps>
   }, [])
 }
 

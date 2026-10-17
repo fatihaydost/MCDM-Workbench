@@ -7,6 +7,7 @@ import { compareRankings, getRankingMethod, rankingMethods } from '../../core'
 import { isEmptyProblem, paramsFor, STAGES, toProblem, useMethodParams, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
 import { Skeleton } from '../../ui'
 import { usePageMeta } from '../landing/usePageMeta'
+import { methodViews, preloadStagePictures } from '../methods/views'
 import { WorkbenchLayout } from '../shell/WorkbenchLayout'
 import { DataStage } from './DataStage'
 import { ExplanationPanel, preloadPanelCards } from './ExplanationPanel'
@@ -15,11 +16,11 @@ import { bestIndex, RankingStage } from './RankingStage'
 import { ResultsStage } from './ResultsStage'
 import { useRobustnessSummary } from './robustnessSummary'
 import { alternativeName, rankingMethodFullLabel, weightMethodFullLabel } from './shared'
-import { vikorCompromiseOf } from './vikorLabels'
 import { WeightsStage } from './WeightsStage'
 
-// The panel's method cards load alongside this chunk, not after the first render.
+// The panel's method cards and the stages' pictures load alongside this chunk, not after the first render.
 preloadPanelCards()
+preloadStagePictures()
 
 // Robustness (its charts, texts and the Monte Carlo worker) is a chunk of its own: /app does not load it up front.
 // Once loaded it renders directly, not through lazy(): a lazy component suspends again on every mount, and React holds
@@ -261,8 +262,9 @@ export default function WorkbenchPage() {
     const rankingLabel = rankingMethodFullLabel(rankingMethod, rankingParams, t)
     stageMeta.ranking = <StageStatus state={ranking.value ? 'done' : 'pending'}>{rankingLabel}</StageStatus>
     if (ranking.value) {
-      // VIKOR's answer can be a compromise set: name it (at most three, then a count), not only the first by Q.
-      const set = rankingMethod === 'vikor' ? vikorCompromiseOf(ranking.value)?.set : undefined
+      // A method's own answer can be a set (VIKOR's compromise set): name it (at most three, then a count).
+      const names = problem.alternatives.map((_, i) => alternativeName(problem, i, t))
+      const set = methodViews[rankingMethod].verdict?.(ranking.value, names, t, String)?.set
       const shown = set && set.length > 1 ? set : [bestIndex(ranking.value)]
       const label = shown.slice(0, 3).map((i) => alternativeName(problem, i, t)).join(', ') + (shown.length > 3 ? ` +${shown.length - 3}` : '')
       stageMeta.results = <StageStatus state="done">{label}</StageStatus>

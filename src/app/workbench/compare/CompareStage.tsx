@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { compareRankings, defaultPair, rankingMethods, vikorCompromise, type Comparison } from '../../../core'
-import { RankLines, type RankLinesColumn } from '../../../features/illustrations'
+import { compareRankings, defaultPair, rankingMethods, type Comparison } from '../../../core'
+import { RankLines, type RankLinesColumn } from '../../../features/illustrations/RankLines'
 import { useNumberFormat } from '../../../i18n'
 import { isEmptyProblem, paramsFor, toProblem, useWeights, useWorkbench } from '../../../state/workbench'
 import { Button, EmptyState } from '../../../ui'
+import { viewOf } from '../../methods/views'
 import { useWorkbenchNav } from '../nav'
 import { BlockedByIssues } from '../parts'
-import { alternativeName, findStep, placeIssue, tr } from '../shared'
+import { alternativeName, placeIssue, tr } from '../shared'
 import { useCompareText } from './text'
 import { WhyPanel } from './WhyPanel'
 
@@ -84,10 +85,8 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
       const issue = r.issues.find((x) => x.severity === 'error')
       return { methodId: r.methodId, label, ranking: null, reason: issue && placeIssue(issue, draft, t, nf.format).message }
     }
-    const S = findStep(r.result.steps, 'vikor.groupUtility')?.vector
-    const R = findStep(r.result.steps, 'vikor.individualRegret')?.vector
-    // VIKOR's column is its Q order; when its own rule gives no single winner, one line says so (decision 6).
-    const set = r.methodId === 'vikor' && S && R ? vikorCompromise(S, R, r.result.scores).set : []
+    // A column is the method's score order; when its answer is a set (VIKOR's compromise set), a line says so (decision 6).
+    const set = viewOf(r.methodId)?.verdict?.(r.result, names, t, nf.format)?.set ?? []
     const note = set.length > 1 ? tc('vikorNote', { list: set.map((i) => names[i]).join(', ') }) : undefined
     return { methodId: r.methodId, label, ranking: r.result.ranking, note }
   })

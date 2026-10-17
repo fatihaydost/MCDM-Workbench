@@ -1,15 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getWeightingMethod, type ValidationIssue, type WeightingResult } from '../../core'
-import type { EntropyNormalization } from '../../core/methods/entropy'
 import { getExample, shortCitation } from '../../data/examples'
-import { BarChart, ChartTableModeProvider } from '../../features/charts'
-import { CriticIdea, EntropyIdea, MerecIdea, SdIdea } from '../../features/illustrations'
+import { BarChart } from '../../features/charts'
 import { useNumberFormat } from '../../i18n'
 import {
   computeWeights,
-  toProblem,
   isEmptyProblem,
+  toProblem,
   useMethodParams,
   useWeights,
   useWorkbench,
@@ -17,31 +15,14 @@ import {
   type WeightMethodId,
 } from '../../state/workbench'
 import { Button, cn, EmptyState, ErrorSummary, NumberInput, SegmentedControl, Table, TBody, Td, Th, THead, Tr, type ErrorSummaryItem } from '../../ui'
+import { methodViews, WEIGHTING_VIEW_IDS } from '../methods/views'
 import { MethodParams } from './MethodParams'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
 import { criterionName, DECIMALS, findStep, ids, placeIssue, sumDecimals, tr, weightMethodLabel } from './shared'
 
-const METHODS: readonly WeightMethodId[] = ['critic', 'entropy', 'sd', 'merec', 'equal', 'manual']
-
 /** A weighting method that the core computes (everything but manual). */
 type ComputedMethod = Exclude<WeightMethodId, 'manual'>
-
-/** Intermediate results shown as columns next to the weight, per method: step key and column header. */
-const EXTRA_COLUMNS: Partial<Record<ComputedMethod, readonly { step: string; label: string }[]>> = {
-  critic: [
-    { step: 'critic.sigma', label: 'workbench.weights.columns.sigma' },
-    { step: 'critic.conflict', label: 'workbench.weights.columns.conflict' },
-    { step: 'critic.information', label: 'workbench.weights.columns.information' },
-  ],
-  // d next to w: on homogeneous data tiny differences in d decide the weights (docs/research/methods/entropy.md).
-  entropy: [
-    { step: 'entropy.entropy', label: 'workbench.weights.columns.entropy' },
-    { step: 'entropy.diversification', label: 'workbench.weights.columns.diversification' },
-  ],
-  sd: [{ step: 'sd.sigma', label: 'workbench.weights.columns.spread' }],
-  merec: [{ step: 'merec.removalEffect', label: 'workbench.weights.columns.removalEffect' }],
-}
 
 export function WeightsStage() {
   const { t } = useTranslation()
@@ -85,7 +66,7 @@ export function WeightsStage() {
           aria-label={t('workbench.weightMethod.label')}
           value={weightMethod}
           onValueChange={setWeightMethod}
-          options={METHODS.map((m) => ({ value: m, label: weightMethodLabel(m, t) }))}
+          options={WEIGHTING_VIEW_IDS.map((m) => ({ value: m, label: weightMethodLabel(m, t) }))}
           size="md"
           // Six methods do not fit one row at 390 px: below sm the segments form a 3 x 2 grid across the width.
           className="self-start max-sm:grid max-sm:grid-cols-3 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
@@ -113,10 +94,12 @@ export function WeightsStage() {
 function ComputedWeights({ problem, method, result }: { problem: DraftProblem; method: ComputedMethod; result: WeightingResult }) {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.weight)
-  const format = useCallback((v: number) => nf.format(v), [nf])
   const names = problem.criteria.map((_, j) => criterionName(problem.criteria, j, t))
-  const extra = (EXTRA_COLUMNS[method] ?? []).map((c) => ({ ...c, values: findStep(result.steps, c.step)?.vector }))
-  const entropyParams = useMethodParams('entropy')
+  const view = methodViews[method]
+  const extra = (view.columns ?? []).map((c) => ({ ...c, values: findStep(result.steps, c.step)?.vector }))
+  const params = useMethodParams(method)
+  const Picture = view.stage?.Component
+  const core = useMemo(() => toProblem(problem), [problem])
   const n = problem.criteria.length
 
   return (
@@ -125,77 +108,10 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
       {method === 'equal' && (
         <p className="text-14 text-text">{t('workbench.weights.equalNote', { n, value: nf.format(1 / n) })}</p>
       )}
-      {method === 'critic' && (
-        // The table right below shows the same numbers, so the picture keeps its table for
-        // screen readers only instead of a third copy behind "Show as table".
-        <ChartTableModeProvider value="screen-reader">
-          <CriticIdea
-            problem={toProblem(problem)}
-            format={format}
-            labels={{
-              title: t('workbench.visual.critic.title'),
-              contrast: t('workbench.visual.critic.contrast'),
-              conflict: t('workbench.visual.critic.conflict'),
-              weight: t('workbench.visual.critic.weight'),
-              information: t('workbench.visual.critic.information'),
-              showTable: t('workbench.chart.showTable'),
-              criterion: t('workbench.criterion'),
-            }}
-            className="max-w-[760px]"
-          />
-        </ChartTableModeProvider>
-      )}
-      {method === 'entropy' && (
-        <ChartTableModeProvider value="screen-reader">
-          <EntropyIdea
-            problem={toProblem(problem)}
-            params={{ normalization: entropyParams.normalization as EntropyNormalization }}
-            format={format}
-            labels={{
-              title: t('workbench.visual.entropy.title'),
-              even: t('workbench.visual.entropy.even'),
-              entropy: t('workbench.visual.entropy.entropy'),
-              weight: t('workbench.visual.entropy.weight'),
-              share: t('workbench.visual.entropy.share'),
-              showTable: t('workbench.chart.showTable'),
-              alternative: t('workbench.alternative'),
-            }}
-            className="max-w-[760px]"
-          />
-        </ChartTableModeProvider>
-      )}
-      {method === 'sd' && (
-        <ChartTableModeProvider value="screen-reader">
-          <SdIdea
-            problem={toProblem(problem)}
-            format={format}
-            labels={{
-              title: t('workbench.visual.sd.title'),
-              spread: t('workbench.visual.sd.spread'),
-              weight: t('workbench.visual.sd.weight'),
-              showTable: t('workbench.chart.showTable'),
-              criterion: t('workbench.criterion'),
-            }}
-            className="max-w-[760px]"
-          />
-        </ChartTableModeProvider>
-      )}
-      {method === 'merec' && (
-        <ChartTableModeProvider value="screen-reader">
-          <MerecIdea
-            problem={toProblem(problem)}
-            format={format}
-            labels={{
-              title: t('workbench.visual.merec.title'),
-              drop: t('workbench.visual.merec.drop'),
-              effect: t('workbench.visual.merec.effect'),
-              weight: t('workbench.visual.merec.weight'),
-              showTable: t('workbench.chart.showTable'),
-              criterion: t('workbench.criterion'),
-            }}
-            className="max-w-[760px]"
-          />
-        </ChartTableModeProvider>
+      {Picture && (
+        <Suspense fallback={null}>
+          <Picture problem={core} weights={result.weights} params={params} />
+        </Suspense>
       )}
       <section className="flex flex-col gap-3">
         <SectionTitle>
