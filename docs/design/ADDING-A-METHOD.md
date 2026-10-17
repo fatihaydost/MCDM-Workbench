@@ -311,6 +311,6 @@ page), else the current one if listed, else the first; `ExampleDataset.buttonLab
   Borda and W; with fewer than two methods ranking, the stage is blocked.
 - A new ranking method appears in Compare by itself. It only needs `why.character.<id>` (one sentence on how the
   method treats a weakness) in both `compare.en.json` and `compare.tr.json`, and its entry in the character map in
-  `compare/why.ts` (a `Record` over `RankingMethodId`, so a miss is a type error).
+  `compare/why.ts`.
 - Agreement statistics in `src/core/robustness.ts` §C.6 (`midRanks`, `spearman`, `kendallTauB`, `wsCoefficient`) are
   used by criterion removal; Kendall's W and Borda live in `compare.ts`.
