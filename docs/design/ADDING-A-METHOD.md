@@ -126,10 +126,8 @@ Both:
   :130-138 takes the store's id). The panel shows the card's first summary sentence and first pitfall; keep a stage
   under 60 words [E] `tests/e2e/a11y.spec.ts:224` (checked for the example's methods).
 - [ ] `MethodWarnings` (`parts.tsx:146`) renders `warnings.<code>` generically (§13).
-- [ ] `WorkbenchPage.tsx:195`: the rail treats any blocking issue whose code contains "weight" as a weights problem;
-
-Ranking method: add `why.character.<id>` for the Compare stage (§14).
-  keep new code names honest.
+- [ ] `WorkbenchPage.tsx:195`: the rail treats any blocking issue whose code contains "weight" as a weights problem; keep new code names honest.
+- [ ] Ranking method: add `why.character.<id>` for the Compare stage (§14).
 
 ## 5. Robustness (`src/app/workbench/robustness`, `src/core/robustness.ts`)
 
