@@ -635,7 +635,7 @@
       },
       "sd": {
         "title": "Wider spread, more weight",
-        "spread": "Spread (σ)",
+        "spread": "Spread σ",
         "weight": "Weight"
       }
     },
@@ -883,7 +883,7 @@
         },
         "sd": {
           "title": "Wider spread, more weight",
-          "spread": "Spread (σ)",
+          "spread": "Spread σ",
           "weight": "Weight",
           "caption": "Each dot is one alternative on the 0 to 1 scale; the ruler under the dots is σ.",
           "weightHead": "Weight = σ / {{total}}"
@@ -953,7 +953,7 @@
     },
     "sd": {
       "normalized": "Min-max normalization: each column is rescaled to the range 0 to 1, with cost criteria reversed so that 1 is always the best value.",
-      "sigma": "Spread: the sample standard deviation of each normalized column. Criterion types do not change it.",
+      "sigma": "Spread: the sample standard deviation of each normalized column.",
       "sigmaTotal": "Total spread over all criteria.",
       "weights": "Weights: each criterion's share of the total spread."
     }

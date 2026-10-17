@@ -635,7 +635,7 @@
       },
       "sd": {
         "title": "Geniş yayılım, çok ağırlık",
-        "spread": "Yayılım (σ)",
+        "spread": "Yayılım σ",
         "weight": "Ağırlık"
       }
     },
@@ -883,7 +883,7 @@
         },
         "sd": {
           "title": "Geniş yayılım, çok ağırlık",
-          "spread": "Yayılım (σ)",
+          "spread": "Yayılım σ",
           "weight": "Ağırlık",
           "caption": "Her nokta 0 ile 1 ölçeğinde bir alternatif; noktaların altındaki cetvel σ.",
           "weightHead": "Ağırlık = σ / {{total}}"
@@ -953,7 +953,7 @@
     },
     "sd": {
       "normalized": "Min-maks normalizasyonu: her sütun 0 ile 1 arasına ölçeklenir, maliyet kriterleri ters çevrilir; böylece 1 her zaman en iyi değerdir.",
-      "sigma": "Yayılım: normalize edilmiş her sütunun örneklem standart sapması. Kriter türü bunu değiştirmez.",
+      "sigma": "Yayılım: normalize edilmiş her sütunun örneklem standart sapması.",
       "sigmaTotal": "Tüm kriterlerin toplam yayılımı.",
       "weights": "Ağırlıklar: her kriterin toplam yayılım içindeki payı."
     }

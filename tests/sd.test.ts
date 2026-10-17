@@ -67,8 +67,7 @@ describe('SD: properties', () => {
   it('a constant column gets weight 0 and a warning', () => {
     const res = sd.compute(makeProblem(dm1.map((row) => [row[0]!, row[1]!, 150, row[3]!, row[4]!]), mukTypes), {})
     expect(res.weights[2]).toBe(0)
-    // Card, Pitfalls, prints 3 d.p.; w4 = 0.2315 there reads 0.232, hence 1e-3.
-    expectClose(res.weights, [0.265, 0.256, 0, 0.232, 0.247], 1e-3)
+    expectClose(res.weights, [0.2652, 0.2564, 0, 0.2315, 0.247], 1e-4) // card, Pitfalls (recomputed)
     expect(res.warnings).toContainEqual({ code: 'sd.constant-column', col: 2 })
     expect(res.diagnostics?.constantColumns).toBe(1)
   })

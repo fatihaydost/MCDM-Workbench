@@ -14,7 +14,7 @@ type Props = {
   weights: readonly number[]
   /** The ranking method and options. */
   run: RankingRun
-  /** The objective weighting method (CRITIC, Entropy) when the weights come from one: offers "recompute". */
+  /** The objective weighting method when the weights come from one: offers "recompute". */
   weighting: WeightingMethod | undefined
   /** Its options, so the recompute runs the same variant. */
   weightingParams: MethodParams
@@ -25,7 +25,7 @@ type Props = {
 
 /**
  * D: leave one criterion out. One row per dropped criterion: does first place hold, and how close is the new ranking
- * to yours (Spearman ρ, WS). With objective weights (CRITIC, Entropy) the rest can be rescaled or the method run again
+ * to yours (Spearman ρ, WS). With weights from an objective weighting method the rest can be rescaled or the method run again
  * without the criterion.
  */
 export function RemovalSection({ problem, weights, run, weighting, weightingParams, weightingName, names, criteria }: Props) {

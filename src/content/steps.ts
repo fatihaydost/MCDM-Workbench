@@ -65,8 +65,8 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
     tr: 'Min-maks normalize matris: her sütun 0-1 aralığına iner, 1 en iyidir (maliyet ters).',
     tex: String.raw`r_{ij} = \begin{cases} \dfrac{x_{ij} - \min_i x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{+} \\[2ex] \dfrac{\max_i x_{ij} - x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{-} \end{cases}`,
     edgeCase: {
-      en: 'A constant column (max = min) is set to 0 in every row.',
-      tr: 'Sabit bir sütun (maks = min) her satırda 0 alınır.',
+      en: 'A constant column (max ≈ min, relative 1e-12) is 0 in every row.',
+      tr: 'Sabit bir sütun (maks ≈ min, göreli 1e-12) her satırda 0 alınır.',
     },
   },
   'critic.sigma': {
@@ -166,8 +166,8 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
     tr: 'Min-maks normalize matris: her sütun 0-1 aralığına iner, 1 en iyidir (maliyet ters).',
     tex: String.raw`r_{ij} = \begin{cases} \dfrac{x_{ij} - \min_i x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{+} \\[2ex] \dfrac{\max_i x_{ij} - x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{-} \end{cases}`,
     edgeCase: {
-      en: 'A constant column (max = min) is set to 0 in every row.',
-      tr: 'Sabit bir sütun (maks = min) her satırda 0 alınır.',
+      en: 'A constant column (max ≈ min, relative 1e-12) is 0 in every row.',
+      tr: 'Sabit bir sütun (maks ≈ min, göreli 1e-12) her satırda 0 alınır.',
     },
   },
   'sd.sigma': {

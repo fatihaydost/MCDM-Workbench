@@ -24,7 +24,7 @@ export type SdIdeaLabels = {
 /** Development defaults only: the pages pass translated labels. */
 export const SD_IDEA_LABELS_EN: SdIdeaLabels = {
   title: 'Wider spread, more weight',
-  spread: 'Spread (σ)',
+  spread: 'Spread σ',
   weight: 'Weight',
   showTable: 'Show as table',
   criterion: 'Criterion',
@@ -64,7 +64,8 @@ export function SdIdea({ problem, format = defaultFormat, labels, className }: S
 
   // Columns: name | strip | → | weight + value.
   const W = Math.max(width, 280)
-  const nameW = Math.ceil(Math.min(Math.max(...problem.criteria.map((c) => estimateTextWidth(c.name, 13))) + 12, W * 0.26, 140))
+  // No fixed cap: on a wide figure long names fit; on a phone the 26 % share still truncates them.
+  const nameW = Math.ceil(Math.min(Math.max(...problem.criteria.map((c) => estimateTextWidth(c.name, 13))) + 12, W * 0.26))
   const valueW = Math.ceil(Math.max(...weightTexts.map((t) => estimateTextWidth(t, 13))) + 8)
   const free = Math.max(120, W - nameW - valueW - OP)
   const stripW = free * 0.55
