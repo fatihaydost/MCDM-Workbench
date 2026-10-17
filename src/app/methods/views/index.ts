@@ -44,7 +44,7 @@ export const RANKING_VIEW_IDS = ids.filter((id): id is RankingMethodId => method
 export const viewOf = (id: string): MethodView | undefined =>
   Object.hasOwn(methodViews, id) ? methodViews[id as ViewId] : undefined
 
-/** Starts loading every stage picture (the workbench calls it when its chunk loads). */
-export function preloadStagePictures(): void {
-  for (const id of ids) void methodViews[id].stage?.preload()
+/** Loads every stage picture; settles when all have loaded or failed (a failed one suspends again when rendered). */
+export function preloadStagePictures(): Promise<unknown> {
+  return Promise.allSettled(ids.map((id) => methodViews[id].stage?.preload()))
 }

@@ -1,5 +1,5 @@
 import { CheckCircle, WarningCircle } from '@phosphor-icons/react'
-import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { lazy, Suspense, use, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getExample } from '../../data/examples'
 import { useLang } from '../../i18n'
@@ -18,9 +18,11 @@ import { useRobustnessSummary } from './robustnessSummary'
 import { alternativeName, rankingMethodFullLabel, weightMethodFullLabel } from './shared'
 import { WeightsStage } from './WeightsStage'
 
-// The panel's method cards and the stages' pictures load alongside this chunk, not after the first render.
+// The panel's method cards load alongside this chunk, not after the first render.
 preloadPanelCards()
-preloadStagePictures()
+// The stages' pictures (chunks of their own) load alongside too, and the page waits for them (`use` below, under the
+// route's skeleton): a deep link to Weights or Ranking renders its picture in the first frame, so the table never shifts.
+const stagePictures = preloadStagePictures()
 
 // Robustness (its charts, texts and the Monte Carlo worker) is a chunk of its own: /app does not load it up front.
 // Once loaded it renders directly, not through lazy(): a lazy component suspends again on every mount, and React holds
@@ -133,6 +135,7 @@ function StageStatus({ state, children }: { state: StageState; children: ReactNo
 const NO_ATTEMPTS: Record<Stage, boolean> = { data: false, weights: false, ranking: false, results: false, robustness: false, compare: false }
 
 export default function WorkbenchPage() {
+  use(stagePictures)
   const { t } = useTranslation()
   usePageMeta(t('workbench.meta.title'), t('workbench.meta.description'))
   useQueryBootstrap()

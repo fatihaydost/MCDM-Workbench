@@ -350,6 +350,32 @@ test('MEREC: the illustrative example gives the published weights and the pictur
   await expect(page.locator('#wb-cell-1-2')).toBeFocused()
 })
 
+test('a cold deep link to a stage renders its picture in the first frame: the table below does not shift', async ({ page }) => {
+  // Every animation frame from the first: where the weights table first appears and whether the picture was there.
+  await page.addInitScript(() => {
+    const w = window as unknown as { firstTable?: { top: number; picture: boolean } }
+    const tick = () => {
+      const table = document.querySelector('table[aria-labelledby="wb-weights-table"]')
+      if (table && !w.firstTable) w.firstTable = { top: table.getBoundingClientRect().top, picture: document.querySelector('main figure') !== null }
+      if (!w.firstTable) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  })
+  // A slow network for the picture chunks, so a page that rendered before them would show the table first.
+  await page.route(/\.pictures\b/, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 600))
+    await route.continue()
+  })
+  await page.goto('/app?example=keshavarz-2021-merec&stage=weights')
+  const table = page.getByRole('table', { name: 'Weights by criterion' })
+  await expect(table).toBeVisible()
+  await page.waitForLoadState('networkidle')
+  const first = await page.evaluate(() => (window as unknown as { firstTable?: { top: number; picture: boolean } }).firstTable)
+  const settled = await table.evaluate((el) => el.getBoundingClientRect().top)
+  expect(first?.picture).toBe(true)
+  expect(first?.top).toBe(settled)
+})
+
 test('SAW: the Podvezko example ranks with SAW, sum changes the scores, the contributions add up to S, TOPSIS brings back D+ and D−', async ({ page }) => {
   const ex = getExample('podvezko-2011-baltic')!
   const p = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
