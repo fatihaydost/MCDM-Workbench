@@ -482,6 +482,49 @@ export const examples: readonly ExampleDataset[] = [
     // Table 7 at λ = 0.5, the slider's default; the paper prints every λ from 0 to 1 (tests/fixtures/waspas-adali2017.json).
     published: [{ label: 'waspas.scores', values: [0.805, 0.7751, 0.7702, 0.7964, 0.7882], decimals: 4 }],
   },
+  {
+    id: 'ozcan-celik-2021-separators',
+    name: { en: 'Cream separators (Özcan and Çelik 2021)', tr: 'Krema separatörleri (Özcan ve Çelik 2021)' },
+    buttonLabel: { en: 'Cream separators', tr: 'Krema separatörleri' },
+    summary: {
+      en: 'Seven cream separators for a dairy on seven criteria, four of them cost, weighted by Entropy. The paper reports the COPRAS Q; its rank row swaps A2 and A3, so the ranks here follow the printed Q.',
+      tr: 'Bir süt işletmesi için yedi krema separatörü, dördü maliyet olmak üzere yedi kriter, Entropi ağırlıklarıyla. Makale COPRAS Q değerlerini veriyor; sıra satırı A2 ile A3\'ü yer değiştirmiş, bu yüzden buradaki sıralar basılı Q\'yu izliyor.',
+    },
+    // The paper's chain: Entropy weights from Table 1 (our Entropy reproduces Table 2 within 5e-5), then COPRAS. The
+    // printed weights sum to 0.9999, so the example opens with Entropy instead of typing them in.
+    referenceFor: ['entropy', 'copras'],
+    citation: {
+      authors: 'Özcan, S.; Çelik, A.K.',
+      year: 2021,
+      title: 'A comparison of TOPSIS, grey relational analysis and COPRAS methods for machine selection problem in the food industry of Turkey',
+      venue: 'International Journal of Production Management and Engineering 9(2), 81-92',
+      doi: '10.4995/ijpme.2021.14734',
+      tables: { en: 'Table 1 (input), Table 2 (Entropy weights), Tables 10 and 11 (output)', tr: 'Tablo 1 (girdi), Tablo 2 (Entropi ağırlıkları), Tablo 10 ve 11 (çıktı)' },
+    },
+    alternatives: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7'],
+    criteria: [
+      { name: { en: 'Separation performance', tr: 'Ayırma performansı' }, type: 'benefit' },
+      { name: { en: 'Drum discharge volume', tr: 'Tambur boşaltma hacmi' }, type: 'benefit' },
+      { name: { en: 'Drum turnover', tr: 'Tambur devri' }, type: 'benefit' },
+      { name: { en: 'Energy consumption', tr: 'Enerji tüketimi' }, type: 'cost' },
+      { name: { en: 'Weight', tr: 'Ağırlık' }, type: 'cost' },
+      { name: { en: 'Price', tr: 'Fiyat' }, type: 'cost' },
+      { name: { en: 'Number of separators', tr: 'Separatör sayısı' }, type: 'cost' },
+    ],
+    matrix: [
+      [10, 3.5, 7.7, 15, 1.3, 39, 2],
+      [20, 6, 6.8, 20, 1.6, 65, 1],
+      [15, 9, 5.05, 30, 1.6, 60, 2],
+      [18, 15, 6.2, 18.5, 1.3, 68, 1],
+      [10, 15, 5.7, 18.5, 1.5, 87, 2],
+      [20, 18, 6.2, 18.5, 1.8, 120, 1],
+      [12.5, 15, 5.1, 15, 1.1, 42, 2],
+    ],
+    published: [
+      { label: 'entropy.weights', values: [0.1186, 0.3442, 0.0323, 0.086, 0.0368, 0.2148, 0.1672], decimals: 4 },
+      { label: 'copras.significance', values: [0.1137, 0.134, 0.1206, 0.1702, 0.1377, 0.1615, 0.1623], decimals: 4 },
+    ],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

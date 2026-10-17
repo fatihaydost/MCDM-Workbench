@@ -14,7 +14,7 @@ const ROWS: readonly MethodMeta[] = [
   { id: 'cilos', name: { en: 'CILOS', tr: 'CILOS' }, family: 'weighting-objective', status: 'research', year: 2016 },
   { id: 'cocoso', name: { en: 'CoCoSo', tr: 'CoCoSo' }, family: 'ranking-utility', status: 'research', year: 2019 },
   { id: 'codas', name: { en: 'CODAS', tr: 'CODAS' }, family: 'ranking-distance', status: 'research', year: 2016 },
-  { id: 'copras', name: { en: 'COPRAS', tr: 'COPRAS' }, family: 'ranking-utility', status: 'research', year: 1994 },
+  { id: 'copras', name: { en: 'COPRAS', tr: 'COPRAS' }, family: 'ranking-utility', status: 'available', year: 1994 },
   { id: 'critic', name: { en: 'CRITIC', tr: 'CRITIC' }, family: 'weighting-objective', status: 'available', year: 1995 },
   { id: 'edas', name: { en: 'EDAS', tr: 'EDAS' }, family: 'ranking-distance', status: 'available', year: 2015 },
   { id: 'electre-i', name: { en: 'ELECTRE I', tr: 'ELECTRE I' }, family: 'ranking-outranking', status: 'research', year: 1968 },

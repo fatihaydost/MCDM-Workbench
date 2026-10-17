@@ -115,6 +115,9 @@
       },
       "waspas": {
         "claim": "All 55 scores of Table 7, λ from 0 to 1, match {{citation}} to {{decimals}} decimals, with the three rank orders the paper reports."
+      },
+      "copras": {
+        "claim": "All seven Q values of Table 11 and every cell of Table 10 match {{citation}} to {{decimals}} decimals; the printed rank row swaps A2 and A3, the printed Q does not."
       }
     },
     "catalogue": {
@@ -201,7 +204,8 @@
       "saw": "SAW",
       "vikor": "VIKOR",
       "edas": "EDAS",
-      "waspas": "WASPAS"
+      "waspas": "WASPAS",
+      "copras": "COPRAS"
     },
     "params": {
       "entropy": {
@@ -376,7 +380,8 @@
         "saw": "Weights the rescaled values of each criterion and adds them up.",
         "vikor": "Looks for a compromise between the best total (S) and the smallest worst regret (R); a lower Q is better.",
         "edas": "Scores each alternative by how far it lies above and below the average of all alternatives; a higher AS is better.",
-        "waspas": "Blends a weighted sum with a weighted product, which punishes a very weak value harder; a higher Q is better."
+        "waspas": "Blends a weighted sum with a weighted product, which punishes a very weak value harder; a higher Q is better.",
+        "copras": "Adds up each alternative's weighted share of the benefit criteria plus a bonus that grows as its cost share shrinks; a higher Q is better."
       },
       "columns": {
         "rank": "Rank",
@@ -388,7 +393,8 @@
         "aboveAverage": "Above average SP",
         "belowAverage": "Below average SN",
         "wsm": "Sum Q1",
-        "wpm": "Product Q2"
+        "wpm": "Product Q2",
+        "utility": "Utility degree N (%)"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -415,6 +421,11 @@
         "waspas": {
           "name": "Score Q",
           "title": "WASPAS score Q",
+          "symbol": "Q"
+        },
+        "copras": {
+          "name": "Relative significance Q",
+          "title": "COPRAS relative significance Q",
           "symbol": "Q"
         }
       },
@@ -565,6 +576,14 @@
         "wpm": "Weighted product Q2",
         "scores": "Score Q",
         "lambdaSweep": "Q at every λ"
+      },
+      "copras": {
+        "normalizedSum": "Shares of the column total r",
+        "weighted": "Weighted shares d",
+        "sPlus": "Benefit sum S+",
+        "sMinus": "Cost sum S-",
+        "significance": "Relative significance Q",
+        "utility": "Utility degree N (%)"
       }
     },
     "issues": {
@@ -693,6 +712,16 @@
         "noSwaps": "No two lines cross: the order is the same at every λ.",
         "point": "{{alternative}}, λ = {{lambda}}: Q = {{value}}, rank {{rank}}",
         "readout": "At λ = {{lambda}}: {{order}}"
+      },
+      "copras": {
+        "title": "Benefit share plus cost bonus",
+        "caption": "Each bar is S+ (benefit share) plus the cost bonus, which grows as the cost share S- shrinks; it ends at Q, then N in percent of the best.",
+        "legend": "Parts of Q",
+        "benefit": "Benefit share S+",
+        "bonus": "Cost bonus",
+        "segment": "{{alternative}}, {{part}}: {{value}} (Q = {{score}}, N = {{utility}})",
+        "readout": "{{alternative}}: {{part}} {{value}} of Q = {{score}}",
+        "percent": "{{value}} %"
       }
     },
     "flow": {
@@ -751,6 +780,12 @@
         "wsm": "Sum and product",
         "scores": "Q",
         "lambdaSweep": "λ sweep"
+      },
+      "copras": {
+        "normalizedSum": "Shares",
+        "sPlus": "S+ and S-",
+        "significance": "Q",
+        "utility": "N (%)"
       }
     },
     "pipeline": {
@@ -762,7 +797,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR, EDAS or WASPAS and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS or COPRAS and see every step of the calculation."
     }
   },
   "methods": {
@@ -783,7 +818,8 @@
       "edas": "EDAS",
       "sd": "SD",
       "merec": "MEREC",
-      "waspas": "WASPAS"
+      "waspas": "WASPAS",
+      "copras": "COPRAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -841,7 +877,8 @@
         "edas": "Measures the distance above and below the average.",
         "sd": "Weights from how widely the data spread.",
         "merec": "Weights from what removing a criterion changes.",
-        "waspas": "Blends a weighted sum with a weighted product."
+        "waspas": "Blends a weighted sum with a weighted product.",
+        "copras": "Adds benefit shares and a bonus for a small cost share."
       },
       "groups": {
         "weighting": "Weighting",
@@ -972,6 +1009,10 @@
         "waspas": {
           "title": "Sum or product: λ sets the blend",
           "caption": "Each line is one alternative; where two lines cross, they swap places. The vertical line marks λ = 0.5."
+        },
+        "copras": {
+          "title": "Benefit share plus a bonus for low cost",
+          "caption": "Each bar is S+ (benefit share) plus the cost bonus, which grows as the cost share S- shrinks; it ends at Q, then N in percent of the best."
         }
       }
     }
@@ -1056,6 +1097,14 @@
       "wpm": "Weighted product Q2: each normalized value raised to its criterion weight, multiplied together. It is never above Q1.",
       "scores": "Score Q = λ Q1 + (1 - λ) Q2. A higher value ranks higher.",
       "lambdaSweep": "Q at λ = 0, 0.1, ..., 1: where two alternatives swap places as λ moves."
+    },
+    "copras": {
+      "normalizedSum": "Shares r: each value divided by its column total, for benefit and cost criteria alike.",
+      "weighted": "Weighted shares d = w r: each column now adds up to its criterion weight.",
+      "sPlus": "Benefit sum S+: the weighted shares of the benefit criteria, added up.",
+      "sMinus": "Cost sum S-: the weighted shares of the cost criteria, added up. A smaller S- is better.",
+      "significance": "Relative significance Q = S+ plus the cost weight shared out by 1 / S-. A higher value ranks higher; the Q values add up to 1.",
+      "utility": "Utility degree N: Q as a percentage of the largest Q, so the best alternative has 100."
     }
   },
   "validation": {
@@ -1124,6 +1173,9 @@
       "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead.",
       "dominant-weight": "{{criterion}} takes more than half of the weight, so check that its range is real.",
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet MEREC gives it a removal effect. Check whether the difference is real."
+    },
+    "copras": {
+      "no-cost-criteria": "There is no cost criterion with a weight above 0, so Q = S+ and COPRAS gives the same result as SAW with the sum option."
     }
   }
 }

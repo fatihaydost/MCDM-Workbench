@@ -209,6 +209,24 @@ criterion (negative = below the average), SP, SN, AS.
 Use: `/methods/edas` "The idea" (Keshavarz Ghorabaee et al. 2015, ten alternatives, set 1); workbench Ranking stage
 when the method is EDAS (it replaces the score chart).
 
+## CoprasBonus
+
+COPRAS as a picture: one horizontal bar per alternative, in rank order, made of two parts: the benefit share S+_i
+(`--data-cat-1`) and the cost bonus Q_i - S+_i = W_C (1 / S-_i) / Σ (1 / S-_k) (`--data-cat-5`, not red: the bonus is
+good news). The bar ends at Q_i, printed after it; the utility degree N_i closes the row on the right. Hover and keyboard
+as SawContributions (left / right: the two parts). Numbers from `coprasParts(problem, weights)` (the core's COPRAS
+steps). Table: S+, bonus, Q, N per alternative, in rank order.
+
+| Prop | Type | Notes |
+|---|---|---|
+| `problem` | `Problem` | Renders nothing when COPRAS cannot run (a value of 0 or less). |
+| `weights` | `number[]` | |
+| `format`, `formatPercent` | `(n) => string` | Q and its parts (4 decimals); N with its locale's percent sign (2 decimals). |
+| `labels` | `{ title, caption?, showTable, alternative, score, utility, legend, benefit, bonus, segment(a, p, v, s, u), readout(a, p, v, s) }` | Translations in `workbench.visual.copras.*` and `methods.page.idea.copras.*`. |
+
+Use: `/methods/copras` "The idea" (Özcan and Çelik 2021, Entropy weights from the data); workbench Ranking stage when
+the method is COPRAS (it replaces the score chart).
+
 ## StepFlow
 
 Map of the worked calculation: numbered square nodes on a hairline, the active one in the accent,
@@ -266,7 +284,7 @@ lines cross, two neighbouring methods order that pair differently; each crossing
 Space or click call `onSelectPair`). The selected pair keeps its colour, the rest step back.
 A column with `ranking: null` shows its `reason` instead of points; a column `note` is a line
 under the chart (`data-testid="<methodId>-note"`). Rows are 22 px, so 47 alternatives stay
-readable; the width follows the container. Table: alternatives by Borda rank, methods + Borda.
+readable; the width follows the container. Heads wider than a column step (six methods at 390 px) alternate between two lines. Table: alternatives by Borda rank, methods + Borda.
 
 | Prop | Type | Notes |
 |---|---|---|
@@ -281,7 +299,7 @@ readable; the width follows the container. Table: alternatives by Borda rank, me
 `topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale
 screen scales, values growing right and up), `distancePoints(proj)`, `closenessAt(p)`,
 `isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `placeLabels(...)`, `ISO_C_DEFAULT`, `linePath(...)`, `pointCss(...)`,
-`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sdParts(problem)`, `merecParts(problem)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `edasParts(problem, weights)`, `divergingSegments(above, below, center, px)`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `argMax`, `flowIndex`. The
+`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sdParts(problem)`, `merecParts(problem)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `edasParts(problem, weights)`, `coprasParts(problem, weights)`, `divergingSegments(above, below, center, px)`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `argMax`, `flowIndex`. The
 tests check that A+ / A- and C equal the core and the published values (Opricovic and Tzeng 2004:
 C = 0.762, 0.722, 0.238; Krishnan et al. 2021: σ and weights), that the distance plane places every
 alternative at the core's (D+, D-) with C = y / (x + y) and the core's order, that each ray keeps its

@@ -6,7 +6,7 @@ export const copras: MethodContent = {
   name: { en: 'COPRAS', tr: 'COPRAS' },
   fullName: { en: 'COmplex PRoportional ASsessment', tr: 'Karmaşık oransal değerlendirme' },
   family: 'ranking-utility',
-  status: 'research',
+  status: 'available',
   year: 1994,
   origin: {
     authors: 'Zavadskas, E.K.; Kaklauskas, A.; Šarka, V.',
@@ -14,14 +14,18 @@ export const copras: MethodContent = {
     title: 'The new method of multicriteria complex proportional assessment of projects',
     venue: 'Technological and Economic Development of Economy 1(3), 131-139',
     note: {
-      en: 'Commonly cited origin; no DOI found and the details are not verified against a primary page. Podvezko (2011) attributes the method to Zavadskas & Kaklauskas (1996); the formulas follow Podvezko (2011).',
-      tr: 'Yaygın atıf yapılan kaynak; DOI bulunamadı, künye birincil bir sayfadan doğrulanmadı. Podvezko (2011) yöntemi Zavadskas ve Kaklauskas (1996) kaynağına bağlar; formüller Podvezko (2011) anlatımını izler.',
+      en: 'The origin the authors cite themselves; no DOI and no copy online, so it was not opened. The formulas follow their own restatement (Zavadskas, Kaklauskas, Peldschus & Turskis 2007, Eqs. 1-6), checked against Podvezko (2011).',
+      tr: 'Yazarların kendilerinin atıf yaptığı kaynak; DOI yok, çevrimiçi kopyası da yok, bu yüzden açılmadı. Formüller yazarların kendi yeniden anlatımını (Zavadskas, Kaklauskas, Peldschus ve Turskis 2007, Denklem 1-6) izler, Podvezko (2011) ile karşılaştırıldı.',
     },
   },
   steps: [
     {
-      title: { en: 'Sum normalization and weighting', tr: 'Toplam normalizasyonu ve ağırlıklandırma' },
-      tex: String.raw`d_{ij} = \frac{w_j\, x_{ij}}{\sum_{i=1}^{m} x_{ij}}`,
+      title: { en: 'Weighted shares of the column total', tr: 'Sütun toplamındaki ağırlıklı paylar' },
+      tex: String.raw`d_{ij} = \frac{w_j\, x_{ij}}{\sum_{k=1}^{m} x_{kj}}`,
+      note: {
+        en: 'Benefit and cost columns alike; nothing is inverted.',
+        tr: 'Fayda ve maliyet sütunlarında aynı; hiçbir şey ters çevrilmez.',
+      },
     },
     {
       title: { en: 'Benefit and cost sums', tr: 'Fayda ve maliyet toplamları' },
@@ -29,27 +33,34 @@ export const copras: MethodContent = {
     },
     {
       title: { en: 'Relative significance', tr: 'Göreli önem' },
-      tex: String.raw`Q_i = S_{+i} + \frac{\sum_{i=1}^{m} S_{-i}}{S_{-i} \sum_{i=1}^{m} \frac{1}{S_{-i}}}`,
+      tex: String.raw`Q_i = S_{+i} + W_C\, \frac{1 / S_{-i}}{\sum_{k=1}^{m} 1 / S_{-k}}, \qquad W_C = \sum_{j \in J^{-}} w_j`,
       note: {
-        en: 'With no cost criteria, Q equals S+.',
-        tr: 'Maliyet kriteri yoksa Q, S+ değerine eşittir.',
+        en: 'With no cost criteria, or cost weights that are all 0, Q equals S+ (SAW with the sum option).',
+        tr: 'Maliyet kriteri yoksa ya da maliyet ağırlıklarının hepsi 0 ise Q, S+ olur (toplam seçenekli SAW).',
       },
     },
     {
       title: { en: 'Utility degree', tr: 'Fayda derecesi' },
-      tex: String.raw`N_i = \frac{Q_i}{\max_k Q_k} \times 100\%`,
+      tex: String.raw`N_i = 100\% \cdot \frac{Q_i}{\max_k Q_k}`,
       note: {
-        en: 'Rank by decreasing Q.',
-        tr: 'Q değerine göre büyükten küçüğe sıralanır.',
+        en: 'Rank by decreasing Q; the best alternative has N = 100 %.',
+        tr: "Q değerine göre büyükten küçüğe sıralanır; en iyi alternatifin N değeri %100'dür.",
       },
     },
   ],
   combinedWith: [
     {
+      methodId: 'entropy',
+      text: {
+        en: 'Entropy weights, then COPRAS: Özcan & Çelik (2021), the example used here.',
+        tr: 'Entropi ağırlıkları, ardından COPRAS: Özcan ve Çelik (2021); buradaki örnek budur.',
+      },
+    },
+    {
       methodId: 'ahp',
       text: {
-        en: 'AHP or expert weights in the Vilnius school (many applications listed by Podvezko 2011).',
-        tr: 'Vilnius okulunda AHP ya da uzman ağırlıkları (Podvezko 2011 pek çok uygulamayı listeler).',
+        en: 'AHP weights, then COPRAS (Aytaç Adalı & Tuş Işık 2016); the 2007 restatement uses expert weights.',
+        tr: 'AHP ağırlıkları, ardından COPRAS (Aytaç Adalı ve Tuş Işık 2016); 2007 anlatımı uzman ağırlıkları kullanır.',
       },
     },
     {
@@ -60,72 +71,76 @@ export const copras: MethodContent = {
       },
     },
     {
-      methodId: 'edas',
+      methodId: 'saw',
       text: {
-        en: 'Used as a comparison method in the EDAS (2015), CODAS (2016), MABAC (2015) and CoCoSo (2019) papers.',
-        tr: 'EDAS (2015), CODAS (2016), MABAC (2015) ve CoCoSo (2019) makalelerinde karşılaştırma yöntemi olarak kullanılır.',
+        en: 'With at most one cost criterion COPRAS gives exactly SAW with the sum option; they differ from two cost criteria on.',
+        tr: 'En fazla bir maliyet kriteriyle COPRAS, toplam seçenekli SAW ile birebir aynıdır; iki maliyet kriterinden itibaren ayrışırlar.',
       },
     },
   ],
   reference: {
-    source: 'Podvezko, V. (2011). The Comparative Analysis of MCDA Methods SAW and COPRAS. Inžinerinė ekonomika - Engineering Economics 22(2), 134-146',
-    doi: '10.5755/j01.ee.22.2.310',
+    source: 'Özcan, S.; Çelik, A.K. (2021). A comparison of TOPSIS, grey relational analysis and COPRAS methods for machine selection problem in the food industry of Turkey. International Journal of Production Management and Engineering 9(2), 81-92',
+    doi: '10.4995/ijpme.2021.14734',
     match: 'match',
     note: {
-      en: 'Published example (Tables 7-8, Variant II); this method is not computed here yet, only recomputed during research. Three alternatives, four criteria. Variant II matches (S+, S-, Q, ranks 3, 2, 1). Variant I is not used: its S- values need 220 where the table prints 215, and its Q row is a copy of Variant II. Ranks also match Keshavarz Ghorabaee et al. (2015) in 7 of 7 weight sets.',
-      tr: "Yayımlanmış örnek (Tablo 7-8, II. varyant); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Üç alternatif, dört kriter. II. varyant örtüşüyor (S+, S-, Q, sıralar 3, 2, 1). I. varyant kullanılmadı: S- değerleri tablodaki 215 yerine 220 ile elde ediliyor, Q satırı da II. varyantın kopyası. Sıralamalar Keshavarz Ghorabaee vd. (2015) ile 7 ağırlık setinin 7'sinde aynı.",
+      en: "Published example, reproduced by the tests: seven cream separators, seven criteria (four of them cost), Entropy weights (Tables 1, 2, 10, 11). All 49 cells of Table 10 match to 4 decimals and the seven Q values of Table 11 to 0.0001; our Entropy reproduces the weights of Table 2. The printed rank row swaps A2 and A3 (it copies the TOPSIS column); the ranks here follow the printed Q. Also tested: Podvezko (2011, Tables 7-8), and Zavadskas et al. (2007), whose Table 2 prints Q = S+ + S- instead of its own Eq. 5, so only its S+ and S- are used.",
+      tr: "Yayımlanmış örnek, testlerde yeniden üretiliyor: yedi krema separatörü, yedi kriter (dördü maliyet), Entropi ağırlıkları (Tablo 1, 2, 10, 11). Tablo 10'un 49 hücresinin tamamı 4 basamağa, Tablo 11'in yedi Q değeri 0,0001'e kadar aynı; bizim Entropi yöntemimiz Tablo 2'nin ağırlıklarını veriyor. Basılı sıra satırı A2 ile A3'ü yer değiştirmiş (TOPSIS sütununu kopyalıyor); buradaki sıralar basılı Q'yu izliyor. Ayrıca sınananlar: Podvezko (2011, Tablo 7-8) ve Zavadskas vd. (2007); bu makalenin Tablo 2'si kendi Denklem 5'i yerine Q = S+ + S- basmış, bu yüzden yalnız S+ ve S- değerleri kullanıldı.",
     },
   },
   sources: [
-    { label: 'Zavadskas, Kaklauskas & Šarka (1994), Technological and Economic Development of Economy 1(3), 131-139' },
-    { label: 'Podvezko (2011), Engineering Economics 22(2), 134-146', doi: '10.5755/j01.ee.22.2.310' },
+    { label: 'Zavadskas, Kaklauskas & Šarka (1994), Technological and Economic Development of Economy 1(3), 131-139 (not opened)' },
+    { label: 'Zavadskas, Kaklauskas, Peldschus & Turskis (2007), Multi-attribute assessment of road design solutions by using the COPRAS method, The Baltic Journal of Road and Bridge Engineering 2(4), 195-203' },
+    { label: 'Podvezko (2011), The Comparative Analysis of MCDA Methods SAW and COPRAS, Engineering Economics 22(2), 134-146', doi: '10.5755/j01.ee.22.2.310' },
+    { label: 'Özcan & Çelik (2021), International Journal of Production Management and Engineering 9(2), 81-92', doi: '10.4995/ijpme.2021.14734' },
     { label: 'Keshavarz Ghorabaee, Zavadskas, Olfat & Turskis (2015), Informatica 26(3), 435-451', doi: '10.15388/Informatica.2015.57' },
-    { label: 'pyDecision 5.1.1, copras_method', url: 'https://github.com/Valdecy/pyDecision' },
+    { label: 'pyDecision 5.1.1, copras_method (returns only N / 100)', url: 'https://github.com/Valdecy/pyDecision' },
   ],
   en: {
     summary:
-      'COPRAS sums the weighted shares of benefit and cost criteria separately and rewards a small cost sum. The result is a utility score as a percentage of the best alternative.',
+      'COPRAS adds up each alternative\'s weighted benefit shares, adds a bonus that grows as its cost share shrinks, and shows every alternative as a percentage of the best.',
     whenToUse: [
-      'Mixed benefit and cost criteria.',
-      'Positive data.',
-      'The audience is comfortable with proportional (sum) normalization.',
+      'Every value is a positive amount: prices, durations, counts.',
+      'Benefit and cost criteria are mixed.',
+      'Costs should stay in their own term, not flipped first.',
     ],
     whenNot: [
-      'Dominant cost criteria with uncertain data: small changes reversed ranks (Podvezko 2011).',
-      'All criteria are benefit: COPRAS reduces to SAW, so use SAW.',
+      'Zeros or negative values in the data (blocked, no shift).',
+      'Cost criteria dominate and alternatives are close.',
+      'Interval data where zero is arbitrary: shares depend on it.',
     ],
     inputs: [
-      'Decision matrix, strictly positive.',
+      'Decision matrix, every value above 0.',
       'Criterion type per column, weights summing to 1.',
       'No parameters.',
     ],
     pitfalls: [
-      'Zero or negative values break the sum normalization and 1/S-.',
-      'An alternative whose cost entries are all 0 has S- = 0 and divides by zero.',
-      'Useful check: the Q values always add up to the sum of the weights (Podvezko 2011).',
+      'Unlike SAW, a constant cost column can change the ranking: it raises every cost sum by the same amount, which shifts the bonuses.',
+      'A very small cost total gets a large bonus, and two small cost changes reversed ranks in Podvezko (2011).',
+      'Check: the Q values add up to the sum of the weights.',
     ],
   },
   tr: {
     summary:
-      'COPRAS fayda ve maliyet kriterlerinin ağırlıklı paylarını ayrı ayrı toplar ve maliyet toplamı küçük olanı ödüllendirir. Sonuç, en iyi alternatifin yüzdesi olarak bir fayda skorudur.',
+      'COPRAS her alternatifin ağırlıklı fayda paylarını toplar, maliyet payı küçüldükçe büyüyen bir puan ekler ve her alternatifi en iyisinin yüzdesi olarak gösterir.',
     whenToUse: [
+      'Tüm değerler pozitif miktarlar: fiyat, süre, adet.',
       'Fayda ve maliyet kriterleri karışık.',
-      'Veriler pozitif.',
-      'Okuyucu oransal (toplam) normalizasyona alışkın.',
+      'Maliyetler önce çevrilmeden kendi teriminde kalmalı.',
     ],
     whenNot: [
-      'Baskın maliyet kriterleri, belirsiz veri: küçük değişiklik sıralamayı çevirdi (Podvezko 2011).',
-      "Bütün kriterler fayda: COPRAS SAW'a iner, SAW kullanın.",
+      'Veride sıfır ya da negatif değer var (engellenir, kaydırma yok).',
+      'Maliyet kriterleri baskın ve alternatifler birbirine yakın.',
+      'Sıfırın keyfi olduğu aralık verisi: paylar ona bağlı.',
     ],
     inputs: [
-      'Kesinlikle pozitif değerli karar matrisi.',
+      "Karar matrisi, her değer 0'dan büyük.",
       'Her sütun için kriter türü, toplamı 1 olan ağırlıklar.',
       'Parametre yok.',
     ],
     pitfalls: [
-      'Sıfır ya da negatif değerler toplam normalizasyonunu ve 1/S- terimini bozar.',
-      'Maliyet değerlerinin hepsi 0 olan bir alternatifte S- = 0 olur ve sıfıra bölünür.',
-      'İşe yarar kontrol: Q değerlerinin toplamı her zaman ağırlıkların toplamına eşittir (Podvezko 2011).',
+      "SAW'dan farklı olarak sabit bir maliyet sütunu sıralamayı değiştirebilir: her maliyet toplamını aynı miktar artırır, bu da puanları kaydırır.",
+      'Maliyet toplamı çok küçük olan büyük puan alır; Podvezko (2011) iki küçük maliyet değişikliğiyle sıralamayı tersine çevirdi.',
+      'Kontrol: Q değerlerinin toplamı ağırlıkların toplamına eşittir.',
     ],
   },
 }

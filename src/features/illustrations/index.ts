@@ -12,4 +12,5 @@ export { SawContributions, SAW_CONTRIBUTIONS_LABELS_EN, type SawContributionsLab
 export { sdParts, merecParts, criticParts, edasParts, divergingSegments, entropyParts, sawParts, vikorParts, isoQSegment, stackSegments, defaultAxes, distancePoints, topsisProjection } from './geometry'
 export { VikorIdea, VIKOR_IDEA_LABELS_EN, type VikorIdeaLabels, type VikorIdeaProps } from './VikorIdea'
 export { EdasIdea, EDAS_IDEA_LABELS_EN, type EdasIdeaLabels, type EdasIdeaProps } from './EdasIdea'
+export { CoprasBonus, COPRAS_BONUS_LABELS_EN, type CoprasBonusLabels, type CoprasBonusProps } from './CoprasBonus'
 export { RankLines, RANK_LINES_LABELS_EN, type RankLinesColumn, type RankLinesLabels, type RankLinesProps } from './RankLines'

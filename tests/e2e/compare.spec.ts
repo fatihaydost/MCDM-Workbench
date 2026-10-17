@@ -26,7 +26,7 @@ test('compare: one column per ranking method, VIKOR\'s A7 first, Borda at the en
   await expect(page.getByTestId('vikor-note')).toHaveText("VIKOR's own rule: compromise set A7, A1, A8")
   await expect(page.locator('[data-testid="borda-rank"][data-name="A1"]')).toHaveText('1')
   const summary = page.getByTestId('compare-summary')
-  await expect(summary).toContainText("Agreement (Kendall's W): 0.97")
+  await expect(summary).toContainText(`Agreement (Kendall's W): ${core.kendallW!.toFixed(2)}`)
   await expect(summary).toContainText(`A1 is first in ${core.firstPlace!.methods} of ${N} methods`)
   await expect(summary).not.toContainText('methods ranked')
 
@@ -57,7 +57,7 @@ test('compare: the why panel opens on A1 and A7, and a crossing changes the pair
   await expect(title).not.toHaveText('A1 or A7?')
 })
 
-test('compare: a zero cell leaves SAW and WASPAS out with their reason', async ({ page }) => {
+test('compare: a zero cell leaves SAW, WASPAS and COPRAS out with their reason', async ({ page }) => {
   await page.goto('/app?example=keshavarz-2015-ten-alternatives&stage=data')
   await page.locator('#wb-cell-0-0').click()
   await page.keyboard.type('0')
@@ -67,7 +67,8 @@ test('compare: a zero cell leaves SAW and WASPAS out with their reason', async (
   await expect(saw).toContainText('This method divides by the values or takes their logarithm, so each must be above 0.')
   await expect(saw.locator('[data-rank]')).toHaveCount(0)
   await expect(page.locator('[data-testid="rank-column"][data-method="waspas"] [data-rank]')).toHaveCount(0)
-  await expect(page.getByTestId('compare-summary')).toContainText(`${N - 2} of ${N} methods ranked`)
+  await expect(page.locator('[data-testid="rank-column"][data-method="copras"] [data-rank]')).toHaveCount(0)
+  await expect(page.getByTestId('compare-summary')).toContainText(`${N - 3} of ${N} methods ranked`)
 })
 
 test('compare: Turkish', async ({ page }) => {
@@ -75,7 +76,7 @@ test('compare: Turkish', async ({ page }) => {
   await page.getByRole('radio', { name: /^TR/ }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Karşılaştır' })).toBeVisible()
   await expect(page.getByTestId('why-panel').getByRole('heading', { name: 'A1 ya da A7?' })).toBeVisible()
-  await expect(page.getByTestId('compare-summary')).toContainText('Uyum (Kendall W): 0,97')
+  await expect(page.getByTestId('compare-summary')).toContainText(`Uyum (Kendall W): ${core.kendallW!.toFixed(2).replace('.', ',')}`)
 })
 
 test('compare: no sideways scroll at 390 px with 47 items', async ({ page }) => {

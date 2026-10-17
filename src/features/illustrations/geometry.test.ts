@@ -6,6 +6,7 @@ import { topsis as topsisSteps } from '../../content/steps/topsis'
 import { getExample } from '../../data/examples'
 import {
   argMax,
+  coprasParts,
   divergingSegments,
   edasParts,
   isoQRegion,
@@ -400,5 +401,21 @@ describe('EDAS parts', () => {
       { col: 2, side: 'at', value: 0, x: 100, width: 0 },
       { col: 3, side: 'above', value: 0.1, x: 102, width: 1 },
     ])
+  })
+})
+
+describe('COPRAS parts', () => {
+  const ex = getExample('ozcan-celik-2021-separators')!
+  const p: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const w = [0.1186, 0.3442, 0.0323, 0.086, 0.0368, 0.2148, 0.1672].map((x) => x / 0.9999)
+  it('splits each Q into S+ and the cost bonus, rows in rank order', () => {
+    const parts = coprasParts(p, w)!
+    expect(parts.order.map((i) => ex.alternatives[i])).toEqual(['A4', 'A7', 'A6', 'A5', 'A2', 'A3', 'A1'])
+    parts.scores.forEach((q, i) => expect(parts.sPlus[i]! + parts.bonus[i]!).toBeCloseTo(q, 15))
+    expect(parts.bonus.reduce((a, b) => a + b, 0)).toBeCloseTo(w.slice(3).reduce((a, b) => a + b, 0), 12)
+    expect(parts.utility[parts.order[0]!]).toBe(100)
+  })
+  it('is null when COPRAS cannot run', () => {
+    expect(coprasParts({ ...p, matrix: p.matrix.map((r, i) => (i === 0 ? [0, ...r.slice(1)] : r)) }, w)).toBeNull()
   })
 })

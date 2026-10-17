@@ -102,6 +102,10 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
   const step = slots > 1 ? (x1 - x0) / (slots - 1) : 0
   const xOf = (slot: number) => x0 + slot * step
   const bordaX = xOf(columns.length)
+  // Heads wider than a column step (six methods at 390 px) alternate between two lines, so neighbours never touch.
+  const heads = [...columns.map((c) => c.label), ...(borda ? [l.borda] : [])]
+  const crowded = maxOf(heads.map((h) => estimateTextWidth(h, HEAD_FONT))) > step - 4
+  const headY = (slot: number) => (crowded ? (slot % 2 === 0 ? 6 : HEAD - 8) : HEAD / 2 - 2)
 
   const crossings: Crossing[] = []
   for (let c = 0; c + 1 < ranked.length; c++) {
@@ -198,7 +202,7 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
           </g>
           {columns.map((c, j) => (
             <g key={c.methodId} data-testid="rank-column" data-method={c.methodId} data-label={c.label}>
-              <text className={s.rankHead} x={xOf(j)} y={HEAD / 2 - 2} textAnchor="middle" dominantBaseline="central">
+              <text className={s.rankHead} x={xOf(j)} y={headY(j)} textAnchor="middle" dominantBaseline="central">
                 {c.label}
               </text>
               {c.ranking
@@ -224,7 +228,7 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
             </g>
           ))}
           {borda && (
-            <text className={s.rankHead} x={bordaX} y={HEAD / 2 - 2} textAnchor="middle" dominantBaseline="central">
+            <text className={s.rankHead} x={bordaX} y={headY(columns.length)} textAnchor="middle" dominantBaseline="central">
               {l.borda}
             </text>
           )}

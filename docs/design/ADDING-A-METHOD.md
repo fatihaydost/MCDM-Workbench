@@ -96,7 +96,7 @@ controls, the catalogue cards and the landing ledger. Fields (`views/types.ts`, 
 | Field | Used by |
 |---|---|
 | `kind` | which segmented control and catalogue row |
-| `columns` (step key + header key), `columnsFromSm` | extra table columns before the weight (Weights) or the score (Ranking); `columnsFromSm` hides them below 640 px |
+| `columns` (step key + header key, optional `after`, `decimals`), `columnsFromSm` | extra table columns before the weight (Weights) or the score (Ranking); ranking `after: true` puts one after the score (COPRAS's N, `decimals: 2`), and then the heads wrap below 640 px; `columnsFromSm` hides them below 640 px |
 | `stage` | the picture on the Weights / Ranking stage (`StagePictureProps`: core `problem`, `weights`, `params`, `className?`) |
 | `pictureShowsScores` | ranking: the stage picture draws every score in rank order, so it replaces the score chart (SAW, VIKOR, EDAS) |
 | `idea` (`example` + `Picture`) | the method page picture (§6) |
@@ -121,7 +121,8 @@ Weighting method:
 
 Ranking method:
 
-- [ ] i18n `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T].
+- [ ] i18n `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T]. Six methods (since COPRAS) are a
+  3 x 2 grid below `sm` (`RankingStage.tsx` className), like the weighting control; a seventh needs another layout decision.
 - [ ] The score's words, `workbench.ranking.score.<id>` in en.json and tr.json [T] (read by `scoreWords`,
   `shared.ts`): `name` ("Closeness C", "Score S": table column, workbook column, sweep table), `title` ("Closeness
   coefficient C", "Weighted sum S": score chart, robustness sweep chart `{{score}}`) and `symbol` ("C", "S": the

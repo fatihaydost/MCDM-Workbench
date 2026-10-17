@@ -2,6 +2,7 @@
  * Pure data for the method illustrations. Everything is read from the core's own steps, so a
  * picture can never disagree with the worked calculation. No DOM.
  */
+import { copras } from '../../core/methods/copras'
 import { critic } from '../../core/methods/critic'
 import { edas } from '../../core/methods/edas'
 import { maxOf } from '../../core/math'
@@ -644,4 +645,40 @@ export function placeLabels(
     placed.push(best!.box)
   }
   return out
+}
+
+// ---------------------------------------------------------------------------------------------
+// COPRAS
+// ---------------------------------------------------------------------------------------------
+
+export type CoprasParts = {
+  result: RankingResult
+  /** Benefit share S+_i and the cost bonus Q_i - S+_i (0 without cost weight); the two add up to Q_i. */
+  sPlus: number[]
+  bonus: number[]
+  scores: number[]
+  /** Utility degree N_i in percent of the best Q. */
+  utility: number[]
+  /** Alternatives in rank order (ties keep input order). */
+  order: number[]
+}
+
+/** The core's COPRAS result for its picture, or null when COPRAS cannot run on the data. */
+export function coprasParts(problem: Problem, weights: readonly number[]): CoprasParts | null {
+  let result: RankingResult
+  try {
+    result = copras.compute(problem, [...weights], {})
+  } catch {
+    return null
+  }
+  const order = result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b)
+  const sPlus = stepVector(result.steps, 'copras.sPlus')
+  return {
+    result,
+    sPlus,
+    bonus: result.scores.map((q, i) => q - sPlus[i]!),
+    scores: result.scores,
+    utility: stepVector(result.steps, 'copras.utility'),
+    order,
+  }
 }

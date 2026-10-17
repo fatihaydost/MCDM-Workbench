@@ -68,7 +68,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { critic, edas, entropy, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
+    const { copras, critic, edas, entropy, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -139,7 +139,10 @@ describe('i18n resources', () => {
     // WASPAS: no warnings of its own (zeros and negatives are validation codes, as for SAW).
     const wp = waspas.compute(p, [0.5, 0.5], { lambda: 0.3 })
     expect(wp.warnings).toEqual([])
-    const steps = [...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
+    // COPRAS: with a cost criterion, and its one notice (no cost criterion).
+    const cp = [copras.compute(p, [0.5, 0.5], {}), copras.compute({ ...p, criteria: [p.criteria[0]!, { ...p.criteria[0]!, name: 'y' }] }, [0.5, 0.5], {})]
+    expect(cp.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual(['copras.no-cost-criteria'])
+    const steps = [...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),
@@ -149,6 +152,7 @@ describe('i18n resources', () => {
       ...sw.flatMap((x) => x.warnings ?? []),
       ...vk.flatMap((x) => x.warnings ?? []),
       ...ed.flatMap((x) => x.warnings ?? []),
+      ...cp.flatMap((x) => x.warnings ?? []),
     ]
     expect(new Set(warnings.filter((x) => x.code.startsWith('entropy.')).map((x) => x.code))).toEqual(
       new Set(['entropy.constant-column', 'entropy.zeros-in-column', 'entropy.two-alternatives-minmax', 'entropy.all-constant-equal-weights', 'entropy.dominant-weight']),

@@ -40,8 +40,11 @@ export type MethodView<K extends 'weighting' | 'ranking' = 'weighting' | 'rankin
   idea?: { example: string; Picture: Preloadable<IdeaPictureProps> }
   /** The picture on the method's catalogue card. */
   thumb?: (kit: ThumbKit) => MethodThumbProps
-  /** Intermediate results shown as table columns before the weight or score: step key and header key. */
-  columns?: readonly { step: string; label: string }[]
+  /**
+   * Intermediate results shown as table columns before the weight or score: step key and header key; ranking: `after`
+   * puts one after the score (COPRAS's N), `decimals` overrides the score's 4.
+   */
+  columns?: readonly { step: string; label: string; after?: true; decimals?: number }[]
   /** Ranking: hide those columns below 640 px, so the score that decides the rank is never the one scrolled off. */
   columnsFromSm?: true
   /** The method's idea drawn on the current problem, on the Weights or Ranking stage. */

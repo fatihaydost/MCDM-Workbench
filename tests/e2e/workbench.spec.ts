@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { critic, edas, entropy, merec, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
+import { copras, critic, edas, entropy, merec, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -629,6 +629,48 @@ test('EDAS: a negative value computes with a notice; a criterion whose average d
   await setCell('-2')
   await toRanking()
   await expect(page.getByRole('button', { name: /^The average of C4 is .+ EDAS divides by each criterion's average, so it must be above 0\.$/ })).toBeVisible()
+  await expect(page.getByTestId('ranking-row')).toHaveCount(0)
+})
+
+test('COPRAS: the method page opens the cream separators with Entropy and COPRAS; published Q, the N column and the bonus bars; a zero blocks', async ({ page }) => {
+  const ex = getExample('ozcan-celik-2021-separators')!
+  const p = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const res = copras.compute(p, entropy.compute(p, {}).weights, {})
+  const n = res.steps.find((x) => x.key === 'copras.utility')!.vector!
+
+  await page.goto('/methods/copras')
+  await expect(page.getByTestId('copras-bonus')).toBeVisible()
+  await page.getByRole('link', { name: /Open in workbench/ }).first().click()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(stageHeading(page, 'Ranking')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'COPRAS' })).toHaveAttribute('aria-checked', 'true')
+  await expect(page.locator('nav[aria-label="Stages"]:visible')).toContainText('Entropy')
+  const table = page.getByRole('table', { name: 'Ranking' })
+  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'Relative significance Q', 'Utility degree N (%)'])
+  // Q equals the core and the printed Table 11 to 4 decimals (Entropy weights from the data).
+  const byName = Object.fromEntries(ex.alternatives.map((a, i) => [a, f4(res.scores[i]!)]))
+  expect(await closenessByName(page)).toEqual(byName)
+  const published = ex.published.find((x) => x.label === 'copras.significance')!.values as number[]
+  expect(Object.values(byName).map(Number)).toEqual(published)
+  const order = await table.getByTestId('ranking-row').evaluateAll((els) => els.map((el) => el.querySelector('th')!.textContent!.trim()))
+  expect(order).toEqual(['A4', 'A7', 'A6', 'A5', 'A2', 'A3', 'A1'])
+  await expect(table.getByTestId('column-copras.utility')).toHaveText(order.map((a) => n[ex.alternatives.indexOf(a)]!.toFixed(2)))
+  await expect(page.getByTestId('best-sentence')).toHaveText(`A4 ranks first (Q = ${f4(res.scores[3]!)}).`)
+  // The picture replaces the score chart: one two-part bar per alternative in rank order, N at the end.
+  await expect(page.getByTestId('copras-bar')).toHaveCount(7)
+  await expect(page.getByTestId('copras-utility').first()).toHaveText('100.00 %')
+  await page.locator('[data-testid="copras-segment"][tabindex="0"]').focus()
+  await page.keyboard.press('ArrowRight')
+  expect(await focusedLabel(page)).toMatch(/^A4, Cost bonus: 0\.\d{4} \(Q = 0\.1702, N = 100\.00 %\)/)
+
+  // A zero in a benefit column: Entropy still weighs, COPRAS blocks with the message at the cell.
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Data' }).click()
+  await page.locator('#wb-cell-1-2').click()
+  await page.keyboard.type('0')
+  await page.keyboard.press('Enter')
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  const error = page.getByRole('button', { name: 'A2 on Drum turnover is 0. This method divides by the values or takes their logarithm, so each must be above 0.' })
+  await expect(error).toBeVisible()
   await expect(page.getByTestId('ranking-row')).toHaveCount(0)
 })
 

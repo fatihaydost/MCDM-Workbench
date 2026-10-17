@@ -23,6 +23,7 @@ import merecK from './fixtures/merec-keshavarz2021-illustrative.json'
 import vikorKG from './fixtures/vikor-keshavarz2015.json'
 import vikorOT from './fixtures/vikor-opricovic-tzeng2004.json'
 import waspasA from './fixtures/waspas-adali2017.json'
+import coprasOC from './fixtures/copras-ozcan-celik2021.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -124,6 +125,19 @@ describe('examples match the published fixtures', () => {
     expect(ex.criteria.map((c) => c.type)).toEqual(waspasA.types)
     expect(ex.weights).toEqual(waspasA.weights)
     expect(ex.published).toEqual([{ label: 'waspas.scores', values: waspasA.expected.Q_table7.map((row) => row[5]), decimals: 4 }])
+  })
+  it('Özcan and Çelik 2021 (Entropy then COPRAS)', () => {
+    const ex = getExample('ozcan-celik-2021-separators')!
+    expect(ex.referenceFor).toEqual(['entropy', 'copras'])
+    expect(ex.matrix).toEqual(coprasOC.matrix)
+    expect(ex.alternatives).toEqual(coprasOC.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(coprasOC.types)
+    expect(ex.criteria.map((c) => c.name.en.toLowerCase())).toEqual(coprasOC.criteria)
+    expect(ex.weights).toBeUndefined()
+    expect(ex.published).toEqual([
+      { label: 'entropy.weights', values: coprasOC.weights_printed_table2, decimals: 4 },
+      { label: 'copras.significance', values: coprasOC.published.Q_table11, decimals: 4 },
+    ])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
@@ -365,6 +379,19 @@ describe('store actions', () => {
     const r1 = computeRanking(useWorkbench.getState())
     expectClose(r1.value!.scores, at(10), waspasA.expected.tolerance.Q)
     expect(r1.value!.ranking).toEqual(waspasA.expected.ranking['lambda_0.9_to_1'])
+  })
+
+  it('COPRAS through the store: the cream separators open with Entropy weights and COPRAS, Q and ranks as published', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.loadExample('ozcan-celik-2021-separators', 'en')
+    const s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('copras')
+    expect(s.weightMethod).toBe('entropy')
+    const r = computeRanking(s)
+    expectClose(r.value!.scores, coprasOC.published.Q_table11, coprasOC.expected.tolerance)
+    expect(r.value!.ranking).toEqual(coprasOC.expected.ranking)
+    expect(r.value!.warnings).toEqual([])
   })
 
   it('EDAS through the store: the 47 items open with EDAS and equal weights, the ten alternatives through the method page link', () => {

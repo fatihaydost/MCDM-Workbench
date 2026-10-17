@@ -52,9 +52,14 @@ export function RankingTable({
   const nf = useNumberFormat(DECIMALS.score)
   const view = methodViews[method]
   const extra = compact ? [] : (view.columns ?? []).map((c) => ({ ...c, values: findStep(result.steps, c.step)?.vector }))
+  const before = extra.filter((c) => !c.after)
+  const after = extra.filter((c) => c.after)
   const order = rankOrder(result)
   const narrowHidden = !compact && view.columnsFromSm === true
   const extraClass = narrowHidden ? 'max-sm:hidden' : undefined
+  // A column after the score (COPRAS's N) comes with long words ("Relative significance Q", "Utility degree N (%)"):
+  // those heads wrap at 390 px, so the N column is not scrolled off. Other tables keep their one-line heads.
+  const wrapHead = after.length > 0 ? 'max-sm:whitespace-normal' : undefined
   const wide = extra.length > 0
   return (
     <div className="min-w-0">
@@ -65,12 +70,19 @@ export function RankingTable({
               {t('workbench.ranking.columns.rank')}
             </Th>
             <Th>{t('workbench.ranking.columns.alternative')}</Th>
-            {extra.map((c) => (
-              <Th key={c.step} numeric className={extraClass}>
+            {before.map((c) => (
+              <Th key={c.step} numeric className={cn(extraClass, wrapHead)}>
                 {tr(t, c.label)}
               </Th>
             ))}
-            <Th numeric>{scoreWords(method, t).name}</Th>
+            <Th numeric className={wrapHead}>
+              {scoreWords(method, t).name}
+            </Th>
+            {after.map((c) => (
+              <Th key={c.step} numeric className={cn(extraClass, wrapHead)}>
+                {tr(t, c.label)}
+              </Th>
+            ))}
           </Tr>
         </THead>
         <TBody>
@@ -84,14 +96,19 @@ export function RankingTable({
                 <Th scope="row" className={cn(first && 'font-semibold')}>
                   {alternativeName(problem, i, t)}
                 </Th>
-                {extra.map((c) => (
+                {before.map((c) => (
                   <Td key={c.step} numeric className={extraClass}>
-                    {nf.format(c.values?.[i])}
+                    {nf.format(c.values?.[i], c.decimals)}
                   </Td>
                 ))}
                 <Td numeric data-testid="closeness" className={cn(first ? 'font-semibold' : 'font-medium')}>
                   {nf.format(result.scores[i])}
                 </Td>
+                {after.map((c) => (
+                  <Td key={c.step} numeric className={extraClass} data-testid={`column-${c.step}`}>
+                    {nf.format(c.values?.[i], c.decimals)}
+                  </Td>
+                ))}
               </Tr>
             )
           })}
@@ -159,18 +176,19 @@ export function RankingStage() {
   return (
     <div className="flex flex-col gap-6 pt-4">
       <div className="flex flex-col gap-2">
+        {/* Six methods do not fit one row at 390 px: a 3 x 2 grid below sm, as on the Weights stage. */}
         <SegmentedControl<RankingMethodId>
           aria-label={t('workbench.rankingMethod.label')}
           value={rankingMethod}
           onValueChange={setRankingMethod}
           options={RANKING_VIEW_IDS.map((m) => ({ value: m, label: t(`workbench.rankingMethod.${m}`) }))}
           size="md"
-          className="self-start"
+          className="self-start max-sm:grid max-sm:grid-cols-3 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
         />
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
-        {/* TOPSIS and EDAS have no options; SAW shows its normalization here, VIKOR its v, WASPAS its λ. */}
+        {/* TOPSIS, EDAS and COPRAS have no options; SAW shows its normalization here, VIKOR its v, WASPAS its λ. */}
         <MethodParams methodId={rankingMethod} descriptors={getRankingMethod(rankingMethod)?.params} />
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
           <span>{t('workbench.ranking.weightsUsed', { method: weightMethodFullLabel(weightMethod, weightParams, t) })}</span>

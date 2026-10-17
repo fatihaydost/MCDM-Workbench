@@ -115,6 +115,9 @@
       },
       "waspas": {
         "claim": "Tablo 7'nin 55 skorunun tamamı, λ 0'dan 1'e, {{citation}} ile {{decimals}} basamağa kadar aynı; makalenin bildirdiği üç sıralama da aynı."
+      },
+      "copras": {
+        "claim": "Tablo 11'in yedi Q değerinin tamamı ve Tablo 10'un her hücresi {{citation}} ile {{decimals}} basamağa kadar aynı; basılı sıra satırı A2 ile A3'ü yer değiştirmiş, basılı Q değerleri değiştirmemiş."
       }
     },
     "catalogue": {
@@ -201,7 +204,8 @@
       "saw": "SAW",
       "vikor": "VIKOR",
       "edas": "EDAS",
-      "waspas": "WASPAS"
+      "waspas": "WASPAS",
+      "copras": "COPRAS"
     },
     "params": {
       "entropy": {
@@ -376,7 +380,8 @@
         "saw": "Kriterlerin ölçeklenmiş değerlerini ağırlıklandırıp toplar.",
         "vikor": "En iyi toplam (S) ile en küçük en büyük pişmanlık (R) arasında uzlaşı arar; Q küçüldükçe sıra yükselir.",
         "edas": "Her alternatifi, bütün alternatiflerin ortalamasının ne kadar üstünde ya da altında olduğuna göre puanlar; AS büyüdükçe sıra yükselir.",
-        "waspas": "Ağırlıklı toplamı, çok zayıf bir değeri daha sert cezalandıran ağırlıklı çarpımla karıştırır; Q büyüdükçe sıra yükselir."
+        "waspas": "Ağırlıklı toplamı, çok zayıf bir değeri daha sert cezalandıran ağırlıklı çarpımla karıştırır; Q büyüdükçe sıra yükselir.",
+        "copras": "Her alternatifin fayda kriterlerindeki ağırlıklı payını toplar, maliyet payı küçüldükçe büyüyen bir puan ekler; Q büyüdükçe sıra yükselir."
       },
       "columns": {
         "rank": "Sıra",
@@ -388,7 +393,8 @@
         "aboveAverage": "Ortalama üstü SP",
         "belowAverage": "Ortalama altı SN",
         "wsm": "Toplam Q1",
-        "wpm": "Çarpım Q2"
+        "wpm": "Çarpım Q2",
+        "utility": "Fayda derecesi N (%)"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -415,6 +421,11 @@
         "waspas": {
           "name": "Skor Q",
           "title": "WASPAS skoru Q",
+          "symbol": "Q"
+        },
+        "copras": {
+          "name": "Göreli önem Q",
+          "title": "COPRAS göreli önem Q",
           "symbol": "Q"
         }
       },
@@ -565,6 +576,14 @@
         "wpm": "Ağırlıklı çarpım Q2",
         "scores": "Skor Q",
         "lambdaSweep": "Her λ için Q"
+      },
+      "copras": {
+        "normalizedSum": "Sütun toplamındaki paylar r",
+        "weighted": "Ağırlıklı paylar d",
+        "sPlus": "Fayda toplamı S+",
+        "sMinus": "Maliyet toplamı S-",
+        "significance": "Göreli önem Q",
+        "utility": "Fayda derecesi N (%)"
       }
     },
     "issues": {
@@ -693,6 +712,16 @@
         "noSwaps": "Hiçbir çizgi kesişmiyor: sıralama her λ için aynı.",
         "point": "{{alternative}}, λ = {{lambda}}: Q = {{value}}, {{rank}}. sıra",
         "readout": "λ = {{lambda}} iken: {{order}}"
+      },
+      "copras": {
+        "title": "Fayda payı artı maliyet puanı",
+        "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır; maliyet payı S- küçüldükçe puan büyür. Çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir.",
+        "legend": "Q'nun parçaları",
+        "benefit": "Fayda payı S+",
+        "bonus": "Maliyet puanı",
+        "segment": "{{alternative}}, {{part}}: {{value}} (Q = {{score}}, N = {{utility}})",
+        "readout": "{{alternative}}: {{part}} {{value}}, Q = {{score}}",
+        "percent": "%{{value}}"
       }
     },
     "flow": {
@@ -751,6 +780,12 @@
         "wsm": "Toplam ve çarpım",
         "scores": "Q",
         "lambdaSweep": "λ taraması"
+      },
+      "copras": {
+        "normalizedSum": "Paylar",
+        "sPlus": "S+ ve S-",
+        "significance": "Q",
+        "utility": "N (%)"
       }
     },
     "pipeline": {
@@ -762,7 +797,7 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, MEREC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR, EDAS ya da WASPAS ile sıralayın ve hesabın her adımını görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, MEREC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR, EDAS, WASPAS ya da COPRAS ile sıralayın ve hesabın her adımını görün."
     }
   },
   "methods": {
@@ -783,7 +818,8 @@
       "edas": "EDAS",
       "sd": "SD",
       "merec": "MEREC",
-      "waspas": "WASPAS"
+      "waspas": "WASPAS",
+      "copras": "COPRAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -841,7 +877,8 @@
         "edas": "Ortalamanın üstündeki ve altındaki uzaklığı ölçer.",
         "sd": "Ağırlığı verinin ne kadar geniş yayıldığından bulur.",
         "merec": "Kriteri çıkarmanın neyi değiştirdiğinden ağırlık.",
-        "waspas": "Ağırlıklı toplamı ağırlıklı çarpımla karıştırır."
+        "waspas": "Ağırlıklı toplamı ağırlıklı çarpımla karıştırır.",
+        "copras": "Fayda paylarını toplar, küçük maliyet payını ödüllendirir."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -972,6 +1009,10 @@
         "waspas": {
           "title": "Toplam mı çarpım mı: karışımı λ belirler",
           "caption": "Her çizgi bir alternatif; iki çizginin kesiştiği yerde sıraları yer değiştirir. Dikey çizgi λ = 0,5 değerini gösterir."
+        },
+        "copras": {
+          "title": "Fayda payı artı düşük maliyet puanı",
+          "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır; maliyet payı S- küçüldükçe puan büyür. Çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir."
         }
       }
     }
@@ -1056,6 +1097,14 @@
       "wpm": "Ağırlıklı çarpım Q2: her normalize değerin kriter ağırlığı kadar kuvveti alınıp çarpılır. Q1'den hiçbir zaman büyük değildir.",
       "scores": "Skor Q = λ Q1 + (1 - λ) Q2. Değer büyüdükçe sıra yükselir.",
       "lambdaSweep": "λ = 0; 0,1; ...; 1 için Q: λ değiştikçe iki alternatifin nerede yer değiştirdiğini gösterir."
+    },
+    "copras": {
+      "normalizedSum": "Paylar r: her değer sütun toplamına bölünür; fayda ve maliyet kriterinde aynı.",
+      "weighted": "Ağırlıklı paylar d = w r: her sütunun toplamı artık kriter ağırlığına eşit.",
+      "sPlus": "Fayda toplamı S+: fayda kriterlerinin ağırlıklı payları toplanır.",
+      "sMinus": "Maliyet toplamı S-: maliyet kriterlerinin ağırlıklı payları toplanır. S- küçüldükçe iyidir.",
+      "significance": "Göreli önem Q = S+ artı 1 / S- oranında paylaştırılan maliyet ağırlığı. Değer büyüdükçe sıra yükselir; Q değerlerinin toplamı 1 eder.",
+      "utility": "Fayda derecesi N: Q, en büyük Q'nun yüzdesi olarak; en iyi alternatif 100 alır."
     }
   },
   "validation": {
@@ -1124,6 +1173,9 @@
       "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanılıyor.",
       "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; aralığın gerçek olup olmadığına bakın.",
       "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, yine de MEREC ona bir çıkarma etkisi veriyor. Farkın gerçek olup olmadığına bakın."
+    },
+    "copras": {
+      "no-cost-criteria": "Ağırlığı 0'dan büyük maliyet kriteri yok; bu yüzden Q = S+ ve COPRAS, SAW'ın toplam seçeneğiyle aynı sonucu veriyor."
     }
   }
 }
