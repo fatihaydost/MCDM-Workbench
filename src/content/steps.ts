@@ -3,7 +3,7 @@ import type { Bilingual } from './types'
 /**
  * One-line explanation and formula for every intermediate step the core returns
  * (Step.key in src/core/methods/*.ts). Formulas follow the code, including its edge cases:
- * src/core/methods/critic.ts, entropy.ts, sd.ts, topsis.ts, saw.ts, vikor.ts and edas.ts.
+ * src/core/methods/critic.ts, entropy.ts, sd.ts, merec.ts, topsis.ts, saw.ts, vikor.ts and edas.ts.
  * Notation: i = alternative (1..m), j, k = criterion (1..n), J+ benefit and J- cost criteria.
  */
 export type StepContent = Bilingual & {
@@ -30,6 +30,12 @@ export type StepKey =
   | 'sd.sigma'
   | 'sd.sigmaTotal'
   | 'sd.weights'
+  | 'merec.normalized'
+  | 'merec.absLog'
+  | 'merec.performance'
+  | 'merec.performanceRemoved'
+  | 'merec.removalEffect'
+  | 'merec.weights'
   | 'topsis.normalized'
   | 'topsis.weighted'
   | 'topsis.idealBest'
@@ -188,6 +194,48 @@ export const stepContent: Readonly<Record<StepKey, StepContent>> = {
     en: "SD weights: each criterion's share of the total spread.",
     tr: 'SD ağırlıkları: her kriterin toplam yayılım içindeki payı.',
     tex: String.raw`w_j = \frac{\sigma_j}{\sum_{k=1}^{n} \sigma_k}`,
+    edgeCase: {
+      en: 'If the total is 0 (every column constant), every weight is 1/n.',
+      tr: 'Toplam 0 ise (bütün sütunlar sabit) her ağırlık 1/n olur.',
+    },
+  },
+  'merec.normalized': {
+    en: 'Normalized matrix n: the worst value of each column is 1, the best smallest.',
+    tr: 'Normalize matris n: her sütunun en kötü değeri 1, en iyisi en küçüktür.',
+    tex: String.raw`n_{ij} = \begin{cases} \dfrac{\min_k x_{kj}}{x_{ij}} & j \in J^{+} \\[2ex] \dfrac{x_{ij}}{\max_k x_{kj}} & j \in J^{-} \end{cases}`,
+    edgeCase: {
+      en: 'A constant column is set to 1 in every row, so it adds nothing.',
+      tr: 'Sabit bir sütun her satırda 1 alınır; hiçbir şey eklemez.',
+    },
+  },
+  'merec.absLog': {
+    en: 'Absolute logarithm of each normalized value: 0 for the worst value.',
+    tr: 'Her normalize değerin mutlak logaritması: en kötü değer için 0.',
+    tex: String.raw`L_{ij} = \left|\ln n_{ij}\right| = -\ln n_{ij}`,
+  },
+  'merec.performance': {
+    en: 'Overall performance of each alternative over all n criteria.',
+    tr: 'Her alternatifin n kriterin tümü üzerinden genel performansı.',
+    tex: String.raw`S_i = \ln\!\left(1 + \frac{1}{n}\sum_{j=1}^{n} L_{ij}\right)`,
+  },
+  'merec.performanceRemoved': {
+    en: 'Performance of each alternative with one criterion removed; the divisor stays n.',
+    tr: 'Bir kriter çıkarılınca her alternatifin performansı; payda n kalır.',
+    tex: String.raw`S'_{ij} = \ln\!\left(1 + \frac{1}{n}\sum_{k \ne j} L_{ik}\right)`,
+  },
+  'merec.removalEffect': {
+    en: 'Removal effect: how much the performances drop when the criterion is removed.',
+    tr: 'Çıkarma etkisi: kriter çıkarılınca performansların ne kadar düştüğü.',
+    tex: String.raw`E_j = \sum_{i=1}^{m} \left|S'_{ij} - S_i\right|`,
+    edgeCase: {
+      en: 'Each term is computed as ln((n + R) / (n + R - L)), R = Σ L.',
+      tr: 'Her terim ln((n + R) / (n + R - L)) olarak hesaplanır, R = Σ L.',
+    },
+  },
+  'merec.weights': {
+    en: "MEREC weights: each criterion's share of the total removal effect.",
+    tr: 'MEREC ağırlıkları: her kriterin toplam çıkarma etkisi içindeki payı.',
+    tex: String.raw`w_j = \frac{E_j}{\sum_{k=1}^{n} E_k}`,
     edgeCase: {
       en: 'If the total is 0 (every column constant), every weight is 1/n.',
       tr: 'Toplam 0 ise (bütün sütunlar sabit) her ağırlık 1/n olur.',

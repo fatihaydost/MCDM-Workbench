@@ -6,6 +6,7 @@ import { critic } from '../../core/methods/critic'
 import { edas } from '../../core/methods/edas'
 import { maxOf } from '../../core/math'
 import { entropy, type EntropyParams } from '../../core/methods/entropy'
+import { merec } from '../../core/methods/merec'
 import { sd } from '../../core/methods/sd'
 import { saw, type SawParams } from '../../core/methods/saw'
 import { topsis } from '../../core/methods/topsis'
@@ -299,6 +300,33 @@ export function sdParts(problem: Problem): SdParts | null {
 }
 
 // ---------------------------------------------------------------------------------------------
+// MEREC parts
+// ---------------------------------------------------------------------------------------------
+
+export type MerecParts = {
+  result: WeightingResult
+  /** drops[j][i] = S_i - S'_ij: how much alternative i's performance falls when criterion j is removed. */
+  drops: number[][]
+  /** E_j = Σ_i drops[j][i]. */
+  effect: number[]
+  weights: number[]
+}
+
+/** MEREC through the core, with the per-alternative drops the illustration stacks. Null when it cannot run. */
+export function merecParts(problem: Problem): MerecParts | null {
+  let result: WeightingResult
+  try {
+    result = merec.compute(problem, {})
+  } catch {
+    return null
+  }
+  const s = stepVector(result.steps, 'merec.performance')
+  const removed = stepMatrix(result.steps, 'merec.performanceRemoved')
+  const drops = problem.criteria.map((_, j) => s.map((si, i) => Math.max(0, si - removed[i]![j]!)))
+  return { result, drops, effect: stepVector(result.steps, 'merec.removalEffect'), weights: result.weights }
+}
+
+// ---------------------------------------------------------------------------------------------
 // Entropy parts
 // ---------------------------------------------------------------------------------------------
 
@@ -579,6 +607,15 @@ export const SD_FLOW: readonly FlowNode[] = [
   { key: 'sd.normalized', stepKeys: ['sd.normalized'] },
   { key: 'sd.sigma', stepKeys: ['sd.sigma'] },
   { key: 'sd.weights', stepKeys: ['sd.sigmaTotal', 'sd.weights'] },
+]
+
+/** MEREC in five nodes: Normalize, Performance, Without j, Removal effect, Weights. */
+export const MEREC_FLOW: readonly FlowNode[] = [
+  { key: 'merec.normalized', stepKeys: ['merec.normalized', 'merec.absLog'] },
+  { key: 'merec.performance', stepKeys: ['merec.performance'] },
+  { key: 'merec.performanceRemoved', stepKeys: ['merec.performanceRemoved'] },
+  { key: 'merec.removalEffect', stepKeys: ['merec.removalEffect'] },
+  { key: 'merec.weights', stepKeys: ['merec.weights'] },
 ]
 
 /** VIKOR in five nodes: Best and worst, Distances, S and R, Q, Threshold. */

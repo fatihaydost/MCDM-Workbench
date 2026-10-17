@@ -225,11 +225,12 @@ test('Results is a summary: no second copy of the closeness bars or the TOPSIS p
   await expect(page.getByRole('table', { name: 'Ranking' }).locator('thead th')).toHaveCount(3)
 })
 
-// The CRITIC example for every stage, and the Entropy, SD, SAW, VIKOR and EDAS examples where their cards are shown.
+// The CRITIC example for every stage, and the Entropy, SD, MEREC, SAW, VIKOR and EDAS examples where their cards are shown.
 const PANEL_RUNS = [
   ['krishnan-2021-smartphones', ['data', 'weights', 'ranking', 'results', 'robustness', 'compare']],
   ['zavadskas-2017-vilnius', ['weights', 'results']],
   ['diakoulaki-1995-pharma', ['weights', 'results']],
+  ['keshavarz-2021-merec', ['weights', 'results']],
   ['podvezko-2011-baltic', ['ranking', 'results']],
   ['keshavarz-2015-ten-alternatives', ['ranking']],
   ['keshavarz-2015-inventory', ['ranking']],

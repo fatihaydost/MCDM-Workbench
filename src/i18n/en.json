@@ -109,6 +109,9 @@
       },
       "sd": {
         "claim": "Weights match {{citation}} to {{decimals}} decimals, and standard deviations once the paper's population SD is converted."
+      },
+      "merec": {
+        "claim": "Weights match {{citation}} to {{decimals}} decimals, and the normalized matrix, S, S' and the removal effects match every printed value."
       }
     },
     "catalogue": {
@@ -186,7 +189,8 @@
       "entropy": "Entropy",
       "equal": "Equal weights",
       "manual": "Manual",
-      "sd": "SD"
+      "sd": "SD",
+      "merec": "MEREC"
     },
     "rankingMethod": {
       "label": "Ranking method",
@@ -324,7 +328,8 @@
         "entropy": "Objective weights from how unevenly each criterion's values are spread over the alternatives.",
         "equal": "Every criterion gets the same weight.",
         "manual": "Enter your own weights. They must be 0 or more and sum to 1.",
-        "sd": "Objective weights from how widely each criterion's values spread over the alternatives."
+        "sd": "Objective weights from how widely each criterion's values spread over the alternatives.",
+        "merec": "Objective weights from how much the alternatives' overall performance drops when each criterion is removed. Every value must be above 0."
       },
       "columns": {
         "criterion": "Criterion",
@@ -335,7 +340,8 @@
         "entropy": "Entropy e",
         "diversification": "Diversification d",
         "weight": "Weight w",
-        "spread": "Spread σ"
+        "spread": "Spread σ",
+        "removalEffect": "Removal effect E"
       },
       "tableTitle": "Weights by criterion",
       "chartTitle": "Criterion weights",
@@ -524,6 +530,14 @@
         "sigma": "Spread σ",
         "sigmaTotal": "Total spread Σσ",
         "weights": "Weights w"
+      },
+      "merec": {
+        "normalized": "Normalized matrix n (worst = 1)",
+        "absLog": "Absolute logarithms |ln n|",
+        "performance": "Overall performance S",
+        "performanceRemoved": "Performance without criterion j, S'",
+        "removalEffect": "Removal effect E",
+        "weights": "Weights w"
       }
     },
     "issues": {
@@ -637,6 +651,12 @@
         "title": "Wider spread, more weight",
         "spread": "Spread σ",
         "weight": "Weight"
+      },
+      "merec": {
+        "title": "Remove a criterion, see how much the scores drop",
+        "drop": "Drops in S, sum E",
+        "effect": "Removal effect E",
+        "weight": "Weight"
       }
     },
     "flow": {
@@ -682,6 +702,13 @@
         "normalized": "Normalize",
         "sigma": "Spread",
         "weights": "Weights"
+      },
+      "merec": {
+        "normalized": "Normalize",
+        "performance": "Performance",
+        "performanceRemoved": "Without j",
+        "removalEffect": "Removal effect",
+        "weights": "Weights"
       }
     },
     "pipeline": {
@@ -693,7 +720,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR or EDAS and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR or EDAS and see every step of the calculation."
     }
   },
   "methods": {
@@ -712,7 +739,8 @@
       "saw": "SAW",
       "vikor": "VIKOR",
       "edas": "EDAS",
-      "sd": "SD"
+      "sd": "SD",
+      "merec": "MEREC"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -768,7 +796,8 @@
         "saw": "Adds up weighted, rescaled values.",
         "vikor": "Balances the best total against the worst regret.",
         "edas": "Measures the distance above and below the average.",
-        "sd": "Weights from how widely the data spread."
+        "sd": "Weights from how widely the data spread.",
+        "merec": "Weights from what removing a criterion changes."
       },
       "groups": {
         "weighting": "Weighting",
@@ -887,6 +916,14 @@
           "weight": "Weight",
           "caption": "Each dot is one alternative on the 0 to 1 scale; the ruler under the dots is σ.",
           "weightHead": "Weight = σ / {{total}}"
+        },
+        "merec": {
+          "title": "Remove a criterion, see how much the scores drop",
+          "drop": "Drops in S, sum E",
+          "effect": "Removal effect E",
+          "weight": "Weight",
+          "caption": "Each segment is one alternative's drop in overall performance when the criterion is removed; together they make E.",
+          "weightHead": "Weight = E / {{total}}"
         }
       }
     }
@@ -956,6 +993,14 @@
       "sigma": "Spread: the sample standard deviation of each normalized column.",
       "sigmaTotal": "Total spread over all criteria.",
       "weights": "Weights: each criterion's share of the total spread."
+    },
+    "merec": {
+      "normalized": "Normalization to smaller is better: benefit min / x, cost x / max, so the worst value of each column is 1 and the best the smallest.",
+      "absLog": "Absolute logarithm of each normalized value: 0 for the worst value, larger the better the value.",
+      "performance": "Overall performance of each alternative: ln(1 + the mean of its absolute logarithms over all criteria).",
+      "performanceRemoved": "Performance with one criterion removed: the same sum without that criterion, still divided by the number of criteria.",
+      "removalEffect": "Removal effect: the total drop in performance over all alternatives when the criterion is removed.",
+      "weights": "MEREC weights: each criterion's share of the total removal effect."
     }
   },
   "validation": {
@@ -1018,6 +1063,11 @@
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",
       "two-alternatives": "With 2 alternatives, every criterion that is not constant gets the same SD weight.",
       "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead."
+    },
+    "merec": {
+      "constant-column": "{{criterion}} has the same value for every alternative, so removing it changes nothing and its MEREC weight is 0.",
+      "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead.",
+      "dominant-weight": "{{criterion}} takes more than half of the weight. MEREC favours a criterion whose largest value is many times its smallest; check that its range is real."
     }
   }
 }

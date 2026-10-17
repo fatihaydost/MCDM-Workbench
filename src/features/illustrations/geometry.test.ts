@@ -16,6 +16,8 @@ import {
   ENTROPY_FLOW,
   SD_FLOW,
   sdParts,
+  MEREC_FLOW,
+  merecParts,
   ENTROPY_MINMAX_FLOW,
   entropyParts,
   distancePoints,
@@ -316,6 +318,21 @@ describe('sdParts', () => {
   })
   it('is null when SD cannot run', () => {
     expect(sdParts({ ...problem, matrix: [[1, 2, 3]] })).toBeNull()
+  })
+})
+
+describe('merecParts', () => {
+  const ex = getExample('keshavarz-2021-merec')!
+  const problem: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+
+  it('stacks per-alternative drops that add up to E, and its step map covers every emitted step', () => {
+    const parts = merecParts(problem)!
+    expect(parts.weights).toEqual(parts.result.weights)
+    parts.drops.forEach((d, j) => expect(d.reduce((a, b) => a + b, 0)).toBeCloseTo(parts.effect[j]!, 12))
+    expect(MEREC_FLOW.flatMap((n) => n.stepKeys)).toEqual(parts.result.steps.map((s) => s.key))
+  })
+  it('is null when MEREC cannot run (a zero cell)', () => {
+    expect(merecParts({ ...problem, matrix: problem.matrix.map((r, i) => (i === 0 ? [0, ...r.slice(1)] : r)) })).toBeNull()
   })
 })
 

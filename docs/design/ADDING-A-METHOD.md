@@ -94,6 +94,8 @@ Weighting method:
 - [ ] `WeightsStage.tsx:22` `METHODS`: add the id where it should appear in the segmented control.
   [E] `tests/e2e/workbench.spec.ts:201-213` walks CRITIC → Equal weights → Manual with the arrow keys; inserting
   between them changes the sequence. Update the test or append after Manual (decide with the design).
+  Six methods (since MEREC) do not fit one row at 390 px: below `sm` the control is a 3 x 2 grid (`WeightsStage.tsx`
+  className); a seventh needs another layout decision.
 - [ ] i18n `workbench.weightMethod.<id>` (en.json:163) and `workbench.weights.methodHint.<id>` (en.json:255).
   [T] both keys are built from the typed id (`shared.ts:37`, `WeightsStage.tsx:73`).
 - [ ] `ComputedWeights` (`WeightsStage.tsx:89`) is typed `method: 'critic' | 'equal'` [T]. Widen it, then decide what

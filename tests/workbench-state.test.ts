@@ -19,6 +19,7 @@ import f from './fixtures/opricovic-tzeng-2004-f.json'
 import phi from './fixtures/opricovic-tzeng-2004-phi.json'
 import podvezko from './fixtures/saw-podvezko2011.json'
 import diak from './fixtures/sd-diakoulaki1995.json'
+import merecK from './fixtures/merec-keshavarz2021-illustrative.json'
 import vikorKG from './fixtures/vikor-keshavarz2015.json'
 import vikorOT from './fixtures/vikor-opricovic-tzeng2004.json'
 
@@ -50,6 +51,17 @@ describe('examples match the published fixtures', () => {
     expect(ex.alternatives).toEqual(diak.alternatives)
     expect(ex.criteria.map((c) => c.type)).toEqual(diak.types)
     expect(ex.published).toEqual([{ label: 'sd.weights', values: diak.published.weights, decimals: 3 }])
+  })
+  it('Keshavarz-Ghorabaee et al. 2021 (MEREC)', () => {
+    const ex = getExample('keshavarz-2021-merec')!
+    expect(ex.matrix).toEqual(merecK.matrix)
+    expect(ex.alternatives).toEqual(merecK.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(merecK.types)
+    expect(ex.published).toEqual([
+      { label: 'merec.performance', values: merecK.expected.S, decimals: 2 },
+      { label: 'merec.removalEffect', values: merecK.expected.E_printed, decimals: 2 },
+      { label: 'merec.weights', values: merecK.expected.weights, decimals: 4 },
+    ])
   })
   for (const [id, fx] of [['opricovic-tzeng-2004-f', f], ['opricovic-tzeng-2004-phi', phi]] as const) {
     it(id, () => {
@@ -149,6 +161,19 @@ describe('derived results', () => {
   it('SD weights reproduce Diakoulaki et al. 1995 through the store', () => {
     const w = computeWeights({ problem: draftOf('diakoulaki-1995-pharma'), weightMethod: 'sd', manualWeights: [] })
     expectClose(w.value!.weights, diak.published.weights, diak.expected.tolerance)
+  })
+
+  it('MEREC weights reproduce Keshavarz-Ghorabaee et al. 2021 through the store', () => {
+    const w = computeWeights({ problem: draftOf('keshavarz-2021-merec'), weightMethod: 'merec', manualWeights: [] })
+    expectClose(w.value!.weights, merecK.expected.weights, merecK.expected.tolerance.weights)
+  })
+
+  it('MEREC blocks a zero cell with non-positive-value at that cell', () => {
+    const problem = draftOf('keshavarz-2021-merec')
+    problem.matrix[1]![2] = 0
+    const w = computeWeights({ problem, weightMethod: 'merec', manualWeights: [] })
+    expect(w.value).toBeNull()
+    expect(w.issues).toContainEqual(expect.objectContaining({ code: 'non-positive-value', row: 1, col: 2 }))
   })
 
   it('ignores a saved option the method does not declare', () => {

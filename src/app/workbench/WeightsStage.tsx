@@ -4,7 +4,7 @@ import { getWeightingMethod, type ValidationIssue, type WeightingResult } from '
 import type { EntropyNormalization } from '../../core/methods/entropy'
 import { getExample, shortCitation } from '../../data/examples'
 import { BarChart, ChartTableModeProvider } from '../../features/charts'
-import { CriticIdea, EntropyIdea, SdIdea } from '../../features/illustrations'
+import { CriticIdea, EntropyIdea, MerecIdea, SdIdea } from '../../features/illustrations'
 import { useNumberFormat } from '../../i18n'
 import {
   computeWeights,
@@ -22,7 +22,7 @@ import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
 import { criterionName, DECIMALS, findStep, ids, placeIssue, sumDecimals, tr, weightMethodLabel } from './shared'
 
-const METHODS: readonly WeightMethodId[] = ['critic', 'entropy', 'sd', 'equal', 'manual']
+const METHODS: readonly WeightMethodId[] = ['critic', 'entropy', 'sd', 'merec', 'equal', 'manual']
 
 /** A weighting method that the core computes (everything but manual). */
 type ComputedMethod = Exclude<WeightMethodId, 'manual'>
@@ -40,6 +40,7 @@ const EXTRA_COLUMNS: Partial<Record<ComputedMethod, readonly { step: string; lab
     { step: 'entropy.diversification', label: 'workbench.weights.columns.diversification' },
   ],
   sd: [{ step: 'sd.sigma', label: 'workbench.weights.columns.spread' }],
+  merec: [{ step: 'merec.removalEffect', label: 'workbench.weights.columns.removalEffect' }],
 }
 
 export function WeightsStage() {
@@ -86,8 +87,8 @@ export function WeightsStage() {
           onValueChange={setWeightMethod}
           options={METHODS.map((m) => ({ value: m, label: weightMethodLabel(m, t) }))}
           size="md"
-          // Five methods: below sm the segments tighten so the control fits 390 px without a sideways scroll.
-          className="self-start max-sm:[&>*]:px-2.5 max-sm:[&>*]:text-13"
+          // Six methods do not fit one row at 390 px: below sm the segments form a 3 x 2 grid across the width.
+          className="self-start max-sm:grid max-sm:grid-cols-3 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
         />
         <span id={ids.weightMethod} tabIndex={-1} className="sr-only">
           {t('workbench.weightMethod.label')}
@@ -172,6 +173,23 @@ function ComputedWeights({ problem, method, result }: { problem: DraftProblem; m
               title: t('workbench.visual.sd.title'),
               spread: t('workbench.visual.sd.spread'),
               weight: t('workbench.visual.sd.weight'),
+              showTable: t('workbench.chart.showTable'),
+              criterion: t('workbench.criterion'),
+            }}
+            className="max-w-[760px]"
+          />
+        </ChartTableModeProvider>
+      )}
+      {method === 'merec' && (
+        <ChartTableModeProvider value="screen-reader">
+          <MerecIdea
+            problem={toProblem(problem)}
+            format={format}
+            labels={{
+              title: t('workbench.visual.merec.title'),
+              drop: t('workbench.visual.merec.drop'),
+              effect: t('workbench.visual.merec.effect'),
+              weight: t('workbench.visual.merec.weight'),
               showTable: t('workbench.chart.showTable'),
               criterion: t('workbench.criterion'),
             }}

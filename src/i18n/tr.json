@@ -109,6 +109,9 @@
       },
       "sd": {
         "claim": "Ağırlıklar {{citation}} ile {{decimals}} basamağa kadar aynı; makalenin anakütle standart sapması dönüştürülünce standart sapmalar da."
+      },
+      "merec": {
+        "claim": "Ağırlıklar {{citation}} ile {{decimals}} basamakta örtüşüyor; normalize matris, S, S' ve çıkarma etkileri de basılı her değerle örtüşüyor."
       }
     },
     "catalogue": {
@@ -186,7 +189,8 @@
       "entropy": "Entropi",
       "equal": "Eşit ağırlık",
       "manual": "Elle",
-      "sd": "SD"
+      "sd": "SD",
+      "merec": "MEREC"
     },
     "rankingMethod": {
       "label": "Sıralama yöntemi",
@@ -324,7 +328,8 @@
         "entropy": "Her kriterin değerlerinin alternatifler arasında ne kadar dengesiz dağıldığına bakan nesnel ağırlıklar.",
         "equal": "Her kriter aynı ağırlığı alır.",
         "manual": "Ağırlıkları kendiniz girin. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli.",
-        "sd": "Her kriterin değerlerinin alternatifler arasında ne kadar yayıldığına bakan nesnel ağırlıklar."
+        "sd": "Her kriterin değerlerinin alternatifler arasında ne kadar yayıldığına bakan nesnel ağırlıklar.",
+        "merec": "Her kriter çıkarıldığında alternatiflerin genel performansının ne kadar düştüğüne bakan nesnel ağırlıklar. Her değer 0'dan büyük olmalı."
       },
       "columns": {
         "criterion": "Kriter",
@@ -335,7 +340,8 @@
         "entropy": "Entropi e",
         "diversification": "Çeşitlenme d",
         "weight": "Ağırlık w",
-        "spread": "Yayılım σ"
+        "spread": "Yayılım σ",
+        "removalEffect": "Çıkarma etkisi E"
       },
       "tableTitle": "Kriter ağırlıkları",
       "chartTitle": "Kriter ağırlıkları",
@@ -524,6 +530,14 @@
         "sigma": "Yayılım σ",
         "sigmaTotal": "Toplam yayılım Σσ",
         "weights": "Ağırlıklar w"
+      },
+      "merec": {
+        "normalized": "Normalize matris n (en kötü = 1)",
+        "absLog": "Mutlak logaritmalar |ln n|",
+        "performance": "Genel performans S",
+        "performanceRemoved": "j kriteri olmadan performans S'",
+        "removalEffect": "Çıkarma etkisi E",
+        "weights": "Ağırlıklar w"
       }
     },
     "issues": {
@@ -637,6 +651,12 @@
         "title": "Geniş yayılım, çok ağırlık",
         "spread": "Yayılım σ",
         "weight": "Ağırlık"
+      },
+      "merec": {
+        "title": "Bir kriteri çıkarın, puanların ne kadar düştüğüne bakın",
+        "drop": "S düşüşleri, toplam E",
+        "effect": "Çıkarma etkisi E",
+        "weight": "Ağırlık"
       }
     },
     "flow": {
@@ -682,6 +702,13 @@
         "normalized": "Normalize et",
         "sigma": "Yayılım",
         "weights": "Ağırlıklar"
+      },
+      "merec": {
+        "normalized": "Normalize",
+        "performance": "Performans",
+        "performanceRemoved": "j olmadan",
+        "removalEffect": "Çıkarma etkisi",
+        "weights": "Ağırlıklar"
       }
     },
     "pipeline": {
@@ -693,7 +720,7 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR ya da EDAS ile sıralayın ve hesabın her adımını görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, MEREC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR ya da EDAS ile sıralayın ve hesabın her adımını görün."
     }
   },
   "methods": {
@@ -712,7 +739,8 @@
       "saw": "SAW",
       "vikor": "VIKOR",
       "edas": "EDAS",
-      "sd": "SD"
+      "sd": "SD",
+      "merec": "MEREC"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -768,7 +796,8 @@
         "saw": "Ölçeklenmiş değerleri ağırlıklı toplar.",
         "vikor": "En iyi toplamı en büyük pişmanlıkla dengeler.",
         "edas": "Ortalamanın üstündeki ve altındaki uzaklığı ölçer.",
-        "sd": "Ağırlığı verinin ne kadar geniş yayıldığından bulur."
+        "sd": "Ağırlığı verinin ne kadar geniş yayıldığından bulur.",
+        "merec": "Kriteri çıkarmanın neyi değiştirdiğinden ağırlık."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -887,6 +916,14 @@
           "weight": "Ağırlık",
           "caption": "Her nokta 0 ile 1 ölçeğinde bir alternatif; noktaların altındaki cetvel σ.",
           "weightHead": "Ağırlık = σ / {{total}}"
+        },
+        "merec": {
+          "title": "Bir kriteri çıkarın, puanların ne kadar düştüğüne bakın",
+          "drop": "S düşüşleri, toplam E",
+          "effect": "Çıkarma etkisi E",
+          "weight": "Ağırlık",
+          "caption": "Her parça, kriter çıkarılınca bir alternatifin genel performansındaki düşüştür; parçaların toplamı E eder.",
+          "weightHead": "Ağırlık = E / {{total}}"
         }
       }
     }
@@ -956,6 +993,14 @@
       "sigma": "Yayılım: normalize edilmiş her sütunun örneklem standart sapması.",
       "sigmaTotal": "Tüm kriterlerin toplam yayılımı.",
       "weights": "Ağırlıklar: her kriterin toplam yayılım içindeki payı."
+    },
+    "merec": {
+      "normalized": "Küçük olan iyi olacak biçimde normalizasyon: fayda min / x, maliyet x / maks; her sütunun en kötü değeri 1, en iyisi en küçük olur.",
+      "absLog": "Her normalize değerin mutlak logaritması: en kötü değer için 0, değer iyileştikçe daha büyük.",
+      "performance": "Her alternatifin genel performansı: ln(1 + tüm kriterlerdeki mutlak logaritmalarının ortalaması).",
+      "performanceRemoved": "Bir kriter çıkarılınca performans: o kriter olmadan aynı toplam, yine kriter sayısına bölünür.",
+      "removalEffect": "Çıkarma etkisi: kriter çıkarılınca tüm alternatiflerde performansın toplam düşüşü.",
+      "weights": "MEREC ağırlıkları: her kriterin toplam çıkarma etkisi içindeki payı."
     }
   },
   "validation": {
@@ -1018,6 +1063,11 @@
       "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
       "two-alternatives": "2 alternatifle, sabit olmayan her kriter aynı SD ağırlığını alır.",
       "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı."
+    },
+    "merec": {
+      "constant-column": "{{criterion}} her alternatifte aynı değerde; çıkarılması hiçbir şeyi değiştirmez, MEREC ağırlığı 0 olur.",
+      "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanılıyor.",
+      "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor. MEREC, en büyük değeri en küçüğünün kat kat üstünde olan kriteri öne çıkarır; bu aralığın gerçek olup olmadığına bakın."
     }
   }
 }

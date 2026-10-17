@@ -8,6 +8,7 @@ import { EdasIdea } from '../../features/illustrations/EdasIdea'
 import { EntropyIdea } from '../../features/illustrations/EntropyIdea'
 import { IdeaSteps, useIdeaSteps, type IdeaStepsLabels } from '../../features/illustrations/IdeaSteps'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
+import { MerecIdea } from '../../features/illustrations/MerecIdea'
 import { SdIdea } from '../../features/illustrations/SdIdea'
 import { SawContributions } from '../../features/illustrations/SawContributions'
 import { TOPSIS_IDEA_STEPS, TopsisGeometry } from '../../features/illustrations/TopsisGeometry'
@@ -22,9 +23,9 @@ function toProblem(ex: ExampleDataset, lang: Lang): Problem {
 }
 
 /**
- * The picture at the top of a method page. TOPSIS, CRITIC, Entropy, SD, SAW, VIKOR and EDAS draw their idea on their published
+ * The picture at the top of a method page. TOPSIS, CRITIC, Entropy, SD, MEREC, SAW, VIKOR and EDAS draw their idea on their published
  * example; every other method shows its family glyph (no illustration for methods in research yet).
- * The Entropy, SD and SAW pictures have no step-through story yet (SAW's answers hover and focus); VIKOR's has a v slider
+ * The Entropy, SD, MEREC and SAW pictures have no step-through story yet (SAW's answers hover and focus); VIKOR's has a v slider
  * instead, since turning the threshold line is its idea.
  */
 export function MethodIdea({ m }: { m: MethodContent }) {
@@ -36,6 +37,7 @@ export function MethodIdea({ m }: { m: MethodContent }) {
   const criticEx = m.id === 'critic' ? getExample('krishnan-2021-smartphones') : undefined
   const entropyEx = m.id === 'entropy' ? getExample('zavadskas-2017-vilnius') : undefined
   const sdEx = m.id === 'sd' ? getExample('diakoulaki-1995-pharma') : undefined
+  const merecEx = m.id === 'merec' ? getExample('keshavarz-2021-merec') : undefined
   const sawEx = m.id === 'saw' ? getExample('podvezko-2011-baltic') : undefined
   // VIKOR on ten alternatives, where no leader is clearly ahead, so the compromise set and the DQ line show.
   const vikorEx = m.id === 'vikor' ? getExample('keshavarz-2015-ten-alternatives') : undefined
@@ -43,9 +45,9 @@ export function MethodIdea({ m }: { m: MethodContent }) {
   const edasEx = m.id === 'edas' ? getExample('keshavarz-2015-ten-alternatives') : undefined
   const edasLabels = useEdasLabels('methods.page.idea.edas.title', 'methods.page.idea.edas.caption')
   const problem = useMemo(() => {
-    const ex = topsisEx ?? criticEx ?? entropyEx ?? sdEx ?? sawEx ?? vikorEx ?? edasEx
+    const ex = topsisEx ?? criticEx ?? entropyEx ?? sdEx ?? merecEx ?? sawEx ?? vikorEx ?? edasEx
     return ex ? toProblem(ex, lang) : null
-  }, [topsisEx, criticEx, entropyEx, sdEx, sawEx, vikorEx, edasEx, lang])
+  }, [topsisEx, criticEx, entropyEx, sdEx, merecEx, sawEx, vikorEx, edasEx, lang])
 
   // "Step through": one story per method, the picture transforms from step to step (MOTION.md, explain).
   const storyCount = topsisEx ? TOPSIS_IDEA_STEPS : criticEx ? CRITIC_IDEA_STEPS : 0
@@ -164,6 +166,28 @@ export function MethodIdea({ m }: { m: MethodContent }) {
           }}
         />
         {source(sdEx)}
+      </div>
+    )
+  }
+
+  if (merecEx && problem) {
+    return (
+      <div className="flex flex-col gap-2">
+        <MerecIdea
+          problem={problem}
+          format={(v) => format(v, 4)}
+          labels={{
+            title: t('methods.page.idea.merec.title'),
+            caption: t('methods.page.idea.merec.caption'),
+            drop: t('methods.page.idea.merec.drop'),
+            effect: t('methods.page.idea.merec.effect'),
+            weight: t('methods.page.idea.merec.weight'),
+            weightHead: (total) => t('methods.page.idea.merec.weightHead', { total }),
+            showTable: t('methods.page.idea.showTable'),
+            criterion: t('methods.page.idea.criterion'),
+          }}
+        />
+        {source(merecEx)}
       </div>
     )
   }

@@ -6,7 +6,7 @@ export const merec: MethodContent = {
   name: { en: 'MEREC', tr: 'MEREC' },
   fullName: { en: 'MEthod based on the Removal Effects of Criteria', tr: 'Kriter çıkarma etkisine dayalı yöntem' },
   family: 'weighting-objective',
-  status: 'research',
+  status: 'available',
   year: 2021,
   origin: {
     authors: 'Keshavarz-Ghorabaee, M.; Amiri, M.; Zavadskas, E.K.; Turskis, Z.; Antucheviciene, J.',
@@ -39,6 +39,10 @@ export const merec: MethodContent = {
     {
       title: { en: 'Removal effect', tr: 'Çıkarma etkisi' },
       tex: String.raw`E_j = \sum_{i=1}^{m} \left|S'_{ij} - S_i\right|`,
+      note: {
+        en: "S' is never above S, so E is 0 exactly when the column is constant.",
+        tr: "S' hiçbir zaman S'den büyük değildir; E yalnız sütun sabitse 0 olur.",
+      },
     },
     {
       title: { en: 'Weights', tr: 'Ağırlıklar' },
@@ -47,23 +51,24 @@ export const merec: MethodContent = {
   ],
   combinedWith: [
     {
+      methodId: 'cocoso',
       text: {
-        en: 'MEREC with other objective weightings, then MARA, RAM and PIV for material selection: Dua et al. (2024), whose MEREC weights were reproduced exactly during research.',
-        tr: 'Malzeme seçimi için diğer nesnel ağırlıklandırmalarla birlikte MEREC, ardından MARA, RAM ve PIV: Dua vd. (2024); onların MEREC ağırlıkları araştırmada birebir yeniden hesaplandı.',
+        en: 'MEREC only weighs; published studies rank with CoCoSo, EDAS (Bektaş 2022), MARCOS, WASPAS, CODAS, MABAC (Ecer and Ayçın 2022), WISP (Ulutaş et al. 2022) and COBRA (Popović et al. 2022).',
+        tr: 'MEREC yalnız ağırlık üretir; yayımlanmış çalışmalar sıralamayı CoCoSo, EDAS (Bektaş 2022), MARCOS, WASPAS, CODAS, MABAC (Ecer ve Ayçın 2022), WISP (Ulutaş vd. 2022) ve COBRA (Popović vd. 2022) ile yapar.',
       },
     },
     {
-      methodId: 'cocoso',
+      methodId: 'lopcow',
       text: {
-        en: 'LOPCOW and MEREC then CoCoSo or EDAS in the insurance sector (Bektaş 2022), as listed in Keleş (2023), Table 1.',
-        tr: "Sigorta sektöründe LOPCOW ile MEREC ardından CoCoSo ya da EDAS (Bektaş 2022), Keleş (2023) Tablo 1'de listelendiği gibi.",
+        en: 'MEREC next to Entropy, LOPCOW, CRITIC and equal weights, then MARA, RAM and PIV for material selection: Dua et al. (2024); their Case 2 and Case 3 MEREC weights match ours to 4 decimals.',
+        tr: 'Malzeme seçiminde MEREC, Entropi, LOPCOW, CRITIC ve eşit ağırlıkla yan yana, ardından MARA, RAM ve PIV: Dua vd. (2024); 2. ve 3. vakadaki MEREC ağırlıkları bizimkiyle 4 basamakta örtüşüyor.',
       },
     },
     {
       methodId: 'critic',
       text: {
-        en: 'The origin paper compares MEREC with CRITIC, Entropy and SD (section 4.2).',
-        tr: "Özgün makale MEREC'i CRITIC, Entropi ve SD ile karşılaştırır (4.2 bölümü).",
+        en: 'The origin paper compares MEREC with CRITIC, Entropy and SD (section 4.2, correlations 0.85 to 0.98).',
+        tr: "Özgün makale MEREC'i CRITIC, Entropi ve SD ile karşılaştırır (4.2 bölümü, korelasyonlar 0,85 ile 0,98 arası).",
       },
     },
   ],
@@ -72,25 +77,29 @@ export const merec: MethodContent = {
     doi: '10.3390/sym13040525',
     match: 'match',
     note: {
-      en: "Published example (Section 4.1, Tables 2-4; Section 4.2, Tables 5-6); this method is not computed here yet, only recomputed during research. Illustrative example (5 x 4) and comparative example (10 x 7). Weights match to 4 and 3 decimals, and all 20 values of S' match Table 4. Compare the weights, not the printed E values: those are rounded to 2 decimals and do not give the published weights.",
-      tr: "Yayımlanmış örnek (Bölüm 4.1, Tablo 2-4; Bölüm 4.2, Tablo 5-6); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Açıklayıcı örnek (5 x 4) ve karşılaştırmalı örnek (10 x 7). Ağırlıklar 4 ve 3 basamakta örtüşüyor; S' değerlerinin 20'si de Tablo 4 ile aynı. Karşılaştırmayı basılı E değerleriyle değil, ağırlıklarla yapın: E değerleri 2 basamağa yuvarlanmıştır ve yayımlanan ağırlıkları vermez.",
+      en: "Illustrative example (Section 4.1, Tables 2-4, 5 x 4): our weights match the printed 4 decimals (largest difference 3.9e-5), and N, S, all 20 values of S' and E match the printed 3 and 2 decimals. The printed E are rounded, so the weights do not follow from them exactly. The comparative example (Section 4.2, Tables 5-6, 10 x 7) matches to 3 decimals, and Dua et al. (2024), Cases 2 and 3, to 4.",
+      tr: "Açıklayıcı örnek (Bölüm 4.1, Tablo 2-4, 5 x 4): ağırlıklarımız basılı 4 basamakla örtüşüyor (en büyük fark 3,9e-5); N, S, S' değerlerinin 20'si ve E de basılı 3 ve 2 basamakla örtüşüyor. Basılı E değerleri yuvarlanmış olduğundan ağırlıklar onlardan birebir çıkmaz. Karşılaştırmalı örnek (Bölüm 4.2, Tablo 5-6, 10 x 7) 3 basamakta, Dua vd. (2024) 2. ve 3. vaka 4 basamakta örtüşüyor.",
     },
   },
   sources: [
     { label: 'Keshavarz-Ghorabaee, Amiri, Zavadskas, Turskis & Antucheviciene (2021), Symmetry 13(4), 525', doi: '10.3390/sym13040525' },
-    { label: 'Dua, Duc, Bao & Trung (2024), EUREKA: Physics and Engineering', doi: '10.21303/2461-4262.2024.003171' },
-    { label: 'Keleş (2023), Ömer Halisdemir Üniversitesi İİBF Dergisi 16(3), 727-747', doi: '10.25287/ohuiibf.1239201' },
+    { label: 'Dua, Duc, Bao & Trung (2024), EUREKA: Physics and Engineering (2), 131-148', doi: '10.21303/2461-4262.2024.003171' },
+    { label: 'Ulutaş, Stanujkić, Karabašević, Popović & Novaković (2022), Strategic Management 27(4), 23-29', doi: '10.5937/straman2200013u' },
+    { label: 'Popović, Pucar & Smarandache (2022), Journal of Process Management and New Technologies 10(3-4), 66-74', doi: '10.5937/jouproman2203066p' },
+    { label: 'Bektaş (2022), BDDK Bankacılık ve Finansal Piyasalar Dergisi', doi: '10.46520/bddkdergisi.1178359' },
+    { label: 'Ecer & Ayçın (2022), Informatica', doi: '10.15388/22-infor494' },
   ],
   en: {
     summary:
-      "MEREC weights each criterion by how much the alternatives' overall scores change when it is removed. Use it for positive data when weights should reflect effect on the result, not just spread.",
+      "MEREC removes each criterion in turn and measures how much the alternatives' overall scores change; criteria whose removal changes the scores most get the largest weights. It needs every value to be above zero.",
     whenToUse: [
-      'Data are positive ratio-scale values.',
-      'You want objective weights less driven by variance than SD or Entropy.',
+      'Weights from the data alone, every value a positive amount.',
+      'A comparison next to CRITIC, Entropy and SD.',
     ],
     whenNot: [
-      'Zeros or negatives: the logarithm is undefined and shifting changes weights.',
-      'One extreme outlier: min/x ratios explode and take most weight.',
+      'Zeros or negatives: they are blocked, a shift would change weights.',
+      'Interval scales such as 1-9 ratings or temperatures.',
+      'One near-zero value: that criterion takes most of the weight.',
     ],
     inputs: [
       'Decision matrix, every value above 0.',
@@ -98,21 +107,22 @@ export const merec: MethodContent = {
       'No parameters.',
     ],
     pitfalls: [
-      'A shift (x - min + 1) is possible only with a warning that the weights depend on it.',
-      'A constant column has |ln n| = 0 everywhere, so its weight is 0.',
-      "Outliers dominate: one value of 5 against 450 gives that criterion 0.575 in the paper's example; show E next to w.",
+      "A wide max/min ratio takes the weight: 5 against 450 gives 0.575 in the paper's example.",
+      'A constant column gets weight 0; if every column is constant, the weights fall back to 1/n.',
+      'Adding or removing an alternative moves the column minimum and maximum, so the weights change too.',
     ],
   },
   tr: {
     summary:
-      'MEREC her kriteri, çıkarıldığında alternatiflerin genel puanlarının ne kadar değiştiğine göre ağırlıklandırır. Pozitif veride, ağırlıkların yalnız yayılımı değil sonuca etkiyi yansıtması gerekiyorsa kullanın.',
+      'MEREC her kriteri sırayla çıkarır ve alternatiflerin genel puanlarının ne kadar değiştiğini ölçer; çıkarıldığında puanları en çok değiştiren kriter en büyük ağırlığı alır. Her değerin sıfırdan büyük olmasını ister.',
     whenToUse: [
-      'Veriler pozitif, oran ölçekli değerler.',
-      'SD ya da Entropiden daha az varyansa dayalı nesnel ağırlık istiyorsunuz.',
+      'Ağırlıklar yalnız veriden gelsin, her değer pozitif bir miktar.',
+      'CRITIC, Entropi ve SD yanında bir karşılaştırma.',
     ],
     whenNot: [
-      'Sıfır ya da negatif değer var: logaritma tanımsız, kaydırma ağırlıkları değiştirir.',
-      'Tek bir uç değer: min/x oranları patlar, ağırlığın çoğunu o kriter alır.',
+      'Sıfır ya da negatif: engellenir, kaydırma ağırlıkları değiştirirdi.',
+      '1-9 puanları ya da sıcaklık gibi aralık ölçekleri.',
+      'Sıfıra yakın tek değer: ağırlığın çoğunu o kriter alır.',
     ],
     inputs: [
       "Her değeri 0'dan büyük karar matrisi.",
@@ -120,9 +130,9 @@ export const merec: MethodContent = {
       'Parametre yok.',
     ],
     pitfalls: [
-      'Kaydırma (x - min + 1) ancak ağırlıkların ona bağlı olduğu uyarısıyla yapılabilir.',
-      'Sabit bir sütunda her yerde |ln n| = 0 olur, ağırlığı 0 çıkar.',
-      "Uç değerler baskındır: makaledeki örnekte 450'ye karşı tek bir 5 değeri o kritere 0,575 ağırlık verir; w'nin yanında E'yi de gösterin.",
+      "Geniş bir maks/min oranı ağırlığı alır: makaledeki örnekte 450'ye karşı 5, 0,575 verir.",
+      'Sabit bir sütunun ağırlığı 0 olur; bütün sütunlar sabitse ağırlıklar 1/n olur.',
+      'Alternatif eklemek ya da çıkarmak sütunun en küçük ve en büyük değerini kaydırır, ağırlıklar da değişir.',
     ],
   },
 }

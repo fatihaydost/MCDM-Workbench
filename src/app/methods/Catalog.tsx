@@ -6,17 +6,17 @@ import { allMethods, FAMILY_ORDER, methodsByFamily } from '../../content/methods
 import { getExample } from '../../data/examples'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { MethodThumb } from '../../features/illustrations/MethodThumb'
-import { argMax, distancePoints, edasParts, entropyParts, sawParts, topsisProjection, vikorParts } from '../../features/illustrations/geometry'
+import { argMax, distancePoints, edasParts, entropyParts, merecParts, sawParts, topsisProjection, vikorParts } from '../../features/illustrations/geometry'
 import { useLang } from '../../i18n'
 import { SiteFooter } from '../landing/SiteFooter'
 import { usePageMeta } from '../landing/usePageMeta'
 import { Guide } from './Guide'
 import { pageContainer } from './shared'
 
-type Available = 'critic' | 'entropy' | 'sd' | 'topsis' | 'saw' | 'vikor' | 'edas' | 'equal'
+type Available = 'critic' | 'entropy' | 'sd' | 'merec' | 'topsis' | 'saw' | 'vikor' | 'edas' | 'equal'
 /** The available methods in two rows, weighting first (the order of the workbench), then ranking. */
 const AVAILABLE: Readonly<Record<'weighting' | 'ranking', readonly Available[]>> = {
-  weighting: ['critic', 'entropy', 'sd', 'equal'],
+  weighting: ['critic', 'entropy', 'sd', 'merec', 'equal'],
   ranking: ['topsis', 'saw', 'vikor', 'edas'],
 }
 
@@ -40,6 +40,9 @@ function useThumbs() {
     const sharesOf = (j: number) => vilnius?.shares.map((row) => row[j]!) ?? []
     // SD on its reference example: the weights as bars, the largest in the accent.
     const sdWeights = sd.compute(exampleProblem('diakoulaki-1995-pharma'), {}).weights
+    // MEREC on its reference example: per criterion the drops its removal causes, stacked (the bar is E), largest first.
+    const mr = merecParts(exampleProblem('keshavarz-2021-merec'))
+    const merecRows = mr ? mr.effect.map((_, j) => j).sort((a, b) => mr.effect[b]! - mr.effect[a]!).map((j) => mr.drops[j]!) : []
     // SAW on its reference example: each country's score as a stack of contributions, best first.
     const baltic = getExample('podvezko-2011-baltic')!
     const sawP = sawParts(exampleProblem(baltic.id), baltic.weights!)
@@ -53,6 +56,7 @@ function useThumbs() {
       topsis: { kind: 'plane' as const, points: plane, highlight: proj ? argMax(proj.closeness) : undefined },
       entropy: { kind: 'shares' as const, even: sharesOf(vilnius?.pair[0] ?? 0), uneven: sharesOf(vilnius?.pair[1] ?? 1) },
       sd: { kind: 'bars' as const, values: sdWeights, highlight: argMax(sdWeights) },
+      merec: { kind: 'stack' as const, rows: merecRows },
       saw: { kind: 'stack' as const, rows: sawP ? sawP.order.map((i) => sawP.contributions[i]!) : [] },
       vikor: {
         kind: 'compromise' as const,

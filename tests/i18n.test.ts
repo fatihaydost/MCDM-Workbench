@@ -68,7 +68,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { critic, edas, entropy, saw, sd, topsis, vikor } = await import('../src/core')
+    const { critic, edas, entropy, merec, saw, sd, topsis, vikor } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -105,6 +105,15 @@ describe('i18n resources', () => {
     expect(new Set(sdr.flatMap((x) => x.warnings ?? []).map((x) => x.code).filter((c) => c.endsWith('near-constant-column') || c.startsWith('sd.')))).toEqual(
       new Set(['sd.constant-column', 'sd.near-constant-column', 'sd.two-alternatives', 'sd.all-constant-equal-weights', 'critic.near-constant-column']),
     )
+    // MEREC: constant column, all constant, dominant weight (C1 from 5 to 450 against a narrow C2).
+    const mr = [
+      merec.compute(p, {}),
+      merec.compute({ ...p, matrix: [[1, 1], [1, 1], [1, 1]] }, {}),
+      merec.compute({ ...p, matrix: [[450, 5], [5, 6], [100, 5.5]] }, {}),
+    ]
+    expect(new Set(mr.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
+      new Set(['merec.constant-column', 'merec.all-constant-equal-weights', 'merec.dominant-weight']),
+    )
     // SAW: both normalizations (it emits no warnings of its own; its data errors are validation codes).
     const sw = [saw.compute(p, [0.5, 0.5], {}), saw.compute(p, [0.5, 0.5], { normalization: 'sum' })]
     // VIKOR: small problems that trigger each of its notices.
@@ -126,12 +135,13 @@ describe('i18n resources', () => {
     expect(new Set(ed.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
       new Set(['edas.constant-column', 'edas.negative-values', 'edas.small-average', 'edas.no-spread']),
     )
-    const steps = [...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
+    const steps = [...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),
       ...e.flatMap((x) => x.warnings ?? []),
       ...sdr.flatMap((x) => x.warnings ?? []),
+      ...mr.flatMap((x) => x.warnings ?? []),
       ...sw.flatMap((x) => x.warnings ?? []),
       ...vk.flatMap((x) => x.warnings ?? []),
       ...ed.flatMap((x) => x.warnings ?? []),

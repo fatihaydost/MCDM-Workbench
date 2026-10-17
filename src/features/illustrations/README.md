@@ -127,6 +127,22 @@ compare like the rulers) with its value; the largest weight in the accent. Stati
 
 Use: `/methods/sd` "The idea" (Diakoulaki et al. 1995 example); workbench Weights stage when the method is SD.
 
+## MerecIdea
+
+One row per criterion, read left to right like SdIdea: what removing the criterion costs each alternative
+(S_i - S'_ij) as the segments of one bar (stripDot fill, the background stroke draws the gaps), so the bar is the
+removal effect E_j with its value, then `→` and the weight w = E / ΣE as a bar (relative to the largest) with its
+value; the largest weight in the accent. Each segment has a `<title>` with the alternative and its drop. Static: no
+motion. Numbers from `merecParts(problem)` (the core's MEREC steps). Table: E and w per criterion.
+
+| Prop | Type | Notes |
+|---|---|---|
+| `problem` | `Problem` | Renders nothing when MEREC cannot run (a value <= 0). |
+| `format` | `(n) => string` | E, w and the table (4 decimals). |
+| `labels` | `{ title, caption?, drop, effect, weight, weightHead?, showTable, criterion }` | Translations in `workbench.visual.merec.*` and `methods.page.idea.merec.*`. |
+
+Use: `/methods/merec` "The idea" (Keshavarz-Ghorabaee et al. 2021 example); workbench Weights stage when the method is MEREC.
+
 ## SawContributions
 
 SAW as a picture: one horizontal stacked bar per alternative, in rank order. Each segment is one criterion's
@@ -267,7 +283,7 @@ readable; the width follows the container. Table: alternatives by Borda rank, me
 `topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale
 screen scales, values growing right and up), `distancePoints(proj)`, `closenessAt(p)`,
 `isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `placeLabels(...)`, `ISO_C_DEFAULT`, `linePath(...)`, `pointCss(...)`,
-`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sdParts(problem)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `edasParts(problem, weights)`, `divergingSegments(above, below, center, px)`, `EDAS_FLOW`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `VIKOR_FLOW`, `argMax`, `flowIndex`, `TOPSIS_FLOW`,
+`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sdParts(problem)`, `merecParts(problem)`, `MEREC_FLOW`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `edasParts(problem, weights)`, `divergingSegments(above, below, center, px)`, `EDAS_FLOW`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `VIKOR_FLOW`, `argMax`, `flowIndex`, `TOPSIS_FLOW`,
 `CRITIC_FLOW`, `ENTROPY_FLOW`, `ENTROPY_MINMAX_FLOW`. The
 tests check that A+ / A- and C equal the core and the published values (Opricovic and Tzeng 2004:
 C = 0.762, 0.722, 0.238; Krishnan et al. 2021: σ and weights), that the distance plane places every

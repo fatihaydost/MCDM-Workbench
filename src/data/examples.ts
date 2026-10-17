@@ -180,6 +180,45 @@ export const examples: readonly ExampleDataset[] = [
     published: [{ label: 'sd.weights', values: [0.279, 0.341, 0.38], decimals: 3 }],
   },
   {
+    id: 'keshavarz-2021-merec',
+    name: { en: 'Five alternatives, four criteria (Keshavarz-Ghorabaee et al. 2021)', tr: 'Beş alternatif, dört kriter (Keshavarz-Ghorabaee vd. 2021)' },
+    buttonLabel: { en: 'Illustrative example', tr: 'Açıklayıcı örnek' },
+    summary: {
+      en: 'The worked example of the paper that introduced MEREC: two benefit and two cost criteria, every value above 0. C1 runs from 5 to 450, so it takes most of the weight.',
+      tr: "MEREC'i tanıtan makalenin çözümlü örneği: iki fayda ve iki maliyet kriteri, her değer 0'dan büyük. C1 5 ile 450 arasında değiştiği için ağırlığın çoğunu alır.",
+    },
+    referenceFor: ['merec'],
+    citation: {
+      authors: 'Keshavarz-Ghorabaee, M.; Amiri, M.; Zavadskas, E.K.; Turskis, Z.; Antucheviciene, J.',
+      year: 2021,
+      title: 'Determination of Objective Weights Using a New Method Based on the Removal Effects of Criteria (MEREC)',
+      venue: 'Symmetry 13(4), 525',
+      doi: '10.3390/sym13040525',
+      tables: { en: 'Table 2 (input), Tables 3-4 and Steps 3-6 (output)', tr: 'Tablo 2 (girdi), Tablo 3-4 ve Adım 3-6 (çıktı)' },
+    },
+    // The paper names them A1 to A5 and C1 to C4 (Table 2); C1 and C2 are benefit, C3 and C4 cost.
+    alternatives: ['A1', 'A2', 'A3', 'A4', 'A5'],
+    criteria: [
+      { name: { en: 'C1', tr: 'C1' }, type: 'benefit' },
+      { name: { en: 'C2', tr: 'C2' }, type: 'benefit' },
+      { name: { en: 'C3', tr: 'C3' }, type: 'cost' },
+      { name: { en: 'C4', tr: 'C4' }, type: 'cost' },
+    ],
+    matrix: [
+      [450, 8000, 54, 145],
+      [10, 9100, 2, 160],
+      [100, 8200, 31, 153],
+      [220, 9300, 1, 162],
+      [5, 8400, 23, 158],
+    ],
+    // S, S' and E are printed to 2 decimals (rounded from the exact values); the weights to 4.
+    published: [
+      { label: 'merec.performance', values: [0.77, 0.71, 0.65, 1.09, 0.21], decimals: 2 },
+      { label: 'merec.removalEffect', values: [1.71, 0.04, 1.19, 0.03], decimals: 2 },
+      { label: 'merec.weights', values: [0.5752, 0.0141, 0.4016, 0.0091], decimals: 4 },
+    ],
+  },
+  {
     id: 'opricovic-tzeng-2004-f',
     name: { en: 'Mountain climbing (Opricovic and Tzeng 2004)', tr: 'Dağ tırmanışı (Opricovic ve Tzeng 2004)' },
     summary: {

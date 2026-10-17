@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { critic, edas, entropy, saw, sd, topsis, vikor, vikorCompromise, type CriterionType } from '../../src/core'
+import { critic, edas, entropy, merec, saw, sd, topsis, vikor, vikorCompromise, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -207,11 +207,13 @@ test('the whole flow works with the keyboard alone', async ({ page }) => {
   }
   await arrow('ArrowRight', 'Entropy')
   await arrow('ArrowRight', 'SD')
+  await arrow('ArrowRight', 'MEREC')
   await arrow('ArrowRight', 'Equal weights')
   await arrow('ArrowRight', 'Manual')
   await page.keyboard.press('Space')
   await expect(page.getByRole('radio', { name: 'Manual' })).toHaveAttribute('aria-checked', 'true')
   await arrow('ArrowLeft', 'Equal weights')
+  await arrow('ArrowLeft', 'MEREC')
   await arrow('ArrowLeft', 'SD')
   await arrow('ArrowLeft', 'Entropy')
   await arrow('ArrowLeft', 'CRITIC')
@@ -315,6 +317,37 @@ test('SD: the Diakoulaki example gives the published weights, the picture and th
   await expect(steps).toHaveCount(4)
   expect(await steps.evaluateAll((els) => els.map((e) => e.getAttribute('data-step')))).toEqual(['sd.normalized', 'sd.sigma', 'sd.sigmaTotal', 'sd.weights'])
   await expect(page.getByRole('navigation', { name: 'Calculation steps' })).toContainText('Spread')
+})
+
+test('MEREC: the illustrative example gives the published weights and the picture; a zero cell blocks at the cell', async ({ page }) => {
+  const k = fixture('merec-keshavarz2021-illustrative') as { matrix: number[][]; types: CriterionType[]; expected: { weights: number[] } }
+  await page.goto('/app?example=keshavarz-2021-merec&stage=weights')
+  await expect(stageHeading(page, 'Weights')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'MEREC', exact: true })).toHaveAttribute('aria-checked', 'true')
+  const weightCells = page.getByRole('table', { name: 'Weights by criterion' }).locator('tbody tr td:last-child')
+  const p = { alternatives: k.matrix.map((_, i) => `A${i}`), criteria: k.types.map((type, j) => ({ name: `C${j}`, type })), matrix: k.matrix }
+  const core = merec.compute(p, {}).weights
+  await expect(weightCells).toHaveText(core.map(f4))
+  expect(core.map(f4)).toEqual(k.expected.weights.map(f4))
+  await expect(page.locator('figure', { hasText: 'Remove a criterion, see how much the scores drop' })).toBeVisible()
+  await expect(page.getByText('C1 takes more than half of the weight.')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Show the calculation' }).click()
+  const steps = page.locator('section[data-step]')
+  await expect(steps).toHaveCount(6)
+  await expect(page.getByRole('navigation', { name: 'Calculation steps' })).toContainText('Removal effect')
+
+  // A zero cell: MEREC cannot divide by it or take its logarithm, so the stage is blocked; the message leads to the cell.
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Data' }).click()
+  await page.locator('#wb-cell-1-2').click()
+  await page.keyboard.type('0')
+  await page.keyboard.press('Enter')
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Weights' }).click()
+  const error = page.getByRole('button', { name: /^A2 on C3 is 0\. This method divides by the values, so each must be above 0\.$/ })
+  await expect(error).toBeVisible()
+  await expect(weightCells).toHaveCount(0)
+  await error.click()
+  await expect(page.locator('#wb-cell-1-2')).toBeFocused()
 })
 
 test('SAW: the Podvezko example ranks with SAW, sum changes the scores, the contributions add up to S, TOPSIS brings back D+ and D−', async ({ page }) => {
