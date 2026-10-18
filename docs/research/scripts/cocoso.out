@@ -1,0 +1,73 @@
+== F1 Yazdani et al. 2019, section 3.1 (Tables I, III-VI)
+  sum w = 1.0000
+  S  [0.429973, 0.608249, 0.636339, 0.447073, 0.240268, 0.268331, 0.503143]  max|diff| 0.00005
+  P  [3.291361, 4.390712, 4.502038, 4.205820, 2.260980, 2.505710, 4.199086]  max|diff| 0.00004
+  ka [0.130623, 0.175469, 0.180363, 0.163322, 0.087797, 0.097372, 0.165054]  max|diff| 0.00047
+  kb [3.245282, 4.473498, 4.639646, 3.720904, 2.000000, 2.225040, 3.951291]  max|diff| 0.00050
+  kc [0.724224, 0.972868, 1.000000, 0.905518, 0.486778, 0.539867, 0.915120]  max|diff| 0.00048
+  k  [2.041313, 2.787990, 2.882350, 2.416046, 1.298692, 1.443143, 2.519094]  max|diff| 0.00131
+  ranking ours [5, 2, 1, 4, 7, 6, 3] MATCH (published [5, 2, 1, 4, 7, 6, 3])
+    rank(ka) == rank(k): True
+    rank(kb) == rank(k): True
+    rank(kc) == rank(k): True
+== F2 Yazdani et al. 2019, section 3.2.3 (Tables X-XI)
+  sum w = 1.0000
+  S  [0.471796, 0.635067, 0.556544, 0.492696, 0.297142, 0.408371, 0.671574, 0.432256, 0.391977, 0.384981]
+  P  [5.406463, 6.467954, 6.331759, 6.220358, 4.178744, 4.611492, 6.596875, 6.035803, 4.301356, 5.429976]
+  ka [0.097446, 0.117749, 0.114190, 0.111285, 0.074198, 0.083216, 0.120492, 0.107223, 0.077803, 0.096397]  max|diff| 0.00005
+  kb [2.881582, 3.685074, 3.388222, 3.146688, 2.000000, 2.477890, 3.838789, 2.899119, 2.348501, 2.595041]  max|diff| 0.00004
+  kc [0.808736, 0.977240, 0.947699, 0.923588, 0.615797, 0.690637, 1.000000, 0.889882, 0.645713, 0.800027]  max|diff| 0.00012
+  k  [1.872688, 2.344635, 2.199113, 2.080273, 1.347088, 1.606126, 2.426457, 1.950314, 1.514472, 1.748751]  max|diff| 0.00005
+  ranking ours [6, 2, 3, 4, 10, 8, 1, 5, 9, 7] MATCH (published [6, 2, 3, 4, 10, 8, 1, 5, 9, 7])
+    rank(ka) == rank(k): True
+    rank(kb) == rank(k): True
+    rank(kc) == rank(k): True
+== F3 Akgul 2021, CRITIC -> CoCoSo, 2016 (Tables 4, 7, 9-12)
+  sum w = 1.0000
+  S  [0.545268, 0.479895, 0.540239, 0.587772, 0.683331, 0.433629, 0.406202, 0.400500, 0.659316]  max|diff| 0.00010
+  P  [6.923022, 8.234209, 8.372176, 8.414463, 8.592454, 8.152568, 7.571322, 2.000000, 8.474862]  max|diff| 0.00014
+  ka [0.104494, 0.121925, 0.124699, 0.125956, 0.129783, 0.120135, 0.111619, 0.033587, 0.127802]  max|diff| 0.00004
+  kb [4.822980, 5.315345, 5.534999, 5.674828, 6.002422, 5.159004, 4.799899, 2.000000, 5.883663]  max|diff| 0.00054
+  kc [0.805138, 0.939446, 0.960826, 0.970509, 1.000000, 0.925657, 0.860038, 0.258792, 0.984734]  max|diff| 0.00006
+  k  [2.651201, 2.973121, 3.078893, 3.142330, 3.297531, 2.899190, 2.696228, 1.023176, 3.236760]  max|diff| 0.00024
+  ranking ours [8, 5, 4, 3, 1, 6, 7, 9, 2] MATCH (published [8, 5, 4, 3, 1, 6, 7, 9, 2])
+    rank(ka) == rank(k): True
+    rank(kb) == rank(k): False
+    rank(kc) == rank(k): True
+== F1 table checks
+  Table III (r) max|diff| 0.00005
+  Table V (r**w) max|diff| 0.00031; A7/C2 printed 0.988, ours 0.9877; A3/A5 C2 printed 0.9877 (same r = 0.9375)
+  Table II is x / sum(x): A1 C1 60/93.15 = 0.6441 (printed 0.6441), A1 C2 = 0.3540 (0.3540)
+  k from printed ka, kb, kc: [2.0418, 2.7869, 2.8817, 2.4157, 1.2992, 1.4425, 2.5188]; max|diff| vs printed k 0.0012
+== F3 Table 9 spot checks: BNK1 CR6 0.9268 (0.9270), BNK5 CR8 0.4008 (0.4008), BNK9 CR9 0.2116 (0.2116); zero cells in r: 9
+== libraries (L = 0.5)
+  pyDecision: max|k - ours| F1 4.4e-16, F2 4.4e-16, F3 4.4e-16
+  pymcdm: max|k - ours| F1 4.4e-16, F2 4.4e-16, F3 4.4e-16
+  pyrepo-mcda: max|k - ours| F1 4.4e-16, F2 4.4e-16, F3 4.4e-16
+== properties on the fixtures
+  F1: kc/ka spread at lambda 0.5 = 8.9e-16 (constant 5.5444); min kb = 2.0000; mean S 0.448, mean P 3.622; share of P in lambda=0.5 numerator, mean 0.892
+  F2: kc/ka spread at lambda 0.5 = 1.8e-15 (constant 8.2993); min kb = 2.0000; mean S 0.474, mean P 5.558; share of P in lambda=0.5 numerator, mean 0.922
+  F3: kc/ka spread at lambda 0.5 = 8.9e-16 (constant 7.7051); min kb = 2.0000; mean S 0.526, mean P 7.415; share of P in lambda=0.5 numerator, mean 0.926
+== lambda sweep 0, 0.1, ..., 1 on the fixtures
+  F1: lambdas whose ranking differs from 0.5: []
+  F2: lambdas whose ranking differs from 0.5: [1.0]
+     lambda 1.0: [5, 2, 3, 4, 10, 8, 1, 6, 9, 7] vs [6, 2, 3, 4, 10, 8, 1, 5, 9, 7]
+  F3: lambdas whose ranking differs from 0.5: [0.9, 1.0]
+     lambda 0.9: [7, 5, 4, 3, 1, 6, 8, 9, 2] vs [8, 5, 4, 3, 1, 6, 7, 9, 2]
+     lambda 1.0: [7, 5, 4, 3, 1, 6, 8, 9, 2] vs [8, 5, 4, 3, 1, 6, 7, 9, 2]
+== random 2000 problems (m 3..8, n 2..7, x in [1, 10] rounded to 0.1, 30 % cost, Dirichlet weights)
+  some alternative worst on every criterion (min S = min P = 0, kb divides by 0): 100/2000
+    by n: n=2: 80/349, n=3: 16/315, n=4: 4/334, n=5: 0/303, n=6: 0/353, n=7: 0/346
+    pyDecision '+1' hack: ranking differs from plain S + P order in 0/100 (kb becomes S + P + 2)
+  of the remaining 1900:
+    rank(k) == rank(kb): 1311/1900; rank(k) == rank(S + P) (= rank ka = rank kc at 0.5): 737/1900; rank(k) == rank(S) (SAW min-max): 790/1900
+    ranking changes somewhere on the lambda grid 0..1: 731/1900; within 0.3..0.7: 213/1900
+    per-column x -> a x + b (a > 0, b may make values negative): max|k diff| 2.5e-11
+    constant column as zeros == column dropped (weights kept): 1900/1900; as ones (pymcdm) reorders: 514/1900
+    an extra criterion with weight 0 (adds 1 to every P) reorders: 320/1900
+== edge cases
+  the cliff at r = 0: r**0.2 for r = 0.1 -> 0.631, 0.01 -> 0.398, 0.001 -> 0.251, 1e-06 -> 0.063, 0 -> 0
+  all alternatives equal: S [0. 0. 0. 0.], P [0. 0. 0. 0.], kb [nan nan nan nan], k [nan nan nan nan]
+  A1 worst on every criterion: S [0.0000, 0.7625, 0.6375, 0.5000], P [0.0000, 2.7186, 2.4527, 2.2936], kb [nan inf inf inf], k [nan inf inf inf]
+  single alternative: r [[0. 0. 0.]], k [nan]
+  m = 2, A2 better on both: S [0. 1.], kb [nan inf]

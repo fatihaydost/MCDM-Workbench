@@ -9,6 +9,7 @@
  */
 import { reweight } from './reweight'
 import type { RankerFor } from './run'
+import { ProblemValidationError } from './validate'
 import type { MethodParams, Problem, WeightingMethod } from './types'
 
 // ---------- shared helpers ----------
@@ -46,7 +47,11 @@ export type StableInterval = { from: number; to: number; ranking: number[]; top:
 
 export type Sweep = {
   k: number
-  /** Grid of `steps + 1` points over w_k ∈ [0, 1] (default steps 100). */
+  /**
+   * Grid of `steps + 1` points over w_k ∈ [0, 1] (default steps 100). A grid end where the method cannot rank (CoCoSo
+   * at w_k = 1: the alternative worst on criterion k gets S = 0) is left out, so points and intervals start or end at
+   * the next grid point.
+   */
   points: SweepPoint[]
   /** Consecutive intervals covering [0, 1] where the full ranking is constant. */
   rankingIntervals: StableInterval[]
@@ -104,7 +109,20 @@ export function sweepWeight(
   // Oriented score gap: negative when a is ahead, whatever the method's score direction.
   const gap = (e: Eval, a: number, b: number): number => e.sign * (e.scores[a]! - e.scores[b]!)
 
-  const grid: Eval[] = Array.from({ length: steps + 1 }, (_, i) => evalAt(i / steps))
+  // Only the ends can block: inside (0, 1) every weight that was above 0 stays above 0.
+  const tryEval = (t: number): Eval | null => {
+    try {
+      return evalAt(t)
+    } catch (err) {
+      if (err instanceof ProblemValidationError && (t === 0 || t === 1)) return null
+      throw err
+    }
+  }
+  const grid: Eval[] = Array.from({ length: steps + 1 }, (_, i) => tryEval(i / steps)).filter((e): e is Eval => e !== null)
+  if (grid.length < 2) throw new RangeError('the method cannot rank along this sweep')
+  const lo = grid[0]!.t
+  const hi = grid[grid.length - 1]!.t
+  const last = grid.length - 1
   const m = grid[0]!.ranking.length
   const breaks: number[] = []
 
@@ -171,17 +189,17 @@ export function sweepWeight(
     for (let b = a + 1; b < m; b++) {
       const st = grid.map((e) => state(e, a, b))
       const f = grid.map((e, i) => st[i]! * gap(e, a, b))
-      for (let i = 0; i < steps; i++) if (st[i] !== st[i + 1]) bisect(grid[i]!, grid[i + 1]!, a, b)
-      for (let i = 0; i <= steps; i++) {
+      for (let i = 0; i < last; i++) if (st[i] !== st[i + 1]) bisect(grid[i]!, grid[i + 1]!, a, b)
+      for (let i = 0; i <= last; i++) {
         const s = st[i]!
         if (s === 0) continue
         const L = i > 0 && st[i - 1] === s ? i - 1 : i
-        const R = i < steps && st[i + 1] === s ? i + 1 : i
+        const R = i < last && st[i + 1] === s ? i + 1 : i
         if (L === R || f[i]! > f[L]! || f[i]! > f[R]!) continue
         // Three samples for the parabola: the window itself, or the window extended on its open side.
         let idx: number[]
         if (R - L === 2) idx = [L, i, R]
-        else if (L === i && R + 1 <= steps && st[R + 1] === s) idx = [L, R, R + 1]
+        else if (L === i && R + 1 <= last && st[R + 1] === s) idx = [L, R, R + 1]
         else if (R === i && L - 1 >= 0 && st[L - 1] === s) idx = [L - 1, L, R]
         else idx = []
         const predicted =
@@ -198,14 +216,14 @@ export function sweepWeight(
 
   // Pieces between merged switch points; ranking at each piece's midpoint; merge equal neighbours.
   breaks.sort((x, y) => x - y)
-  const cuts: number[] = [0]
+  const cuts: number[] = [lo]
   for (const p of breaks) {
-    if (p <= 0 || p >= 1) continue
+    if (p <= lo || p >= hi) continue
     if (p - cuts[cuts.length - 1]! <= MERGE_TOL) continue
     cuts.push(p)
   }
-  if (cuts.length > 1 && 1 - cuts[cuts.length - 1]! <= MERGE_TOL) cuts.pop()
-  cuts.push(1)
+  if (cuts.length > 1 && hi - cuts[cuts.length - 1]! <= MERGE_TOL) cuts.pop()
+  cuts.push(hi)
 
   const rankingIntervals: StableInterval[] = []
   for (let j = 0; j + 1 < cuts.length; j++) {
@@ -234,7 +252,7 @@ export function sweepWeight(
     const first = rankingIntervals[0]!
     if (first.to - first.from <= END_TIE_WIDTH && onlyMerges(first.ranking, rankingIntervals[1]!.ranking)) {
       rankingIntervals.shift()
-      rankingIntervals[0]!.from = 0
+      rankingIntervals[0]!.from = lo
     }
   }
   if (rankingIntervals.length > 1) {
@@ -242,7 +260,7 @@ export function sweepWeight(
     const prev = rankingIntervals[rankingIntervals.length - 2]!
     if (last.to - last.from <= END_TIE_WIDTH && onlyMerges(last.ranking, prev.ranking)) {
       rankingIntervals.pop()
-      prev.to = 1
+      prev.to = hi
     }
   }
 
@@ -254,7 +272,7 @@ export function sweepWeight(
   }
 
   // The interval containing the base weight; at a switch point, the one whose ranking is the base ranking.
-  const base = clamp01(weights[k]!)
+  const base = Math.min(hi, Math.max(lo, clamp01(weights[k]!)))
   const baseEval = evalAt(base)
   const pick = (ivs: StableInterval[], match: (iv: StableInterval) => boolean): StableInterval => {
     const containing = ivs.filter((iv) => iv.from - MERGE_TOL <= base && base <= iv.to + MERGE_TOL)
@@ -525,18 +543,28 @@ export function removeCriteria(
   const baseTop = topSet(baseRanking)
   const rows: RemovalRow[] = []
 
-  const row = (j: number, mode: RemovalRow['mode'], reduced: Problem, w: number[]): RemovalRow => {
-    const ranking = rankFor(reduced)(w).ranking
-    const full = [...w.slice(0, j), 0, ...w.slice(j)]
-    return {
-      j,
-      mode,
-      weights: full,
-      ranking,
-      sameTop: sameList(topSet(ranking), baseTop),
-      spearman: spearman(baseRanking, ranking),
-      ws: wsCoefficient(baseRanking, ranking),
+  // shortcut: a removal the method cannot rank (CoCoSo: an alternative then worst on every remaining criterion) is
+  // left out of the rows; show it as its own row if users need to see why a criterion is missing.
+  const row = (j: number, mode: RemovalRow['mode'], reduced: Problem, w: number[]): RemovalRow[] => {
+    let ranking: number[]
+    try {
+      ranking = rankFor(reduced)(w).ranking
+    } catch (err) {
+      if (err instanceof ProblemValidationError) return []
+      throw err
     }
+    const full = [...w.slice(0, j), 0, ...w.slice(j)]
+    return [
+      {
+        j,
+        mode,
+        weights: full,
+        ranking,
+        sameTop: sameList(topSet(ranking), baseTop),
+        spearman: spearman(baseRanking, ranking),
+        ws: wsCoefficient(baseRanking, ranking),
+      },
+    ]
   }
 
   for (let j = 0; j < n; j++) {
@@ -548,8 +576,8 @@ export function removeCriteria(
     const rest = weights.filter((_, c) => c !== j)
     const restSum = rest.reduce((s, w) => s + w, 0)
     const renorm = restSum > 0 ? rest.map((w) => w / restSum) : rest.map(() => 1 / rest.length)
-    rows.push(row(j, 'renormalize', reduced, renorm))
-    if (weighting) rows.push(row(j, 'recompute', reduced, weighting.compute(reduced, opts?.weightingParams ?? {}).weights))
+    rows.push(...row(j, 'renormalize', reduced, renorm))
+    if (weighting) rows.push(...row(j, 'recompute', reduced, weighting.compute(reduced, opts?.weightingParams ?? {}).weights))
   }
   return rows
 }

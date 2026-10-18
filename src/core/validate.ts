@@ -13,6 +13,7 @@ export type ValidationCode =
   | 'non-positive-value'
   | 'negative-value'
   | 'non-positive-average'
+  | 'all-worst-alternative'
   | 'weights-length-mismatch'
   | 'invalid-weight'
   | 'negative-weight'
