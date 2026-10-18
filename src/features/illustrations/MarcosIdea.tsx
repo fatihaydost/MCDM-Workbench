@@ -49,8 +49,21 @@ export type MarcosRowsProps = {
   /** S, K and f(K) in the active locale with the given decimals. */
   format?: ((value: number, decimals: number) => string) | undefined
   labels?: Partial<MarcosRowsLabels>
+  /**
+   * Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. MARCOS_ROWS_STEPS - 1 draws that
+   * step, the last one being the full picture.
+   */
+  step?: number | null | undefined
+  /** Move at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
+  explain?: boolean | undefined
   className?: string | undefined
 }
+
+/**
+ * The steps of the MARCOS idea: 0 the weighted totals S of the alternatives on one scale, 1 the two imaginary rows
+ * (ideal, anti-ideal) and their guides appear, 2 the bars are read against them: f(K) closes each row.
+ */
+export const MARCOS_ROWS_STEPS = 3
 
 const FONT = 13
 const BAR = 16
@@ -69,7 +82,7 @@ const defaultFormat = (v: number, d: number) => v.toFixed(d)
  * dashed guides. Alternatives in rank order, the first in the accent; f(K) closes each row on the right. Hover or focus
  * a bar (up / down) to read its K- and K+. Static at first paint; new numbers move rows and bars at --dur-data.
  */
-export function MarcosRows({ problem, weights, format = defaultFormat, labels, className }: MarcosRowsProps) {
+export function MarcosRows({ problem, weights, format = defaultFormat, labels, step, explain = false, className }: MarcosRowsProps) {
   const l = { ...MARCOS_ROWS_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
@@ -80,6 +93,9 @@ export function MarcosRows({ problem, weights, format = defaultFormat, labels, c
   if (!parts) return null
 
   const { s: totals, kMinus, kPlus, scores, sAai, sAi, order } = parts
+  const stepping = step !== null && step !== undefined
+  const stage = stepping ? Math.min(Math.max(step, 0), MARCOS_ROWS_STEPS - 1) : MARCOS_ROWS_STEPS - 1
+  const off = (from: number) => (stage >= from ? undefined : '')
   const names = problem.alternatives
   const m = names.length
   const f4 = (v: number) => format(v, 4)
@@ -139,7 +155,7 @@ export function MarcosRows({ problem, weights, format = defaultFormat, labels, c
   return (
     <ChartFigure titleId={`${uid}-title`} tableId={`${uid}-table`} title={l.title} showTable={l.showTable} table={table} plotRef={plotRef} className={className}>
       <svg
-        className={animate ? `${s.svg} ${s.animate}` : s.svg}
+        className={[s.svg, animate && s.animate, explain && s.explain].filter(Boolean).join(' ')}
         width={W}
         height={height}
         viewBox={`0 0 ${W} ${height}`}
@@ -150,8 +166,8 @@ export function MarcosRows({ problem, weights, format = defaultFormat, labels, c
       >
         {/* The two reference totals as guides through every row: K- and K+ are a bar's length against them. */}
         <g aria-hidden>
-          <line className={s.marcosGuide} x1={0} x2={0} y1={barY} y2={height - rowStep + barY + BAR} style={{ transform: `translate(${xAai}px, 0px)` }} />
-          <line className={s.marcosGuide} x1={0} x2={0} y1={barY} y2={height - rowStep + barY + BAR} style={{ transform: `translate(${xAi}px, 0px)` }} />
+          <line className={`${s.marcosGuide} ${s.stageItem}`} data-off={off(1)} x1={0} x2={0} y1={barY} y2={height - rowStep + barY + BAR} style={{ transform: `translate(${xAai}px, 0px)` }} />
+          <line className={`${s.marcosGuide} ${s.stageItem}`} data-off={off(1)} x1={0} x2={0} y1={barY} y2={height - rowStep + barY + BAR} style={{ transform: `translate(${xAi}px, 0px)` }} />
         </g>
         <g onKeyDown={move} onMouseLeave={() => setActive(null)}>
           {rows.map((r, k) => {
@@ -163,21 +179,21 @@ export function MarcosRows({ problem, weights, format = defaultFormat, labels, c
                 key={r.key}
                 className={s.sawRow}
                 style={{ transform: `translate(0px, ${k * rowStep}px)` }}
-                data-highlight={r.i === best || undefined}
+                data-highlight={(r.i === best && stage >= 2) || undefined}
                 data-ghost={r.ghost || undefined}
                 data-testid={r.ghost ? 'marcos-ghost' : 'marcos-bar'}
               >
-                <text className={r.ghost ? s.marcosGhostName : s.sawName} x={0} y={stacked ? 8 : ROW / 2} dominantBaseline="central">
+                <text className={r.ghost ? `${s.marcosGhostName} ${s.stageItem}` : s.sawName} data-off={r.ghost ? off(1) : undefined} x={0} y={stacked ? 8 : ROW / 2} dominantBaseline="central">
                   {short !== r.name ? <title>{r.name}</title> : null}
                   {short}
                 </text>
                 {r.ghost ? (
-                  <rect className={s.marcosGhost} x={plotLeft} y={barY + 0.5} width={Math.max(0, end - plotLeft)} height={BAR - 1} aria-hidden />
+                  <rect className={`${s.marcosGhost} ${s.stageItem}`} data-off={off(1)} x={plotLeft} y={barY + 0.5} width={Math.max(0, end - plotLeft)} height={BAR - 1} aria-hidden />
                 ) : (
                   <rect
                     className={s.marcosBar}
                     data-on={active === row || undefined}
-                    data-highlight={r.i === best || undefined}
+                    data-highlight={(r.i === best && stage >= 2) || undefined}
                     data-row={row}
                     x={0}
                     y={barY}
@@ -195,11 +211,18 @@ export function MarcosRows({ problem, weights, format = defaultFormat, labels, c
                     onBlur={() => setActive(null)}
                   />
                 )}
-                <text className={s.sawValue} x={0} y={barY + BAR / 2} dominantBaseline="central" style={{ transform: `translate(${end + VALUE_GAP}px, 0px)` }}>
+                <text
+                  className={r.ghost ? `${s.sawValue} ${s.stageItem}` : s.sawValue}
+                  data-off={r.ghost ? off(1) : undefined}
+                  x={0}
+                  y={barY + BAR / 2}
+                  dominantBaseline="central"
+                  style={{ transform: `translate(${end + VALUE_GAP}px, 0px)` }}
+                >
                   {texts[k]}
                 </text>
                 {!r.ghost && (
-                  <text className={s.sawValue} x={W} y={barY + BAR / 2} dominantBaseline="central" textAnchor="end" data-testid="marcos-utility">
+                  <text className={`${s.sawValue} ${s.stageItem}`} data-off={off(2)} x={W} y={barY + BAR / 2} dominantBaseline="central" textAnchor="end" data-testid="marcos-utility">
                     {right[r.i]}
                   </text>
                 )}
@@ -215,7 +238,8 @@ export function MarcosRows({ problem, weights, format = defaultFormat, labels, c
             {l.readout(names[shown]!, f3(kMinus[shown]!), f3(kPlus[shown]!), right[shown]!)}
           </span>
         ) : (
-          <span>{l.caption ?? ' '}</span>
+          // Hidden, not removed, before the last step: the picture below keeps its place.
+          <span className={stage >= 2 ? undefined : 'invisible'}>{l.caption ?? ' '}</span>
         )}
       </p>
     </ChartFigure>

@@ -1166,7 +1166,12 @@
           "sawCaption": "Every dot lies on one line through 0, so no two alternatives can swap places.",
           "sawX": "SAW (Linear) score S",
           "sawY": "MARCOS f(K)",
-          "sawLine": "f(K) = c · S, c = {{c}}"
+          "sawLine": "f(K) = c · S, c = {{c}}",
+          "steps": {
+            "s1": "Weighted totals S: each bar is an alternative's weighted sum, all on one scale.",
+            "s2": "Two imaginary rows: the ideal AI (best of every criterion) and the anti-ideal AAI (worst) mark the ends.",
+            "s3": "Utility f(K): each bar is read against both rows (K− and K+); the highest f(K) ranks first."
+          }
         },
         "cocoso": {
           "title": "Two scores, three readings",
