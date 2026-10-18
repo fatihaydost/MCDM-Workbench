@@ -377,7 +377,7 @@
         "manual": "Ağırlıkları kendiniz girin. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli.",
         "sd": "Her kriterin değerlerinin alternatifler arasında ne kadar yayıldığına bakan nesnel ağırlıklar.",
         "merec": "Ağırlığı, kriteri çıkarmanın neyi değiştirdiğinden bulur. Her değer 0'dan büyük olmalı.",
-        "bwm": "En önemli ve en önemsiz kriteri seçin, diğer her kriteri bu ikisiyle karşılaştırın (1-9); 2n - 3 yanıt ağırlıkları verir."
+        "bwm": "En önemli ve en önemsiz kriteri seçin, diğer her kriteri bu ikisiyle karşılaştırın (1‑9); 2n - 3 yanıt ağırlıkları verir."
       },
       "columns": {
         "criterion": "Kriter",
@@ -1419,8 +1419,8 @@
       "scores": "Sınıra uzaklık S: Q'nun satır toplamı. Büyük olan önde sıralanır; S, min-maks ağırlıklı toplamdan tek bir sabit çıkarılarak bulunur, bu yüzden sıra o toplamın sırasıdır."
     },
     "bwm": {
-      "bestToOthers": "En iyinin diğerlerine üstünlüğü: en iyi kriter her birinden kaç kat önemli, 1-9.",
-      "othersToWorst": "Diğerlerinin en kötüye üstünlüğü: her kriter en kötüden kaç kat önemli, 1-9.",
+      "bestToOthers": "En iyinin diğerlerine üstünlüğü: en iyi kriter her birinden kaç kat önemli, 1‑9.",
+      "othersToWorst": "Diğerlerinin en kötüye üstünlüğü: her kriter en kötüden kaç kat önemli, 1‑9.",
       "consistencyLocal": "Kriter başına tutarlılık: a_Bj ile a_jW çarpımı a_BW değerinden ne kadar uzak.",
       "xi": "Sapma: yanıtlarla uyarlanan ağırlıklar arasındaki en büyük fark.",
       "weights": "BWM ağırlıkları: doğrusal model, kapalı biçimde çözülür, toplamı 1."

@@ -43,6 +43,7 @@ export function Stage({ problem, judgements, weights }: StagePictureProps) {
       warn={progress.flagged !== null}
       format={format}
       labels={{ ...labels, showTable: t('workbench.chart.showTable'), criterion: t('workbench.criterion') }}
+      pinAxis
       className="max-w-[760px]"
     />
   )

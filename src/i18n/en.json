@@ -377,7 +377,7 @@
         "manual": "Enter your own weights. They must be 0 or more and sum to 1.",
         "sd": "Objective weights from how widely each criterion's values spread over the alternatives.",
         "merec": "Objective weights from how much the alternatives' overall performance drops when each criterion is removed. Every value must be above 0.",
-        "bwm": "Pick the most and least important criterion, then compare every other with these two (1-9); 2n - 3 answers give the weights."
+        "bwm": "Pick the most and least important criterion, then compare every other with these two (1‑9); 2n - 3 answers give the weights."
       },
       "columns": {
         "criterion": "Criterion",
@@ -1419,8 +1419,8 @@
       "scores": "Distance to border S: the row sum of Q. A higher value ranks higher; S is the min-max weighted sum minus one constant, so the order is that sum's."
     },
     "bwm": {
-      "bestToOthers": "Best over others: how much more important the best criterion is than each, 1-9.",
-      "othersToWorst": "Others over worst: how much more important each criterion is than the worst, 1-9.",
+      "bestToOthers": "Best over others: how much more important the best criterion is than each, 1‑9.",
+      "othersToWorst": "Others over worst: how much more important each criterion is than the worst, 1‑9.",
       "consistencyLocal": "Consistency per criterion: how far a_Bj times a_jW is from a_BW.",
       "xi": "Deviation: the largest gap between the answers and the fitted weights.",
       "weights": "BWM weights: the linear model, solved in closed form, summing to 1."

@@ -188,6 +188,17 @@ describe('judgements in the store', () => {
     expect(s.judgements!.worst).toBeNull()
   })
 
+  it('a saved state whose problem lacks criteria falls back to the current problem instead of throwing', async () => {
+    const storage = useWorkbench.persist.getOptions().storage!
+    const old = { ...initialWorkbench(), stage: 'ranking', problem: { alternatives: ['A'] } } as unknown
+    await storage.setItem(WORKBENCH_STORAGE_KEY, { state: old, version: 1 })
+    await useWorkbench.persist.rehydrate()
+    const s = useWorkbench.getState()
+    expect(s.stage).toBe('ranking') // the rest of the saved state still loaded (a throwing merge would drop it)
+    expect(Array.isArray(s.problem.criteria)).toBe(true)
+    square(s)
+  })
+
   it('startBlank and reset empty the answers', () => {
     answered()
     const st = useWorkbench.getState()

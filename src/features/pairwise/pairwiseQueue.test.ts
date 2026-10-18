@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { emptyJudgements, judgementsFromBwm, setPair, type Judgements } from '../../core'
+import { bwmAnswers, emptyJudgements, judgementsFromBwm, setPair, type Judgements } from '../../core'
 import { ahpQuestions, answerOf, bwmQuestions, modeFor, nextUnanswered, progress } from './pairwiseQueue'
 
 const ab = (qs: { a: number; b: number }[]) => qs.map((q) => [q.a, q.b])
@@ -34,6 +34,29 @@ describe('pairwiseQueue', () => {
     const q = { a: 1, b: 0, fixed: 'a' as const }
     expect(answerOf(q, j.pairs, modeFor(q, j))).toBeNull()
     expect(answerOf(q, j.pairs, { kind: 'ahp' })).toBe(0.5)
+  })
+
+  it('BWM answers as asked agree with bwmAnswers on random judgements', () => {
+    let seed = 7
+    const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648)
+    for (let t = 0; t < 200; t++) {
+      const n = 3 + Math.floor(rnd() * 4)
+      const best = Math.floor(rnd() * n)
+      const worst = (best + 1 + Math.floor(rnd() * (n - 1))) % n
+      let j: Judgements = { ...emptyJudgements(n), best, worst }
+      for (let a = 0; a < n; a++)
+        for (let b = 0; b < n; b++) {
+          if (a === b || rnd() < 0.3) continue
+          const v = rnd() < 0.15 ? 0.5 : rnd() < 0.15 ? 11 : 1 + Math.floor(rnd() * 9)
+          j = setPair(j, a, b, v)
+        }
+      const want = bwmAnswers(j)!
+      for (const q of bwmQuestions(n, best, worst)) {
+        const got = answerOf(q, j.pairs, modeFor(q, j))
+        const exp = q.a === best && q.b === worst ? want.bestToOthers[worst] : q.a === best ? want.bestToOthers[q.b] : want.othersToWorst[q.a]
+        expect(got).toBe(exp)
+      }
+    }
   })
 
   it('nextUnanswered wraps and ends with null', () => {

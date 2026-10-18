@@ -24,8 +24,8 @@ export const bwm: MethodContent = {
       title: { en: 'Two comparison vectors', tr: 'İki karşılaştırma vektörü' },
       tex: String.raw`a_B = (a_{B1}, \dots, a_{Bn}), \qquad a_W = (a_{1W}, \dots, a_{nW}), \qquad a_{BB} = a_{WW} = 1`,
       note: {
-        en: 'B is the best (most important) criterion and W the worst, on a 1-9 scale; a_BW must be the same number in both vectors.',
-        tr: 'B en iyi (en önemli), W en kötü kriterdir, değerler 1-9 ölçeğindedir; a_BW iki vektörde de aynı sayı olmalı.',
+        en: 'B is the best (most important) criterion and W the worst, on a 1‑9 scale; a_BW must be the same number in both vectors.',
+        tr: 'B en iyi (en önemli), W en kötü kriterdir, değerler 1‑9 ölçeğindedir; a_BW iki vektörde de aynı sayı olmalı.',
       },
     },
     {
@@ -95,7 +95,7 @@ export const bwm: MethodContent = {
   ],
   en: {
     summary:
-      'BWM compares the most important criterion with all others and all others with the least important (1-9). That is only 2n - 3 judgements instead of n(n-1)/2 in AHP, with a consistency check.',
+      'BWM compares the most important criterion with all others and all others with the least important (1‑9). That is only 2n - 3 judgements instead of n(n-1)/2 in AHP, with a consistency check.',
     whenToUse: [
       'Subjective weights with fewer questions than AHP.',
       'Between 3 and 10 criteria.',
@@ -107,8 +107,8 @@ export const bwm: MethodContent = {
     ],
     inputs: [
       'Which criterion is best (B) and which is worst (W).',
-      'Best-to-others vector, values 1-9, with a_BB = 1.',
-      'Others-to-worst vector, values 1-9, with a_WW = 1. a_BW must match in both.',
+      'Best-to-others vector, values 1‑9, with a_BB = 1.',
+      'Others-to-worst vector, values 1‑9, with a_WW = 1. a_BW must match in both.',
       'Answers are capped at a_BW.',
     ],
     pitfalls: [
@@ -119,7 +119,7 @@ export const bwm: MethodContent = {
   },
   tr: {
     summary:
-      "BWM en önemli kriteri diğer hepsiyle, diğer hepsini de en önemsiz kriterle karşılaştırır (1-9). AHP'deki n(n-1)/2 yerine yalnız 2n - 3 yargı gerekir ve tutarlılık da raporlanır.",
+      "BWM en önemli kriteri diğer hepsiyle, diğer hepsini de en önemsiz kriterle karşılaştırır (1‑9). AHP'deki n(n-1)/2 yerine yalnız 2n - 3 yargı gerekir ve tutarlılık da raporlanır.",
     whenToUse: [
       "AHP'den daha az soruyla öznel ağırlık.",
       '3 ile 10 arası kriter.',
@@ -131,8 +131,8 @@ export const bwm: MethodContent = {
     ],
     inputs: [
       'Hangi kriterin en iyi (B), hangisinin en kötü (W) olduğu.',
-      'En iyiden diğerlerine vektörü, 1-9 değerleri, a_BB = 1.',
-      'Diğerlerinden en kötüye vektörü, 1-9 değerleri, a_WW = 1. a_BW iki vektörde aynı olmalı.',
+      'En iyiden diğerlerine vektörü, 1‑9 değerleri, a_BB = 1.',
+      'Diğerlerinden en kötüye vektörü, 1‑9 değerleri, a_WW = 1. a_BW iki vektörde aynı olmalı.',
       'Yanıtlar a_BW ile sınırlıdır.',
     ],
     pitfalls: [

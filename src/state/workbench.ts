@@ -533,7 +533,9 @@ export const useWorkbench = create<WorkbenchState>()(
       }),
       // Saved state is a trust boundary (hand-edited or stale localStorage): refit the judgements to the criteria.
       merge: (persisted, current) => {
-        const p = (persisted ?? {}) as Partial<WorkbenchData>
+        const p = { ...(persisted ?? {}) } as Partial<WorkbenchData>
+        // A problem without a criteria list cannot be shown or refitted: keep the current one.
+        if (!Array.isArray(p.problem?.criteria)) delete p.problem
         const n = (p.problem ?? current.problem).criteria.length
         return { ...current, ...p, judgements: sanitizeJudgements(p.judgements, n) }
       },

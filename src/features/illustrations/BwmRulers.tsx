@@ -60,7 +60,17 @@ export type BwmRulersProps = {
   step?: number | null | undefined
   /** Fade at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
   explain?: boolean | undefined
+  /** Hold the axis maximum at 9 or above (the workbench, where answers arrive one by one). */
+  pinAxis?: boolean | undefined
   className?: string | undefined
+}
+
+/**
+ * The ruler's domain: from just left of 1 (the worst), or of a weight ratio below it: no empty strip from 0. `pin`
+ * (the workbench, where answers arrive one by one) holds the upper end at 9 or above so the axis does not rescale.
+ */
+export function bwmAxis(drawn: readonly number[], pin = false): [number, number] {
+  return [Math.min(1, ...drawn) - 0.25, Math.ceil(Math.max(pin ? 9 : 1, ...drawn))]
 }
 
 /** 0 the anchors, 1 the best's ruler, 2 the worst's ruler with the bands, 3 the weights (the full picture). */
@@ -78,7 +88,7 @@ const defaultFormat = (v: number) => v.toFixed(4)
  * disagreement. The weight is a dot at w_j / w_W. Static: steps only fade parts in.
  */
 export function BwmRulers(props: BwmRulersProps) {
-  const { criteria, best, worst, bestToOthers, othersToWorst, weights, flagged, warn = false, format = defaultFormat, step, explain = false, className } = props
+  const { criteria, best, worst, bestToOthers, othersToWorst, weights, flagged, warn = false, format = defaultFormat, step, explain = false, pinAxis = false, className } = props
   const l = { ...BWM_RULERS_LABELS_EN, ...props.labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
@@ -102,10 +112,9 @@ export function BwmRulers(props: BwmRulersProps) {
   const x0 = nameW + 8
   const x1 = W - valueW - 8
   const drawn = [aBW, ...(ratio ?? []), ...fromBest, ...toWorst].filter((v): v is number => v !== null && v !== undefined)
-  const max = Math.max(...drawn)
-  // From just left of 1 (the worst), or of a weight ratio below it: no empty strip from 0.
-  const x = scaleLinear([Math.min(1, ...drawn) - 0.25, Math.ceil(max)], [x0, x1])
-  const grid = Array.from({ length: Math.ceil(max) }, (_, k) => k + 1)
+  const [lo, hi9] = bwmAxis(drawn, pinAxis)
+  const x = scaleLinear([lo, hi9], [x0, x1])
+  const grid = Array.from({ length: hi9 }, (_, k) => k + 1)
   // Every integer when there is room for its label, else only the anchors' 1 and a_BW.
   const every = x(2) - x(1) >= 18
   const height = HEAD + n * ROW + FOOT
