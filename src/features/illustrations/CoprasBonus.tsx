@@ -51,8 +51,22 @@ export type CoprasBonusProps = {
   /** N in percent (active locale, 2 decimals). */
   formatPercent?: ((value: number) => string) | undefined
   labels?: Partial<CoprasBonusLabels>
+  /**
+   * Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. COPRAS_BONUS_STEPS - 1 draws that
+   * step, the last one being the full picture.
+   */
+  step?: number | null | undefined
+  /** Move at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
+  explain?: boolean | undefined
   className?: string | undefined
 }
+
+/**
+ * The steps of the COPRAS idea: 0 the benefit shares S+, 1 the cost bonus grows from the end of S+ (the cost share S-
+ * is printed at the bar end: the smaller it is, the larger the bonus), 2 the bar ends at Q = S+ plus bonus and the rows
+ * slide from the order of the table to the rank order, 3 the utility degree N, percent of the best Q.
+ */
+export const COPRAS_BONUS_STEPS = 4
 
 const FONT = 13
 const BAR = 16
@@ -80,7 +94,7 @@ type Active = { row: number; col: number }
  * other part. Arrow keys move between segments (left / right: parts, up / down: alternatives). Static at first paint;
  * new numbers move rows and segments at --dur-data. Every number comes from the core's COPRAS steps.
  */
-export function CoprasBonus({ problem, weights, format = defaultFormat, formatPercent = defaultPercent, labels, className }: CoprasBonusProps) {
+export function CoprasBonus({ problem, weights, format = defaultFormat, formatPercent = defaultPercent, labels, step, explain = false, className }: CoprasBonusProps) {
   const l = { ...COPRAS_BONUS_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
@@ -90,11 +104,16 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
   const [focusKey, setFocusKey] = useState<Active>({ row: 0, col: 0 })
   if (!parts) return null
 
-  const { sPlus, bonus, scores, utility, order } = parts
+  const { sPlus, bonus, sMinus, scores, utility, order } = parts
+  const stepping = step !== null && step !== undefined
+  const stage = stepping ? Math.min(Math.max(step, 0), COPRAS_BONUS_STEPS - 1) : COPRAS_BONUS_STEPS - 1
+  const off = (from: number) => (stage >= from ? undefined : '')
   const m = problem.alternatives.length
   const names = problem.alternatives
   const partNames = [l.benefit, l.bonus]
   const values = (i: number) => [sPlus[i]!, bonus[i]!]
+  // Before step 1 the bonus has no length yet; it grows from the end of S+.
+  const drawn = (i: number) => [sPlus[i]!, stage >= 1 ? bonus[i]! : 0]
   const W = Math.max(width, 240)
   const stacked = W < STACK_BELOW
   const texts = scores.map((v) => format(v))
@@ -140,7 +159,7 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
   return (
     <ChartFigure titleId={`${uid}-title`} tableId={`${uid}-table`} title={l.title} showTable={l.showTable} table={table} plotRef={plotRef} className={className}>
       <svg
-        className={animate ? `${s.svg} ${s.animate}` : s.svg}
+        className={[s.svg, animate && s.animate, explain && s.explain].filter(Boolean).join(' ')}
         width={W}
         height={height}
         viewBox={`0 0 ${W} ${height}`}
@@ -151,16 +170,17 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
       >
         <g onKeyDown={move} onMouseLeave={() => setActive(null)} data-dimmed={active ? '' : undefined} className={s.sawPlot}>
           {order.map((i, row) => {
-            const segs = stackSegments(values(i), plotLeft, pxPerUnit)
+            const segs = stackSegments(drawn(i), plotLeft, pxPerUnit)
             const end = plotLeft + scores[i]! * pxPerUnit
+            const place = stage >= 2 ? row : i
             const name = names[i]!
             const short = truncate(name, stacked ? W - valueWidth - percentWidth : labelWidth - GAP, FONT)
             return (
               <g
                 key={i}
                 className={s.sawRow}
-                style={{ transform: `translate(0px, ${row * rowStep}px)` }}
-                data-highlight={i === best || undefined}
+                style={{ transform: `translate(0px, ${place * rowStep}px)` }}
+                data-highlight={(i === best && stage >= 2) || undefined}
                 data-testid="copras-bar"
                 data-score={scores[i]}
               >
@@ -195,11 +215,23 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
                     onBlur={() => setActive(null)}
                   />
                 ))}
-                <rect className={s.sawGap} x={-1} y={barY} width={2} height={BAR} style={{ transform: `translate(${segs[1]!.x}px, 0px)` }} aria-hidden />
-                <text className={s.sawValue} x={0} y={barY + BAR / 2} dominantBaseline="central" style={{ transform: `translate(${end + VALUE_GAP}px, 0px)` }}>
+                <rect className={`${s.sawGap} ${s.stageItem}`} data-off={off(1)} x={-1} y={barY} width={2} height={BAR} style={{ transform: `translate(${segs[1]!.x}px, 0px)` }} aria-hidden />
+                {/* The cost share that sets the bonus: at the bar end for step 1 only, where Q takes its place. */}
+                <text
+                  className={`${s.sawValue} ${s.stageItem}`}
+                  data-off={stage === 1 ? undefined : ''}
+                  x={0}
+                  y={barY + BAR / 2}
+                  dominantBaseline="central"
+                  style={{ transform: `translate(${end + VALUE_GAP}px, 0px)` }}
+                  aria-hidden
+                >
+                  {`S− ${format(sMinus[i]!)}`}
+                </text>
+                <text className={`${s.sawValue} ${s.stageItem}`} data-off={off(2)} x={0} y={barY + BAR / 2} dominantBaseline="central" style={{ transform: `translate(${end + VALUE_GAP}px, 0px)` }}>
                   {texts[i]}
                 </text>
-                <text className={s.sawValue} x={W} y={barY + BAR / 2} dominantBaseline="central" textAnchor="end" data-testid="copras-utility">
+                <text className={`${s.sawValue} ${s.stageItem}`} data-off={off(3)} x={W} y={barY + BAR / 2} dominantBaseline="central" textAnchor="end" data-testid="copras-utility">
                   {percents[i]}
                 </text>
               </g>

@@ -1151,7 +1151,13 @@
         },
         "copras": {
           "title": "Fayda payı artı düşük maliyet puanı",
-          "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır, maliyet payı S- küçüldükçe puan büyür; çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir."
+          "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır, maliyet payı S- küçüldükçe puan büyür; çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir.",
+          "steps": {
+            "s1": "Fayda payı S+: her çubuk, alternatifin fayda kriterlerindeki payıdır.",
+            "s2": "Maliyet bonusu: maliyet payı S− (yazılı) ne kadar küçükse bonus o kadar uzundur.",
+            "s3": "Q, S+ ile bonusun toplamıdır; en uzun çubuk birinci sırada.",
+            "s4": "N: her Q, en iyi Q'nun yüzdesi olarak gösterilir."
+          }
         },
         "marcos": {
           "title": "Ölçü için iki hayali satır",

@@ -1151,7 +1151,13 @@
         },
         "copras": {
           "title": "Benefit share plus a bonus for low cost",
-          "caption": "Each bar is S+ (benefit share) plus the cost bonus, which grows as the cost share S- shrinks; it ends at Q, then N in percent of the best."
+          "caption": "Each bar is S+ (benefit share) plus the cost bonus, which grows as the cost share S- shrinks; it ends at Q, then N in percent of the best.",
+          "steps": {
+            "s1": "Benefit share S+: each bar is the alternative's share of the benefit criteria.",
+            "s2": "Cost bonus: the smaller the cost share S− (printed), the longer the bonus.",
+            "s3": "Q = S+ plus the bonus; the longest bar ranks first.",
+            "s4": "N: each Q as a percent of the best Q."
+          }
         },
         "marcos": {
           "title": "Two imaginary rows to measure against",

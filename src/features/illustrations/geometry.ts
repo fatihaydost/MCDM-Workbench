@@ -665,6 +665,8 @@ export type CoprasParts = {
   /** Benefit share S+_i and the cost bonus Q_i - S+_i (0 without cost weight); the two add up to Q_i. */
   sPlus: number[]
   bonus: number[]
+  /** Cost share S-_i (the core's 'copras.sMinus' step). */
+  sMinus: number[]
   scores: number[]
   /** Utility degree N_i in percent of the best Q. */
   utility: number[]
@@ -686,6 +688,7 @@ export function coprasParts(problem: Problem, weights: readonly number[]): Copra
     result,
     sPlus,
     bonus: result.scores.map((q, i) => q - sPlus[i]!),
+    sMinus: stepVector(result.steps, 'copras.sMinus'),
     scores: result.scores,
     utility: stepVector(result.steps, 'copras.utility'),
     order,
