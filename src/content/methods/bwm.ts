@@ -113,7 +113,7 @@ export const bwm: MethodContent = {
     ],
     pitfalls: [
       'With more than about nine criteria the questions get hard to answer well; group the criteria and weigh each group separately.',
-      'Linear xi is in weight units and much smaller than non-linear xi* (0.0109 vs 0.1459); never divide it by Rezaei's 2015 CI values.',
+      'Linear xi is in weight units and much smaller than non-linear xi* (0.0109 vs 0.1459); never divide it by the CI values of Rezaei (2015).',
       'Two equally best criteria: pick one as B and enter 1 for the other.',
     ],
   },
