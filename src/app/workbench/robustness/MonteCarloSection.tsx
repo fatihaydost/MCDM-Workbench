@@ -89,6 +89,11 @@ export function MonteCarloSection({ problem, weights, run, names, baseRanking }:
                 ? t('monteCarlo.sameTop', { name: names[baseTop[0]!], share: formatShare(r.sameTop, nf.lang, 1) })
                 : t('monteCarlo.sameTopTied', { share: formatShare(r.sameTop, nf.lang, 1) })}
             </p>
+            {r.blocked > 0 && (
+              <p className="text-13 text-text-2" data-testid="mc-blocked">
+                {t('monteCarlo.blocked', { count: r.blocked })}
+              </p>
+            )}
             <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-2">
               <Heatmap
                 title={t('monteCarlo.acceptTitle')}

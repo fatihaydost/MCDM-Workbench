@@ -286,6 +286,12 @@
     "loadingStage": "Loading the workbench",
     "loadingRobustness": "Loading the robustness checks",
     "loadingCompare": "Loading the comparison",
+    "crash": {
+      "title": "This stage could not be shown",
+      "body": "Your data is kept. Go back to Data, or reload the page.",
+      "back": "Back to Data",
+      "reload": "Reload the page"
+    },
     "grid": {
       "name": "Decision matrix",
       "corner": "Alternative",
@@ -1219,11 +1225,11 @@
       "utility": "Utility f(K): K+ and K- merged by the two utility functions. A higher value ranks higher; since f(K) = c · S, the order is the order of S."
     },
     "cocoso": {
-      "normalized": "Min-max normalization: the worst value of each column becomes 0 and the best 1, for a cost criterion the other way round. Any sign works.",
+      "normalized": "Min-max normalization: the worst value of each column becomes 0 and the best 1, for a cost criterion the other way round. Negative values work too.",
       "s": "Weighted sum S: each normalized value times its criterion weight, added up.",
       "p": "Power sum P: each normalized value raised to its criterion weight, added up. A criterion with weight 0 is left out, since 0 to the power 0 would add 1 to every P.",
       "ka": "ka: the share of S + P in the total over all alternatives.",
-      "kb": "kb: S and P each divided by the smallest one, added. The weakest alternative gets 2.",
+      "kb": "kb: S and P each divided by the smallest one, added. It is at least 2; exactly 2 for an alternative with both the smallest S and the smallest P.",
       "kc": "kc = (λ S + (1 - λ) P) / (λ max S + (1 - λ) max P). The best mix gets 1.",
       "scores": "Combined score k = (ka kb kc)^(1/3) + (ka + kb + kc) / 3. A higher value ranks higher.",
       "lambdaSweep": "k at λ = 0, 0.1, ..., 1: where two alternatives swap places as λ moves."

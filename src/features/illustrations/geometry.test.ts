@@ -31,6 +31,7 @@ import {
   referenceGuides,
   pointCss,
   topsisProjection,
+  lineCrossings,
 } from './geometry'
 
 const problemOf = (id: string): Problem => {
@@ -434,5 +435,26 @@ describe('MARCOS parts', () => {
   })
   it('is null when MARCOS cannot run', () => {
     expect(marcosParts({ ...p, matrix: p.matrix.map((r, i) => (i === 0 ? [0, ...r.slice(1)] : r)) }, ex.weights!)).toBeNull()
+  })
+})
+
+describe('lineCrossings', () => {
+  const xs = [0, 0.1, 0.2, 0.3]
+  it('a sign change inside a cell is one crossing, linear in the cell', () => {
+    const c = lineCrossings(xs, [0, 1, 2, 3], [1, 1.5, 1, 0])
+    expect(c).toHaveLength(1)
+    expect(c[0]!.x).toBeCloseTo(0.1 + 0.1 * (0.5 / 1.5), 12)
+  })
+  it('an exact 0 at an interior grid point is one crossing there', () => {
+    expect(lineCrossings(xs, [0, 1, 2, 3], [2, 1.5, 2, 2.5])).toEqual([{ x: 0.2, y: 2 }])
+    expect(lineCrossings(xs, [0, 1, 2, 3], [2, 1, 0, -1])).toEqual([{ x: 0.1, y: 1 }])
+    // A touch: 0 at a grid point with the same sign on both sides.
+    expect(lineCrossings(xs, [0, 1, 2, 3], [2, 1, 3, 4])).toEqual([])
+    // Two zeros in a row between a − and a +: one crossing, at the first.
+    expect(lineCrossings(xs, [0, 1, 2, 3], [2, 1, 2, 1])).toEqual([{ x: 0.1, y: 1 }])
+  })
+  it('a 0 at an end is not a crossing', () => {
+    expect(lineCrossings(xs, [1, 2, 3, 4], [1, 1, 1, 1])).toEqual([])
+    expect(lineCrossings(xs, [1, 2, 3, 0], [0, 0, 0, 0])).toEqual([])
   })
 })

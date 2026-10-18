@@ -728,3 +728,26 @@ export function marcosParts(problem: Problem, weights: readonly number[]): Marco
     order: result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b),
   }
 }
+
+/**
+ * Where two polylines over the same xs cross: a sign change of a − b between neighbouring samples, linear inside the
+ * cell. A difference of exactly 0 at a grid point between a + and a − is one crossing there (not one per neighbouring
+ * cell, and not none); a touch (the same sign on both sides) and a 0 at an end are not crossings.
+ */
+export function lineCrossings(xs: readonly number[], a: readonly number[], b: readonly number[]): Point[] {
+  const out: Point[] = []
+  let prev = -1
+  for (let k = 0; k < xs.length; k++) {
+    const d = a[k]! - b[k]!
+    if (d === 0) continue
+    if (prev >= 0 && Math.sign(d) !== Math.sign(a[prev]! - b[prev]!)) {
+      if (k === prev + 1) {
+        const d0 = a[prev]! - b[prev]!
+        const t = d0 / (d0 - d)
+        out.push({ x: xs[prev]! + t * (xs[k]! - xs[prev]!), y: a[prev]! + t * (a[k]! - a[prev]!) })
+      } else out.push({ x: xs[prev + 1]!, y: a[prev + 1]! })
+    }
+    prev = k
+  }
+  return out
+}

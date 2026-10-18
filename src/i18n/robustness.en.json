@@ -18,7 +18,9 @@
     "legendLeader": "First at this weight",
     "tableCorner": "Alternative, by weight of {{criterion}}",
     "tied": "{{names}} are tied for first at your weight.",
-    "computing": "Calculating"
+    "computing": "Calculating",
+    "blockedOne": "At w = {{w}}, {{method}} can't rank: {{name}} is the worst on this criterion.",
+    "blockedRest": "At w = {{w}}, {{method}} can't rank: {{name}} is the worst on every other weighted criterion."
   },
   "perturb": {
     "title": "Nudge each weight",
@@ -33,7 +35,9 @@
     "na": "n/a",
     "zeroNote": "Criteria with weight 0 are left out: a percentage of 0 is still 0.",
     "allOnOne": "All the weight is on one criterion: the others cannot be rescaled, so there is nothing to nudge.",
-    "changedAt": "{{criterion}} {{delta}}: {{name}} first"
+    "changedAt": "{{criterion}} {{delta}}: {{name}} first",
+    "cantRank": "can't rank",
+    "blockedAt": "{{criterion}} {{delta}}: {{status}}"
   },
   "monteCarlo": {
     "title": "Random weights",
@@ -55,7 +59,9 @@
     "mean": "Mean rank",
     "low": "2.5%",
     "high": "97.5%",
-    "failed": "The random weights could not be calculated. Reload the page and try again."
+    "failed": "The random weights could not be calculated. Reload the page and try again.",
+    "blocked_one": "{{count}} draw couldn't be ranked and is left out.",
+    "blocked_other": "{{count}} draws couldn't be ranked and are left out."
   },
   "removal": {
     "title": "Drop a criterion",
@@ -69,7 +75,8 @@
     "ws": "WS",
     "same": "Same ({{name}})",
     "changed": "{{name}} first",
-    "tooFew": "Dropping a criterion needs at least 3 criteria."
+    "tooFew": "Dropping a criterion needs at least 3 criteria.",
+    "cantRank": "Can't rank"
   },
   "sources": {
     "summary": "Formula and sources",
@@ -80,5 +87,6 @@
     "removal": "The remaining weights are divided by their sum. A change of first place shows how much the result relies on that criterion; only when the criterion hardly separates the alternatives is it a rank reversal.",
     "removalRecompute": "With Recompute, {{method}} is run again without the criterion.",
     "spearmanTies": "ρ as written holds without ties; with ties it is the Pearson correlation of mid-ranks."
-  }
+  },
+  "blockedBy": "{{name}} is the worst on every weighted criterion"
 }

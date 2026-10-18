@@ -1,14 +1,14 @@
-import { ArrowsDownUp, Check } from '@phosphor-icons/react'
+import { ArrowsDownUp, Check, Prohibit } from '@phosphor-icons/react'
 import { useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DEFAULT_DELTAS, perturbWeights } from '../../../core/robustness'
+import { DEFAULT_DELTAS, perturbWeights, type PerturbationRow } from '../../../core/robustness'
 import { rankerFor, type RankingRun } from '../../../core/run'
 import type { Problem } from '../../../core/types'
 import { ChartFigure } from '../../../features/charts/ChartFigure'
 import { estimateTextWidth } from '../../../features/charts/layout'
 import { useElementWidth } from '../../../features/charts/useElementWidth'
 import { useNumberFormat } from '../../../i18n'
-import { applicable, formatDelta, heldCount, perturbGrid } from './helpers'
+import { applicable, blockedNames, formatDelta, heldCount, perturbGrid } from './helpers'
 import s from './robustness.module.css'
 import { SectionHead, SourcesDisclosure } from './SectionParts'
 import { useRobustnessText } from './text'
@@ -27,7 +27,7 @@ const CELL = 56
 const CELL_COMPACT = 34
 const GAP = 2
 
-type Cell = { kind: 'same' } | { kind: 'changed'; leader: string } | { kind: 'na' } | null
+type Cell = { kind: 'same' } | { kind: 'changed'; leader: string } | { kind: 'na' } | { kind: 'blocked'; text: string } | null
 
 /**
  * B: small changes. Each weight moved by ±5, 10 and 20 % (the others rescaled): one cell per criterion and change,
@@ -51,6 +51,11 @@ export function PerturbSection({ problem, weights, run, names, criteria }: Props
       .map((r, i) => (r === 1 ? names[i] : null))
       .filter((x): x is string => x !== null)
       .join(', ')
+  // Why the method cannot rank a change (CoCoSo: who is then the worst on every weighted criterion).
+  const blockedText = (r: PerturbationRow) => {
+    const who = blockedNames(r.blocked, names)
+    return who ? `${t('perturb.cantRank')} (${t('blockedBy', { name: who })})` : t('perturb.cantRank')
+  }
   const deltaText = DEFAULT_DELTAS.map((d) => formatDelta(d, nf.lang))
   const labelWidth = Math.min(140, Math.max(...criteria.map((c) => estimateTextWidth(c, 13))) + 12)
   const compact = labelWidth + DEFAULT_DELTAS.length * (CELL + GAP) > boxWidth
@@ -60,6 +65,8 @@ export function PerturbSection({ problem, weights, run, names, criteria }: Props
     columns: [t('perturb.change'), t('perturb.firstPlace'), t('perturb.ws'), 'ρ'],
     rows: rows.map((r) => {
       const na = !applicable(r, weights)
+      if (r.blocked && !na)
+        return { label: criteria[r.k] ?? '', cells: [formatDelta(r.delta, nf.lang), blockedText(r), '', ''] }
       return {
         label: criteria[r.k] ?? '',
         cells: [
@@ -71,7 +78,8 @@ export function PerturbSection({ problem, weights, run, names, criteria }: Props
       }
     }),
   }
-  const changes = rows.filter((r) => applicable(r, weights) && !r.sameTop)
+  const changes = rows.filter((r) => applicable(r, weights) && !r.sameTop && !r.blocked)
+  const blocked = rows.filter((r) => applicable(r, weights) && r.blocked)
 
   return (
     <section aria-labelledby={`${uid}-title`} className="flex flex-col gap-4" ref={boxRef}>
@@ -110,7 +118,15 @@ export function PerturbSection({ problem, weights, run, names, criteria }: Props
                 criterion={criteria[j] ?? ''}
                 compact={compact}
                 na={t('perturb.na')}
-                cells={cells.map((r): Cell => (!r || !applicable(r, weights) ? { kind: 'na' } : r.sameTop ? { kind: 'same' } : { kind: 'changed', leader: leader(r.ranking) }))}
+                cells={cells.map((r): Cell =>
+                  !r || !applicable(r, weights)
+                    ? { kind: 'na' }
+                    : r.blocked
+                      ? { kind: 'blocked', text: blockedText(r) }
+                      : r.sameTop
+                        ? { kind: 'same' }
+                        : { kind: 'changed', leader: leader(r.ranking) },
+                )}
               />
             ))}
           </div>
@@ -122,6 +138,16 @@ export function PerturbSection({ problem, weights, run, names, criteria }: Props
             <li key={`${r.k}-${r.delta}`} className="inline-flex items-center gap-1.5">
               <ArrowsDownUp aria-hidden className="size-3.5 shrink-0 text-text-2" />
               {t('perturb.changedAt', { criterion: criteria[r.k], delta: formatDelta(r.delta, nf.lang), name: leader(r.ranking) })}
+            </li>
+          ))}
+        </ul>
+      )}
+      {blocked.length > 0 && (
+        <ul className="flex flex-col gap-1 text-13 text-text-2" data-testid="perturb-blocked">
+          {blocked.map((r) => (
+            <li key={`${r.k}-${r.delta}`} className="inline-flex items-center gap-1.5">
+              <Prohibit aria-hidden className="size-3.5 shrink-0" />
+              {t('perturb.blockedAt', { criterion: criteria[r.k], delta: formatDelta(r.delta, nf.lang), status: blockedText(r) })}
             </li>
           ))}
         </ul>
@@ -144,6 +170,12 @@ function PerturbRow({ criterion, cells, compact, na }: { criterion: string; cell
           return (
             <span key={d} className={s.pcell} data-na="" data-testid="perturb-cell">
               {na}
+            </span>
+          )
+        if (c.kind === 'blocked')
+          return (
+            <span key={d} className={s.pcell} data-na="" data-testid="perturb-cell" title={c.text}>
+              <Prohibit aria-hidden className="size-3.5" />
             </span>
           )
         if (c.kind === 'same')

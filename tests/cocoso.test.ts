@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { cocoso, ProblemValidationError, rankerFor, WASPAS_LAMBDA_GRID, type CriterionType, type Problem } from '../src/core'
-import { perturbWeights, removeCriteria, sweepWeight } from '../src/core/robustness'
+import { monteCarlo, perturbWeights, removeCriteria, sweepWeight } from '../src/core/robustness'
+import type { RankerFor } from '../src/core/run'
 import f1 from './fixtures/cocoso-yazdani2019-logistics.json'
 import f2 from './fixtures/cocoso-yazdani2019-green-suppliers.json'
 import f3 from './fixtures/cocoso-akgul2021-banks.json'
@@ -209,12 +210,44 @@ describe('CoCoSo in the robustness checks', () => {
       expect(sw.baseRankingInterval.ranking).toEqual(f1.expected.ranking)
     }
   })
-  it('criterion removal and the nudges run; a removal it cannot rank is left out', () => {
+  it('criterion removal and the nudges run; a removal it cannot rank is a blocked row naming the alternative', () => {
     const rows = removeCriteria(makeProblem([[1, 2, 3], [2, 3, 1], [3, 1, 2]], ['benefit', 'benefit', 'benefit']), [0.3, 0.3, 0.4], rf)
     expect(rows.map((r) => r.j)).toEqual([0, 1, 2])
+    expect(rows.every((r) => r.blocked === undefined)).toBe(true)
     const blocked = removeCriteria(makeProblem([[1, 1, 3], [2, 3, 1], [3, 2, 2]], ['benefit', 'benefit', 'benefit']), [0.3, 0.3, 0.4], rf)
     // Without C3, A1 is the worst on C1 and C2.
-    expect(blocked.map((r) => r.j)).toEqual([0, 1])
+    expect(blocked.map((r) => r.j)).toEqual([0, 1, 2])
+    expect(blocked[2]!.blocked?.map((x) => [x.code, x.row])).toEqual([['all-worst-alternative', 0]])
+    expect(blocked[2]!.ranking).toEqual([])
+    expect(blocked[2]!.sameTop).toBe(false)
     expect(perturbWeights(p, f1.weights, rf)).toHaveLength(30)
+  })
+  it('a nudge that puts all the weight on one criterion is a blocked row, not a throw', () => {
+    // +20 % on 0.9 clips to 1: C2 gets 0 and A1, the worst on C1, has S = 0.
+    const q = makeProblem([[1, 3], [2, 1], [3, 2]], ['benefit', 'benefit'])
+    const rows = perturbWeights(q, [0.9, 0.1], rf)
+    expect(rows).toHaveLength(12)
+    const blocked = rows.filter((r) => r.blocked)
+    expect(blocked.map((r) => [r.k, r.delta])).toEqual([[0, 0.2]])
+    expect(blocked[0]!.blocked?.map((x) => [x.code, x.row])).toEqual([['all-worst-alternative', 0]])
+    expect(blocked[0]!.ranking).toEqual([])
+    expect(rows.filter((r) => !r.blocked).every((r) => r.ranking.length === 3)).toBe(true)
+  })
+  it('Monte Carlo skips draws the method cannot rank and counts them', () => {
+    const q = makeProblem([[1, 3], [2, 1], [3, 2]], ['benefit', 'benefit'])
+    const inner = rankerFor({ methodId: 'saw', params: {} })
+    const picky: RankerFor = (prob) => {
+      const rank = inner(prob)
+      return (w) => {
+        if (w[0]! > 0.8) throw new ProblemValidationError([{ code: 'all-worst-alternative', severity: 'error', row: 0 }])
+        return rank(w)
+      }
+    }
+    const res = monteCarlo(q, [0.5, 0.5], picky, { concentration: 'uniform', n: 1000, seed: 3 })
+    expect(res.blocked).toBeGreaterThan(100)
+    expect(res.blocked).toBeLessThan(300)
+    expect(res.n).toBe(1000)
+    for (const row of res.acceptability) expect(row.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12)
+    expect(monteCarlo(q, [0.5, 0.5], inner, { concentration: 'uniform', n: 200 }).blocked).toBe(0)
   })
 })

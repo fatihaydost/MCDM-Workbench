@@ -8,6 +8,7 @@ import r from '../charts/robustness.module.css'
 import { stepDecimals } from '../charts/scale'
 import { layoutSweep } from '../charts/sweep'
 import { useAnimateValues, useElementWidth } from '../charts/useElementWidth'
+import { lineCrossings } from './geometry'
 import s from './illustrations.module.css'
 
 export type WaspasLambdaLabels = {
@@ -101,20 +102,11 @@ export function WaspasLambda({ method = 'waspas', problem, weights, lambda, form
   const ranksAt = WASPAS_LAMBDA_GRID.map((_, k) => rankScores(sweep.map((row) => row[k]!), 'desc'))
   const grid = (k: number) => format(WASPAS_LAMBDA_GRID[k]!, 1)
 
-  // A pair whose difference changes sign inside a grid cell swaps there; linear inside the cell (exact for WASPAS,
-  // where Q_i(λ) = a_i + b_i λ is one straight line; CoCoSo's k is drawn through the grid points the same way).
+  // A pair whose difference changes sign swaps there; linear inside a grid cell (exact for WASPAS, where
+  // Q_i(λ) = a_i + b_i λ is one straight line; CoCoSo's k is drawn through the grid points the same way).
   const last = WASPAS_LAMBDA_GRID.length - 1
   const swaps: { x: number; y: number }[] = []
-  for (let a = 0; a < m; a++)
-    for (let b = a + 1; b < m; b++)
-      for (let k = 0; k < last; k++) {
-        const d0 = sweep[a]![k]! - sweep[b]![k]!
-        const d1 = sweep[a]![k + 1]! - sweep[b]![k + 1]!
-        if (d0 * d1 >= 0) continue
-        const t = d0 / (d0 - d1)
-        const x0 = WASPAS_LAMBDA_GRID[k]!
-        swaps.push({ x: x0 + t * (WASPAS_LAMBDA_GRID[k + 1]! - x0), y: sweep[a]![k]! + t * (sweep[a]![k + 1]! - sweep[a]![k]!) })
-      }
+  for (let a = 0; a < m; a++) for (let b = a + 1; b < m; b++) swaps.push(...lineCrossings(xs, sweep[a]!, sweep[b]!))
 
   const table: ChartTable = {
     corner: l.alternative,

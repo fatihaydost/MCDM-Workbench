@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { critic, rankerFor, topsis } from '../../src/core'
+import { critic, rankerFor, topsis, type ProblemValidationError } from '../../src/core'
 import { monteCarlo, perturbWeights, removeCriteria, reweight, sweepWeight } from '../../src/core/robustness'
 import { rankOrder, stepWeight } from '../../src/app/ranking/order'
 import { largestWeight } from '../../src/app/workbench/robustness/helpers'
@@ -251,3 +251,53 @@ for (const width of [390, 1440]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   })
 }
+
+test('CoCoSo: at a sweep end it cannot rank, the table gives way to a note naming the alternative', async ({ page }) => {
+  const cx = getExample('yazdani-2019-logistics')!
+  const cp = { alternatives: cx.alternatives, criteria: cx.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: cx.matrix }
+  const k = largestWeight(cx.weights!)
+  let worst = ''
+  try {
+    rankerFor({ methodId: 'cocoso', params: {} })(cp)(reweight(cx.weights!, k, 1))
+  } catch (err) {
+    worst = cx.alternatives[(err as ProblemValidationError).issues[0]!.row!]!
+  }
+  expect(worst).not.toBe('')
+  await page.goto('/app?example=yazdani-2019-logistics&stage=robustness')
+  await expect(page.getByTestId('live-row')).toHaveCount(cx.alternatives.length)
+  await page.getByRole('slider', { name: `Weight of ${cp.criteria[k]!.name}` }).focus()
+  await page.keyboard.press('End')
+  await expect(page.getByTestId('sweep-weight')).toHaveText('1.0000')
+  await expect(page.getByTestId('sweep-blocked')).toHaveText(`At w = 1, CoCoSo can't rank: ${worst} is the worst on this criterion.`)
+  await expect(page.getByTestId('live-row')).toHaveCount(0)
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByTestId('sweep-blocked')).toHaveCount(0)
+  await expect(page.getByTestId('live-row')).toHaveCount(cx.alternatives.length)
+  // The rest of the stage still renders.
+  await expect(page.getByTestId('perturb-summary')).toBeVisible()
+  await expect(page.getByTestId('stage-crash')).toHaveCount(0)
+})
+
+test('CoCoSo: a nudge that clips a weight to 1 is a cell it cannot rank, not a blank page', async ({ page }) => {
+  const cx = getExample('yazdani-2019-logistics')!
+  const n = cx.criteria.length
+  const w = [0.9, ...Array.from({ length: n - 1 }, () => 0.1 / (n - 1))]
+  const perturbed = perturbWeights(
+    { alternatives: cx.alternatives, criteria: cx.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: cx.matrix },
+    w,
+    rankerFor({ methodId: 'cocoso', params: {} }),
+  )
+  const blocked = perturbed.filter((r) => r.blocked)
+  expect(blocked.map((r) => [r.k, r.delta])).toEqual([[0, 0.2]])
+  const worst = cx.alternatives[blocked[0]!.blocked![0]!.row!]!
+
+  await page.goto('/app?example=yazdani-2019-logistics&stage=weights')
+  await page.getByRole('radio', { name: 'Manual' }).click()
+  for (const [j, v] of w.entries()) {
+    await page.locator(`#wb-weight-${j}`).fill(String(v))
+    await page.locator(`#wb-weight-${j}`).blur()
+  }
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Robustness' }).click()
+  await expect(page.getByTestId('perturb-blocked')).toHaveText(`${cx.criteria[0]!.name.en} +20%: can't rank (${worst} is the worst on every weighted criterion)`)
+  await expect(page.getByTestId('stage-crash')).toHaveCount(0)
+})

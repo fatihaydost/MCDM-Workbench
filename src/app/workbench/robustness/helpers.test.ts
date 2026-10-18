@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { PerturbationRow, StableInterval } from '../../../core/robustness'
 import {
+  blockedNames,
   CONCENTRATION,
   formatDelta,
   formatShare,
@@ -61,6 +62,14 @@ describe('perturbation grid', () => {
     expect(heldCount(rows, [0.5, 0.5])).toEqual({ held: 2, total: 3 })
     // A criterion with weight 0 is not perturbed at all: left out of the count.
     expect(heldCount(rows, [0, 1])).toEqual({ held: 1, total: 2 })
+  })
+
+  it('leaves a change the method cannot rank out of the count, and names who blocks it', () => {
+    const blocked: PerturbationRow = { ...row(0, 0.2, false), spearman: Number.NaN, ws: Number.NaN, blocked: [{ code: 'all-worst-alternative', severity: 'error', row: 1 }] }
+    expect(heldCount([row(0, -0.2, true), blocked], [0.9, 0.1])).toEqual({ held: 1, total: 1 })
+    expect(blockedNames(blocked.blocked, ['A', 'B', 'C'])).toBe('B')
+    expect(blockedNames([{ code: 'weights-sum', severity: 'error' }], ['A'])).toBe('')
+    expect(blockedNames(undefined, ['A'])).toBe('')
   })
 })
 

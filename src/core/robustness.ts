@@ -10,6 +10,7 @@
 import { reweight } from './reweight'
 import type { RankerFor } from './run'
 import { ProblemValidationError } from './validate'
+import type { ValidationIssue } from './validate'
 import type { MethodParams, Problem, WeightingMethod } from './types'
 
 // ---------- shared helpers ----------
@@ -29,6 +30,25 @@ const sameList = (a: readonly number[], b: readonly number[]): boolean =>
   a.length === b.length && a.every((v, i) => v === b[i])
 
 const rankKey = (ranking: readonly number[]): string => ranking.join(',')
+
+/** The ranking at these weights, or the issues that block the method there (CoCoSo: an all-worst alternative). */
+const tryRank = (rank: (w: number[]) => { ranking: number[] }, w: number[]): number[] | ProblemValidationError => {
+  try {
+    return rank(w).ranking
+  } catch (err) {
+    if (err instanceof ProblemValidationError) return err
+    throw err
+  }
+}
+
+/** Agreement fields of a row the method cannot rank: no ranking, nothing to compare. */
+const blockedRow = (err: ProblemValidationError): { ranking: number[]; sameTop: boolean; spearman: number; ws: number; blocked: ValidationIssue[] } => ({
+  ranking: [],
+  sameTop: false,
+  spearman: Number.NaN,
+  ws: Number.NaN,
+  blocked: err.issues.filter((x) => x.severity === 'error'),
+})
 
 // ---------- C.1 One-at-a-time weight perturbation ----------
 
@@ -300,6 +320,8 @@ export type PerturbationRow = {
   sameTop: boolean
   spearman: number
   ws: number
+  /** Set when the method cannot rank at these weights (its blocking issues); then ranking is [], spearman and ws NaN. */
+  blocked?: ValidationIssue[]
 }
 
 /** The other weights summing to at most this count as 0: criterion k holds all the weight. */
@@ -313,7 +335,8 @@ export const DEFAULT_DELTAS: readonly number[] = [-0.2, -0.1, -0.05, 0.05, 0.1, 
  * w_k(1 + δ) is clamped to [0, 1] and the others rescaled by `reweight`. A criterion with weight 0 stays 0
  * (its rows equal the base). A criterion that holds all the weight (w_k = 1, the others 0) is skipped
  * (combinations.md §C.1): the others cannot be rescaled, and an equal split of the rest would be invented weights.
- * Agreement is to the base ranking (x = base, y = perturbed).
+ * Agreement is to the base ranking (x = base, y = perturbed). A change the method cannot rank (CoCoSo: clipped to 1,
+ * an alternative is then worst on the only weighted criterion) is a row with `blocked` set.
  */
 export function perturbWeights(
   problem: Problem,
@@ -332,7 +355,11 @@ export function perturbWeights(
     if (others <= ALL_ON_ONE) continue
     for (const delta of ds) {
       const w = reweight(weights, k, weights[k]! * (1 + delta))
-      const ranking = rank(w).ranking
+      const ranking = tryRank(rank, w)
+      if (ranking instanceof ProblemValidationError) {
+        rows.push({ k, delta, weights: w, ...blockedRow(ranking) })
+        continue
+      }
       rows.push({
         k,
         delta,
@@ -354,6 +381,8 @@ export type Concentration = 'uniform' | number
 
 export type MonteCarloResult = {
   n: number
+  /** Draws the method could not rank (CoCoSo: a weight so small an alternative's S rounds to 0); left out of every share. */
+  blocked: number
   /** acceptability[i][r] = share of runs where alternative i has rank r + 1 (competition ranks; ties share). */
   acceptability: number[][]
   /** Mean rank of each alternative. */
@@ -453,6 +482,7 @@ function rankQuantile(counts: readonly number[], total: number, p: number): numb
  * - rankInterval: nearest-rank 2.5 % and 97.5 % quantiles (the ceil(0.025 N)-th and ceil(0.975 N)-th smallest
  *   rank), which are always attained ranks.
  * - sameTop, meanSpearman, meanWs compare every run to the base ranking (x = base, y = run).
+ * - A draw the method cannot rank is counted in `blocked` and left out; the shares are over the ranked draws.
  */
 export function monteCarlo(
   problem: Problem,
@@ -480,9 +510,14 @@ export function monteCarlo(
   let sameTop = 0
   let sumRho = 0
   let sumWs = 0
+  let blocked = 0
   for (let run = 0; run < runs; run++) {
     const w = sampleDirichlet(alpha, rng)
-    const ranking = rank(w).ranking
+    const ranking = tryRank(rank, w)
+    if (ranking instanceof ProblemValidationError) {
+      blocked++
+      continue
+    }
     let top = true
     for (let i = 0; i < m; i++) {
       const r = ranking[i]!
@@ -494,14 +529,17 @@ export function monteCarlo(
     sumWs += wsCoefficient(baseRanking, ranking)
   }
 
+  const ranked = runs - blocked
+  if (ranked === 0) throw new RangeError('the method cannot rank any of the draws')
   return {
     n: runs,
-    acceptability: counts.map((row) => row.map((x) => x / runs)),
-    meanRank: counts.map((row) => row.reduce((s, x, r) => s + x * (r + 1), 0) / runs),
-    rankInterval: counts.map((row) => [rankQuantile(row, runs, 0.025), rankQuantile(row, runs, 0.975)]),
-    sameTop: sameTop / runs,
-    meanSpearman: sumRho / runs,
-    meanWs: sumWs / runs,
+    blocked,
+    acceptability: counts.map((row) => row.map((x) => x / ranked)),
+    meanRank: counts.map((row) => row.reduce((s, x, r) => s + x * (r + 1), 0) / ranked),
+    rankInterval: counts.map((row) => [rankQuantile(row, ranked, 0.025), rankQuantile(row, ranked, 0.975)]),
+    sameTop: sameTop / ranked,
+    meanSpearman: sumRho / ranked,
+    meanWs: sumWs / ranked,
   }
 }
 
@@ -521,6 +559,8 @@ export type RemovalRow = {
   sameTop: boolean
   spearman: number
   ws: number
+  /** Set when the method cannot rank without criterion j (its blocking issues); then ranking is [], spearman and ws NaN. */
+  blocked?: ValidationIssue[]
 }
 
 /**
@@ -543,28 +583,26 @@ export function removeCriteria(
   const baseTop = topSet(baseRanking)
   const rows: RemovalRow[] = []
 
-  // shortcut: a removal the method cannot rank (CoCoSo: an alternative then worst on every remaining criterion) is
-  // left out of the rows; show it as its own row if users need to see why a criterion is missing.
-  const row = (j: number, mode: RemovalRow['mode'], reduced: Problem, w: number[]): RemovalRow[] => {
-    let ranking: number[]
-    try {
-      ranking = rankFor(reduced)(w).ranking
-    } catch (err) {
-      if (err instanceof ProblemValidationError) return []
-      throw err
-    }
+  // A removal the method cannot rank (CoCoSo: an alternative then worst on every remaining criterion) is a blocked row.
+  const row = (j: number, mode: RemovalRow['mode'], reduced: Problem, w: number[]): RemovalRow => {
     const full = [...w.slice(0, j), 0, ...w.slice(j)]
-    return [
-      {
-        j,
-        mode,
-        weights: full,
-        ranking,
-        sameTop: sameList(topSet(ranking), baseTop),
-        spearman: spearman(baseRanking, ranking),
-        ws: wsCoefficient(baseRanking, ranking),
-      },
-    ]
+    let ranking: number[] | ProblemValidationError
+    try {
+      ranking = tryRank(rankFor(reduced), w)
+    } catch (err) {
+      if (!(err instanceof ProblemValidationError)) throw err
+      ranking = err
+    }
+    if (ranking instanceof ProblemValidationError) return { j, mode, weights: full, ...blockedRow(ranking) }
+    return {
+      j,
+      mode,
+      weights: full,
+      ranking,
+      sameTop: sameList(topSet(ranking), baseTop),
+      spearman: spearman(baseRanking, ranking),
+      ws: wsCoefficient(baseRanking, ranking),
+    }
   }
 
   for (let j = 0; j < n; j++) {
@@ -576,8 +614,8 @@ export function removeCriteria(
     const rest = weights.filter((_, c) => c !== j)
     const restSum = rest.reduce((s, w) => s + w, 0)
     const renorm = restSum > 0 ? rest.map((w) => w / restSum) : rest.map(() => 1 / rest.length)
-    rows.push(...row(j, 'renormalize', reduced, renorm))
-    if (weighting) rows.push(...row(j, 'recompute', reduced, weighting.compute(reduced, opts?.weightingParams ?? {}).weights))
+    rows.push(row(j, 'renormalize', reduced, renorm))
+    if (weighting) rows.push(row(j, 'recompute', reduced, weighting.compute(reduced, opts?.weightingParams ?? {}).weights))
   }
   return rows
 }

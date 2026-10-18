@@ -764,6 +764,11 @@ test('CoCoSo: the method page opens the logistics example with CoCoSo; S, P and 
   await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
   await expect(page.getByRole('button', { name: /^A5 LDI Dimotrans is the worst on every weighted criterion/ })).toBeVisible()
   await expect(page.getByTestId('ranking-row')).toHaveCount(0)
+  // Compare keeps the other methods and names the alternative in CoCoSo's column.
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Compare' }).click()
+  const column = page.locator('[data-testid="rank-column"][data-method="cocoso"]')
+  await expect(column).toContainText('A5 LDI Dimotrans is the worst on every weighted criterion')
+  await expect(column.locator('[data-rank]')).toHaveCount(0)
 })
 
 test('CoCoSo: the ranking control is two full rows of four at 375 px', async ({ page }) => {

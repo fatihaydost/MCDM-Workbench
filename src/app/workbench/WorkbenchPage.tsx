@@ -14,6 +14,7 @@ import { ExplanationPanel, preloadPanelCards } from './ExplanationPanel'
 import { WorkbenchNavContext, type ImportReport, type WorkbenchNav } from './nav'
 import { bestIndex, RankingStage } from './RankingStage'
 import { ResultsStage } from './ResultsStage'
+import { StageErrorBoundary } from './StageErrorBoundary'
 import { useRobustnessSummary } from './robustnessSummary'
 import { alternativeName, rankingMethodFullLabel, weightMethodFullLabel } from './shared'
 import { WeightsStage } from './WeightsStage'
@@ -227,7 +228,13 @@ export default function WorkbenchPage() {
   const rankingParams = useMethodParams(rankingMethod)
   const robustness = useMemo(() => {
     if (!robustnessSummary || !getRankingMethod(rankingMethod) || !weights.value || !ranking.value) return null
-    return robustnessSummary(toProblem(problem), weights.value.weights, { methodId: rankingMethod, params: rankingParams })
+    // The rail line is outside the stage's error boundary: a failure here hides the line, never the page.
+    try {
+      return robustnessSummary(toProblem(problem), weights.value.weights, { methodId: rankingMethod, params: rankingParams })
+    } catch (err) {
+      console.error(err)
+      return null
+    }
   }, [robustnessSummary, rankingMethod, rankingParams, problem, weights.value, ranking.value])
 
   // The rail line: the alternative most methods put first, from every ranking method on the same weights.
@@ -314,7 +321,9 @@ export default function WorkbenchPage() {
   return (
     <WorkbenchNavContext.Provider value={nav}>
       <WorkbenchLayout stage={stage} onStageChange={(s) => goTo(s)} stageMeta={stageMeta} explanation={<ExplanationPanel stage={stage} />}>
-        {content}
+        <StageErrorBoundary key={stage} onBack={() => goTo('data')}>
+          {content}
+        </StageErrorBoundary>
       </WorkbenchLayout>
     </WorkbenchNavContext.Provider>
   )

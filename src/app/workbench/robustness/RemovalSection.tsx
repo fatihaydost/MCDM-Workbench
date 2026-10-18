@@ -1,10 +1,11 @@
-import { ArrowsDownUp, Check } from '@phosphor-icons/react'
+import { ArrowsDownUp, Check, Prohibit } from '@phosphor-icons/react'
 import { useId, useMemo, useState } from 'react'
 import { removeCriteria, type RemovalRow } from '../../../core/robustness'
 import { rankerFor, type RankingRun } from '../../../core/run'
 import type { MethodParams, Problem, WeightingMethod } from '../../../core/types'
 import { useNumberFormat } from '../../../i18n'
 import { cn, Notice, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../../ui'
+import { blockedNames } from './helpers'
 import s from './robustness.module.css'
 import { SectionHead, SourcesDisclosure } from './SectionParts'
 import { useRobustnessText } from './text'
@@ -77,24 +78,48 @@ export function RemovalSection({ problem, weights, run, weighting, weightingPara
               </Tr>
             </THead>
             <TBody>
-              {shown.map((r) => (
-                <tr key={`${r.j}-${r.mode}`} className={cn(!r.sameTop && s.changedRow)} data-testid="removal-row" data-changed={!r.sameTop || undefined}>
-                  <Th scope="row">{criteria[r.j]}</Th>
-                  <Td>
-                    <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap', r.sameTop ? 'text-text-2' : 'font-medium text-text')}>
-                      {r.sameTop ? <Check aria-hidden className="size-3.5 shrink-0" /> : <ArrowsDownUp aria-hidden className="size-3.5 shrink-0" />}
-                      {r.sameTop ? t('removal.same', { name: leader(r.ranking) }) : t('removal.changed', { name: leader(r.ranking) })}
-                    </span>
-                  </Td>
-                  <Td numeric>{nf.format(r.spearman, 3)}</Td>
-                  <Td numeric>{nf.format(r.ws, 3)}</Td>
-                </tr>
-              ))}
+              {shown.map((r) => {
+                if (r.blocked) {
+                  const who = blockedNames(r.blocked, names)
+                  return <BlockedRow key={`${r.j}-${r.mode}`} criterion={criteria[r.j] ?? ''} label={t('removal.cantRank')} reason={who && t('blockedBy', { name: who })} />
+                }
+                return (
+                  <tr key={`${r.j}-${r.mode}`} className={cn(!r.sameTop && s.changedRow)} data-testid="removal-row" data-changed={!r.sameTop || undefined}>
+                    <Th scope="row">{criteria[r.j]}</Th>
+                    <Td>
+                      <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap', r.sameTop ? 'text-text-2' : 'font-medium text-text')}>
+                        {r.sameTop ? <Check aria-hidden className="size-3.5 shrink-0" /> : <ArrowsDownUp aria-hidden className="size-3.5 shrink-0" />}
+                        {r.sameTop ? t('removal.same', { name: leader(r.ranking) }) : t('removal.changed', { name: leader(r.ranking) })}
+                      </span>
+                    </Td>
+                    <Td numeric>{nf.format(r.spearman, 3)}</Td>
+                    <Td numeric>{nf.format(r.ws, 3)}</Td>
+                  </tr>
+                )
+              })}
             </TBody>
           </Table>
         </>
       )}
       <SourcesDisclosure part="removal" recompute={weighting ? weightingName : undefined} />
     </section>
+  )
+}
+
+/** A removal the method cannot rank (CoCoSo: an alternative is then the worst on every remaining criterion). */
+function BlockedRow({ criterion, label, reason }: { criterion: string; label: string; reason: string }) {
+  return (
+    <tr data-testid="removal-row" data-blocked="">
+      <Th scope="row">{criterion}</Th>
+      <Td>
+        <span className="inline-flex items-center gap-1.5 text-text-2">
+          <Prohibit aria-hidden className="size-3.5 shrink-0" />
+          {label}
+          {reason && <span className="text-13">({reason})</span>}
+        </span>
+      </Td>
+      <Td numeric />
+      <Td numeric />
+    </tr>
   )
 }

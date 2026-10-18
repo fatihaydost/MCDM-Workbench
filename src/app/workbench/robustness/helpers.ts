@@ -3,6 +3,7 @@
  * No DOM and no React, so they are unit tested (helpers.test.ts).
  */
 import type { Concentration, PerturbationRow, StableInterval } from '../../../core/robustness'
+import type { ValidationIssue } from '../../../core/validate'
 import type { Lang } from '../../../i18n/lang'
 import { rankOrder } from '../../ranking/order'
 
@@ -97,9 +98,17 @@ export function perturbGrid(
  */
 export const applicable = (row: PerturbationRow, weights: readonly number[]): boolean => (weights[row.k] ?? 0) > 0
 
+/** The alternatives that keep the method from ranking (CoCoSo's all-worst), comma-joined; '' for any other block. */
+export function blockedNames(issues: readonly ValidationIssue[] | undefined, names: readonly string[]): string {
+  return (issues ?? [])
+    .flatMap((x) => (x.code === 'all-worst-alternative' && x.row !== undefined ? [names[x.row] ?? ''] : []))
+    .join(', ')
+}
+
 /** First place held in how many of the (applicable) perturbations. */
 export function heldCount(rows: readonly PerturbationRow[], weights: readonly number[]): { held: number; total: number } {
-  const counted = rows.filter((r) => applicable(r, weights))
+  // A change the method cannot rank is no test of first place either.
+  const counted = rows.filter((r) => applicable(r, weights) && !r.blocked)
   return { held: counted.filter((r) => r.sameTop).length, total: counted.length }
 }
 

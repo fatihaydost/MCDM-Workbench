@@ -8,13 +8,13 @@ import { ProblemValidationError } from '../../../core/validate'
 import { SweepChart } from '../../../features/charts/SweepChart'
 import { useElementWidth } from '../../../features/charts/useElementWidth'
 import { useNumberFormat } from '../../../i18n'
-import { Button, SegmentedControl, Select } from '../../../ui'
+import { Button, Notice, SegmentedControl, Select } from '../../../ui'
 import type { RankingMethodId } from '../../../state/workbench'
-import { DECIMALS, scoreWords } from '../shared'
+import { DECIMALS, scoreWords, tr } from '../shared'
 import { LiveRanking } from '../../ranking/LiveRanking'
 import { rankOrder, snapWeight } from '../../ranking/order'
 import { THUMB, WeightRange } from '../../ranking/WeightRange'
-import { labelledLines, largestWeight, MANY_ALTERNATIVES, MANY_SWITCHES } from './helpers'
+import { blockedNames, labelledLines, largestWeight, MANY_ALTERNATIVES, MANY_SWITCHES } from './helpers'
 import s from './robustness.module.css'
 import { SectionHead, segmentedWidth, SourcesDisclosure } from './SectionParts'
 import { useRobustnessText } from './text'
@@ -70,24 +70,31 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
   const xs = useMemo(() => sweep?.points.map((p) => p.wk) ?? [], [sweep])
   const series = useMemo(() => (sweep ? names.map((_, i) => sweep.points.map((p) => p.scores[i]!)) : []), [sweep, names])
   // The ranking at the slider's weight: computed exactly there, never read off the grid. Where the method cannot rank
-  // (CoCoSo at w_k = 1: an alternative is then worst on every weighted criterion), the nearest end of the sweep's grid.
-  const lo = current ? sweep.points[0]!.wk : base
-  const hi = current ? sweep.points[sweep.points.length - 1]!.wk : base
+  // (CoCoSo at w_k = 1: an alternative is then worst on every weighted criterion) there is no ranking, only a note.
   const at = useMemo(() => {
-    const rank = rankerFor(run)(problem)
-    for (const w of [wk, Math.min(hi, Math.max(lo, wk))]) {
-      try {
-        return rank(reweight(weights, k, w))
-      } catch (err) {
-        if (!(err instanceof ProblemValidationError)) throw err
-      }
+    try {
+      return rankerFor(run)(problem)(reweight(weights, k, wk))
+    } catch (err) {
+      if (err instanceof ProblemValidationError) return err
+      throw err
     }
-    return rank([...weights])
-  }, [run, problem, weights, k, wk, lo, hi])
-  const order = rankOrder(at.ranking)
-  const leaders = order.filter((i) => at.ranking[i] === 1)
+  }, [run, problem, weights, k, wk])
+  const atRes = at instanceof ProblemValidationError ? null : at
+  const atRanking = atRes?.ranking ?? NO_LINES
+  const atScores = atRes?.scores ?? NO_LINES
+  const order = rankOrder(atRanking)
+  const leaders = order.filter((i) => atRanking[i] === 1)
   const baseLeaders = rankOrder(baseRanking).filter((i) => baseRanking[i] === 1)
   const criterion = criteria[k] ?? ''
+  // shortcut: names only CoCoSo's all-worst alternative, the one block a sweep end meets; another block would read "can't rank: ".
+  const blockedNote =
+    at instanceof ProblemValidationError
+      ? t(wk === 1 ? 'sweep.blockedOne' : 'sweep.blockedRest', {
+          w: nf.format(wk, Number.isInteger(wk) ? 0 : 2),
+          method: tr(tw, `workbench.rankingMethod.${run.methodId}`),
+          name: blockedNames(at.issues, names),
+        })
+      : null
   // The registry method the workbench ranked with, so its id is one of the workbench's ranking methods.
   const score = scoreWords(run.methodId as RankingMethodId, tw)
   const shownCriterion = sweep ? (criteria[sweep.k] ?? '') : criterion
@@ -175,7 +182,7 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
             xs={sweep ? xs : EMPTY_XS}
             series={series}
             cursor={current ? wk : null}
-            cursorValues={at.scores}
+            cursorValues={atScores}
             base={weights[sweep?.k ?? k] ?? 0}
             switches={!result ? NO_MARKS : many ? result.topMarks : result.marks}
             topBand={sweep ? [sweep.baseTopInterval.from, sweep.baseTopInterval.to] : [base, base]}
@@ -237,23 +244,29 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
           <h3 id={tableTitleId} className="text-14 font-medium text-text">
             {t('sweep.tableTitle')}
           </h3>
-          <LiveRanking
-            order={order}
-            ranking={at.ranking}
-            scores={at.scores}
-            names={names}
-            format={format4}
-            labelledBy={tableTitleId}
-            instant={keyRepeat.current}
-            columns={{
-              rank: tw('workbench.ranking.columns.rank'),
-              alternative: tw('workbench.ranking.columns.alternative'),
-              closeness: score.name,
-            }}
-          />
+          {blockedNote ? (
+            <Notice tone="info">
+              <span data-testid="sweep-blocked">{blockedNote}</span>
+            </Notice>
+          ) : (
+            <LiveRanking
+              order={order}
+              ranking={atRanking}
+              scores={atScores}
+              names={names}
+              format={format4}
+              labelledBy={tableTitleId}
+              instant={keyRepeat.current}
+              columns={{
+                rank: tw('workbench.ranking.columns.rank'),
+                alternative: tw('workbench.ranking.columns.alternative'),
+                closeness: score.name,
+              }}
+            />
+          )}
           {/* Said when first place changes; the table itself is not a live region (it changes on every step). */}
           <p aria-live="polite" className="sr-only">
-            {t('sweep.leader', { name: leaders.map((i) => names[i]).join(', ') })}
+            {blockedNote ?? t('sweep.leader', { name: leaders.map((i) => names[i]).join(', ') })}
           </p>
         </div>
       </div>

@@ -18,7 +18,9 @@
     "legendLeader": "Bu ağırlıkta birinci",
     "tableCorner": "Alternatif, {{criterion}} ağırlığına göre",
     "tied": "Sizin ağırlığınızda {{names}} birinciliği paylaşıyor.",
-    "computing": "Hesaplanıyor"
+    "computing": "Hesaplanıyor",
+    "blockedOne": "w = {{w}} iken {{method}} sıralayamaz: {{name}}, bu kriterde en kötü.",
+    "blockedRest": "w = {{w}} iken {{method}} sıralayamaz: {{name}}, ağırlığı olan diğer her kriterde en kötü."
   },
   "perturb": {
     "title": "Her ağırlığı biraz oynatın",
@@ -33,7 +35,9 @@
     "na": "yok",
     "zeroNote": "Ağırlığı 0 olan kriterler sayılmaz: 0'ın yüzdesi yine 0'dır.",
     "allOnOne": "Bütün ağırlık tek bir kriterde: diğerleri yeniden ölçeklenemez, oynatılacak bir şey yok.",
-    "changedAt": "{{criterion}} {{delta}}: birinci {{name}}"
+    "changedAt": "{{criterion}} {{delta}}: birinci {{name}}",
+    "cantRank": "sıralanamaz",
+    "blockedAt": "{{criterion}} {{delta}}: {{status}}"
   },
   "monteCarlo": {
     "title": "Rastgele ağırlıklar",
@@ -55,7 +59,9 @@
     "mean": "Ortalama sıra",
     "low": "%2,5",
     "high": "%97,5",
-    "failed": "Rastgele ağırlıklar hesaplanamadı. Sayfayı yenileyip yeniden deneyin."
+    "failed": "Rastgele ağırlıklar hesaplanamadı. Sayfayı yenileyip yeniden deneyin.",
+    "blocked_one": "{{count}} çekiliş sıralanamadı, hesaba katılmadı.",
+    "blocked_other": "{{count}} çekiliş sıralanamadı, hesaba katılmadı."
   },
   "removal": {
     "title": "Bir kriteri çıkarın",
@@ -69,7 +75,8 @@
     "ws": "WS",
     "same": "Aynı ({{name}})",
     "changed": "Birinci {{name}}",
-    "tooFew": "Kriter çıkarmak için en az 3 kriter gerekir."
+    "tooFew": "Kriter çıkarmak için en az 3 kriter gerekir.",
+    "cantRank": "Sıralanamaz"
   },
   "sources": {
     "summary": "Formül ve kaynaklar",
@@ -80,5 +87,6 @@
     "removal": "Kalan ağırlıklar toplamlarına bölünür. Birinci yerin değişmesi sonucun o kritere ne kadar dayandığını gösterir; yalnız kriter alternatifleri neredeyse hiç ayırmıyorsa bu bir sıralama tersine dönmesidir.",
     "removalRecompute": "Yeniden hesaplamada {{method}} kriter olmadan yeniden çalıştırılır.",
     "spearmanTies": "Yazılan ρ eşitlik yokken geçerlidir; eşitlik varsa orta sıraların Pearson korelasyonudur."
-  }
+  },
+  "blockedBy": "{{name}}, ağırlığı olan her kriterde en kötü"
 }
