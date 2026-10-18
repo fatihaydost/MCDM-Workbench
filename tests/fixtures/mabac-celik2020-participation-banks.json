@@ -1,0 +1,27 @@
+{
+  "id": "mabac-celik-2020-participation-banks",
+  "source": "Celik 2020, Journal of Islamic Economics and Finance 6(2):311-334, Tables 3, 4, 7, 10-12 (DergiPark article-file 1194510)",
+  "alternatives": ["Albaraka Turk", "Kuveyt Turk", "Emlak Katilim", "Turkiye Finans", "Vakif Katilim", "Ziraat Katilim"],
+  "criteria": ["K1 total assets", "K2 total loans", "K3 total funds collected", "K4 equity/assets", "K5 fixed assets/assets", "K6 liquid assets/short-term liabilities", "K7 net profit/assets", "K8 personnel/other operating expense", "K9 branches", "K10 employees"],
+  "types": ["benefit", "benefit", "benefit", "benefit", "cost", "benefit", "benefit", "cost", "cost", "cost"],
+  "weights": [0.081, 0.078, 0.082, 0.115, 0.120, 0.099, 0.092, 0.092, 0.121, 0.120],
+  "matrix": [
+    [51392368, 30880921, 39769408, 0.07, 0.03, 0.41, 0.02, 1.5, 230, 3791],
+    [104439345, 57925969, 85494387, 0.07, 0.01, 0.5, 0.16, 1.13, 431, 5955],
+    [9282271, 1097529, 5952676, 0.13, 0.01, 0.29, 0.04, 1.6, 11, 381],
+    [52427410, 33272689, 39974514, 0.09, 0.03, 0.41, 0.08, 0.9, 310, 3461],
+    [30348784, 18770501, 22953215, 0.06, 0.01, 0.41, 0.17, 1.02, 104, 1322],
+    [36392174, 29565030, 25457245, 0.09, 0.01, 0.25, 0.16, 0.76, 93, 1129]
+  ],
+  "published": {
+    "G": [0.111, 0.113, 0.111, 0.152, 0.191, 0.146, 0.139, 0.137, 0.183, 0.185],
+    "S": [-0.162, 0.146, 0.035, -0.038, 0.124, 0.162],
+    "ranking": [6, 2, 4, 5, 3, 1]
+  },
+  "expected": {
+    "G": [0.110882, 0.113301, 0.110993, 0.151997, 0.190488, 0.145872, 0.138934, 0.136817, 0.183656, 0.185693],
+    "S": [-0.161812, 0.145137, 0.035472, -0.038009, 0.123914, 0.162048],
+    "ranking": [6, 2, 4, 5, 3, 1],
+    "tolerance_vs_published": 1e-3
+  }
+}
