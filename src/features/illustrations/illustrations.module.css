@@ -1164,3 +1164,19 @@
 .marcosDot[data-highlight] {
   fill: var(--data-accent);
 }
+
+/* CoCoSo lenses, step through the idea: a column grows and fades in at the explain pace. */
+.animate.explain .marcosBar {
+  transition:
+    transform var(--dur-explain) var(--ease),
+    fill var(--dur-explain) var(--ease),
+    opacity var(--dur-explain) var(--ease);
+}
+
+.animate.explain .marcosBar[data-off] {
+  transition:
+    transform var(--dur-explain) var(--ease),
+    fill var(--dur-explain) var(--ease),
+    opacity var(--dur-explain) var(--ease),
+    visibility var(--dur-explain) var(--ease);
+}

@@ -35,8 +35,22 @@ export type CocosoLensesProps = {
   lambda: number
   format?: ((value: number, decimals: number) => string) | undefined
   labels?: Partial<CocosoLensesLabels>
+  /**
+   * Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. COCOSO_IDEA_STEPS - 1 draws that
+   * step, the last one being the full picture. While stepping the rows are inert (no hover, no focus target).
+   */
+  step?: number | null | undefined
+  /** Move at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
+  explain?: boolean | undefined
   className?: string | undefined
 }
+
+/**
+ * The steps of the CoCoSo idea: 0 ka (the share of the total of S and P), 1 kb (against the weakest alternative),
+ * 2 kc (against the best mix of S and P), 3 the combined k, which is the full picture. The picture holds the results
+ * of S and P, not S and P themselves, so the story starts at the first reading.
+ */
+export const COCOSO_IDEA_STEPS = 4
 
 const FONT = 13
 const BAR = 14
@@ -55,12 +69,12 @@ const defaultFormat = (v: number, d: number) => v.toFixed(d)
  * order is clear; where they disagree, k (dominated by k_b) settles it. Hover or focus a row (up / down) to read its
  * numbers. Static at first paint; new numbers move rows and bars at --dur-data.
  */
-export function CocosoLenses({ problem, weights, lambda, format = defaultFormat, labels, className }: CocosoLensesProps) {
+export function CocosoLenses({ problem, weights, lambda, format = defaultFormat, labels, step, explain = false, className }: CocosoLensesProps) {
   const l = { ...COCOSO_LENSES_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const animate = useAnimateValues(width)
-  const [active, setActive] = useState<number | null>(null)
+  const [activeRow, setActive] = useState<number | null>(null)
   const [focusRow, setFocusRow] = useState(0)
   const res = useMemo(() => {
     try {
@@ -70,6 +84,12 @@ export function CocosoLenses({ problem, weights, lambda, format = defaultFormat,
     }
   }, [problem, weights, lambda])
   if (!res) return null
+
+  const stepping = step !== null && step !== undefined
+  const stage = stepping ? Math.min(Math.max(step, 0), COCOSO_IDEA_STEPS - 1) : COCOSO_IDEA_STEPS - 1
+  const active = stepping ? null : activeRow
+  // A column the story has not reached yet: drawn at zero length, invisible.
+  const off = (c: number) => (stage >= c ? undefined : '')
 
   const at = (key: string) => res.steps.find((x) => x.key === key)!.vector!
   const cols = [at('cocoso.ka'), at('cocoso.kb'), at('cocoso.kc'), res.scores]
@@ -119,7 +139,7 @@ export function CocosoLenses({ problem, weights, lambda, format = defaultFormat,
   return (
     <ChartFigure titleId={`${uid}-title`} tableId={`${uid}-table`} title={l.title} showTable={l.showTable} table={table} plotRef={plotRef} className={className}>
       <svg
-        className={animate ? `${s.svg} ${s.animate}` : s.svg}
+        className={[s.svg, animate && s.animate, explain && s.explain].filter(Boolean).join(' ')}
         width={W}
         height={height}
         viewBox={`0 0 ${W} ${height}`}
@@ -130,7 +150,7 @@ export function CocosoLenses({ problem, weights, lambda, format = defaultFormat,
       >
         <g aria-hidden>
           {l.heads.map((h, c) => (
-            <text key={h} className={c === 3 ? s.sawName : s.marcosGhostName} x={labelWidth + c * colW} y={HEAD / 2} dominantBaseline="central">
+            <text key={h} className={`${c === 3 ? s.sawName : s.marcosGhostName} ${s.stageItem}`} data-off={off(c)} x={labelWidth + c * colW} y={HEAD / 2} dominantBaseline="central">
               {h}
             </text>
           ))}
@@ -145,7 +165,7 @@ export function CocosoLenses({ problem, weights, lambda, format = defaultFormat,
                 style={{ transform: `translate(0px, ${HEAD + row * rowStep}px)` }}
                 data-highlight={i === best || undefined}
                 data-testid="cocoso-row"
-                onMouseEnter={() => setActive(row)}
+                onMouseEnter={stepping ? undefined : () => setActive(row)}
               >
                 <text className={s.sawName} x={0} y={stacked ? 8 : ROW / 2} dominantBaseline="central">
                   {short !== names[i] ? <title>{names[i]}</title> : null}
@@ -154,18 +174,19 @@ export function CocosoLenses({ problem, weights, lambda, format = defaultFormat,
                 {cols.map((col, c) => (
                   <rect
                     key={c}
-                    className={s.marcosBar}
+                    className={`${s.marcosBar} ${s.stageItem}`}
                     data-on={active === row || undefined}
+                    data-off={off(c)}
                     data-highlight={(c === 3 && i === best) || undefined}
                     x={0}
                     y={barY}
                     width={1}
                     height={BAR}
-                    style={{ transform: `translate(${labelWidth + c * colW}px, 0px) scale(${Math.max((col[i]! / maxOf(col)) * barMax, 0.01)}, 1)` }}
+                    style={{ transform: `translate(${labelWidth + c * colW}px, 0px) scale(${stage >= c ? Math.max((col[i]! / maxOf(col)) * barMax, 0.01) : 0.01}, 1)` }}
                     {...(c === 3
                       ? {
                           'data-row': row,
-                          tabIndex: focus === row ? 0 : -1,
+                          tabIndex: focus === row && !stepping ? 0 : -1,
                           role: 'img',
                           'aria-label': rowName(i),
                           onFocus: () => {
@@ -177,7 +198,7 @@ export function CocosoLenses({ problem, weights, lambda, format = defaultFormat,
                       : { 'aria-hidden': true })}
                   />
                 ))}
-                <text className={s.sawValue} x={W} y={barY + BAR / 2} dominantBaseline="central" textAnchor="end" data-testid="cocoso-k">
+                <text className={`${s.sawValue} ${s.stageItem}`} data-off={off(3)} x={W} y={barY + BAR / 2} dominantBaseline="central" textAnchor="end" data-testid="cocoso-k">
                   {kText[i]}
                 </text>
               </g>
@@ -192,7 +213,8 @@ export function CocosoLenses({ problem, weights, lambda, format = defaultFormat,
             {rowName(shown)}
           </span>
         ) : (
-          <span>{l.caption ?? ' '}</span>
+          // Hidden, not removed, before the last step: the picture above keeps its place.
+          <span className={stage >= COCOSO_IDEA_STEPS - 1 ? undefined : 'invisible'}>{l.caption ?? ' '}</span>
         )}
       </p>
     </ChartFigure>

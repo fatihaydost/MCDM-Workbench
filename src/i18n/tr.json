@@ -1160,7 +1160,13 @@
         "cocoso": {
           "title": "İki puan, üç okuma",
           "caption": "ka toplam içindeki pay, kb en zayıf firmaya göre büyüklük, kc en iyiye göre λ karışımı; k üçünü birleştirir.",
-          "lambdaCaption": "λ yalnız kc'yi değiştirir, bu yüzden çizgiler pek bükülmez: burada hiçbir λ'da iki firma yer değiştirmiyor."
+          "lambdaCaption": "λ yalnız kc'yi değiştirir, bu yüzden çizgiler pek bükülmez: burada hiçbir λ'da iki firma yer değiştirmiyor.",
+          "steps": {
+            "s1": "ka: her firmanın S ve P toplamındaki payı.",
+            "s2": "kb: her firmanın en zayıf firmanın ne kadar üstünde olduğu.",
+            "s3": "kc: her firmanın S ile P'nin en iyi karışımına göre durumu.",
+            "s4": "k üç okumayı birleştirir; en uzun çubuk ilk sırada."
+          }
         },
         "mabac": {
           "title": "Her kritere bir sınır",
