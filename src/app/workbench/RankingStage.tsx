@@ -61,8 +61,14 @@ export function RankingTable({
   // those heads wrap at 390 px, so the N column is not scrolled off. Other tables keep their one-line heads.
   const wrapHead = after.length > 0 ? 'max-sm:whitespace-normal' : undefined
   const wide = extra.length > 0
+  const constants = compact ? [] : (view.constants ?? []).map((c) => `${c.symbol} = ${nf.format(findStep(result.steps, c.step)?.scalar)}`)
   return (
     <div className="min-w-0">
+      {constants.length > 0 && (
+        <p className="mb-2 text-13 text-text-2" data-testid="ranking-constants">
+          {t('workbench.ranking.constants', { list: constants.join(', ') })}
+        </p>
+      )}
       <Table density="regular" className={cn('w-auto', !wide ? 'min-w-[min(100%,360px)]' : narrowHidden ? 'min-w-[min(100%,360px)] sm:min-w-[min(100%,560px)]' : 'min-w-[min(100%,560px)]')} aria-labelledby={id} containerClassName={compact ? 'max-w-[560px]' : undefined}>
         <THead>
           <Tr>
@@ -176,19 +182,19 @@ export function RankingStage() {
   return (
     <div className="flex flex-col gap-6 pt-4">
       <div className="flex flex-col gap-2">
-        {/* Six methods do not fit one row at 390 px: a 3 x 2 grid below sm, as on the Weights stage. */}
+        {/* Seven methods do not fit one row at 390 px: four columns below sm, the last one spanning the empty slot. */}
         <SegmentedControl<RankingMethodId>
           aria-label={t('workbench.rankingMethod.label')}
           value={rankingMethod}
           onValueChange={setRankingMethod}
           options={RANKING_VIEW_IDS.map((m) => ({ value: m, label: t(`workbench.rankingMethod.${m}`) }))}
           size="md"
-          className="self-start max-sm:grid max-sm:grid-cols-3 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
+          className="self-start max-sm:grid max-sm:grid-cols-4 max-sm:self-stretch max-sm:[&>*:last-child]:col-span-2 max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
         />
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
-        {/* TOPSIS, EDAS and COPRAS have no options; SAW shows its normalization here, VIKOR its v, WASPAS its λ. */}
+        {/* TOPSIS, EDAS, COPRAS and MARCOS have no options; SAW shows its normalization here, VIKOR its v, WASPAS its λ. */}
         <MethodParams methodId={rankingMethod} descriptors={getRankingMethod(rankingMethod)?.params} />
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
           <span>{t('workbench.ranking.weightsUsed', { method: weightMethodFullLabel(weightMethod, weightParams, t) })}</span>

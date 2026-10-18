@@ -97,6 +97,7 @@ controls, the catalogue cards and the landing ledger. Fields (`views/types.ts`, 
 |---|---|
 | `kind` | which segmented control and catalogue row |
 | `columns` (step key + header key, optional `after`, `decimals`), `columnsFromSm` | extra table columns before the weight (Weights) or the score (Ranking); ranking `after: true` puts one after the score (COPRAS's N, `decimals: 2`), and then the heads wrap below 640 px; `columnsFromSm` hides them below 640 px |
+| `constants` (scalar step key + symbol) | ranking: numbers that are the same for every alternative (MARCOS's f(K⁻), f(K⁺)), one line above the table instead of columns |
 | `stage` | the picture on the Weights / Ranking stage (`StagePictureProps`: core `problem`, `weights`, `params`, `className?`) |
 | `pictureShowsScores` | ranking: the stage picture draws every score in rank order, so it replaces the score chart (SAW, VIKOR, EDAS) |
 | `idea` (`example` + `Picture`) | the method page picture (§6) |
@@ -121,8 +122,8 @@ Weighting method:
 
 Ranking method:
 
-- [ ] i18n `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T]. Six methods (since COPRAS) are a
-  3 x 2 grid below `sm` (`RankingStage.tsx` className), like the weighting control; a seventh needs another layout decision.
+- [ ] i18n `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T]. Seven methods (since MARCOS) are a
+  grid of four columns below `sm` (`RankingStage.tsx` className); an eighth fills that grid, a ninth needs another layout decision.
 - [ ] The score's words, `workbench.ranking.score.<id>` in en.json and tr.json [T] (read by `scoreWords`,
   `shared.ts`): `name` ("Closeness C", "Score S": table column, workbook column, sweep table), `title` ("Closeness
   coefficient C", "Weighted sum S": score chart, robustness sweep chart `{{score}}`) and `symbol` ("C", "S": the
@@ -326,6 +327,9 @@ page), else the current one if listed, else the first; `ExampleDataset.buttonLab
   method, the Borda merge next to them (never instead of them), Kendall's W over the methods that ranked, and a
   "why" panel for the selected pair. A method that cannot rank (SAW with a 0 cell) shows its issue and is left out of
   Borda and W; with fewer than two methods ranking, the stage is blocked.
+- A method whose ranking is another one's by construction (MARCOS = c x SAW 'linearMax') is an echo (`findEchoes` in
+  `compare.ts`): its column stands next to the other one, a badge says so, and it is left out of Borda, W, the first
+  place and the pair's method list, so it never adds a second agreeing vote.
 - A new ranking method appears in Compare by itself. It only needs `why.character.<id>` (one sentence on how the
   method treats a weakness) in both `compare.en.json` and `compare.tr.json`; `compare/why.ts` reads the key by id.
   A method whose answer can be a set gives its view a `verdict` (§4) and Compare's column gets its one-line note.

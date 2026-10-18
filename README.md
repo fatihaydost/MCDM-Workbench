@@ -5,7 +5,7 @@
   </picture>
 </h1>
 
-A browser tool for multi-criteria decision analysis: weight criteria with CRITIC, Entropy, SD or MEREC, rank alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS or COPRAS and read every intermediate step, in English or Turkish.
+A browser tool for multi-criteria decision analysis: weight criteria with CRITIC, Entropy, SD or MEREC, rank alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS or MARCOS and read every intermediate step, in English or Turkish.
 
 **Live demo:** https://fatihaydost.github.io/MCDM-Workbench/ (published once ten methods compute)
 
@@ -14,7 +14,7 @@ A browser tool for multi-criteria decision analysis: weight criteria with CRITIC
 ## What it does
 
 - Enter a decision matrix in a spreadsheet-like grid, paste it from Excel or import `.xlsx` / `.csv`, and mark each criterion as benefit or cost.
-- Weights from CRITIC, Entropy (raw-data shares or min-max), SD (standard deviation of the min-max columns), MEREC (removal effect of each criterion, positive data only), equal weights or your own; ranking by TOPSIS (closeness C), SAW (weighted sum S, linear max or sum normalization, with each score drawn as its criteria's contributions) or VIKOR (compromise index Q with a v slider, group utility S against the largest regret R, the acceptable advantage and stability conditions and the compromise set) or EDAS (appraisal score AS from the weighted distance above and below the average solution, drawn as one diverging bar per alternative) or WASPAS (weighted sum and weighted product blended by a λ slider, with Q of every alternative drawn against λ) or COPRAS (relative significance Q from the benefit share S+ and a cost bonus that grows as the cost share S- shrinks, with the utility degree N in percent of the best, drawn as one two-part bar per alternative).
+- Weights from CRITIC, Entropy (raw-data shares or min-max), SD (standard deviation of the min-max columns), MEREC (removal effect of each criterion, positive data only), equal weights or your own; ranking by TOPSIS (closeness C), SAW (weighted sum S, linear max or sum normalization, with each score drawn as its criteria's contributions) or VIKOR (compromise index Q with a v slider, group utility S against the largest regret R, the acceptable advantage and stability conditions and the compromise set) or EDAS (appraisal score AS from the weighted distance above and below the average solution, drawn as one diverging bar per alternative) or WASPAS (weighted sum and weighted product blended by a λ slider, with Q of every alternative drawn against λ) or COPRAS (relative significance Q from the benefit share S+ and a cost bonus that grows as the cost share S- shrinks, with the utility degree N in percent of the best, drawn as one two-part bar per alternative) or MARCOS (utility f(K) from the weighted total against an imaginary ideal and anti-ideal row, drawn between those two dashed rows; always the order of SAW with linear max, shown as one straight line and counted once in Compare).
 - Shows the worked calculation step by step, with formulas and labelled matrices; copy any step as TSV or LaTeX, or download the whole calculation as `.xlsx`.
 - Runs entirely in the browser: no sign-up, no server, nothing uploaded.
 
@@ -36,12 +36,13 @@ The test suite recomputes published examples and compares every printed digit:
 | EDAS | Keshavarz Ghorabaee et al. (2015), Informatica 26(3):435, Tables 1-3 (47 items; Table 2 is rounded to 3 and then 2 decimals, all 517 cells reproduced) and Table 7 (ranks, all seven weight sets); Aydın Ünal (2019) and Sarıhan and Aydın (2023), each with a printing error recorded | average, PDA, NDA, SP, SN, NSP, NSN, AS, classes and ranks | ±0.006 |
 | WASPAS | Aytaç Adalı and Tuş Işık (2017), IREM 5(4):56, Tables 4-7 (supplier selection, all 55 scores of Table 7 over λ); Chakraborty and Zavadskas (2014), Informatica 25(1):1, Tables 13-15 (robots); Zavadskas et al. (2012) Table 2 (Table 1 misprints one a1 value, recorded) | normalized matrix, WSM, WPM, Q at every λ and ranks | ±0.0001 |
 | COPRAS | Özcan and Çelik (2021), IJPME 9(2):81, Tables 1, 2, 10, 11 (cream separators, Entropy then COPRAS; the printed rank row swaps A2 and A3, the printed Q does not); Podvezko (2011) Tables 7-8 (two cost changes flip the ranks); Zavadskas et al. (2007) Tables 1-2 (S+ and S- only: the printed Q is S+ + S-, not the paper's own Eq. 5) | weighted shares, S+, S-, Q, N and ranks | ±0.0001 |
+| MARCOS | Stević and Brković (2020), Logistics 4(1):4, Tables 2-5 (23 drivers, FUCOM weights as Table 4 applies them; the paper's Figure 2 swaps C3 and C4, which would move 9 ranks); Madenoğlu (2020), EBOR 2(2):99, Tables 3-7 (6 suppliers, 16 criteria, AHP weights) | S, K-, f(K), the reference totals and ranks; f(K) = c x SAW (linear max) on 300 random problems | ±0.001 |
 
 CRITIC is also checked against the hand-solved spreadsheet from the original coursework (`legacy/CRITIC(2).xlsx`) and the full CRITIC + TOPSIS chain against the legacy Python code, both to 10⁻¹². Fixtures are in [`tests/fixtures/`](tests/fixtures).
 
 ## Methods
 
-11 methods compute today (CRITIC, Entropy, SD, MEREC, equal weights, TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS) and 15 more are researched and documented, each with its own page: [methods catalogue](https://fatihaydost.github.io/MCDM-Workbench/methods).
+12 methods compute today (CRITIC, Entropy, SD, MEREC, equal weights, TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS) and 14 more are researched and documented, each with its own page: [methods catalogue](https://fatihaydost.github.io/MCDM-Workbench/methods).
 
 ![TOPSIS method page: an interactive distance diagram, when to use it and the algorithm](docs/screenshots/method-topsis.png)
 

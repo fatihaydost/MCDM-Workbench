@@ -227,6 +227,25 @@ steps). Table: S+, bonus, Q, N per alternative, in rank order.
 Use: `/methods/copras` "The idea" (Özcan and Çelik 2021, Entropy weights from the data); workbench Ranking stage when
 the method is COPRAS (it replaces the score chart).
 
+## MarcosRows, MarcosSawLine
+
+MARCOS as two pictures. `MarcosRows`: the table grows two imaginary rows, the ideal AI on top and the anti-ideal AAI at
+the bottom (dashed outlines, `--text-3`, not data); between them one bar per alternative at its weighted total S_i, in
+rank order, the first in the accent, S after the bar and f(K) closing the row on the right. Two dotted guides through
+every row at S_aai and S_ai: K- = S / S_aai and K+ = S / S_ai are a bar's length against them. Hover or focus a bar
+(up / down) for its K- and K+ in the readout. Table: AI, the alternatives, AAI with S, K-, K+, f(K).
+`MarcosSawLine`: x = SAW (Linear) score from SAW itself, y = f(K), both 0 to 1 on one scale; every dot lies on the line
+f(K) = c S through the origin (accent, labelled with c). Static. Numbers from `marcosParts(problem, weights)`.
+
+| Prop | Type | Notes |
+|---|---|---|
+| `problem`, `weights` | `Problem`, `number[]` | Renders nothing when MARCOS cannot run (a value of 0 or less). |
+| `format` | `(n, decimals) => string` | Active locale. |
+| `labels` | `MarcosRowsLabels` / `MarcosSawLineLabels` | Translations in `workbench.visual.marcos.*` and `methods.page.idea.marcos.*`. |
+
+Use: `/methods/marcos` "The idea" (Stević and Brković 2020, 23 drivers, both pictures); workbench Ranking stage when the
+method is MARCOS (`MarcosRows`, it replaces the score chart).
+
 ## StepFlow
 
 Map of the worked calculation: numbered square nodes on a hairline, the active one in the accent,
@@ -299,7 +318,7 @@ readable; the width follows the container. Heads wider than a column step (six m
 `topsisProjection(problem, weights, axes?)`, `defaultAxes(weights)`, `fitPlot(...)` (equal-scale
 screen scales, values growing right and up), `distancePoints(proj)`, `closenessAt(p)`,
 `isoClosenessEnd(c, xMax, yMax)`, `fitDistancePlane(...)`, `placeLabels(...)`, `ISO_C_DEFAULT`, `linePath(...)`, `pointCss(...)`,
-`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sdParts(problem)`, `merecParts(problem)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `edasParts(problem, weights)`, `coprasParts(problem, weights)`, `divergingSegments(above, below, center, px)`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `argMax`, `flowIndex`. The
+`planarDistance`, `criticParts(problem)`, `entropyParts(problem, params)`, `sdParts(problem)`, `merecParts(problem)`, `sawParts(problem, weights, params)`, `stackSegments(...)`, `vikorParts(problem, weights, params)`, `edasParts(problem, weights)`, `coprasParts(problem, weights)`, `marcosParts(problem, weights)`, `divergingSegments(above, below, center, px)`, `isoQSegment(v, q)`, `isoQRegion(v, q)`, `argMax`, `flowIndex`. The
 tests check that A+ / A- and C equal the core and the published values (Opricovic and Tzeng 2004:
 C = 0.762, 0.722, 0.238; Krishnan et al. 2021: σ and weights), that the distance plane places every
 alternative at the core's (D+, D-) with C = y / (x + y) and the core's order, that each ray keeps its

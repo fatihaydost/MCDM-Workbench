@@ -24,6 +24,7 @@ import vikorKG from './fixtures/vikor-keshavarz2015.json'
 import vikorOT from './fixtures/vikor-opricovic-tzeng2004.json'
 import waspasA from './fixtures/waspas-adali2017.json'
 import coprasOC from './fixtures/copras-ozcan-celik2021.json'
+import marcosSB from './fixtures/marcos-stevic-brkovic2020.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -138,6 +139,15 @@ describe('examples match the published fixtures', () => {
       { label: 'entropy.weights', values: coprasOC.weights_printed_table2, decimals: 4 },
       { label: 'copras.significance', values: coprasOC.published.Q_table11, decimals: 4 },
     ])
+  })
+  it('Stević and Brković 2020 (MARCOS, the weights as Table 4 applies them)', () => {
+    const ex = getExample('stevic-brkovic-2020-drivers')!
+    expect(ex.referenceFor).toEqual(['marcos'])
+    expect(ex.matrix).toEqual(marcosSB.matrix)
+    expect(ex.alternatives).toEqual(marcosSB.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(marcosSB.types)
+    expect(ex.weights).toEqual(marcosSB.weights)
+    expect(ex.published).toEqual([{ label: 'marcos.utility', values: marcosSB.published.fK, decimals: 3 }])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
@@ -392,6 +402,18 @@ describe('store actions', () => {
     expectClose(r.value!.scores, coprasOC.published.Q_table11, coprasOC.expected.tolerance)
     expect(r.value!.ranking).toEqual(coprasOC.expected.ranking)
     expect(r.value!.warnings).toEqual([])
+  })
+
+  it('MARCOS through the store: the drivers open with the paper weights and MARCOS, f(K) and ranks as published', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.loadExample('stevic-brkovic-2020-drivers', 'en')
+    const s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('marcos')
+    expect(s.weightMethod).toBe('manual')
+    const r = computeRanking(s)
+    expectClose(r.value!.scores, marcosSB.published.fK, marcosSB.expected.tolerance)
+    expect(r.value!.ranking).toEqual(marcosSB.published.ranking)
   })
 
   it('EDAS through the store: the 47 items open with EDAS and equal weights, the ten alternatives through the method page link', () => {

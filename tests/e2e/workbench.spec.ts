@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { copras, critic, edas, entropy, merec, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
+import { copras, critic, edas, entropy, marcos, merec, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -671,6 +671,43 @@ test('COPRAS: the method page opens the cream separators with Entropy and COPRAS
   await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
   const error = page.getByRole('button', { name: 'A2 on Drum turnover is 0. This method divides by the values or takes their logarithm, so each must be above 0.' })
   await expect(error).toBeVisible()
+  await expect(page.getByTestId('ranking-row')).toHaveCount(0)
+})
+
+test('MARCOS: the method page opens the drivers with MARCOS; published f(K), f(K-) and f(K+) once above the table, the ghost rows; a zero blocks', async ({ page }) => {
+  const ex = getExample('stevic-brkovic-2020-drivers')!
+  const p = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const res = marcos.compute(p, ex.weights!, {})
+  const scalar = (key: string) => res.steps.find((x) => x.key === key)!.scalar!
+
+  await page.goto('/methods/marcos')
+  await expect(page.getByTestId('marcos-rows')).toBeVisible()
+  await expect(page.getByTestId('marcos-saw-line')).toBeVisible()
+  await page.getByRole('link', { name: /Open in workbench/ }).first().click()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(stageHeading(page, 'Ranking')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'MARCOS' })).toHaveAttribute('aria-checked', 'true')
+  const table = page.getByRole('table', { name: 'Ranking' })
+  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'Utility f(K)'])
+  const byName = Object.fromEntries(ex.alternatives.map((a, i) => [a, f4(res.scores[i]!)]))
+  expect(await closenessByName(page)).toEqual(byName)
+  const published = ex.published.find((x) => x.label === 'marcos.utility')!.values as number[]
+  res.scores.forEach((f, i) => expect(Math.abs(f - published[i]!)).toBeLessThanOrEqual(0.001))
+  await expect(page.getByTestId('best-sentence')).toHaveText(`A8 ranks first (f(K) = ${f4(res.scores[7]!)}).`)
+  await expect(page.getByTestId('ranking-constants')).toHaveText(
+    `The same for every alternative: f(K⁻) = ${f4(scalar('marcos.fKMinus'))}, f(K⁺) = ${f4(scalar('marcos.fKPlus'))}`,
+  )
+  // The picture replaces the score chart: the ideal and anti-ideal rows around one bar per alternative.
+  await expect(page.getByTestId('marcos-ghost')).toHaveCount(2)
+  await expect(page.getByTestId('marcos-bar')).toHaveCount(23)
+  await expect(page.getByTestId('marcos-utility').first()).toHaveText(f4(res.scores[7]!))
+
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Data' }).click()
+  await page.locator('#wb-cell-0-2').click()
+  await page.keyboard.type('0')
+  await page.keyboard.press('Enter')
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(page.getByRole('button', { name: /^A1 on Vehicle maintenance is 0\./ })).toBeVisible()
   await expect(page.getByTestId('ranking-row')).toHaveCount(0)
 })
 

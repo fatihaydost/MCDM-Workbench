@@ -68,7 +68,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { copras, critic, edas, entropy, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
+    const { copras, critic, edas, entropy, marcos, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -142,7 +142,10 @@ describe('i18n resources', () => {
     // COPRAS: with a cost criterion, and its one notice (no cost criterion).
     const cp = [copras.compute(p, [0.5, 0.5], {}), copras.compute({ ...p, criteria: [p.criteria[0]!, { ...p.criteria[0]!, name: 'y' }] }, [0.5, 0.5], {})]
     expect(cp.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual(['copras.no-cost-criteria'])
-    const steps = [...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
+    // MARCOS: no warnings of its own (zeros and negatives are validation codes, as for SAW).
+    const mc = marcos.compute(p, [0.5, 0.5], {})
+    expect(mc.warnings).toEqual([])
+    const steps = [...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),

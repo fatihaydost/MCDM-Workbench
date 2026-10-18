@@ -13,4 +13,5 @@ export { sdParts, merecParts, criticParts, edasParts, divergingSegments, entropy
 export { VikorIdea, VIKOR_IDEA_LABELS_EN, type VikorIdeaLabels, type VikorIdeaProps } from './VikorIdea'
 export { EdasIdea, EDAS_IDEA_LABELS_EN, type EdasIdeaLabels, type EdasIdeaProps } from './EdasIdea'
 export { CoprasBonus, COPRAS_BONUS_LABELS_EN, type CoprasBonusLabels, type CoprasBonusProps } from './CoprasBonus'
+export { MarcosRows, MarcosSawLine, MARCOS_ROWS_LABELS_EN, MARCOS_SAW_LINE_LABELS_EN, type MarcosRowsLabels, type MarcosSawLineLabels } from './MarcosIdea'
 export { RankLines, RANK_LINES_LABELS_EN, type RankLinesColumn, type RankLinesLabels, type RankLinesProps } from './RankLines'

@@ -1058,3 +1058,87 @@
   stroke: var(--accent);
   stroke-width: 2;
 }
+
+/* MARCOS idea --------------------------------------------------------------------------------- */
+
+/* The two imaginary rows (ideal, anti-ideal): drawn, not data, so dashed outlines in the UI line colour. */
+.marcosGhost {
+  fill: none;
+  stroke: var(--text-3);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.marcosGhostName {
+  fill: var(--text-2);
+  font-size: 13px;
+}
+
+/* The reference totals S_aai and S_ai through every row. */
+.marcosGuide {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.marcosBar {
+  fill: var(--data-context);
+  outline: none;
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transition: fill var(--dur) var(--ease);
+}
+
+.marcosBar[data-highlight] {
+  fill: var(--data-accent);
+}
+
+.marcosBar[data-on] {
+  stroke: var(--data-accent);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.marcosBar:focus-visible {
+  stroke: var(--accent);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.animate .marcosBar {
+  transition:
+    transform var(--dur-data) var(--ease),
+    fill var(--dur) var(--ease);
+}
+
+.marcosGrid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.marcosLine {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.marcosLineLabel {
+  fill: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.marcosDot {
+  fill: var(--data-context);
+  stroke: var(--bg);
+  stroke-width: 1.5;
+}
+
+.marcosDot[data-highlight] {
+  fill: var(--data-accent);
+}

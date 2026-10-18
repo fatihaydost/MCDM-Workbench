@@ -5,6 +5,7 @@
 import { copras } from '../../core/methods/copras'
 import { critic } from '../../core/methods/critic'
 import { edas } from '../../core/methods/edas'
+import { marcos } from '../../core/methods/marcos'
 import { maxOf } from '../../core/math'
 import { entropy, type EntropyParams } from '../../core/methods/entropy'
 import { merec } from '../../core/methods/merec'
@@ -680,5 +681,50 @@ export function coprasParts(problem: Problem, weights: readonly number[]): Copra
     scores: result.scores,
     utility: stepVector(result.steps, 'copras.utility'),
     order,
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// MARCOS
+// ---------------------------------------------------------------------------------------------
+
+export type MarcosParts = {
+  result: RankingResult
+  /** Weighted total S_i (= the SAW 'linearMax' score), K-_i = S_i / S_aai, K+_i = S_i / S_ai, f(K_i) = c S_i. */
+  s: number[]
+  kMinus: number[]
+  kPlus: number[]
+  scores: number[]
+  /** The two imaginary rows' totals: anti-ideal and ideal (= Σw = 1). */
+  sAai: number
+  sAi: number
+  /** f(K) = c S, the same c for every alternative. */
+  c: number
+  /** SAW 'linearMax' scores from SAW itself, for the "same order" scatter. */
+  saw: number[]
+  /** Alternatives in rank order (ties keep input order). */
+  order: number[]
+}
+
+/** The core's MARCOS result (and SAW 'linearMax' on the same data) for its pictures, or null when MARCOS cannot run. */
+export function marcosParts(problem: Problem, weights: readonly number[]): MarcosParts | null {
+  let result: RankingResult
+  try {
+    result = marcos.compute(problem, [...weights], {})
+  } catch {
+    return null
+  }
+  const scalar = (key: string) => result.steps.find((x) => x.key === key)!.scalar!
+  return {
+    result,
+    s: stepVector(result.steps, 'marcos.s'),
+    kMinus: stepVector(result.steps, 'marcos.kMinus'),
+    kPlus: stepVector(result.steps, 'marcos.kPlus'),
+    scores: result.scores,
+    sAai: scalar('marcos.sAai'),
+    sAi: scalar('marcos.sAi'),
+    c: result.diagnostics!.c!,
+    saw: saw.compute(problem, [...weights], { normalization: 'linearMax' }).scores,
+    order: result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b),
   }
 }

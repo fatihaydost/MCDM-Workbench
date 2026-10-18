@@ -50,9 +50,13 @@ describe('kendallW', () => {
 })
 
 describe('compareRankings', () => {
-  it('reference example: six rankings, Borda, W, first place', () => {
+  it('reference example: seven rankings, MARCOS echoes SAW and is counted once in Borda, W and first place', () => {
     const c = compareRankings(problem(), ex.weights!, allRuns)
-    const rankings = c.runs.map((r) => r.result!.ranking)
+    const all = c.runs.map((r) => r.result!.ranking)
+    expect(all[6]).toEqual(all[1]) // MARCOS = SAW (Linear)
+    expect(c.echoes).toEqual([{ methodId: 'marcos', of: 'saw' }])
+    expect(c.ranked).toHaveLength(7)
+    const rankings = all.slice(0, 6)
     expect(c.comparable).toBe(true)
     expect(rankings).toEqual([
       [1, 4, 6, 10, 7, 8, 2, 3, 5, 9],
@@ -78,9 +82,11 @@ describe('compareRankings', () => {
     const saw = c.runs.find((r) => r.methodId === 'saw')!
     expect(saw.result).toBeNull()
     expect(saw.issues.some((i) => i.code === 'non-positive-value')).toBe(true)
-    // SAW, WASPAS and COPRAS all need positive values.
+    // SAW, WASPAS, COPRAS and MARCOS all need positive values.
     expect(c.runs.find((r) => r.methodId === 'waspas')!.result).toBeNull()
     expect(c.runs.find((r) => r.methodId === 'copras')!.result).toBeNull()
+    expect(c.runs.find((r) => r.methodId === 'marcos')!.result).toBeNull()
+    expect(c.echoes).toEqual([])
     expect(c.ranked).toHaveLength(3)
     expect(c.firstPlace!.of).toBe(3)
   })
@@ -99,6 +105,18 @@ describe('compareRankings', () => {
 })
 
 describe('compareRankings with method options', () => {
+  it('MARCOS counts as its own method when SAW runs with the sum option', () => {
+    const runs = allRuns.map((r) => (r.methodId === 'saw' ? { ...r, params: { normalization: 'sum' } } : r))
+    const c = compareRankings(problem(), ex.weights!, runs)
+    expect(c.echoes).toEqual([])
+    expect(c.firstPlace!.of).toBe(7)
+    expect(c.kendallW).toBe(kendallW(c.runs.map((r) => r.result!.ranking)))
+  })
+  it('SAW and MARCOS alone are one ranking: nothing to compare', () => {
+    const c = compareRankings(problem(), ex.weights!, [{ methodId: 'saw', params: {} }, { methodId: 'marcos', params: {} }])
+    expect(c.ranked).toEqual(['saw', 'marcos'])
+    expect(c.comparable).toBe(false)
+  })
   it('runs WASPAS with the λ it is given, not the default', () => {
     const w = (lambda: number) =>
       compareRankings(problem(), ex.weights!, [{ methodId: 'topsis', params: {} }, { methodId: 'waspas', params: { lambda } }]).runs[1]!.result!
@@ -128,6 +146,7 @@ describe('pair facts', () => {
       { methodId: 'waspas', higher: 'a' },
       { methodId: 'copras', higher: 'a' },
     ])
+    // MARCOS echoes SAW, so it is not a second voice in the pair's method list.
     expect(f.unanimous).toBe(false)
     expect(f.criteria.length).toBeGreaterThanOrEqual(1)
     expect(f.criteria.length).toBeLessThanOrEqual(3)
@@ -177,6 +196,7 @@ describe('pair facts', () => {
       issues: [],
     })),
     ranked: Object.keys(rankings),
+    echoes: [],
     comparable: true,
     borda: bordaCount(Object.values(rankings)),
     kendallW: null,

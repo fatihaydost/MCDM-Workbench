@@ -49,6 +49,14 @@ export type MethodThumbProps =
       className?: string | undefined
     }
   | {
+      /** MARCOS: the ideal row (dashed, top), alternatives' weighted totals in rank order (the first in the accent), the anti-ideal row (dashed, bottom). */
+      kind: 'ghostRows'
+      rows: readonly number[]
+      ideal: number
+      antiIdeal: number
+      className?: string | undefined
+    }
+  | {
       /** TOPSIS distance plane: (D+, D-) points and the rays of constant closeness. */
       kind: 'plane'
       points: readonly Point[]
@@ -129,6 +137,28 @@ export function MethodThumb(props: MethodThumbProps) {
             x += w
             return seg
           })
+        })}
+      </svg>
+    )
+  }
+  if (props.kind === 'ghostRows') {
+    const { rows, ideal, antiIdeal } = props
+    const all = [ideal, ...rows, antiIdeal]
+    const max = Math.max(...all, 1e-12)
+    const gap = 4
+    const bh = (H - 2 * PAD - gap * (all.length - 1)) / all.length
+    return (
+      <svg className={cls} width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        <line className={s.thumbAxis} x1={PAD} x2={PAD} y1={PAD - 2} y2={H - PAD + 2} />
+        {all.map((v, i) => {
+          const ghost = i === 0 || i === all.length - 1
+          const w = Math.max((v / max) * (W - 2 * PAD - 1) - 1, 0)
+          const y = PAD + i * (bh + gap)
+          return ghost ? (
+            <rect key={i} className={s.marcosGhost} x={PAD + 1.5} y={y + 0.5} width={w} height={bh - 1} />
+          ) : (
+            <rect key={i} className={i === 1 ? s.thumbAccent : s.thumbMark} x={PAD + 1} y={y} width={w} height={bh} />
+          )
         })}
       </svg>
     )

@@ -24,7 +24,8 @@
       "vikor": "VIKOR toplamı tek bir en büyük pişmanlıkla tartar, bu yüzden tek büyük zayıflık ağır basar.",
       "edas": "EDAS ortalamanın üstündeki ve altındaki uzaklığa bakar, bu yüzden güçlü yanlar bir zayıflığı telafi edebilir.",
       "waspas": "WASPAS toplamı çarpımla karıştırır, bu yüzden çok zayıf bir değer düz bir toplamdakinden daha çok etkiler.",
-      "copras": "COPRAS fayda paylarını toplar, maliyet ise toplam payının tersiyle girer; bu yüzden maliyeti çok düşük bir alternatif büyük bir puan alır."
+      "copras": "COPRAS fayda paylarını toplar, maliyet ise toplam payının tersiyle girer; bu yüzden maliyeti çok düşük bir alternatif büyük bir puan alır.",
+      "marcos": "MARCOS, SAW'ın ağırlıklı toplamını iki sabit sayıya böler; bu yüzden Doğrusal seçenekli SAW ile birebir aynı sıralar."
     },
     "unanimous": "{{n}} yöntemin hepsi {{a}} alternatifini {{b}} alternatifinin üstüne koyuyor.",
     "crossings": "Başka bir çifti görmek için grafikte bir kesişim seçin.",
@@ -39,5 +40,7 @@
     "vikorRegret": "VIKOR'un en büyük pişmanlığı {{a}} için {{ca}}, {{b}} için {{cb}} kriterinde, daha büyüğü {{larger}} için.",
     "vikorRegretSame": "VIKOR'un en büyük pişmanlığı hem {{a}} hem {{b}} için {{c}} kriterinde, daha büyüğü {{larger}} için.",
     "vikorRegretEqual": "VIKOR'un en büyük pişmanlıkları {{a}} ve {{b}} için eşit."
-  }
+  },
+  "echo": "{{method}}: {{of}} ile aynı sıra, bir kez sayılır",
+  "sawLinear": "SAW (Doğrusal)"
 }

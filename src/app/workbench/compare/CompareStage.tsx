@@ -12,6 +12,9 @@ import { alternativeName, placeIssue, tr } from '../shared'
 import { useCompareText } from './text'
 import { WhyPanel } from './WhyPanel'
 
+/** Registry order, but MARCOS next to SAW: it orders like SAW (Linear), so the lines between the two run straight. */
+const COMPARE_ORDER = rankingMethods.map((m) => m.id).flatMap((id) => (id === 'marcos' ? [] : id === 'saw' ? ['saw', 'marcos'] : [id]))
+
 /**
  * Compare: every ranking method on the same data and weights, each with its own saved options. Read only: nothing
  * here changes the user's choices.
@@ -31,7 +34,7 @@ export default function CompareStage() {
         ? compareRankings(
             toProblem(draft),
             w,
-            rankingMethods.map((m) => ({ methodId: m.id, params: paramsFor({ methodParams }, m.id) })),
+            COMPARE_ORDER.map((id) => ({ methodId: id, params: paramsFor({ methodParams }, id) })),
           )
         : null,
     [draft, w, methodParams],
@@ -90,7 +93,7 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
     const note = set.length > 1 ? tc('vikorNote', { list: set.map((i) => names[i]).join(', ') }) : undefined
     return { methodId: r.methodId, label, ranking: r.result.ranking, note }
   })
-  const { firstPlace, kendallW, ranked, runs } = comparison
+  const { echoes, firstPlace, kendallW, ranked, runs } = comparison
 
   return (
     <div className="flex flex-col gap-3" data-testid="compare-ready">
@@ -111,7 +114,17 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
         }}
         className="max-w-[880px]"
       />
-      <p className="flex flex-wrap gap-x-4 gap-y-1 text-13 text-text-2" data-testid="compare-summary">
+      <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-13 text-text-2" data-testid="compare-summary">
+        {/* MARCOS = c x SAW (Linear): one order, counted once in Borda, W and the first place (decision 4, 18.10). */}
+        {echoes.map((e) => (
+          <span
+            key={e.methodId}
+            className="inline-flex h-5 items-center rounded-control border border-line-strong px-1.5 text-12 font-medium whitespace-nowrap text-text"
+            data-testid={`${e.methodId}-badge`}
+          >
+            {tc('echo', { method: tr(t, `workbench.rankingMethod.${e.methodId}`), of: tc('sawLinear') })}
+          </span>
+        ))}
         {kendallW !== null && <span>{tc('summary.w', { w: nf.format(kendallW, 2) })}</span>}
         {firstPlace && <span>{tc('summary.first', { name: names[firstPlace.alternative]!, n: firstPlace.methods, of: firstPlace.of })}</span>}
         {ranked.length < runs.length && <span>{tc('summary.ranked', { n: ranked.length, of: runs.length })}</span>}

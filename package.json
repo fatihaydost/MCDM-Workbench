@@ -2,7 +2,7 @@
   "name": "mcdm-workbench",
   "private": true,
   "version": "0.1.0",
-  "description": "Multi-criteria decision analysis in the browser: CRITIC, Entropy, SD and MEREC weights, TOPSIS, SAW, VIKOR, EDAS, WASPAS and COPRAS ranking and the full worked calculation, in English and Turkish.",
+  "description": "Multi-criteria decision analysis in the browser: CRITIC, Entropy, SD and MEREC weights, TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS and MARCOS ranking and the full worked calculation, in English and Turkish.",
   "homepage": "https://fatihaydost.github.io/MCDM-Workbench/",
   "license": "MIT",
   "engines": {

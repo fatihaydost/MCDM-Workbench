@@ -525,6 +525,49 @@ export const examples: readonly ExampleDataset[] = [
       { label: 'copras.significance', values: [0.1137, 0.134, 0.1206, 0.1702, 0.1377, 0.1615, 0.1623], decimals: 4 },
     ],
   },
+  {
+    id: 'stevic-brkovic-2020-drivers',
+    name: { en: 'Truck drivers (Stević and Brković 2020)', tr: 'Kamyon şoförleri (Stević ve Brković 2020)' },
+    buttonLabel: { en: 'Truck drivers', tr: 'Kamyon şoförleri' },
+    summary: {
+      en: 'Twenty-three drivers of a transport company on five criteria, two of them cost, with FUCOM weights. "No damage" is entered as 0.001, as in the paper, because MARCOS needs every value above 0.',
+      tr: 'Bir taşımacılık şirketinin yirmi üç şoförü, ikisi maliyet olmak üzere beş kriter, FUCOM ağırlıklarıyla. MARCOS her değerin 0\'dan büyük olmasını istediği için "hasar yok", makaledeki gibi 0,001 olarak girildi.',
+    },
+    referenceFor: ['marcos'],
+    citation: {
+      authors: 'Stević, Ž.; Brković, N.',
+      year: 2020,
+      title: 'A Novel Integrated FUCOM-MARCOS Model for Evaluation of Human Resources in a Transport Company',
+      venue: 'Logistics 4(1), 4',
+      doi: '10.3390/logistics4010004',
+      tables: { en: 'Table 2 (input), Table 4 (weights as applied), Table 5 (output)', tr: 'Tablo 2 (girdi), Tablo 4 (uygulanan ağırlıklar), Tablo 5 (çıktı)' },
+    },
+    alternatives: Array.from({ length: 23 }, (_, i) => `A${i + 1}`),
+    criteria: [
+      { name: { en: 'Fuel consumption (l/100 km)', tr: 'Yakıt tüketimi (l/100 km)' }, type: 'cost' },
+      { name: { en: 'Damage per km', tr: 'Km başına hasar' }, type: 'cost' },
+      { name: { en: 'Vehicle maintenance', tr: 'Araç bakımı' }, type: 'benefit' },
+      { name: { en: 'Information timeliness', tr: 'Bilgi zamanlılığı' }, type: 'benefit' },
+      { name: { en: 'Loyalty', tr: 'Sadakat' }, type: 'benefit' },
+    ],
+    matrix: [
+      [33.9, 0.001, 7, 9, 7], [30.0, 0.001, 9, 7, 7], [31.5, 0.001, 9, 7, 9], [33.0, 0.001, 7, 9, 9],
+      [31.9, 0.001, 9, 7, 7], [31.1, 0.05, 7, 7, 9], [34.8, 0.001, 7, 7, 7], [25.8, 0.001, 7, 7, 7],
+      [31.7, 0.001, 7, 7, 9], [35.7, 0.001, 7, 7, 7], [34.2, 0.001, 7, 7, 9], [29.6, 0.1, 7, 7, 7],
+      [30.2, 0.001, 9, 5, 5], [34.3, 0.001, 7, 7, 9], [31.0, 0.001, 5, 7, 7], [34.5, 0.001, 7, 7, 7],
+      [33.9, 0.001, 5, 7, 7], [33.1, 0.001, 9, 9, 9], [32.7, 0.001, 9, 9, 9], [35.0, 0.001, 9, 9, 7],
+      [31.8, 0.001, 5, 7, 9], [31.0, 0.001, 9, 7, 7], [32.5, 0.001, 7, 7, 3],
+    ],
+    // As applied in Table 4; the paper's FUCOM result (Figure 2) has C3 and C4 the other way round, which moves 9 ranks.
+    weights: [0.434, 0.255, 0.128, 0.096, 0.087],
+    published: [
+      {
+        label: 'marcos.utility',
+        values: [0.738, 0.781, 0.783, 0.763, 0.762, 0.544, 0.712, 0.809, 0.756, 0.705, 0.734, 0.541, 0.744, 0.733, 0.722, 0.714, 0.695, 0.786, 0.79, 0.754, 0.73, 0.771, 0.698],
+        decimals: 3,
+      },
+    ],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

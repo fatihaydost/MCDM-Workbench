@@ -2,6 +2,8 @@
  * Comparing ranking methods: every method runs on the same problem and weights, and the individual rankings are
  * summarised by a Borda count (consensus order), Kendall's W (agreement) and the most common first place.
  * A method that cannot rank (blocking issues) stays in `runs` with its issues and is left out of every summary.
+ * A method whose ranking is another run's by construction (an echo: MARCOS of SAW 'linearMax') is shown but counted
+ * once, so it never adds a second agreeing vote.
  */
 import { rankScores } from './rank'
 import { midRanks } from './robustness'
@@ -11,11 +13,26 @@ import type { ValidationIssue } from './validate'
 
 export type MethodRun = { methodId: string; result: RankingResult | null; issues: ValidationIssue[] }
 
+/** A ranked method that always orders like another ranked run, and that run (MARCOS = c x SAW 'linearMax'). */
+export type Echo = { methodId: string; of: string }
+
+/**
+ * MARCOS with data-derived ideal rows is SAW 'linearMax' times one constant (docs/research/methods/marcos.md, step 7),
+ * so it echoes SAW when SAW ran with that option. SAW 'sum' can order differently: no echo then.
+ */
+function findEchoes(runs: readonly RankingRun[], ranked: ReadonlySet<string>): Echo[] {
+  const sawRun = runs.find((r) => r.methodId === 'saw')
+  const linear = (sawRun?.params.normalization ?? 'linearMax') === 'linearMax'
+  return ranked.has('marcos') && ranked.has('saw') && linear ? [{ methodId: 'marcos', of: 'saw' }] : []
+}
+
 export type Comparison = {
   /** One per requested run, in the order given. */
   runs: MethodRun[]
   /** Ids of the methods that produced a result. */
   ranked: string[]
+  /** Ranked methods left out of Borda, W, first place and the pair's method list, because they echo another run. */
+  echoes: Echo[]
   /** At least two methods ranked, so there is something to compare. */
   comparable: boolean
   borda: { points: number[]; ranking: number[] } | null
@@ -61,18 +78,21 @@ export function compareRankings(problem: Problem, weights: number[], runs: Ranki
     return { methodId: run.methodId, result: res.value, issues: res.issues }
   })
   const done = results.filter((r): r is MethodRun & { result: RankingResult } => r.result !== null)
-  const rankings = done.map((r) => r.result.ranking)
-  const comparable = done.length >= 2
+  const echoes = findEchoes(runs, new Set(done.map((r) => r.methodId)))
+  const counted = done.filter((r) => !echoes.some((e) => e.methodId === r.methodId))
+  const rankings = counted.map((r) => r.result.ranking)
+  const comparable = counted.length >= 2
   const firsts = new Map<number, number>()
   for (const r of rankings) r.forEach((rank, i) => rank === 1 && firsts.set(i, (firsts.get(i) ?? 0) + 1))
   let firstPlace: Comparison['firstPlace'] = null
   for (const [alternative, methods] of [...firsts].sort((a, b) => b[1] - a[1] || a[0] - b[0])) {
-    firstPlace = { alternative, methods, of: done.length }
+    firstPlace = { alternative, methods, of: counted.length }
     break
   }
   return {
     runs: results,
     ranked: done.map((r) => r.methodId),
+    echoes,
     comparable,
     borda: comparable ? bordaCount(rankings) : null,
     kendallW: comparable ? kendallW(rankings) : null,
@@ -128,7 +148,7 @@ export function pairFacts(problem: Problem, weights: number[], c: Comparison, i:
     .slice(0, 3)
     .map(({ col, better }) => ({ col, better }))
   const methods = c.runs.flatMap((r) => {
-    if (!r.result) return []
+    if (!r.result || c.echoes.some((e) => e.methodId === r.methodId)) return []
     const { ranking } = r.result
     const higher = ranking[a]! === ranking[b]! ? 'tie' : ranking[a]! < ranking[b]! ? 'a' : 'b'
     return [{ methodId: r.methodId, higher } as const]

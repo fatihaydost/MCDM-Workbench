@@ -118,6 +118,9 @@
       },
       "copras": {
         "claim": "Tablo 11'in yedi Q değerinin tamamı ve Tablo 10'un her hücresi {{citation}} ile {{decimals}} basamağa kadar aynı; basılı sıra satırı A2 ile A3'ü yer değiştirmiş, basılı Q değerleri değiştirmemiş."
+      },
+      "marcos": {
+        "claim": "Tablo 5'in 23 fayda değeri f(K) {{citation}} ile {{decimals}} basamağa kadar aynı, 23 sıra da aynı; makale C3 ve C4 ağırlıklarını kendi FUCOM şekline göre yer değiştirmiş uyguluyor, bu kontrol de öyle."
       }
     },
     "catalogue": {
@@ -205,7 +208,8 @@
       "vikor": "VIKOR",
       "edas": "EDAS",
       "waspas": "WASPAS",
-      "copras": "COPRAS"
+      "copras": "COPRAS",
+      "marcos": "MARCOS"
     },
     "params": {
       "entropy": {
@@ -381,7 +385,8 @@
         "vikor": "En iyi toplam (S) ile en küçük en büyük pişmanlık (R) arasında uzlaşı arar; Q küçüldükçe sıra yükselir.",
         "edas": "Her alternatifi, bütün alternatiflerin ortalamasının ne kadar üstünde ya da altında olduğuna göre puanlar; AS büyüdükçe sıra yükselir.",
         "waspas": "Ağırlıklı toplamı, çok zayıf bir değeri daha sert cezalandıran ağırlıklı çarpımla karıştırır; Q büyüdükçe sıra yükselir.",
-        "copras": "Her alternatifin fayda kriterlerindeki ağırlıklı payını toplar, maliyet payı küçüldükçe büyüyen bir puan ekler; Q büyüdükçe sıra yükselir."
+        "copras": "Her alternatifin fayda kriterlerindeki ağırlıklı payını toplar, maliyet payı küçüldükçe büyüyen bir puan ekler; Q büyüdükçe sıra yükselir.",
+        "marcos": "Her ağırlıklı toplamı hayali bir ideal ve anti-ideal satırla ölçer; f(K) büyüdükçe sıra yükselir, sıra SAW (Doğrusal) ile aynıdır."
       },
       "columns": {
         "rank": "Sıra",
@@ -427,12 +432,18 @@
           "name": "Göreli önem Q",
           "title": "COPRAS göreli önem Q",
           "symbol": "Q"
+        },
+        "marcos": {
+          "name": "Fayda f(K)",
+          "title": "MARCOS faydası f(K)",
+          "symbol": "f(K)"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
       "changeWeights": "Ağırlıkları değiştir",
       "best": "İlk sırada {{name}} ({{symbol}} = {{value}}).",
-      "bestTied": "İlk sırayı {{names}} paylaşıyor ({{symbol}} = {{value}})."
+      "bestTied": "İlk sırayı {{names}} paylaşıyor ({{symbol}} = {{value}}).",
+      "constants": "Her alternatif için aynı: {{list}}"
     },
     "results": {
       "sourceFile": "{{name}} dosyasından içe aktarıldı",
@@ -584,6 +595,18 @@
         "sMinus": "Maliyet toplamı S-",
         "significance": "Göreli önem Q",
         "utility": "Fayda derecesi N (%)"
+      },
+      "marcos": {
+        "normalized": "İdeale göre normalize n",
+        "weighted": "Ağırlıklı değerler v",
+        "sAai": "Anti-ideal toplamı S_aai",
+        "sAi": "İdeal toplamı S_ai",
+        "s": "Ağırlıklı toplam S",
+        "kMinus": "Fayda derecesi K-",
+        "kPlus": "Fayda derecesi K+",
+        "fKMinus": "Fayda fonksiyonu f(K-)",
+        "fKPlus": "Fayda fonksiyonu f(K+)",
+        "utility": "Fayda f(K)"
       }
     },
     "issues": {
@@ -722,6 +745,14 @@
         "segment": "{{alternative}}, {{part}}: {{value}} (Q = {{score}}, N = {{utility}})",
         "readout": "{{alternative}}: {{part}} {{value}}, Q = {{score}}",
         "percent": "%{{value}}"
+      },
+      "marcos": {
+        "title": "İdeal ile anti-ideal arasında",
+        "caption": "Kesikli satırlar hayalidir: her kriterin en iyi ve en kötü değeri. K- bir çubuğu anti-idealle, K+ idealle karşılaştırır; sağda f(K).",
+        "ideal": "İdeal AI",
+        "antiIdeal": "Anti-ideal AAI",
+        "bar": "{{alternative}}: S = {{total}}, K- = {{kMinus}}, K+ = {{kPlus}}, f(K) = {{score}}",
+        "readout": "{{alternative}}: {{kMinus}} anti-ideal değerinde (K-), idealin {{kPlus}} kadarına ulaşıyor (K+), f(K) = {{score}}"
       }
     },
     "flow": {
@@ -786,6 +817,12 @@
         "sPlus": "S+ ve S-",
         "significance": "Q",
         "utility": "N (%)"
+      },
+      "marcos": {
+        "normalized": "Normalize",
+        "sAai": "Toplamlar",
+        "kMinus": "K- ve K+",
+        "utility": "f(K)"
       }
     },
     "pipeline": {
@@ -797,7 +834,7 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, MEREC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR, EDAS, WASPAS ya da COPRAS ile sıralayın ve hesabın her adımını görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, MEREC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS ya da MARCOS ile sıralayın ve hesabın her adımını görün."
     }
   },
   "methods": {
@@ -819,7 +856,8 @@
       "sd": "SD",
       "merec": "MEREC",
       "waspas": "WASPAS",
-      "copras": "COPRAS"
+      "copras": "COPRAS",
+      "marcos": "MARCOS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -878,7 +916,8 @@
         "sd": "Ağırlığı verinin ne kadar geniş yayıldığından bulur.",
         "merec": "Kriteri çıkarmanın neyi değiştirdiğinden ağırlık.",
         "waspas": "Ağırlıklı toplamı ağırlıklı çarpımla karıştırır.",
-        "copras": "Fayda paylarını toplar, küçük maliyet payını ödüllendirir."
+        "copras": "Fayda paylarını toplar, küçük maliyet payını ödüllendirir.",
+        "marcos": "Hayali bir ideal ve anti-ideale göre ölçer."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1013,6 +1052,15 @@
         "copras": {
           "title": "Fayda payı artı düşük maliyet puanı",
           "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır, maliyet payı S- küçüldükçe puan büyür; çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir."
+        },
+        "marcos": {
+          "title": "Ölçü için iki hayali satır",
+          "caption": "Kesikli satırlar hayalidir: her kriterin en iyi ve en kötü değeri. K- bir çubuğu anti-idealle, K+ idealle karşılaştırır; sağda f(K).",
+          "sawTitle": "SAW (Doğrusal) ile aynı sıra",
+          "sawCaption": "Her nokta 0'dan geçen tek bir doğru üzerinde; bu yüzden hiçbir iki alternatif yer değiştiremez.",
+          "sawX": "SAW (Doğrusal) skoru S",
+          "sawY": "MARCOS f(K)",
+          "sawLine": "f(K) = c · S, c = {{c}}"
         }
       }
     }
@@ -1105,6 +1153,18 @@
       "sMinus": "Maliyet toplamı S-: maliyet kriterlerinin ağırlıklı payları toplanır; S- küçüldükçe iyidir.",
       "significance": "Göreli önem Q = S+ artı maliyet ağırlığı, 1 / S- ile orantılı olarak paylaştırılır; değer büyüdükçe sıra yükselir ve Q değerlerinin toplamı 1 eder.",
       "utility": "Fayda derecesi N: Q, en büyük Q'nun yüzdesi olarak; en iyi alternatif 100 alır."
+    },
+    "marcos": {
+      "normalized": "Normalize değerler n: her değer ideal satır AI (sütunun en iyisi) ile oranlanır, ideal 1 alır; SAW (Doğrusal) ile aynı.",
+      "weighted": "Ağırlıklı değerler v = w n: her normalize değer kriter ağırlığıyla çarpılır.",
+      "sAai": "S_aai: anti-ideal satır AAI, yani her kriterin en kötü değeri için ağırlıklı toplam.",
+      "sAi": "S_ai: ideal satır AI için ağırlıklı toplam; ağırlıkların toplamı, yani 1.",
+      "s": "Her alternatifin ağırlıklı toplamı S: v'nin satır toplamı, SAW (Doğrusal) skoruyla aynı sayı.",
+      "kMinus": "Fayda derecesi K- = S / S_aai: alternatif kaç anti-ideal değerinde.",
+      "kPlus": "Fayda derecesi K+ = S / S_ai: alternatifin ideale ulaştığı pay.",
+      "fKMinus": "f(K-) = K+ / (K+ + K-): her alternatif için aynı sayı, bu yüzden bir kez gösterilir.",
+      "fKPlus": "f(K+) = K- / (K+ + K-): her alternatif için aynı sayı, bu yüzden bir kez gösterilir.",
+      "utility": "Fayda f(K): K+ ve K-, iki fayda fonksiyonuyla birleştirilir. Değer büyüdükçe sıra yükselir; c S'ye eşittir, bu yüzden sıra S'nin sırasıdır."
     }
   },
   "validation": {

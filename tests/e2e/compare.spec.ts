@@ -4,11 +4,13 @@ import { getExample } from '../../src/data/examples'
 
 // Every registry ranking method is a column; the counts and firsts come from the core on the same example.
 const N = RANKING_IDS.length
+// Registry order, MARCOS next to SAW (it orders like SAW (Linear)).
+const ORDER = RANKING_IDS.filter((id) => id !== 'marcos').flatMap((id) => (id === 'saw' ? ['saw', 'marcos'] : [id]))
 const ex = getExample('keshavarz-2015-ten-alternatives')!
 const core = compareRankings(
   { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix },
   ex.weights!,
-  RANKING_IDS.map((methodId) => ({ methodId, params: {} })),
+  ORDER.map((methodId) => ({ methodId, params: {} })),
 )
 const firsts = core.runs.map((r) => ex.alternatives[r.result!.ranking.indexOf(1)])
 
@@ -18,16 +20,19 @@ test('compare: one column per ranking method, VIKOR\'s A7 first, Borda at the en
 
   const columns = page.getByTestId('rank-column')
   await expect(columns).toHaveCount(N)
-  expect(await columns.evaluateAll((els) => els.map((el) => el.getAttribute('data-label')))).toEqual(RANKING_IDS.map((id) => id.toUpperCase()))
+  expect(await columns.evaluateAll((els) => els.map((el) => el.getAttribute('data-label')))).toEqual(ORDER.map((id) => id.toUpperCase()))
   const firstOf = async (k: number) => columns.nth(k).locator('[data-rank="1"]').first().getAttribute('data-name')
   for (let k = 0; k < N; k++) expect(await firstOf(k)).toBe(firsts[k])
-  expect(firsts[RANKING_IDS.indexOf('vikor')]).toBe('A7')
+  expect(firsts[ORDER.indexOf('vikor')]).toBe('A7')
 
   await expect(page.getByTestId('vikor-note')).toHaveText("VIKOR's own rule: compromise set A7, A1, A8")
   await expect(page.locator('[data-testid="borda-rank"][data-name="A1"]')).toHaveText('1')
   const summary = page.getByTestId('compare-summary')
   await expect(summary).toContainText(`Agreement (Kendall's W): ${core.kendallW!.toFixed(2)}`)
-  await expect(summary).toContainText(`A1 is first in ${core.firstPlace!.methods} of ${N} methods`)
+  // MARCOS echoes SAW (Linear): a badge, and it is counted once.
+  await expect(page.getByTestId('marcos-badge')).toHaveText('MARCOS: same order as SAW (Linear), counted once')
+  expect(core.firstPlace!.of).toBe(N - 1)
+  await expect(summary).toContainText(`A1 is first in ${core.firstPlace!.methods} of ${N - 1} methods`)
   await expect(summary).not.toContainText('methods ranked')
 
   // The top two (A1, A7) are selected at first; clicking another crossing selects that pair, arrows move focus.
@@ -64,7 +69,7 @@ test('compare: the why panel opens on A1 and A7, and a crossing changes the pair
   await expect(title).not.toHaveText('A1 or A7?')
 })
 
-test('compare: a zero cell leaves SAW, WASPAS and COPRAS out with their reason', async ({ page }) => {
+test('compare: a zero cell leaves SAW, WASPAS, COPRAS and MARCOS out with their reason', async ({ page }) => {
   await page.goto('/app?example=keshavarz-2015-ten-alternatives&stage=data')
   await page.locator('#wb-cell-0-0').click()
   await page.keyboard.type('0')
@@ -75,7 +80,9 @@ test('compare: a zero cell leaves SAW, WASPAS and COPRAS out with their reason',
   await expect(saw.locator('[data-rank]')).toHaveCount(0)
   await expect(page.locator('[data-testid="rank-column"][data-method="waspas"] [data-rank]')).toHaveCount(0)
   await expect(page.locator('[data-testid="rank-column"][data-method="copras"] [data-rank]')).toHaveCount(0)
-  await expect(page.getByTestId('compare-summary')).toContainText(`${N - 3} of ${N} methods ranked`)
+  await expect(page.locator('[data-testid="rank-column"][data-method="marcos"] [data-rank]')).toHaveCount(0)
+  await expect(page.getByTestId('marcos-badge')).toHaveCount(0)
+  await expect(page.getByTestId('compare-summary')).toContainText(`${N - 4} of ${N} methods ranked`)
 })
 
 test('compare: Turkish', async ({ page }) => {

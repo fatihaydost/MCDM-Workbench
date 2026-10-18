@@ -7,6 +7,7 @@ import { getExample } from '../../data/examples'
 import {
   argMax,
   coprasParts,
+  marcosParts,
   divergingSegments,
   edasParts,
   isoQRegion,
@@ -417,5 +418,21 @@ describe('COPRAS parts', () => {
   })
   it('is null when COPRAS cannot run', () => {
     expect(coprasParts({ ...p, matrix: p.matrix.map((r, i) => (i === 0 ? [0, ...r.slice(1)] : r)) }, w)).toBeNull()
+  })
+})
+
+describe('MARCOS parts', () => {
+  const ex = getExample('stevic-brkovic-2020-drivers')!
+  const p: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  it('puts every alternative on f(K) = c x SAW (Linear), the ideal total at 1, rows in rank order', () => {
+    const parts = marcosParts(p, ex.weights!)!
+    parts.scores.forEach((f, i) => expect(f).toBeCloseTo(parts.c * parts.saw[i]!, 14))
+    parts.s.forEach((x, i) => expect(x).toBeCloseTo(parts.saw[i]!, 15))
+    expect(parts.sAi).toBeCloseTo(1, 12)
+    expect(parts.sAai).toBeCloseTo(0.469642, 6)
+    expect(ex.alternatives[parts.order[0]!]).toBe('A8')
+  })
+  it('is null when MARCOS cannot run', () => {
+    expect(marcosParts({ ...p, matrix: p.matrix.map((r, i) => (i === 0 ? [0, ...r.slice(1)] : r)) }, ex.weights!)).toBeNull()
   })
 })

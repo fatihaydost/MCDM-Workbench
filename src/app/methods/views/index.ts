@@ -5,6 +5,7 @@ import { edas } from './edas'
 import { entropy } from './entropy'
 import { equal } from './equal'
 import { manual } from './manual'
+import { marcos } from './marcos'
 import { merec } from './merec'
 import { saw } from './saw'
 import { sd } from './sd'
@@ -38,6 +39,7 @@ export const methodViews: Readonly<Views> = {
   edas,
   waspas,
   copras,
+  marcos,
 }
 
 const ids = Object.keys(methodViews) as ViewId[]

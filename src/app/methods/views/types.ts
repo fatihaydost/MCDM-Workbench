@@ -45,6 +45,8 @@ export type MethodView<K extends 'weighting' | 'ranking' = 'weighting' | 'rankin
    * puts one after the score (COPRAS's N), `decimals` overrides the score's 4.
    */
   columns?: readonly { step: string; label: string; after?: true; decimals?: number }[]
+  /** Ranking: scalar steps that are one number for the whole table (MARCOS's f(K-), f(K+)), shown once above it. */
+  constants?: readonly { step: string; symbol: string }[]
   /** Ranking: hide those columns below 640 px, so the score that decides the rank is never the one scrolled off. */
   columnsFromSm?: true
   /** The method's idea drawn on the current problem, on the Weights or Ranking stage. */

@@ -4,6 +4,7 @@ import { edas } from './edas'
 import { entropy } from './entropy'
 import { equal } from './equal'
 import { manual } from './manual'
+import { marcos } from './marcos'
 import { merec } from './merec'
 import { saw } from './saw'
 import { sd } from './sd'
@@ -18,7 +19,7 @@ export type { FlowNode, MethodSteps, StepContent } from './types'
  * Every method's step module (`src/content/steps/<id>.ts`), by method id. Import this index only from
  * lazy code (WorkedCalculation): the TeX must stay out of the main chunk.
  */
-const modules = { critic, entropy, sd, merec, equal, manual, topsis, saw, vikor, edas, waspas, copras }
+const modules = { critic, entropy, sd, merec, equal, manual, topsis, saw, vikor, edas, waspas, copras, marcos }
 type Modules = typeof modules
 
 export type StepKey = { [M in keyof Modules]: keyof Modules[M]['steps'] & string }[keyof Modules]

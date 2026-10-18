@@ -118,6 +118,9 @@
       },
       "copras": {
         "claim": "All seven Q values of Table 11 and every cell of Table 10 match {{citation}} to {{decimals}} decimals; the printed rank row swaps A2 and A3, the printed Q does not."
+      },
+      "marcos": {
+        "claim": "All 23 utilities f(K) of Table 5 match {{citation}} to {{decimals}} decimals, with the same 23 ranks; the paper applies its C3 and C4 weights swapped against its own FUCOM figure, and so does this check."
       }
     },
     "catalogue": {
@@ -205,7 +208,8 @@
       "vikor": "VIKOR",
       "edas": "EDAS",
       "waspas": "WASPAS",
-      "copras": "COPRAS"
+      "copras": "COPRAS",
+      "marcos": "MARCOS"
     },
     "params": {
       "entropy": {
@@ -381,7 +385,8 @@
         "vikor": "Looks for a compromise between the best total (S) and the smallest worst regret (R); a lower Q is better.",
         "edas": "Scores each alternative by how far it lies above and below the average of all alternatives; a higher AS is better.",
         "waspas": "Blends a weighted sum with a weighted product, which punishes a very weak value harder; a higher Q is better.",
-        "copras": "Adds up each alternative's weighted share of the benefit criteria plus a bonus that grows as its cost share shrinks; a higher Q is better."
+        "copras": "Adds up each alternative's weighted share of the benefit criteria plus a bonus that grows as its cost share shrinks; a higher Q is better.",
+        "marcos": "Measures each weighted total against an imaginary ideal and anti-ideal row; a higher f(K) is better, in the same order as SAW (Linear)."
       },
       "columns": {
         "rank": "Rank",
@@ -427,12 +432,18 @@
           "name": "Relative significance Q",
           "title": "COPRAS relative significance Q",
           "symbol": "Q"
+        },
+        "marcos": {
+          "name": "Utility f(K)",
+          "title": "MARCOS utility f(K)",
+          "symbol": "f(K)"
         }
       },
       "weightsUsed": "Weights: {{method}}",
       "changeWeights": "Change weights",
       "best": "{{name}} ranks first ({{symbol}} = {{value}}).",
-      "bestTied": "{{names}} share first place ({{symbol}} = {{value}})."
+      "bestTied": "{{names}} share first place ({{symbol}} = {{value}}).",
+      "constants": "The same for every alternative: {{list}}"
     },
     "results": {
       "sourceFile": "Imported from {{name}}",
@@ -584,6 +595,18 @@
         "sMinus": "Cost sum S-",
         "significance": "Relative significance Q",
         "utility": "Utility degree N (%)"
+      },
+      "marcos": {
+        "normalized": "Normalized against the ideal n",
+        "weighted": "Weighted values v",
+        "sAai": "Anti-ideal total S_aai",
+        "sAi": "Ideal total S_ai",
+        "s": "Weighted total S",
+        "kMinus": "Utility degree K-",
+        "kPlus": "Utility degree K+",
+        "fKMinus": "Utility function f(K-)",
+        "fKPlus": "Utility function f(K+)",
+        "utility": "Utility f(K)"
       }
     },
     "issues": {
@@ -722,6 +745,14 @@
         "segment": "{{alternative}}, {{part}}: {{value}} (Q = {{score}}, N = {{utility}})",
         "readout": "{{alternative}}: {{part}} {{value}} of Q = {{score}}",
         "percent": "{{value}}%"
+      },
+      "marcos": {
+        "title": "Between the ideal and the anti-ideal",
+        "caption": "The dashed rows are imaginary: the best and the worst value of every criterion. K- is a bar against the anti-ideal, K+ against the ideal; f(K) on the right.",
+        "ideal": "Ideal AI",
+        "antiIdeal": "Anti-ideal AAI",
+        "bar": "{{alternative}}: S = {{total}}, K- = {{kMinus}}, K+ = {{kPlus}}, f(K) = {{score}}",
+        "readout": "{{alternative}}: worth {{kMinus}} anti-ideals (K-), reaches {{kPlus}} of the ideal (K+), f(K) = {{score}}"
       }
     },
     "flow": {
@@ -786,6 +817,12 @@
         "sPlus": "S+ and S-",
         "significance": "Q",
         "utility": "N (%)"
+      },
+      "marcos": {
+        "normalized": "Normalize",
+        "sAai": "Totals",
+        "kMinus": "K- and K+",
+        "utility": "f(K)"
       }
     },
     "pipeline": {
@@ -797,7 +834,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS or COPRAS and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS or MARCOS and see every step of the calculation."
     }
   },
   "methods": {
@@ -819,7 +856,8 @@
       "sd": "SD",
       "merec": "MEREC",
       "waspas": "WASPAS",
-      "copras": "COPRAS"
+      "copras": "COPRAS",
+      "marcos": "MARCOS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -878,7 +916,8 @@
         "sd": "Weights from how widely the data spread.",
         "merec": "Weights from what removing a criterion changes.",
         "waspas": "Blends a weighted sum with a weighted product.",
-        "copras": "Adds benefit shares and a bonus for a small cost share."
+        "copras": "Adds benefit shares and a bonus for a small cost share.",
+        "marcos": "Measures against an imaginary ideal and anti-ideal."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1013,6 +1052,15 @@
         "copras": {
           "title": "Benefit share plus a bonus for low cost",
           "caption": "Each bar is S+ (benefit share) plus the cost bonus, which grows as the cost share S- shrinks; it ends at Q, then N in percent of the best."
+        },
+        "marcos": {
+          "title": "Two imaginary rows to measure against",
+          "caption": "The dashed rows are imaginary: the best and the worst value of every criterion. K- is a bar against the anti-ideal, K+ against the ideal; f(K) on the right.",
+          "sawTitle": "Same order as SAW (Linear)",
+          "sawCaption": "Every dot lies on one line through 0, so no two alternatives can swap places.",
+          "sawX": "SAW (Linear) score S",
+          "sawY": "MARCOS f(K)",
+          "sawLine": "f(K) = c · S, c = {{c}}"
         }
       }
     }
@@ -1105,6 +1153,18 @@
       "sMinus": "Cost sum S-: the weighted shares of the cost criteria, added up; a smaller S- is better.",
       "significance": "Relative significance Q = S+ plus the cost weight shared out in proportion to 1 / S-; a higher value ranks higher and the Q values add up to 1.",
       "utility": "Utility degree N: Q as a percentage of the largest Q, so the best alternative has 100."
+    },
+    "marcos": {
+      "normalized": "Normalized values n: each value against the ideal row AI (the column best), so the ideal gets 1; the same as SAW (Linear).",
+      "weighted": "Weighted values v = w n: each normalized value times its criterion weight.",
+      "sAai": "S_aai: the weighted total of the anti-ideal row AAI, the worst value of every criterion.",
+      "sAi": "S_ai: the weighted total of the ideal row AI, which is the sum of the weights, 1.",
+      "s": "Weighted total S of each alternative: the row sum of v, the same number as the SAW (Linear) score.",
+      "kMinus": "Utility degree K- = S / S_aai: how many anti-ideals the alternative is worth.",
+      "kPlus": "Utility degree K+ = S / S_ai: the share of the ideal the alternative reaches.",
+      "fKMinus": "f(K-) = K+ / (K+ + K-): the same number for every alternative, so it is shown once.",
+      "fKPlus": "f(K+) = K- / (K+ + K-): the same number for every alternative, so it is shown once.",
+      "utility": "Utility f(K): K+ and K- merged by the two utility functions. A higher value ranks higher; it equals c S, so the order is the order of S."
     }
   },
   "validation": {
