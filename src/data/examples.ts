@@ -606,6 +606,49 @@ export const examples: readonly ExampleDataset[] = [
     // Table VI at λ = 0.5, as printed (trailing zeros dropped); 1.3 and 2.52 are the paper's rounding of 1.2987 and 2.5191.
     published: [{ label: 'cocoso.scores', values: [2.041, 2.788, 2.882, 2.416, 1.3, 1.443, 2.52], decimals: 3 }],
   },
+  {
+    id: 'pamucar-cirovic-2015-forklifts',
+    name: { en: 'Forklifts (Pamučar and Ćirović 2015)', tr: 'Forkliftler (Pamučar ve Ćirović 2015)' },
+    summary: {
+      en: 'Seven forklifts for a logistics centre on ten criteria, three of them costs, with DEMATEL weights: the example of the MABAC paper. Service network and spare parts are rated from very poor (1) to very good (5).',
+      tr: 'Bir lojistik merkezi için yedi forklift, üçü maliyet olan on kriter, DEMATEL ağırlıklarıyla: MABAC makalesinin örneği. Servis ağı ve yedek parça çok kötüden (1) çok iyiye (5) puanlanır.',
+    },
+    referenceFor: ['mabac'],
+    citation: {
+      authors: 'Pamučar, D.; Ćirović, G.',
+      year: 2015,
+      title: 'The selection of transport and handling resources in logistics centers using Multi-Attributive Border Approximation area Comparison (MABAC)',
+      venue: 'Expert Systems with Applications 42(6), 3016-3028',
+      doi: '10.1016/j.eswa.2014.11.057',
+      tables: { en: 'Tables 5 and 7 (input and weights), Table 12 (output)', tr: 'Tablo 5 ve 7 (girdi ve ağırlıklar), Tablo 12 (çıktı)' },
+    },
+    alternatives: ['Forklift 1', 'Forklift 2', 'Forklift 3', 'Forklift 4', 'Forklift 5', 'Forklift 6', 'Forklift 7'],
+    criteria: [
+      { name: { en: 'Purchase price', tr: 'Satın alma fiyatı' }, type: 'cost' },
+      { name: { en: 'Warranty', tr: 'Garanti' }, type: 'benefit' },
+      { name: { en: 'Service network', tr: 'Servis ağı' }, type: 'benefit' },
+      { name: { en: 'Spare parts', tr: 'Yedek parça' }, type: 'benefit' },
+      { name: { en: 'Maintenance cost', tr: 'Bakım maliyeti' }, type: 'cost' },
+      { name: { en: 'Fuel use', tr: 'Yakıt tüketimi' }, type: 'cost' },
+      { name: { en: 'Bearing capacity', tr: 'Taşıma kapasitesi' }, type: 'benefit' },
+      { name: { en: 'Lifting capacity', tr: 'Kaldırma kapasitesi' }, type: 'benefit' },
+      { name: { en: 'Movement speed', tr: 'Hareket hızı' }, type: 'benefit' },
+      { name: { en: 'Lifting speed', tr: 'Kaldırma hızı' }, type: 'benefit' },
+    ],
+    // Service network and spare parts: the paper's terms VG, G, F, P, VP coded 5 to 1 (Table 6, as mabacR and pymcdm do).
+    matrix: [
+      [22600, 3800, 2, 5, 1.06, 3.0, 3.5, 2.8, 24.5, 6.5],
+      [19500, 4200, 3, 2, 0.95, 3.0, 3.4, 2.2, 24, 7.0],
+      [21700, 4000, 1, 3, 1.25, 3.2, 3.3, 2.5, 24.5, 7.3],
+      [20600, 3800, 2, 5, 1.05, 3.25, 3.2, 2.0, 22.5, 11.0],
+      [22500, 3800, 4, 3, 1.35, 3.2, 3.7, 2.1, 23, 6.3],
+      [23250, 4210, 3, 5, 1.45, 3.6, 3.5, 2.8, 23.5, 7.0],
+      [20300, 3850, 2, 5, 0.9, 3.25, 3.0, 2.6, 21.5, 6.0],
+    ],
+    weights: [0.146, 0.144, 0.119, 0.121, 0.115, 0.101, 0.088, 0.068, 0.05, 0.048],
+    // Table 12 as printed.
+    published: [{ label: 'mabac.scores', values: [0.0826, 0.2183, -0.0488, 0.0246, -0.0704, 0.0465, 0.0464], decimals: 4 }],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

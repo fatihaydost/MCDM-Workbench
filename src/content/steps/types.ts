@@ -17,6 +17,8 @@ export type StepContent = {
   symbol?: string
   /** The same label in TeX math for the LaTeX copy (pdfLaTeX has no σ in text mode). */
   texSymbol?: string
+  /** Cells marked by sign (MABAC's Q: above the border or below it), with a glyph as well as a colour. */
+  signed?: true
 } & (Bilingual | { en?: never; tr?: never })
 
 /** One method's steps, keyed by step key, and its optional step map. */

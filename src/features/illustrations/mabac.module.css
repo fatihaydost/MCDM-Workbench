@@ -1,0 +1,74 @@
+/*
+ * MABAC border picture (MabacBorder.tsx). Tokens only: the upper area (towards the best value, positive q) in the
+ * data accent, the lower area (towards the worst, negative q) in the data negative colour; the direction of each stick
+ * says the same without colour. Motion only on a state change (docs/design/MOTION.md).
+ */
+
+.head {
+  fill: var(--text-2);
+  font-size: 11px;
+}
+
+.upper {
+  fill: var(--accent-bg);
+}
+
+.lower {
+  fill: var(--surface-2);
+}
+
+.border {
+  stroke: var(--text-3);
+  stroke-width: 1;
+}
+
+.zero {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.stick,
+.score {
+  fill: var(--data-context);
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.stick[data-sign='up'],
+.score[data-sign='up'],
+.dot[data-sign='up'] {
+  fill: var(--data-accent);
+}
+
+.stick[data-sign='down'],
+.score[data-sign='down'],
+.dot[data-sign='down'] {
+  fill: var(--data-negative);
+}
+
+.dot {
+  fill: var(--data-context);
+  stroke: var(--bg);
+  stroke-width: 1.5;
+}
+
+.hit {
+  fill: transparent;
+  outline: none;
+}
+
+.hit[data-on] {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.hit:focus-visible {
+  stroke: var(--accent);
+  stroke-width: 2px;
+}
+
+.animate .stick,
+.animate .score {
+  transition: transform var(--dur-data) var(--ease);
+}

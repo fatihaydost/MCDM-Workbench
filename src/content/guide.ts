@@ -455,7 +455,10 @@ export const rankingRequirements: readonly RankingRequirement[] = [
     normalization: { en: 'Min-max, then v = w (r + 1)', tr: 'Min-maks, ardından v = w (r + 1)' },
     negatives: 'yes',
     zeros: 'yes',
-    note: { en: 'Divides by the column range: a constant column needs a guard.', tr: 'Sütun aralığına böler: sabit sütun için önlem gerekir.' },
+    note: {
+      en: 'Same order as a min-max weighted sum; the border G only sets the sign. A constant column adds nothing.',
+      tr: 'Min-maks ağırlıklı toplamla aynı sıra; sınır G yalnız işareti belirler. Sabit sütun katkı vermez.',
+    },
     params: null,
     output: { en: 'Distance to the border area', tr: 'Sınır alanına uzaklık' },
   },

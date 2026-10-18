@@ -69,7 +69,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { cocoso, copras, critic, edas, entropy, marcos, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
+    const { cocoso, copras, critic, edas, entropy, mabac, marcos, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -152,7 +152,13 @@ describe('i18n resources', () => {
       cocoso.compute({ ...p, matrix: [[1, 5], [3, 5 + 1e-10], [2, 5]] }, [0.5, 0.5], {}),
     ]
     expect(cc.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual(['cocoso.near-constant-column'])
-    const steps = [...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
+    // MABAC: negatives allowed, and its one notice (a near-constant column).
+    const mb = [
+      mabac.compute({ ...p, matrix: [[-1, 2], [3, -1], [2, 3]] }, [0.5, 0.5], {}),
+      mabac.compute({ ...p, matrix: [[1, 5], [3, 5 + 1e-10], [2, 5]] }, [0.5, 0.5], {}),
+    ]
+    expect(mb.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual(['mabac.near-constant-column'])
+    const steps = [...mb.flatMap((x) => x.steps), ...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),
@@ -164,6 +170,7 @@ describe('i18n resources', () => {
       ...ed.flatMap((x) => x.warnings ?? []),
       ...cp.flatMap((x) => x.warnings ?? []),
       ...cc.flatMap((x) => x.warnings ?? []),
+      ...mb.flatMap((x) => x.warnings ?? []),
     ]
     expect(new Set(warnings.filter((x) => x.code.startsWith('entropy.')).map((x) => x.code))).toEqual(
       new Set(['entropy.constant-column', 'entropy.zeros-in-column', 'entropy.two-alternatives-minmax', 'entropy.all-constant-equal-weights', 'entropy.dominant-weight']),

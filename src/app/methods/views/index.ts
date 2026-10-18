@@ -7,6 +7,7 @@ import { entropy } from './entropy'
 import { equal } from './equal'
 import { manual } from './manual'
 import { marcos } from './marcos'
+import { mabac } from './mabac'
 import { merec } from './merec'
 import { saw } from './saw'
 import { sd } from './sd'
@@ -42,6 +43,7 @@ export const methodViews: Readonly<Views> = {
   copras,
   marcos,
   cocoso,
+  mabac,
 }
 
 const ids = Object.keys(methodViews) as ViewId[]
