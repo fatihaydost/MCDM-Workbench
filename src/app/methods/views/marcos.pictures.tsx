@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { MarcosRows, MarcosSawLine, type MarcosRowsLabels } from '../../../features/illustrations/MarcosIdea'
+import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
+import { MARCOS_ROWS_STEPS, MarcosRows, MarcosSawLine, type MarcosRowsLabels } from '../../../features/illustrations/MarcosIdea'
 import { useNumberFormat } from '../../../i18n'
 import { cn } from '../../../ui'
-import { IdeaSource } from './parts'
+import { IdeaSource, useStepLabels } from './parts'
 import type { IdeaPictureProps, StagePictureProps } from './types'
 
 function useMarcosLabels(): MarcosRowsLabels {
@@ -30,12 +31,15 @@ export function Stage({ problem, weights, className }: StagePictureProps) {
   return <MarcosRows problem={problem} weights={weights} format={format} labels={labels} className={cn('max-w-[760px]', className)} />
 }
 
-/** Method page: the same rows on the drivers example, then why its order is SAW (Linear)'s: one line through the origin. */
+/** Method page: the same rows on the drivers example (with a step-through story: S, the two rows, f(K)), then why its order is SAW (Linear)'s: one line through the origin. */
 export function Idea({ example, problem }: IdeaPictureProps) {
   const { t } = useTranslation()
   const labels = useMarcosLabels()
   const { format } = useNumberFormat(4)
   const weights = example.weights ?? []
+  const steps = useIdeaSteps(MARCOS_ROWS_STEPS)
+  const stepLabels = useStepLabels()
+  const sentences = (['s1', 's2', 's3'] as const).map((k) => t(`methods.page.idea.marcos.steps.${k}`))
   return (
     <div className="flex flex-col gap-6">
       <MarcosRows
@@ -49,8 +53,11 @@ export function Idea({ example, problem }: IdeaPictureProps) {
           showTable: t('methods.page.idea.showTable'),
           alternative: t('methods.page.idea.alternative'),
         }}
+        step={steps.step}
+        explain={steps.explain}
         className="max-w-[760px]"
       />
+      <IdeaSteps control={steps} sentences={sentences} labels={stepLabels} className="-mt-4" />
       <MarcosSawLine
         problem={problem}
         weights={weights}

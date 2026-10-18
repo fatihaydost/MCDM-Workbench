@@ -1123,7 +1123,12 @@
         },
         "edas": {
           "title": "Better or worse than the average, criterion by criterion",
-          "caption": "Right of the line: weighted distance above the average; left: below it; AS divides each by the largest SP or SN."
+          "caption": "Right of the line: weighted distance above the average; left: below it; AS divides each by the largest SP or SN.",
+          "steps": {
+            "s1": "Distance: right of the line is above the average, left is below it (PDA and NDA).",
+            "s2": "Weight: each distance is multiplied by its criterion's weight; the stacks end at SP and SN.",
+            "s3": "Appraisal: AS joins SP and SN in one score; the highest AS ranks first."
+          }
         },
         "sd": {
           "title": "Wider spread, more weight",
@@ -1157,7 +1162,13 @@
         },
         "copras": {
           "title": "Benefit share plus a bonus for low cost",
-          "caption": "Each bar is S+ (benefit share) plus the cost bonus, which grows as the cost share S- shrinks; it ends at Q, then N in percent of the best."
+          "caption": "Each bar is S+ (benefit share) plus the cost bonus, which grows as the cost share S- shrinks; it ends at Q, then N in percent of the best.",
+          "steps": {
+            "s1": "Benefit share S+: each bar is the alternative's share of the benefit criteria.",
+            "s2": "Cost bonus: the smaller the cost share S− (printed), the longer the bonus.",
+            "s3": "Q = S+ plus the bonus; the longest bar ranks first.",
+            "s4": "N: each Q as a percent of the best Q."
+          }
         },
         "marcos": {
           "title": "Two imaginary rows to measure against",
@@ -1166,7 +1177,12 @@
           "sawCaption": "Every dot lies on one line through 0, so no two alternatives can swap places.",
           "sawX": "SAW (Linear) score S",
           "sawY": "MARCOS f(K)",
-          "sawLine": "f(K) = c · S, c = {{c}}"
+          "sawLine": "f(K) = c · S, c = {{c}}",
+          "steps": {
+            "s1": "Weighted totals S: each bar is an alternative's weighted sum, all on one scale.",
+            "s2": "Two imaginary rows: the ideal AI (best of every criterion) and the anti-ideal AAI (worst) mark the ends.",
+            "s3": "Utility f(K): each bar is read against both rows (K− and K+); the highest f(K) ranks first."
+          }
         },
         "cocoso": {
           "title": "Two scores, three readings",

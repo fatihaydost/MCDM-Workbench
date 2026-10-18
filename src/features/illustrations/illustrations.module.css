@@ -808,13 +808,21 @@
   transform-origin: 0 0;
 }
 
-.animate .edasAxis {
+.animate .edasAxis,
+.animate .edasHead {
   transition: transform var(--dur-data) var(--ease);
+}
+
+.animate.explain .edasAxis,
+.animate.explain .edasHead {
+  transition-duration: var(--dur-explain);
 }
 
 .edasHead {
   fill: var(--text-2);
   font-size: 12px;
+  transform-box: view-box;
+  transform-origin: 0 0;
 }
 
 /* VIKOR idea ---------------------------------------------------------------------------------- */

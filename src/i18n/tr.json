@@ -1123,7 +1123,12 @@
         },
         "edas": {
           "title": "Kriter kriter ortalamadan iyi mi, kötü mü",
-          "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık; AS her birini en büyük SP ya da SN'ye böler."
+          "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık; AS her birini en büyük SP ya da SN'ye böler.",
+          "steps": {
+            "s1": "Uzaklık: çizginin sağı ortalamanın üstünü, solu altını gösterir (PDA ve NDA).",
+            "s2": "Ağırlık: her uzaklık kriterinin ağırlığıyla çarpılır; yığınlar SP ve SN'de biter.",
+            "s3": "Değerlendirme: AS, SP ile SN'yi tek puanda birleştirir; en yüksek AS birinci sırada."
+          }
         },
         "sd": {
           "title": "Geniş yayılım, çok ağırlık",
@@ -1157,7 +1162,13 @@
         },
         "copras": {
           "title": "Fayda payı artı düşük maliyet puanı",
-          "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır, maliyet payı S- küçüldükçe puan büyür; çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir."
+          "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır, maliyet payı S- küçüldükçe puan büyür; çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir.",
+          "steps": {
+            "s1": "Fayda payı S+: her çubuk, alternatifin fayda kriterlerindeki payıdır.",
+            "s2": "Maliyet bonusu: maliyet payı S− (yazılı) ne kadar küçükse bonus o kadar uzundur.",
+            "s3": "Q, S+ ile bonusun toplamıdır; en uzun çubuk birinci sırada.",
+            "s4": "N: her Q, en iyi Q'nun yüzdesi olarak gösterilir."
+          }
         },
         "marcos": {
           "title": "Ölçü için iki hayali satır",
@@ -1166,7 +1177,12 @@
           "sawCaption": "Her nokta 0'dan geçen tek bir doğru üzerinde; bu yüzden hiçbir iki alternatif yer değiştiremez.",
           "sawX": "SAW (Doğrusal) skoru S",
           "sawY": "MARCOS f(K)",
-          "sawLine": "f(K) = c · S, c = {{c}}"
+          "sawLine": "f(K) = c · S, c = {{c}}",
+          "steps": {
+            "s1": "Ağırlıklı toplam S: her çubuk alternatifin ağırlıklı toplamıdır; hepsi tek ölçekte.",
+            "s2": "İki hayali satır: ideal AI (her kriterin en iyisi) ve anti-ideal AAI (en kötüsü) uçları belirler.",
+            "s3": "Fayda f(K): her çubuk iki satırla karşılaştırılır (K− ve K+); f(K) en yüksek olan birinci."
+          }
         },
         "cocoso": {
           "title": "İki puan, üç okuma",
