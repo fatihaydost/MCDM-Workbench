@@ -19,3 +19,4 @@ export { waspas, WASPAS_DEFAULT_LAMBDA, WASPAS_LAMBDA_GRID, type WaspasParams } 
 export * from './registry'
 export * from './run'
 export * from './compare'
+export * from './judgements'

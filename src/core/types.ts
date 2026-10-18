@@ -53,12 +53,30 @@ export type ParamDescriptor =
   | { key: string; kind: 'choice'; options: readonly string[]; default: string }
   | { key: string; kind: 'number'; min: number; max: number; step: number; default: number }
 
+/** Saaty's scale as stored: 1/9 … 1/2, 1, 2 … 9 (17 values). */
+export type Ratio = number
+
+/**
+ * The user's answers about the criteria, index-aligned with problem.criteria (like the store's manualWeights).
+ * pairs[i][j]: how many times criterion i matters more than j; null = not answered.
+ * Invariants (kept by every writer and re-established on load): pairs is n × n, pairs[i][i] = 1,
+ * pairs[j][i] = 1 / pairs[i][j], every value one of the 17 scale values.
+ */
+export type Judgements = {
+  pairs: (Ratio | null)[][]
+  /** BWM anchors, criterion indices; null until picked. AHP ignores them. */
+  best: number | null
+  worst: number | null
+}
+
 export interface WeightingMethod<P = {}> {
   id: string
   kind: 'weighting'
+  /** What the method reads: the decision matrix (default) or the user's judgements. */
+  reads?: 'data' | 'judgements'
   /** Options the method takes; absent when it has none. */
   params?: readonly ParamDescriptor[]
-  compute(problem: Problem, params: P): WeightingResult
+  compute(problem: Problem, params: P, judgements?: Judgements): WeightingResult
 }
 
 export type RankingResult = {
