@@ -8,6 +8,7 @@ import {
   heldCount,
   largestWeight,
   perturbGrid,
+  recomputable,
   switchMarks,
   labelledLines,
   topSwitchMarks,
@@ -92,5 +93,13 @@ describe('share texts', () => {
 
   it('names the κ presets of combinations.md §C.2', () => {
     expect(CONCENTRATION).toEqual({ uniform: 'uniform', loose: 20, medium: 100, tight: 500 })
+  })
+})
+
+describe('recomputable', () => {
+  it('offers no recompute for equal weights or for weights from answers', () => {
+    expect(recomputable('bwm')).toBeUndefined()
+    expect(recomputable('equal')).toBeUndefined()
+    expect(recomputable('critic')?.id).toBe('critic')
   })
 })

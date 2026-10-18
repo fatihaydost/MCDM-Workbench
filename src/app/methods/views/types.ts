@@ -1,12 +1,12 @@
 import type { TFunction } from 'i18next'
-import type { MethodParams, Problem, RankingResult } from '../../../core'
+import type { Judgements, MethodParams, Problem, RankingResult } from '../../../core'
 import type { ExampleDataset } from '../../../data/examples'
 import type * as Geometry from '../../../features/illustrations/geometry'
 import type { MethodThumbProps } from '../../../features/illustrations/MethodThumb'
 import type { Preloadable } from '../../preloadable'
 
 /** A method's picture on the Weights or Ranking stage, drawn on the current problem (the store's, as the core reads it). */
-export type StagePictureProps = { problem: Problem; weights: readonly number[]; params: MethodParams; className?: string }
+export type StagePictureProps = { problem: Problem; weights: readonly number[]; params: MethodParams; judgements?: Judgements; className?: string }
 
 /** A method's picture at the top of its method page, drawn on its published example. */
 export type IdeaPictureProps = { example: ExampleDataset; problem: Problem }

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DEFAULT_DELTAS, perturbWeights } from '../../../core/robustness'
-import { getRankingMethod, getWeightingMethod } from '../../../core/registry'
+import { getRankingMethod } from '../../../core/registry'
 import { rankerFor, type RankingRun } from '../../../core/run'
 import { isEmptyProblem, toProblem, useMethodParams, useRanking, useWeights, useWorkbench } from '../../../state/workbench'
 import { Button, EmptyState } from '../../../ui'
@@ -9,7 +9,7 @@ import { useWorkbenchNav } from '../nav'
 import { BlockedByIssues, ContinueBar } from '../parts'
 import { registerRobustnessSummary } from '../robustnessSummary'
 import { alternativeName, criterionName, weightMethodFullLabel } from '../shared'
-import { heldCount } from './helpers'
+import { heldCount, recomputable } from './helpers'
 import { MonteCarloSection } from './MonteCarloSection'
 import { PerturbSection } from './PerturbSection'
 import { RemovalSection } from './RemovalSection'
@@ -63,8 +63,7 @@ export default function RobustnessStage() {
     )
   }
 
-  // Any objective weighting method can be run again on the reduced matrix; equal weights have nothing to recompute.
-  const weighting = weightMethod === 'equal' ? undefined : getWeightingMethod(weightMethod)
+  const weighting = recomputable(weightMethod)
   return (
     <div className="flex flex-col gap-12 pt-4">
       <SweepSection problem={problem} weights={w} run={run} baseRanking={ranking.value.ranking} names={names} criteria={criteria} />

@@ -830,6 +830,19 @@ test('the ranking control is three full rows of three at 375 px', async ({ page 
   for (const b of boxes) expect(b.x + b.w).toBeLessThanOrEqual(375)
 })
 
+test('the weighting control is two rows at 375 px: four, then three', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.goto('/app?example=krishnan-2021-smartphones&stage=weights')
+  const radios = page.locator('[aria-label="Weighting method"]').getByRole('radio')
+  await expect(radios).toHaveCount(7)
+  const boxes = await radios.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).map((r) => ({ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) })))
+  const rows = [...new Set(boxes.map((b) => b.y))]
+  expect(rows).toHaveLength(2)
+  expect(boxes.filter((b) => b.y === rows[0]).length).toBe(4)
+  expect(boxes.filter((b) => b.y === rows[1]).length).toBe(3)
+  for (const b of boxes) expect(b.x + b.w).toBeLessThanOrEqual(375)
+})
+
 test('SAW: a zero blocks the ranking with a message at its cell', async ({ page }) => {
   await page.goto('/app?example=podvezko-2011-baltic&stage=data')
   await page.locator('#wb-cell-2-3').click()

@@ -2,9 +2,12 @@
  * Pure helpers of the Robustness stage: crossing marks, the perturbation grid and share texts.
  * No DOM and no React, so they are unit tested (helpers.test.ts).
  */
+import { getWeightingMethod } from '../../../core/registry'
 import type { Concentration, PerturbationRow, StableInterval } from '../../../core/robustness'
+import type { WeightingMethod } from '../../../core/types'
 import type { ValidationIssue } from '../../../core/validate'
 import type { Lang } from '../../../i18n/lang'
+import type { WeightMethodId } from '../../../state/workbench'
 import { rankOrder } from '../../ranking/order'
 
 /** Monte Carlo settings shown in the UI (N and seed are printed next to the results). */
@@ -144,4 +147,13 @@ export function formatShare(p: number, lang: Lang, decimals = 0): string {
 /** A relative change with its sign (EN "+10%", "-20%"; TR "+%10", "-%20"). */
 export function formatDelta(delta: number, lang: Lang): string {
   return percent(lang, 0, true).format(delta)
+}
+
+/**
+ * The weighting method Removal runs again on the reduced matrix. Equal weights have nothing to recompute; weights from
+ * the user's answers are not recomputed (no answers exist for the reduced set), so their weights are renormalized.
+ */
+export function recomputable(weightMethod: WeightMethodId): WeightingMethod | undefined {
+  const method = weightMethod === 'equal' ? undefined : getWeightingMethod(weightMethod)
+  return method?.reads === 'judgements' ? undefined : method
 }
