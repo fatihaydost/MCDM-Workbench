@@ -376,6 +376,8 @@ export type SawParts = {
   result: RankingResult
   /** contributions[i][j] = w_j r_ij, the core's 'saw.weighted' step; row i sums to the score S_i. */
   contributions: number[][]
+  /** r_ij, the core's normalized step (linear max or sum), before the weights. */
+  normalized: number[][]
   scores: number[]
   /** Alternatives in rank order (ties keep input order). */
   order: number[]
@@ -390,7 +392,8 @@ export function sawParts(problem: Problem, weights: readonly number[], params: S
     return null
   }
   const order = result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b)
-  return { result, contributions: stepMatrix(result.steps, 'saw.weighted'), scores: result.scores, order }
+  const normalizedKey = result.steps.find((st) => st.key.startsWith('saw.normalized'))!.key
+  return { result, contributions: stepMatrix(result.steps, 'saw.weighted'), normalized: stepMatrix(result.steps, normalizedKey), scores: result.scores, order }
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -1061,11 +1061,22 @@
           "entropy": "Entropy e",
           "weight": "Weight w",
           "share": "Share p",
-          "caption": "Each bar is one alternative's share of the column total."
+          "caption": "Each bar is one alternative's share of the column total.",
+          "steps": {
+            "s1": "Shares: each bar is one alternative's share of the column. The dashed line is an even split.",
+            "s2": "Entropy e: the more even the shares, the closer e is to 1.",
+            "s3": "1 − e is the information an even column lacks; the uneven criterion has more of it.",
+            "s4": "Weight w: 1 − e divided by the total over all criteria."
+          }
         },
         "saw": {
           "title": "Every part of the score has a criterion",
-          "caption": "Each segment is one criterion's weight times its normalized value; the bar ends at S."
+          "caption": "Each segment is one criterion's weight times its normalized value; the bar ends at S.",
+          "steps": {
+            "s1": "Rescale: every value goes onto one 0 to 1 scale (r), so criteria can be added.",
+            "s2": "Weight: each part is multiplied by its criterion's weight; important criteria take more of the bar.",
+            "s3": "Add up: the bar ends at the score S, and the longest bar ranks first."
+          }
         },
         "steps": {
           "start": "Step through the idea",

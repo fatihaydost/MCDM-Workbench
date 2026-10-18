@@ -81,6 +81,24 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       expect(await drawing(page)).toEqual(full)
     })
 
+    for (const [method, count] of [['entropy', 4], ['saw', 3]] as const) {
+      test(`${method}: ${count} steps, the last one is the full picture`, async ({ page }) => {
+        await page.goto(`/methods/${method}`)
+        await expect(page.locator('#idea figure').first()).toBeVisible()
+        await settled(page)
+        const full = await drawing(page)
+
+        await page.getByRole('button', { name: 'Step through the idea' }).click()
+        await expect(counter(page)).toHaveText(`1 / ${count}`)
+        for (let k = 2; k <= count; k++) {
+          await page.getByRole('button', { name: 'Next' }).click()
+          await expect(counter(page)).toHaveText(`${k} / ${count}`)
+        }
+        await settled(page)
+        expect(await drawing(page)).toEqual(full)
+      })
+    }
+
     test('keyboard: arrows move, Escape closes and gives the focus back', async ({ page }) => {
       await page.goto('/methods/topsis')
       await expect(page.locator('#idea svg [role="radio"]')).toHaveCount(3)
@@ -169,12 +187,12 @@ test('CRITIC: σ is drawn to its true length, in the full picture and at the con
   await expect(page.locator('#idea svg').getByText('0.4394')).toBeVisible()
 })
 
-test('the step sentence never moves the text below it (390 and 1440 px, TOPSIS and CRITIC)', async ({ page }) => {
+test('the step sentence never moves the text below it (390 and 1440 px, every method with steps)', async ({ page }) => {
   for (const width of [390, 1440])
-  for (const [method, count] of [['topsis', 5], ['critic', 4]] as const) {
+  for (const [method, count] of [['topsis', 5], ['critic', 4], ['entropy', 4], ['saw', 3]] as const) {
     await page.setViewportSize({ width, height: 900 })
     await page.goto(`/methods/${method}`)
-    await expect(page.locator('#idea svg')).toBeVisible()
+    await expect(page.locator('#idea figure').first()).toBeVisible()
     await page.getByRole('button', { name: 'Step through the idea' }).click()
     const source = page.locator('#idea').getByText(/^Data: /)
     const tops: number[] = []

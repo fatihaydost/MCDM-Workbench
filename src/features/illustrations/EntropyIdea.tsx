@@ -4,7 +4,7 @@ import type { EntropyParams } from '../../core/methods/entropy'
 import type { Problem } from '../../core/types'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
 import { truncate } from '../charts/layout'
-import { useElementWidth } from '../charts/useElementWidth'
+import { useAnimateValues, useElementWidth } from '../charts/useElementWidth'
 import { entropyParts } from './geometry'
 import s from './illustrations.module.css'
 
@@ -42,8 +42,22 @@ export type EntropyIdeaProps = {
   /** Number format for e, w and the table (active locale, 4 decimals). */
   format?: ((value: number) => string) | undefined
   labels?: Partial<EntropyIdeaLabels>
+  /**
+   * Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. ENTROPY_IDEA_STEPS - 1 draws that
+   * step, the last one being the full picture.
+   */
+  step?: number | null | undefined
+  /** Move at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
+  explain?: boolean | undefined
   className?: string | undefined
 }
+
+/**
+ * The steps of the Entropy idea: 0 the shares p (bars against the dashed even share), 1 entropy e, drawn as a fill on a
+ * 0..1 track, 2 what e leaves out, 1 - e (the rest of the track, nearly nothing for an even column), 3 weight w: that
+ * rest, divided by the total over all criteria, moves down and is stretched into the weight bar.
+ */
+export const ENTROPY_IDEA_STEPS = 4
 
 const NAME = 18
 const PLOT_TOP = 30
@@ -57,13 +71,15 @@ const defaultFormat = (v: number) => v.toFixed(4)
 /**
  * Entropy in one picture: two criteria side by side, each alternative's share p_ij as a bar on one common scale,
  * with the even share 1/m dashed. The most even criterion (entropy near 1) is on the left, the most uneven one on the
- * right; under each, its entropy e_j and the resulting weight w_j with a bar on one scale. Static: no motion.
+ * right; under each, its entropy e_j and the resulting weight w_j with a bar on one scale. Steps through its story on the method page (IdeaSteps).
  * Every number comes from the core's Entropy steps.
  */
-export function EntropyIdea({ problem, params, format = defaultFormat, labels, className }: EntropyIdeaProps) {
+export function EntropyIdea({ problem, params, format = defaultFormat, labels, step, explain = false, className }: EntropyIdeaProps) {
   const l = { ...ENTROPY_IDEA_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
+  // Resizing redraws at once, also while stepping (the bars only move on a step change).
+  const animate = useAnimateValues(width)
   const normalization = params?.normalization
   const parts = useMemo(() => entropyParts(problem, normalization ? { normalization } : {}), [problem, normalization])
   if (!parts) return null
@@ -85,6 +101,12 @@ export function EntropyIdea({ problem, params, format = defaultFormat, labels, c
   const yW = yE + LINE
   const yBar = yW + 12
   const height = yBar + BAR + LEGEND
+
+  const stepping = step !== null && step !== undefined
+  const stage = stepping ? Math.min(Math.max(step, 0), ENTROPY_IDEA_STEPS - 1) : ENTROPY_IDEA_STEPS - 1
+  const off = (from: number) => (stage >= from ? undefined : '')
+  // Parts that belong to the steps in between only: gone again at the last step.
+  const between = (from: number, to: number) => (stage >= from && stage < to ? undefined : '')
 
   const names = pair.map((j) => problem.criteria[j]!.name)
   const table: ChartTable = {
@@ -108,7 +130,7 @@ export function EntropyIdea({ problem, params, format = defaultFormat, labels, c
       className={className}
     >
       <svg
-        className={s.svg}
+        className={[s.svg, animate && s.animate, explain && s.explain].filter(Boolean).join(' ')}
         width={W}
         height={height}
         viewBox={`0 0 ${W} ${height}`}
@@ -139,19 +161,40 @@ export function EntropyIdea({ problem, params, format = defaultFormat, labels, c
               ))}
               <line className={s.evenLine} x1={x0} x2={x0 + panelW} y1={y(1 / m)} y2={y(1 / m)} />
               <line className={s.stripBase} x1={x0} x2={x0 + panelW} y1={base + 0.5} y2={base + 0.5} />
-              <text className={s.barValue} x={x0} y={yE} dominantBaseline="central">
+              <text className={`${s.barValue} ${s.stageItem}`} data-off={off(1)} x={x0} y={yE} dominantBaseline="central">
                 {`${l.entropy} = ${format(parts.entropy[j]!)}`}
               </text>
-              <text className={s.barValue} data-highlight={on || undefined} x={x0} y={yW} dominantBaseline="central">
-                {`${l.weight} = ${format(parts.weights[j]!)}`}
+              {/* 1 - e at its step; the weight line takes its place after it. */}
+              <text className={`${s.barValue} ${s.stageItem} ${s.criticValue}`} data-off={between(2, 3)} x={x0} y={yW} dominantBaseline="central">
+                {`1 − e = ${format(1 - parts.entropy[j]!)}`}
               </text>
-              <rect
-                className={s.bar}
+              <text
+                className={`${s.barValue} ${s.stageItem} ${s.criticValue}`}
+                data-off={off(3)}
                 data-highlight={on || undefined}
                 x={x0}
-                y={yBar}
-                width={Math.max((parts.weights[j]! / maxW) * panelW, 1)}
-                height={BAR}
+                y={yW}
+                dominantBaseline="central"
+              >
+                {`${l.weight} = ${format(parts.weights[j]!)}`}
+              </text>
+              {/* The 0..1 track of e, only while e and 1 - e are the subject. */}
+              <rect className={`${s.entropyTrack} ${s.stageItem}`} data-off={between(1, 3)} x={x0} y={yBar} width={panelW} height={BAR} />
+              <rect className={`${s.entropyFill} ${s.stageItem}`} data-off={between(1, 3)} x={x0} y={yBar} width={Math.max(parts.entropy[j]! * panelW, 0)} height={BAR} />
+              {/* What e leaves out: a unit square that waits at the end of the e fill, then moves down to the start of
+                  the row and is stretched to the weight bar. */}
+              <rect
+                className={`${s.bar} ${s.criticBar} ${s.stageItem}`}
+                data-off={off(2)}
+                data-highlight={on || undefined}
+                width={1}
+                height={1}
+                style={{
+                  transform:
+                    stage >= 3
+                      ? `translate(${x0}px, ${yBar}px) scale(${Math.max((parts.weights[j]! / maxW) * panelW, 1)}, ${BAR})`
+                      : `translate(${x0 + parts.entropy[j]! * panelW}px, ${yBar}px) scale(${Math.max((1 - parts.entropy[j]!) * panelW, 1)}, ${BAR})`,
+                }}
               />
             </g>
           )
