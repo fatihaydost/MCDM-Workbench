@@ -111,6 +111,32 @@ describe('MARCOS: the same order as SAW (Linear)', () => {
       expect(scalar(res.steps, 'marcos.sAi')).toBeCloseTo(1, 12)
     }
   })
+  it('f(K-) and f(K+) are the same number for every row (K+ and K- are both proportional to S)', () => {
+    const next = rng(77)
+    for (let t = 0; t < 200; t++) {
+      const m = 2 + Math.floor(next() * 7)
+      const n = 2 + Math.floor(next() * 5)
+      const matrix = Array.from({ length: m }, () => Array.from({ length: n }, () => 0.1 + next() * 10))
+      const types = Array.from({ length: n }, () => (next() < 0.5 ? 'cost' : 'benefit') as CriterionType)
+      const res = marcos.compute(makeProblem(matrix, types), Array(n).fill(1 / n), {})
+      const kp = vec(res.steps, 'marcos.kPlus')
+      const km = vec(res.steps, 'marcos.kMinus')
+      const fm = scalar(res.steps, 'marcos.fKMinus')
+      const fp = scalar(res.steps, 'marcos.fKPlus')
+      kp.forEach((x, i) => {
+        expect(x / (x + km[i]!)).toBeCloseTo(fm, 12)
+        expect(km[i]! / (x + km[i]!)).toBeCloseTo(fp, 12)
+      })
+    }
+  })
+  it('only cost criteria: the ranking is SAW linearMax (lowest values first)', () => {
+    const p = makeProblem([[4, 9, 2], [2, 5, 6], [7, 3, 3], [3, 8, 1]], ['cost', 'cost', 'cost'])
+    const w = [0.5, 0.3, 0.2]
+    const res = marcos.compute(p, w, {})
+    const ref = saw.compute(p, w, { normalization: 'linearMax' })
+    expect(res.ranking).toEqual(ref.ranking)
+    expectClose(res.scores, ref.scores.map((s) => res.diagnostics!.c! * s), 1e-12)
+  })
   it('normalizes exactly as SAW linearMax', () => {
     const p = makeProblem(f2.matrix, f2.types as CriterionType[])
     const ref = saw.compute(p, f2.weights, {})

@@ -1,5 +1,6 @@
 {
   "blocked": "Bu veriyi henüz en fazla bir yöntem sıralayabiliyor; karşılaştırma için en az iki yöntem gerekir.",
+  "onlyOneRanking": "Yalnızca tek bir sıralama var: MARCOS, SAW (Doğrusal) ile aynı sırayı verir.",
   "weightsBlocked": "Ağırlıklar henüz tamam değil, bu yüzden hiçbir yöntem sıralayamıyor.",
   "chart": {
     "title": "Her yöntemde sıra",

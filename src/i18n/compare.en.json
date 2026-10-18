@@ -1,5 +1,6 @@
 {
   "blocked": "Fewer than two methods can rank this data, so there is nothing to compare yet.",
+  "onlyOneRanking": "Only one ranking: MARCOS gives the same order as SAW (Linear).",
   "weightsBlocked": "The weights are not complete yet, so no method can rank.",
   "chart": {
     "title": "Rank under each method",

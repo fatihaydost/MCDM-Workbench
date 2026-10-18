@@ -120,7 +120,7 @@
         "claim": "Tablo 11'in yedi Q değerinin tamamı ve Tablo 10'un her hücresi {{citation}} ile {{decimals}} basamağa kadar aynı; basılı sıra satırı A2 ile A3'ü yer değiştirmiş, basılı Q değerleri değiştirmemiş."
       },
       "marcos": {
-        "claim": "Tablo 5'in 23 fayda değeri f(K) {{citation}} ile {{decimals}} basamağa kadar aynı, 23 sıra da aynı; makale C3 ve C4 ağırlıklarını kendi FUCOM şekline göre yer değiştirmiş uyguluyor, bu kontrol de öyle."
+        "claim": "Tablo 5'in 23 fayda değeri f(K) {{citation}} ile {{decimals}} basamağa kadar aynı, 23 sıra da aynı. Makale C3 ve C4 ağırlıklarını kendi FUCOM şekline göre yer değiştirmiş uyguluyor; bu kontrol de öyle."
       }
     },
     "catalogue": {
@@ -1164,7 +1164,7 @@
       "kPlus": "Fayda derecesi K+ = S / S_ai: alternatifin ideale ulaştığı pay.",
       "fKMinus": "f(K-) = K+ / (K+ + K-): her alternatif için aynı sayı, bu yüzden bir kez gösterilir.",
       "fKPlus": "f(K+) = K- / (K+ + K-): her alternatif için aynı sayı, bu yüzden bir kez gösterilir.",
-      "utility": "Fayda f(K): K+ ve K-, iki fayda fonksiyonuyla birleştirilir. Değer büyüdükçe sıra yükselir; c S'ye eşittir, bu yüzden sıra S'nin sırasıdır."
+      "utility": "Fayda f(K): K+ ve K-, iki fayda fonksiyonuyla birleştirilir. Değer büyüdükçe sıra yükselir; f(K) = c · S olduğundan sıra S'nin sırasıdır."
     }
   },
   "validation": {

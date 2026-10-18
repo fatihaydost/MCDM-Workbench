@@ -54,11 +54,13 @@ export default function CompareStage() {
     const issues = comparison
       ? [...new Map(comparison.runs.flatMap((r) => r.issues).map((x) => [`${x.code}:${x.row}:${x.col}`, x])).values()]
       : weights.issues
+    // SAW and MARCOS are the only ones that ranked and they order alike: one ranking, not a blocked comparison.
+    const onlyEcho = !!comparison && comparison.echoes.length > 0 && comparison.ranked.length - comparison.echoes.length === 1
     return (
       <div className="flex flex-col gap-4">
         <EmptyState
           title={t('workbench.empty.compare.title')}
-          description={comparison ? tc('blocked') : tc('weightsBlocked')}
+          description={comparison ? (onlyEcho ? tc('onlyOneRanking') : tc('blocked')) : tc('weightsBlocked')}
           className="pb-2"
         />
         <BlockedByIssues issues={issues} problem={draft} />

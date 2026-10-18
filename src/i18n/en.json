@@ -1164,7 +1164,7 @@
       "kPlus": "Utility degree K+ = S / S_ai: the share of the ideal the alternative reaches.",
       "fKMinus": "f(K-) = K+ / (K+ + K-): the same number for every alternative, so it is shown once.",
       "fKPlus": "f(K+) = K- / (K+ + K-): the same number for every alternative, so it is shown once.",
-      "utility": "Utility f(K): K+ and K- merged by the two utility functions. A higher value ranks higher; it equals c S, so the order is the order of S."
+      "utility": "Utility f(K): K+ and K- merged by the two utility functions. A higher value ranks higher; since f(K) = c · S, the order is the order of S."
     }
   },
   "validation": {

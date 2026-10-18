@@ -10,6 +10,8 @@ import {
   type Comparison,
   type Problem,
 } from '../src/core'
+import en from '../src/i18n/compare.en.json'
+import tr from '../src/i18n/compare.tr.json'
 import { getExample } from '../src/data/examples'
 
 const ex = getExample('keshavarz-2015-ten-alternatives')!
@@ -110,12 +112,21 @@ describe('compareRankings with method options', () => {
     const c = compareRankings(problem(), ex.weights!, runs)
     expect(c.echoes).toEqual([])
     expect(c.firstPlace!.of).toBe(7)
+    // MARCOS is an independent method in the pair facts too (it can disagree with SAW 'sum').
+    const f = pairFacts(problem(), ex.weights!, c, 0, 1)
+    expect(f.methods.map((m) => m.methodId)).toContain('marcos')
     expect(c.kendallW).toBe(kendallW(c.runs.map((r) => r.result!.ranking)))
   })
   it('SAW and MARCOS alone are one ranking: nothing to compare', () => {
     const c = compareRankings(problem(), ex.weights!, [{ methodId: 'saw', params: {} }, { methodId: 'marcos', params: {} }])
     expect(c.ranked).toEqual(['saw', 'marcos'])
     expect(c.comparable).toBe(false)
+    // The stage shows its own "only one ranking" message for exactly this case (echo + one counted run).
+    expect(c.echoes.length > 0 && c.ranked.length - c.echoes.length === 1).toBe(true)
+  })
+  it('has an EN and a TR message for the one-ranking case', () => {
+    expect(en.onlyOneRanking).toMatch(/^Only one ranking: MARCOS/)
+    expect(tr.onlyOneRanking).toMatch(/MARCOS/)
   })
   it('runs WASPAS with the λ it is given, not the default', () => {
     const w = (lambda: number) =>
