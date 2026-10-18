@@ -40,6 +40,7 @@
     "blockedAt": "{{criterion}} {{delta}}: {{status}}"
   },
   "monteCarlo": {
+    "progress": "{{done}} / {{total}} çekiliş",
     "title": "Rastgele ağırlıklar",
     "lead": "{{n}} rastgele ağırlık vektörü: her alternatif hangi sıraya ne sıklıkla yerleşiyor?",
     "spread": "Çekilen ağırlıklar",

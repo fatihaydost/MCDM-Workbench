@@ -650,6 +650,14 @@
   transform-origin: 0 0;
 }
 
+.entropyTrack {
+  fill: var(--surface-2);
+}
+
+.entropyFill {
+  fill: var(--line-strong);
+}
+
 .sigmaValue {
   fill: var(--accent);
   font-size: 11px;
@@ -747,6 +755,20 @@
   transition:
     transform var(--dur-data) var(--ease),
     opacity var(--dur) var(--ease);
+}
+
+/* Step through the idea: segments and rows move at the explain pace; the scores come in the second phase. */
+.animate.explain .sawRow,
+.animate.explain .sawSeg,
+.animate.explain .sawGap {
+  transition-duration: var(--dur-explain);
+}
+
+.animate.explain .sawValue {
+  transition:
+    transform var(--dur-explain) var(--ease),
+    opacity var(--dur-explain) var(--ease) var(--delay-explain),
+    visibility var(--dur-explain) var(--ease) var(--delay-explain);
 }
 
 .sawLegend {

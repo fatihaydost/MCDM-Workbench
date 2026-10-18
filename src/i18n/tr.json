@@ -1091,11 +1091,22 @@
           "entropy": "Entropi e",
           "weight": "Ağırlık w",
           "share": "Pay p",
-          "caption": "Her çubuk, bir alternatifin sütun toplamındaki payıdır."
+          "caption": "Her çubuk, bir alternatifin sütun toplamındaki payıdır.",
+          "steps": {
+            "s1": "Paylar: her çubuk bir alternatifin sütundaki payıdır. Kesikli çizgi eşit paylaşımdır.",
+            "s2": "Entropi e: paylar ne kadar eşitse e o kadar 1'e yakındır.",
+            "s3": "1 − e, eşit bir sütunda bulunmayan bilgidir; eşitsiz kriterde daha fazladır.",
+            "s4": "Ağırlık w: 1 − e, tüm kriterlerin toplamına bölünür."
+          }
         },
         "saw": {
           "title": "Skorun her parçasının bir kriteri var",
-          "caption": "Her parça bir kriterin ağırlığı ile normalize değerinin çarpımı; çubuk S değerinde biter."
+          "caption": "Her parça bir kriterin ağırlığı ile normalize değerinin çarpımı; çubuk S değerinde biter.",
+          "steps": {
+            "s1": "Ölçekleme: her değer ortak bir 0 ile 1 ölçeğine gelir (r), böylece kriterler toplanabilir.",
+            "s2": "Ağırlıklandırma: her parça kriterinin ağırlığıyla çarpılır; önemli kriter çubuktan daha çok pay alır.",
+            "s3": "Toplama: çubuk S skorunda biter, en uzun çubuk birinci olur."
+          }
         },
         "steps": {
           "start": "Fikri adım adım izle",

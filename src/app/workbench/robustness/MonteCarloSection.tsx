@@ -43,6 +43,9 @@ export function MonteCarloSection({ problem, weights, run, names, baseRanking }:
   const rowLabels = useMemo(() => rowOrder.map((i) => names[i]!), [rowOrder, names])
   const colLabels = useMemo(() => Array.from({ length: m }, (_, k) => String(k + 1)), [m])
   const values = useMemo(() => (r ? rowOrder.map((i) => r.acceptability[i]!) : []), [r, rowOrder])
+  // A job that outlasts SLOW_MS draws its partial counts: the heat map fills as the draws accumulate (real counts so far).
+  const progress = mc.busy && mc.slow ? mc.progress : null
+  const partialValues = useMemo(() => (progress ? rowOrder.map((i) => progress.acceptability[i]!) : null), [progress, rowOrder])
   const share = useCallback((v: number) => formatShare(v, nf.lang), [nf.lang])
   const formatMean = useCallback((v: number) => nf.format(v, 2), [nf])
   const formatRank = useCallback((v: number) => nf.format(v, Number.isInteger(v) ? 0 : 1), [nf])
@@ -82,14 +85,21 @@ export function MonteCarloSection({ problem, weights, run, names, baseRanking }:
       {mc.failed && <Notice tone="danger">{t('monteCarlo.failed')}</Notice>}
 
       <div aria-busy={mc.busy} data-testid="mc-result" className="flex flex-col gap-4">
-        {r ? (
+        {r || progress ? (
           <>
-            <p className="text-16 font-medium text-text" data-testid="mc-same-top">
-              {baseTop.length === 1
-                ? t('monteCarlo.sameTop', { name: names[baseTop[0]!], share: formatShare(r.sameTop, nf.lang, 1) })
-                : t('monteCarlo.sameTopTied', { share: formatShare(r.sameTop, nf.lang, 1) })}
-            </p>
-            {r.blocked > 0 && (
+            {progress ? (
+              // The sentence of the finished result is not true of the half-made one: its place shows the draws made.
+              <p className="num min-h-6 text-16 font-medium text-text-2" data-testid="mc-progress" aria-hidden>
+                {t('monteCarlo.progress', { done: nf.format(progress.done, 0), total: runs })}
+              </p>
+            ) : r ? (
+              <p className="text-16 font-medium text-text" data-testid="mc-same-top">
+                {baseTop.length === 1
+                  ? t('monteCarlo.sameTop', { name: names[baseTop[0]!], share: formatShare(r.sameTop, nf.lang, 1) })
+                  : t('monteCarlo.sameTopTied', { share: formatShare(r.sameTop, nf.lang, 1) })}
+              </p>
+            ) : null}
+            {!progress && r && r.blocked > 0 && (
               <p className="text-13 text-text-2" data-testid="mc-blocked">
                 {t('monteCarlo.blocked', { count: r.blocked })}
               </p>
@@ -99,7 +109,7 @@ export function MonteCarloSection({ problem, weights, run, names, baseRanking }:
                 title={t('monteCarlo.acceptTitle')}
                 rowLabels={rowLabels}
                 colLabels={colLabels}
-                values={values}
+                values={partialValues ?? values}
                 scale="sequential"
                 domain={[0, 1]}
                 format={share}
@@ -108,24 +118,28 @@ export function MonteCarloSection({ problem, weights, run, names, baseRanking }:
                 columnsTitle={t('monteCarlo.rankColumn')}
                 className="min-w-0"
               />
-              <RankIntervalChart
-                title={t('monteCarlo.intervalTitle')}
-                labels={names}
-                mean={r.meanRank}
-                interval={r.rankInterval}
-                ranks={m}
-                highlight={baseTop}
-                format={formatMean}
-                formatRank={formatRank}
-                tableLabels={{
-                  show: tw('workbench.chart.showTable'),
-                  label: tw('workbench.alternative'),
-                  mean: t('monteCarlo.mean'),
-                  low: t('monteCarlo.low'),
-                  high: t('monteCarlo.high'),
-                }}
-                className="min-w-0"
-              />
+              {r ? (
+                <RankIntervalChart
+                  title={t('monteCarlo.intervalTitle')}
+                  labels={names}
+                  mean={r.meanRank}
+                  interval={r.rankInterval}
+                  ranks={m}
+                  highlight={baseTop}
+                  format={formatMean}
+                  formatRank={formatRank}
+                  tableLabels={{
+                    show: tw('workbench.chart.showTable'),
+                    label: tw('workbench.alternative'),
+                    mean: t('monteCarlo.mean'),
+                    low: t('monteCarlo.low'),
+                    high: t('monteCarlo.high'),
+                  }}
+                  className="min-w-0"
+                />
+              ) : (
+                <Skeleton height={240} />
+              )}
             </div>
           </>
         ) : (
