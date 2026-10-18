@@ -148,6 +148,8 @@ export function placeIssue(
         targetId: ids.normalize,
       }
     case 'weights-length-mismatch':
+    case 'anchors-missing':
+    case 'judgements-incomplete':
       return { ...base, stage: 'weights', targetId: ids.weightMethod }
   }
 }

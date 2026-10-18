@@ -230,10 +230,11 @@ def rank_desc(s, tol=1e-5):
     return np.array([1 + int(np.sum(s > v + tol)) for v in s])
 
 
-def random_pcs(n, scale=9, consistent_order=False):
+def random_pcs(n, scale=9, consistent_order=False, rng=None):
     """Random BO/OW pair on 1..a_BW with B = 0, W = n - 1 (entries capped at a_BW as Rezaei 2015 and Liang 2020)."""
-    abw = int(RNG.integers(2, scale + 1))
-    bo = RNG.integers(1, abw + 1, n).astype(float); ow = RNG.integers(1, abw + 1, n).astype(float)
+    rng = RNG if rng is None else rng
+    abw = int(rng.integers(2, scale + 1))
+    bo = rng.integers(1, abw + 1, n).astype(float); ow = rng.integers(1, abw + 1, n).astype(float)
     bo[0], ow[0], bo[-1], ow[-1] = 1, abw, abw, 1
     return bo, ow, 0, n - 1
 
@@ -550,5 +551,19 @@ def main():
           '(pyDecision omits the absolute value, so products below a_BW count as negative)')
 
 
+def oracle():
+    """JSON oracle for the TypeScript closed form: 50 random inputs (n cycling 3..15) and their LP solution."""
+    import json
+    rng = np.random.default_rng(20261019)
+    cases = []
+    for k in range(50):
+        bo, ow, B, W = random_pcs(3 + k % 13, rng=rng)
+        w, xi = linear_lp(bo, ow, B, W)
+        cases.append({'bestToOthers': [int(x) for x in bo], 'othersToWorst': [int(x) for x in ow], 'best': B, 'worst': W,
+                      'weights': [float(x) for x in w], 'xi': xi})
+    print(json.dumps({'source': 'bwm.py linear_lp (HiGHS), seed 20261019', 'cases': cases}, indent=1))
+
+
 if __name__ == '__main__':
-    main()
+    import sys
+    oracle() if sys.argv[1:] == ['--oracle'] else main()

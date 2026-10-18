@@ -1,0 +1,12 @@
+{
+  "id": "bwm-ratandhara-kumar-closed-form",
+  "source": "Ratandhara & Kumar, arXiv 2506.17666, Examples 1-4 (best = first, worst = last)",
+  "cases": [
+    {"name": "ex1_eq16", "bestToOthers": [1, 2, 3, 4, 7], "othersToWorst": [7, 2, 3, 2, 1], "expected": {"weights": [0.443787, 0.195266, 0.165680, 0.124260, 0.071006], "xiL": 0.053254}},
+    {"name": "ex2_eq17", "bestToOthers": [1, 4, 3, 2, 9], "othersToWorst": [9, 2, 4, 7, 1], "expected": {"weights": [0.432337, 0.121265, 0.161687, 0.242531, 0.042179], "xiL": 0.052724}},
+    {"name": "ex3_eq18", "bestToOthers": [1, 1, 4, 3, 2, 4, 5], "othersToWorst": [5, 2, 5, 2, 3, 2, 1], "expected": {"weights": [0.278293, 0.178108, 0.094620, 0.126160, 0.189239, 0.094620, 0.038961], "xiL": 0.100186}},
+    {"name": "ex4_eq17", "bestToOthers": [1, 5, 4, 8], "othersToWorst": [8, 4, 1, 1], "expected": {"weights": [0.618182, 0.145455, 0.172727, 0.063636], "xiL": 0.109091}}
+  ],
+  "published_xi": [0.0533, 0.0527, 0.1002, 0.1091],
+  "tolerance_vs_published": 6e-5
+}
