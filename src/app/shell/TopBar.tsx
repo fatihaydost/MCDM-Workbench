@@ -95,7 +95,7 @@ export function TopBar() {
     <header className="sticky top-0 z-30 shrink-0 border-b border-line bg-bg">
       <div
         className={cn(
-          'flex h-15 items-center gap-2',
+          'flex h-15 items-center gap-1 sm:gap-2',
           inWorkbench ? 'w-full px-4' : 'mx-auto w-full max-w-[1200px] px-4 md:px-8',
         )}
       >
@@ -118,7 +118,7 @@ export function TopBar() {
           <NavLink href="/app">{t('nav.workbench')}</NavLink>
           <NavLink href="/methods">{t('nav.methods')}</NavLink>
         </nav>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
           <LanguageSwitch />
           <ThemeMenu />
           <span className="hidden sm:inline-flex">

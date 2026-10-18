@@ -181,7 +181,9 @@
   }
 
   :focus-visible {
-    outline: none;
+    /* Transparent, not none: forced-colors (Windows high contrast) drops the shadow but repaints this outline. */
+    outline: 2px solid transparent;
+    outline-offset: 2px;
     box-shadow: var(--ring);
   }
 

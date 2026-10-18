@@ -85,6 +85,7 @@
     "verified": {
       "title": "Checked against published results",
       "lead": "The test suite recomputes the published examples and compares every printed digit.",
+      "matched": "What matched",
       "toleranceNote": "The tolerance is half a unit of the last printed digit.",
       "critic": {
         "claim": "Weights and standard deviations match {{citation}} to {{decimals}} decimals."

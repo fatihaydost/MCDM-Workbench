@@ -53,20 +53,26 @@ export function Verified() {
 
       <ul className="flex flex-col border-t border-line">
         {rows.map((r) => (
-          <li key={r.method} className="grid grid-cols-1 gap-x-8 gap-y-1 border-b border-line py-4 md:grid-cols-[120px_minmax(0,1fr)_auto] md:items-baseline">
+          <li key={r.method} className="grid grid-cols-1 gap-x-8 gap-y-1 border-b border-line py-3 md:grid-cols-[120px_minmax(0,1fr)_auto] md:items-baseline">
             <Link href={`/methods/${r.method}`} className="text-20 font-semibold text-text no-underline hover:underline">
               {t(`methods.names.${r.method}`)}
             </Link>
             <div className="flex flex-col gap-1">
-              <p className="text-16 text-text">
-                {t(`landing.verified.${r.method}.claim`, { citation: shortCitation(r.citation, lang), decimals: decimalsOf(r.tolerance) })}
+              <p className="text-14 text-text">
+                {shortCitation(r.citation, lang)}
+                <span className="text-text-2">
+                  {' · '}
+                  <a href={doiUrl(r.citation.doi)} className={textLink} target="_blank" rel="noreferrer">
+                    doi:{r.citation.doi}
+                  </a>
+                </span>
               </p>
-              <p className="text-13 text-text-2">
-                {r.citation.venue.split(',')[0]}.{' '}
-                <a href={doiUrl(r.citation.doi)} className={textLink} target="_blank" rel="noreferrer">
-                  doi:{r.citation.doi}
-                </a>
-              </p>
+              <details className="text-13 text-text-2">
+                <summary className="cursor-pointer hover:text-text">{t('landing.verified.matched')}</summary>
+                <p className="mt-1 max-w-[65ch] text-14 text-text">
+                  {t(`landing.verified.${r.method}.claim`, { citation: shortCitation(r.citation, lang), decimals: decimalsOf(r.tolerance) })}
+                </p>
+              </details>
             </div>
             <span className="num text-13 text-text-2">{t('landing.verified.tolerance', { tol: formatTolerance(r.tolerance, lang) })}</span>
           </li>

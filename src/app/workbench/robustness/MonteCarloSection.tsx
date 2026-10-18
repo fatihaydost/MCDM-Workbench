@@ -6,7 +6,7 @@ import { Heatmap } from '../../../features/charts'
 import { RankIntervalChart } from '../../../features/charts/RankIntervalChart'
 import { useNumberFormat } from '../../../i18n'
 import { useElementWidth } from '../../../features/charts/useElementWidth'
-import { Notice, SegmentedControl, Select } from '../../../ui'
+import { Notice, SegmentedControl, Select, Skeleton } from '../../../ui'
 import { rankOrder } from '../../ranking/order'
 import { CONCENTRATION, formatShare, MC_RUNS, MC_SEED, SPREADS, type Spread } from './helpers'
 import { SectionHead, segmentedWidth, SourcesDisclosure } from './SectionParts'
@@ -125,7 +125,7 @@ export function MonteCarloSection({ problem, weights, run, names, baseRanking }:
           </>
         ) : (
           // First calculation: the space the result will take, so nothing below jumps when it lands.
-          <div aria-hidden className="h-[320px]" />
+          <Skeleton height={320} />
         )}
       </div>
       <SourcesDisclosure part="monteCarlo" />
