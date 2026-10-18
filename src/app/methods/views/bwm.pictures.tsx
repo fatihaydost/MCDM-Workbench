@@ -40,6 +40,7 @@ export function Stage({ problem, judgements, weights }: StagePictureProps) {
       othersToWorst={a.othersToWorst}
       weights={progress.provisional ? null : weights}
       flagged={progress.flagged}
+      warn={progress.flagged !== null}
       format={format}
       labels={{ ...labels, showTable: t('workbench.chart.showTable'), criterion: t('workbench.criterion') }}
       className="max-w-[760px]"
@@ -60,6 +61,7 @@ export function Idea({ example, criteria }: JudgementIdeaProps) {
   const ow = a.othersToWorst as number[]
   const { weights } = bwmSolve(bo, ow, a.best, a.worst)
   const { crInput, mostInconsistent } = bwmConsistency(bo, ow, a.best, a.worst)
+  const threshold = bwmProgress(example.judgements, criteria.length).threshold!.value
   return (
     <div className="flex flex-col gap-2">
       <BwmRulers
@@ -69,11 +71,13 @@ export function Idea({ example, criteria }: JudgementIdeaProps) {
         bestToOthers={bo}
         othersToWorst={ow}
         weights={weights}
+        // The card marks the CR^I argmax even within the threshold; no warning icon then (the workbench would not warn).
         flagged={crInput > 0 ? mostInconsistent : null}
+        warn={crInput > threshold}
         format={(v) => format(v, 4)}
         labels={{
           ...labels,
-          caption: t('methods.page.idea.bwm.caption'),
+          caption: t('methods.page.idea.bwm.caption', { cr: format(crInput, 2), threshold: format(threshold, 2) }),
           showTable: t('methods.page.idea.showTable'),
           criterion: t('methods.page.idea.criterion'),
         }}

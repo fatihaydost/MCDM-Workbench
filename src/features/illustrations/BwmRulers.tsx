@@ -51,6 +51,8 @@ export type BwmRulersProps = {
   weights: readonly number[] | null
   /** The criterion whose band is drawn in the accent (by CR^I, not by width), or null. */
   flagged: number | null
+  /** The flagged row is over the consistency threshold: the warning icon goes with its text (the workbench warns too). */
+  warn?: boolean | undefined
   /** Number format for the weights and the table. */
   format?: ((value: number) => string) | undefined
   labels?: Partial<BwmRulersLabels>
@@ -76,7 +78,7 @@ const defaultFormat = (v: number) => v.toFixed(4)
  * disagreement. The weight is a dot at w_j / w_W. Static: steps only fade parts in.
  */
 export function BwmRulers(props: BwmRulersProps) {
-  const { criteria, best, worst, bestToOthers, othersToWorst, weights, flagged, format = defaultFormat, step, explain = false, className } = props
+  const { criteria, best, worst, bestToOthers, othersToWorst, weights, flagged, warn = false, format = defaultFormat, step, explain = false, className } = props
   const l = { ...BWM_RULERS_LABELS_EN, ...props.labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
@@ -94,13 +96,15 @@ export function BwmRulers(props: BwmRulersProps) {
 
   const W = Math.max(width, 280)
   // The tags under the names (best, worst, the flag after its icon) count too.
-  const tagW = Math.max(estimateTextWidth(l.best, 12), estimateTextWidth(l.worst, 12), flagged === null ? 0 : estimateTextWidth(l.flagged, 12) + 14)
+  const tagW = Math.max(estimateTextWidth(l.best, 12), estimateTextWidth(l.worst, 12), flagged === null ? 0 : estimateTextWidth(l.flagged, 12) + (warn ? 14 : 0))
   const nameW = Math.ceil(Math.min(Math.max(tagW, ...criteria.map((c) => estimateTextWidth(c, 13))) + 12, W * 0.26))
   const valueW = Math.ceil(Math.max(estimateTextWidth(l.weight, 12), ...(weightTexts ?? []).map((t) => estimateTextWidth(t, 13))) + 12)
   const x0 = nameW + 8
   const x1 = W - valueW - 8
-  const max = Math.max(aBW, ...(ratio ?? []), ...fromBest.map((v) => v ?? 0), ...toWorst.map((v) => v ?? 0))
-  const x = scaleLinear([0, Math.ceil(max)], [x0, x1])
+  const drawn = [aBW, ...(ratio ?? []), ...fromBest, ...toWorst].filter((v): v is number => v !== null && v !== undefined)
+  const max = Math.max(...drawn)
+  // From just left of 1 (the worst), or of a weight ratio below it: no empty strip from 0.
+  const x = scaleLinear([Math.min(1, ...drawn) - 0.25, Math.ceil(max)], [x0, x1])
   const grid = Array.from({ length: Math.ceil(max) }, (_, k) => k + 1)
   // Every integer when there is room for its label, else only the anchors' 1 and a_BW.
   const every = x(2) - x(1) >= 18
@@ -180,11 +184,15 @@ export function BwmRulers(props: BwmRulersProps) {
               ) : null}
               {isFlagged ? (
                 <g className={s.stageItem} data-off={off(2)}>
-                  <circle className={s.bwmFlagIcon} cx={5} cy={y + 10} r={4.5} />
-                  <path className={s.bwmFlagIcon} d={`M5 ${y + 7.5}v3`} />
-                  <circle className={s.bwmFlagDot} cx={5} cy={y + 12.5} r={0.8} />
-                  <text className={s.bwmFlagText} x={14} y={y + 10} dominantBaseline="central">
-                    {truncate(l.flagged, nameW - 18, 12)}
+                  {warn ? (
+                    <g data-warn="">
+                      <circle className={s.bwmFlagIcon} cx={5} cy={y + 10} r={4.5} />
+                      <path className={s.bwmFlagIcon} d={`M5 ${y + 7.5}v3`} />
+                      <circle className={s.bwmFlagDot} cx={5} cy={y + 12.5} r={0.8} />
+                    </g>
+                  ) : null}
+                  <text className={s.bwmFlagText} x={warn ? 14 : 0} y={y + 10} dominantBaseline="central">
+                    {truncate(l.flagged, nameW - (warn ? 18 : 4), 12)}
                   </text>
                 </g>
               ) : null}

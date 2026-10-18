@@ -9,7 +9,7 @@ import xlsx from '../../../tests/fixtures/critic-xlsx.json'
 import { methodViews, type ViewId } from '../methods/views'
 import { textLink } from './usePageMeta'
 
-/** Every core method but Equal has a published result to check against. */
+/** Every method view with a `ledger` (all but Equal and Manual) has a published result to check against. */
 type Row = { method: Exclude<ViewId, 'equal' | 'manual'>; citation: Citation; tolerance: number }
 
 /** ±0.00005 in the active locale, with as many decimals as the tolerance needs. */

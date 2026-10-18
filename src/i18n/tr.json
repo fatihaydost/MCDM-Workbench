@@ -1282,7 +1282,7 @@
         },
         "bwm": {
           "title": "İki cetvel, tek ölçek",
-          "caption": "Dolu işaretler her kriteri en iyi kritere ilişkin yanıtlara, boş işaretler en kötüye ilişkin yanıtlara göre yerleştirir; nokta ağırlıktır, en kötü kriterin ağırlığının katı olarak.",
+          "caption": "Dolu işaretler her kriteri en iyi kritere ilişkin yanıtlara, boş işaretler en kötüye ilişkin yanıtlara göre yerleştirir; nokta ağırlıktır, en kötü kriterin ağırlığının katı olarak; burada tüm yanıtlar tutarlılık eşiğinin içinde (CR {{cr}}, eşik {{threshold}}), bu yüzden çalışma alanı uyarı vermez.",
           "axis": "En kötü kriterin katı",
           "fromBest": "En iyiden",
           "toWorst": "En kötüye",

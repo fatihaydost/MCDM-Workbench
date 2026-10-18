@@ -97,7 +97,10 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       await expect(counter(page)).toHaveText('3 / 4')
       // Rezaei 2016 Ex3: comfort, a_BW / a_Bj = 8 / 4 = 2 on the best's ruler, a_jW = 4 on the worst's; CR^I argmax.
       const flagged = page.locator('#idea [data-flagged]')
-      await expect(flagged).toContainText('comfort')
+      await expect(flagged).toContainText('Comfort')
+      // Ex3 is within Liang's threshold (0.1429 < 0.2958): marked, but no warning icon (the workbench would not warn).
+      await expect(flagged.locator('[data-warn]')).toHaveCount(0)
+      await expect(page.locator('#idea figure').first()).toContainText('CR 0.14, threshold 0.30')
       await expect(flagged.locator('[data-value="2"]')).toHaveCount(1)
       await expect(flagged.locator('[data-value="4"]')).toHaveCount(1)
       await page.getByRole('button', { name: 'Next' }).click()

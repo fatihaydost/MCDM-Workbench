@@ -1282,7 +1282,7 @@
         },
         "bwm": {
           "title": "Two rulers, one scale",
-          "caption": "Filled marks place each criterion by the answers about the best criterion, hollow marks by the answers about the worst; the dot is the weight, in times the worst criterion's weight.",
+          "caption": "Filled marks place each criterion by the answers about the best criterion, hollow marks by the answers about the worst; the dot is the weight, in times the worst criterion's weight; here every answer stays within the consistency threshold (CR {{cr}}, threshold {{threshold}}), so the workbench would not warn.",
           "axis": "Times the worst criterion",
           "fromBest": "From the best",
           "toWorst": "To the worst",

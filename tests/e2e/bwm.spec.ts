@@ -96,6 +96,22 @@ test.describe('1440 px', () => {
     await expect(weightCells(page)).toHaveText(WEIGHTS)
   })
 
+  test('the rulers above the card: no weight column until every answer is in; a warning icon only over the threshold', async ({ page }) => {
+    const rulers = page.locator('figure').filter({ hasText: 'Your answers on one scale' }).locator('svg')
+    await open(page)
+    await anchors(page)
+    await tap(page, 8, '2 / 7')
+    await tap(page, 2, '3 / 7')
+    await expect(rulers.locator('[data-value="4"]')).toHaveCount(1) // Price: 8 / 2
+    await expect(rulers.getByText('Weight', { exact: true })).toBeHidden()
+    for (const [k, v] of [4, 3, 4, 8].entries()) await tap(page, v, `${k + 4} / 7`)
+    await tap(page, 3, null)
+    // CR 0.43 over 0.30 on Pixel density: the flagged row carries the icon, and the weights are drawn.
+    await expect(rulers.getByText('Weight', { exact: true })).toBeVisible()
+    await expect(rulers.locator('[data-flagged]')).toContainText('Pixel density')
+    await expect(rulers.locator('[data-flagged] [data-warn]')).toBeVisible()
+  })
+
   test('an inconsistent answer is flagged with a suggestion; Use 2 clears the warning', async ({ page }) => {
     await open(page)
     await anchors(page)

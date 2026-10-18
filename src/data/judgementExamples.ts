@@ -18,11 +18,11 @@ export const judgementExamples: readonly JudgementExample[] = [
       tables: { en: 'Table 4 (input)', tr: 'Tablo 4 (girdi)' },
     },
     criteria: [
-      { en: 'quality', tr: 'kalite' },
-      { en: 'price', tr: 'fiyat' },
-      { en: 'comfort', tr: 'konfor' },
-      { en: 'safety', tr: 'güvenlik' },
-      { en: 'style', tr: 'stil' },
+      { en: 'Quality', tr: 'Kalite' },
+      { en: 'Price', tr: 'Fiyat' },
+      { en: 'Comfort', tr: 'Konfor' },
+      { en: 'Safety', tr: 'Güvenlik' },
+      { en: 'Style', tr: 'Stil' },
     ],
     // Example 3: price is the best, style the worst.
     judgements: judgementsFromBwm(5, 1, 4, [2, 1, 4, 3, 8], [4, 8, 4, 2, 1]),
