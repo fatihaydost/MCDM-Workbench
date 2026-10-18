@@ -1275,7 +1275,7 @@
       "lambdaSweep": "λ = 0; 0,1; ...; 1 için k: λ değiştikçe iki alternatifin nerede yer değiştirdiğini gösterir."
     },
     "mabac": {
-      "normalized": "Min-maks normalizasyonu: her sütunun en kötü değeri 0, en iyisi 1 olur; maliyet kriterinde tersi. Her işaret çalışır.",
+      "normalized": "Min-maks normalizasyonu: her sütunun en kötü değeri 0, en iyisi 1 olur; maliyet kriterinde tersi. Negatif ve sıfır değerler de olur.",
       "weighted": "Ağırlıklı matris V: her normalize değere 1 eklenip kriter ağırlığıyla çarpılır; sonuç w ile 2w arasındadır.",
       "border": "Sınır G: V'nin her sütununun geometrik ortalaması; yüzlerce alternatifte 0'a düşmesin diye logaritmayla hesaplanır.",
       "distance": "Uzaklık Q = V - G: üst bölgede (en iyi değere doğru) pozitif, alt bölgede negatif.",

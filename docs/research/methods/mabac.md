@@ -29,7 +29,7 @@ One criterion at a time (selector), plus a summary strip. For the selected crite
 
 ## When to use / when not
 - **Use when:** criteria are on different, possibly interval scales (min–max is shift- and scale-invariant, so negative values, zeros and temperatures work; the origin's §4.2 demonstrates exactly this with a Likert rescale y = 2x − 1, Table 16); you want a signed score with a "above / below average" reading; you want results comparable with the Pamučar-school and Turkish finance literature (DEMATEL/CRITIC/Entropy → MABAC).
-- **Do not use when:** you want an independent second opinion to a min–max weighted sum: MABAC's ranking **is** the min–max weighted sum's (step 6), so in a consensus it must not count as a separate vote next to CoCoSo's S or a SAW min–max; you need a score comparable across problems (the border moves with the alternative set); the origin's claim of invariance under reciprocal reformulation (x → 60/x, its IFC case 2) does not hold in general (347/1000 random problems reorder, Pitfalls).
+- **Do not use when:** you want an independent second opinion to a min–max weighted sum: MABAC's ranking **is** the min–max weighted sum's (step 6), so it adds no information beyond a sign (it still counts as its own vote in Compare, Decision 3); you need a score comparable across problems (the border moves with the alternative set); the origin's claim of invariance under reciprocal reformulation (x → 60/x, its IFC case 2) does not hold in general (347/1000 random problems reorder, Pitfalls).
 
 ## Inputs
 - Decision matrix X (m × n), m ≥ 2, n ≥ 1, **any finite values** (negatives and zeros allowed; no `requires.positiveValues`), see Decision 2.
@@ -206,6 +206,7 @@ Note: forklifts 6 and 7 differ by 1.3e-4 in S (0.046539 vs 0.046412); the tolera
 1. **G computation:** geometric mean through logs, `exp(mean(log v))`, skipping zero-weight columns (recommended): identical to the paper for normal m, correct for m in the hundreds where the literal product underflows to G = 0 (5/10 columns at m = 300). Alternative: the literal formula, with a hard cap on m.
 2. **Negative / zero values:** allowed, no `requires.positiveValues` (recommended): min–max makes MABAC invariant to shifting and scaling a column (checked, 1.3e-15), and the origin's §4.2 is built on that property. Same rule as CoCoSo.
 3. **Same order as SAW min–max:** state it on the method page and in Compare (badge "same order as a min–max weighted sum; MABAC adds a sign"), and do not count MABAC as an independent vote next to CoCoSo's S in any consensus (recommended). Alternative: add a SAW `minMax` normalization option and show the identity live; more UI for a duplicate.
+   **Decided: Fatih (18.10): independent vote in Compare, no badge — SAW has no min-max option.** (Overrides the recommendation above.)
 4. **Sign reading:** show Q cells coloured by sign and S centred on zero, with the note that the border moves with the alternative set (recommended). No user-set border (the paper has none; a fixed border would only shift S, step 7).
 5. **Fixtures:** F1 origin forklifts as main (now readable; tolerance 1e-4, below the forklift 6/7 gap of 1.3e-4), F2 Biswas & Das (9-digit match) and F3 Çelik 2020 (Turkish, CRITIC weights, end-to-end) as secondary (recommended).
 

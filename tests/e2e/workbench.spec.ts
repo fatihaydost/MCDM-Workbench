@@ -779,6 +779,8 @@ test('MABAC: the method page opens the forklifts with MABAC; S matches the paper
   await page.goto('/methods/mabac')
   await expect(page.getByTestId('mabac-border')).toBeVisible()
   await expect(page.getByTestId('mabac-dot')).toHaveCount(7)
+  // Every criterion name is reachable in full: on the (truncated) header and over the strip cells.
+  for (const c of p.criteria) await expect(page.getByTestId('mabac-border').locator('title', { hasText: c.name }).first()).toBeAttached()
   await page.getByRole('link', { name: /Open in workbench/ }).first().click()
   await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
   await expect(stageHeading(page, 'Ranking')).toBeVisible()

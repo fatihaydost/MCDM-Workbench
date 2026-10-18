@@ -165,7 +165,7 @@ export function MabacBorder({ problem, weights, format = defaultFormat, labels, 
             const short = truncate(c, cell - 2, 11)
             return cell >= 32 ? (
               <text key={j} className={b.head} x={stripLeft + (j + 0.5) * cell} y={HEAD / 2} textAnchor="middle" dominantBaseline="central">
-                {short !== c ? <title>{c}</title> : null}
+                <title>{c}</title>
                 {short}
               </text>
             ) : null
@@ -223,6 +223,12 @@ export function MabacBorder({ problem, weights, format = defaultFormat, labels, 
                   {texts[i]}
                 </text>
                 {/* One focus target per row: the whole row, so its name reads the row. */}
+                {/* A transparent cell per criterion over the row, so hovering the strip names the criterion. */}
+                {crit.map((c, j) => (
+                  <rect key={j} x={stripLeft + j * cell} y={stacked ? 0 : 1} width={cell} height={rowStep - 2} fill="transparent" onMouseEnter={() => setActive(row)}>
+                    <title>{c}</title>
+                  </rect>
+                ))}
                 <rect
                   className={b.hit}
                   data-on={active === row || undefined}
@@ -329,8 +335,8 @@ export function MabacSumLine({ problem, weights, format = defaultFormat, labels,
               </text>
             </g>
           ))}
-          {[-border, 0, 1 - border].map((v) => (
-            <text key={v} className={s.colHead} x={x(0) - 6} y={y(v)} textAnchor="end" dominantBaseline="central">
+          {[-border, 0, 1 - border].map((v, k) => (
+            <text key={k} className={s.colHead} x={x(0) - 6} y={y(v)} textAnchor="end" dominantBaseline="central">
               {v === 0 ? format(0, 0) : signed(format, v, 2)}
             </text>
           ))}

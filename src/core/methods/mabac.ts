@@ -19,16 +19,18 @@ export const mabac: RankingMethod = {
   compute(problem: Problem, weights: number[]): RankingResult {
     assertValid([...validateProblem(problem), ...validateWeights(weights, problem.criteria.length)])
 
-    const { r, nearConstant } = minMaxNormalize(problem)
+    const { r, constant, nearConstant } = minMaxNormalize(problem)
     const warnings: MethodWarning[] = []
     nearConstant.forEach((near, j) => near && warnings.push({ code: 'mabac.near-constant-column', col: j }))
 
     const m = r.length
     const v = r.map((row) => row.map((t, j) => weights[j]! * (t + 1)))
-    const g = weights.map((w, j) => (w > 0 ? Math.exp(sum(column(v, j).map(Math.log)) / m) : 0))
-    const q = v.map((row) => row.map((x, j) => x - g[j]!))
-    const scores = q.map(sum)
-    // The constant S is shifted by from the min-max weighted sum.
+    // A constant column has v = w in every row, so its border is w exactly (exp(mean(log w)) is off by ~1e-17).
+    const g = weights.map((w, j) => (w <= 0 ? 0 : constant[j] ? w : Math.exp(sum(column(v, j).map(Math.log)) / m)))
+    // `+ 0` turns -0 into 0, so no cell reads "-0".
+    const q = v.map((row) => row.map((x, j) => x - g[j]! + 0))
+    const scores = q.map((row) => sum(row) + 0)
+    // B: the constant that S is shifted by from the min-max weighted sum (S = sum - B).
     const border = sum(weights.map((w, j) => g[j]! - w))
 
     return {

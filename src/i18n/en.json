@@ -1275,7 +1275,7 @@
       "lambdaSweep": "k at λ = 0, 0.1, ..., 1: where two alternatives swap places as λ moves."
     },
     "mabac": {
-      "normalized": "Min-max normalization: the worst value of each column becomes 0 and the best 1, for a cost criterion the other way round. Any sign works.",
+      "normalized": "Min-max normalization: the worst value of each column becomes 0 and the best 1, for a cost criterion the other way round. Negative and zero values are fine too.",
       "weighted": "Weighted matrix V: each normalized value plus 1, times its criterion weight, so it lies between w and 2w.",
       "border": "Border G: the geometric mean of each column of V, computed through logarithms so that hundreds of alternatives do not underflow to 0.",
       "distance": "Distance Q = V - G: positive in the upper area (towards the best value), negative in the lower area.",

@@ -184,3 +184,17 @@ describe('MABAC in the robustness checks', () => {
     expect(removeCriteria(p, f1.weights, rf).every((r) => !r.blocked && r.ranking.length === 7)).toBe(true)
   })
 })
+
+describe('MABAC on constant columns', () => {
+  it('all-equal alternatives with uneven weights give exactly 0 in every Q and S (no -0, no rounding dust)', () => {
+    const p = makeProblem([[7, 3, 9], [7, 3, 9], [7, 3, 9], [7, 3, 9], [7, 3, 9]], ['benefit', 'cost', 'benefit'])
+    const res = mabac.compute(p, [0.1, 0.3, 0.6], {})
+    const q = step(res.steps, 'mabac.distance').matrix!.flat()
+    for (const x of [...q, ...res.scores]) expect(Object.is(x, 0)).toBe(true)
+    expect(q.filter((x) => x > 0)).toHaveLength(0)
+  })
+  it('a constant column next to a varying one contributes exactly 0 to Q', () => {
+    const res = mabac.compute(makeProblem([[1, 5], [2, 5], [4, 5]], ['benefit', 'benefit']), [0.4, 0.6], {})
+    for (const row of step(res.steps, 'mabac.distance').matrix!) expect(Object.is(row[1], 0)).toBe(true)
+  })
+})
