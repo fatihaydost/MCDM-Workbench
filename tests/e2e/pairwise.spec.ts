@@ -90,6 +90,12 @@ test('BWM card: values above the cap are disabled and say why', async ({ page })
     await expect(cell).toBeDisabled()
     await expect(cell).toHaveAttribute('title', 'At most 3')
   }
+  // The reason is visible (touch has no tooltip) and describes the value grid.
+  const note = card.getByText('At most 3', { exact: true })
+  await expect(note).toBeVisible()
+  const noteId = await note.getAttribute('id')
+  await expect(card.getByRole('radiogroup', { name: 'By how much' })).toHaveAttribute('aria-describedby', noteId!)
+  await expect(card.getByRole('radiogroup', { name: 'By how much' })).toHaveAccessibleDescription('At most 3')
   await card.getByRole('radio', { name: /^3,/ }).click()
   await expect(card).toContainText('Safety ▸ 3 · moderately')
 })

@@ -173,6 +173,14 @@
   color: var(--text-3);
 }
 
+/* Why values above the BWM cap are disabled; visible, since touch has no tooltip. */
+.capNote {
+  margin: -4px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 20px;
+}
+
 /* Flag: icon + sentence + one-tap fix; the accent bar on the left is not the only signal. */
 .flag {
   display: grid;

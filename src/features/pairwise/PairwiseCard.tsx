@@ -2,7 +2,7 @@ import { CaretLeft, WarningCircle } from '@phosphor-icons/react'
 import * as ToggleGroup from '@radix-ui/react-toggle-group'
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import type { Ratio } from '../../core'
-import type { Mode, Question } from './pairwiseQueue'
+import { withinCap, type Mode, type Question } from './pairwiseQueue'
 import s from './pairwise.module.css'
 
 /** Words on the odd scale values (1 equal, 3 moderately, 5 strongly, 7 very strongly, 9 extremely). */
@@ -63,12 +63,6 @@ export function answerText(q: Question, v: Ratio | null, names: readonly string[
   return `${names[v > 1 ? q.a : q.b]} ▸ ${magnitude(v)}`
 }
 
-/** The answer a card shows: BWM values above the cap count as unanswered (asked again, never rewritten). */
-function shownValue(v: Ratio | null, mode: Mode): Ratio | null {
-  if (v === null || mode.kind === 'ahp') return v
-  return Number.isInteger(v) && v >= 1 && v <= mode.cap ? v : null
-}
-
 /**
  * One pairwise question: AHP picks a side then a value (two taps, `=` in one), BWM only a value.
  * Keep the same element across questions (no `key`): after an answer or Back it moves focus to the next card.
@@ -90,7 +84,7 @@ export function PairwiseCard({
   const refocus = useRef(false)
   const qKey = `${question.a}-${question.b}`
   const fixed = mode.kind === 'bwm'
-  const answer = shownValue(value, mode)
+  const answer = withinCap(value, mode)
   const storedSide: Side | null = answer === null ? null : fixed ? 'a' : sideOf(answer)
   // A side tapped on this question; it resets when the question changes.
   const [pick, setPick] = useState<{ key: string; side: Side } | null>(null)
@@ -107,13 +101,18 @@ export function PairwiseCard({
     target?.focus()
   }, [qKey, fixed])
 
-  const answerWith = (v: Ratio) => {
+  // Armed only for the commit this event causes: if the question did not change, a later jump must not steal focus.
+  const arm = () => {
     refocus.current = true
+    requestAnimationFrame(() => (refocus.current = false))
+  }
+  const answerWith = (v: Ratio) => {
+    arm()
     onAnswer(v)
   }
   const back = () => {
     if (position.index === 0) return
-    refocus.current = true
+    arm()
     onBack()
   }
   const choose = (n: number) => {
@@ -212,6 +211,7 @@ export function PairwiseCard({
         value={selected}
         disabled={!gridOn}
         aria-label={labels.values}
+        aria-describedby={cap < 9 ? `${id}-cap` : undefined}
         className={s.values}
         data-values=""
       >
@@ -234,6 +234,12 @@ export function PairwiseCard({
           )
         })}
       </ToggleGroup.Root>
+
+      {cap < 9 && (
+        <p id={`${id}-cap`} className={s.capNote}>
+          {labels.atMost(cap)}
+        </p>
+      )}
 
       {flagShown && (
         <div className={s.flag}>

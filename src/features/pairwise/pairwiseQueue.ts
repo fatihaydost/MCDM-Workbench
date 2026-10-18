@@ -30,10 +30,14 @@ export function modeFor(q: Question, j: Judgements): Mode {
   return { kind: 'bwm', cap: anchor || !ok ? 9 : aBW! }
 }
 
+/** The answer as asked: in BWM a value outside 1..cap counts as unanswered (never rewritten). */
+export function withinCap(v: Ratio | null, mode: Mode): Ratio | null {
+  if (v === null || mode.kind === 'ahp') return v
+  return Number.isInteger(v) && v >= 1 && v <= mode.cap ? v : null
+}
+
 export function answerOf(q: Question, pairs: Pairs, mode: Mode): Ratio | null {
-  const v = pairs[q.a]?.[q.b] ?? null
-  if (mode.kind === 'ahp') return v
-  return v !== null && Number.isInteger(v) && v >= 1 && v <= mode.cap ? v : null
+  return withinCap(pairs[q.a]?.[q.b] ?? null, mode)
 }
 
 export function nextUnanswered(
