@@ -82,7 +82,7 @@ export const bwm: MethodContent = {
     match: 'match',
     note: {
       en: 'Published example (Tables 2-3 (input), Sections 3 and 4 (output)). Car purchase, five criteria, best = price, worst = style. The linear-model weights match for the consistent and the inconsistent example (largest difference 4.6e-5, xi^L = 0.0109). The site computes the linear model only.',
-      tr: 'Yayımlanmış örnek (Tablo 2-3 (girdi), Bölüm 3 ve 4 (çıktı)); Araba satın alma, beş kriter, en iyi = fiyat, en kötü = stil. Doğrusal model ağırlıkları tutarlı ve tutarsız örnekte örtüşüyor (en büyük fark 4,6e-5, xi^L = 0,0109). Site yalnız doğrusal modeli hesaplar.',
+      tr: 'Yayımlanmış örnek (Tablo 2-3 (girdi), Bölüm 3 ve 4 (çıktı). Araba satın alma, beş kriter, en iyi = fiyat, en kötü = stil. Doğrusal model ağırlıkları tutarlı ve tutarsız örnekte örtüşüyor (en büyük fark 4,6e-5, xi^L = 0,0109). Site yalnız doğrusal modeli hesaplar.',
     },
   },
   sources: [
@@ -113,7 +113,7 @@ export const bwm: MethodContent = {
     ],
     pitfalls: [
       'With more than about nine criteria the questions get hard to answer well; group the criteria and weigh each group separately.',
-      'Linear xi is in weight units and much smaller than non-linear xi* (0.0109 vs 0.1459); never divide it by the non-linear CI table.',
+      'Linear xi is in weight units and much smaller than non-linear xi* (0.0109 vs 0.1459); never divide it by Rezaei's 2015 CI values.',
       'Two equally best criteria: pick one as B and enter 1 for the other.',
     ],
   },
@@ -137,7 +137,7 @@ export const bwm: MethodContent = {
     ],
     pitfalls: [
       'Dokuz civarından fazla kriterde soruları iyi yanıtlamak zorlaşır; kriterleri gruplayıp her grubu ayrı ağırlıklandırın.',
-      'Doğrusal modelin xi değeri ağırlık birimindedir ve xi* değerinden çok küçüktür (0,0109 ve 0,1459); doğrusal olmayan modelin CI tablosuna bölmeyin.',
+      'Doğrusal modelin xi değeri ağırlık birimindedir ve xi* değerinden çok küçüktür (0,0109 ve 0,1459); Rezaei'nin (2015) CI değerlerine bölmeyin.',
       'İki kriter eşit derecede en iyiyse birini B seçin, diğeri için 1 girin.',
     ],
   },

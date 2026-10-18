@@ -943,8 +943,8 @@
       "progress": "{{index}} / {{total}}",
       "back": "Geri",
       "atMost": "En çok {{cap}}",
-      "suggest": "Diğer yanıtlarınız {{answer}} önerisini işaret ediyor",
-      "use": "{{value}} kullan",
+      "suggest": "Diğer yanıtlarınız {{answer}} değerini öneriyor",
+      "use": "{{value}} kullanın",
       "allEqual": "Hepsi eşit önemde",
       "anchors": {
         "best": "En önemli (en iyi)",
@@ -1476,7 +1476,7 @@
       "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin."
     },
     "bwm": {
-      "inconsistent": "{{criterion}} hakkındaki yanıtlarınız en az uyuyor; ağırlıklar yine de hesaplanır.",
+      "inconsistent": "{{criterion}} hakkındaki yanıtlarınız en az tutarlı olanlar; ağırlıklar yine de hesaplanır.",
       "threshold-approximate": "9'dan fazla kriterde tutarlılık eşiği yaklaşıktır (9 kriterlik değer kullanılır)."
     }
   }

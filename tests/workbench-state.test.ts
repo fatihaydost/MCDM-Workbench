@@ -626,7 +626,7 @@ describe('store actions', () => {
 })
 
 describe('BWM through the store', () => {
-  it('BWM through the store: Rezaei 2016 Ex2 answers on the Krishnan criteria give the paper weights; incomplete answers block the ranking with judgements-incomplete', () => {
+  it('Rezaei 2016 Ex2 answers on the Krishnan criteria give the paper weights; incomplete answers block the ranking with judgements-incomplete', () => {
     const st = () => useWorkbench.getState()
     st().loadExample('krishnan-2021-smartphones', 'en')
     st().setWeightMethod('bwm')
