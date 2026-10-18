@@ -1,7 +1,7 @@
 import { useId, useMemo } from 'react'
 import { ChartFigure } from './ChartFigure'
 import s from './charts.module.css'
-import { heatPaint, layoutHeatmap, type HeatScale } from './layout'
+import { estimateTextWidth, heatPaint, layoutHeatmap, type HeatScale } from './layout'
 import type { Domain } from './scale'
 import { useElementWidth } from './useElementWidth'
 import { useHeatTokens } from './useHeatTokens'
@@ -46,10 +46,14 @@ export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, fo
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const tokens = useHeatTokens()
-  const layout = useMemo(() => layoutHeatmap({ rowLabels, colLabels, width }), [rowLabels, colLabels, width])
+  const text = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? format(v) : emptyText)
+  // Short values ("44%") need no 44 px column: the narrowest cell that still holds the widest printed value, so ten
+  // rank columns fit a 390 px phone instead of scrolling sideways.
+  const widest = Math.max(0, ...values.flatMap((row) => row.map((v) => estimateTextWidth(text(v), 12))))
+  const minCellWidth = Math.min(44, Math.max(28, Math.ceil(widest) + 10))
+  const layout = useMemo(() => layoutHeatmap({ rowLabels, colLabels, width, minCellWidth }), [rowLabels, colLabels, width, minCellWidth])
   const { labelWidth, headerHeight, cellWidth, cellHeight } = layout
 
-  const text = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? format(v) : emptyText)
   const top = columnsTitle ? 18 : 0
   const table = {
     corner: tableLabels.corner,

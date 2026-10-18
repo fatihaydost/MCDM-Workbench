@@ -178,6 +178,7 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
           <SweepChart
             title={t('sweep.chartTitle', { score: score.title, criterion: shownCriterion })}
             labels={names}
+            pending={!sweep}
             endLabels={sweep ? endLabels : NO_LINES}
             xs={sweep ? xs : EMPTY_XS}
             series={series}

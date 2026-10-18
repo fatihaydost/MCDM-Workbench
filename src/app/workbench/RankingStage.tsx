@@ -55,6 +55,8 @@ export function RankingTable({
   const before = extra.filter((c) => !c.after)
   const after = extra.filter((c) => c.after)
   const order = rankOrder(result)
+  // Results (compact): a small bar before each score, the same raw scale as the score chart on Ranking.
+  const topScore = Math.max(...result.scores.map((v) => (Number.isFinite(v) ? Math.max(v, 0) : 0)), 0)
   const narrowHidden = !compact && view.columnsFromSm === true
   const extraClass = narrowHidden ? 'max-sm:hidden' : undefined
   // A column after the score (COPRAS's N) comes with long words ("Relative significance Q", "Utility degree N (%)"):
@@ -108,6 +110,14 @@ export function RankingTable({
                   </Td>
                 ))}
                 <Td numeric data-testid="closeness" className={cn(first ? 'font-semibold' : 'font-medium')}>
+                  {compact && topScore > 0 && (
+                    <span aria-hidden className="mr-3 inline-block h-2 w-20 bg-surface-2 align-middle">
+                      <span
+                        className={cn('block h-full', first ? 'bg-accent' : 'bg-[var(--data-context)]')}
+                        style={{ width: `${(Math.max(result.scores[i]!, 0) / topScore) * 100}%` }}
+                      />
+                    </span>
+                  )}
                   {nf.format(result.scores[i])}
                 </Td>
                 {after.map((c) => (
