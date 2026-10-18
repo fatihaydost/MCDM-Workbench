@@ -128,6 +128,9 @@
       },
       "mabac": {
         "claim": "Tablo 10 ve 12'deki sınır G, skorlar S ve yedi sıranın tamamı {{citation}} ile {{decimals}} basamakta örtüşüyor."
+      },
+      "bwm": {
+        "claim": "Doğrusal BWM ağırlıkları {{citation}} ile {{decimals}} basamağa kadar aynı."
       }
     },
     "catalogue": {
@@ -829,6 +832,16 @@
         "title": "Sınırın üstünde mi, altında mı",
         "caption": "Her çubuk bir kriter: yukarı üst bölgeye (en iyi değere doğru), aşağı alt bölgeye. S bunları toplar.",
         "row": "{{alternative}}: S = {{score}}, {{n}} kriterin {{above}} tanesinde sınırın üstünde"
+      },
+      "bwm": {
+        "title": "Yanıtlarınız tek ölçekte",
+        "axis": "En kötü kriterin katı",
+        "fromBest": "En iyiden",
+        "toWorst": "En kötüye",
+        "weight": "Ağırlık",
+        "best": "En iyi",
+        "worst": "En kötü",
+        "flagged": "En az uyan"
       }
     },
     "flow": {
@@ -1265,6 +1278,23 @@
             "s1": "Her satırdaki çizgi sınır G; üstü üst bölge, altı alt bölge.",
             "s2": "Her kriterin G'ye uzaklığı bir çubuktur: forklift G'den iyiyse yukarı, kötüyse aşağı.",
             "s3": "Çubukları toplayın: çubuk skor S'dir, en yüksek S ilk sırada."
+          }
+        },
+        "bwm": {
+          "title": "İki cetvel, tek ölçek",
+          "caption": "Dolu işaretler her kriteri en iyi kritere ilişkin yanıtlara, boş işaretler en kötüye ilişkin yanıtlara göre yerleştirir; nokta ağırlıktır, en kötü kriterin ağırlığının katı olarak.",
+          "axis": "En kötü kriterin katı",
+          "fromBest": "En iyiden",
+          "toWorst": "En kötüye",
+          "weight": "Ağırlık",
+          "best": "En iyi",
+          "worst": "En kötü",
+          "flagged": "En az uyan",
+          "steps": {
+            "s1": "Önce iki çapa: en önemli ve en önemsiz kriter, ve birincinin kaç kat önemli olduğu.",
+            "s2": "Her \"en iyi bundan x kat önemli\" yanıtı kriteri ölçekte bir yere koyar.",
+            "s3": "En kötüyle ilgili yanıtlar kriteri ikinci kez yerleştirir. İki yer farklıysa yanıtlarınız çelişir; işaretli olan en az uyandır.",
+            "s4": "BWM bu aralıkların en büyüğünü olabildiğince küçük tutan ağırlıkları seçer."
           }
         }
       }

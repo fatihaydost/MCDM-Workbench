@@ -17,7 +17,7 @@ import type { MethodView } from './types'
 import { vikor } from './vikor'
 import { waspas } from './waspas'
 
-export type { IdeaPictureProps, MethodView, StagePictureProps, ThumbKit, Verdict } from './types'
+export type { IdeaPictureProps, JudgementIdeaProps, MethodView, StagePictureProps, ThumbKit, Verdict } from './types'
 
 export type ViewId = WeightMethodId | RankingMethodId
 

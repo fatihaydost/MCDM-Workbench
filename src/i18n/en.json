@@ -128,6 +128,9 @@
       },
       "mabac": {
         "claim": "The border G, the scores S and all seven ranks of Tables 10 and 12 match {{citation}} to {{decimals}} decimals."
+      },
+      "bwm": {
+        "claim": "Linear BWM weights match {{citation}} to {{decimals}} decimals."
       }
     },
     "catalogue": {
@@ -829,6 +832,16 @@
         "title": "Above or below the border",
         "caption": "Each stick is one criterion: up into the upper area (towards the best value), down into the lower area. S adds them up.",
         "row": "{{alternative}}: S = {{score}}, above the border on {{above}} of {{n}} criteria"
+      },
+      "bwm": {
+        "title": "Your answers on one scale",
+        "axis": "Times the worst criterion",
+        "fromBest": "From the best",
+        "toWorst": "To the worst",
+        "weight": "Weight",
+        "best": "Best",
+        "worst": "Worst",
+        "flagged": "Fits worst"
       }
     },
     "flow": {
@@ -1265,6 +1278,23 @@
             "s1": "The line in each row is the border G; above it is the upper area, below it the lower one.",
             "s2": "Each criterion's distance from G is a stick: up if the forklift is better than G, down if worse.",
             "s3": "Add the sticks up: the bar is the score S, and the highest S ranks first."
+          }
+        },
+        "bwm": {
+          "title": "Two rulers, one scale",
+          "caption": "Filled marks place each criterion by the answers about the best criterion, hollow marks by the answers about the worst; the dot is the weight, in times the worst criterion's weight.",
+          "axis": "Times the worst criterion",
+          "fromBest": "From the best",
+          "toWorst": "To the worst",
+          "weight": "Weight",
+          "best": "Best",
+          "worst": "Worst",
+          "flagged": "Fits worst",
+          "steps": {
+            "s1": "First the two anchors: the most important criterion and the least important one, and how many times more important the first is.",
+            "s2": "Each \"best is x times more important than this one\" puts the criterion somewhere on the scale.",
+            "s3": "The answers about the worst criterion place it a second time. Where the two places differ, your answers disagree; the marked one fits worst.",
+            "s4": "BWM picks the weights that keep the largest of these gaps as small as possible."
           }
         }
       }

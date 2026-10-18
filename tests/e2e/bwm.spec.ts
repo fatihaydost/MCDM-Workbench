@@ -8,7 +8,8 @@ const WEIGHTS = ['0.2295', '0.4481', '0.1148', '0.1530', '0.0546']
 const card = (page: Page) => page.getByRole('group', { name: /^How many times more important is / })
 const pairs = (page: Page) => page.getByRole('navigation', { name: 'All pairs' })
 const panel = (page: Page) => page.getByRole('group', { name: 'Weights', exact: true })
-const weightCells = (page: Page) => page.locator('table').first().locator('tbody tr td:last-child')
+// The weights table (the stage picture above the card has its own table, behind "Show as table").
+const weightCells = (page: Page) => page.locator('table[aria-labelledby="wb-weights-table"]').locator('tbody tr td:last-child')
 
 async function open(page: Page) {
   await page.goto('/app?example=krishnan-2021-smartphones&stage=weights')

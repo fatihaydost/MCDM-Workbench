@@ -17,6 +17,7 @@ import f2 from './fixtures/bwm-ratandhara-kumar.json'
 import f3 from './fixtures/bwm-demir-bircan2020.json'
 import f4 from './fixtures/bwm-arsu2021.json'
 import oracle from './fixtures/bwm-lp-oracle.json'
+import { getJudgementExample } from '../src/data/judgementExamples'
 import { expectClose, step } from './helpers'
 
 const problemOf = (n: number): Problem => ({
@@ -42,6 +43,15 @@ describe('BWM: published fixtures', () => {
       if (p.weights) expectClose(r.weights, p.weights, f1.tolerance_vs_published, `${c.name} published`)
       if (p.xiL !== undefined) expectClose(xiOf(r), p.xiL, f1.tolerance_vs_published, `${c.name} published xi`)
     }
+  })
+  it('the method page example is Rezaei 2016 Ex3 from the fixture', () => {
+    const ex3 = f1.cases.find((c) => c.name === 'ex3')!
+    expect(bwmAnswers(getJudgementExample('rezaei-2016-car')!.judgements)).toEqual({
+      best: f1.best,
+      worst: f1.worst,
+      bestToOthers: ex3.bestToOthers,
+      othersToWorst: ex3.othersToWorst,
+    })
   })
   it('F2 Ratandhara & Kumar: one case per closed-form branch', () => {
     f2.cases.forEach((c, k) => {

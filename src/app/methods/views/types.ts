@@ -1,6 +1,7 @@
 import type { TFunction } from 'i18next'
 import type { Judgements, MethodParams, Problem, RankingResult } from '../../../core'
 import type { ExampleDataset } from '../../../data/examples'
+import type { JudgementExample } from '../../../data/judgementExamples'
 import type * as Geometry from '../../../features/illustrations/geometry'
 import type { MethodThumbProps } from '../../../features/illustrations/MethodThumb'
 import type { Preloadable } from '../../preloadable'
@@ -10,6 +11,9 @@ export type StagePictureProps = { problem: Problem; weights: readonly number[]; 
 
 /** A method's picture at the top of its method page, drawn on its published example. */
 export type IdeaPictureProps = { example: ExampleDataset; problem: Problem }
+
+/** A judgement method's picture at the top of its method page, drawn on published answers (criterion names in the UI language). */
+export type JudgementIdeaProps = { example: JudgementExample; criteria: readonly string[] }
 
 /** What a catalogue thumbnail is computed with (passed in, so the view registry does not import the geometry). */
 export type ThumbKit = {
@@ -38,6 +42,8 @@ export type MethodView<K extends 'weighting' | 'ranking' = 'weighting' | 'rankin
   kind: K
   /** The picture on the method page and the published example it is drawn on. */
   idea?: { example: string; Picture: Preloadable<IdeaPictureProps> }
+  /** The same for a method that reads judgements, not a matrix (BWM): drawn on a published judgement example. */
+  judgementIdea?: { example: string; Picture: Preloadable<JudgementIdeaProps> }
   /** The picture on the method's catalogue card. */
   thumb?: (kit: ThumbKit) => MethodThumbProps
   /**
