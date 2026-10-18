@@ -624,3 +624,24 @@ describe('store actions', () => {
     expect(useWorkbench.getState().problem.alternatives).toEqual([])
   })
 })
+
+describe('BWM through the store', () => {
+  it('BWM through the store: Rezaei 2016 Ex2 answers on the Krishnan criteria give the paper weights; incomplete answers block the ranking with judgements-incomplete', () => {
+    const st = () => useWorkbench.getState()
+    st().loadExample('krishnan-2021-smartphones', 'en')
+    st().setWeightMethod('bwm')
+    expect(computeRanking(st()).issues).toContainEqual({ code: 'anchors-missing', severity: 'error' })
+    // Best 1, worst 4 (0-based) and a_BW alone: 1 of the 2n - 3 = 7 answers.
+    st().setAnchors(1, 4)
+    st().setJudgement(1, 4, 8)
+    expect(computeRanking(st()).issues).toContainEqual({ code: 'judgements-incomplete', severity: 'error', value: 1 })
+    const others = [0, 2, 3]
+    others.forEach((j, k) => {
+      st().setJudgement(1, j, [2, 4, 3][k]!)
+      st().setJudgement(j, 4, [4, 2, 3][k]!)
+    })
+    const w = computeWeights(st())
+    expect(w.value).not.toBeNull()
+    expectClose(w.value!.weights, [0.229508, 0.448087, 0.114754, 0.153005, 0.054645], 1e-6)
+  })
+})

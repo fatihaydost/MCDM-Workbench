@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import en from '../src/i18n/en.json'
 import tr from '../src/i18n/tr.json'
 import type { ValidationCode } from '../src/core'
+import f3 from './fixtures/bwm-demir-bircan2020.json'
 
 type Tree = { [k: string]: string | Tree }
 
@@ -64,12 +65,14 @@ describe('i18n resources', () => {
       'invalid-weight',
       'negative-weight',
       'weights-sum',
+      'judgements-incomplete',
+      'anchors-missing',
     ]
     for (const c of codes) expect(flatEn[`validation.codes.${c}`], c).toBeTypeOf('string')
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { cocoso, copras, critic, edas, entropy, mabac, marcos, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
+    const { bwm, judgementsFromBwm, cocoso, copras, critic, edas, entropy, mabac, marcos, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -158,7 +161,15 @@ describe('i18n resources', () => {
       mabac.compute({ ...p, matrix: [[1, 5], [3, 5 + 1e-10], [2, 5]] }, [0.5, 0.5], {}),
     ]
     expect(mb.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual(['mabac.near-constant-column'])
-    const steps = [...mb.flatMap((x) => x.steps), ...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
+    // BWM: the Demir & Bircan answers (F3, n = 9, inconsistent on K7) and n = 10 all ones (approximate threshold).
+    const bwmProblem = (n: number) => ({ ...p, criteria: Array.from({ length: n }, (_, j) => ({ name: `C${j + 1}`, type: 'benefit' as const })), matrix: [new Array<number>(n).fill(1), new Array<number>(n).fill(2)] })
+    const ones = new Array<number>(10).fill(1)
+    const bw = [
+      bwm.compute(bwmProblem(9), {}, judgementsFromBwm(9, f3.best, f3.worst, f3.bestToOthers, f3.othersToWorst)),
+      bwm.compute(bwmProblem(10), {}, judgementsFromBwm(10, 0, 9, ones, ones)),
+    ]
+    expect(new Set(bw.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(new Set(['bwm.inconsistent', 'bwm.threshold-approximate']))
+    const steps = [...bw.flatMap((x) => x.steps), ...mb.flatMap((x) => x.steps), ...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),
@@ -171,6 +182,7 @@ describe('i18n resources', () => {
       ...cp.flatMap((x) => x.warnings ?? []),
       ...cc.flatMap((x) => x.warnings ?? []),
       ...mb.flatMap((x) => x.warnings ?? []),
+      ...bw.flatMap((x) => x.warnings ?? []),
     ]
     expect(new Set(warnings.filter((x) => x.code.startsWith('entropy.')).map((x) => x.code))).toEqual(
       new Set(['entropy.constant-column', 'entropy.zeros-in-column', 'entropy.two-alternatives-minmax', 'entropy.all-constant-equal-weights', 'entropy.dominant-weight']),

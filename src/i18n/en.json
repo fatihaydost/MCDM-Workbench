@@ -206,7 +206,8 @@
       "equal": "Equal weights",
       "manual": "Manual",
       "sd": "SD",
-      "merec": "MEREC"
+      "merec": "MEREC",
+      "bwm": "BWM"
     },
     "rankingMethod": {
       "label": "Ranking method",
@@ -372,7 +373,8 @@
         "equal": "Every criterion gets the same weight.",
         "manual": "Enter your own weights. They must be 0 or more and sum to 1.",
         "sd": "Objective weights from how widely each criterion's values spread over the alternatives.",
-        "merec": "Objective weights from how much the alternatives' overall performance drops when each criterion is removed. Every value must be above 0."
+        "merec": "Objective weights from how much the alternatives' overall performance drops when each criterion is removed. Every value must be above 0.",
+        "bwm": "Pick the most and least important criterion, then compare every other with these two (1-9); 2n - 3 answers give the weights."
       },
       "columns": {
         "criterion": "Criterion",
@@ -661,6 +663,13 @@
         "border": "Border G",
         "distance": "Distance Q",
         "scores": "Distance to border S"
+      },
+      "bwm": {
+        "bestToOthers": "Best over others a_B",
+        "othersToWorst": "Others over worst a_W",
+        "consistencyLocal": "Consistency CR^I_j",
+        "xi": "Deviation ξ",
+        "weights": "Weights w"
       }
     },
     "issues": {
@@ -915,6 +924,53 @@
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
       "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo or MABAC and see every step of the calculation."
+    },
+    "pairwise": {
+      "question": "Which matters more?",
+      "fixed": "How many times more important is {{a}} than {{b}}?",
+      "sides": "Which matters more",
+      "values": "By how much",
+      "equal": "Equally important",
+      "words": {
+        "1": "equal",
+        "3": "moderately",
+        "5": "strongly",
+        "7": "very strongly",
+        "9": "extremely"
+      },
+      "valueName": "{{value}}",
+      "valueNameWord": "{{value}}, {{word}}",
+      "progress": "{{index}} / {{total}}",
+      "back": "Back",
+      "atMost": "At most {{cap}}",
+      "suggest": "Your other answers suggest {{answer}}",
+      "use": "Use {{value}}",
+      "allEqual": "All equally important",
+      "anchors": {
+        "best": "Most important (best)",
+        "worst": "Least important (worst)"
+      },
+      "sections": {
+        "bestToOthers": "Best over others",
+        "othersToWorst": "Others over worst"
+      },
+      "panel": {
+        "title": "Weights",
+        "provisional": "Provisional, more answers refine them",
+        "consistency": "Consistency (CR)",
+        "notApplicable": "not applicable",
+        "value": "CR {{value}}, threshold {{threshold}}",
+        "valueApproximate": "CR {{value}}, threshold about {{threshold}}",
+        "valueNoThreshold": "CR {{value}}",
+        "ok": "Consistent",
+        "warning": "Consistency warning: {{criterion}}",
+        "warningUnnamed": "Consistency warning"
+      },
+      "list": {
+        "title": "All pairs",
+        "pair": "{{a}} vs {{b}}",
+        "flagged": "check this answer"
+      }
     }
   },
   "methods": {
@@ -939,7 +995,8 @@
       "copras": "COPRAS",
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
-      "mabac": "MABAC"
+      "mabac": "MABAC",
+      "bwm": "BWM"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1001,7 +1058,8 @@
         "copras": "Adds benefit shares and a bonus for a small cost share.",
         "marcos": "Measures against an imaginary ideal and anti-ideal.",
         "cocoso": "Three readings of a sum and a power sum, combined.",
-        "mabac": "Distance above or below a border per criterion."
+        "mabac": "Distance above or below a border per criterion.",
+        "bwm": "Weights from your answers to a few comparisons."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1329,6 +1387,13 @@
       "border": "Border G: the geometric mean of each column of V, computed through logarithms so that hundreds of alternatives do not underflow to 0.",
       "distance": "Distance Q = V - G: positive in the upper area (towards the best value), negative in the lower area.",
       "scores": "Distance to border S: the row sum of Q. A higher value ranks higher; S is the min-max weighted sum minus one constant, so the order is that sum's."
+    },
+    "bwm": {
+      "bestToOthers": "Best over others: how much more important the best criterion is than each, 1-9.",
+      "othersToWorst": "Others over worst: how much more important each criterion is than the worst, 1-9.",
+      "consistencyLocal": "Consistency per criterion: how far a_Bj times a_jW is from a_BW.",
+      "xi": "Deviation: the largest gap between the answers and the fitted weights.",
+      "weights": "BWM weights: the linear model, solved in closed form, summing to 1."
     }
   },
   "validation": {
@@ -1352,7 +1417,9 @@
       "negative-weight": "The weight of {{criterion}} is {{value}}. Weights cannot be negative.",
       "weights-sum": "Weights sum to {{value}}, they must sum to 1.",
       "non-positive-average": "The average of {{criterion}} is {{value}}. EDAS divides by each criterion's average, so it must be above 0.",
-      "all-worst-alternative": "{{alternative}} is the worst on every weighted criterion, so its S and P are 0 and CoCoSo would divide by 0. Remove it or choose another method."
+      "all-worst-alternative": "{{alternative}} is the worst on every weighted criterion, so its S and P are 0 and CoCoSo would divide by 0. Remove it or choose another method.",
+      "judgements-incomplete": "{{value}} of the questions answered; answer the rest to get the weights.",
+      "anchors-missing": "Choose the best and the worst criterion first."
     }
   },
   "warnings": {
@@ -1407,6 +1474,10 @@
     },
     "mabac": {
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real."
+    },
+    "bwm": {
+      "inconsistent": "Answers about {{criterion}} fit worst; the weights are still computed.",
+      "threshold-approximate": "With more than 9 criteria the consistency threshold is approximate (the 9-criteria value)."
     }
   }
 }

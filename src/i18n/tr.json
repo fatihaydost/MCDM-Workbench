@@ -206,7 +206,8 @@
       "equal": "Eşit ağırlık",
       "manual": "Elle",
       "sd": "SD",
-      "merec": "MEREC"
+      "merec": "MEREC",
+      "bwm": "BWM"
     },
     "rankingMethod": {
       "label": "Sıralama yöntemi",
@@ -372,7 +373,8 @@
         "equal": "Her kriter aynı ağırlığı alır.",
         "manual": "Ağırlıkları kendiniz girin. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli.",
         "sd": "Her kriterin değerlerinin alternatifler arasında ne kadar yayıldığına bakan nesnel ağırlıklar.",
-        "merec": "Ağırlığı, kriteri çıkarmanın neyi değiştirdiğinden bulur. Her değer 0'dan büyük olmalı."
+        "merec": "Ağırlığı, kriteri çıkarmanın neyi değiştirdiğinden bulur. Her değer 0'dan büyük olmalı.",
+        "bwm": "En önemli ve en önemsiz kriteri seçin, diğer her kriteri bu ikisiyle karşılaştırın (1-9); 2n - 3 yanıt ağırlıkları verir."
       },
       "columns": {
         "criterion": "Kriter",
@@ -661,6 +663,13 @@
         "border": "Sınır G",
         "distance": "Uzaklık Q",
         "scores": "Sınıra uzaklık S"
+      },
+      "bwm": {
+        "bestToOthers": "En iyinin diğerlerine üstünlüğü a_B",
+        "othersToWorst": "Diğerlerinin en kötüye üstünlüğü a_W",
+        "consistencyLocal": "Tutarlılık CR^I_j",
+        "xi": "Sapma ξ",
+        "weights": "Ağırlıklar w"
       }
     },
     "issues": {
@@ -915,6 +924,53 @@
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
       "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, MEREC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo ya da MABAC ile sıralayın ve hesabın her adımını görün."
+    },
+    "pairwise": {
+      "question": "Hangisi daha önemli?",
+      "fixed": "{{a}}, {{b}} kriterinden kaç kat daha önemli?",
+      "sides": "Hangisi daha önemli",
+      "values": "Kaç kat",
+      "equal": "Eşit önemde",
+      "words": {
+        "1": "eşit",
+        "3": "biraz",
+        "5": "güçlü",
+        "7": "çok güçlü",
+        "9": "son derece"
+      },
+      "valueName": "{{value}}",
+      "valueNameWord": "{{value}}, {{word}}",
+      "progress": "{{index}} / {{total}}",
+      "back": "Geri",
+      "atMost": "En çok {{cap}}",
+      "suggest": "Diğer yanıtlarınız {{answer}} önerisini işaret ediyor",
+      "use": "{{value}} kullan",
+      "allEqual": "Hepsi eşit önemde",
+      "anchors": {
+        "best": "En önemli (en iyi)",
+        "worst": "En önemsiz (en kötü)"
+      },
+      "sections": {
+        "bestToOthers": "En iyinin diğerlerine üstünlüğü",
+        "othersToWorst": "Diğerlerinin en kötüye üstünlüğü"
+      },
+      "panel": {
+        "title": "Ağırlıklar",
+        "provisional": "Geçici, yeni yanıtlar ağırlıkları netleştirir",
+        "consistency": "Tutarlılık (CR)",
+        "notApplicable": "uygulanmaz",
+        "value": "CR {{value}}, eşik {{threshold}}",
+        "valueApproximate": "CR {{value}}, eşik yaklaşık {{threshold}}",
+        "valueNoThreshold": "CR {{value}}",
+        "ok": "Tutarlı",
+        "warning": "Tutarlılık uyarısı: {{criterion}}",
+        "warningUnnamed": "Tutarlılık uyarısı"
+      },
+      "list": {
+        "title": "Tüm çiftler",
+        "pair": "{{a}} ve {{b}}",
+        "flagged": "bu yanıtı gözden geçirin"
+      }
     }
   },
   "methods": {
@@ -939,7 +995,8 @@
       "copras": "COPRAS",
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
-      "mabac": "MABAC"
+      "mabac": "MABAC",
+      "bwm": "BWM"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1001,7 +1058,8 @@
         "copras": "Fayda paylarını toplar, küçük maliyet payını ödüllendirir.",
         "marcos": "Hayali bir ideal ve anti-ideale göre ölçer.",
         "cocoso": "Bir toplamın ve bir üs toplamının üç okuması, birleşik.",
-        "mabac": "Her kriterde bir sınırın üstüne ya da altına uzaklık."
+        "mabac": "Her kriterde bir sınırın üstüne ya da altına uzaklık.",
+        "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1329,6 +1387,13 @@
       "border": "Sınır G: V'nin her sütununun geometrik ortalaması; yüzlerce alternatifte 0'a düşmesin diye logaritmayla hesaplanır.",
       "distance": "Uzaklık Q = V - G: üst bölgede (en iyi değere doğru) pozitif, alt bölgede negatif.",
       "scores": "Sınıra uzaklık S: Q'nun satır toplamı. Büyük olan önde sıralanır; S, min-maks ağırlıklı toplamdan tek bir sabit çıkarılarak bulunur, bu yüzden sıra o toplamın sırasıdır."
+    },
+    "bwm": {
+      "bestToOthers": "En iyinin diğerlerine üstünlüğü: en iyi kriter her birinden kaç kat önemli, 1-9.",
+      "othersToWorst": "Diğerlerinin en kötüye üstünlüğü: her kriter en kötüden kaç kat önemli, 1-9.",
+      "consistencyLocal": "Kriter başına tutarlılık: a_Bj ile a_jW çarpımı a_BW değerinden ne kadar uzak.",
+      "xi": "Sapma: yanıtlarla uyarlanan ağırlıklar arasındaki en büyük fark.",
+      "weights": "BWM ağırlıkları: doğrusal model, kapalı biçimde çözülür, toplamı 1."
     }
   },
   "validation": {
@@ -1352,7 +1417,9 @@
       "negative-weight": "{{criterion}} ağırlığı {{value}}. Ağırlıklar negatif olamaz.",
       "weights-sum": "Ağırlıkların toplamı {{value}}, toplam 1 olmalı.",
       "non-positive-average": "{{criterion}} kriterinin ortalaması {{value}}. EDAS her kriterin ortalamasına böler, bu yüzden ortalama 0'dan büyük olmalı.",
-      "all-worst-alternative": "{{alternative}}, ağırlığı olan her kriterde en kötü; S ve P değeri 0 olur ve CoCoSo 0'a bölerdi. Bu alternatifi çıkarın ya da başka bir yöntem seçin."
+      "all-worst-alternative": "{{alternative}}, ağırlığı olan her kriterde en kötü; S ve P değeri 0 olur ve CoCoSo 0'a bölerdi. Bu alternatifi çıkarın ya da başka bir yöntem seçin.",
+      "judgements-incomplete": "Soruların {{value}} tanesi yanıtlandı; ağırlıkları görmek için kalanları yanıtlayın.",
+      "anchors-missing": "Önce en iyi ve en kötü kriteri seçin."
     }
   },
   "warnings": {
@@ -1407,6 +1474,10 @@
     },
     "mabac": {
       "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin."
+    },
+    "bwm": {
+      "inconsistent": "{{criterion}} hakkındaki yanıtlarınız en az uyuyor; ağırlıklar yine de hesaplanır.",
+      "threshold-approximate": "9'dan fazla kriterde tutarlılık eşiği yaklaşıktır (9 kriterlik değer kullanılır)."
     }
   }
 }

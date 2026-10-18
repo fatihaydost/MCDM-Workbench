@@ -6,7 +6,7 @@ export const bwm: MethodContent = {
   name: { en: 'BWM', tr: 'BWM' },
   fullName: { en: 'Best-Worst Method', tr: 'En iyi-en kötü yöntemi' },
   family: 'weighting-subjective',
-  status: 'research',
+  status: 'available',
   year: 2015,
   origin: {
     authors: 'Rezaei, J.',
@@ -37,11 +37,11 @@ export const bwm: MethodContent = {
       },
     },
     {
-      title: { en: 'Non-linear model (option)', tr: 'Doğrusal olmayan model (seçenek)' },
+      title: { en: 'Non-linear model (not offered)', tr: 'Doğrusal olmayan model (sunulmuyor)' },
       tex: String.raw`\begin{aligned} &\min\ \xi \\ &\left|\frac{w_B}{w_j} - a_{Bj}\right| \le \xi,\ \ \left|\frac{w_j}{w_W} - a_{jW}\right| \le \xi\ \ \forall j, \qquad \sum_j w_j = 1,\ \ w_j \ge 0 \end{aligned}`,
       note: {
-        en: 'Rezaei (2015): xi* is unique but the weights may not be; CR = xi* / CI(a_BW), with CI = 0, 0.44, 1.00, 1.63, 2.30, 3.00, 3.73, 4.47, 5.23 for a_BW = 1 to 9.',
-        tr: 'Rezaei (2015): en iyi xi* tektir, ağırlıklar tek olmayabilir; CR = xi* / CI(a_BW), a_BW = 1 ile 9 için CI = 0; 0,44; 1,00; 1,63; 2,30; 3,00; 3,73; 4,47; 5,23.',
+        en: 'Rezaei (2015): xi* is unique but the weights may not be; this site does not offer it, because it needs an LP solver and its weights are intervals.',
+        tr: 'Rezaei (2015): en iyi xi* tektir, ağırlıklar tek olmayabilir; bu site sunmaz, çünkü bir LP çözücü gerekir ve ağırlıkları aralıktır.',
       },
     },
     {
@@ -81,8 +81,8 @@ export const bwm: MethodContent = {
     doi: '10.1016/j.omega.2015.12.001',
     match: 'match',
     note: {
-      en: 'Published example (Tables 2-3 (input), Sections 3 and 4 (output)); this method is not computed here yet, only recomputed during research. Car purchase, five criteria, best = price, worst = style. Linear-model weights match for the consistent and the inconsistent example (largest difference 4.6e-5, xi^L = 0.0109). The non-linear xi* = 0.1459 matches and the weights fall inside all five published intervals.',
-      tr: 'Yayımlanmış örnek (Tablo 2-3 (girdi), Bölüm 3 ve 4 (çıktı)); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Araba satın alma, beş kriter, en iyi = fiyat, en kötü = stil. Doğrusal model ağırlıkları tutarlı ve tutarsız örnekte örtüşüyor (en büyük fark 4,6e-5, xi^L = 0,0109). Doğrusal olmayan xi* = 0,1459 aynı; ağırlıklar yayımlanan beş aralığın hepsinin içinde.',
+      en: 'Published example (Tables 2-3 (input), Sections 3 and 4 (output)). Car purchase, five criteria, best = price, worst = style. The linear-model weights match for the consistent and the inconsistent example (largest difference 4.6e-5, xi^L = 0.0109). The site computes the linear model only.',
+      tr: 'Yayımlanmış örnek (Tablo 2-3 (girdi), Bölüm 3 ve 4 (çıktı)); Araba satın alma, beş kriter, en iyi = fiyat, en kötü = stil. Doğrusal model ağırlıkları tutarlı ve tutarsız örnekte örtüşüyor (en büyük fark 4,6e-5, xi^L = 0,0109). Site yalnız doğrusal modeli hesaplar.',
     },
   },
   sources: [
@@ -109,10 +109,10 @@ export const bwm: MethodContent = {
       'Which criterion is best (B) and which is worst (W).',
       'Best-to-others vector, values 1-9, with a_BB = 1.',
       'Others-to-worst vector, values 1-9, with a_WW = 1. a_BW must match in both.',
-      'Model option: linear (default) or non-linear.',
+      'Answers are capped at a_BW.',
     ],
     pitfalls: [
-      'The non-linear model can have many optimal weight vectors with the same xi*, so solvers return different weights.',
+      'With more than about nine criteria the questions get hard to answer well; group the criteria and weigh each group separately.',
       'Linear xi is in weight units and much smaller than non-linear xi* (0.0109 vs 0.1459); never divide it by the non-linear CI table.',
       'Two equally best criteria: pick one as B and enter 1 for the other.',
     ],
@@ -133,10 +133,10 @@ export const bwm: MethodContent = {
       'Hangi kriterin en iyi (B), hangisinin en kötü (W) olduğu.',
       'En iyiden diğerlerine vektörü, 1-9 değerleri, a_BB = 1.',
       'Diğerlerinden en kötüye vektörü, 1-9 değerleri, a_WW = 1. a_BW iki vektörde aynı olmalı.',
-      'Model seçeneği: doğrusal (varsayılan) ya da doğrusal olmayan.',
+      'Yanıtlar a_BW ile sınırlıdır.',
     ],
     pitfalls: [
-      'Doğrusal olmayan modelde aynı xi* değerini veren birden çok ağırlık vektörü olabilir; çözücüler farklı ağırlık döndürür.',
+      'Dokuz civarından fazla kriterde soruları iyi yanıtlamak zorlaşır; kriterleri gruplayıp her grubu ayrı ağırlıklandırın.',
       'Doğrusal modelin xi değeri ağırlık birimindedir ve xi* değerinden çok küçüktür (0,0109 ve 0,1459); doğrusal olmayan modelin CI tablosuna bölmeyin.',
       'İki kriter eşit derecede en iyiyse birini B seçin, diğeri için 1 girin.',
     ],

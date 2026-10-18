@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import katex from 'katex'
 import { describe, expect, it } from 'vitest'
+import { judgementsFromBwm } from '../core/judgements'
 import { listMethods } from '../core/registry'
 import type { Method, Problem, Step } from '../core/types'
 import {
@@ -106,7 +107,7 @@ describe('method content', () => {
     const available = allMethods.filter((m) => m.status === 'available').map((m) => m.id).sort()
     const registry = listMethods().map((m) => m.id).sort()
     expect(available).toEqual(registry)
-    expect(available).toEqual(['cocoso', 'copras', 'critic', 'edas', 'entropy', 'equal', 'mabac', 'marcos', 'merec', 'saw', 'sd', 'topsis', 'vikor', 'waspas'])
+    expect(available).toEqual(['bwm', 'cocoso', 'copras', 'critic', 'edas', 'entropy', 'equal', 'mabac', 'marcos', 'merec', 'saw', 'sd', 'topsis', 'vikor', 'waspas'])
   })
 
   it('gives each registry method the matching kind of family', () => {
@@ -191,8 +192,13 @@ describe('method content', () => {
 function runsOf(method: Method): Step[][] {
   const variants: Record<string, string>[] = [{}]
   for (const p of method.params ?? []) if (p.kind === 'choice') for (const o of p.options) variants.push({ [p.key]: o })
+  const n = problem.criteria.length
+  const ones = new Array<number>(n).fill(1)
+  const answers = judgementsFromBwm(n, 0, n - 1, ones, ones)
   return variants.map((params) =>
-    method.kind === 'weighting' ? method.compute(problem, params).steps : method.compute(problem, [0.4, 0.3, 0.3], params).steps,
+    method.kind === 'weighting'
+      ? method.compute(problem, params, method.reads === 'judgements' ? answers : undefined).steps
+      : method.compute(problem, [0.4, 0.3, 0.3], params).steps,
   )
 }
 

@@ -66,7 +66,7 @@ export type WorkbenchData = {
   /** Method options by method id. Optional: a state saved before options existed loads without it. */
   methodParams?: MethodParamsState | undefined
   /** Pairwise answers about the criteria (AHP, BWM), n × n for the current criteria; travels like manualWeights. */
-  judgements?: Judgements
+  judgements?: Judgements | undefined
 }
 
 export type WorkbenchActions = {
@@ -575,7 +575,7 @@ export function rankingRunFor(data: Pick<WorkbenchData, 'rankingMethod' | 'metho
 
 /** Weights for the selected method, or null plus the blocking issues. */
 export function computeWeights(
-  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'methodParams'>,
+  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'methodParams' | 'judgements'>,
 ): Computed<WeightingResult> {
   const problem = toProblem(data.problem)
   const issues = validateProblem(problem)
@@ -595,9 +595,21 @@ export function computeWeights(
     return { value: { weights, steps: [{ key: 'equal.weights', vector: weights, axes: 'criteria' }] }, issues: [] }
   }
 
-  if (hasErrors(issues)) return { value: null, issues }
   const method = getWeightingMethod(data.weightMethod)
   if (!method) return { value: null, issues }
+  if (method.reads === 'judgements') {
+    // Answers instead of the matrix: the matrix is not validated, only the number of criteria.
+    if (n < 2) return { value: null, issues: issues.filter((x) => x.code === 'too-few-criteria') }
+    const given = data.judgements
+    const judgements = given && given.pairs.length === n ? given : emptyJudgements(n)
+    try {
+      return { value: method.compute(problem, paramsFor(data, method.id), judgements), issues: [] }
+    } catch (err) {
+      if (err instanceof ProblemValidationError) return { value: null, issues: err.issues }
+      throw err
+    }
+  }
+  if (hasErrors(issues)) return { value: null, issues }
   try {
     return { value: method.compute(problem, paramsFor(data, method.id)), issues }
   } catch (err) {
@@ -608,7 +620,7 @@ export function computeWeights(
 
 /** Ranking with the selected method on the computed weights, or null plus every blocking issue. */
 export function computeRanking(
-  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'rankingMethod' | 'methodParams'>,
+  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'rankingMethod' | 'methodParams' | 'judgements'>,
   weights: Computed<WeightingResult> = computeWeights(data),
 ): Computed<RankingResult> {
   const problem = toProblem(data.problem)
@@ -632,9 +644,10 @@ export function useWeights(): Computed<WeightingResult> {
   const weightMethod = useWorkbench((s) => s.weightMethod)
   const manualWeights = useWorkbench((s) => s.manualWeights)
   const methodParams = useWorkbench((s) => s.methodParams)
+  const judgements = useWorkbench((s) => s.judgements)
   return useMemo(
-    () => computeWeights({ problem, weightMethod, manualWeights, methodParams }),
-    [problem, weightMethod, manualWeights, methodParams],
+    () => computeWeights({ problem, weightMethod, manualWeights, methodParams, judgements }),
+    [problem, weightMethod, manualWeights, methodParams, judgements],
   )
 }
 
@@ -646,9 +659,10 @@ export function useRanking(): Computed<RankingResult> {
   const manualWeights = useWorkbench((s) => s.manualWeights)
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
   const methodParams = useWorkbench((s) => s.methodParams)
+  const judgements = useWorkbench((s) => s.judgements)
   return useMemo(
-    () => computeRanking({ problem, weightMethod, manualWeights, rankingMethod, methodParams }, weights),
-    [problem, weightMethod, manualWeights, rankingMethod, methodParams, weights],
+    () => computeRanking({ problem, weightMethod, manualWeights, rankingMethod, methodParams, judgements }, weights),
+    [problem, weightMethod, manualWeights, rankingMethod, methodParams, judgements, weights],
   )
 }
 
