@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { bwmProgress, emptyJudgements, type Ratio, type WeightingResult } from '../../core'
+import { bwmAnswers, bwmProgress, emptyJudgements, type Ratio, type WeightingResult } from '../../core'
 import {
   AnchorPicker,
   answerOf,
@@ -48,10 +48,15 @@ export function JudgementWeights({ problem, method, result }: Props) {
   const questions = useMemo(() => (anchored ? bwmQuestions(n, best, worst) : []), [anchored, n, best, worst])
   const progress = bwmProgress(judgements, n)
   const complete = result.value !== null
+  // A criterion with neither answer yet is left out of the provisional weights: the panel shows "—", not 0.
+  const answers = bwmAnswers(judgements)
+  const shown = progress.weights?.map((w, j) => (answers?.bestToOthers[j] === null && answers.othersToWorst[j] === null ? undefined : w)) ?? null
 
   // The question on screen, valid only for these anchors; null: the first unanswered one (or the summary when complete).
   const key = `${n}-${best}-${worst}`
   const [at, setAt] = useState<{ key: string; index: number | null }>({ key, index: null })
+  // New anchors start over at the first unanswered question (A, B, then A again does not reopen A's old card).
+  if (at.key !== key) setAt({ key, index: null })
   const chosen = at.key === key && at.index !== null && at.index < questions.length ? at.index : null
   const index = chosen ?? (complete ? null : nextUnanswered(questions, judgements.pairs, (q) => modeFor(q, judgements), -1))
   const question = index === null ? undefined : questions[index]
@@ -204,14 +209,15 @@ export function JudgementWeights({ problem, method, result }: Props) {
                 {progress.weights && (
                   <JudgementPanel
                     names={names}
-                    weights={progress.weights}
+                    weights={shown}
                     provisional={progress.provisional}
                     consistency={consistency}
                     flagged={flagged}
                     labels={panelLabels}
                   />
                 )}
-                {question && list('max-lg:hidden')}
+                {/* Mid-flow the list is the desktop's jump list; on phones it appears as the summary once complete. */}
+                {question && <div className="max-lg:hidden">{list()}</div>}
               </div>
             )}
           </div>

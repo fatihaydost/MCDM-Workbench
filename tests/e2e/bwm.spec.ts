@@ -40,6 +40,8 @@ test.describe('390 px', () => {
     await expect(card(page)).toHaveAccessibleDescription('1 / 7')
     await expect(card(page)).toContainText('How many times more important is Screen size than Mass?')
     await tap(page, ANSWERS[0]!, '2 / 7')
+    // Mid-flow on a phone the pair list steps aside (it is the summary once complete).
+    await expect(pairs(page)).toBeHidden()
     // The next card's first value takes focus (Radix moves it after the render, so wait).
     await expect(card(page).locator('[data-value="1"]')).toBeFocused()
     for (let k = 1; k < ANSWERS.length; k++) await tap(page, ANSWERS[k]!, k + 1 < ANSWERS.length ? `${k + 2} / 7` : null)
@@ -112,6 +114,9 @@ test.describe('1440 px', () => {
     await open(page)
     await anchors(page)
     for (const [k, v] of ANSWERS.slice(0, 3).entries()) await tap(page, v, `${k + 2} / 7`)
+    // Thickness has neither answer yet: left out of the provisional weights, shown as "—".
+    await expect(panel(page).getByRole('listitem').filter({ hasText: 'Thickness' })).toContainText('—')
+    await expect(panel(page).getByRole('listitem').filter({ hasText: 'Pixel density' })).not.toContainText('—')
     await page.getByRole('radio', { name: 'Manual', exact: true }).click()
     await page.getByRole('radio', { name: 'BWM', exact: true }).click()
     // 3 / 7 answered: four pairs still show "—", the card asks question 4.

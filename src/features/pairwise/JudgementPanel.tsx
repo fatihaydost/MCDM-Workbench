@@ -24,7 +24,8 @@ export type JudgementPanelLabels = {
 
 export type JudgementPanelProps = {
   names: readonly string[]
-  weights: readonly number[] | null
+  /** undefined entries (not answered yet) show "—". */
+  weights: readonly (number | undefined)[] | null
   provisional: boolean
   /** null: not applicable (n = 2). */
   consistency: Consistency | null
@@ -37,7 +38,7 @@ export type JudgementPanelProps = {
 /** Live weights (bars relative to the largest) and the consistency badge. */
 export function JudgementPanel({ names, weights, provisional, consistency, flagged, labels, className }: JudgementPanelProps) {
   const id = useId()
-  const max = weights ? Math.max(...weights, 1e-12) : 1
+  const max = weights ? Math.max(...weights.map((w) => w ?? 0), 1e-12) : 1
   const over = consistency !== null && consistency.threshold !== null && consistency.value > consistency.threshold
   const flaggedName = flagged === null ? null : (names[flagged] ?? null)
   // The live region only changes text when the state changes, never with each recomputed number.
