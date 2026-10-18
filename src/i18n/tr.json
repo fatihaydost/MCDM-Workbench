@@ -1130,7 +1130,12 @@
           "spread": "Yayılım σ",
           "weight": "Ağırlık",
           "caption": "Her nokta 0 ile 1 ölçeğinde bir alternatif; noktaların altındaki cetvel σ.",
-          "weightHead": "Ağırlık = σ / {{total}}"
+          "weightHead": "Ağırlık = σ / {{total}}",
+          "steps": {
+            "s1": "Her nokta bir alternatifin değeri, min-maks ile 0 ile 1 arasına ölçeklenmiş.",
+            "s2": "Yayılım σ: noktaların standart sapması, aynı ölçekte 0'dan çizilir.",
+            "s3": "Ağırlık w = σ / Σσ: cetvel toplama bölünür, ağırlıkların toplamı 1 olur."
+          }
         },
         "merec": {
           "title": "Bir kriteri çıkarın, puanların ne kadar düştüğüne bakın",
@@ -1138,7 +1143,13 @@
           "effect": "Çıkarma etkisi E",
           "weight": "Ağırlık",
           "caption": "Her parça, kriter çıkarılınca bir alternatifin genel performansındaki düşüştür; parçaların toplamı E eder.",
-          "weightHead": "Ağırlık = E / {{total}}"
+          "weightHead": "Ağırlık = E / {{total}}",
+          "steps": {
+            "s1": "Her satır bir kriter. Kriteri çıkarın, puanlara ne olduğuna bakın.",
+            "s2": "Düşüşler: bu kriter olmadan her alternatifin genel performansı S'den kaybettiği pay.",
+            "s3": "Düşüşlerin toplamı çıkarma etkisi E eder.",
+            "s4": "Ağırlık w = E / ΣE: toplam etkideki pay, ağırlıkların toplamı 1 olur."
+          }
         },
         "waspas": {
           "title": "Toplam mı çarpım mı: karışımı λ belirler",

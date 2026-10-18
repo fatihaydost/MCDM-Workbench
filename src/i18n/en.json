@@ -1130,7 +1130,12 @@
           "spread": "Spread σ",
           "weight": "Weight",
           "caption": "Each dot is one alternative on the 0 to 1 scale; the ruler under the dots is σ.",
-          "weightHead": "Weight = σ / {{total}}"
+          "weightHead": "Weight = σ / {{total}}",
+          "steps": {
+            "s1": "Each dot is one alternative's value, min-max scaled to 0 to 1.",
+            "s2": "Spread σ: the standard deviation of the dots, drawn from 0 on the same scale.",
+            "s3": "Weight w = σ / Σσ: the ruler is divided by the total, so the weights add up to 1."
+          }
         },
         "merec": {
           "title": "Remove a criterion, see how much the scores drop",
@@ -1138,7 +1143,13 @@
           "effect": "Removal effect E",
           "weight": "Weight",
           "caption": "Each segment is one alternative's drop in overall performance when the criterion is removed; together they make E.",
-          "weightHead": "Weight = E / {{total}}"
+          "weightHead": "Weight = E / {{total}}",
+          "steps": {
+            "s1": "Each row is a criterion. Remove it and see what happens to the scores.",
+            "s2": "Drops: the part of each alternative's overall performance S that is lost without this criterion.",
+            "s3": "The drops add up to the removal effect E.",
+            "s4": "Weight w = E / ΣE: the share of the total effect, so the weights add up to 1."
+          }
         },
         "waspas": {
           "title": "Sum or product: λ sets the blend",
