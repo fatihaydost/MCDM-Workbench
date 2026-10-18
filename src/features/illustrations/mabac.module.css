@@ -72,3 +72,25 @@
 .animate .score {
   transition: transform var(--dur-data) var(--ease);
 }
+
+/* Step through the idea: a part its step has not reached is at no length and invisible; sticks and S move at the explain pace. */
+.stick[data-off],
+.score[data-off] {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.animate.explain .stick,
+.animate.explain .score {
+  transition:
+    transform var(--dur-explain) var(--ease),
+    opacity var(--dur-explain) var(--ease);
+}
+
+.animate.explain .stick[data-off],
+.animate.explain .score[data-off] {
+  transition:
+    transform var(--dur-explain) var(--ease),
+    opacity var(--dur-explain) var(--ease),
+    visibility var(--dur-explain) var(--ease);
+}

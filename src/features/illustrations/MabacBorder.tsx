@@ -64,8 +64,22 @@ export type MabacBorderProps = {
   weights: readonly number[]
   format?: ((value: number, decimals: number) => string) | undefined
   labels?: Partial<MabacBorderLabels>
+  /**
+   * Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. MABAC_IDEA_STEPS - 1 draws that
+   * step, the last one being the full picture. While stepping the rows are inert (no hover, no focus target).
+   */
+  step?: number | null | undefined
+  /** Move at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
+  explain?: boolean | undefined
   className?: string | undefined
 }
+
+/**
+ * The steps of the MABAC idea: 0 the border G in every row with the upper and lower area around it, 1 the distance q
+ * of every criterion from G, a stick up or down out of the border, 2 the sum of the sticks, the score S, which is the
+ * full picture.
+ */
+export const MABAC_IDEA_STEPS = 3
 
 const FONT = 13
 const HEAD = 22
@@ -81,15 +95,22 @@ const GAP = 8
  * worst, the negative colour), all on one scale. The sticks add up to S, drawn on the right as one bar from zero.
  * Hover or focus a row (up / down) to read it. Static at first paint; new numbers move the sticks at --dur-data.
  */
-export function MabacBorder({ problem, weights, format = defaultFormat, labels, className }: MabacBorderProps) {
+export function MabacBorder({ problem, weights, format = defaultFormat, labels, step, explain = false, className }: MabacBorderProps) {
   const l = { ...MABAC_BORDER_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const animate = useAnimateValues(width)
   const parts = useMemo(() => mabacParts(problem, weights), [problem, weights])
-  const [active, setActive] = useState<number | null>(null)
+  const [activeRow, setActive] = useState<number | null>(null)
   const [focusRow, setFocusRow] = useState(0)
   if (!parts) return null
+
+  const stepping = step !== null && step !== undefined
+  const stage = stepping ? Math.min(Math.max(step, 0), MABAC_IDEA_STEPS - 1) : MABAC_IDEA_STEPS - 1
+  const active = stepping ? null : activeRow
+  // Until its step a stick or the S bar is drawn at no length, invisible.
+  const sticksOff = stage >= 1 ? undefined : ''
+  const scoreOff = stage >= 2 ? undefined : ''
 
   const { q, scores, order } = parts
   const names = problem.alternatives
@@ -151,7 +172,7 @@ export function MabacBorder({ problem, weights, format = defaultFormat, labels, 
   return (
     <ChartFigure titleId={`${uid}-title`} tableId={`${uid}-table`} title={l.title} showTable={l.showTable} table={table} plotRef={plotRef} className={className}>
       <svg
-        className={animate ? `${s.svg} ${s.animate} ${b.animate}` : s.svg}
+        className={[s.svg, animate && `${s.animate} ${b.animate}`, explain && `${s.explain} ${b.explain}`].filter(Boolean).join(' ')}
         width={W}
         height={height}
         viewBox={`0 0 ${W} ${height}`}
@@ -170,10 +191,10 @@ export function MabacBorder({ problem, weights, format = defaultFormat, labels, 
               </text>
             ) : null
           })}
-          <text className={b.head} x={zero} y={HEAD / 2} textAnchor="middle" dominantBaseline="central">
+          <text className={`${b.head} ${s.stageItem}`} data-off={scoreOff} x={zero} y={HEAD / 2} textAnchor="middle" dominantBaseline="central">
             {l.score}
           </text>
-          <line className={b.zero} x1={zero} x2={zero} y1={HEAD} y2={height} />
+          <line className={`${b.zero} ${s.stageItem}`} data-off={scoreOff} x1={zero} x2={zero} y1={HEAD} y2={height} />
         </g>
         <g onKeyDown={move} onMouseLeave={() => setActive(null)}>
           {order.map((i, row) => {
@@ -199,12 +220,13 @@ export function MabacBorder({ problem, weights, format = defaultFormat, labels, 
                     key={j}
                     className={b.stick}
                     data-sign={sign(x)}
+                    data-off={sticksOff}
                     data-testid="mabac-q"
                     x={0}
                     y={0}
                     width={stick}
                     height={1}
-                    style={{ transform: `translate(${stripLeft + (j + 0.5) * cell - stick / 2}px, ${mid}px) scale(1, ${-x * unitQ || 0.001})` }}
+                    style={{ transform: `translate(${stripLeft + (j + 0.5) * cell - stick / 2}px, ${mid}px) scale(1, ${(stage >= 1 && -x * unitQ) || 0.001})` }}
                     aria-hidden
                   />
                 ))}
@@ -212,20 +234,21 @@ export function MabacBorder({ problem, weights, format = defaultFormat, labels, 
                 <rect
                   className={b.score}
                   data-sign={sign(scores[i]!)}
+                  data-off={scoreOff}
                   x={0}
                   y={mid - 7}
                   width={1}
                   height={14}
-                  style={{ transform: `translate(${zero}px, 0px) scale(${end || 0.001}, 1)` }}
+                  style={{ transform: `translate(${zero}px, 0px) scale(${(stage >= 2 && end) || 0.001}, 1)` }}
                   aria-hidden
                 />
-                <text className={s.sawValue} x={W} y={mid} textAnchor="end" dominantBaseline="central" data-testid="mabac-s">
+                <text className={`${s.sawValue} ${s.stageItem}`} data-off={scoreOff} x={W} y={mid} textAnchor="end" dominantBaseline="central" data-testid="mabac-s">
                   {texts[i]}
                 </text>
                 {/* One focus target per row: the whole row, so its name reads the row. */}
                 {/* A transparent cell per criterion over the row, so hovering the strip names the criterion. */}
                 {crit.map((c, j) => (
-                  <rect key={j} x={stripLeft + j * cell} y={stacked ? 0 : 1} width={cell} height={rowStep - 2} fill="transparent" onMouseEnter={() => setActive(row)}>
+                  <rect key={j} x={stripLeft + j * cell} y={stacked ? 0 : 1} width={cell} height={rowStep - 2} fill="transparent" onMouseEnter={stepping ? undefined : () => setActive(row)}>
                     <title>{c}</title>
                   </rect>
                 ))}
@@ -237,10 +260,10 @@ export function MabacBorder({ problem, weights, format = defaultFormat, labels, 
                   y={stacked ? 0 : 1}
                   width={W}
                   height={rowStep - 2}
-                  tabIndex={focus === row ? 0 : -1}
+                  tabIndex={focus === row && !stepping ? 0 : -1}
                   role="img"
                   aria-label={rowText(i)}
-                  onMouseEnter={() => setActive(row)}
+                  onMouseEnter={stepping ? undefined : () => setActive(row)}
                   onFocus={() => {
                     setFocusRow(row)
                     setActive(row)
@@ -258,7 +281,8 @@ export function MabacBorder({ problem, weights, format = defaultFormat, labels, 
             {rowText(shown)}
           </span>
         ) : (
-          <span>{l.caption ?? ' '}</span>
+          // Hidden, not removed, before the last step: the picture above keeps its place.
+          <span className={stage >= MABAC_IDEA_STEPS - 1 ? undefined : 'invisible'}>{l.caption ?? ' '}</span>
         )}
       </p>
     </ChartFigure>

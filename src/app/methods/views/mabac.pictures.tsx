@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
-import { MabacBorder, MabacSumLine, type MabacBorderLabels } from '../../../features/illustrations/MabacBorder'
+import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
+import { MABAC_IDEA_STEPS, MabacBorder, MabacSumLine, type MabacBorderLabels } from '../../../features/illustrations/MabacBorder'
 import { useNumberFormat } from '../../../i18n'
 import { cn } from '../../../ui'
-import { IdeaSource } from './parts'
+import { IdeaSource, useStepLabels } from './parts'
 import type { IdeaPictureProps, StagePictureProps } from './types'
 
 function useBorderLabels(): MabacBorderLabels {
@@ -24,12 +25,15 @@ export function Stage({ problem, weights, className }: StagePictureProps) {
   return <MabacBorder problem={problem} weights={weights} format={format} labels={labels} className={cn('max-w-[760px]', className)} />
 }
 
-/** Method page: the border picture on the forklifts, then why the order is the min-max weighted sum's: one line. */
+/** Method page: the border picture on the forklifts, then why the order is the min-max weighted sum's: one line. The border picture steps through G, q, S. */
 export function Idea({ example, problem }: IdeaPictureProps) {
   const { t } = useTranslation()
   const labels = useBorderLabels()
   const { format } = useNumberFormat(4)
   const weights = example.weights ?? []
+  const steps = useIdeaSteps(MABAC_IDEA_STEPS)
+  const stepLabels = useStepLabels()
+  const sentences = (['s1', 's2', 's3'] as const).map((k) => t(`methods.page.idea.mabac.steps.${k}`))
   return (
     <div className="flex flex-col gap-6">
       <MabacBorder
@@ -43,8 +47,11 @@ export function Idea({ example, problem }: IdeaPictureProps) {
           showTable: t('methods.page.idea.showTable'),
           alternative: t('methods.page.idea.alternative'),
         }}
+        step={steps.step}
+        explain={steps.explain}
         className="max-w-[760px]"
       />
+      <IdeaSteps control={steps} sentences={sentences} labels={stepLabels} />
       <MabacSumLine
         problem={problem}
         weights={weights}

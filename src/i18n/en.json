@@ -1171,7 +1171,13 @@
         "cocoso": {
           "title": "Two scores, three readings",
           "caption": "ka is the share of the total, kb the size against the weakest provider, kc a λ-mix against the best; k combines the three.",
-          "lambdaCaption": "λ moves only kc, so the lines barely bend: here no two providers swap at any λ."
+          "lambdaCaption": "λ moves only kc, so the lines barely bend: here no two providers swap at any λ.",
+          "steps": {
+            "s1": "ka: each provider's share of the total of S and P.",
+            "s2": "kb: how far each stands above the weakest provider.",
+            "s3": "kc: how each compares with the best mix of S and P.",
+            "s4": "k combines the three readings; the longest bar ranks first."
+          }
         },
         "mabac": {
           "title": "One border per criterion",
@@ -1180,7 +1186,12 @@
           "sumCaption": "Every dot sits on one line, so no two forklifts can swap; G only decides the sign of S.",
           "sumX": "Min-max weighted sum",
           "sumY": "MABAC S",
-          "sumLine": "S = sum - B, B = {{border}}"
+          "sumLine": "S = sum - B, B = {{border}}",
+          "steps": {
+            "s1": "The line in each row is the border G; above it is the upper area, below it the lower one.",
+            "s2": "Each criterion's distance from G is a stick: up if the forklift is better than G, down if worse.",
+            "s3": "Add the sticks up: the bar is the score S, and the highest S ranks first."
+          }
         }
       }
     }
