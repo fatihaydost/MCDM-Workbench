@@ -20,7 +20,7 @@ test('compare: one column per ranking method, VIKOR\'s A7 first, Borda at the en
 
   const columns = page.getByTestId('rank-column')
   await expect(columns).toHaveCount(N)
-  expect(await columns.evaluateAll((els) => els.map((el) => el.getAttribute('data-label')))).toEqual(ORDER.map((id) => id.toUpperCase()))
+  expect(await columns.evaluateAll((els) => els.map((el) => el.getAttribute('data-label')))).toEqual(ORDER.map((id) => (id === 'cocoso' ? 'CoCoSo' : id.toUpperCase())))
   const firstOf = async (k: number) => columns.nth(k).locator('[data-rank="1"]').first().getAttribute('data-name')
   for (let k = 0; k < N; k++) expect(await firstOf(k)).toBe(firsts[k])
   expect(firsts[ORDER.indexOf('vikor')]).toBe('A7')
@@ -69,7 +69,7 @@ test('compare: the why panel opens on A1 and A7, and a crossing changes the pair
   await expect(title).not.toHaveText('A1 or A7?')
 })
 
-test('compare: a zero cell leaves SAW, WASPAS, COPRAS and MARCOS out with their reason', async ({ page }) => {
+test('compare: a zero cell leaves SAW, WASPAS, COPRAS and MARCOS out with their reason, CoCoSo still ranks', async ({ page }) => {
   await page.goto('/app?example=keshavarz-2015-ten-alternatives&stage=data')
   await page.locator('#wb-cell-0-0').click()
   await page.keyboard.type('0')
@@ -82,6 +82,8 @@ test('compare: a zero cell leaves SAW, WASPAS, COPRAS and MARCOS out with their 
   await expect(page.locator('[data-testid="rank-column"][data-method="copras"] [data-rank]')).toHaveCount(0)
   await expect(page.locator('[data-testid="rank-column"][data-method="marcos"] [data-rank]')).toHaveCount(0)
   await expect(page.getByTestId('marcos-badge')).toHaveCount(0)
+  // CoCoSo normalizes by min-max, so the zero cell is an ordinary value for it.
+  await expect(page.locator('[data-testid="rank-column"][data-method="cocoso"] [data-rank]')).toHaveCount(10)
   await expect(page.getByTestId('compare-summary')).toContainText(`${N - 4} of ${N} methods ranked`)
 })
 

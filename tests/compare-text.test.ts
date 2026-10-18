@@ -21,7 +21,7 @@ const problem = (): Problem => ({
   matrix: ex.matrix.map((r) => [...r]),
 })
 const runs = rankingMethods.map((m) => ({ methodId: m.id, params: {} }))
-const labels: Record<string, string> = { topsis: 'TOPSIS', saw: 'SAW', vikor: 'VIKOR', edas: 'EDAS', waspas: 'WASPAS', copras: 'COPRAS' }
+const labels: Record<string, string> = { topsis: 'TOPSIS', saw: 'SAW', vikor: 'VIKOR', edas: 'EDAS', waspas: 'WASPAS', copras: 'COPRAS', cocoso: 'CoCoSo' }
 
 async function ctx(lang: 'en' | 'tr', p: Problem, identical = false): Promise<WhyContext> {
   const i = i18next.createInstance()
@@ -44,7 +44,7 @@ describe('whySentences', () => {
     const f = pairFacts(p, ex.weights!, c, 0, 6)
     expect(whySentences(f, await ctx('en', p))).toEqual([
       'A1 is mainly ahead on C1 and C6 but behind on C5.',
-      'TOPSIS, SAW, EDAS, WASPAS and COPRAS rank A1 above A7.',
+      'TOPSIS, SAW, EDAS, WASPAS, COPRAS and CoCoSo rank A1 above A7.',
       'VIKOR ranks A7 above A1.',
       'VIKOR weighs the total against the single largest regret, so one big weakness weighs heavily.',
       "VIKOR's largest regret for both A1 and A7 is on C3, and A1's is larger.",
@@ -55,7 +55,7 @@ describe('whySentences', () => {
     const f = pairFacts(p, ex.weights!, c, 0, 6)
     expect(whySentences(f, await ctx('tr', p))).toEqual([
       'A1, özellikle C1 ve C6 kriterlerinde önde ama C5 kriterinde geride.',
-      'TOPSIS, SAW, EDAS, WASPAS ve COPRAS için A1 alternatifi A7 alternatifinden önde.',
+      'TOPSIS, SAW, EDAS, WASPAS, COPRAS ve CoCoSo için A1 alternatifi A7 alternatifinden önde.',
       'VIKOR için A7 alternatifi A1 alternatifinden önde.',
       'VIKOR toplamı tek bir en büyük pişmanlıkla tartar, bu yüzden tek büyük zayıflık ağır basar.',
       "VIKOR'un en büyük pişmanlığı hem A1 hem A7 için C3 kriterinde, daha büyüğü A1 için.",
@@ -95,9 +95,9 @@ describe('whySentences', () => {
     const f = pairFacts(p, ex.weights!, c, 0, 1)
     expect(f.unanimous).toBe(true)
     const s = whySentences(f, await ctx('en', p))
-    expect(s[0]).toBe('All 6 methods put A1 above A2.')
-    expect(whySentences(f, await ctx('tr', p))[0]).toBe('6 yöntemin hepsi A1 alternatifini A2 alternatifinin üstüne koyuyor.')
-    expect(s).toEqual(['All 6 methods put A1 above A2.', 'Select a crossing in the chart to see another pair.'])
+    expect(s[0]).toBe('All 7 methods put A1 above A2.')
+    expect(whySentences(f, await ctx('tr', p))[0]).toBe('7 yöntemin hepsi A1 alternatifini A2 alternatifinin üstüne koyuyor.')
+    expect(s).toEqual(['All 7 methods put A1 above A2.', 'Select a crossing in the chart to see another pair.'])
   })
 
   it('identical rankings: exactly one sentence', async () => {

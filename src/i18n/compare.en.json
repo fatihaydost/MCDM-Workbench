@@ -26,7 +26,8 @@
       "edas": "EDAS measures the distance above and below the average, so strengths can make up for a weakness.",
       "waspas": "WASPAS blends a sum with a product, so a very weak value counts more than in a plain sum.",
       "copras": "COPRAS adds up the benefit shares, and cost enters through the reciprocal of its total share, so a very low-cost alternative gets a big bonus.",
-      "marcos": "MARCOS divides SAW's weighted total by two fixed numbers, so it orders exactly like SAW with the Linear option."
+      "marcos": "MARCOS divides SAW's weighted total by two fixed numbers, so it orders exactly like SAW with the Linear option.",
+      "cocoso": "CoCoSo adds up powers of the 0-1 values, so being exactly last on a criterion costs almost a full point."
     },
     "unanimous": "All {{n}} methods put {{a}} above {{b}}.",
     "crossings": "Select a crossing in the chart to see another pair.",

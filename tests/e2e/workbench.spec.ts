@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { copras, critic, edas, entropy, marcos, merec, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
+import { cocoso, copras, critic, edas, entropy, marcos, merec, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -709,6 +709,75 @@ test('MARCOS: the method page opens the drivers with MARCOS; published f(K), f(K
   await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
   await expect(page.getByRole('button', { name: /^A1 on Vehicle maintenance is 0\./ })).toBeVisible()
   await expect(page.getByTestId('ranking-row')).toHaveCount(0)
+})
+
+test('CoCoSo: the method page opens the logistics example with CoCoSo; S, P and k, the three readings, the λ chart and slider; an all-worst row blocks', async ({ page }) => {
+  const ex = getExample('yazdani-2019-logistics')!
+  const p = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const at = (lambda: number) => cocoso.compute(p, ex.weights!, { lambda })
+  const byName = (scores: number[]) => Object.fromEntries(ex.alternatives.map((a, i) => [a, f4(scores[i]!)]))
+
+  await page.goto('/methods/cocoso')
+  await expect(page.getByTestId('cocoso-lenses')).toBeVisible()
+  await expect(page.getByTestId('cocoso-lambda')).toBeVisible()
+  await page.getByRole('link', { name: /Open in workbench/ }).first().click()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(stageHeading(page, 'Ranking')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'CoCoSo' })).toHaveAttribute('aria-checked', 'true')
+  const table = page.getByRole('table', { name: 'Ranking' })
+  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'Weighted sum S', 'Power sum P', 'Combined score k'])
+  const half = at(0.5)
+  expect(await closenessByName(page)).toEqual(byName(half.scores))
+  const published = ex.published.find((x) => x.label === 'cocoso.scores')!.values as number[]
+  half.scores.forEach((k, i) => expect(Math.abs(k - published[i]!)).toBeLessThanOrEqual(0.0015))
+  await expect(page.getByTestId('best-sentence')).toHaveText(`A3 GEFCO ranks first (k = ${f4(half.scores[2]!)}).`)
+
+  // The readings replace the score chart; the λ chart has one line per provider and no swap on this example.
+  await expect(page.getByTestId('cocoso-row')).toHaveCount(7)
+  await expect(page.getByTestId('cocoso-k').first()).toHaveText(f4(half.scores[2]!))
+  await expect(page.getByTestId('cocoso-line')).toHaveCount(7)
+  await expect(page.getByTestId('cocoso-swap')).toHaveCount(0)
+  await expect(page.getByTestId('cocoso-cursor')).toHaveAttribute('data-lambda', '0.5')
+
+  // λ to 0.2 with the keyboard (step 0.1): k and the variant label follow, the order holds.
+  const slider = page.getByRole('slider', { name: 'Mix λ in kc' })
+  await slider.focus()
+  for (let k = 0; k < 3; k++) await page.keyboard.press('ArrowLeft')
+  await expect(page.getByTestId('param-value')).toHaveText('0.20')
+  await expect.poll(() => closenessByName(page)).toEqual(byName(at(0.2).scores))
+  await expect(page.getByTestId('cocoso-cursor')).toHaveAttribute('data-lambda', '0.2')
+  await expect(page.locator('nav[aria-label="Stages"]:visible')).toContainText('CoCoSo (λ = 0.20)')
+
+  // A negative value is fine; making A5 the worst on every criterion blocks with its name.
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Data' }).click()
+  await page.locator('#wb-cell-4-0').click()
+  await page.keyboard.type('-5')
+  await page.keyboard.press('Enter')
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(page.getByTestId('ranking-row')).toHaveCount(7)
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Data' }).click()
+  for (const [col, v] of [[1, '0.5'], [2, '100'], [3, '100'], [4, '100']] as const) {
+    await page.locator(`#wb-cell-4-${col}`).click()
+    await page.keyboard.type(v)
+    await page.keyboard.press('Enter')
+  }
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(page.getByRole('button', { name: /^A5 LDI Dimotrans is the worst on every weighted criterion/ })).toBeVisible()
+  await expect(page.getByTestId('ranking-row')).toHaveCount(0)
+})
+
+test('CoCoSo: the ranking control is two full rows of four at 375 px', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.goto('/app?example=yazdani-2019-logistics&stage=ranking')
+  const radios = page.locator('[aria-label="Ranking method"]').getByRole('radio')
+  await expect(radios).toHaveCount(8)
+  const boxes = await radios.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).map((r) => ({ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) })))
+  const rows = [...new Set(boxes.map((b) => b.y))]
+  expect(rows).toHaveLength(2)
+  for (const y of rows) expect(boxes.filter((b) => b.y === y)).toHaveLength(4)
+  const widths = new Set(boxes.map((b) => b.w))
+  expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(1)
+  for (const b of boxes) expect(b.x + b.w).toBeLessThanOrEqual(375)
 })
 
 test('SAW: a zero blocks the ranking with a message at its cell', async ({ page }) => {

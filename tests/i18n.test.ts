@@ -59,6 +59,7 @@ describe('i18n resources', () => {
       'non-positive-value',
       'negative-value',
       'non-positive-average',
+      'all-worst-alternative',
       'weights-length-mismatch',
       'invalid-weight',
       'negative-weight',
@@ -68,7 +69,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { copras, critic, edas, entropy, marcos, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
+    const { cocoso, copras, critic, edas, entropy, marcos, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -145,7 +146,13 @@ describe('i18n resources', () => {
     // MARCOS: no warnings of its own (zeros and negatives are validation codes, as for SAW).
     const mc = marcos.compute(p, [0.5, 0.5], {})
     expect(mc.warnings).toEqual([])
-    const steps = [...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
+    // CoCoSo: negatives allowed, and its one notice (a near-constant column).
+    const cc = [
+      cocoso.compute({ ...p, matrix: [[-1, 2], [3, -1], [2, 3]] }, [0.5, 0.5], { lambda: 0.3 }),
+      cocoso.compute({ ...p, matrix: [[1, 5], [3, 5 + 1e-10], [2, 5]] }, [0.5, 0.5], {}),
+    ]
+    expect(cc.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual(['cocoso.near-constant-column'])
+    const steps = [...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),
@@ -156,6 +163,7 @@ describe('i18n resources', () => {
       ...vk.flatMap((x) => x.warnings ?? []),
       ...ed.flatMap((x) => x.warnings ?? []),
       ...cp.flatMap((x) => x.warnings ?? []),
+      ...cc.flatMap((x) => x.warnings ?? []),
     ]
     expect(new Set(warnings.filter((x) => x.code.startsWith('entropy.')).map((x) => x.code))).toEqual(
       new Set(['entropy.constant-column', 'entropy.zeros-in-column', 'entropy.two-alternatives-minmax', 'entropy.all-constant-equal-weights', 'entropy.dominant-weight']),

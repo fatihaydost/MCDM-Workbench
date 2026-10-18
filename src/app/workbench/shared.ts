@@ -133,6 +133,7 @@ export function placeIssue(
     case 'non-positive-average':
       return { ...base, stage: 'data', targetId: col !== undefined ? ids.criterion(col) : ids.corner }
     case 'row-length-mismatch':
+    case 'all-worst-alternative':
       return { ...base, stage: 'data', targetId: row !== undefined ? ids.alternative(row) : ids.corner }
     case 'alternatives-count-mismatch':
       return { ...base, stage: 'data', targetId: ids.corner }

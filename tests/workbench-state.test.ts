@@ -25,6 +25,7 @@ import vikorOT from './fixtures/vikor-opricovic-tzeng2004.json'
 import waspasA from './fixtures/waspas-adali2017.json'
 import coprasOC from './fixtures/copras-ozcan-celik2021.json'
 import marcosSB from './fixtures/marcos-stevic-brkovic2020.json'
+import cocosoY from './fixtures/cocoso-yazdani2019-logistics.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -148,6 +149,15 @@ describe('examples match the published fixtures', () => {
     expect(ex.criteria.map((c) => c.type)).toEqual(marcosSB.types)
     expect(ex.weights).toEqual(marcosSB.weights)
     expect(ex.published).toEqual([{ label: 'marcos.utility', values: marcosSB.published.fK, decimals: 3 }])
+  })
+  it('Yazdani et al. 2019 (CoCoSo, example 1)', () => {
+    const ex = getExample('yazdani-2019-logistics')!
+    expect(ex.referenceFor).toEqual(['cocoso'])
+    expect(ex.matrix).toEqual(cocosoY.matrix)
+    expect(ex.alternatives).toEqual(cocosoY.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(cocosoY.types)
+    expect(ex.weights).toEqual(cocosoY.weights)
+    expect(ex.published).toEqual([{ label: 'cocoso.scores', values: cocosoY.published.k, decimals: 3 }])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
@@ -414,6 +424,24 @@ describe('store actions', () => {
     const r = computeRanking(s)
     expectClose(r.value!.scores, marcosSB.published.fK, marcosSB.expected.tolerance)
     expect(r.value!.ranking).toEqual(marcosSB.published.ranking)
+  })
+
+  it('CoCoSo through the store: the logistics example opens with CoCoSo and the paper weights, λ from the slider state', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.setMethodParam('cocoso', 'lambda', 0.9)
+    st.loadExample('yazdani-2019-logistics', 'en')
+    const s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('cocoso')
+    expect(s.weightMethod).toBe('manual')
+    expect(s.methodParams?.cocoso).toEqual({})
+    const r = computeRanking(s)
+    expectClose(r.value!.scores, cocosoY.published.k, cocosoY.expected.tolerance_vs_published.k)
+    expect(r.value!.ranking).toEqual(cocosoY.published.ranking)
+    st.setMethodParam('cocoso', 'lambda', 0)
+    const r0 = computeRanking(useWorkbench.getState())
+    expect(r0.value!.scores).not.toEqual(r.value!.scores)
+    expect(r0.value!.ranking).toEqual(cocosoY.published.ranking)
   })
 
   it('EDAS through the store: the 47 items open with EDAS and equal weights, the ten alternatives through the method page link', () => {

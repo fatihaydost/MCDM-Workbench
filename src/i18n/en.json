@@ -121,6 +121,9 @@
       },
       "marcos": {
         "claim": "All 23 utilities f(K) of Table 5 match {{citation}} to {{decimals}} decimals, with the same 23 ranks; the paper applies its C3 and C4 weights swapped against its own FUCOM figure, and so does this check."
+      },
+      "cocoso": {
+        "claim": "S, P, ka, kb, kc, k and all seven ranks of Table VI match {{citation}} to {{decimals}} decimals; k only within 0.0015, because the paper rounded it at another stage."
       }
     },
     "catalogue": {
@@ -209,7 +212,8 @@
       "edas": "EDAS",
       "waspas": "WASPAS",
       "copras": "COPRAS",
-      "marcos": "MARCOS"
+      "marcos": "MARCOS",
+      "cocoso": "CoCoSo"
     },
     "params": {
       "entropy": {
@@ -255,6 +259,14 @@
         "lambdaEnds": {
           "min": "0: product only",
           "max": "1: sum only"
+        },
+        "lambdaVariant": "λ = {{value}}"
+      },
+      "cocoso": {
+        "lambda": "Mix λ in kc",
+        "lambdaEnds": {
+          "min": "0: P only",
+          "max": "1: S only"
         },
         "lambdaVariant": "λ = {{value}}"
       }
@@ -386,7 +398,8 @@
         "edas": "Scores each alternative by how far it lies above and below the average of all alternatives; a higher AS is better.",
         "waspas": "Blends a weighted sum with a weighted product, which punishes a very weak value harder; a higher Q is better.",
         "copras": "Adds up each alternative's weighted share of the benefit criteria plus a bonus that grows as its cost share shrinks; a higher Q is better.",
-        "marcos": "Measures each weighted total against an imaginary ideal and anti-ideal row; a higher f(K) is better, in the same order as SAW (Linear)."
+        "marcos": "Measures each weighted total against an imaginary ideal and anti-ideal row; a higher f(K) is better, in the same order as SAW (Linear).",
+        "cocoso": "Reads a weighted sum S and a power sum P three ways and combines them; a higher k is better. Zeros and negative values are allowed."
       },
       "columns": {
         "rank": "Rank",
@@ -399,7 +412,9 @@
         "belowAverage": "Below average SN",
         "wsm": "Sum Q1",
         "wpm": "Product Q2",
-        "utility": "Utility degree N (%)"
+        "utility": "Utility degree N (%)",
+        "weightedSum": "Weighted sum S",
+        "powerSum": "Power sum P"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -437,6 +452,11 @@
           "name": "Utility f(K)",
           "title": "MARCOS utility f(K)",
           "symbol": "f(K)"
+        },
+        "cocoso": {
+          "name": "Combined score k",
+          "title": "CoCoSo combined score k",
+          "symbol": "k"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -607,6 +627,16 @@
         "fKMinus": "Utility function f(K-)",
         "fKPlus": "Utility function f(K+)",
         "utility": "Utility f(K)"
+      },
+      "cocoso": {
+        "normalized": "Normalized matrix r",
+        "s": "Weighted sum S",
+        "p": "Power sum P",
+        "ka": "Share of the total ka",
+        "kb": "Against the weakest kb",
+        "kc": "Against the best kc",
+        "scores": "Combined score k",
+        "lambdaSweep": "k at every λ"
       }
     },
     "issues": {
@@ -753,6 +783,14 @@
         "antiIdeal": "Anti-ideal AAI",
         "bar": "{{alternative}}: S = {{total}}, K- = {{kMinus}}, K+ = {{kPlus}}, f(K) = {{score}}",
         "readout": "{{alternative}}: worth {{kMinus}} anti-ideals (K-), reaches {{kPlus}} of the ideal (K+), f(K) = {{score}}"
+      },
+      "cocoso": {
+        "title": "Three readings, one score",
+        "caption": "Each bar is against its column's largest value. Where ka, kb and kc agree, the order is clear; k combines them, and kb weighs most.",
+        "row": "{{alternative}}: ka = {{ka}}, kb = {{kb}}, kc = {{kc}}, k = {{k}}",
+        "lambdaTitle": "Score k as λ moves",
+        "axis": "λ: share of S in kc",
+        "point": "{{alternative}}, λ = {{lambda}}: k = {{value}}, rank {{rank}}"
       }
     },
     "flow": {
@@ -823,6 +861,13 @@
         "sAai": "Totals",
         "kMinus": "K- and K+",
         "utility": "f(K)"
+      },
+      "cocoso": {
+        "normalized": "Normalize",
+        "s": "S and P",
+        "ka": "Three readings",
+        "scores": "k",
+        "lambdaSweep": "λ sweep"
       }
     },
     "pipeline": {
@@ -834,7 +879,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS or MARCOS and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS or CoCoSo and see every step of the calculation."
     }
   },
   "methods": {
@@ -857,7 +902,8 @@
       "merec": "MEREC",
       "waspas": "WASPAS",
       "copras": "COPRAS",
-      "marcos": "MARCOS"
+      "marcos": "MARCOS",
+      "cocoso": "CoCoSo"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -917,7 +963,8 @@
         "merec": "Weights from what removing a criterion changes.",
         "waspas": "Blends a weighted sum with a weighted product.",
         "copras": "Adds benefit shares and a bonus for a small cost share.",
-        "marcos": "Measures against an imaginary ideal and anti-ideal."
+        "marcos": "Measures against an imaginary ideal and anti-ideal.",
+        "cocoso": "Three readings of a sum and a power sum, combined."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1061,6 +1108,11 @@
           "sawX": "SAW (Linear) score S",
           "sawY": "MARCOS f(K)",
           "sawLine": "f(K) = c · S, c = {{c}}"
+        },
+        "cocoso": {
+          "title": "Two scores, three readings",
+          "caption": "ka is the share of the total, kb the size against the weakest provider, kc a λ-mix against the best; k combines the three.",
+          "lambdaCaption": "λ moves only kc, so the lines barely bend: here no two providers swap at any λ."
         }
       }
     }
@@ -1165,6 +1217,16 @@
       "fKMinus": "f(K-) = K+ / (K+ + K-): the same number for every alternative, so it is shown once.",
       "fKPlus": "f(K+) = K- / (K+ + K-): the same number for every alternative, so it is shown once.",
       "utility": "Utility f(K): K+ and K- merged by the two utility functions. A higher value ranks higher; since f(K) = c · S, the order is the order of S."
+    },
+    "cocoso": {
+      "normalized": "Min-max normalization: the worst value of each column becomes 0 and the best 1, for a cost criterion the other way round. Any sign works.",
+      "s": "Weighted sum S: each normalized value times its criterion weight, added up.",
+      "p": "Power sum P: each normalized value raised to its criterion weight, added up. A criterion with weight 0 is left out, since 0 to the power 0 would add 1 to every P.",
+      "ka": "ka: the share of S + P in the total over all alternatives.",
+      "kb": "kb: S and P each divided by the smallest one, added. The weakest alternative gets 2.",
+      "kc": "kc = (λ S + (1 - λ) P) / (λ max S + (1 - λ) max P). The best mix gets 1.",
+      "scores": "Combined score k = (ka kb kc)^(1/3) + (ka + kb + kc) / 3. A higher value ranks higher.",
+      "lambdaSweep": "k at λ = 0, 0.1, ..., 1: where two alternatives swap places as λ moves."
     }
   },
   "validation": {
@@ -1187,7 +1249,8 @@
       "invalid-weight": "Enter a number for the weight of {{criterion}}.",
       "negative-weight": "The weight of {{criterion}} is {{value}}. Weights cannot be negative.",
       "weights-sum": "Weights sum to {{value}}, they must sum to 1.",
-      "non-positive-average": "The average of {{criterion}} is {{value}}. EDAS divides by each criterion's average, so it must be above 0."
+      "non-positive-average": "The average of {{criterion}} is {{value}}. EDAS divides by each criterion's average, so it must be above 0.",
+      "all-worst-alternative": "{{alternative}} is the worst on every weighted criterion, so its S and P are 0 and CoCoSo would divide by 0. Remove it or choose another method."
     }
   },
   "warnings": {
@@ -1236,6 +1299,9 @@
     },
     "copras": {
       "no-cost-criteria": "There is no cost criterion with a weight above 0, so Q = S+ and COPRAS gives the same result as SAW with the sum option."
+    },
+    "cocoso": {
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real."
     }
   }
 }

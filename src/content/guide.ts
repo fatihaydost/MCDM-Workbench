@@ -441,10 +441,10 @@ export const rankingRequirements: readonly RankingRequirement[] = [
     methodIds: ['cocoso'],
     normalization: { en: 'Min-max, then sums of r^w', tr: 'Min-maks, ardından r^w toplamları' },
     negatives: 'yes',
-    zeros: 'conditional',
+    zeros: 'yes',
     note: {
-      en: 'Fails when one alternative is worst on every criterion (min S = 0, so k_b divides by zero).',
-      tr: 'Bir alternatif her kriterde en kötüyse bozulur (min S = 0 olur, k_b sıfıra böler).',
+      en: 'Blocked when one alternative is the worst on every criterion (min S = 0, so k_b would divide by zero).',
+      tr: 'Bir alternatif her kriterde en kötüyse engellenir (min S = 0 olur, k_b sıfıra bölerdi).',
     },
     params: { en: 'λ, default 0.5', tr: 'λ, varsayılan 0,5' },
     output: { en: 'Score', tr: 'Skor' },

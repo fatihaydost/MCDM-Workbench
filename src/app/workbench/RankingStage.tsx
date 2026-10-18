@@ -182,19 +182,19 @@ export function RankingStage() {
   return (
     <div className="flex flex-col gap-6 pt-4">
       <div className="flex flex-col gap-2">
-        {/* Seven methods do not fit one row at 390 px: four columns below sm, the last one spanning the empty slot. */}
+        {/* Eight methods do not fit one row at 390 px: two rows of four below sm, no empty cell. */}
         <SegmentedControl<RankingMethodId>
           aria-label={t('workbench.rankingMethod.label')}
           value={rankingMethod}
           onValueChange={setRankingMethod}
           options={RANKING_VIEW_IDS.map((m) => ({ value: m, label: t(`workbench.rankingMethod.${m}`) }))}
           size="md"
-          className="self-start max-sm:grid max-sm:grid-cols-4 max-sm:self-stretch max-sm:[&>*:last-child]:col-span-2 max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
+          className="self-start max-sm:grid max-sm:grid-cols-4 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
         />
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
-        {/* TOPSIS, EDAS, COPRAS and MARCOS have no options; SAW shows its normalization here, VIKOR its v, WASPAS its λ. */}
+        {/* TOPSIS, EDAS, COPRAS and MARCOS have no options; SAW shows its normalization here, VIKOR its v, WASPAS and CoCoSo their λ. */}
         <MethodParams methodId={rankingMethod} descriptors={getRankingMethod(rankingMethod)?.params} />
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
           <span>{t('workbench.ranking.weightsUsed', { method: weightMethodFullLabel(weightMethod, weightParams, t) })}</span>

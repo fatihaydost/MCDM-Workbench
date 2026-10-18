@@ -1,4 +1,5 @@
 import { useId, useMemo, useState, type KeyboardEvent } from 'react'
+import { cocoso } from '../../core/methods/cocoso'
 import { waspas, WASPAS_LAMBDA_GRID } from '../../core/methods/waspas'
 import { rankScores } from '../../core/rank'
 import type { Problem } from '../../core/types'
@@ -42,6 +43,8 @@ export const WASPAS_LAMBDA_LABELS_EN: WaspasLambdaLabels = {
 }
 
 export type WaspasLambdaProps = {
+  /** Whose score to draw against λ: WASPAS's Q (straight lines) or CoCoSo's k (λ moves only k_c). */
+  method?: 'waspas' | 'cocoso' | undefined
   problem: Problem
   weights: readonly number[]
   /** The λ the ranking uses (the cursor). */
@@ -60,12 +63,13 @@ type Active = { i: number; k: number }
 /**
  * WASPAS as a picture: Q of every alternative against λ = 0, 0.1, ..., 1 (the core's `waspas.lambdaSweep` step). Q is
  * linear in λ, from the weighted product (λ = 0) to the weighted sum (λ = 1), so each line is straight and every rank
- * swap is where two lines cross (marked, computed exactly from the two ends). The vertical line is the current λ, with
+ * swap is where two lines cross (marked). The vertical line is the current λ, with
  * each alternative's Q on it; the first there in the accent. Hover or focus a grid point to read the order at that λ;
  * arrow keys move along λ (left / right) and between alternatives (up / down). A λ change is a state change: the
  * cursor jumps, the lines stay (they do not depend on λ); a weight change moves the lines (object constancy).
+ * `method="cocoso"` draws CoCoSo's k the same way: λ moves only k_c, so k bends a little between grid points.
  */
-export function WaspasLambda({ problem, weights, lambda, format = defaultFormat, labels, className }: WaspasLambdaProps) {
+export function WaspasLambda({ method = 'waspas', problem, weights, lambda, format = defaultFormat, labels, className }: WaspasLambdaProps) {
   const l = { ...WASPAS_LAMBDA_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
@@ -75,12 +79,12 @@ export function WaspasLambda({ problem, weights, lambda, format = defaultFormat,
   const names = problem.alternatives
   const res = useMemo(() => {
     try {
-      return waspas.compute(problem, [...weights], { lambda })
+      return (method === 'cocoso' ? cocoso : waspas).compute(problem, [...weights], { lambda })
     } catch {
       return null
     }
-  }, [problem, weights, lambda])
-  const sweep = useMemo(() => res?.steps.find((x) => x.key === 'waspas.lambdaSweep')?.matrix ?? null, [res])
+  }, [method, problem, weights, lambda])
+  const sweep = useMemo(() => res?.steps.find((x) => x.key === `${method}.lambdaSweep`)?.matrix ?? null, [method, res])
   const xs = WASPAS_LAMBDA_GRID as number[]
   const layout = useMemo(
     () => (sweep ? layoutSweep({ width, plotHeight: width < 480 ? 200 : 240, xs, series: sweep, labels: names }) : null),
@@ -97,17 +101,20 @@ export function WaspasLambda({ problem, weights, lambda, format = defaultFormat,
   const ranksAt = WASPAS_LAMBDA_GRID.map((_, k) => rankScores(sweep.map((row) => row[k]!), 'desc'))
   const grid = (k: number) => format(WASPAS_LAMBDA_GRID[k]!, 1)
 
-  // Q_i(λ) = a_i + b_i λ: a pair whose difference changes sign between λ = 0 and 1 swaps exactly once, at d0 / (d0 - d1).
+  // A pair whose difference changes sign inside a grid cell swaps there; linear inside the cell (exact for WASPAS,
+  // where Q_i(λ) = a_i + b_i λ is one straight line; CoCoSo's k is drawn through the grid points the same way).
   const last = WASPAS_LAMBDA_GRID.length - 1
   const swaps: { x: number; y: number }[] = []
   for (let a = 0; a < m; a++)
-    for (let b = a + 1; b < m; b++) {
-      const d0 = sweep[a]![0]! - sweep[b]![0]!
-      const d1 = sweep[a]![last]! - sweep[b]![last]!
-      if (d0 * d1 >= 0) continue
-      const t = d0 / (d0 - d1)
-      swaps.push({ x: t, y: sweep[a]![0]! + t * (sweep[a]![last]! - sweep[a]![0]!) })
-    }
+    for (let b = a + 1; b < m; b++)
+      for (let k = 0; k < last; k++) {
+        const d0 = sweep[a]![k]! - sweep[b]![k]!
+        const d1 = sweep[a]![k + 1]! - sweep[b]![k + 1]!
+        if (d0 * d1 >= 0) continue
+        const t = d0 / (d0 - d1)
+        const x0 = WASPAS_LAMBDA_GRID[k]!
+        swaps.push({ x: x0 + t * (WASPAS_LAMBDA_GRID[k + 1]! - x0), y: sweep[a]![k]! + t * (sweep[a]![k + 1]! - sweep[a]![k]!) })
+      }
 
   const table: ChartTable = {
     corner: l.alternative,
@@ -161,7 +168,7 @@ export function WaspasLambda({ problem, weights, lambda, format = defaultFormat,
         role="group"
         aria-labelledby={`${uid}-title`}
         aria-describedby={`${uid}-table`}
-        data-testid="waspas-lambda"
+        data-testid={`${method}-lambda`}
       >
         <g aria-hidden>
           {layout.yTicks.map((v) => (
@@ -187,16 +194,16 @@ export function WaspasLambda({ problem, weights, lambda, format = defaultFormat,
               className={`${r.sweepLine} ${s.lambdaLine}`}
               data-highlight={leaders.has(i) || undefined}
               data-on={active?.i === i || undefined}
-              data-testid="waspas-line"
+              data-testid={`${method}-line`}
               d={layout.paths[i]}
               style={{ d: `path("${layout.paths[i]}")` }}
             />
           ))}
           {swaps.map((p, k) => (
-            <circle key={k} className={r.switchMark} data-testid="waspas-swap" cx={x(p.x)} cy={y(p.y)} r={3.5} />
+            <circle key={k} className={r.switchMark} data-testid={`${method}-swap`} cx={x(p.x)} cy={y(p.y)} r={3.5} />
           ))}
           {/* The current λ: a state, so it jumps (no transition). */}
-          <line className={r.cursor} data-testid="waspas-cursor" data-lambda={lambda} x1={cx} x2={cx} y1={top - 4} y2={bottom} />
+          <line className={r.cursor} data-testid={`${method}-cursor`} data-lambda={lambda} x1={cx} x2={cx} y1={top - 4} y2={bottom} />
           <text className={r.tick} x={Math.min(Math.max(cx, left + 30), right - 30)} y={top - 12} textAnchor="middle" dominantBaseline="central">
             {l.current}
           </text>

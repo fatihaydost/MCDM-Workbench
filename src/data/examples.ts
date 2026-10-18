@@ -568,6 +568,44 @@ export const examples: readonly ExampleDataset[] = [
       },
     ],
   },
+  {
+    id: 'yazdani-2019-logistics',
+    name: { en: 'Logistics providers (Yazdani et al. 2019)', tr: 'Lojistik firmaları (Yazdani vd. 2019)' },
+    summary: {
+      en: 'Seven logistics providers on five criteria, price the only cost, with expert weights: the first example of the CoCoSo paper, whose three readings agree on the order.',
+      tr: 'Yedi lojistik firması, yalnız fiyatın maliyet olduğu beş kriter, uzman ağırlıklarıyla: CoCoSo makalesinin ilk örneği; üç okuma da aynı sırayı verir.',
+    },
+    referenceFor: ['cocoso'],
+    citation: {
+      authors: 'Yazdani, M.; Zaraté, P.; Zavadskas, E.K.; Turskis, Z.',
+      year: 2019,
+      title: 'A combined compromise solution (CoCoSo) method for multi-criteria decision-making problems',
+      venue: 'Management Decision 57(9), 2501-2519',
+      doi: '10.1108/MD-05-2017-0458',
+      tables: { en: 'Table I (input and weights), Table VI (output)', tr: 'Tablo I (girdi ve ağırlıklar), Tablo VI (çıktı)' },
+    },
+    // The paper's company names (Table I); the matrix is the industrial-robot data of CODAS (2016), relabelled.
+    alternatives: ['A1 Mathez', 'A2 Bansard', 'A3 GEFCO', 'A4 Schneider', 'A5 LDI Dimotrans', 'A6 SAGA', 'A7 GETMA'],
+    criteria: [
+      { name: { en: 'Inventory capacity', tr: 'Stok kapasitesi' }, type: 'benefit' },
+      { name: { en: 'Offered price', tr: 'Teklif edilen fiyat' }, type: 'cost' },
+      { name: { en: 'Batch volume', tr: 'Parti hacmi' }, type: 'benefit' },
+      { name: { en: 'Flexibility', tr: 'Esneklik' }, type: 'benefit' },
+      { name: { en: 'Technology use', tr: 'Teknoloji kullanımı' }, type: 'benefit' },
+    ],
+    matrix: [
+      [60, 0.4, 2540, 500, 990],
+      [6.35, 0.15, 1016, 3000, 1041],
+      [6.8, 0.1, 1727.2, 1500, 1676],
+      [10, 0.2, 1000, 2000, 965],
+      [2.5, 0.1, 560, 500, 915],
+      [4.5, 0.08, 1016, 350, 508],
+      [3, 0.1, 1778, 1000, 920],
+    ],
+    weights: [0.036, 0.192, 0.326, 0.326, 0.12],
+    // Table VI at λ = 0.5, as printed (trailing zeros dropped); 1.3 and 2.52 are the paper's rounding of 1.2987 and 2.5191.
+    published: [{ label: 'cocoso.scores', values: [2.041, 2.788, 2.882, 2.416, 1.3, 1.443, 2.52], decimals: 3 }],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

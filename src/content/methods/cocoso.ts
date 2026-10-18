@@ -6,7 +6,7 @@ export const cocoso: MethodContent = {
   name: { en: 'CoCoSo', tr: 'CoCoSo' },
   fullName: { en: 'COmbined COmpromise SOlution', tr: 'Birleşik uzlaşık çözüm' },
   family: 'ranking-utility',
-  status: 'research',
+  status: 'available',
   year: 2019,
   origin: {
     authors: 'Yazdani, M.; Zaraté, P.; Zavadskas, E.K.; Turskis, Z.',
@@ -14,27 +14,35 @@ export const cocoso: MethodContent = {
     title: 'A combined compromise solution (CoCoSo) method for multi-criteria decision-making problems',
     venue: 'Management Decision 57(9), 2501-2519',
     doi: '10.1108/MD-05-2017-0458',
-    url: 'https://hal.archives-ouvertes.fr/hal-02879091/document',
+    url: 'https://hal.science/hal-02879091/document',
   },
   steps: [
     {
       title: { en: 'Min-max normalization', tr: 'Min-maks normalizasyonu' },
       tex: String.raw`r_{ij} = \begin{cases} \dfrac{x_{ij} - \min_i x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{+} \\[2ex] \dfrac{\max_i x_{ij} - x_{ij}}{\max_i x_{ij} - \min_i x_{ij}} & j \in J^{-} \end{cases}`,
-    },
-    {
-      title: { en: 'Weighted sum and power-weighted sum', tr: 'Ağırlıklı toplam ve üs ağırlıklı toplam' },
-      tex: String.raw`S_i = \sum_{j=1}^{n} w_j\, r_{ij}, \qquad P_i = \sum_{j=1}^{n} r_{ij}^{\,w_j} \quad (0^{w} = 0)`,
       note: {
-        en: 'The origin uses a sum of powers for P, not a product.',
-        tr: 'Özgün yöntem P için çarpım değil, kuvvetlerin toplamını kullanır.',
+        en: 'The worst value of each column becomes 0 and the best 1, so negative values work too.',
+        tr: 'Her sütunun en kötü değeri 0, en iyisi 1 olur; bu yüzden negatif değerler de çalışır.',
       },
     },
     {
-      title: { en: 'Three aggregation strategies', tr: 'Üç birleştirme stratejisi' },
-      tex: String.raw`k_{ia} = \frac{P_i + S_i}{\sum_{i} (P_i + S_i)}, \quad k_{ib} = \frac{S_i}{\min_i S_i} + \frac{P_i}{\min_i P_i}, \quad k_{ic} = \frac{\lambda S_i + (1-\lambda) P_i}{\lambda \max_i S_i + (1-\lambda) \max_i P_i}`,
+      title: { en: 'Weighted sum and power sum', tr: 'Ağırlıklı toplam ve üs toplamı' },
+      tex: String.raw`S_i = \sum_{j=1}^{n} w_j\, r_{ij}, \qquad P_i = \sum_{j:\, w_j > 0} r_{ij}^{\,w_j}`,
+      note: {
+        en: 'P is a sum of powers, not a product; a criterion with weight 0 is left out of P, since 0⁰ = 1 would add 1 to every P.',
+        tr: "P bir çarpım değil, kuvvetlerin toplamıdır; ağırlığı 0 olan kriter P'ye katılmaz, çünkü 0⁰ = 1 her P'ye 1 eklerdi.",
+      },
     },
     {
-      title: { en: 'Final score', tr: 'Nihai skor' },
+      title: { en: 'Three readings', tr: 'Üç okuma' },
+      tex: String.raw`k_{ia} = \frac{P_i + S_i}{\sum_{i} (P_i + S_i)}, \quad k_{ib} = \frac{S_i}{\min_i S_i} + \frac{P_i}{\min_i P_i}, \quad k_{ic} = \frac{\lambda S_i + (1-\lambda) P_i}{\lambda \max_i S_i + (1-\lambda) \max_i P_i}`,
+      note: {
+        en: 'Share of the total, size against the weakest alternative, and a λ-balanced mix against the best (λ = 0.5 by default).',
+        tr: 'Toplam içindeki pay, en zayıf alternatife göre büyüklük ve en iyiye göre λ ile dengelenmiş karışım (varsayılan λ = 0,5).',
+      },
+    },
+    {
+      title: { en: 'Combined score', tr: 'Birleşik puan' },
       tex: String.raw`k_i = \left(k_{ia}\, k_{ib}\, k_{ic}\right)^{1/3} + \frac{1}{3}\left(k_{ia} + k_{ib} + k_{ic}\right)`,
       note: {
         en: 'Rank by decreasing k.',
@@ -45,80 +53,93 @@ export const cocoso: MethodContent = {
   combinedWith: [
     {
       text: {
-        en: 'The origin takes the weights given with the data and runs a 48-scenario weight-swap sensitivity analysis (Table VII).',
-        tr: 'Özgün makale veriyle birlikte verilen ağırlıkları kullanır ve 48 senaryolu bir ağırlık değiştirme duyarlılık analizi yapar (Tablo VII).',
-      },
-    },
-    {
-      methodId: 'waspas',
-      text: {
-        en: 'The origin compares CoCoSo with WASPAS, VIKOR, TOPSIS, CODAS, MOORA, COPRAS and EDAS by Spearman correlation.',
-        tr: "Özgün makale CoCoSo'yu WASPAS, VIKOR, TOPSIS, CODAS, MOORA, COPRAS ve EDAS ile Spearman korelasyonu üzerinden karşılaştırır.",
+        en: 'Expert weights, then CoCoSo: Yazdani et al. (2019), the example used here.',
+        tr: 'Uzman ağırlıkları, ardından CoCoSo: Yazdani vd. (2019); buradaki örnek budur.',
       },
     },
     {
       methodId: 'critic',
       text: {
-        en: 'Objective weights (CRITIC, Entropy, MEREC) then CoCoSo are common in later work; CRITIC and CoCoSo co-occur in 91 OpenAlex records. Turkish example: LOPCOW-CRITIC-CoCoSo, Yılmaz Özekenci (2024), BIST energy.',
-        tr: "Sonraki çalışmalarda nesnel ağırlıklar (CRITIC, Entropi, MEREC) ardından CoCoSo sık görülür; CRITIC ile CoCoSo OpenAlex'te 91 kayıtta birlikte geçer. Türkçe örnek: LOPCOW-CRITIC-CoCoSo, Yılmaz Özekenci (2024), BIST enerji.",
+        en: 'CRITIC then CoCoSo: Akgül (2021), Turkish banks, the third test example.',
+        tr: 'CRITIC ardından CoCoSo: Akgül (2021), Türk bankaları, üçüncü test örneği.',
+      },
+    },
+    {
+      methodId: 'merec',
+      text: {
+        en: 'MEREC then CoCoSo appears in recent Turkish studies (Özel Sönmez & Toktaş 2024, from a search snippet).',
+        tr: 'MEREC ardından CoCoSo yeni Türkçe çalışmalarda görülür (Özel Sönmez ve Toktaş 2024, yalnız arama özeti).',
+      },
+    },
+    {
+      methodId: 'waspas',
+      text: {
+        en: 'The origin compares CoCoSo with WASPAS and VIKOR (same ranking) and with TOPSIS, COPRAS and EDAS.',
+        tr: "Özgün makale CoCoSo'yu WASPAS ve VIKOR (aynı sıralama) ile, TOPSIS, COPRAS ve EDAS ile karşılaştırır.",
       },
     },
   ],
   reference: {
     source: 'Yazdani, M.; Zaraté, P.; Zavadskas, E.K.; Turskis, Z. (2019). A combined compromise solution (CoCoSo) method for multi-criteria decision-making problems. Management Decision 57(9), 2501-2519',
     doi: '10.1108/MD-05-2017-0458',
-    match: 'partial',
+    match: 'match',
     note: {
-      en: 'Published example (Tables I, III-VI); this method is not computed here yet, only recomputed during research. Seven alternatives, five criteria. S, P, ka, kb and kc match to the printed 3 decimals. The final k is off by up to 0.0013 (1.2987 vs the printed "1.3"), more than 3-decimal rounding allows; the paper rounded at some other stage. The ranking is identical and pyDecision agrees with the recomputation to 1e-15.',
-      tr: 'Yayımlanmış örnek (Tablo I, III-VI); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Yedi alternatif, beş kriter. S, P, ka, kb ve kc basılı 3 basamakta örtüşüyor. Nihai k değerinde 0,0013\'e varan fark var (basılı "1.3" yerine 1,2987); bu 3 basamaklı yuvarlamanın açıklayacağından fazla, makale başka bir aşamada yuvarlamış. Sıralama aynı; pyDecision yeniden hesaplamayla 1e-15 düzeyinde uyuşuyor.',
+      en: 'Published example, reproduced by the tests: seven logistics providers, five criteria (one cost), expert weights (Tables I, III-VI). S, P, ka, kb and kc match the printed 3 decimals and all seven ranks match; the final k differs by up to 0.0013 (1.2987 against the printed "1.3"), because the paper rounded at another stage. Also tested: the paper\'s second example (ten green suppliers, Tables X-XI) and Akgül (2021, nine Turkish banks, CRITIC weights), all ranks.',
+      tr: 'Yayımlanmış örnek, testlerde yeniden üretiliyor: yedi lojistik firması, beş kriter (biri maliyet), uzman ağırlıkları (Tablo I, III-VI). S, P, ka, kb ve kc basılı 3 basamakta aynı, yedi sıranın tamamı da aynı; nihai k\'de 0,0013\'e varan fark var (basılı "1.3" yerine 1,2987), çünkü makale başka bir aşamada yuvarlamış. Ayrıca sınanan: makalenin ikinci örneği (on yeşil tedarikçi, Tablo X-XI) ve Akgül (2021, dokuz Türk bankası, CRITIC ağırlıkları), tüm sıralar.',
     },
   },
   sources: [
     { label: 'Yazdani, Zaraté, Zavadskas & Turskis (2019), Management Decision 57(9), 2501-2519', doi: '10.1108/MD-05-2017-0458' },
-    { label: 'Keshavarz Ghorabaee, Zavadskas, Turskis & Antucheviciene (2016), CODAS, Example 1 (same data)', url: 'https://ideas.repec.org/a/cys/ecocyb/v50y2016i3p25-44.html' },
-    { label: 'Yılmaz Özekenci (2024), LOPCOW-CRITIC-CoCoSo, BIST energy', doi: '10.29249/selcuksbmyd.1400056' },
-    { label: 'pyDecision 5.1.1, cocoso_method', url: 'https://github.com/Valdecy/pyDecision' },
+    { label: 'Akgül (2021), CRITIC-CoCoSo, Ekonomi ve Finansal Araştırmalar Dergisi 3(2), 71-90', url: 'https://dergipark.org.tr/tr/download/article-file/2114456' },
+    { label: 'Özel Sönmez & Toktaş (2024), MEREC-CoCoSo, Journal of Scientific Reports-A (search snippet only, not read)', doi: '10.59313/jsr-a.1420728' },
+    { label: 'pyDecision 5.1.8, cocoso_method (adds 1 to all S or P when the minimum is 0; not adopted)', url: 'https://github.com/Valdecy/pyDecision' },
   ],
   en: {
     summary:
-      'CoCoSo merges a weighted sum and a power-weighted sum per alternative, using three aggregation strategies, into one final score. Use it for one result that balances additive and multiplicative views.',
+      'CoCoSo gives each alternative a weighted sum and a sum of weighted powers, reads them three ways (share of the total, size against the weakest, a λ-mix against the best) and combines the three.',
     whenToUse: [
-      'Both additive and multiplicative views of performance should count.',
-      'Each criterion has a clear best and worst value.',
+      'Your data mix units or contain negative values.',
+      'Results should compare with CRITIC or MEREC then CoCoSo studies.',
+      'Being last on a criterion should cost more than in SAW.',
     ],
     whenNot: [
-      'You need a bounded, percentage-like score: k is neither.',
-      'An alternative worst on every criterion makes k_b divide by zero.',
+      'One alternative is the worst on every criterion (blocked).',
+      'You need a bounded score: k is not a percentage.',
+      'Only two criteria: an all-worst alternative is common then.',
     ],
     inputs: [
-      'Decision matrix, criterion type per column, weights summing to 1.',
-      'Parameter λ between 0 and 1, default 0.5.',
+      'Decision matrix; zeros and negative values are allowed (SAW, WASPAS, COPRAS and MARCOS block them).',
+      'Criterion type per column, weights summing to 1; a criterion with weight 0 is left out of P.',
+      'Parameter λ between 0 and 1 in steps of 0.1, default 0.5; it moves only k_c.',
     ],
     pitfalls: [
-      'min S = 0 or min P = 0 breaks k_b; pyDecision silently adds 1 to all S or P, which also changes k_a and k_c.',
-      'A constant column cannot be min-max normalized; it is set to 0 with a warning.',
-      'Rank reversal when alternatives are added: the min-max bounds and the min and max in k_b and k_c move.',
+      'The worst value of a column counts 0 in P, a value just above it almost a full point: being exactly last costs much more than being nearly last.',
+      'k_b (at least 2) dominates k, and P outweighs S even at λ = 0.5.',
+      'Min and max come from the current alternatives, so adding or removing one can reverse ranks.',
     ],
   },
   tr: {
     summary:
-      'CoCoSo her alternatifin ağırlıklı toplamını ve üs ağırlıklı toplamını üç birleştirme stratejisiyle tek bir nihai skora dönüştürür. Toplamsal ve çarpımsal bakışı dengeleyen tek bir sonuç istediğinizde kullanın.',
+      'CoCoSo her alternatife ağırlıklı toplam ve ağırlıklı üslerin toplamı olmak üzere iki puan verir; bunları üç biçimde okur (toplamdaki pay, en zayıfa göre büyüklük, en iyiye göre λ karışımı) ve birleştirir.',
     whenToUse: [
-      'Performansa hem toplamsal hem çarpımsal bakış önemli.',
-      'Her kriterin belirgin bir en iyi ve en kötü değeri var.',
+      'Verileriniz farklı birimlerde ya da negatif değer içeriyor.',
+      'Sonuç CRITIC ya da MEREC ardından CoCoSo çalışmalarıyla karşılaştırılmalı.',
+      "Bir kriterde sonuncu olmak SAW'dakinden daha pahalı olmalı.",
     ],
     whenNot: [
-      'Sınırlı, yüzde gibi okunan bir skor gerekiyor: k ikisi de değil.',
-      'Her kriterde en kötü bir alternatif varsa k_b sıfıra bölünür.',
+      'Bir alternatif her kriterde en kötü (engellenir).',
+      'Sınırlı bir puan gerekiyor: k yüzde değildir.',
+      'Yalnız iki kriter: her yerde en kötü alternatif o zaman sık görülür.',
     ],
     inputs: [
-      'Karar matrisi, her sütun için kriter türü, toplamı 1 olan ağırlıklar.',
-      '0 ile 1 arasında λ parametresi, varsayılan 0,5.',
+      'Karar matrisi; sıfır ve negatif değerlere izin verilir (SAW, WASPAS, COPRAS ve MARCOS bunları engeller).',
+      "Her sütun için kriter türü, toplamı 1 olan ağırlıklar; ağırlığı 0 olan kriter P'ye katılmaz.",
+      "0 ile 1 arasında, 0,1 adımlı λ parametresi, varsayılan 0,5; yalnız k_c'yi değiştirir.",
     ],
     pitfalls: [
-      "min S = 0 ya da min P = 0 olursa k_b bozulur; pyDecision sessizce tüm S ya da P değerlerine 1 ekler, bu da k_a ve k_c'yi değiştirir.",
-      'Sabit sütun min-maks ile normalize edilemez; 0 alınır ve uyarı gösterilir.',
-      'Alternatif eklenince sıralama tersine dönebilir: min-maks sınırları ve k_b, k_c içindeki min ve maks kayar.',
+      "Sütunun en kötü değeri P'de 0 sayılır, hemen üstündeki değer neredeyse tam puan alır: tam sonuncu olmak, neredeyse sonuncu olmaktan çok daha pahalıdır.",
+      "k'yi k_b (en az 2) belirler; λ = 0,5'te bile P, S'den ağır basar.",
+      'Min ve maks mevcut alternatiflerden gelir; bir alternatif eklemek ya da çıkarmak sıralamayı tersine çevirebilir.',
     ],
   },
 }

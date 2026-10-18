@@ -122,8 +122,8 @@ Weighting method:
 
 Ranking method:
 
-- [ ] i18n `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T]. Seven methods (since MARCOS) are a
-  grid of four columns below `sm` (`RankingStage.tsx` className); an eighth fills that grid, a ninth needs another layout decision.
+- [ ] i18n `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T]. Eight methods (since CoCoSo) are a
+  grid of two rows of four below `sm` (`RankingStage.tsx` className); a ninth needs another layout decision.
 - [ ] The score's words, `workbench.ranking.score.<id>` in en.json and tr.json [T] (read by `scoreWords`,
   `shared.ts`): `name` ("Closeness C", "Score S": table column, workbook column, sweep table), `title` ("Closeness
   coefficient C", "Weighted sum S": score chart, robustness sweep chart `{{score}}`) and `symbol` ("C", "S": the
@@ -240,8 +240,8 @@ every caller passes `{}` (store `workbench.ts:315,336`; robustness `robustness.t
 parameter (the URL carries only `?example` and `?stage`, removed after load). Entropy (normalization), SAW
 (normalization), VIKOR (v) and WASPAS (λ) all need one, so it is worth one small generic path.
 
-**Status (2026-10-18):** implemented for Entropy and SAW (choices), VIKOR and WASPAS (numbers). A number option in [0, 1]
-renders as a slider on its descriptor's `step` grid (VIKOR 0.01, WASPAS 0.1) (`MethodParams.tsx` `UnitSlider`, reusing `WeightRange`; tick at the default,
+**Status (2026-10-18):** implemented for Entropy and SAW (choices), VIKOR, WASPAS and CoCoSo (numbers). A number option in [0, 1]
+renders as a slider on its descriptor's `step` grid (VIKOR 0.01, WASPAS and CoCoSo 0.1) (`MethodParams.tsx` `UnitSlider`, reusing `WeightRange`; tick at the default,
 optional end words `workbench.params.<id>.<key>Ends.min/.max`); any other range as a number input. A number option's
 variant label is `workbench.params.<id>.<key>Variant` with `{{value}}` ("VIKOR (v = 0,70)"), checked by
 `tests/i18n.test.ts`.

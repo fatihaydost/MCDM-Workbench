@@ -246,6 +246,17 @@ f(K) = c S through the origin (accent, labelled with c). Static. Numbers from `m
 Use: `/methods/marcos` "The idea" (Stević and Brković 2020, 23 drivers, both pictures); workbench Ranking stage when the
 method is MARCOS (`MarcosRows`, it replaces the score chart).
 
+## CocosoLenses
+
+CoCoSo's three readings of the same two scores. One row per alternative in rank order, four bar columns: k_a (share of
+the total), k_b (against the weakest), k_c (λ-mix against the best), each bar against its column's largest value, and
+the combined k, the first in the accent, with k's value at the right. Hover or focus a k bar (up / down) for the four
+numbers in the readout. Numbers from `cocoso.compute`; renders nothing when CoCoSo cannot rank (an all-worst row).
+`WaspasLambda` with `method="cocoso"` draws k against λ beside it (λ moves only k_c).
+
+Use: `/methods/cocoso` "The idea" (Yazdani et al. 2019, seven logistics providers, both pictures); workbench Ranking
+stage when the method is CoCoSo (both pictures; they replace the score chart).
+
 ## StepFlow
 
 Map of the worked calculation: numbered square nodes on a hairline, the active one in the accent,

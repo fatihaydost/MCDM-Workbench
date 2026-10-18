@@ -121,6 +121,9 @@
       },
       "marcos": {
         "claim": "Tablo 5'in 23 fayda değeri f(K) {{citation}} ile {{decimals}} basamağa kadar aynı, 23 sıra da aynı. Makale C3 ve C4 ağırlıklarını kendi FUCOM şekline göre yer değiştirmiş uyguluyor; bu kontrol de öyle."
+      },
+      "cocoso": {
+        "claim": "S, P, ka, kb, kc, k ve Tablo VI'nın yedi sırasının tamamı {{citation}} ile {{decimals}} basamakta örtüşüyor; makale k'yi başka bir aşamada yuvarladığı için k yalnız 0,0015 içinde."
       }
     },
     "catalogue": {
@@ -209,7 +212,8 @@
       "edas": "EDAS",
       "waspas": "WASPAS",
       "copras": "COPRAS",
-      "marcos": "MARCOS"
+      "marcos": "MARCOS",
+      "cocoso": "CoCoSo"
     },
     "params": {
       "entropy": {
@@ -255,6 +259,14 @@
         "lambdaEnds": {
           "min": "0: yalnız çarpım",
           "max": "1: yalnız toplam"
+        },
+        "lambdaVariant": "λ = {{value}}"
+      },
+      "cocoso": {
+        "lambda": "kc'deki karışım λ",
+        "lambdaEnds": {
+          "min": "0: yalnız P",
+          "max": "1: yalnız S"
         },
         "lambdaVariant": "λ = {{value}}"
       }
@@ -386,7 +398,8 @@
         "edas": "Her alternatifi, bütün alternatiflerin ortalamasının ne kadar üstünde ya da altında olduğuna göre puanlar; AS büyüdükçe sıra yükselir.",
         "waspas": "Ağırlıklı toplamı, çok zayıf bir değeri daha sert cezalandıran ağırlıklı çarpımla karıştırır; Q büyüdükçe sıra yükselir.",
         "copras": "Her alternatifin fayda kriterlerindeki ağırlıklı payını toplar, maliyet payı küçüldükçe büyüyen bir puan ekler; Q büyüdükçe sıra yükselir.",
-        "marcos": "Her ağırlıklı toplamı hayali bir ideal ve anti-ideal satırla ölçer; f(K) büyüdükçe sıra yükselir, sıra SAW (Doğrusal) ile aynıdır."
+        "marcos": "Her ağırlıklı toplamı hayali bir ideal ve anti-ideal satırla ölçer; f(K) büyüdükçe sıra yükselir, sıra SAW (Doğrusal) ile aynıdır.",
+        "cocoso": "Ağırlıklı toplam S ile üs toplamı P'yi üç biçimde okuyup birleştirir; k büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir."
       },
       "columns": {
         "rank": "Sıra",
@@ -399,7 +412,9 @@
         "belowAverage": "Ortalama altı SN",
         "wsm": "Toplam Q1",
         "wpm": "Çarpım Q2",
-        "utility": "Fayda derecesi N (%)"
+        "utility": "Fayda derecesi N (%)",
+        "weightedSum": "Ağırlıklı toplam S",
+        "powerSum": "Üs toplamı P"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -437,6 +452,11 @@
           "name": "Fayda f(K)",
           "title": "MARCOS faydası f(K)",
           "symbol": "f(K)"
+        },
+        "cocoso": {
+          "name": "Birleşik puan k",
+          "title": "CoCoSo birleşik puanı k",
+          "symbol": "k"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -607,6 +627,16 @@
         "fKMinus": "Fayda fonksiyonu f(K-)",
         "fKPlus": "Fayda fonksiyonu f(K+)",
         "utility": "Fayda f(K)"
+      },
+      "cocoso": {
+        "normalized": "Normalize matris r",
+        "s": "Ağırlıklı toplam S",
+        "p": "Üs toplamı P",
+        "ka": "Toplamdaki pay ka",
+        "kb": "En zayıfa göre kb",
+        "kc": "En iyiye göre kc",
+        "scores": "Birleşik puan k",
+        "lambdaSweep": "Her λ için k"
       }
     },
     "issues": {
@@ -753,6 +783,14 @@
         "antiIdeal": "Anti-ideal AAI",
         "bar": "{{alternative}}: S = {{total}}, K- = {{kMinus}}, K+ = {{kPlus}}, f(K) = {{score}}",
         "readout": "{{alternative}}: {{kMinus}} anti-ideal değerinde (K-), idealin {{kPlus}} kadarına ulaşıyor (K+), f(K) = {{score}}"
+      },
+      "cocoso": {
+        "title": "Üç okuma, tek puan",
+        "caption": "Her çubuk kendi sütununun en büyük değerine göredir. ka, kb ve kc aynı sırayı veriyorsa sıra açıktır; k üçünü birleştirir, en çok kb etkiler.",
+        "row": "{{alternative}}: ka = {{ka}}, kb = {{kb}}, kc = {{kc}}, k = {{k}}",
+        "lambdaTitle": "λ değiştikçe puan k",
+        "axis": "λ: kc'de S'nin payı",
+        "point": "{{alternative}}, λ = {{lambda}}: k = {{value}}, {{rank}}. sıra"
       }
     },
     "flow": {
@@ -823,6 +861,13 @@
         "sAai": "Toplamlar",
         "kMinus": "K- ve K+",
         "utility": "f(K)"
+      },
+      "cocoso": {
+        "normalized": "Normalizasyon",
+        "s": "S ve P",
+        "ka": "Üç okuma",
+        "scores": "k",
+        "lambdaSweep": "λ taraması"
       }
     },
     "pipeline": {
@@ -834,7 +879,7 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, MEREC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS ya da MARCOS ile sıralayın ve hesabın her adımını görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, MEREC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS ya da CoCoSo ile sıralayın ve hesabın her adımını görün."
     }
   },
   "methods": {
@@ -857,7 +902,8 @@
       "merec": "MEREC",
       "waspas": "WASPAS",
       "copras": "COPRAS",
-      "marcos": "MARCOS"
+      "marcos": "MARCOS",
+      "cocoso": "CoCoSo"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -917,7 +963,8 @@
         "merec": "Kriteri çıkarmanın neyi değiştirdiğinden ağırlık.",
         "waspas": "Ağırlıklı toplamı ağırlıklı çarpımla karıştırır.",
         "copras": "Fayda paylarını toplar, küçük maliyet payını ödüllendirir.",
-        "marcos": "Hayali bir ideal ve anti-ideale göre ölçer."
+        "marcos": "Hayali bir ideal ve anti-ideale göre ölçer.",
+        "cocoso": "Bir toplamın ve bir üs toplamının üç okuması, birleşik."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1061,6 +1108,11 @@
           "sawX": "SAW (Doğrusal) skoru S",
           "sawY": "MARCOS f(K)",
           "sawLine": "f(K) = c · S, c = {{c}}"
+        },
+        "cocoso": {
+          "title": "İki puan, üç okuma",
+          "caption": "ka toplam içindeki pay, kb en zayıf firmaya göre büyüklük, kc en iyiye göre λ karışımı; k üçünü birleştirir.",
+          "lambdaCaption": "λ yalnız kc'yi değiştirir, bu yüzden çizgiler pek bükülmez: burada hiçbir λ'da iki firma yer değiştirmiyor."
         }
       }
     }
@@ -1165,6 +1217,16 @@
       "fKMinus": "f(K-) = K+ / (K+ + K-): her alternatif için aynı sayı, bu yüzden bir kez gösterilir.",
       "fKPlus": "f(K+) = K- / (K+ + K-): her alternatif için aynı sayı, bu yüzden bir kez gösterilir.",
       "utility": "Fayda f(K): K+ ve K-, iki fayda fonksiyonuyla birleştirilir. Değer büyüdükçe sıra yükselir; f(K) = c · S olduğundan sıra S'nin sırasıdır."
+    },
+    "cocoso": {
+      "normalized": "Min-maks normalizasyonu: her sütunun en kötü değeri 0, en iyisi 1 olur; maliyet kriterinde tersi. Her işaret çalışır.",
+      "s": "Ağırlıklı toplam S: her normalize değer kriter ağırlığıyla çarpılıp toplanır.",
+      "p": "Üs toplamı P: her normalize değerin kriter ağırlığı kadar kuvveti alınıp toplanır. Ağırlığı 0 olan kriter katılmaz, çünkü 0'ın 0. kuvveti her P'ye 1 eklerdi.",
+      "ka": "ka: S + P'nin tüm alternatiflerin toplamı içindeki payı.",
+      "kb": "kb: S ve P ayrı ayrı en küçüğüne bölünüp toplanır. En zayıf alternatif 2 alır.",
+      "kc": "kc = (λ S + (1 - λ) P) / (λ maks S + (1 - λ) maks P). En iyi karışım 1 alır.",
+      "scores": "Birleşik puan k = (ka kb kc)^(1/3) + (ka + kb + kc) / 3. Değer büyüdükçe sıra yükselir.",
+      "lambdaSweep": "λ = 0; 0,1; ...; 1 için k: λ değiştikçe iki alternatifin nerede yer değiştirdiğini gösterir."
     }
   },
   "validation": {
@@ -1187,7 +1249,8 @@
       "invalid-weight": "{{criterion}} ağırlığına bir sayı gir.",
       "negative-weight": "{{criterion}} ağırlığı {{value}}. Ağırlıklar negatif olamaz.",
       "weights-sum": "Ağırlıkların toplamı {{value}}, toplam 1 olmalı.",
-      "non-positive-average": "{{criterion}} kriterinin ortalaması {{value}}. EDAS her kriterin ortalamasına böler, bu yüzden ortalama 0'dan büyük olmalı."
+      "non-positive-average": "{{criterion}} kriterinin ortalaması {{value}}. EDAS her kriterin ortalamasına böler, bu yüzden ortalama 0'dan büyük olmalı.",
+      "all-worst-alternative": "{{alternative}} ağırlığı olan her kriterde en kötü; S ve P değeri 0 olur ve CoCoSo 0'a bölerdi. Bu alternatifi çıkarın ya da başka bir yöntem seçin."
     }
   },
   "warnings": {
@@ -1236,6 +1299,9 @@
     },
     "copras": {
       "no-cost-criteria": "Ağırlığı 0'dan büyük maliyet kriteri yok; bu yüzden Q = S+ ve COPRAS, SAW'ın toplam seçeneğiyle aynı sonucu veriyor."
+    },
+    "cocoso": {
+      "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin."
     }
   }
 }

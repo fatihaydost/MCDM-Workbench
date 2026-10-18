@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { reweight } from '../../../core/robustness'
 import { rankerFor, type RankingRun } from '../../../core/run'
 import type { Problem } from '../../../core/types'
+import { ProblemValidationError } from '../../../core/validate'
 import { SweepChart } from '../../../features/charts/SweepChart'
 import { useElementWidth } from '../../../features/charts/useElementWidth'
 import { useNumberFormat } from '../../../i18n'
@@ -68,8 +69,21 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
   const current = sweep !== null && sweep.k === k
   const xs = useMemo(() => sweep?.points.map((p) => p.wk) ?? [], [sweep])
   const series = useMemo(() => (sweep ? names.map((_, i) => sweep.points.map((p) => p.scores[i]!)) : []), [sweep, names])
-  // The ranking at the slider's weight: computed exactly there, never read off the grid.
-  const at = useMemo(() => rankerFor(run)(problem)(reweight(weights, k, wk)), [run, problem, weights, k, wk])
+  // The ranking at the slider's weight: computed exactly there, never read off the grid. Where the method cannot rank
+  // (CoCoSo at w_k = 1: an alternative is then worst on every weighted criterion), the nearest end of the sweep's grid.
+  const lo = current ? sweep.points[0]!.wk : base
+  const hi = current ? sweep.points[sweep.points.length - 1]!.wk : base
+  const at = useMemo(() => {
+    const rank = rankerFor(run)(problem)
+    for (const w of [wk, Math.min(hi, Math.max(lo, wk))]) {
+      try {
+        return rank(reweight(weights, k, w))
+      } catch (err) {
+        if (!(err instanceof ProblemValidationError)) throw err
+      }
+    }
+    return rank([...weights])
+  }, [run, problem, weights, k, wk, lo, hi])
   const order = rankOrder(at.ranking)
   const leaders = order.filter((i) => at.ranking[i] === 1)
   const baseLeaders = rankOrder(baseRanking).filter((i) => baseRanking[i] === 1)
