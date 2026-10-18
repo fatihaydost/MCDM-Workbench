@@ -67,8 +67,22 @@ export type EdasIdeaProps = {
   /** Number format for AS, the distances and the table (active locale, 4 decimals). */
   format?: ((value: number) => string) | undefined
   labels?: Partial<EdasIdeaLabels>
+  /**
+   * Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. EDAS_IDEA_STEPS - 1 draws that
+   * step, the last one being the full picture.
+   */
+  step?: number | null | undefined
+  /** Move at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
+  explain?: boolean | undefined
   className?: string | undefined
 }
+
+/**
+ * The steps of the EDAS idea: 0 the distances PDA and NDA from the average line (on a scale of their own), 1 weighted:
+ * every segment takes its criterion's weight and the stacks end at SP and SN, 2 appraisal: AS closes the rows, and
+ * the rows slide from the order of the table to the rank order.
+ */
+export const EDAS_IDEA_STEPS = 3
 
 const FONT = 13
 const HEAD_FONT = 12
@@ -97,7 +111,7 @@ type Active = { row: number; col: number }
  * Static at first paint; when the numbers change the segments move (MOTION.md object constancy, --dur-data).
  * Every number comes from the core's EDAS steps.
  */
-export function EdasIdea({ problem, weights, format = defaultFormat, labels, className }: EdasIdeaProps) {
+export function EdasIdea({ problem, weights, format = defaultFormat, labels, step, explain = false, className }: EdasIdeaProps) {
   const l = { ...EDAS_IDEA_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
@@ -108,6 +122,14 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, cla
   if (!parts) return null
 
   const { above, below, sp, sn, scores, order } = parts
+  const stepping = step !== null && step !== undefined
+  const stage = stepping ? Math.min(Math.max(step, 0), EDAS_IDEA_STEPS - 1) : EDAS_IDEA_STEPS - 1
+  const sum = (row: readonly number[]) => row.reduce((a, b) => a + b, 0)
+  // Step 0 draws the unweighted distances PDA and NDA on a scale of their own; the sums SP and SN follow from step 1.
+  const drawAbove = stage === 0 ? parts.pda : above
+  const drawBelow = stage === 0 ? parts.nda : below
+  const drawSp = stage === 0 ? drawAbove.map(sum) : sp
+  const drawSn = stage === 0 ? drawBelow.map(sum) : sn
   const m = problem.alternatives.length
   const n = problem.criteria.length
   const names = problem.alternatives
@@ -121,8 +143,8 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, cla
   const plotLeft = labelWidth
   const plotRight = Math.max(plotLeft + 1, W - valueWidth)
   // One scale for both sides: the line sits where the longest SN ends, so SP and SN keep their true proportions.
-  const maxSn = maxOf(sn)
-  const maxSp = maxOf(sp)
+  const maxSn = maxOf(drawSn)
+  const maxSp = maxOf(drawSp)
   const span = maxSn + maxSp > 0 ? maxSn + maxSp : 1
   const pxPerUnit = (plotRight - plotLeft) / span
   const center = plotLeft + (maxSn + maxSp > 0 ? maxSn : span / 2) * pxPerUnit
@@ -187,7 +209,7 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, cla
       className={className}
     >
       <svg
-        className={animate ? `${s.svg} ${s.animate}` : s.svg}
+        className={[s.svg, animate && s.animate, explain && s.explain].filter(Boolean).join(' ')}
         width={W}
         height={height}
         viewBox={`0 0 ${W} ${height}`}
@@ -197,24 +219,26 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, cla
         data-testid="edas-idea"
       >
         <g aria-hidden>
-          <text className={s.edasHead} x={belowX} y={HEAD / 2 - 2} textAnchor="end" dominantBaseline="central">
+          <text className={s.edasHead} x={0} y={HEAD / 2 - 2} style={{ transform: `translate(${belowX}px, 0px)` }} textAnchor="end" dominantBaseline="central">
             {belowText}
           </text>
-          <text className={s.edasHead} x={aboveX} y={HEAD / 2 - 2} textAnchor="start" dominantBaseline="central">
+          <text className={s.edasHead} x={0} y={HEAD / 2 - 2} style={{ transform: `translate(${aboveX}px, 0px)` }} textAnchor="start" dominantBaseline="central">
             {aboveText}
           </text>
         </g>
         <g onKeyDown={move} onMouseLeave={() => setActive(null)} data-dimmed={active ? '' : undefined} className={s.sawPlot}>
           {order.map((i, row) => {
-            const segs = divergingSegments(above[i]!, below[i]!, center, pxPerUnit)
-            const first = i === best
+            const segs = divergingSegments(drawAbove[i]!, drawBelow[i]!, center, pxPerUnit)
+            const first = i === best && stage >= 2
+            // Until the last step the rows keep the order of the table; then they slide to the rank order.
+            const place = stage >= 2 ? row : i
             const name = names[i]!
             const short = truncate(name, stacked ? W - valueWidth : labelWidth - GAP, FONT)
             return (
               <g
                 key={i}
                 className={s.sawRow}
-                style={{ transform: `translate(0px, ${HEAD + row * rowStep}px)` }}
+                style={{ transform: `translate(0px, ${HEAD + place * rowStep}px)` }}
                 data-highlight={first || undefined}
                 data-testid="edas-row"
                 data-score={scores[i]}
@@ -277,7 +301,14 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, cla
                       aria-hidden
                     />
                   ))}
-                <text className={s.sawValue} x={W} y={barY + BAR / 2} textAnchor="end" dominantBaseline="central">
+                <text
+                  className={`${s.sawValue} ${s.stageItem}`}
+                  data-off={stage >= 2 ? undefined : ''}
+                  x={W}
+                  y={barY + BAR / 2}
+                  textAnchor="end"
+                  dominantBaseline="central"
+                >
                   {texts[i]}
                 </text>
               </g>

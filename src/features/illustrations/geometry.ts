@@ -437,6 +437,9 @@ export function vikorParts(problem: Problem, weights: readonly number[], params:
 
 export type EdasParts = {
   result: RankingResult
+  /** pda[i][j] and nda[i][j]: the core's distances above and below the average, before the weights. */
+  pda: number[][]
+  nda: number[][]
   /** above[i][j] = w_j PDA_ij and below[i][j] = w_j NDA_ij, the core's weighted distances (one of them is 0). */
   above: number[][]
   below: number[][]
@@ -460,6 +463,8 @@ export function edasParts(problem: Problem, weights: readonly number[]): EdasPar
   const order = result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b)
   return {
     result,
+    pda: stepMatrix(result.steps, 'edas.pda'),
+    nda: stepMatrix(result.steps, 'edas.nda'),
     above: stepMatrix(result.steps, 'edas.weightedPda'),
     below: stepMatrix(result.steps, 'edas.weightedNda'),
     sp: stepVector(result.steps, 'edas.sp'),

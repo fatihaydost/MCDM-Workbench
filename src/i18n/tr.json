@@ -1123,7 +1123,12 @@
         },
         "edas": {
           "title": "Kriter kriter ortalamadan iyi mi, kötü mü",
-          "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık; AS her birini en büyük SP ya da SN'ye böler."
+          "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık; AS her birini en büyük SP ya da SN'ye böler.",
+          "steps": {
+            "s1": "Uzaklık: çizginin sağı ortalamanın üstünü, solu altını gösterir (PDA ve NDA).",
+            "s2": "Ağırlık: her uzaklık kriterinin ağırlığıyla çarpılır; yığınlar SP ve SN'de biter.",
+            "s3": "Değerlendirme: AS, SP ile SN'yi tek puanda birleştirir; en yüksek AS birinci sırada."
+          }
         },
         "sd": {
           "title": "Geniş yayılım, çok ağırlık",
