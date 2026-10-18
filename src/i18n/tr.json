@@ -1175,7 +1175,12 @@
           "sumCaption": "Her nokta tek bir doğru üzerinde, bu yüzden hiçbir iki forklift yer değiştiremez; G yalnız S'nin işaretini belirler.",
           "sumX": "Min-maks ağırlıklı toplam",
           "sumY": "MABAC S",
-          "sumLine": "S = toplam - B, B = {{border}}"
+          "sumLine": "S = toplam - B, B = {{border}}",
+          "steps": {
+            "s1": "Her satırdaki çizgi sınır G; üstü üst bölge, altı alt bölge.",
+            "s2": "Her kriterin G'ye uzaklığı bir çubuktur: forklift G'den iyiyse yukarı, kötüyse aşağı.",
+            "s3": "Çubukları toplayın: çubuk skor S'dir, en yüksek S ilk sırada."
+          }
         }
       }
     }

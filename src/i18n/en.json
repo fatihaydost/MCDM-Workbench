@@ -1175,7 +1175,12 @@
           "sumCaption": "Every dot sits on one line, so no two forklifts can swap; G only decides the sign of S.",
           "sumX": "Min-max weighted sum",
           "sumY": "MABAC S",
-          "sumLine": "S = sum - B, B = {{border}}"
+          "sumLine": "S = sum - B, B = {{border}}",
+          "steps": {
+            "s1": "The line in each row is the border G; above it is the upper area, below it the lower one.",
+            "s2": "Each criterion's distance from G is a stick: up if the forklift is better than G, down if worse.",
+            "s3": "Add the sticks up: the bar is the score S, and the highest S ranks first."
+          }
         }
       }
     }

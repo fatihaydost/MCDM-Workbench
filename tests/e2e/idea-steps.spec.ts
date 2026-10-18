@@ -81,7 +81,7 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       expect(await drawing(page)).toEqual(full)
     })
 
-    for (const [method, count] of [['entropy', 4], ['saw', 3], ['cocoso', 4]] as const) {
+    for (const [method, count] of [['entropy', 4], ['saw', 3], ['cocoso', 4], ['mabac', 3]] as const) {
       test(`${method}: ${count} steps, the last one is the full picture`, async ({ page }) => {
         await page.goto(`/methods/${method}`)
         await expect(page.locator('#idea figure').first()).toBeVisible()
@@ -190,7 +190,7 @@ test('CRITIC: σ is drawn to its true length, in the full picture and at the con
 test('the step sentence never moves the text below it (390 and 1440 px, every method with steps)', async ({ page }) => {
   test.setTimeout(90_000)
   for (const width of [390, 1440])
-  for (const [method, count] of [['topsis', 5], ['critic', 4], ['entropy', 4], ['saw', 3], ['cocoso', 4]] as const) {
+  for (const [method, count] of [['topsis', 5], ['critic', 4], ['entropy', 4], ['saw', 3], ['cocoso', 4], ['mabac', 3]] as const) {
     await page.setViewportSize({ width, height: 900 })
     await page.goto(`/methods/${method}`)
     await expect(page.locator('#idea figure').first()).toBeVisible()
