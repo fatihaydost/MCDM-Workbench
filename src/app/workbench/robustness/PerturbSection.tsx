@@ -57,7 +57,7 @@ export function PerturbSection({ problem, weights, run, names, criteria }: Props
     return who ? `${t('perturb.cantRank')} (${t('blockedBy', { name: who })})` : t('perturb.cantRank')
   }
   const deltaText = DEFAULT_DELTAS.map((d) => formatDelta(d, nf.lang))
-  const labelWidth = Math.min(140, Math.max(...criteria.map((c) => estimateTextWidth(c, 13))) + 12)
+  const labelWidth = Math.min(140, Math.max(...criteria.map((c) => estimateTextWidth(c, 13))) + 24)
   const compact = labelWidth + DEFAULT_DELTAS.length * (CELL + GAP) > boxWidth
 
   const table = {

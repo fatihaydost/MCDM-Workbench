@@ -44,6 +44,20 @@ export function WorkbenchLayout({ stage, onStageChange, stageMeta, explanation, 
   const [sheetOpen, setSheetOpen] = useState(false)
   // Six stages do not fit a phone: the switcher scrolls inside its bar, and the open stage is kept in view.
   const switcher = useRef<HTMLElement>(null)
+  // A fade on the right edge says there are more stages to scroll to.
+  const [moreRight, setMoreRight] = useState(false)
+  useEffect(() => {
+    const nav = switcher.current
+    if (!nav) return
+    const update = () => setMoreRight(nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 4)
+    update()
+    nav.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      nav.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [])
   useEffect(() => {
     // scrollLeft, not scrollIntoView: that would move the keyboard's starting point away from the skip link.
     const nav = switcher.current
@@ -89,7 +103,14 @@ export function WorkbenchLayout({ stage, onStageChange, stageMeta, explanation, 
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Stage switcher, under md */}
-        <nav ref={switcher} aria-label={t('workbench.stagesLabel')} className="overflow-x-auto border-b border-line px-4 py-2 md:hidden">
+        <nav
+          ref={switcher}
+          aria-label={t('workbench.stagesLabel')}
+          className={cn(
+            'overflow-x-auto border-b border-line px-4 py-2 md:hidden',
+            moreRight && '[mask-image:linear-gradient(to_right,#000_calc(100%-32px),transparent)]',
+          )}
+        >
           <SegmentedControl<Stage>
             aria-label={t('workbench.stagesLabel')}
             value={stage}

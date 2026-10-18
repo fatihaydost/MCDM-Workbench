@@ -85,6 +85,7 @@
     "verified": {
       "title": "Yayımlanmış sonuçlarla doğrulandı",
       "lead": "Test takımı yayımlanmış örnekleri yeniden hesaplar ve basılı her basamağı karşılaştırır.",
+      "matched": "Neyin eşleştiği",
       "toleranceNote": "Tolerans, son basılı basamağın yarım birimidir.",
       "critic": {
         "claim": "Ağırlıklar ve standart sapmalar {{citation}} ile {{decimals}} basamağa kadar aynı."
