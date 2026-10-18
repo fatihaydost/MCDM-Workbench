@@ -167,3 +167,61 @@ test.describe('1440 px', () => {
     await expect(page.getByRole('radio', { name: /^Recompute/ })).toHaveCount(0)
   })
 })
+
+// Owner review shots (Turkish; phone dark, desktop light). Run: SHOTS=1 pnpm e2e -g "owner screenshots". Output .shots/ (not committed).
+test.describe('owner screenshots', () => {
+  test.skip(!process.env.SHOTS, 'set SHOTS=1')
+  for (const pass of [
+    { tag: 'dark-390', width: 390, height: 844, scheme: 'dark' as const },
+    { tag: 'light-1440', width: 1440, height: 900, scheme: 'light' as const },
+  ]) {
+    test(`owner screenshots ${pass.tag}`, async ({ browser }) => {
+      const context = await browser.newContext({
+        viewport: { width: pass.width, height: pass.height },
+        colorScheme: pass.scheme,
+        reducedMotion: 'reduce',
+        locale: 'tr-TR',
+      })
+      await context.addInitScript(
+        ([theme]) => {
+          try {
+            localStorage.setItem('kds.lang', 'tr')
+            localStorage.setItem('kds.theme', theme!)
+          } catch {}
+        },
+        [pass.scheme],
+      )
+      const page = await context.newPage()
+      const shot = (name: string) => page.screenshot({ path: `${process.cwd()}/.shots/bwm-${name}-${pass.tag}-tr.png`, fullPage: true })
+      const trCard = page.getByRole('group', { name: /kaç kat daha önemli/ })
+      const trPairs = page.getByRole('navigation', { name: 'Tüm çiftler' })
+      const trTap = async (v: number, next: string | null) => {
+        await trCard.locator(`[data-value="${v}"]`).click()
+        if (next === null) await expect(trCard).toHaveCount(0)
+        else await expect(trCard).toHaveAccessibleDescription(next)
+      }
+
+      await page.goto('/app?example=krishnan-2021-smartphones&stage=weights')
+      await page.getByRole('radio', { name: 'BWM', exact: true }).click()
+      // Criteria order: Price, Screen size, Pixel density, Thickness, Mass.
+      await page.getByRole('radiogroup', { name: 'En önemli (en iyi)' }).getByRole('radio').nth(1).click()
+      await page.getByRole('radiogroup', { name: 'En önemsiz (en kötü)' }).getByRole('radio').nth(4).click()
+      await expect(trCard).toHaveAccessibleDescription('1 / 7')
+      await shot('anchors')
+
+      for (const [k, v] of [8, 2, 4].entries()) await trTap(v, `${k + 2} / 7`)
+      await shot('card')
+
+      for (const [k, v] of [3, 4, 8, 3].entries()) await trTap(v, k + 1 < 4 ? `${k + 5} / 7` : null)
+      await trPairs.getByRole('button', { name: /bu yanıtı gözden geçirin/ }).click()
+      await expect(trCard).toContainText('2 kullanın')
+      await shot('flagged')
+
+      await trCard.getByRole('button', { name: '2 kullanın' }).click()
+      await expect(trCard).toHaveCount(0)
+      await expect(weightCells(page)).toHaveText(WEIGHTS.map((w) => w.replace('.', ',')))
+      await shot('complete')
+      await context.close()
+    })
+  }
+})
