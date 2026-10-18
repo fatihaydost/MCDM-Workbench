@@ -137,7 +137,7 @@ export const bwm: MethodContent = {
     ],
     pitfalls: [
       'Dokuz civarından fazla kriterde soruları iyi yanıtlamak zorlaşır; kriterleri gruplayıp her grubu ayrı ağırlıklandırın.',
-      'Doğrusal modelin xi değeri ağırlık birimindedir ve xi* değerinden çok küçüktür (0,0109 ve 0,1459); Rezaei'nin (2015) CI değerlerine bölmeyin.',
+      'Doğrusal modelin xi değeri ağırlık birimindedir ve xi* değerinden çok küçüktür (0,0109 ve 0,1459); Rezaei (2015) CI değerlerine bölmeyin.',
       'İki kriter eşit derecede en iyiyse birini B seçin, diğeri için 1 girin.',
     ],
   },
