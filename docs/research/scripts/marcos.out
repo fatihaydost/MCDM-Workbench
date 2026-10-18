@@ -1,0 +1,39 @@
+== F1 Stevic & Brkovic 2020 (Table 4 weights)
+  sum w = 1.0000; S_aai = 0.469642; S_ai = 1.000000; f(K-) = 0.319562 (spread 5.6e-17); f(K+) = 0.680438
+  S     [0.848523, 0.898573, 0.900133, 0.876865, 0.876343, 0.626361, 0.818648, 0.930889, 0.869446, 0.810536, 0.843626, 0.622723, 0.855435, 0.842671, 0.829644, 0.821445, 0.798745, 0.904284, 0.908422, 0.866587, 0.839891, 0.886533, 0.802751]
+  K-    [1.806746, 1.913318, 1.916639, 1.867094, 1.865982, 1.3337, 1.743133, 1.982127, 1.851298, 1.725861, 1.796319, 1.325953, 1.821464, 1.794286, 1.766548, 1.74909, 1.700755, 1.925477, 1.934288, 1.845209, 1.788366, 1.887681, 1.709286]
+  f(K)  [0.737795, 0.781314, 0.78267, 0.762438, 0.761984, 0.544624, 0.711818, 0.809413, 0.755988, 0.704765, 0.733537, 0.541461, 0.743805, 0.732707, 0.72138, 0.714251, 0.694513, 0.78628, 0.789878, 0.753501, 0.730289, 0.770845, 0.697996]
+  max|S - pub| = 0.00057; max|K- - pub| = 0.00154; max|f(K) - pub| = 0.00062
+  ranking ours [12, 5, 4, 7, 8, 22, 18, 1, 9, 19, 13, 23, 11, 14, 16, 17, 21, 3, 2, 10, 15, 6, 20] MATCH
+  c = (a+b)/(a^2+ab+b^2) = 0.869505; max|f(K) - c*S| = 2.2e-16; max|S - SAW linearMax| = 0.0e+00
+  AAI row N vs Table 3: 0.00044; AAI row V vs Table 4: 0.00067
+  chained-rounding check A1: 0.849/0.470 = 1.8064; 2.656/3.596 = 0.7386
+  Figure-2 weights ranking [11, 5, 4, 6, 9, 22, 18, 1, 8, 19, 13, 23, 15, 14, 16, 17, 20, 3, 2, 10, 12, 7, 21]
+  moved (alt, Table5 rank, Fig2 rank): [(1, 12, 11), (4, 7, 6), (5, 8, 9), (9, 9, 8), (13, 11, 15), (17, 21, 20), (21, 15, 12), (22, 6, 7), (23, 20, 21)]
+  eps 0.001: f(K) A6 0.5446, A12 0.5415; rank A6 22, A12 23; others unchanged: True
+  eps 0.005: f(K) A6 0.5597, A12 0.5477; rank A6 22, A12 23; others unchanged: True
+  eps 0.01: f(K) A6 0.5783, A12 0.5554; rank A6 22, A12 23; others unchanged: True
+  eps 0.02: f(K) A6 0.6146, A12 0.5703; rank A6 22, A12 23; others unchanged: True
+== F2 Madenoglu 2020
+  sum w = 1.0000; S_aai = 0.368311; S_ai = 1.000000; f(K-) = 0.269172 (spread 5.6e-17); f(K+) = 0.730828
+  S     [0.69461, 0.434683, 0.895788, 0.870539, 0.658331, 0.670499]
+  K-    [1.885935, 1.180206, 2.432152, 2.3636, 1.787435, 1.820471]
+  f(K)  [0.631958, 0.395476, 0.814991, 0.792019, 0.598952, 0.610022]
+  max|S - pub| = 0.00468; max|K- - pub| = 0.00407; max|f(K) - pub| = 0.00501
+  ranking ours [3, 6, 1, 2, 5, 4] MATCH
+  c = (a+b)/(a^2+ab+b^2) = 0.909803; max|f(K) - c*S| = 5.6e-17; max|S - SAW linearMax| = 0.0e+00
+  AAI row vs Table 4: 0.000; AI row: 0.000
+  N (alternatives) vs Table 5: 0.0056 (table at 2 d.p.)
+  S_aai printed 0.37: ours 0.3683
+== pyDecision marcos_method: F1 max diff 0.0e+00, F2 0.0e+00
+== random 2000 cases (m 2..8, n 2..7): max rel spread of f(K)/S_saw and |f(K) - cS| = 5.8e-16; ranking differences 0/2000
+== user AI/AAI on F2 (scale ends 9/1): f(K) spread vs c*S 1.1e-16; S equals SAW with reweighted w (diff 5.6e-17); ranking [3, 6, 1, 2, 5, 4] vs data-derived [3, 6, 1, 2, 5, 4]
+== user AI beyond the data (factor 1..2 per column): ranking changed in 634/2000 random cases (effect = reweighting w_j by 1/u_j, f(K) still c*S)
+== all alternatives equal: S [1.0, 1.0, 1.0], S_aai 1.0, f(K) [0.666667, 0.666667, 0.666667] (2/3 = 0.666667)
+== single alternative: f(K) [0.666667]
+== constant column (w 0.2, others scaled 0.8): ranking [2, 3, 1] vs without [2, 3, 1]; f(K) [0.6271, 0.5457, 0.7575] vs [0.6033, 0.4955, 0.7756] (values change, order does not)
+== zero in cost column: f(K) [nan, nan]
+== zero in benefit column: f(K) [0.4615, 0.7692] (S_aai 0.333)
+== negative benefit value: N row [-0.5, 1.0], f(K) [0.2484, 0.828]
+== project saw.ts linearMax (302 problems: F1, F2, 300 random): max|N_MARCOS - linearMaxNormalize| = 0.0e+00; max|f(K) - c*S_saw.ts| = 3.3e-16; ranking differences 0/302
+   F1 saw.ts ranking == Table 5: True; F2: True

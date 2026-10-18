@@ -1,0 +1,39 @@
+{
+  "id": "marcos-madenoglu-2020",
+  "source": "Madenoglu 2020, Economics Business and Organization Research 2(2):99-120, Tables 3, 4, 7 (DergiPark article-file 1432780)",
+  "alternatives": ["A1", "A2", "A3", "A4", "A5", "A6"],
+  "criteria": ["F1 price stability", "F2 transport cost per product", "F3 financial reliability", "F4 cost-reduction activities", "M1 customer satisfaction", "M2 response time", "M3 reputation", "M4 customer growth", "I1 quality", "I2 production flexibility", "I3 delivery time", "I4 capacity", "Y1 openness to innovation", "Y2 employee satisfaction", "Y3 competitiveness", "Y4 information sharing"],
+  "types": ["benefit", "cost", "benefit", "benefit", "benefit", "cost", "benefit", "benefit", "benefit", "benefit", "cost", "benefit", "benefit", "benefit", "benefit", "benefit"],
+  "weights": [0.153, 0.022, 0.103, 0.048, 0.013, 0.015, 0.033, 0.007, 0.128, 0.046, 0.175, 0.095, 0.058, 0.024, 0.071, 0.009],
+  "matrix": [
+    [5.0, 4.72, 7.0, 7.4, 1.91, 3.98, 3.98, 5.24, 6.08, 4.33, 5.74, 7.61, 1.91, 3.98, 7.0, 8.28],
+    [1.71, 4.72, 3.56, 1.71, 4.22, 4.22, 4.22, 4.22, 1.71, 3.56, 3.98, 5.0, 1.91, 2.47, 3.0, 2.08],
+    [5.59, 5.59, 6.26, 5.0, 6.8, 3.98, 6.8, 7.0, 9.0, 8.28, 2.92, 7.61, 7.4, 7.61, 6.08, 8.28],
+    [5.74, 3.0, 5.74, 6.24, 6.8, 3.56, 6.8, 7.4, 7.61, 7.4, 3.66, 9.0, 6.8, 6.24, 7.61, 7.4],
+    [7.0, 5.74, 6.26, 6.26, 8.28, 6.24, 7.61, 6.8, 3.27, 3.27, 4.33, 3.66, 2.92, 3.66, 4.33, 3.66],
+    [4.22, 5.59, 6.8, 4.22, 2.92, 3.56, 4.72, 4.22, 5.0, 5.59, 4.22, 5.59, 4.72, 5.13, 5.59, 6.8]
+  ],
+  "published": {
+    "S_aai": 0.37,
+    "S_ai": 1.0,
+    "S": [0.69, 0.43, 0.9, 0.87, 0.66, 0.67],
+    "K_minus": [1.89, 1.18, 2.43, 2.36, 1.79, 1.82],
+    "fK_minus": 0.27,
+    "fK_plus": 0.73,
+    "fK": [0.63, 0.4, 0.82, 0.79, 0.6, 0.61],
+    "ranking": [3, 6, 1, 2, 5, 4]
+  },
+  "expected": {
+    "tolerance": 0.006,
+    "S_aai": 0.368311,
+    "S_ai": 1.0,
+    "c": 0.909803,
+    "fK_minus": 0.269172,
+    "fK_plus": 0.730828,
+    "S": [0.69461, 0.434683, 0.895788, 0.870539, 0.658331, 0.670499],
+    "K_minus": [1.885935, 1.180206, 2.432152, 2.3636, 1.787435, 1.820471],
+    "fK": [0.631958, 0.395476, 0.814991, 0.792019, 0.598952, 0.610022],
+    "ranking": [3, 6, 1, 2, 5, 4],
+    "tolerance_vs_published": 0.006
+  }
+}
