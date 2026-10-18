@@ -50,7 +50,7 @@ export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, fo
   // Short values ("44%") need no 44 px column: the narrowest cell that still holds the widest printed value, so ten
   // rank columns fit a 390 px phone instead of scrolling sideways.
   const widest = Math.max(0, ...values.flatMap((row) => row.map((v) => estimateTextWidth(text(v), 12))))
-  const minCellWidth = Math.min(44, Math.max(28, Math.ceil(widest) + 10))
+  const minCellWidth = Math.min(44, Math.max(26, Math.ceil(widest) + 6))
   const layout = useMemo(() => layoutHeatmap({ rowLabels, colLabels, width, minCellWidth }), [rowLabels, colLabels, width, minCellWidth])
   const { labelWidth, headerHeight, cellWidth, cellHeight } = layout
 

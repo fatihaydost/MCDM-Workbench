@@ -5,7 +5,7 @@
  * still busy when a new request comes (the calculation is synchronous, so a message could not interrupt it).
  */
 import { rankerFor, type RankingRun } from '../../../core/run'
-import { monteCarlo, reweight, sweepWeight, type Concentration, type MonteCarloResult, type Sweep } from '../../../core/robustness'
+import { monteCarlo, reweight, sweepWeight, type Concentration, type MonteCarloProgress, type MonteCarloResult, type Sweep } from '../../../core/robustness'
 import type { Problem } from '../../../core/types'
 import { switchMarks, topSwitchMarks, type Mark } from './helpers'
 
@@ -24,15 +24,22 @@ export type WorkerRequest = MonteCarloRequest | SweepRequest
 
 export type WorkerResponse =
   | { id: number; kind: 'monteCarlo'; result: MonteCarloResult }
+  /** A running Monte Carlo's partial counts; more answers follow, the last one is the result. */
+  | { id: number; kind: 'progress'; progress: MonteCarloProgress }
   | { id: number; kind: 'sweep'; result: SweepResult }
   | { id: number; error: string }
 
 /** Runs one request; shared with the main-thread fallback where workers are not available. */
-export function runRequest(req: WorkerRequest): WorkerResponse {
+export function runRequest(req: WorkerRequest, onProgress?: (res: WorkerResponse) => void): WorkerResponse {
   const rankFor = rankerFor(req.run)
   try {
     if (req.kind === 'monteCarlo') {
-      const result = monteCarlo(req.problem, req.weights, rankFor, { concentration: req.concentration, n: req.n, seed: req.seed })
+      const result = monteCarlo(req.problem, req.weights, rankFor, {
+        concentration: req.concentration,
+        n: req.n,
+        seed: req.seed,
+        ...(onProgress ? { onProgress: (progress: MonteCarloProgress) => onProgress({ id: req.id, kind: 'progress', progress }) } : {}),
+      })
       return { id: req.id, kind: 'monteCarlo', result }
     }
     const sweep = sweepWeight(req.problem, req.weights, rankFor, req.k)
@@ -53,5 +60,5 @@ type WorkerScope = { onmessage: ((e: MessageEvent<WorkerRequest>) => void) | nul
 // Only inside a worker (no `document`): the fallback imports runRequest on the main thread too.
 if (typeof document === 'undefined' && typeof self !== 'undefined') {
   const scope = self as unknown as WorkerScope
-  scope.onmessage = (e) => scope.postMessage(runRequest(e.data))
+  scope.onmessage = (e) => scope.postMessage(runRequest(e.data, (res) => scope.postMessage(res)))
 }

@@ -395,6 +395,14 @@ export type MonteCarloResult = {
   meanWs: number
 }
 
+/**
+ * A running Monte Carlo's partial answer: `done` of `total` draws made, and acceptability[i][r] over the draws ranked so
+ * far (the same shape as the result's, so a picture can draw it before the end). Not a different method: the last
+ * snapshot is the result's own acceptability.
+ */
+export type MonteCarloProgress = { done: number; total: number; acceptability: number[][] }
+export type MonteCarloProgressFn = (p: MonteCarloProgress) => void
+
 /** Seeded PRNG (mulberry32): same seed, same sequence, on every platform. Values in [0, 1), 32-bit seed. */
 export function createRng(seed: number): () => number {
   let a = seed >>> 0
@@ -488,10 +496,11 @@ export function monteCarlo(
   problem: Problem,
   weights: readonly number[],
   rankFor: RankerFor,
-  opts: { concentration: Concentration; n?: number; seed?: number },
+  opts: { concentration: Concentration; n?: number; seed?: number; onProgress?: MonteCarloProgressFn; progressEvery?: number },
 ): MonteCarloResult {
   const runs = opts.n ?? 10000
   if (!Number.isInteger(runs) || runs < 1) throw new RangeError('n must be a positive integer')
+  const every = Math.max(1, Math.floor(opts.progressEvery ?? 1000))
   const rng = createRng(opts.seed ?? 1)
   const c = opts.concentration
   let alpha: number[]
@@ -527,6 +536,10 @@ export function monteCarlo(
     if (top) sameTop++
     sumRho += spearman(baseRanking, ranking)
     sumWs += wsCoefficient(baseRanking, ranking)
+    if (opts.onProgress && (run + 1) % every === 0 && run + 1 < runs) {
+      const ranked = run + 1 - blocked
+      if (ranked > 0) opts.onProgress({ done: run + 1, total: runs, acceptability: counts.map((row) => row.map((x) => x / ranked)) })
+    }
   }
 
   const ranked = runs - blocked

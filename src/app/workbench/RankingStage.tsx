@@ -56,7 +56,10 @@ export function RankingTable({
   const after = extra.filter((c) => c.after)
   const order = rankOrder(result)
   // Results (compact): a small bar before each score, the same raw scale as the score chart on Ranking.
-  const topScore = Math.max(...result.scores.map((v) => (Number.isFinite(v) ? Math.max(v, 0) : 0)), 0)
+  // A lower-is-better score (VIKOR's Q) has its best row on the shortest bar, so it gets none.
+  const finite = result.scores.filter(Number.isFinite)
+  const lowerBetter = finite.length > 1 && Math.min(...finite) < Math.max(...finite) && result.scores[bestIndex(result)] === Math.min(...finite)
+  const topScore = lowerBetter ? 0 : Math.max(...finite.map((v) => Math.max(v, 0)), 0)
   const narrowHidden = !compact && view.columnsFromSm === true
   const extraClass = narrowHidden ? 'max-sm:hidden' : undefined
   // A column after the score (COPRAS's N) comes with long words ("Relative significance Q", "Utility degree N (%)"):

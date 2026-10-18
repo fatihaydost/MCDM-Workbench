@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Concentration, MonteCarloResult } from '../../../core/robustness'
+import type { Concentration, MonteCarloProgress, MonteCarloResult } from '../../../core/robustness'
 import type { RankingRun } from '../../../core/run'
 import type { Problem } from '../../../core/types'
 import { runRequest, type SweepResult, type WorkerRequest, type WorkerResponse } from './robustness.worker'
@@ -10,7 +10,14 @@ export type JobState<T> = {
   /** A calculation for the current inputs is running. */
   busy: boolean
   failed: boolean
+  /** The job has been running longer than SLOW_MS: only then does a picture show its progress. */
+  slow: boolean
+  /** Partial counts of a running Monte Carlo (null otherwise, and once the job is done). */
+  progress: MonteCarloProgress | null
 }
+
+/** A job that is done sooner than this shows nothing of its progress: a flash of half a picture is noise. */
+export const SLOW_MS = 250
 
 type Job = WorkerRequest extends infer R ? (R extends WorkerRequest ? Omit<R, 'id'> : never) : never
 
@@ -74,7 +81,7 @@ export function startJob(
  * dropped by id. The previous result stays until the new one arrives.
  */
 function useWorkerJob<T>(job: Job): JobState<T> {
-  const [state, setState] = useState<JobState<T>>({ result: null, busy: true, failed: false })
+  const [state, setState] = useState<JobState<T>>({ result: null, busy: true, failed: false, slow: false, progress: null })
   const slot = useRef<WorkerSlot>({ worker: null, running: false, broken: false })
   const lastId = useRef(0)
 
@@ -83,12 +90,26 @@ function useWorkerJob<T>(job: Job): JobState<T> {
     const req = { ...job, id } as WorkerRequest
     const done = (res: WorkerResponse) => {
       if (res.id !== lastId.current) return
+      if ('progress' in res) {
+        setState((s) => ({ ...s, progress: res.progress }))
+        return
+      }
       slot.current.running = false
-      setState((s) => ('result' in res ? { result: res.result as T, busy: false, failed: false } : { result: s.result, busy: false, failed: true }))
+      setState((s) =>
+        'result' in res
+          ? { result: res.result as T, busy: false, failed: false, slow: false, progress: null }
+          : { result: s.result, busy: false, failed: true, slow: false, progress: null },
+      )
     }
-    setState((s) => (s.busy && !s.failed ? s : { ...s, busy: true, failed: false }))
+    setState((s) => (s.busy && !s.failed && !s.slow && !s.progress ? s : { ...s, busy: true, failed: false, slow: false, progress: null }))
+    // Progress is shown only for a job that outlasts SLOW_MS.
+    const timer = setTimeout(() => setState((s) => (s.busy ? { ...s, slow: true } : s)), SLOW_MS)
     // Without a worker the calculation runs after this frame, so the previous result and the status paint first.
-    return startJob(slot.current, req, done)
+    const cancel = startJob(slot.current, req, done)
+    return () => {
+      clearTimeout(timer)
+      cancel?.()
+    }
   }, [job])
 
   useEffect(
