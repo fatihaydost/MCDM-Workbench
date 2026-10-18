@@ -43,6 +43,22 @@ import {
   type TableDensity,
 } from '../../ui'
 import { Formula } from '../../ui/Formula'
+import { emptyJudgements, setPair } from '../../core/judgements'
+import type { Ratio } from '../../core/types'
+import {
+  AnchorPicker,
+  JudgementPanel,
+  PairList,
+  PairwiseCard,
+  ahpQuestions,
+  answerOf,
+  nextUnanswered,
+  progress,
+  type JudgementPanelLabels,
+  type Mode,
+  type PairListLabels,
+  type PairwiseLabels,
+} from '../../features/pairwise'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -87,6 +103,137 @@ const swatches = [
 ] as const
 
 const krishnan = examples[0]!
+
+const pairNames = ['Price', 'Comfort', 'Safety', 'Fuel']
+const pairLabels: PairwiseLabels = {
+  question: 'Which matters more?',
+  fixed: (a, b) => `How much more important is ${a} than ${b}?`,
+  sides: 'Which matters more',
+  values: 'By how much',
+  equal: 'Equally important',
+  words: { 1: 'equal', 3: 'moderately', 5: 'strongly', 7: 'very strongly', 9: 'extremely' },
+  valueName: (v) =>
+    v === 1 ? '1, equally important' : `${v}, ${{ 3: 'moderately ', 5: 'strongly ', 7: 'very strongly ', 9: 'extremely ' }[v] ?? ''}more important`,
+  progress: (n, total) => `${n} / ${total}`,
+  back: 'Back',
+  atMost: (cap) => `At most ${cap}`,
+  suggest: (answer) => `Your other answers suggest ${answer}`,
+  use: (v) => `Use ${v}`,
+}
+const panelLabels: JudgementPanelLabels = {
+  title: 'Weights',
+  provisional: 'Provisional, more answers refine them',
+  consistency: 'Consistency (CR)',
+  notApplicable: 'not applicable',
+  value: (c) => `CR ${c.approximate ? '≈ ' : ''}${c.value.toFixed(2)}${c.threshold === null ? '' : ` / ${c.threshold.toFixed(2)}`}`,
+  ok: 'Consistent',
+  warning: (name) => (name ? `Look at ${name}` : 'Inconsistent'),
+  format: (n) => n.toFixed(2),
+}
+const listLabels: PairListLabels = { title: 'All pairs', pair: (a, b) => `${a} vs ${b}`, flagged: 'check this answer' }
+const AHP: Mode = { kind: 'ahp' }
+const ahpQs = ahpQuestions(pairNames.length)
+
+/** Live AHP card, BWM card under a cap of 3, a flagged card and the panels. */
+function PairwiseDemo() {
+  const [j, setJ] = useState(() => emptyJudgements(pairNames.length))
+  const [current, setCurrent] = useState(0)
+  const [anchors, setAnchors] = useState<{ best: number | null; worst: number | null }>({ best: 2, worst: 3 })
+  const [bwmValue, setBwmValue] = useState<Ratio | null>(null)
+  const [flagValue, setFlagValue] = useState<Ratio>(7)
+  const q = ahpQs[current]!
+  const done = progress(ahpQs, j.pairs, () => AHP)
+  const answer = (v: Ratio) => {
+    const next = setPair(j, q.a, q.b, v)
+    setJ(next)
+    setCurrent(nextUnanswered(ahpQs, next.pairs, () => AHP, current) ?? current)
+  }
+  return (
+    <div data-dev="pairwise" className="flex flex-col gap-10">
+      <div data-card="ahp" className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
+        <PairwiseCard
+          question={q}
+          mode={AHP}
+          names={pairNames}
+          value={j.pairs[q.a]![q.b]!}
+          position={{ index: current, total: ahpQs.length }}
+          onAnswer={answer}
+          onBack={() => setCurrent((c) => Math.max(0, c - 1))}
+          labels={pairLabels}
+        />
+        <div className="flex max-w-[480px] flex-col gap-8">
+          <JudgementPanel
+            names={pairNames}
+            weights={done.answered === 0 ? null : [0.41, 0.18, 0.29, 0.12]}
+            provisional={done.answered < done.total}
+            consistency={null}
+            flagged={null}
+            labels={panelLabels}
+          />
+          <PairList
+            questions={ahpQs}
+            answers={ahpQs.map((x) => answerOf(x, j.pairs, AHP))}
+            current={current}
+            flagged={null}
+            names={pairNames}
+            onJump={setCurrent}
+            labels={listLabels}
+          />
+        </div>
+      </div>
+      <div data-card="bwm" className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
+        <PairwiseCard
+          question={{ a: 2, b: 0, fixed: 'a' }}
+          mode={{ kind: 'bwm', cap: 3 }}
+          names={pairNames}
+          value={bwmValue}
+          position={{ index: 1, total: 5 }}
+          onAnswer={setBwmValue}
+          onBack={() => {}}
+          labels={pairLabels}
+        />
+        <AnchorPicker
+          names={pairNames}
+          best={anchors.best}
+          worst={anchors.worst}
+          onChange={(best, worst) => setAnchors({ best, worst })}
+          labels={{ best: 'Most important (best)', worst: 'Least important (worst)' }}
+        />
+      </div>
+      <div data-card="flagged" className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
+        <PairwiseCard
+          question={{ a: 0, b: 2 }}
+          mode={AHP}
+          names={pairNames}
+          value={flagValue}
+          position={{ index: 3, total: 6 }}
+          flag={{ suggestion: 3 }}
+          onAnswer={setFlagValue}
+          onBack={() => {}}
+          labels={pairLabels}
+        />
+        <div className="flex max-w-[480px] flex-col gap-8">
+          <JudgementPanel
+            names={pairNames}
+            weights={flagValue === 7 ? [0.52, 0.16, 0.22, 0.1] : [0.44, 0.17, 0.28, 0.11]}
+            provisional={false}
+            consistency={{ value: flagValue === 7 ? 0.14 : 0.04, threshold: 0.1, approximate: false }}
+            flagged={flagValue === 7 ? 0 : null}
+            labels={panelLabels}
+          />
+          <JudgementPanel
+            names={['Price', 'Comfort']}
+            weights={[0.75, 0.25]}
+            provisional={false}
+            consistency={null}
+            flagged={null}
+            labels={panelLabels}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 /** `/dev/ui` (dev builds only): every primitive in every state, both table densities. */
 export default function DevUi() {
@@ -435,6 +582,10 @@ export default function DevUi() {
         <p className="mt-6 flex items-center gap-1.5 text-13 text-text-2">
           Navigate with <Kbd>Tab</Kbd> <Kbd>Enter</Kbd>, edit with <Kbd>F2</Kbd>.
         </p>
+      </Section>
+
+      <Section title="Pairwise card">
+        <PairwiseDemo />
       </Section>
     </main>
   )
