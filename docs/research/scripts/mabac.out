@@ -1,0 +1,68 @@
+== F1 Pamucar & Cirovic 2015, forklifts (Tables 5, 7-12)
+  sum w = 1.0000
+  t: max|ours - published| 0.00043
+  V: max|ours - published| 0.00050
+  G: max|ours - published| 0.00005
+  Q: max|ours - published| 0.00005
+  S: max|ours - published| 0.00004
+  G  [0.208555, 0.188538, 0.171982, 0.195209, 0.174016, 0.162456, 0.131865, 0.101044, 0.078937, 0.058984]
+  S  [0.082591, 0.218334, -0.048816, 0.024617, -0.070429, 0.046539, 0.046412]
+  ranking ours [2, 1, 6, 5, 7, 3, 4] MATCH (published [2, 1, 6, 5, 7, 3, 4])
+  S from printed Q rows [0.0827, 0.2183, -0.0488, 0.0247, -0.0704, 0.0466, 0.0465]; max|diff| vs printed S 0.0001
+== F2 Biswas & Das 2018, hybrid vehicles (Tables 2-7)
+  sum w = 1.0000
+  G: max|ours - published| 0.00000
+  S: max|ours - published| 0.00000
+  G  [0.203764, 0.221142, 0.287306, 0.307462, 0.555522]
+  S  [0.157779, -0.016222, -0.144898, -0.242742, -0.019193, 0.190022, 0.212201, 0.032175, 0.106321]
+  ranking ours [3, 6, 8, 9, 7, 2, 1, 5, 4] MATCH (published [3, 6, 8, 9, 7, 2, 1, 5, 4])
+== F3 Celik 2020, CRITIC -> MABAC, participation banks 2019 (Tables 4, 7-12)
+  sum w = 1.0000
+  t: max|ours - published| 0.00048
+  G: max|ours - published| 0.00069
+  Q: max|ours - published| 0.00069
+  S: max|ours - published| 0.00086
+  G  [0.110882, 0.113301, 0.110993, 0.151997, 0.190488, 0.145872, 0.138934, 0.136817, 0.183656, 0.185693]
+  S  [-0.161812, 0.145137, 0.035472, -0.038009, 0.123914, 0.162048]
+  ranking ours [6, 2, 4, 5, 3, 1] MATCH (published [6, 2, 4, 5, 3, 1])
+  S from printed Q rows [-0.1630, 0.1460, 0.0350, -0.0390, 0.1240, 0.1620]; max|diff| vs printed S 0.0010
+== F1 notes
+  v11 printed 0.171, text computes 0.146*0.173+0.146 = 0.170; ours 0.1713
+  Table 16 S1/S2 (affine Likert rescale y = 2x - 1 on C3, C4): MABAC S unchanged by construction
+    ours: max|S(scale 2) - S(scale 1)| = 0.0e+00
+== F3 notes
+  Table 9 (V) prints 3 d.p.; G ours [0.1109, 0.1133, 0.1110, 0.1520, 0.1905, 0.1459, 0.1389, 0.1368, 0.1837, 0.1857]
+== libraries
+  pyrepo-mcda MABAC fails on numpy 2.5.4: module 'numpy' has no attribute 'product'; rerun with np.product = np.prod
+  pyDecision (no weights): max|S - ours| F1 1.1e-01, F2 1.5e-01, F3 1.9e-01; same ranking [False, False, False]
+    F1: S_py = (n/m) * S_equal-weights: 7.5e-16; per-column rescale reproduces ours: 2.4e-16
+    F2: S_py = (n/m) * S_equal-weights: 1.1e-16; per-column rescale reproduces ours: 2.9e-16
+    F3: S_py = (n/m) * S_equal-weights: 2.8e-16; per-column rescale reproduces ours: 1.7e-16
+  pymcdm: max|S - ours| F1 2.5e-16, F2 0.0e+00, F3 1.1e-16; same ranking [True, True, True]
+  pyrepo-mcda (np.product patched): max|S - ours| F1 2.5e-16, F2 0.0e+00, F3 1.1e-16; same ranking [True, True, True]
+== identity S_i = SAW_minmax_i - B,  B = sum_j w_j (GM_i(1 + t_ij) - 1)
+  F1: B = 0.471585 (spread 1.7e-16); mean SAW_mm 0.514335 >= B; rank(S) == rank(SAW_mm): True
+  F2: B = 0.575196 (spread 2.2e-16); mean SAW_mm 0.605801 >= B; rank(S) == rank(SAW_mm): True
+  F3: B = 0.468634 (spread 0.0e+00); mean SAW_mm 0.513093 >= B; rank(S) == rank(SAW_mm): True
+  random 2000 (m 2-8, n 2-7, Dirichlet w, mixed types): max spread of SAW_mm - S 4.4e-16; ranking differs 0/2000; min(mean SAW_mm - B) 2.69e-02 (>= 0: AM-GM); max S > 0 in 2000/2000
+== invariances
+  per-column x -> a x + b (a > 0, |b| <= 1000, negatives in data): max|dS| 1.3e-15 over 1000
+  one column x -> 60 / x with benefit<->cost swapped (origin IFC case 2): ranking changes in 347/1000
+  complement x -> C - x with type swap (IFC case 1) is affine with a < 0 + type swap: S identical by construction
+== edge cases
+  constant column: q column zeros True; t=0 vs t=1 (pymcdm/pyrepo): max|dS| 5.6e-17; vs dropping the column: 0.0e+00
+  zero weight: v = 0, G = 0.0, q column zeros True; S equals without it: 0.0e+00
+  all alternatives equal: S = [0.000, 0.000, 0.000, 0.000] (all tie at 0)
+  single alternative: t = [[0.0, 0.0]], S = [0.0] (meaningless; blocked by MIN_ALTERNATIVES)
+  negative/zero raw values: S = [-0.2444, 0.2206, 0.1956] (min-max, no restriction)
+  m = 2: G / w = [1.414214, 1.414214] (sqrt 2 = 1.414214); S = [-0.1142, 0.2858], sum S = 0.1716 = (3 - 2 sqrt 2) * sum w = 0.1716
+  m =  2: mean share of alternatives with S > 0: 0.582
+  m =  3: mean share of alternatives with S > 0: 0.581
+  m =  5: mean share of alternatives with S > 0: 0.580
+  m = 10: mean share of alternatives with S > 0: 0.578
+  m = 50: mean share of alternatives with S > 0: 0.563
+  m =  100, n = 10: G via prod**(1/m) zero in 0/10 columns; max|S_prod - S_log| 1.7e-16; ranking same True
+  m =  300, n = 10: G via prod**(1/m) zero in 5/10 columns; max|S_prod - S_log| 2.6e-01; ranking same True
+  m =  400, n = 10: G via prod**(1/m) zero in 6/10 columns; max|S_prod - S_log| 1.9e-01; ranking same True
+  m = 1000, n = 10: G via prod**(1/m) zero in 9/10 columns; max|S_prod - S_log| 9.5e-01; ranking same True
+  remove one random alternative: order of the rest changes in 176/1000 (same rate as SAW min-max by the identity)

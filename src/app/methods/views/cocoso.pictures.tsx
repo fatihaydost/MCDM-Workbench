@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { WASPAS_DEFAULT_LAMBDA } from '../../../core/methods/waspas'
-import { CocosoLenses, type CocosoLensesLabels } from '../../../features/illustrations/CocosoLenses'
+import { COCOSO_IDEA_STEPS, CocosoLenses, type CocosoLensesLabels } from '../../../features/illustrations/CocosoLenses'
+import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
 import { WaspasLambda, type WaspasLambdaLabels } from '../../../features/illustrations/WaspasLambda'
 import { useNumberFormat } from '../../../i18n'
 import { cn } from '../../../ui'
-import { IdeaSource } from './parts'
+import { IdeaSource, useStepLabels } from './parts'
 import type { IdeaPictureProps, StagePictureProps } from './types'
 
 function useLensLabels(): CocosoLensesLabels {
@@ -50,13 +51,16 @@ export function Stage({ problem, weights, params, className }: StagePictureProps
   )
 }
 
-/** Method page: the same two pictures on the logistics example, at the default λ = 0.5. */
+/** Method page: the same two pictures on the logistics example, at the default λ = 0.5; the first steps through ka, kb, kc, k. */
 export function Idea({ example, problem }: IdeaPictureProps) {
   const { t } = useTranslation()
   const { format } = useNumberFormat(4)
   const lens = useLensLabels()
   const lam = useLambdaLabels()
   const weights = example.weights ?? []
+  const steps = useIdeaSteps(COCOSO_IDEA_STEPS)
+  const stepLabels = useStepLabels()
+  const sentences = (['s1', 's2', 's3', 's4'] as const).map((k) => t(`methods.page.idea.cocoso.steps.${k}`))
   const page = { showTable: t('methods.page.idea.showTable'), alternative: t('methods.page.idea.alternative') }
   return (
     <div className="flex flex-col gap-6">
@@ -66,8 +70,11 @@ export function Idea({ example, problem }: IdeaPictureProps) {
         lambda={WASPAS_DEFAULT_LAMBDA}
         format={format}
         labels={{ ...lens, ...page, title: t('methods.page.idea.cocoso.title'), caption: t('methods.page.idea.cocoso.caption') }}
+        step={steps.step}
+        explain={steps.explain}
         className="max-w-[760px]"
       />
+      <IdeaSteps control={steps} sentences={sentences} labels={stepLabels} />
       <WaspasLambda
         method="cocoso"
         problem={problem}

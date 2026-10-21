@@ -1,4 +1,5 @@
 import type { RankingMethodId, WeightMethodId } from '../../../state/workbench'
+import { bwm } from './bwm'
 import { cocoso } from './cocoso'
 import { copras } from './copras'
 import { critic } from './critic'
@@ -7,6 +8,7 @@ import { entropy } from './entropy'
 import { equal } from './equal'
 import { manual } from './manual'
 import { marcos } from './marcos'
+import { mabac } from './mabac'
 import { merec } from './merec'
 import { saw } from './saw'
 import { sd } from './sd'
@@ -15,7 +17,7 @@ import type { MethodView } from './types'
 import { vikor } from './vikor'
 import { waspas } from './waspas'
 
-export type { IdeaPictureProps, MethodView, StagePictureProps, ThumbKit, Verdict } from './types'
+export type { IdeaPictureProps, JudgementIdeaProps, MethodView, StagePictureProps, ThumbKit, Verdict } from './types'
 
 export type ViewId = WeightMethodId | RankingMethodId
 
@@ -34,6 +36,7 @@ export const methodViews: Readonly<Views> = {
   merec,
   equal,
   manual,
+  bwm,
   topsis,
   saw,
   vikor,
@@ -42,6 +45,7 @@ export const methodViews: Readonly<Views> = {
   copras,
   marcos,
   cocoso,
+  mabac,
 }
 
 const ids = Object.keys(methodViews) as ViewId[]

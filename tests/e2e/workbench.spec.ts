@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { cocoso, copras, critic, edas, entropy, marcos, merec, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
+import { cocoso, copras, critic, edas, entropy, mabac, marcos, merec, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -771,17 +771,75 @@ test('CoCoSo: the method page opens the logistics example with CoCoSo; S, P and 
   await expect(column.locator('[data-rank]')).toHaveCount(0)
 })
 
-test('CoCoSo: the ranking control is two full rows of four at 375 px', async ({ page }) => {
+test('MABAC: the method page opens the forklifts with MABAC; S matches the paper, distances up and down from the border, Q by sign; negatives rank', async ({ page }) => {
+  const ex = getExample('pamucar-cirovic-2015-forklifts')!
+  const p = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const res = mabac.compute(p, ex.weights!, {})
+
+  await page.goto('/methods/mabac')
+  await expect(page.getByTestId('mabac-border')).toBeVisible()
+  await expect(page.getByTestId('mabac-dot')).toHaveCount(7)
+  // Every criterion name is reachable in full: on the (truncated) header and over the strip cells.
+  for (const c of p.criteria) await expect(page.getByTestId('mabac-border').locator('title', { hasText: c.name }).first()).toBeAttached()
+  await page.getByRole('link', { name: /Open in workbench/ }).first().click()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(stageHeading(page, 'Ranking')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'MABAC' })).toHaveAttribute('aria-checked', 'true')
+  const table = page.getByRole('table', { name: 'Ranking' })
+  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'Distance to border S'])
+  const published = ex.published.find((x) => x.label === 'mabac.scores')!.values as number[]
+  res.scores.forEach((v, i) => expect(Math.abs(v - published[i]!)).toBeLessThanOrEqual(1e-4))
+  await expect(page.getByTestId('best-sentence')).toHaveText(`Forklift 2 ranks first (S = ${f4(res.scores[1]!)}).`)
+
+  // The picture replaces the score chart: one row per forklift, ten sticks each, S signed on the right.
+  await expect(page.getByTestId('mabac-row')).toHaveCount(7)
+  await expect(page.getByTestId('mabac-q')).toHaveCount(70)
+  await expect(page.getByTestId('mabac-s').first()).toHaveText(`+${f4(res.scores[1]!)}`)
+  await expect(page.getByTestId('mabac-s').last()).toHaveText(f4(res.scores[4]!))
+  const q = res.steps.find((x) => x.key === 'mabac.distance')!.matrix!.flat()
+  await expect(page.locator('[data-testid="mabac-q"][data-sign="up"]')).toHaveCount(q.filter((x) => x > 0).length)
+
+  // The worked calculation marks each Q cell by its area: a triangle up or down, as well as the colour.
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Results' }).click()
+  await page.getByRole('button', { name: 'Show the calculation' }).click()
+  const qBlock = page.locator('section[data-step="mabac.distance"]')
+  await expect(qBlock.locator('[data-sign="up"]')).toHaveCount(q.filter((x) => x > 0).length)
+  await expect(qBlock.locator('[data-sign="down"]')).toHaveCount(q.filter((x) => x < 0).length)
+
+  // A negative value is an ordinary value for min-max.
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Data' }).click()
+  await page.locator('#wb-cell-4-1').click()
+  await page.keyboard.type('-500')
+  await page.keyboard.press('Enter')
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(page.getByTestId('ranking-row')).toHaveCount(7)
+  await expect(page.getByTestId('mabac-row')).toHaveCount(7)
+})
+
+test('the ranking control is three full rows of three at 375 px', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
-  await page.goto('/app?example=yazdani-2019-logistics&stage=ranking')
+  await page.goto('/app?example=pamucar-cirovic-2015-forklifts&stage=ranking')
   const radios = page.locator('[aria-label="Ranking method"]').getByRole('radio')
-  await expect(radios).toHaveCount(8)
+  await expect(radios).toHaveCount(9)
+  const boxes = await radios.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).map((r) => ({ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) })))
+  const rows = [...new Set(boxes.map((b) => b.y))]
+  expect(rows).toHaveLength(3)
+  for (const y of rows) expect(boxes.filter((b) => b.y === y)).toHaveLength(3)
+  const widths = new Set(boxes.map((b) => b.w))
+  expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(1)
+  for (const b of boxes) expect(b.x + b.w).toBeLessThanOrEqual(375)
+})
+
+test('the weighting control is two rows at 375 px: four, then three', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.goto('/app?example=krishnan-2021-smartphones&stage=weights')
+  const radios = page.locator('[aria-label="Weighting method"]').getByRole('radio')
+  await expect(radios).toHaveCount(7)
   const boxes = await radios.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).map((r) => ({ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) })))
   const rows = [...new Set(boxes.map((b) => b.y))]
   expect(rows).toHaveLength(2)
-  for (const y of rows) expect(boxes.filter((b) => b.y === y)).toHaveLength(4)
-  const widths = new Set(boxes.map((b) => b.w))
-  expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(1)
+  expect(boxes.filter((b) => b.y === rows[0]).length).toBe(4)
+  expect(boxes.filter((b) => b.y === rows[1]).length).toBe(3)
   for (const b of boxes) expect(b.x + b.w).toBeLessThanOrEqual(375)
 })
 

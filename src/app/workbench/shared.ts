@@ -20,6 +20,7 @@ export const ids = {
   weight: (j: number) => `wb-weight-${j}`,
   normalize: 'wb-normalize',
   weightMethod: 'wb-weight-method',
+  pairwise: 'wb-pairwise',
 } as const
 
 /**
@@ -149,6 +150,9 @@ export function placeIssue(
       }
     case 'weights-length-mismatch':
       return { ...base, stage: 'weights', targetId: ids.weightMethod }
+    case 'anchors-missing':
+    case 'judgements-incomplete':
+      return { ...base, stage: 'weights', targetId: ids.pairwise }
   }
 }
 

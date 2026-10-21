@@ -26,6 +26,7 @@ import waspasA from './fixtures/waspas-adali2017.json'
 import coprasOC from './fixtures/copras-ozcan-celik2021.json'
 import marcosSB from './fixtures/marcos-stevic-brkovic2020.json'
 import cocosoY from './fixtures/cocoso-yazdani2019-logistics.json'
+import mabacPC from './fixtures/mabac-pamucar-cirovic2015-forklifts.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -158,6 +159,15 @@ describe('examples match the published fixtures', () => {
     expect(ex.criteria.map((c) => c.type)).toEqual(cocosoY.types)
     expect(ex.weights).toEqual(cocosoY.weights)
     expect(ex.published).toEqual([{ label: 'cocoso.scores', values: cocosoY.published.k, decimals: 3 }])
+  })
+  it('Pamučar and Ćirović 2015 (MABAC, forklifts)', () => {
+    const ex = getExample('pamucar-cirovic-2015-forklifts')!
+    expect(ex.referenceFor).toEqual(['mabac'])
+    expect(ex.matrix).toEqual(mabacPC.matrix)
+    expect(ex.alternatives).toEqual(mabacPC.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(mabacPC.types)
+    expect(ex.weights).toEqual(mabacPC.weights)
+    expect(ex.published).toEqual([{ label: 'mabac.scores', values: mabacPC.published.S, decimals: 4 }])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
@@ -444,6 +454,18 @@ describe('store actions', () => {
     expect(r0.value!.ranking).toEqual(cocosoY.published.ranking)
   })
 
+  it('MABAC through the store: the forklifts open with MABAC and the paper weights', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.loadExample('pamucar-cirovic-2015-forklifts', 'en')
+    const s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('mabac')
+    expect(s.weightMethod).toBe('manual')
+    const r = computeRanking(s)
+    expectClose(r.value!.scores, mabacPC.published.S, mabacPC.expected.tolerance_vs_published.S)
+    expect(r.value!.ranking).toEqual(mabacPC.published.ranking)
+  })
+
   it('EDAS through the store: the 47 items open with EDAS and equal weights, the ten alternatives through the method page link', () => {
     const st = useWorkbench.getState()
     st.setRankingMethod('topsis')
@@ -600,5 +622,26 @@ describe('store actions', () => {
     expect(s.problem.criteria.map((c) => c.name)).toEqual(['C1', 'C2', 'C3', 'C4'])
     useWorkbench.getState().reset()
     expect(useWorkbench.getState().problem.alternatives).toEqual([])
+  })
+})
+
+describe('BWM through the store', () => {
+  it('Rezaei 2016 Ex2 answers on the Krishnan criteria give the paper weights; incomplete answers block the ranking with judgements-incomplete', () => {
+    const st = () => useWorkbench.getState()
+    st().loadExample('krishnan-2021-smartphones', 'en')
+    st().setWeightMethod('bwm')
+    expect(computeRanking(st()).issues).toContainEqual({ code: 'anchors-missing', severity: 'error' })
+    // Best 1, worst 4 (0-based) and a_BW alone: 1 of the 2n - 3 = 7 answers.
+    st().setAnchors(1, 4)
+    st().setJudgement(1, 4, 8)
+    expect(computeRanking(st()).issues).toContainEqual({ code: 'judgements-incomplete', severity: 'error', value: 1 })
+    const others = [0, 2, 3]
+    others.forEach((j, k) => {
+      st().setJudgement(1, j, [2, 4, 3][k]!)
+      st().setJudgement(j, 4, [4, 2, 3][k]!)
+    })
+    const w = computeWeights(st())
+    expect(w.value).not.toBeNull()
+    expectClose(w.value!.weights, [0.229508, 0.448087, 0.114754, 0.153005, 0.054645], 1e-6)
   })
 })

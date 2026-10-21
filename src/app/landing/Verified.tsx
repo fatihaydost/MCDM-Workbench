@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
 import { doiUrl, getExample, shortCitation, type Citation } from '../../data/examples'
+import { getJudgementExample } from '../../data/judgementExamples'
 import { formatNumber, useLang, type Lang } from '../../i18n'
 // Tolerances are the test fixtures' (each method view's `ledger`, checked against the fixture by views.test.ts), so the
 // page cannot drift from what the tests check.
@@ -8,7 +9,7 @@ import xlsx from '../../../tests/fixtures/critic-xlsx.json'
 import { methodViews, type ViewId } from '../methods/views'
 import { textLink } from './usePageMeta'
 
-/** Every core method but Equal has a published result to check against. */
+/** Every method view with a `ledger` (all but Equal and Manual) has a published result to check against. */
 type Row = { method: Exclude<ViewId, 'equal' | 'manual'>; citation: Citation; tolerance: number }
 
 /** ±0.00005 in the active locale, with as many decimals as the tolerance needs. */
@@ -39,7 +40,7 @@ export function Verified() {
     .filter((id): id is Row['method'] => methodViews[id].ledger !== undefined)
     .map((method) => {
       const { example, tolerance } = methodViews[method].ledger!
-      return { method, citation: getExample(example)!.citation, tolerance }
+      return { method, citation: (getExample(example) ?? getJudgementExample(example))!.citation, tolerance }
     })
 
   return (

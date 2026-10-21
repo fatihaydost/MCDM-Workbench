@@ -18,6 +18,7 @@ import { Button, cn, EmptyState, ErrorSummary, NumberInput, SegmentedControl, Ta
 import { methodViews, WEIGHTING_VIEW_IDS } from '../methods/views'
 import { MethodParams } from './MethodParams'
 import { useWorkbenchNav } from './nav'
+import { JudgementWeights } from './JudgementWeights'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
 import { criterionName, DECIMALS, findStep, ids, placeIssue, sumDecimals, tr, weightMethodLabel } from './shared'
 
@@ -57,7 +58,9 @@ export function WeightsStage() {
     goTo('ranking')
   }
 
-  const dataBlocked = weights.value === null && weightMethod !== 'manual'
+  // Weights from answers do not read the matrix: missing answers are asked on the stage, only n < 2 blocks.
+  const fromAnswers = getWeightingMethod(weightMethod)?.reads === 'judgements'
+  const dataBlocked = weights.value === null && weightMethod !== 'manual' && !(fromAnswers && problem.criteria.length >= 2)
 
   return (
     <div className="flex flex-col gap-6 pt-4">
@@ -68,8 +71,9 @@ export function WeightsStage() {
           onValueChange={setWeightMethod}
           options={WEIGHTING_VIEW_IDS.map((m) => ({ value: m, label: weightMethodLabel(m, t) }))}
           size="md"
-          // Six methods do not fit one row at 390 px: below sm the segments form a 3 x 2 grid across the width.
-          className="self-start max-sm:grid max-sm:grid-cols-3 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
+          // Seven methods do not fit one row at 390 px: below sm the segments form a 4-column grid across the width
+          // (the four data methods, then the ones from you).
+          className="self-start max-sm:grid max-sm:grid-cols-4 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
         />
         <span id={ids.weightMethod} tabIndex={-1} className="sr-only">
           {t('workbench.weightMethod.label')}
@@ -82,23 +86,29 @@ export function WeightsStage() {
         <ManualWeights problem={problem} issues={weights.issues} showErrors={attempted.weights} summaryRoot={summaryRoot} />
       ) : dataBlocked ? (
         <BlockedByIssues issues={weights.issues} problem={problem} />
+      ) : weightMethod === 'bwm' ? (
+        <JudgementWeights problem={problem} method={weightMethod} result={weights} />
       ) : weights.value ? (
         <ComputedWeights problem={problem} method={weightMethod} result={weights.value} />
       ) : null}
 
+      {fromAnswers && !dataBlocked && attempted.weights && weights.value === null && (
+        <BlockedByIssues issues={weights.issues} problem={problem} />
+      )}
       {!dataBlocked && <ContinueBar to="ranking" onContinue={onContinue} />}
     </div>
   )
 }
 
-function ComputedWeights({ problem, method, result }: { problem: DraftProblem; method: ComputedMethod; result: WeightingResult }) {
+export function ComputedWeights({ problem, method, result }: { problem: DraftProblem; method: ComputedMethod; result: WeightingResult }) {
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.weight)
   const names = problem.criteria.map((_, j) => criterionName(problem.criteria, j, t))
   const view = methodViews[method]
   const extra = (view.columns ?? []).map((c) => ({ ...c, values: findStep(result.steps, c.step)?.vector }))
   const params = useMethodParams(method)
-  const Picture = view.stage?.Component
+  // Weights from answers draw their picture above the questions (JudgementWeights), not here again.
+  const Picture = getWeightingMethod(method)?.reads === 'judgements' ? undefined : view.stage?.Component
   const core = useMemo(() => toProblem(problem), [problem])
   const n = problem.criteria.length
 

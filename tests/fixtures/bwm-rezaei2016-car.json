@@ -1,0 +1,18 @@
+{
+  "id": "bwm-rezaei-2016-car",
+  "source": "Rezaei 2016, Omega 64:126-130, DOI 10.1016/j.omega.2015.12.001, Tables 2-4, Sec. 3-4; Ex2 = BWM-Solver-6.xlsx 'Example'; Ex3 = Liang et al. 2020 Table 1",
+  "criteria": ["quality", "price", "comfort", "safety", "style"],
+  "best": 1, "worst": 4,
+  "cases": [
+    {"name": "ex1_consistent", "bestToOthers": [2, 1, 4, 2, 8], "othersToWorst": [4, 8, 2, 4, 1],
+     "published": {"weights": [0.2105, 0.4211, 0.1053, 0.2105, 0.0526], "xiL": 0.0},
+     "expected": {"weights": [0.210526, 0.421053, 0.105263, 0.210526, 0.052632], "xiL": 0.0, "crInput": 0.0}},
+    {"name": "ex2", "bestToOthers": [2, 1, 4, 3, 8], "othersToWorst": [4, 8, 2, 3, 1],
+     "published": {"weights": [0.2295, 0.4481, 0.1148, 0.1530, 0.0546], "xiL": 0.0109, "xiNonlinear": 0.1459},
+     "expected": {"weights": [0.229508, 0.448087, 0.114754, 0.153005, 0.054645], "xiL": 0.010929, "crInput": 0.017857, "mostInconsistent": 3, "threshold": 0.2958}},
+    {"name": "ex3", "bestToOthers": [2, 1, 4, 3, 8], "othersToWorst": [4, 8, 4, 2, 1],
+     "published": {"xiNonlinear": 1.0, "crInputLocal_liang": {"comfort": 0.14, "safety": 0.04}, "crOutput_liang": 0.223},
+     "expected": {"weights": [0.246154, 0.430769, 0.123077, 0.153846, 0.046154], "xiL": 0.061538, "crInput": 0.142857, "mostInconsistent": 2, "threshold": 0.2958}}
+  ],
+  "tolerance_vs_published": 6e-5
+}

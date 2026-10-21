@@ -1,10 +1,11 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChartTableModeProvider } from '../../../features/charts'
-import { SdIdea } from '../../../features/illustrations/SdIdea'
+import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
+import { SD_IDEA_STEPS, SdIdea } from '../../../features/illustrations/SdIdea'
 import { useNumberFormat } from '../../../i18n'
 import { DECIMALS } from '../../workbench/shared'
-import { IdeaSource } from './parts'
+import { IdeaSource, useStepLabels } from './parts'
 import type { IdeaPictureProps, StagePictureProps } from './types'
 
 /** Weights stage: each criterion's spread and the weight it becomes. */
@@ -30,10 +31,13 @@ export function Stage({ problem }: StagePictureProps) {
   )
 }
 
-/** Method page: the same picture on the published example (no step-through story yet). */
+/** Method page: the same picture on the published example with a step-through story. */
 export function Idea({ example, problem }: IdeaPictureProps) {
   const { t } = useTranslation()
   const { format } = useNumberFormat(3)
+  const steps = useIdeaSteps(SD_IDEA_STEPS)
+  const stepLabels = useStepLabels()
+  const sentences = (['s1', 's2', 's3'] as const).map((k) => t(`methods.page.idea.sd.steps.${k}`))
   return (
     <div className="flex flex-col gap-2">
       <SdIdea
@@ -48,7 +52,10 @@ export function Idea({ example, problem }: IdeaPictureProps) {
           showTable: t('methods.page.idea.showTable'),
           criterion: t('methods.page.idea.criterion'),
         }}
+        step={steps.step}
+        explain={steps.explain}
       />
+      <IdeaSteps control={steps} sentences={sentences} labels={stepLabels} />
       <IdeaSource example={example} />
     </div>
   )

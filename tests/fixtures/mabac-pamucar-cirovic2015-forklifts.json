@@ -1,0 +1,28 @@
+{
+  "id": "mabac-pamucar-cirovic-2015-forklifts",
+  "source": "Pamucar & Cirovic 2015, Expert Systems with Applications 42(6):3016-3028, DOI 10.1016/j.eswa.2014.11.057, Tables 5, 7-12 (Likert VG=5, G=4, F=3, P=2, VP=1)",
+  "alternatives": ["Forklift 1", "Forklift 2", "Forklift 3", "Forklift 4", "Forklift 5", "Forklift 6", "Forklift 7"],
+  "criteria": ["C1 purchase price", "C2 manufacturer's warranty", "C3 service network", "C4 availability of spare parts", "C5 average cost of maintenance", "C6 fuel consumption", "C7 maximum bearing capacity", "C8 maximum lifting capacity", "C9 movement speed (with/without load)", "C10 speed of lifting/lowering"],
+  "types": ["cost", "benefit", "benefit", "benefit", "cost", "cost", "benefit", "benefit", "benefit", "benefit"],
+  "weights": [0.146, 0.144, 0.119, 0.121, 0.115, 0.101, 0.088, 0.068, 0.050, 0.048],
+  "matrix": [
+    [22600, 3800, 2, 5, 1.06, 3.00, 3.5, 2.8, 24.5, 6.5],
+    [19500, 4200, 3, 2, 0.95, 3.00, 3.4, 2.2, 24, 7.0],
+    [21700, 4000, 1, 3, 1.25, 3.20, 3.3, 2.5, 24.5, 7.3],
+    [20600, 3800, 2, 5, 1.05, 3.25, 3.2, 2.0, 22.5, 11.0],
+    [22500, 3800, 4, 3, 1.35, 3.20, 3.7, 2.1, 23, 6.3],
+    [23250, 4210, 3, 5, 1.45, 3.60, 3.5, 2.8, 23.5, 7.0],
+    [20300, 3850, 2, 5, 0.90, 3.25, 3.0, 2.6, 21.5, 6.0]
+  ],
+  "published": {
+    "G": [0.2086, 0.1885, 0.1720, 0.1952, 0.1740, 0.1625, 0.1319, 0.1010, 0.0789, 0.0590],
+    "S": [0.0826, 0.2183, -0.0488, 0.0246, -0.0704, 0.0465, 0.0464],
+    "ranking": [2, 1, 6, 5, 7, 3, 4]
+  },
+  "expected": {
+    "G": [0.208555, 0.188538, 0.171982, 0.195209, 0.174016, 0.162456, 0.131865, 0.101044, 0.078937, 0.058984],
+    "S": [0.082591, 0.218334, -0.048816, 0.024617, -0.070429, 0.046539, 0.046412],
+    "ranking": [2, 1, 6, 5, 7, 3, 4],
+    "tolerance_vs_published": { "G": 1e-4, "S": 1e-4 }
+  }
+}

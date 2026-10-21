@@ -39,6 +39,8 @@ export type SweepChartProps = {
   text: { yours: string; showTable: string; tableCorner: string; axis: string }
   /** Content under the plot that must line up with the x axis (the slider): gets the plot's left and right edges. */
   below?: ((edges: { left: number; right: number; width: number }) => ReactNode) | undefined
+  /** The first sweep is still being calculated: the plot area is a placeholder block behind the empty axes. */
+  pending?: boolean | undefined
   className?: string | undefined
 }
 
@@ -70,6 +72,7 @@ export function SweepChart({
   base,
   switches,
   topBand,
+  pending = false,
   rankingBand,
   highlight,
   format,
@@ -156,6 +159,7 @@ export function SweepChart({
         aria-describedby={`${uid}-table`}
         data-sweep=""
       >
+        {pending ? <rect aria-hidden className={r.pending} x={left} y={top} width={right - left} height={bottom - top} /> : null}
         {layout.yTicks.map((v) => (
           <g key={`y${v}`}>
             <line className={r.grid} x1={left} x2={right} y1={y(v)} y2={y(v)} />

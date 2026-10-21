@@ -47,8 +47,22 @@ export type SawContributionsProps = {
   /** Number format for S, the contributions and the table (active locale, 4 decimals). */
   format?: ((value: number) => string) | undefined
   labels?: Partial<SawContributionsLabels>
+  /**
+   * Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. SAW_IDEA_STEPS - 1 draws that
+   * step, the last one being the full picture.
+   */
+  step?: number | null | undefined
+  /** Move at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
+  explain?: boolean | undefined
   className?: string | undefined
 }
+
+/**
+ * The steps of the SAW idea: 0 the rescaled values r_ij, each segment the same share of its criterion (the bars end at
+ * their sums), 1 weighted: every segment takes its criterion's weight (heavier criteria grow, lighter ones shrink),
+ * 2 added up: the bars end at the scores S, and the rows slide from the order of the table to the rank order.
+ */
+export const SAW_IDEA_STEPS = 3
 
 /** Criteria drawn in their own colour (--data-cat-1..8); the rest share --data-context and one legend entry. */
 export const SAW_CATEGORY_COLOURS = 8
@@ -77,7 +91,7 @@ type Active = { row: number; col: number }
  * the segments and rows move to their new places (MOTION.md object constancy, --dur-data), never on mount.
  * Every number comes from the core's SAW steps.
  */
-export function SawContributions({ problem, weights, params, format = defaultFormat, labels, className }: SawContributionsProps) {
+export function SawContributions({ problem, weights, params, format = defaultFormat, labels, step, explain = false, className }: SawContributionsProps) {
   const l = { ...SAW_CONTRIBUTIONS_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
@@ -103,6 +117,11 @@ export function SawContributions({ problem, weights, params, format = defaultFor
   const plotRight = Math.max(plotLeft + 1, W - valueWidth)
   const top = Math.max(maxOf(scores), 1e-12)
   const pxPerUnit = (plotRight - plotLeft) / top
+  const stepping = step !== null && step !== undefined
+  const stage = stepping ? Math.min(Math.max(step, 0), SAW_IDEA_STEPS - 1) : SAW_IDEA_STEPS - 1
+  // Step 0 draws the rescaled values r_ij on a scale of their own (their sums are longer than the scores).
+  const topR = Math.max(maxOf(parts.normalized.map((row) => row.reduce((a, b) => a + b, 0))), 1e-12)
+  const unit = stage === 0 ? (plotRight - plotLeft) / topR : pxPerUnit
   const rowStep = stacked ? STACKED_ROW : ROW
   const barY = stacked ? NAME_LINE : (ROW - BAR) / 2
   const height = m * rowStep
@@ -150,7 +169,7 @@ export function SawContributions({ problem, weights, params, format = defaultFor
       className={className}
     >
       <svg
-        className={animate ? `${s.svg} ${s.animate}` : s.svg}
+        className={[s.svg, animate && s.animate, explain && s.explain].filter(Boolean).join(' ')}
         width={W}
         height={height}
         viewBox={`0 0 ${W} ${height}`}
@@ -161,16 +180,18 @@ export function SawContributions({ problem, weights, params, format = defaultFor
       >
         <g onKeyDown={move} onMouseLeave={() => setActive(null)} data-dimmed={active ? '' : undefined} className={s.sawPlot}>
           {order.map((i, row) => {
-            const segs = stackSegments(contributions[i]!, plotLeft, pxPerUnit)
+            const segs = stackSegments(stage === 0 ? parts.normalized[i]! : contributions[i]!, plotLeft, unit)
             const end = plotLeft + scores[i]! * pxPerUnit
-            const first = i === best
+            const first = i === best && stage >= 2
+            // Until the last step the rows keep the order of the table; then they slide to the rank order.
+            const place = stage >= 2 ? row : i
             const name = names[i]!
             const short = truncate(name, stacked ? W - valueWidth : labelWidth - GAP, FONT)
             return (
               <g
                 key={i}
                 className={s.sawRow}
-                style={{ transform: `translate(0px, ${row * rowStep}px)` }}
+                style={{ transform: `translate(0px, ${place * rowStep}px)` }}
                 data-highlight={first || undefined}
                 data-testid="saw-bar"
                 data-score={scores[i]}
@@ -224,7 +245,8 @@ export function SawContributions({ problem, weights, params, format = defaultFor
                   />
                 ))}
                 <text
-                  className={s.sawValue}
+                  className={`${s.sawValue} ${s.stageItem}`}
+                  data-off={stage >= 2 ? undefined : ''}
                   x={0}
                   y={barY + BAR / 2}
                   dominantBaseline="central"
@@ -244,7 +266,8 @@ export function SawContributions({ problem, weights, params, format = defaultFor
             {l.readout(names[shown.i]!, critNames[shown.j]!, format(contributions[shown.i]![shown.j]!), texts[shown.i]!)}
           </span>
         ) : (
-          <span>{l.caption ?? '\u00a0'}</span>
+          // Hidden, not removed, before the last step: the picture below keeps its place.
+          <span className={stage >= 2 ? undefined : 'invisible'}>{l.caption ?? '\u00a0'}</span>
         )}
       </p>
       <ul className={s.sawLegend} aria-label={l.legend}>

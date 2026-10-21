@@ -40,6 +40,7 @@
     "blockedAt": "{{criterion}} {{delta}}: {{status}}"
   },
   "monteCarlo": {
+    "progress": "{{done}} / {{total}} draws",
     "title": "Random weights",
     "lead": "{{n}} random weight vectors: how often does each alternative take each place?",
     "spread": "Weights drawn",

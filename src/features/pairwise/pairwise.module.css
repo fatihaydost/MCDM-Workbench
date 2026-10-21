@@ -1,0 +1,476 @@
+/* Pairwise input: card, anchor picker, live panel, pair list. Colours only from tokens.css. */
+
+/* Card ---------------------------------------------------------------------------------------- */
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+  align-self: start;
+  padding: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-float);
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Progress through the queue: a 2 px line on the top edge. */
+.track {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--line);
+}
+
+.trackFill {
+  height: 100%;
+  background: var(--accent);
+  transform-origin: 0 0;
+  transition: transform var(--dur-slow) var(--ease);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.question {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.progress {
+  margin: 0;
+  flex-shrink: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* One line, kept even when empty so the card does not jump between questions. */
+.answer {
+  min-height: 20px;
+  margin: -8px 0 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.answerWord {
+  color: var(--text-3);
+}
+
+/* Side row: [A] [=] [B], 48 px tall. */
+.sides {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.side,
+.value,
+.chip {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.side {
+  height: 48px;
+  min-width: 44px;
+  padding: 0 8px;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.equal {
+  font-size: 18px;
+}
+
+.side:hover,
+.value:hover:not(:disabled),
+.chip:hover:not(:disabled) {
+  border-color: var(--text-3);
+}
+
+/* Selected: accent fill and a heavier border, so it does not rely on colour alone. */
+.side[data-state='on'],
+.value[data-state='on'],
+.chip[data-state='on'] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--accent-bg);
+}
+
+.side:focus-visible,
+.value:focus-visible,
+.chip:focus-visible,
+.button:focus-visible,
+.back:focus-visible,
+.listItem:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 3 x 3 grid 1-9, cells at least 56 px. */
+.values {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(56px, 1fr));
+  gap: 8px;
+}
+
+.value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 6px 4px;
+}
+
+.digit {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.word {
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.value:disabled {
+  border-style: dashed;
+  border-color: var(--line);
+  background: var(--surface-2);
+  color: var(--text-3);
+  cursor: not-allowed;
+}
+
+.value:disabled .word {
+  color: var(--text-3);
+}
+
+/* Why values above the BWM cap are disabled; visible, since touch has no tooltip. */
+.capNote {
+  margin: -4px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+/* Flag: icon + sentence + one-tap fix; the accent bar on the left is not the only signal. */
+.flag {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 4px 8px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-control);
+  background: var(--accent-bg);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.flagIcon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--accent);
+}
+
+.flagText {
+  margin: 0;
+}
+
+.flag .button {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-control);
+  background: var(--accent);
+  color: var(--accent-fg);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--ease);
+}
+
+.button:hover {
+  background: var(--accent-hover);
+}
+
+.foot {
+  display: flex;
+  margin: -4px 0 -8px -8px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.back:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.back:disabled {
+  color: var(--text-3);
+  cursor: default;
+}
+
+/* Anchor picker ------------------------------------------------------------------------------- */
+
+.anchors {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.anchorGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.anchorLabel,
+.panelTitle {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+.chip:disabled {
+  border-style: dashed;
+  border-color: var(--line);
+  color: var(--text-3);
+  cursor: not-allowed;
+}
+
+/* Live panel ---------------------------------------------------------------------------------- */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  color: var(--text);
+}
+
+.note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.swatch {
+  width: 16px;
+  height: 10px;
+  flex-shrink: 0;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(0, 7em) minmax(0, 1fr) 4.5em;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.barName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barTrack {
+  position: relative;
+  height: 12px;
+  overflow: hidden;
+}
+
+.solid {
+  background: var(--data-accent);
+}
+
+/* Provisional: hatched fill with an outline (the note above says it in words). */
+.hatched {
+  background: repeating-linear-gradient(-45deg, var(--data-accent) 0 2px, transparent 2px 5px);
+  box-shadow: inset 0 0 0 1px var(--data-accent);
+}
+
+.barCover {
+  position: absolute;
+  inset: 0;
+  background: var(--surface-2);
+  transform-origin: 100% 0;
+  transition: transform var(--dur-data) var(--ease);
+}
+
+.barValue {
+  color: var(--text-2);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.consistency {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.consistencyLabel {
+  color: var(--text-2);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.badgeValue {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.badgeWarning {
+  background: var(--warning-bg);
+  color: var(--text);
+}
+
+.badgeWarning svg {
+  color: var(--warning);
+}
+
+/* Pair list ----------------------------------------------------------------------------------- */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.listItems {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 8px 0 10px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-left: 2px solid transparent;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.listItem:hover {
+  background: var(--surface-2);
+}
+
+.listItem[aria-current='step'] {
+  border-left-color: var(--accent);
+  background: var(--accent-bg);
+  font-weight: 500;
+}
+
+.listPair {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listAnswer {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}

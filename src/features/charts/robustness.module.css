@@ -162,3 +162,8 @@
     transition: none;
   }
 }
+
+/* The first sweep is not here yet: a still block where the curves will be (no shimmer; Skeleton's rule). */
+.pending {
+  fill: var(--surface-2);
+}

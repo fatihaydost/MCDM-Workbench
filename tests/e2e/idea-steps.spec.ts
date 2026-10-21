@@ -81,6 +81,58 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       expect(await drawing(page)).toEqual(full)
     })
 
+    test('BWM: four steps; step 3 marks comfort, whose ticks sit at 2 and 4; the last step is the full picture', async ({ page }) => {
+      await page.goto('/methods/bwm')
+      await expect(page.locator('#idea figure').first()).toBeVisible()
+      await settled(page)
+      const full = await drawing(page)
+
+      await page.getByRole('button', { name: 'Step through the idea' }).click()
+      await expect(counter(page)).toHaveText('1 / 4')
+      await expect(sentence(page)).toHaveText(
+        'First the two anchors: the most important criterion and the least important one, and how many times more important the first is.',
+      )
+      await page.getByRole('button', { name: 'Next' }).click()
+      await page.getByRole('button', { name: 'Next' }).click()
+      await expect(counter(page)).toHaveText('3 / 4')
+      // Rezaei 2016 Ex3: comfort, a_BW / a_Bj = 8 / 4 = 2 on the best's ruler, a_jW = 4 on the worst's; CR^I argmax.
+      const flagged = page.locator('#idea [data-flagged]')
+      await expect(flagged).toContainText('Comfort')
+      // Ex3 is within Liang's threshold (0.1429 < 0.2958): marked, but no warning icon (the workbench would not warn).
+      await expect(flagged.locator('[data-warn]')).toHaveCount(0)
+      await expect(page.locator('#idea figure').first()).toContainText('CR 0.14, threshold 0.30')
+      await expect(flagged.locator('[data-value="2"]')).toHaveCount(1)
+      await expect(flagged.locator('[data-value="4"]')).toHaveCount(1)
+      await page.getByRole('button', { name: 'Next' }).click()
+      await expect(counter(page)).toHaveText('4 / 4')
+      for (const w of ['0.2462', '0.4308', '0.1231', '0.1538', '0.0462']) await expect(page.locator('#idea svg').getByText(w)).toBeVisible()
+      await settled(page)
+      expect(await drawing(page)).toEqual(full)
+
+      await page.getByRole('button', { name: 'Finish' }).click()
+      await expect(page.getByRole('button', { name: 'Step through the idea' })).toBeFocused()
+      await settled(page)
+      expect(await drawing(page)).toEqual(full)
+    })
+
+    for (const [method, count] of [['entropy', 4], ['saw', 3], ['merec', 4], ['sd', 3], ['cocoso', 4], ['mabac', 3], ['edas', 3], ['copras', 4], ['marcos', 3]] as const) {
+      test(`${method}: ${count} steps, the last one is the full picture`, async ({ page }) => {
+        await page.goto(`/methods/${method}`)
+        await expect(page.locator('#idea figure').first()).toBeVisible()
+        await settled(page)
+        const full = await drawing(page)
+
+        await page.getByRole('button', { name: 'Step through the idea' }).click()
+        await expect(counter(page)).toHaveText(`1 / ${count}`)
+        for (let k = 2; k <= count; k++) {
+          await page.getByRole('button', { name: 'Next' }).click()
+          await expect(counter(page)).toHaveText(`${k} / ${count}`)
+        }
+        await settled(page)
+        expect(await drawing(page)).toEqual(full)
+      })
+    }
+
     test('keyboard: arrows move, Escape closes and gives the focus back', async ({ page }) => {
       await page.goto('/methods/topsis')
       await expect(page.locator('#idea svg [role="radio"]')).toHaveCount(3)
@@ -169,12 +221,13 @@ test('CRITIC: σ is drawn to its true length, in the full picture and at the con
   await expect(page.locator('#idea svg').getByText('0.4394')).toBeVisible()
 })
 
-test('the step sentence never moves the text below it (390 and 1440 px, TOPSIS and CRITIC)', async ({ page }) => {
+test('the step sentence never moves the text below it (390 and 1440 px, every method with steps)', async ({ page }) => {
+  test.setTimeout(90_000)
   for (const width of [390, 1440])
-  for (const [method, count] of [['topsis', 5], ['critic', 4]] as const) {
+  for (const [method, count] of [['topsis', 5], ['critic', 4], ['entropy', 4], ['saw', 3], ['merec', 4], ['sd', 3], ['cocoso', 4], ['mabac', 3], ['edas', 3], ['copras', 4], ['marcos', 3], ['bwm', 4]] as const) {
     await page.setViewportSize({ width, height: 900 })
     await page.goto(`/methods/${method}`)
-    await expect(page.locator('#idea svg')).toBeVisible()
+    await expect(page.locator('#idea figure').first()).toBeVisible()
     await page.getByRole('button', { name: 'Step through the idea' }).click()
     const source = page.locator('#idea').getByText(/^Data: /)
     const tops: number[] = []

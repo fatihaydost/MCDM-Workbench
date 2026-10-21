@@ -240,7 +240,12 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, hea
 
       <div className="min-w-0 sm:pl-8">
         {/* A value the step leaves undefined (a constant column's correlation) says so instead of a blank cell. */}
-        <StepTableView table={table} format={(v) => (Number.isFinite(v) ? nf.format(v) : t('workbench.calc.undefined'))} label={t('workbench.calc.tableLabel', { n: number, name })} />
+        <StepTableView
+          table={table}
+          format={(v) => (Number.isFinite(v) ? nf.format(v) : t('workbench.calc.undefined'))}
+          label={t('workbench.calc.tableLabel', { n: number, name })}
+          signed={content?.signed}
+        />
       </div>
 
       {copied === 'failed' && <p className="text-13 text-danger sm:pl-8">{t('workbench.calc.copyFailed')}</p>}
@@ -257,7 +262,7 @@ type Hover = { r: number; c: number } | null
  * Labelled matrix, vector or scalar in Plex Mono with fixed decimals. Hovering a cell tints its
  * row and column labels. Wide or tall tables scroll inside their own box, never the page.
  */
-function StepTableView({ table, format, label }: { table: StepTable; format: (v: number) => string; label: string }) {
+function StepTableView({ table, format, label, signed }: { table: StepTable; format: (v: number) => string; label: string; signed?: true | undefined }) {
   const [hover, setHover] = useState<Hover>(null)
 
   if (table.kind === 'scalar') {
@@ -315,6 +320,12 @@ function StepTableView({ table, format, label }: { table: StepTable; format: (v:
                     rowOn(r) && colOn(c) && 'bg-accent-bg',
                   )}
                 >
+                  {/* Above or below a border (MABAC's Q): a triangle in the area's colour, so the sign reads without colour too. */}
+                  {signed && v !== 0 && (
+                    <span aria-hidden data-sign={v > 0 ? 'up' : 'down'} className={cn('mr-1.5 text-12', v > 0 ? 'text-data-accent' : 'text-data-negative')}>
+                      {v > 0 ? '▲' : '▼'}
+                    </span>
+                  )}
                   {format(v)}
                 </td>
               ))}

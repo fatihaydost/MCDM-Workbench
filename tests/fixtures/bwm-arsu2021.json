@@ -1,0 +1,11 @@
+{
+  "id": "bwm-arsu-2021-personnel-expert1",
+  "source": "Arsu & Uguz Arsu 2021, Ucuncu Sektor Sosyal Ekonomi Dergisi 56(3):1949-1967, DOI 10.15659/3.sektor-sosyal-ekonomi.21.09.1632, Tables 4-5 (expert 1)",
+  "criteria": ["K1 on degerlendirme", "K2 mesleki donanim", "K3 kisisel ozellik", "K4 sosyal beceri", "K5 yonetim becerisi"],
+  "best": 2, "worst": 4,
+  "bestToOthers": [7, 2, 1, 3, 7],
+  "othersToWorst": [3, 7, 7, 3, 1],
+  "published": {"weights": [0.0750, 0.2625, 0.4375, 0.1750, 0.0500], "to_paper": 0.0234},
+  "expected": {"weights": [0.075, 0.2625, 0.4375, 0.175, 0.05], "xiL": 0.0875, "crInput": 0.333333, "threshold": 0.2819, "acceptable": false, "mostInconsistent": 0},
+  "tolerance_vs_published": 6e-5
+}

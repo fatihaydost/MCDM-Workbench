@@ -705,3 +705,18 @@ describe('sweepWeight with SAW (a second ranking method): Podvezko 2011, both no
     })
   }
 })
+
+describe('monteCarlo progress', () => {
+  it('reports growing partial counts and leaves the result unchanged', () => {
+    const problem = makeProblem([[3, 2], [2, 1], [1, 3]], ['benefit', 'cost'])
+    const rankFor = rankerOf(saw)
+    const seen: { done: number; total: number; acceptability: number[][] }[] = []
+    const base = monteCarlo(problem, [0.5, 0.5], rankFor, { concentration: 'uniform', n: 500, seed: 7 })
+    const withProgress = monteCarlo(problem, [0.5, 0.5], rankFor, { concentration: 'uniform', n: 500, seed: 7, progressEvery: 100, onProgress: (p) => seen.push(p) })
+    expect(withProgress).toEqual(base)
+    expect(seen.map((p) => p.done)).toEqual([100, 200, 300, 400])
+    expect(seen.every((p) => p.total === 500)).toBe(true)
+    // Every row of a snapshot is a distribution over the draws ranked so far.
+    for (const p of seen) for (const row of p.acceptability) expect(row.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 9)
+  })
+})

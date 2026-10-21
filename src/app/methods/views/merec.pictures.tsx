@@ -1,10 +1,11 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChartTableModeProvider } from '../../../features/charts'
-import { MerecIdea } from '../../../features/illustrations/MerecIdea'
+import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
+import { MEREC_IDEA_STEPS, MerecIdea } from '../../../features/illustrations/MerecIdea'
 import { useNumberFormat } from '../../../i18n'
 import { DECIMALS } from '../../workbench/shared'
-import { IdeaSource } from './parts'
+import { IdeaSource, useStepLabels } from './parts'
 import type { IdeaPictureProps, StagePictureProps } from './types'
 
 /** Weights stage: the drops each criterion's removal causes, their sum E and the weight. */
@@ -31,10 +32,13 @@ export function Stage({ problem }: StagePictureProps) {
   )
 }
 
-/** Method page: the same picture on the published example (no step-through story yet). */
+/** Method page: the same picture on the published example with a step-through story. */
 export function Idea({ example, problem }: IdeaPictureProps) {
   const { t } = useTranslation()
   const { format } = useNumberFormat(3)
+  const steps = useIdeaSteps(MEREC_IDEA_STEPS)
+  const stepLabels = useStepLabels()
+  const sentences = (['s1', 's2', 's3', 's4'] as const).map((k) => t(`methods.page.idea.merec.steps.${k}`))
   return (
     <div className="flex flex-col gap-2">
       <MerecIdea
@@ -50,7 +54,10 @@ export function Idea({ example, problem }: IdeaPictureProps) {
           showTable: t('methods.page.idea.showTable'),
           criterion: t('methods.page.idea.criterion'),
         }}
+        step={steps.step}
+        explain={steps.explain}
       />
+      <IdeaSteps control={steps} sentences={sentences} labels={stepLabels} />
       <IdeaSource example={example} />
     </div>
   )

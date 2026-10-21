@@ -6,7 +6,7 @@ export const bwm: MethodContent = {
   name: { en: 'BWM', tr: 'BWM' },
   fullName: { en: 'Best-Worst Method', tr: 'En iyi-en kötü yöntemi' },
   family: 'weighting-subjective',
-  status: 'research',
+  status: 'available',
   year: 2015,
   origin: {
     authors: 'Rezaei, J.',
@@ -24,8 +24,8 @@ export const bwm: MethodContent = {
       title: { en: 'Two comparison vectors', tr: 'İki karşılaştırma vektörü' },
       tex: String.raw`a_B = (a_{B1}, \dots, a_{Bn}), \qquad a_W = (a_{1W}, \dots, a_{nW}), \qquad a_{BB} = a_{WW} = 1`,
       note: {
-        en: 'B is the best (most important) criterion and W the worst, on a 1-9 scale; a_BW must be the same number in both vectors.',
-        tr: 'B en iyi (en önemli), W en kötü kriterdir, değerler 1-9 ölçeğindedir; a_BW iki vektörde de aynı sayı olmalı.',
+        en: 'B is the best (most important) criterion and W the worst, on a 1‑9 scale; a_BW must be the same number in both vectors.',
+        tr: 'B en iyi (en önemli), W en kötü kriterdir, değerler 1‑9 ölçeğindedir; a_BW iki vektörde de aynı sayı olmalı.',
       },
     },
     {
@@ -37,11 +37,11 @@ export const bwm: MethodContent = {
       },
     },
     {
-      title: { en: 'Non-linear model (option)', tr: 'Doğrusal olmayan model (seçenek)' },
+      title: { en: 'Non-linear model (not offered)', tr: 'Doğrusal olmayan model (sunulmuyor)' },
       tex: String.raw`\begin{aligned} &\min\ \xi \\ &\left|\frac{w_B}{w_j} - a_{Bj}\right| \le \xi,\ \ \left|\frac{w_j}{w_W} - a_{jW}\right| \le \xi\ \ \forall j, \qquad \sum_j w_j = 1,\ \ w_j \ge 0 \end{aligned}`,
       note: {
-        en: 'Rezaei (2015): xi* is unique but the weights may not be; CR = xi* / CI(a_BW), with CI = 0, 0.44, 1.00, 1.63, 2.30, 3.00, 3.73, 4.47, 5.23 for a_BW = 1 to 9.',
-        tr: 'Rezaei (2015): en iyi xi* tektir, ağırlıklar tek olmayabilir; CR = xi* / CI(a_BW), a_BW = 1 ile 9 için CI = 0; 0,44; 1,00; 1,63; 2,30; 3,00; 3,73; 4,47; 5,23.',
+        en: 'Rezaei (2015): xi* is unique but the weights may not be; this site does not offer it, because it needs an LP solver and its weights are intervals.',
+        tr: 'Rezaei (2015): en iyi xi* tektir, ağırlıklar tek olmayabilir; bu site sunmaz, çünkü bir LP çözücü gerekir ve ağırlıkları aralıktır.',
       },
     },
     {
@@ -81,8 +81,8 @@ export const bwm: MethodContent = {
     doi: '10.1016/j.omega.2015.12.001',
     match: 'match',
     note: {
-      en: 'Published example (Tables 2-3 (input), Sections 3 and 4 (output)); this method is not computed here yet, only recomputed during research. Car purchase, five criteria, best = price, worst = style. Linear-model weights match for the consistent and the inconsistent example (largest difference 4.6e-5, xi^L = 0.0109). The non-linear xi* = 0.1459 matches and the weights fall inside all five published intervals.',
-      tr: 'Yayımlanmış örnek (Tablo 2-3 (girdi), Bölüm 3 ve 4 (çıktı)); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Araba satın alma, beş kriter, en iyi = fiyat, en kötü = stil. Doğrusal model ağırlıkları tutarlı ve tutarsız örnekte örtüşüyor (en büyük fark 4,6e-5, xi^L = 0,0109). Doğrusal olmayan xi* = 0,1459 aynı; ağırlıklar yayımlanan beş aralığın hepsinin içinde.',
+      en: 'Published example (Tables 2-3 (input), Sections 3 and 4 (output)). Car purchase, five criteria, best = price, worst = style. The linear-model weights match for the consistent and the inconsistent example (largest difference 4.6e-5, xi^L = 0.0109). The site computes the linear model only.',
+      tr: 'Yayımlanmış örnek (Tablo 2-3 (girdi), Bölüm 3 ve 4 (çıktı)). Araba satın alma, beş kriter, en iyi = fiyat, en kötü = stil. Doğrusal model ağırlıkları tutarlı ve tutarsız örnekte örtüşüyor (en büyük fark 4,6e-5, xi^L = 0,0109). Site yalnız doğrusal modeli hesaplar.',
     },
   },
   sources: [
@@ -95,7 +95,7 @@ export const bwm: MethodContent = {
   ],
   en: {
     summary:
-      'BWM compares the most important criterion with all others and all others with the least important (1-9). That is only 2n - 3 judgements instead of n(n-1)/2 in AHP, with a consistency check.',
+      'BWM compares the most important criterion with all others and all others with the least important (1‑9). That is only 2n - 3 judgements instead of n(n-1)/2 in AHP, with a consistency check.',
     whenToUse: [
       'Subjective weights with fewer questions than AHP.',
       'Between 3 and 10 criteria.',
@@ -107,19 +107,19 @@ export const bwm: MethodContent = {
     ],
     inputs: [
       'Which criterion is best (B) and which is worst (W).',
-      'Best-to-others vector, values 1-9, with a_BB = 1.',
-      'Others-to-worst vector, values 1-9, with a_WW = 1. a_BW must match in both.',
-      'Model option: linear (default) or non-linear.',
+      'Best-to-others vector, values 1‑9, with a_BB = 1.',
+      'Others-to-worst vector, values 1‑9, with a_WW = 1. a_BW must match in both.',
+      'Answers are capped at a_BW.',
     ],
     pitfalls: [
-      'The non-linear model can have many optimal weight vectors with the same xi*, so solvers return different weights.',
-      'Linear xi is in weight units and much smaller than non-linear xi* (0.0109 vs 0.1459); never divide it by the non-linear CI table.',
+      'With more than about nine criteria the questions get hard to answer well; group the criteria and weigh each group separately.',
+      'Linear xi is in weight units and much smaller than non-linear xi* (0.0109 vs 0.1459); never divide it by the CI values of Rezaei (2015).',
       'Two equally best criteria: pick one as B and enter 1 for the other.',
     ],
   },
   tr: {
     summary:
-      "BWM en önemli kriteri diğer hepsiyle, diğer hepsini de en önemsiz kriterle karşılaştırır (1-9). AHP'deki n(n-1)/2 yerine yalnız 2n - 3 yargı gerekir ve tutarlılık da raporlanır.",
+      "BWM en önemli kriteri diğer hepsiyle, diğer hepsini de en önemsiz kriterle karşılaştırır (1‑9). AHP'deki n(n-1)/2 yerine yalnız 2n - 3 yargı gerekir ve tutarlılık da raporlanır.",
     whenToUse: [
       "AHP'den daha az soruyla öznel ağırlık.",
       '3 ile 10 arası kriter.',
@@ -131,13 +131,13 @@ export const bwm: MethodContent = {
     ],
     inputs: [
       'Hangi kriterin en iyi (B), hangisinin en kötü (W) olduğu.',
-      'En iyiden diğerlerine vektörü, 1-9 değerleri, a_BB = 1.',
-      'Diğerlerinden en kötüye vektörü, 1-9 değerleri, a_WW = 1. a_BW iki vektörde aynı olmalı.',
-      'Model seçeneği: doğrusal (varsayılan) ya da doğrusal olmayan.',
+      'En iyiden diğerlerine vektörü, 1‑9 değerleri, a_BB = 1.',
+      'Diğerlerinden en kötüye vektörü, 1‑9 değerleri, a_WW = 1. a_BW iki vektörde aynı olmalı.',
+      'Yanıtlar a_BW ile sınırlıdır.',
     ],
     pitfalls: [
-      'Doğrusal olmayan modelde aynı xi* değerini veren birden çok ağırlık vektörü olabilir; çözücüler farklı ağırlık döndürür.',
-      'Doğrusal modelin xi değeri ağırlık birimindedir ve xi* değerinden çok küçüktür (0,0109 ve 0,1459); doğrusal olmayan modelin CI tablosuna bölmeyin.',
+      'Dokuz civarından fazla kriterde soruları iyi yanıtlamak zorlaşır; kriterleri gruplayıp her grubu ayrı ağırlıklandırın.',
+      'Doğrusal modelin xi değeri ağırlık birimindedir ve xi* değerinden çok küçüktür (0,0109 ve 0,1459); Rezaei (2015) CI değerlerine bölmeyin.',
       'İki kriter eşit derecede en iyiyse birini B seçin, diğeri için 1 girin.',
     ],
   },

@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import type { ExampleDataset } from '../../../data/examples'
+import type { Localized } from '../../../data/examples'
 import type { IdeaStepsLabels } from '../../../features/illustrations/IdeaSteps'
 import { useLang } from '../../../i18n'
 
 /** The citation line under a method page's picture. */
-export function IdeaSource({ example }: { example: ExampleDataset }) {
+export function IdeaSource({ example }: { example: { name: Localized } }) {
   const { t } = useTranslation()
   const [lang] = useLang()
   return <p className="text-12 text-text-2">{t('methods.page.idea.source', { citation: example.name[lang] })}</p>

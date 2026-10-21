@@ -2,20 +2,26 @@ import { useMemo } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import {
+  emptyJudgements,
   getRankingMethod,
   getWeightingMethod,
   hasErrors,
   prepareRanking,
   ProblemValidationError,
+  remapJudgements,
   resolveParams,
+  sanitizeJudgements,
+  setPair,
   validateProblem,
   validateWeights,
   type Computed,
   type Criterion,
+  type Judgements,
   type MethodParams,
   type MethodParamValue,
   type Problem,
   type RankingId,
+  type Ratio,
   type RankingResult,
   type RankingRun,
   type ValidationIssue,
@@ -59,6 +65,8 @@ export type WorkbenchData = {
   importedFrom?: string | null
   /** Method options by method id. Optional: a state saved before options existed loads without it. */
   methodParams?: MethodParamsState | undefined
+  /** Pairwise answers about the criteria (AHP, BWM), n × n for the current criteria; travels like manualWeights. */
+  judgements?: Judgements | undefined
 }
 
 export type WorkbenchActions = {
@@ -90,6 +98,10 @@ export type WorkbenchActions = {
   removeCriterion: (col: number) => void
   setWeightMethod: (method: WeightMethodId) => void
   setManualWeight: (col: number, value: number | null) => void
+  /** Writes the answer for criteria i over k and its reciprocal. */
+  setJudgement: (i: number, k: number, value: Ratio | null) => void
+  /** BWM's best and worst criteria; when both are the same index, worst becomes null. */
+  setAnchors: (best: number | null, worst: number | null) => void
   setRankingMethod: (method: RankingMethodId) => void
   /** Sets one option of one method (weighting or ranking), e.g. ('entropy', 'normalization', 'minmax'). */
   setMethodParam: (methodId: string, key: string, value: MethodParamValue) => void
@@ -142,7 +154,11 @@ export const initialWorkbench = (): WorkbenchData => ({
   exampleId: null,
   importedFrom: null,
   methodParams: {},
+  judgements: emptyJudgements(0),
 })
+
+const judgementsOf = (s: Pick<WorkbenchData, 'problem' | 'judgements'>): Judgements =>
+  s.judgements ?? emptyJudgements(s.problem.criteria.length)
 
 const fitWeights = (w: (number | null)[], n: number): (number | null)[] =>
   Array.from({ length: n }, (_, j) => w[j] ?? null)
@@ -158,12 +174,46 @@ function memorize(criteria: readonly Criterion[], weights: readonly (number | nu
 }
 
 /**
- * Manual weights for a new list of criteria, matched to the criterion and not to the column position (deleting the
- * second criterion must not move the third one's weight onto it). In order: the same criterion object (the grid
- * keeps the objects it does not change), a criterion seen before (undo of a delete), the same name, and, only when
- * `byPosition` and the number of criteria is unchanged, the same column (a rename or a direction change creates a
- * new object in place). Anything else starts empty.
+ * Where each new criterion was before: next index → old index, or undefined for a criterion not in the old list.
+ * Matched to the criterion and not to the column position (deleting the second criterion must not move the third
+ * one's data onto it). In order: the same criterion object (the grid keeps the objects it does not change), then a
+ * criterion `remembered` from before (undo of a delete; the caller fills it from its memory, so the later passes skip
+ * it), the same name, and, only when `byPosition` and the number of criteria is unchanged, the same column (a rename or
+ * a direction change creates a new object in place).
  */
+export function matchCriteria(
+  oldCriteria: readonly Criterion[],
+  next: readonly Criterion[],
+  byPosition: boolean,
+  remembered: (c: Criterion) => boolean = () => false,
+): (number | undefined)[] {
+  const used = new Set<number>()
+  const take = (j: number) => {
+    used.add(j)
+    return j
+  }
+  const out: (number | undefined)[] = next.map((c) => {
+    const j = oldCriteria.findIndex((o, k) => o === c && !used.has(k))
+    return j >= 0 ? take(j) : undefined
+  })
+  const open = next.map((c, i) => out[i] === undefined && !remembered(c))
+  next.forEach((c, i) => {
+    if (!open[i]) return
+    const j = oldCriteria.findIndex((o, k) => !used.has(k) && o.name === c.name)
+    if (j >= 0) {
+      out[i] = take(j)
+      open[i] = false
+    }
+  })
+  if (byPosition && next.length === oldCriteria.length) {
+    next.forEach((_, i) => {
+      if (open[i] && !used.has(i)) out[i] = take(i)
+    })
+  }
+  return out
+}
+
+/** Manual weights for a new list of criteria: `matchCriteria`, and the weight memory for criteria seen before. */
 export function carryWeights(
   oldCriteria: readonly Criterion[],
   oldWeights: readonly (number | null)[],
@@ -172,33 +222,55 @@ export function carryWeights(
 ): (number | null)[] {
   const old = fitWeights([...oldWeights], oldCriteria.length)
   memorize(oldCriteria, old)
-  const used = new Set<number>()
-  const take = (j: number) => {
-    used.add(j)
-    return old[j] ?? null
-  }
-  const out: (number | null | undefined)[] = next.map((c) => {
-    const j = oldCriteria.findIndex((o, k) => o === c && !used.has(k))
-    return j >= 0 ? take(j) : undefined
+  const map = matchCriteria(oldCriteria, next, byPosition, (c) => weightMemory.has(c))
+  return next.map((c, i) => {
+    const j = map[i]
+    return j !== undefined ? (old[j] ?? null) : (weightMemory.get(c) ?? null)
   })
-  next.forEach((c, i) => {
-    if (out[i] === undefined && weightMemory.has(c)) out[i] = weightMemory.get(c) ?? null
+}
+
+/**
+ * The judgements' sibling of `weightMemory`: each criterion object's last answers against the other criteria
+ * (row direction: pairMemory.get(a).get(b) was pairs[a][b]) and whether it was the best or worst.
+ */
+const pairMemory = new WeakMap<Criterion, WeakMap<Criterion, Ratio | null>>()
+const anchorMemory = new WeakMap<Criterion, 'best' | 'worst'>()
+
+function memorizeJudgements(criteria: readonly Criterion[], j: Judgements): void {
+  criteria.forEach((c, i) => {
+    pairMemory.set(c, new WeakMap(criteria.map((o, k) => [o, j.pairs[i]?.[k] ?? null])))
+    if (j.best === i) anchorMemory.set(c, 'best')
+    else if (j.worst === i) anchorMemory.set(c, 'worst')
+    else anchorMemory.delete(c)
   })
-  next.forEach((c, i) => {
-    if (out[i] !== undefined) return
-    const j = oldCriteria.findIndex((o, k) => !used.has(k) && o.name === c.name)
-    if (j >= 0) out[i] = take(j)
-  })
-  if (byPosition && next.length === oldCriteria.length) {
-    next.forEach((_, i) => {
-      if (out[i] === undefined && !used.has(i)) out[i] = take(i)
+}
+
+/** Judgements for a new list of criteria, matched like `carryWeights`; criteria seen before get their answers back. */
+function carryJudgements(
+  oldCriteria: readonly Criterion[],
+  old: Judgements | undefined,
+  next: readonly Criterion[],
+  byPosition: boolean,
+): Judgements {
+  const prev = old ?? emptyJudgements(oldCriteria.length)
+  memorizeJudgements(oldCriteria, prev)
+  const map = matchCriteria(oldCriteria, next, byPosition, (c) => pairMemory.has(c))
+  let j = remapJudgements(prev, map)
+  next.forEach((c, a) => {
+    const mem = map[a] === undefined ? pairMemory.get(c) : undefined
+    if (!mem) return
+    next.forEach((o, b) => {
+      const v = mem.get(o)
+      if (a !== b && v != null) j = setPair(j, a, b, v)
     })
-  }
-  return out.map((w) => w ?? null)
+    const role = anchorMemory.get(c)
+    if (role && j[role] === null && j[role === 'best' ? 'worst' : 'best'] !== a) j = { ...j, [role]: a }
+  })
+  return j
 }
 
 /** What a loaded example or import brought with it besides the table. */
-type Setup = Pick<WorkbenchData, 'weightMethod' | 'manualWeights' | 'rankingMethod' | 'methodParams' | 'exampleId' | 'importedFrom'>
+type Setup = Pick<WorkbenchData, 'weightMethod' | 'manualWeights' | 'judgements' | 'rankingMethod' | 'methodParams' | 'exampleId' | 'importedFrom'>
 
 /**
  * Setups of tables that were replaced, keyed by the table's matrix (the alternatives and criteria must be the same
@@ -216,6 +288,7 @@ function remember(s: WorkbenchData, always: boolean): void {
     setup: {
       weightMethod: s.weightMethod,
       manualWeights: [...s.manualWeights],
+      judgements: judgementsOf(s),
       rankingMethod: s.rankingMethod,
       methodParams: s.methodParams ?? {},
       exampleId: s.exampleId,
@@ -252,9 +325,17 @@ export const useWorkbench = create<WorkbenchState>()(
         set((s) => {
           const back = recall(problem)
           const manualWeights = carryWeights(s.problem.criteria, s.manualWeights, problem.criteria, true)
+          const judgements = carryJudgements(s.problem.criteria, s.judgements, problem.criteria, true)
           remember(s, false)
-          if (back) return { problem, ...back, manualWeights: fitWeights(back.manualWeights, problem.criteria.length) }
-          return { problem, exampleId: null, importedFrom: null, manualWeights }
+          const n = problem.criteria.length
+          if (back)
+            return {
+              problem,
+              ...back,
+              manualWeights: fitWeights(back.manualWeights, n),
+              judgements: back.judgements ?? emptyJudgements(n),
+            }
+          return { problem, exampleId: null, importedFrom: null, manualWeights, judgements }
         }),
 
       importProblem: (problem, fileName) =>
@@ -262,7 +343,8 @@ export const useWorkbench = create<WorkbenchState>()(
           remember(s, true)
           // A new file: weights follow criteria of the same name only, never a column position.
           const manualWeights = carryWeights(s.problem.criteria, s.manualWeights, problem.criteria, false)
-          return { problem, exampleId: null, importedFrom: fileName, manualWeights }
+          const judgements = carryJudgements(s.problem.criteria, s.judgements, problem.criteria, false)
+          return { problem, exampleId: null, importedFrom: fileName, manualWeights, judgements }
         }),
 
       loadExample: (id, lang, method) => {
@@ -281,6 +363,7 @@ export const useWorkbench = create<WorkbenchState>()(
           rankingRefs.find((m) => m === method) ?? (rankingRefs.includes(current) ? current : undefined) ?? rankingRefs[0]
         remember(get(), true)
         memorize(get().problem.criteria, get().manualWeights)
+        memorizeJudgements(get().problem.criteria, judgementsOf(get()))
         set((s) => ({
           ...((reference || ranking) && {
             methodParams: { ...s.methodParams, ...(reference && { [reference]: {} }), ...(ranking && { [ranking]: {} }) },
@@ -295,6 +378,7 @@ export const useWorkbench = create<WorkbenchState>()(
           importedFrom: null,
           weightMethod: reference ?? (ex.weights ? 'manual' : ex.equalWeights ? 'equal' : 'critic'),
           manualWeights: ex.weights ? [...ex.weights] : new Array<number | null>(ex.criteria.length).fill(null),
+          judgements: emptyJudgements(ex.criteria.length),
         }))
       },
 
@@ -320,6 +404,7 @@ export const useWorkbench = create<WorkbenchState>()(
       startBlank: (m = 3, n = 3, names) => {
         remember(get(), true)
         memorize(get().problem.criteria, get().manualWeights)
+        memorizeJudgements(get().problem.criteria, judgementsOf(get()))
         set({
           problem: {
             alternatives: Array.from({ length: m }, (_, i) => names?.alternative(i) ?? `A${i + 1}`),
@@ -329,6 +414,7 @@ export const useWorkbench = create<WorkbenchState>()(
           exampleId: null,
           importedFrom: null,
           manualWeights: new Array<number | null>(n).fill(null),
+          judgements: emptyJudgements(n),
         })
       },
 
@@ -386,6 +472,7 @@ export const useWorkbench = create<WorkbenchState>()(
             matrix: s.problem.matrix.map((r) => [...r, null]),
           },
           manualWeights: [...fitWeights(s.manualWeights, s.problem.criteria.length), null],
+          judgements: remapJudgements(judgementsOf(s), [...s.problem.criteria.keys(), undefined]),
         })),
 
       removeCriterion: (col) =>
@@ -398,6 +485,10 @@ export const useWorkbench = create<WorkbenchState>()(
             matrix: s.problem.matrix.map((r) => r.filter((_, j) => j !== col)),
           },
           manualWeights: fitWeights(s.manualWeights, s.problem.criteria.length).filter((_, j) => j !== col),
+          judgements: remapJudgements(
+            judgementsOf(s),
+            [...s.problem.criteria.keys()].filter((j) => j !== col),
+          ),
         })),
 
       setWeightMethod: (weightMethod) => set({ weightMethod }),
@@ -407,6 +498,12 @@ export const useWorkbench = create<WorkbenchState>()(
           manualWeights: fitWeights(s.manualWeights, s.problem.criteria.length).map((w, j) => (j === col ? value : w)),
         })),
 
+      setJudgement: (i, k, value) =>
+        set((s) => (i === k ? {} : { judgements: setPair(judgementsOf(s), i, k, value) })),
+
+      setAnchors: (best, worst) =>
+        set((s) => ({ judgements: { ...judgementsOf(s), best, worst: best !== null && best === worst ? null : worst } })),
+
       setRankingMethod: (rankingMethod) => set({ rankingMethod }),
 
       setMethodParam: (methodId, key, value) =>
@@ -415,6 +512,7 @@ export const useWorkbench = create<WorkbenchState>()(
       reset: () => {
         remember(get(), true)
         memorize(get().problem.criteria, get().manualWeights)
+        memorizeJudgements(get().problem.criteria, judgementsOf(get()))
         set(initialWorkbench())
       },
     }),
@@ -431,7 +529,16 @@ export const useWorkbench = create<WorkbenchState>()(
         exampleId: s.exampleId,
         importedFrom: s.importedFrom ?? null,
         methodParams: s.methodParams ?? {},
+        judgements: judgementsOf(s),
       }),
+      // Saved state is a trust boundary (hand-edited or stale localStorage): refit the judgements to the criteria.
+      merge: (persisted, current) => {
+        const p = { ...(persisted ?? {}) } as Partial<WorkbenchData>
+        // A problem without a criteria list cannot be shown or refitted: keep the current one.
+        if (!Array.isArray(p.problem?.criteria)) delete p.problem
+        const n = (p.problem ?? current.problem).criteria.length
+        return { ...current, ...p, judgements: sanitizeJudgements(p.judgements, n) }
+      },
     },
   ),
 )
@@ -470,7 +577,7 @@ export function rankingRunFor(data: Pick<WorkbenchData, 'rankingMethod' | 'metho
 
 /** Weights for the selected method, or null plus the blocking issues. */
 export function computeWeights(
-  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'methodParams'>,
+  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'methodParams' | 'judgements'>,
 ): Computed<WeightingResult> {
   const problem = toProblem(data.problem)
   const issues = validateProblem(problem)
@@ -490,9 +597,21 @@ export function computeWeights(
     return { value: { weights, steps: [{ key: 'equal.weights', vector: weights, axes: 'criteria' }] }, issues: [] }
   }
 
-  if (hasErrors(issues)) return { value: null, issues }
   const method = getWeightingMethod(data.weightMethod)
   if (!method) return { value: null, issues }
+  if (method.reads === 'judgements') {
+    // Answers instead of the matrix: the matrix is not validated, only the number of criteria.
+    if (n < 2) return { value: null, issues: issues.filter((x) => x.code === 'too-few-criteria') }
+    const given = data.judgements
+    const judgements = given && given.pairs.length === n ? given : emptyJudgements(n)
+    try {
+      return { value: method.compute(problem, paramsFor(data, method.id), judgements), issues: [] }
+    } catch (err) {
+      if (err instanceof ProblemValidationError) return { value: null, issues: err.issues }
+      throw err
+    }
+  }
+  if (hasErrors(issues)) return { value: null, issues }
   try {
     return { value: method.compute(problem, paramsFor(data, method.id)), issues }
   } catch (err) {
@@ -503,7 +622,7 @@ export function computeWeights(
 
 /** Ranking with the selected method on the computed weights, or null plus every blocking issue. */
 export function computeRanking(
-  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'rankingMethod' | 'methodParams'>,
+  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'rankingMethod' | 'methodParams' | 'judgements'>,
   weights: Computed<WeightingResult> = computeWeights(data),
 ): Computed<RankingResult> {
   const problem = toProblem(data.problem)
@@ -527,9 +646,10 @@ export function useWeights(): Computed<WeightingResult> {
   const weightMethod = useWorkbench((s) => s.weightMethod)
   const manualWeights = useWorkbench((s) => s.manualWeights)
   const methodParams = useWorkbench((s) => s.methodParams)
+  const judgements = useWorkbench((s) => s.judgements)
   return useMemo(
-    () => computeWeights({ problem, weightMethod, manualWeights, methodParams }),
-    [problem, weightMethod, manualWeights, methodParams],
+    () => computeWeights({ problem, weightMethod, manualWeights, methodParams, judgements }),
+    [problem, weightMethod, manualWeights, methodParams, judgements],
   )
 }
 
@@ -541,9 +661,10 @@ export function useRanking(): Computed<RankingResult> {
   const manualWeights = useWorkbench((s) => s.manualWeights)
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
   const methodParams = useWorkbench((s) => s.methodParams)
+  const judgements = useWorkbench((s) => s.judgements)
   return useMemo(
-    () => computeRanking({ problem, weightMethod, manualWeights, rankingMethod, methodParams }, weights),
-    [problem, weightMethod, manualWeights, rankingMethod, methodParams, weights],
+    () => computeRanking({ problem, weightMethod, manualWeights, rankingMethod, methodParams, judgements }, weights),
+    [problem, weightMethod, manualWeights, rankingMethod, methodParams, judgements, weights],
   )
 }
 

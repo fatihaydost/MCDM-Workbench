@@ -1,0 +1,120 @@
+
+====================================================================================================
+0. Consistency index tables
+====================================================================================================
+  CI (Rezaei 2015 Eq. 8), a_BW = 1..9: [0.0, 0.44, 1.0, 1.63, 2.3, 3.0, 3.73, 4.47, 5.23]
+  published Table 1:                    [0.0, 0.44, 1.0, 1.63, 2.3, 3.0, 3.73, 4.47, 5.23] MATCH
+  linear CI (Ratandhara & Kumar Eq. 22) vs their Table 1 rows n = 3, 5, 7, 10: max diff 0.0e+00
+  brute force max xi^L over all inputs on 1..a_BW, n = 3, a_BW = 2..9: 8/8 equal Eq. 22
+  brute force max xi^L over all inputs on 1..a_BW, n = 4, a_BW = 2..9: 8/8 equal Eq. 22
+
+====================================================================================================
+1. F1 Rezaei 2016 Examples 1-3 (car, B = price, W = style)
+====================================================================================================
+  Ex1 (Table 2, consistent): bo [2, 1, 4, 2, 8] ow [4, 8, 2, 4, 1]
+    linear LP     w [0.2105, 0.4211, 0.1053, 0.2105, 0.0526] xi^L 0.000000
+    linear closed w [0.2105, 0.4211, 0.1053, 0.2105, 0.0526] xi^L 0.000000   |closed - LP| 0.0e+00
+    published linear w [0.2105, 0.4211, 0.1053, 0.2105, 0.0526] xi^L 0.0: max diff 4.7e-05 MATCH
+    non-linear xi* 0.0000 (published 0.0) MATCH; CR_O = xi*/CI(8) = 0.0000
+    non-linear weight intervals [[0.2105, 0.2105], [0.4211, 0.4211], [0.1053, 0.1053], [0.2105, 0.2105], [0.0526, 0.0526]]
+    CR_I 0.0000 local [0.0000, 0.0000, 0.0000, 0.0000, 0.0000] -> most inconsistent: quality; threshold (a_BW = 8, n = 5) 0.2958 -> ok
+    ordinal OR 0.00 local [0.00, 0.00, 0.00, 0.00, 0.00]
+  Ex2 (Table 3): bo [2, 1, 4, 3, 8] ow [4, 8, 2, 3, 1]
+    linear LP     w [0.2295, 0.4481, 0.1148, 0.1530, 0.0546] xi^L 0.010929
+    linear closed w [0.2295, 0.4481, 0.1148, 0.1530, 0.0546] xi^L 0.010929   |closed - LP| 5.6e-17
+    published linear w [0.2295, 0.4481, 0.1148, 0.1530, 0.0546] xi^L 0.0109: max diff 4.6e-05 MATCH
+    non-linear xi* 0.1459 (published 0.1459) MATCH; CR_O = xi*/CI(8) = 0.0326
+    non-linear weight intervals [[0.2145, 0.2289], [0.4461, 0.4571], [0.1085, 0.1176], [0.1563, 0.1602], [0.0548, 0.0561]]
+    published intervals         [[0.2145, 0.2289], [0.4461, 0.4571], [0.1085, 0.1176], [0.1563, 0.1602], [0.0548, 0.0561]]: max diff 4.9e-05
+    linear w inside the non-linear intervals: [False, True, True, False, False]
+    CR_I 0.0179 local [0.0000, 0.0000, 0.0000, 0.0179, 0.0000] -> most inconsistent: safety; threshold (a_BW = 8, n = 5) 0.2958 -> ok
+    ordinal OR 0.00 local [0.00, 0.00, 0.00, 0.00, 0.00]
+  Ex3 (Table 4): bo [2, 1, 4, 3, 8] ow [4, 8, 4, 2, 1]
+    linear LP     w [0.2462, 0.4308, 0.1231, 0.1538, 0.0462] xi^L 0.061538
+    linear closed w [0.2462, 0.4308, 0.1231, 0.1538, 0.0462] xi^L 0.061538   |closed - LP| 2.8e-17
+    non-linear xi* 1.0000 (published 1.0) MATCH; CR_O = xi*/CI(8) = 0.2238
+    non-linear weight intervals [[0.1579, 0.2469], [0.4286, 0.4932], [0.1429, 0.1644], [0.1111, 0.1579], [0.0476, 0.0548]]
+    CR_I 0.1429 local [0.0000, 0.0000, 0.1429, 0.0357, 0.0000] -> most inconsistent: comfort; threshold (a_BW = 8, n = 5) 0.2958 -> ok
+    ordinal OR 0.30 local [0.10, 0.00, 0.30, 0.20, 0.00]
+  Rezaei's Excel solver (BWM-Solver-6.xlsx, sheet 'Example' = Ex2): stored w vs our closed form 5.6e-17, xi 1.7e-18
+  Liang 2020 Table 1 (Ex3 inputs): CR_I_j printed [0, 0, 0.14, 0.04, 0] (columns price, quality, comfort, safety, style); Table 2 OR_j [0, 0, 0.3, 0.2, 0]; Sec. 5.3 CR_O 0.223 (= 1/4.47)
+
+====================================================================================================
+2. F2 Rezaei 2015 Example 1 and Table 5 (n = 3, non-linear; unique for n = 3)
+====================================================================================================
+  Ex1: xi* 0.2583 (published 0.26), w [0.0714, 0.3387, 0.5899] (published [0.0714, 0.3387, 0.5899]), interval width 2.0e-07, CR_O 0.058 (published 0.058)
+  Table 5, 64 cases: max |xi* - printed| 0.0049, max |w - printed| 0.0050; within 2-d.p. rounding: 64/64
+
+====================================================================================================
+3. F3 Ratandhara & Kumar Examples 1-4 (closed form of the linear model)
+====================================================================================================
+  Ex1: w [0.4438, 0.1953, 0.1657, 0.1243, 0.0710] xi 0.0533 CR_lin 0.2244 | published xi 0.0533 CR 0.2246 w-diff 4.0e-05 | LP diff 5.6e-17 MATCH
+  Ex2: w [0.4323, 0.1213, 0.1617, 0.2425, 0.0422] xi 0.0527 CR_lin 0.1926 | published xi 0.0527 CR 0.1925 w-diff 3.7e-05 | LP diff 2.8e-17 MATCH
+  Ex3: w [0.2783, 0.1781, 0.0946, 0.1262, 0.1892, 0.0946, 0.0390] xi 0.1002 CR_lin 0.6679 | published xi 0.1002 CR 0.668 w-diff 4.0e-05 | LP diff 2.8e-17 MATCH
+  Ex4: w [0.6182, 0.1455, 0.1727, 0.0636] xi 0.1091 CR_lin 0.3779 | published xi 0.1091 CR 0.3779 w-diff 4.5e-05 | LP diff 1.1e-16 MATCH
+
+====================================================================================================
+4. F4 Demir & Bircan 2020 (Turkish, linear model, LINGO 17)
+====================================================================================================
+  ours   w [0.1991, 0.0796, 0.0212, 0.1327, 0.0996, 0.0569, 0.0664, 0.2947, 0.0498] xi^L 0.1035  (LP diff 5.6e-17)
+  paper  w [0.1991, 0.0796, 0.0212, 0.1327, 0.0996, 0.0569, 0.0664, 0.2947, 0.0498] xi^L 0.104
+  max diff 4.6e-05; xi diff 4.6e-04; xi of the printed w 0.1039
+  paper CR = xi^L / CI(9) = 0.104 / 5.23 = 0.020 'consistent (< 0.1)' -- mixes the linear xi with the non-linear CI table.
+  ours: CR_I 0.5417 (threshold a_BW 9, n 9: 0.3662) -> REVISE; most inconsistent criterion K7 (a_B = 6, a_W = 8); linear CR = xi^L / CI_lin(9, 9) = 0.534
+  non-linear xi* 3.3467, CR_O 0.6401 (threshold 0.4747)
+
+====================================================================================================
+5. F5 Arsu & Uguz Arsu 2021 (Turkish, expert 1; "linear programming" model, solver not named)
+====================================================================================================
+  main criteria K1-K5: printed (local) [0.0750, 0.2625, 0.4375, 0.1750, 0.0500]
+    linear [0.0750, 0.2625, 0.4375, 0.1750, 0.0500] diff 0.0000 | non-linear xi* 1.4689, printed inside intervals: False | printed TO 0.0234 vs xi^L/CI 0.0235, xi*/CI 0.3943 | CR_I 0.3333
+  K1 sub-criteria: printed (local) [0.4364, 0.1754, 0.0375, 0.1754, 0.1754]
+    linear [0.4351, 0.1756, 0.0382, 0.1756, 0.1756] diff 0.0013 | non-linear xi* 1.2280, printed inside intervals: False | printed TO 0.0175 vs xi^L/CI 0.0175, xi*/CI 0.2349 | CR_I 0.1667
+  K2 sub-criteria: printed (local) [0.0416, 0.0874, 0.0874, 0.1126, 0.0874, 0.5836]
+    linear [0.0419, 0.0876, 0.0876, 0.1126, 0.0876, 0.5827] diff 0.0009 | non-linear xi* 4.2280, printed inside intervals: False | printed TO 0.0393 vs xi^L/CI 0.0393, xi*/CI 0.8087 | CR_I 0.7500
+  K3 sub-criteria: printed (local) [0.0199, 0.1098, 0.1098, 0.1098, 0.0659, 0.1098, 0.1098, 0.1098, 0.2551]
+    linear [0.0201, 0.1098, 0.1098, 0.1098, 0.0659, 0.1098, 0.1098, 0.1098, 0.2550] diff 0.0001 | non-linear xi* 2.4689, printed inside intervals: False | printed TO 0.0142 vs xi^L/CI 0.0142, xi*/CI 0.4722 | CR_I 0.3611
+  K4 sub-criteria: printed (local) [0.0172, 0.0515, 0.1803, 0.1803, 0.1202, 0.1202, 0.0721, 0.2582]
+    linear [0.0172, 0.0515, 0.1804, 0.1804, 0.1203, 0.1203, 0.0722, 0.2577] diff 0.0004 | non-linear xi* 4.2280, printed inside intervals: False | printed TO 0.0197 vs xi^L/CI 0.0197, xi*/CI 0.8087 | CR_I 0.7500
+  K5 sub-criteria: printed (local) [0.0402, 0.1811, 0.1449, 0.1449, 0.2857, 0.1811, 0.0221]
+    linear [0.0401, 0.1804, 0.1456, 0.1456, 0.2848, 0.1804, 0.0232] diff 0.0011 | non-linear xi* 3.0000, printed inside intervals: False | printed TO 0.0145 vs xi^L/CI 0.0145, xi*/CI 0.5738 | CR_I 0.5000
+
+====================================================================================================
+6. Closed form vs LP (HiGHS) on random inputs; timing
+====================================================================================================
+  n = 3..15, 3900 random inputs on 1..a_BW: max |closed - LP| over w and xi 2.6e-15
+  500 inputs with entries above a_BW allowed: max |closed - LP| 1.5e-15
+  n = 15, CPython: closed form 28 us per solve, scipy HiGHS LP 1.5 ms per solve
+
+====================================================================================================
+7. Linear vs non-linear, CR_I vs CR_O, sensitivity (random inputs on 1..a_BW)
+====================================================================================================
+  n = 4..7, 400 inputs: same criterion ranks, ties within 1e-5 (linear vs midpoint of non-linear intervals) 104/400; linear w inside every non-linear interval 35/400; max |w_lin - midpoint| median 0.050, 90th pct 0.087
+    of these, the 71 with CR_I under the threshold: same ranks 36/71, max |w_lin - midpoint| median 0.041, 90th pct 0.081
+  400 inputs (a_BW >= 3, n 3..9): over threshold by CR_I 261, by CR_O 279; same verdict 323
+  one judgement moved by +-1 (within 1..a_BW): weights unchanged in 916/3697 moves (25 %, the "low sensitivity" of Ratandhara & Kumar Corollary 1)
+
+====================================================================================================
+8. Edge cases
+====================================================================================================
+  n = 2, a_BW = 3: w [0.7500, 0.2500] xi 0.0; (a_BW/(1+a_BW), 1/(1+a_BW)) = [0.7500, 0.2500]
+  all ones (a_BW = 1): w [0.2500, 0.2500, 0.2500, 0.2500] xi 0.0, CR_I 0.0 -> equal weights
+  a_BW = 1 but a_B2 = 9 (entry above a_BW): w [0.5758, 0.0909, 0.3333] xi 0.2424; CR_I 0.0 (Liang Eq. 7 sets CR_I = 0 whenever a_BW = 1: the inconsistency is invisible -> cap entries at a_BW)
+  a_BW = 2, n = 3, bo [1, 2, 2] ow [2, 2, 1]: CR_I 1.000, threshold 0.0 (Liang footnote 2: any CR_I > 0 is "revise"); Excel solver shows no threshold (VLOOKUP starts at 3)
+  B over j and j over W both 4 with a_BW = 9 (4 x 4 = 16 != 9): CR_I 0.097, suggested fix for j: a_jW = a_BW / a_Bj = 2.25 -> 2 (CR_I_j 0.014)
+  n =  2: BWM asks 2n - 3 =  1 judgements, AHP n(n - 1)/2 =   1
+  n =  3: BWM asks 2n - 3 =  3 judgements, AHP n(n - 1)/2 =   3
+  n =  5: BWM asks 2n - 3 =  7 judgements, AHP n(n - 1)/2 =  10
+  n =  9: BWM asks 2n - 3 = 15 judgements, AHP n(n - 1)/2 =  36
+  n = 15: BWM asks 2n - 3 = 27 judgements, AHP n(n - 1)/2 = 105
+
+====================================================================================================
+9. pyDecision 5.1.8 bw_method (divergence only)
+====================================================================================================
+  F1 Ex1: pyDecision [0.2105, 0.4211, 0.1053, 0.2105, 0.0526] vs linear [0.2105, 0.4211, 0.1053, 0.2105, 0.0526] max diff 3.9e-07; prints: CR: 0.0 (The Consistency Level is Acceptable) | Epsilon Value: 0.0
+  F1 Ex2: pyDecision [0.2234, 0.4520, 0.1151, 0.1543, 0.0551] vs linear [0.2295, 0.4481, 0.1148, 0.1530, 0.0546] max diff 6.1e-03; prints: CR: 0.0179 (The Consistency Level is Acceptable) | Epsilon Value: 0.011
+  F1 Ex3: pyDecision [0.2059, 0.4538, 0.1297, 0.1621, 0.0486] vs linear [0.2462, 0.4308, 0.1231, 0.1538, 0.0462] max diff 4.0e-02; prints: CR: 0.1429 (The Consistency Level is Acceptable) | Epsilon Value: 0.0648
+  F4 Demir: pyDecision [0.1376, 0.0969, 0.0414, 0.1391, 0.1012, 0.0727, 0.0849, 0.2625, 0.0636] vs linear [0.1991, 0.0796, 0.0212, 0.1327, 0.0996, 0.0569, 0.0664, 0.2947, 0.0498] max diff 6.2e-02; prints: CR: 0.5417 (The Consistency Level is Not Acceptable) | Epsilon Value: 0.2467
+  F3 Ex2: pyDecision [0.4347, 0.1164, 0.1626, 0.2439, 0.0424] vs linear [0.4323, 0.1213, 0.1617, 0.2425, 0.0422] max diff 4.9e-03; prints: CR: 0.0694 (The Consistency Level is Acceptable) | Epsilon Value: 0.053
+  all ones: prints 'CR: 1 (The Consistency Level is Not Acceptable)' (bug: a fully consistent input flagged; Liang defines CR_I = 0)
+  bo [1, 2, 3, 9] ow [9, 2, 2, 1]: pyDecision 'CR: 0.0 (The Consistency Level is Acceptable)' vs Liang CR_I 0.0694 (pyDecision omits the absolute value, so products below a_BW count as negative)

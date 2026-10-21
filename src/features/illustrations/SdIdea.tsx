@@ -3,7 +3,7 @@ import type { Problem } from '../../core/types'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
 import { estimateTextWidth, truncate } from '../charts/layout'
 import { scaleLinear } from '../charts/scale'
-import { useElementWidth } from '../charts/useElementWidth'
+import { useAnimateValues, useElementWidth } from '../charts/useElementWidth'
 import { argMax, sdParts } from './geometry'
 import s from './illustrations.module.css'
 
@@ -35,8 +35,15 @@ export type SdIdeaProps = {
   /** Number format for σ, the weights and the table (active locale, 4 decimals). */
   format?: ((value: number) => string) | undefined
   labels?: Partial<SdIdeaLabels>
+  /** Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. SD_IDEA_STEPS - 1 that step, the last being the full picture. */
+  step?: number | null | undefined
+  /** Move at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
+  explain?: boolean | undefined
   className?: string | undefined
 }
+
+/** The steps of the SD idea: 0 the normalized values as dots, 1 σ as a ruler from 0, 2 the weight σ / Σσ, the ruler turned into the bar. */
+export const SD_IDEA_STEPS = 3
 
 const ROW = 36
 const HEAD = 28
@@ -49,10 +56,12 @@ const defaultFormat = (v: number) => v.toFixed(4)
  * The bars are drawn relative to the largest weight, so they compare like the rulers do. Static: no motion.
  * Every number comes from the core's SD steps.
  */
-export function SdIdea({ problem, format = defaultFormat, labels, className }: SdIdeaProps) {
+export function SdIdea({ problem, format = defaultFormat, labels, step, explain = false, className }: SdIdeaProps) {
   const l = { ...SD_IDEA_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
+  // Resizing redraws at once, also while stepping (the bars only move on a step change).
+  const animate = useAnimateValues(width)
   const parts = useMemo(() => sdParts(problem), [problem])
   if (!parts) return null
 
@@ -76,6 +85,9 @@ export function SdIdea({ problem, format = defaultFormat, labels, className }: S
   const strip = scaleLinear([0, 1], [x0 + pad, x0 + stripW - pad])
   const maxWeight = Math.max(...parts.weights) || 1
   const height = HEAD + n * ROW
+  const stepping = step !== null && step !== undefined
+  const stage = stepping ? Math.min(Math.max(step, 0), SD_IDEA_STEPS - 1) : SD_IDEA_STEPS - 1
+  const off = (from: number) => (stage >= from ? undefined : '')
   const table: ChartTable = {
     corner: l.criterion,
     columns: [l.spread, l.weight],
@@ -93,7 +105,7 @@ export function SdIdea({ problem, format = defaultFormat, labels, className }: S
       className={className}
     >
       <svg
-        className={s.svg}
+        className={[s.svg, animate && s.animate, explain && s.explain].filter(Boolean).join(' ')}
         width={W}
         height={height}
         viewBox={`0 0 ${W} ${height}`}
@@ -101,10 +113,10 @@ export function SdIdea({ problem, format = defaultFormat, labels, className }: S
         aria-labelledby={`${uid}-title`}
         aria-describedby={`${uid}-table`}
       >
-        <text className={s.colHead} x={x0 + pad} y={HEAD - 10}>
+        <text className={`${s.colHead} ${s.stageItem}`} data-off={off(1)} x={x0 + pad} y={HEAD - 10}>
           {truncate(l.spread, stripW - pad, 12)}
         </text>
-        <text className={s.colHead} x={x1} y={HEAD - 10}>
+        <text className={`${s.colHead} ${s.stageItem}`} data-off={off(2)} x={x1} y={HEAD - 10}>
           {truncate(weightHead, weightW + valueW, 12)}
         </text>
         <line className={s.rowRule} x1={0} x2={W} y1={HEAD - 0.5} y2={HEAD - 0.5} />
@@ -127,10 +139,27 @@ export function SdIdea({ problem, format = defaultFormat, labels, className }: S
               {col.map((v, i) => (
                 <circle key={i} className={s.stripDot} cx={strip(v)} cy={y - 3} r={3.5} />
               ))}
-              <path className={s.sigma} data-sigma={sg} d={`M${lo} ${y + 7}H${hiX}M${lo} ${y + 4.5}v5M${hiX} ${y + 4.5}v5`} />
-              <path className={s.op} d={`M${x1 - OP + 5} ${y}h${OP - 10}m-3.5 -3.5 3.5 3.5 -3.5 3.5`} />
-              <rect className={s.bar} data-highlight={on || undefined} x={x1} y={y - 7} width={Math.max(ww, 1)} height={14} />
-              <text className={s.barValue} data-highlight={on || undefined} x={x1 + ww + 6} y={y} dominantBaseline="central">
+              <path className={`${s.sigma} ${s.stageItem}`} data-off={off(1)} data-emph={stepping && stage === 1 ? '' : undefined} data-sigma={sg} d={`M${lo} ${y + 7}H${hiX}M${lo} ${y + 4.5}v5M${hiX} ${y + 4.5}v5`} />
+              {/* σ's value, only at the spread step. */}
+              <text className={`${s.sigmaValue} ${s.stageItem}`} data-off={stepping && stage === 1 ? undefined : ''} x={hiX + 5} y={y + 7} dominantBaseline="central">
+                {format(sg)}
+              </text>
+              <path className={`${s.op} ${s.stageItem}`} data-off={off(2)} d={`M${x1 - OP + 5} ${y}h${OP - 10}m-3.5 -3.5 3.5 3.5 -3.5 3.5`} />
+              {/* The weight bar waits, hidden, on the σ ruler, so the ruler becomes the bar. */}
+              <rect
+                className={`${s.bar} ${s.criticBar} ${s.stageItem}`}
+                data-off={off(2)}
+                data-highlight={on || undefined}
+                width={1}
+                height={1}
+                style={{
+                  transform:
+                    stage >= 2
+                      ? `translate(${x1}px, ${y - 7}px) scale(${Math.max(ww, 1)}, 14)`
+                      : `translate(${lo}px, ${y + 5}px) scale(${Math.max(hiX - lo, 1)}, 4)`,
+                }}
+              />
+              <text className={`${s.barValue} ${s.stageItem} ${s.criticValue}`} data-off={off(2)} data-highlight={on || undefined} x={x1 + ww + 6} y={y} dominantBaseline="central">
                 {weightTexts[j]}
               </text>
               {j < n - 1 ? <line className={s.rowRule} x1={0} x2={W} y1={y + ROW / 2 - 0.5} y2={y + ROW / 2 - 0.5} /> : null}

@@ -1,0 +1,120 @@
+== F1a Saaty 2008 Table 3, best job (eigenvector)
+  reciprocal: True
+  eigen     [0.0361, 0.1219, 0.2619, 0.0746, 0.5056]  lambda 5.3263  CI 0.0816  CR(Saaty RI) 0.0728  CR(A&L RI) 0.0736
+  RGMM      [0.0351, 0.1185, 0.2715, 0.0721, 0.5027]  max|eigen - RGMM| 0.0096
+  additive  [0.0383, 0.1241, 0.2621, 0.0819, 0.4936]  max|eigen - additive| 0.0120
+  vs published (eigen): 0.00045 MATCH; RGMM 0.00948; additive 0.01243
+== F1b Saaty 2008 Table 2, drinks, a(Tea,Wine) = 3 (printed 2, typo)
+  reciprocal: True
+  eigen     [0.1775, 0.0191, 0.0418, 0.1164, 0.1896, 0.1288, 0.3268]  lambda 7.1766  CI 0.0294  CR(Saaty RI) 0.0223  CR(A&L RI) 0.0219
+  RGMM      [0.1787, 0.0185, 0.0422, 0.1165, 0.1911, 0.1286, 0.3243]  max|eigen - RGMM| 0.0025
+  additive  [0.1776, 0.0195, 0.0421, 0.1173, 0.1888, 0.1296, 0.3250]  max|eigen - additive| 0.0018
+  vs published (eigen): 0.00046 MATCH; RGMM 0.00268; additive 0.00197
+  CR ours 0.0223 vs published 0.022 -> MATCH
+== F1c Saaty 2008 Table 4, 3 x 3
+  reciprocal: True
+  eigen     [0.0914, 0.2176, 0.6910]  lambda 3.0536  CI 0.0268  CR(Saaty RI) 0.0462  CR(A&L RI) 0.0511
+  RGMM      [0.0914, 0.2176, 0.6910]  max|eigen - RGMM| 0.0000
+  additive  [0.0934, 0.2213, 0.6853]  max|eigen - additive| 0.0057
+  vs published (eigen): 0.00040 MATCH; RGMM 0.00040; additive 0.00571
+  drinks as printed (non-reciprocal): eigen [0.1777, 0.0193, 0.0393, 0.1167, 0.1904, 0.1292, 0.3274] CR 0.0142 -> tea 0.0393 vs 0.042: MISMATCH (typo)
+  Table 4: max|eigen - RGMM| = 1.7e-13 (n = 3: identical)
+== F2 Doguc 2022 Tables 4-7, recruitment criteria (additive normalization)
+  reciprocal: True
+  eigen     [0.1201, 0.3024, 0.0726, 0.1550, 0.3499]  lambda 5.2672  CI 0.0668  CR(Saaty RI) 0.0597  CR(A&L RI) 0.0603
+  RGMM      [0.1189, 0.3034, 0.0723, 0.1569, 0.3485]  max|eigen - RGMM| 0.0020
+  additive  [0.1239, 0.3001, 0.0746, 0.1567, 0.3447]  max|eigen - additive| 0.0052
+  additive vs published w: 0.00002 MATCH
+  Aw/w (additive w) [5.1734, 5.3735, 5.1511, 5.2709, 5.3777] vs published [5.1734, 5.3735, 5.1511, 5.2709, 5.3777]: 0.0000
+  lambda from additive w 5.2693 (published 5.2693), CI 0.0673 (0.0673), CR 0.0601 (0.0601)
+  true Perron lambda 5.2672, CR 0.0597: the paper's lambda is the approximation (+0.0021)
+  rank eigen [4, 2, 5, 3, 1] RGMM [4, 2, 5, 3, 1] additive [4, 2, 5, 3, 1] published [4, 2, 5, 3, 1]
+== F3 Bozoki et al. 2010 Example 2, incomplete 8 x 8 (12 of 28 missing)
+  graph connected: True; given judgments 16 of 28 (spanning tree needs 7)
+  Laplacian diagonal (degrees) [7, 4, 3, 4, 3, 4, 3, 4]
+  LLSM y [-0.6485, -1.6101, -0.6485, -2.8449, -2.2214, -2.0998, -0.8674] vs published: 0.00005 MATCH
+  LLSM w [0.1770, 0.0676, 0.1770, 0.0197, 0.0367, 0.0415, 0.1422, 0.3385] vs published: 0.00005 MATCH
+  EM completion lambda 9.2981 (published 9.2981), w [0.1894, 0.0567, 0.2116, 0.0175, 0.0319, 0.0354, 0.1509, 0.3066] vs published: 0.00004 MATCH
+  completed x (row-wise upper) [0.3300, 1.7197, 0.4663, 9.9206, 4.8525, 0.5696, 0.5253, 0.1424, 0.9312, 0.1093, 0.2912, 0.4031] vs published Table 1 k=20: 0.0001
+  CR of the completion (Saaty RI 1.41): 0.1315; RGMM of the completion [0.1761, 0.0654, 0.1865, 0.0194, 0.0372, 0.0403, 0.1406, 0.3346]
+== RI: our Monte Carlo (uniform over the 17 Saaty values, upper triangle iid), N = 100000
+   n   ours      std     Saaty   A&L-T2   pymcdm  A&L fit
+   3  0.5257  0.6965   0.58   0.5247   0.5799   0.4792
+   4  0.8836  0.6302   0.90   0.8816   0.8921   0.9094
+   5  1.1090  0.5077   1.12   1.1086   1.1159   1.1245
+   6  1.2490  0.4076   1.24   1.2479   1.2358   1.2536
+   7  1.3408  0.3339   1.32   1.3417   1.3322   1.3397
+   8  1.4044  0.2783   1.41   1.4057   1.3952   1.4011
+   9  1.4510  0.2379   1.45   1.4499   1.4537   1.4472
+  10  1.4857  0.2088   1.49   1.4854   1.4882   1.4831
+  11  1.5145  0.1853   1.51   1.5140   1.5117   1.5118
+  12  1.5365  0.1667   1.48   1.5365   1.5356   1.5352
+  13  1.5547  0.1508   1.56   1.5551   1.5571   1.5548
+  14  1.5702  0.1387   1.57   1.5713   1.5714   1.5713
+  15  1.5837  0.1272   1.59   1.5838   1.5831   1.5855
+  16  1.5957  0.1178   nan   nan   nan   1.5978
+  17  1.6053  0.1101   nan   nan   nan   1.6086
+  18  1.6137  0.1031   nan   nan   nan   1.6181
+  19  1.6216  0.0979   nan   nan   nan   1.6265
+  20  1.6294  0.0916   nan   nan   nan   1.6340
+  max|ours - A&L| n 3-15: 0.0020; max|ours - Saaty|: 0.0565 (Saaty n=3: 0.58 vs 0.5257)
+  Saaty table not monotone: RI(11) 1.51 > RI(12) 1.48
+  CR at the threshold lambda: a matrix with CR(A&L) = 0.10 has CR(Saaty) = n3:0.090, n4:0.098, n5:0.099, n7:0.102, n9:0.100, n12:0.104
+== eigenvector vs RGMM on random judgment matrices (n 3-9, noise sigma in {0, 0.3, 0.6, 1.0} on log ratios)
+  sigma 0.0: median CR 0.016, share CR>0.1 0.06; max|w_e - w_g| median 0.0021 max 0.0326; ranking differs 0/750, top differs 0
+  sigma 0.3: median CR 0.038, share CR>0.1 0.11; max|w_e - w_g| median 0.0042 max 0.0351; ranking differs 82/750, top differs 10
+  sigma 0.6: median CR 0.095, share CR>0.1 0.46; max|w_e - w_g| median 0.0094 max 0.0662; ranking differs 168/750, top differs 31
+  sigma 1.0: median CR 0.207, share CR>0.1 0.85; max|w_e - w_g| median 0.0196 max 0.1101; ranking differs 269/750, top differs 50
+== most inconsistent judgment: planted single error (n 4-9, true matrix rounded, error = other side or x3 off)
+  eps_eigen     finds the planted pair 1944/2000 (97.2%)
+  eps_rgmm      finds the planted pair 1956/2000 (97.8%)
+  best_cr_drop  finds the planted pair 1972/2000 (98.6%)
+  loo_llsm      finds the planted pair 1958/2000 (97.9%)
+  suggested value = original judgment: best fit from all-judgment eigen weights 21/2000, from leave-one-out LLSM 1184/2000
+  CR before median 0.155, after applying the leave-one-out suggestion median 0.017; share still > 0.1: 0.052
+== incomplete input: first + second diagonal only (2n-3 judgments), LLSM, vs full matrix (RGMM)
+  sigma 0.0: max|w_2diag - w_full| median 0.0260, p90 0.0724; ranking differs 425/666
+  sigma 0.3: max|w_2diag - w_full| median 0.0370, p90 0.0869; ranking differs 388/666
+  sigma 0.6: max|w_2diag - w_full| median 0.0558, p90 0.1230; ranking differs 450/666
+== group: aggregation of individual judgments (AIJ)
+  geometric AIJ reciprocal: True; arithmetic AIJ reciprocal: False
+  opposite judgments 3 and 1/3 -> geometric mean 1.000 ("equal"), the disagreement is lost
+  RGMM(geometric AIJ) = normalized geometric mean of individual RGMM weights: 5.6e-17
+== judgments to ask: AHP full n(n-1)/2, minimum spanning n-1, Comparion "two diagonals" 2n-3, BWM 2n-3
+  n  3: full   3  spanning  2  two diagonals  3
+  n  4: full   6  spanning  3  two diagonals  5
+  n  5: full  10  spanning  4  two diagonals  7
+  n  6: full  15  spanning  5  two diagonals  9
+  n  7: full  21  spanning  6  two diagonals 11
+  n  8: full  28  spanning  7  two diagonals 13
+  n  9: full  36  spanning  8  two diagonals 15
+  n 10: full  45  spanning  9  two diagonals 17
+  n 12: full  66  spanning 11  two diagonals 21
+  n 15: full 105  spanning 14  two diagonals 27
+== edges
+  n = 2, a12 = 5: eigen [0.8333, 0.1667] lambda 2.0000 -> CI 0, RI(2) = 0, CR = 0/0 (undefined; show "not applicable")
+  all "equal" (n 4): w [0.2500, 0.2500, 0.2500, 0.2500], CR 0.0000
+  chain at the scale end A>B 9, B>C 9, A>C 9 (should be 81): w [0.7785, 0.1799, 0.0416] CR 0.4835 -> the 1-9 cap alone forces CR > 0.1
+  cyclic A>B 9, B>C 9, C>A 9: w [0.3333, 0.3333, 0.3333] CR 6.130 (intransitive)
+  A>B 3, B>C 3, A>C 3 (should be 9): CR 0.1169; with A>C 5: 0.0332; A>C 9: 0.0000
+  n 16: Saaty RI table has no entry; A&L fit RI 1.5978
+  n 20: Saaty RI table has no entry; A&L fit RI 1.6340
+  power iteration to 1e-12 on 500 noisy matrices n 3-15: max 123 iterations, median 32
+== libraries
+  pyDecision F1a: me 6.1e-14 (CR 0.0728), g vs RGMM 1.4e-17 (CR 0.0721), m vs additive 0.0e+00 (CR 0.0764); our CR 0.0728
+  pyDecision F1b: me 2.0e-14 (CR 0.0223), g vs RGMM 4.2e-17 (CR 0.0221), m vs additive 0.0e+00 (CR 0.0225); our CR 0.0223
+  pyDecision F1c: me 1.7e-13 (CR 0.0462), g vs RGMM 0.0e+00 (CR 0.0462), m vs additive 0.0e+00 (CR 0.0467); our CR 0.0462
+  pyDecision F2 : me 9.9e-14 (CR 0.0597), g vs RGMM 0.0e+00 (CR 0.0596), m vs additive 0.0e+00 (CR 0.0601); our CR 0.0597
+  pyDecision n = 2: CR nan
+  pyDecision n = 16: IndexError: index 16 is out of bounds for axis 0 with size 16
+  pymcdm F1a: w vs eigen 6.1e-14; get_cr 0.0731 (= CI / Golden-Wang RI; ours with that RI 0.0731)
+  pymcdm F1b: w vs eigen 2.0e-14; get_cr 0.0221 (= CI / Golden-Wang RI; ours with that RI 0.0221)
+  pymcdm F1c: w vs eigen 1.7e-13; get_cr 0.0462 (= CI / Golden-Wang RI; ours with that RI 0.0462)
+  pymcdm F2 : w vs eigen 9.9e-14; get_cr 0.0599 (= CI / Golden-Wang RI; ours with that RI 0.0599)
+  pymcdm n = 2: get_cr 0
+  pymcdm n = 16: IndexError: list index out of range (the intended ValueError is built but not raised)
+  pymcdm AHP(ranking=[1, 2, 4, 3]) docstring weights reproduced: [0.4814, 0.2200, 0.1307, 0.1678]
+  pyrepo-mcda F1a: eigen 6.1e-14, geometric 1.4e-17, "normalized column sum" (row sums / total) vs additive 0.0431; prints 'Inconsistency index:  0.07283056326253257'
+  pyrepo-mcda F1b: eigen 2.0e-14, geometric 4.2e-17, "normalized column sum" (row sums / total) vs additive 0.0522; prints 'Inconsistency index:  0.022301646380094443'
+  pyrepo-mcda F1c: eigen 1.7e-13, geometric 0.0e+00, "normalized column sum" (row sums / total) vs additive 0.0324; prints 'Inconsistency index:  0.0462254964473906'
+  pyrepo-mcda F2 : eigen 9.8e-14, geometric 0.0e+00, "normalized column sum" (row sums / total) vs additive 0.0384; prints 'Inconsistency index:  0.05965096119658817'

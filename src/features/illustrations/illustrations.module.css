@@ -650,6 +650,14 @@
   transform-origin: 0 0;
 }
 
+.entropyTrack {
+  fill: var(--surface-2);
+}
+
+.entropyFill {
+  fill: var(--line-strong);
+}
+
 .sigmaValue {
   fill: var(--accent);
   font-size: 11px;
@@ -749,6 +757,20 @@
     opacity var(--dur) var(--ease);
 }
 
+/* Step through the idea: segments and rows move at the explain pace; the scores come in the second phase. */
+.animate.explain .sawRow,
+.animate.explain .sawSeg,
+.animate.explain .sawGap {
+  transition-duration: var(--dur-explain);
+}
+
+.animate.explain .sawValue {
+  transition:
+    transform var(--dur-explain) var(--ease),
+    opacity var(--dur-explain) var(--ease) var(--delay-explain),
+    visibility var(--dur-explain) var(--ease) var(--delay-explain);
+}
+
 .sawLegend {
   display: flex;
   flex-wrap: wrap;
@@ -786,13 +808,21 @@
   transform-origin: 0 0;
 }
 
-.animate .edasAxis {
+.animate .edasAxis,
+.animate .edasHead {
   transition: transform var(--dur-data) var(--ease);
+}
+
+.animate.explain .edasAxis,
+.animate.explain .edasHead {
+  transition-duration: var(--dur-explain);
 }
 
 .edasHead {
   fill: var(--text-2);
   font-size: 12px;
+  transform-box: view-box;
+  transform-origin: 0 0;
 }
 
 /* VIKOR idea ---------------------------------------------------------------------------------- */
@@ -1141,4 +1171,75 @@
 
 .marcosDot[data-highlight] {
   fill: var(--data-accent);
+}
+
+/* CoCoSo lenses, step through the idea: a column grows and fades in at the explain pace. */
+.animate.explain .marcosBar {
+  transition:
+    transform var(--dur-explain) var(--ease),
+    fill var(--dur-explain) var(--ease),
+    opacity var(--dur-explain) var(--ease);
+}
+
+.animate.explain .marcosBar[data-off] {
+  transition:
+    transform var(--dur-explain) var(--ease),
+    fill var(--dur-explain) var(--ease),
+    opacity var(--dur-explain) var(--ease),
+    visibility var(--dur-explain) var(--ease);
+}
+
+/* BWM two rulers ------------------------------------------------------------------------------- */
+
+/* The best's ruler: a filled mark above the line; the worst's ruler: a hollow one below (shape, not colour, tells them apart). */
+.bwmFromBest {
+  fill: var(--text-2);
+}
+
+.bwmToWorst {
+  fill: var(--bg);
+  stroke: var(--text-2);
+  stroke-width: 1.5;
+}
+
+/* Where the two rulers disagree; the criterion that fits worst (by CR^I) in the accent. */
+.bwmBand {
+  fill: var(--line-strong);
+}
+
+.bwmBand[data-highlight] {
+  fill: var(--accent);
+}
+
+.bwmDot {
+  fill: var(--text);
+  stroke: var(--bg);
+  stroke-width: 1.5;
+}
+
+.bwmGrid {
+  stroke: var(--line);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.bwmGrid[data-one] {
+  stroke: var(--line-strong);
+}
+
+.bwmFlagIcon {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.bwmFlagDot {
+  fill: var(--accent);
+}
+
+.bwmFlagText {
+  fill: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
 }

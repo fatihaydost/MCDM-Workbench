@@ -301,3 +301,26 @@ test('CoCoSo: a nudge that clips a weight to 1 is a cell it cannot rank, not a b
   await expect(page.getByTestId('perturb-blocked')).toHaveText(`${cx.criteria[0]!.name.en} +20%: can't rank (${worst} is the worst on every weighted criterion)`)
   await expect(page.getByTestId('stage-crash')).toHaveCount(0)
 })
+
+test('Monte Carlo on the 47-item example: the draws made so far show while it runs, then the finished result', async ({ page }) => {
+  await page.goto('/app?example=keshavarz-2015-inventory&stage=robustness')
+  // Polled every frame in the page: the partial picture lives for a few hundred ms.
+  const seen = await page.evaluate(
+    () =>
+      new Promise<string[]>((resolve) => {
+        const out: string[] = []
+        const t0 = performance.now()
+        const tick = () => {
+          const el = document.querySelector('[data-testid="mc-progress"]')
+          if (el?.textContent && out.at(-1) !== el.textContent) out.push(el.textContent)
+          if (document.querySelector('[data-testid="mc-same-top"]') || performance.now() - t0 > 15000) resolve(out)
+          else requestAnimationFrame(tick)
+        }
+        tick()
+      }),
+  )
+  expect(seen.length).toBeGreaterThan(0)
+  expect(seen.every((t) => /^\d[\d.,]* \/ 10[.,]000/.test(t))).toBe(true)
+  await expect(page.getByTestId('mc-same-top')).toBeVisible()
+  await expect(page.getByTestId('mc-progress')).toHaveCount(0)
+})

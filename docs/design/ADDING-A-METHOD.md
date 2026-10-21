@@ -122,8 +122,8 @@ Weighting method:
 
 Ranking method:
 
-- [ ] i18n `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T]. Eight methods (since CoCoSo) are a
-  grid of two rows of four below `sm` (`RankingStage.tsx` className); a ninth needs another layout decision.
+- [ ] i18n `workbench.rankingMethod.<id>` and `workbench.ranking.methodHint.<id>` [T]. Nine methods (since MABAC) are a
+  grid of three rows of three below `sm` (`RankingStage.tsx` className); a tenth needs another layout decision.
 - [ ] The score's words, `workbench.ranking.score.<id>` in en.json and tr.json [T] (read by `scoreWords`,
   `shared.ts`): `name` ("Closeness C", "Score S": table column, workbook column, sweep table), `title` ("Closeness
   coefficient C", "Weighted sum S": score chart, robustness sweep chart `{{score}}`) and `symbol` ("C", "S": the

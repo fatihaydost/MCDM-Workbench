@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { Problem } from '../../core'
 import type { MethodContent } from '../../content/types'
 import { alternativeNames, getExample, type ExampleDataset } from '../../data/examples'
+import { getJudgementExample } from '../../data/judgementExamples'
 import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { useLang, type Lang } from '../../i18n'
 import { viewOf } from './views'
@@ -13,7 +14,8 @@ function toProblem(ex: ExampleDataset, lang: Lang): Problem {
 
 /** Starts loading the idea picture of a method page (App's preloadRoute, so a prerendered page is replaced at once). */
 export function preloadIdea(id: string): Promise<unknown> | undefined {
-  return viewOf(id)?.idea?.Picture.preload()
+  const v = viewOf(id)
+  return (v?.idea ?? v?.judgementIdea)?.Picture.preload()
 }
 
 /**
@@ -24,11 +26,17 @@ export function preloadIdea(id: string): Promise<unknown> | undefined {
 export function MethodIdea({ m }: { m: MethodContent }) {
   const { t } = useTranslation()
   const [lang] = useLang()
-  const idea = viewOf(m.id)?.idea
+  const view = viewOf(m.id)
+  const idea = view?.idea
   const example = idea ? getExample(idea.example) : undefined
   const problem = useMemo(() => (example ? toProblem(example, lang) : null), [example, lang])
+  // A method that reads judgements (BWM) draws on published answers instead of a matrix.
+  const judged = view?.judgementIdea
+  const answers = judged ? getJudgementExample(judged.example) : undefined
+  const criteria = useMemo(() => answers?.criteria.map((c) => c[lang]) ?? [], [answers, lang])
 
   if (idea && example && problem) return <idea.Picture.Component example={example} problem={problem} />
+  if (judged && answers) return <judged.Picture.Component example={answers} criteria={criteria} />
 
   return (
     <div className="flex items-center gap-3 text-text-2">

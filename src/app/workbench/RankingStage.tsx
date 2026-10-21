@@ -55,6 +55,11 @@ export function RankingTable({
   const before = extra.filter((c) => !c.after)
   const after = extra.filter((c) => c.after)
   const order = rankOrder(result)
+  // Results (compact): a small bar before each score, the same raw scale as the score chart on Ranking.
+  // A lower-is-better score (VIKOR's Q) has its best row on the shortest bar, so it gets none.
+  const finite = result.scores.filter(Number.isFinite)
+  const lowerBetter = finite.length > 1 && Math.min(...finite) < Math.max(...finite) && result.scores[bestIndex(result)] === Math.min(...finite)
+  const topScore = lowerBetter ? 0 : Math.max(...finite.map((v) => Math.max(v, 0)), 0)
   const narrowHidden = !compact && view.columnsFromSm === true
   const extraClass = narrowHidden ? 'max-sm:hidden' : undefined
   // A column after the score (COPRAS's N) comes with long words ("Relative significance Q", "Utility degree N (%)"):
@@ -108,6 +113,14 @@ export function RankingTable({
                   </Td>
                 ))}
                 <Td numeric data-testid="closeness" className={cn(first ? 'font-semibold' : 'font-medium')}>
+                  {compact && topScore > 0 && (
+                    <span aria-hidden className="mr-3 inline-block h-2 w-20 bg-surface-2 align-middle">
+                      <span
+                        className={cn('block h-full', first ? 'bg-accent' : 'bg-[var(--data-context)]')}
+                        style={{ width: `${(Math.max(result.scores[i]!, 0) / topScore) * 100}%` }}
+                      />
+                    </span>
+                  )}
                   {nf.format(result.scores[i])}
                 </Td>
                 {after.map((c) => (
@@ -182,19 +195,19 @@ export function RankingStage() {
   return (
     <div className="flex flex-col gap-6 pt-4">
       <div className="flex flex-col gap-2">
-        {/* Eight methods do not fit one row at 390 px: two rows of four below sm, no empty cell. */}
+        {/* Nine methods do not fit one row at 390 px: three rows of three below sm, no empty cell. */}
         <SegmentedControl<RankingMethodId>
           aria-label={t('workbench.rankingMethod.label')}
           value={rankingMethod}
           onValueChange={setRankingMethod}
           options={RANKING_VIEW_IDS.map((m) => ({ value: m, label: t(`workbench.rankingMethod.${m}`) }))}
           size="md"
-          className="self-start max-sm:grid max-sm:grid-cols-4 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
+          className="self-start max-sm:grid max-sm:grid-cols-3 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
         />
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
-        {/* TOPSIS, EDAS, COPRAS and MARCOS have no options; SAW shows its normalization here, VIKOR its v, WASPAS and CoCoSo their λ. */}
+        {/* TOPSIS, EDAS, COPRAS, MARCOS and MABAC have no options; SAW shows its normalization here, VIKOR its v, WASPAS and CoCoSo their λ. */}
         <MethodParams methodId={rankingMethod} descriptors={getRankingMethod(rankingMethod)?.params} />
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
           <span>{t('workbench.ranking.weightsUsed', { method: weightMethodFullLabel(weightMethod, weightParams, t) })}</span>

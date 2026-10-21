@@ -125,6 +125,12 @@
       },
       "cocoso": {
         "claim": "S, P, ka, kb, kc, k and all seven ranks of Table VI match {{citation}} to {{decimals}} decimals; k only within 0.0015, because the paper rounded it at another stage."
+      },
+      "mabac": {
+        "claim": "The border G, the scores S and all seven ranks of Tables 10 and 12 match {{citation}} to {{decimals}} decimals."
+      },
+      "bwm": {
+        "claim": "Linear BWM weights match {{citation}} to {{decimals}} decimals."
       }
     },
     "catalogue": {
@@ -203,7 +209,8 @@
       "equal": "Equal weights",
       "manual": "Manual",
       "sd": "SD",
-      "merec": "MEREC"
+      "merec": "MEREC",
+      "bwm": "BWM"
     },
     "rankingMethod": {
       "label": "Ranking method",
@@ -214,7 +221,8 @@
       "waspas": "WASPAS",
       "copras": "COPRAS",
       "marcos": "MARCOS",
-      "cocoso": "CoCoSo"
+      "cocoso": "CoCoSo",
+      "mabac": "MABAC"
     },
     "params": {
       "entropy": {
@@ -368,7 +376,8 @@
         "equal": "Every criterion gets the same weight.",
         "manual": "Enter your own weights. They must be 0 or more and sum to 1.",
         "sd": "Objective weights from how widely each criterion's values spread over the alternatives.",
-        "merec": "Objective weights from how much the alternatives' overall performance drops when each criterion is removed. Every value must be above 0."
+        "merec": "Objective weights from how much the alternatives' overall performance drops when each criterion is removed. Every value must be above 0.",
+        "bwm": "Pick the most and least important criterion, then compare every other with these two (1‑9); 2n - 3 answers give the weights."
       },
       "columns": {
         "criterion": "Criterion",
@@ -406,7 +415,8 @@
         "waspas": "Blends a weighted sum with a weighted product, which punishes a very weak value harder; a higher Q is better.",
         "copras": "Adds up each alternative's weighted share of the benefit criteria plus a bonus that grows as its cost share shrinks; a higher Q is better.",
         "marcos": "Measures each weighted total against an imaginary ideal and anti-ideal row; a higher f(K) is better, in the same order as SAW (Linear).",
-        "cocoso": "Reads a weighted sum S and a power sum P three ways and combines them; a higher k is better. Zeros and negative values are allowed."
+        "cocoso": "Reads a weighted sum S and a power sum P three ways and combines them; a higher k is better. Zeros and negative values are allowed.",
+        "mabac": "Adds up how far each alternative lies above or below a border, the geometric mean of every criterion; a higher S is better, in the same order as a min-max weighted sum. Zeros and negative values are allowed."
       },
       "columns": {
         "rank": "Rank",
@@ -464,6 +474,11 @@
           "name": "Combined score k",
           "title": "CoCoSo combined score k",
           "symbol": "k"
+        },
+        "mabac": {
+          "name": "Distance to border S",
+          "title": "MABAC distance to border S",
+          "symbol": "S"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -644,6 +659,20 @@
         "kc": "Against the best kc",
         "scores": "Combined score k",
         "lambdaSweep": "k at every λ"
+      },
+      "mabac": {
+        "normalized": "Normalized (min-max)",
+        "weighted": "Weighted V = w(t + 1)",
+        "border": "Border G",
+        "distance": "Distance Q",
+        "scores": "Distance to border S"
+      },
+      "bwm": {
+        "bestToOthers": "Best over others a_B",
+        "othersToWorst": "Others over worst a_W",
+        "consistencyLocal": "Consistency CR^I_j",
+        "xi": "Deviation ξ",
+        "weights": "Weights w"
       }
     },
     "issues": {
@@ -798,6 +827,21 @@
         "lambdaTitle": "Score k as λ moves",
         "axis": "λ: share of S in kc",
         "point": "{{alternative}}, λ = {{lambda}}: k = {{value}}, rank {{rank}}"
+      },
+      "mabac": {
+        "title": "Above or below the border",
+        "caption": "Each stick is one criterion: up into the upper area (towards the best value), down into the lower area. S adds them up.",
+        "row": "{{alternative}}: S = {{score}}, above the border on {{above}} of {{n}} criteria"
+      },
+      "bwm": {
+        "title": "Your answers on one scale",
+        "axis": "Times the worst criterion",
+        "fromBest": "From the best",
+        "toWorst": "To the worst",
+        "weight": "Weight",
+        "best": "Best",
+        "worst": "Worst",
+        "flagged": "Fits worst"
       }
     },
     "flow": {
@@ -875,6 +919,12 @@
         "ka": "Three readings",
         "scores": "k",
         "lambdaSweep": "λ sweep"
+      },
+      "mabac": {
+        "normalized": "Normalize",
+        "border": "Border G",
+        "distance": "Q",
+        "scores": "S"
       }
     },
     "pipeline": {
@@ -886,7 +936,54 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS or CoCoSo and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo or MABAC and see every step of the calculation."
+    },
+    "pairwise": {
+      "question": "Which matters more?",
+      "fixed": "How many times more important is {{a}} than {{b}}?",
+      "sides": "Which matters more",
+      "values": "By how much",
+      "equal": "Equally important",
+      "words": {
+        "1": "equal",
+        "3": "moderately",
+        "5": "strongly",
+        "7": "very strongly",
+        "9": "extremely"
+      },
+      "valueName": "{{value}}",
+      "valueNameWord": "{{value}}, {{word}}",
+      "progress": "{{index}} / {{total}}",
+      "back": "Back",
+      "atMost": "At most {{cap}}",
+      "suggest": "Your other answers suggest {{answer}}",
+      "use": "Use {{value}}",
+      "allEqual": "All equally important",
+      "anchors": {
+        "best": "Most important (best)",
+        "worst": "Least important (worst)"
+      },
+      "sections": {
+        "bestToOthers": "Best over others",
+        "othersToWorst": "Others over worst"
+      },
+      "panel": {
+        "title": "Weights",
+        "provisional": "Provisional, more answers refine them",
+        "consistency": "Consistency (CR)",
+        "notApplicable": "not applicable",
+        "value": "CR {{value}}, threshold {{threshold}}",
+        "valueApproximate": "CR {{value}}, threshold about {{threshold}}",
+        "valueNoThreshold": "CR {{value}}",
+        "ok": "Consistent",
+        "warning": "Consistency warning: {{criterion}}",
+        "warningUnnamed": "Consistency warning"
+      },
+      "list": {
+        "title": "All pairs",
+        "pair": "{{a}} vs {{b}}",
+        "flagged": "check this answer"
+      }
     }
   },
   "methods": {
@@ -910,7 +1007,9 @@
       "waspas": "WASPAS",
       "copras": "COPRAS",
       "marcos": "MARCOS",
-      "cocoso": "CoCoSo"
+      "cocoso": "CoCoSo",
+      "mabac": "MABAC",
+      "bwm": "BWM"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -971,7 +1070,9 @@
         "waspas": "Blends a weighted sum with a weighted product.",
         "copras": "Adds benefit shares and a bonus for a small cost share.",
         "marcos": "Measures against an imaginary ideal and anti-ideal.",
-        "cocoso": "Three readings of a sum and a power sum, combined."
+        "cocoso": "Three readings of a sum and a power sum, combined.",
+        "mabac": "Distance above or below a border per criterion.",
+        "bwm": "Weights from your answers to a few comparisons."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1061,11 +1162,22 @@
           "entropy": "Entropy e",
           "weight": "Weight w",
           "share": "Share p",
-          "caption": "Each bar is one alternative's share of the column total."
+          "caption": "Each bar is one alternative's share of the column total.",
+          "steps": {
+            "s1": "Shares: each bar is one alternative's share of the column. The dashed line is an even split.",
+            "s2": "Entropy e: the more even the shares, the closer e is to 1.",
+            "s3": "1 − e is the information an even column lacks; the uneven criterion has more of it.",
+            "s4": "Weight w: 1 − e divided by the total over all criteria."
+          }
         },
         "saw": {
           "title": "Every part of the score has a criterion",
-          "caption": "Each segment is one criterion's weight times its normalized value; the bar ends at S."
+          "caption": "Each segment is one criterion's weight times its normalized value; the bar ends at S.",
+          "steps": {
+            "s1": "Rescale: every value goes onto one 0 to 1 scale (r), so criteria can be added.",
+            "s2": "Weight: each part is multiplied by its criterion's weight; important criteria take more of the bar.",
+            "s3": "Add up: the bar ends at the score S, and the longest bar ranks first."
+          }
         },
         "steps": {
           "start": "Step through the idea",
@@ -1082,14 +1194,24 @@
         },
         "edas": {
           "title": "Better or worse than the average, criterion by criterion",
-          "caption": "Right of the line: weighted distance above the average; left: below it; AS divides each by the largest SP or SN."
+          "caption": "Right of the line: weighted distance above the average; left: below it; AS divides each by the largest SP or SN.",
+          "steps": {
+            "s1": "Distance: right of the line is above the average, left is below it (PDA and NDA).",
+            "s2": "Weight: each distance is multiplied by its criterion's weight; the stacks end at SP and SN.",
+            "s3": "Appraisal: AS joins SP and SN in one score; the highest AS ranks first."
+          }
         },
         "sd": {
           "title": "Wider spread, more weight",
           "spread": "Spread σ",
           "weight": "Weight",
           "caption": "Each dot is one alternative on the 0 to 1 scale; the ruler under the dots is σ.",
-          "weightHead": "Weight = σ / {{total}}"
+          "weightHead": "Weight = σ / {{total}}",
+          "steps": {
+            "s1": "Each dot is one alternative's value, min-max scaled to 0 to 1.",
+            "s2": "Spread σ: the standard deviation of the dots, drawn from 0 on the same scale.",
+            "s3": "Weight w = σ / Σσ: the ruler is divided by the total, so the weights add up to 1."
+          }
         },
         "merec": {
           "title": "Remove a criterion, see how much the scores drop",
@@ -1097,7 +1219,13 @@
           "effect": "Removal effect E",
           "weight": "Weight",
           "caption": "Each segment is one alternative's drop in overall performance when the criterion is removed; together they make E.",
-          "weightHead": "Weight = E / {{total}}"
+          "weightHead": "Weight = E / {{total}}",
+          "steps": {
+            "s1": "Each row is a criterion. Remove it and see what happens to the scores.",
+            "s2": "Drops: the part of each alternative's overall performance S that is lost without this criterion.",
+            "s3": "The drops add up to the removal effect E.",
+            "s4": "Weight w = E / ΣE: the share of the total effect, so the weights add up to 1."
+          }
         },
         "waspas": {
           "title": "Sum or product: λ sets the blend",
@@ -1105,7 +1233,13 @@
         },
         "copras": {
           "title": "Benefit share plus a bonus for low cost",
-          "caption": "Each bar is S+ (benefit share) plus the cost bonus, which grows as the cost share S- shrinks; it ends at Q, then N in percent of the best."
+          "caption": "Each bar is S+ (benefit share) plus the cost bonus, which grows as the cost share S- shrinks; it ends at Q, then N in percent of the best.",
+          "steps": {
+            "s1": "Benefit share S+: each bar is the alternative's share of the benefit criteria.",
+            "s2": "Cost bonus: the smaller the cost share S− (printed), the longer the bonus.",
+            "s3": "Q = S+ plus the bonus; the longest bar ranks first.",
+            "s4": "N: each Q as a percent of the best Q."
+          }
         },
         "marcos": {
           "title": "Two imaginary rows to measure against",
@@ -1114,12 +1248,54 @@
           "sawCaption": "Every dot lies on one line through 0, so no two alternatives can swap places.",
           "sawX": "SAW (Linear) score S",
           "sawY": "MARCOS f(K)",
-          "sawLine": "f(K) = c · S, c = {{c}}"
+          "sawLine": "f(K) = c · S, c = {{c}}",
+          "steps": {
+            "s1": "Weighted totals S: each bar is an alternative's weighted sum, all on one scale.",
+            "s2": "Two imaginary rows: the ideal AI (best of every criterion) and the anti-ideal AAI (worst) mark the ends.",
+            "s3": "Utility f(K): each bar is read against both rows (K− and K+); the highest f(K) ranks first."
+          }
         },
         "cocoso": {
           "title": "Two scores, three readings",
           "caption": "ka is the share of the total, kb the size against the weakest provider, kc a λ-mix against the best; k combines the three.",
-          "lambdaCaption": "λ moves only kc, so the lines barely bend: here no two providers swap at any λ."
+          "lambdaCaption": "λ moves only kc, so the lines barely bend: here no two providers swap at any λ.",
+          "steps": {
+            "s1": "ka: each provider's share of the total of S and P.",
+            "s2": "kb: how far each stands above the weakest provider.",
+            "s3": "kc: how each compares with the best mix of S and P.",
+            "s4": "k combines the three readings; the longest bar ranks first."
+          }
+        },
+        "mabac": {
+          "title": "One border per criterion",
+          "caption": "The line in every row is the border G, the geometric mean of the forklifts. Upper area: above it, lower area: below; S adds the sticks up.",
+          "sumTitle": "Same order as a min-max weighted sum",
+          "sumCaption": "Every dot sits on one line, so no two forklifts can swap; G only decides the sign of S.",
+          "sumX": "Min-max weighted sum",
+          "sumY": "MABAC S",
+          "sumLine": "S = sum - B, B = {{border}}",
+          "steps": {
+            "s1": "The line in each row is the border G; above it is the upper area, below it the lower one.",
+            "s2": "Each criterion's distance from G is a stick: up if the forklift is better than G, down if worse.",
+            "s3": "Add the sticks up: the bar is the score S, and the highest S ranks first."
+          }
+        },
+        "bwm": {
+          "title": "Two rulers, one scale",
+          "caption": "Filled marks place each criterion by the answers about the best criterion, hollow marks by the answers about the worst; the dot is the weight, in times the worst criterion's weight; here every answer stays within the consistency threshold (CR {{cr}}, threshold {{threshold}}), so the workbench would not warn.",
+          "axis": "Times the worst criterion",
+          "fromBest": "From the best",
+          "toWorst": "To the worst",
+          "weight": "Weight",
+          "best": "Best",
+          "worst": "Worst",
+          "flagged": "Fits worst",
+          "steps": {
+            "s1": "First the two anchors: the most important criterion and the least important one, and how many times more important the first is.",
+            "s2": "Each \"best is x times more important than this one\" puts the criterion somewhere on the scale.",
+            "s3": "The answers about the worst criterion place it a second time. Where the two places differ, your answers disagree; the marked one fits worst.",
+            "s4": "BWM picks the weights that keep the largest of these gaps as small as possible."
+          }
         }
       }
     }
@@ -1234,6 +1410,20 @@
       "kc": "kc = (λ S + (1 - λ) P) / (λ max S + (1 - λ) max P). The best mix gets 1.",
       "scores": "Combined score k = (ka kb kc)^(1/3) + (ka + kb + kc) / 3. A higher value ranks higher.",
       "lambdaSweep": "k at λ = 0, 0.1, ..., 1: where two alternatives swap places as λ moves."
+    },
+    "mabac": {
+      "normalized": "Min-max normalization: the worst value of each column becomes 0 and the best 1, for a cost criterion the other way round. Negative and zero values are fine too.",
+      "weighted": "Weighted matrix V: each normalized value plus 1, times its criterion weight, so it lies between w and 2w.",
+      "border": "Border G: the geometric mean of each column of V, computed through logarithms so that hundreds of alternatives do not underflow to 0.",
+      "distance": "Distance Q = V - G: positive in the upper area (towards the best value), negative in the lower area.",
+      "scores": "Distance to border S: the row sum of Q. A higher value ranks higher; S is the min-max weighted sum minus one constant, so the order is that sum's."
+    },
+    "bwm": {
+      "bestToOthers": "Best over others: how much more important the best criterion is than each, 1‑9.",
+      "othersToWorst": "Others over worst: how much more important each criterion is than the worst, 1‑9.",
+      "consistencyLocal": "Consistency per criterion: how far a_Bj times a_jW is from a_BW.",
+      "xi": "Deviation: the largest gap between the answers and the fitted weights.",
+      "weights": "BWM weights: the linear model, solved in closed form, summing to 1."
     }
   },
   "validation": {
@@ -1257,7 +1447,9 @@
       "negative-weight": "The weight of {{criterion}} is {{value}}. Weights cannot be negative.",
       "weights-sum": "Weights sum to {{value}}, they must sum to 1.",
       "non-positive-average": "The average of {{criterion}} is {{value}}. EDAS divides by each criterion's average, so it must be above 0.",
-      "all-worst-alternative": "{{alternative}} is the worst on every weighted criterion, so its S and P are 0 and CoCoSo would divide by 0. Remove it or choose another method."
+      "all-worst-alternative": "{{alternative}} is the worst on every weighted criterion, so its S and P are 0 and CoCoSo would divide by 0. Remove it or choose another method.",
+      "judgements-incomplete": "{{value}} of the questions answered; answer the rest to get the weights.",
+      "anchors-missing": "Choose the best and the worst criterion first."
     }
   },
   "warnings": {
@@ -1309,6 +1501,13 @@
     },
     "cocoso": {
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real."
+    },
+    "mabac": {
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real."
+    },
+    "bwm": {
+      "inconsistent": "Answers about {{criterion}} fit worst; the weights are still computed.",
+      "threshold-approximate": "With more than 9 criteria the consistency threshold is approximate (the 9-criteria value)."
     }
   }
 }

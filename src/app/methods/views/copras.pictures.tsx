@@ -1,11 +1,12 @@
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { entropy } from '../../../core/methods/entropy'
-import { CoprasBonus, type CoprasBonusLabels } from '../../../features/illustrations/CoprasBonus'
+import { COPRAS_BONUS_STEPS, CoprasBonus, type CoprasBonusLabels } from '../../../features/illustrations/CoprasBonus'
+import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
 import { useNumberFormat } from '../../../i18n'
 import { cn } from '../../../ui'
 import { DECIMALS, scoreWords } from '../../workbench/shared'
-import { IdeaSource } from './parts'
+import { IdeaSource, useStepLabels } from './parts'
 import type { IdeaPictureProps, StagePictureProps } from './types'
 
 function useCoprasLabels(): CoprasBonusLabels {
@@ -41,11 +42,14 @@ export function Stage({ problem, weights, className }: StagePictureProps) {
   return <CoprasBonus problem={problem} weights={weights} format={format} formatPercent={formatPercent} labels={labels} className={cn('max-w-[760px]', className)} />
 }
 
-/** Method page: the same picture on the cream separators, with the Entropy weights the paper computes from the data. */
+/** Method page: the same picture (with a step-through story: S+, bonus, Q, N) on the cream separators, with the Entropy weights the paper computes from the data. */
 export function Idea({ example, problem }: IdeaPictureProps) {
   const { t } = useTranslation()
   const labels = useCoprasLabels()
   const { format, formatPercent } = useFormats()
+  const steps = useIdeaSteps(COPRAS_BONUS_STEPS)
+  const stepLabels = useStepLabels()
+  const sentences = (['s1', 's2', 's3', 's4'] as const).map((k) => t(`methods.page.idea.copras.steps.${k}`))
   const weights = useMemo(() => example.weights ?? entropy.compute(problem, {}).weights, [example, problem])
   return (
     <div className="flex flex-col gap-2">
@@ -61,8 +65,11 @@ export function Idea({ example, problem }: IdeaPictureProps) {
           showTable: t('methods.page.idea.showTable'),
           alternative: t('methods.page.idea.alternative'),
         }}
+        step={steps.step}
+        explain={steps.explain}
         className="max-w-[760px]"
       />
+      <IdeaSteps control={steps} sentences={sentences} labels={stepLabels} />
       <IdeaSource example={example} />
     </div>
   )

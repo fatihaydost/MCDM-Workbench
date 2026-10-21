@@ -10,7 +10,7 @@ export type MethodMeta = Pick<MethodContent, 'id' | 'family' | 'status' | 'year'
 const ROWS: readonly MethodMeta[] = [
   { id: 'ahp', name: { en: 'AHP', tr: 'AHP' }, family: 'weighting-subjective', status: 'research', year: 1977 },
   { id: 'aras', name: { en: 'ARAS', tr: 'ARAS' }, family: 'ranking-utility', status: 'research', year: 2010 },
-  { id: 'bwm', name: { en: 'BWM', tr: 'BWM' }, family: 'weighting-subjective', status: 'research', year: 2015 },
+  { id: 'bwm', name: { en: 'BWM', tr: 'BWM' }, family: 'weighting-subjective', status: 'available', year: 2015 },
   { id: 'cilos', name: { en: 'CILOS', tr: 'CILOS' }, family: 'weighting-objective', status: 'research', year: 2016 },
   { id: 'cocoso', name: { en: 'CoCoSo', tr: 'CoCoSo' }, family: 'ranking-utility', status: 'available', year: 2019 },
   { id: 'codas', name: { en: 'CODAS', tr: 'CODAS' }, family: 'ranking-distance', status: 'research', year: 2016 },
@@ -22,7 +22,7 @@ const ROWS: readonly MethodMeta[] = [
   { id: 'entropy', name: { en: 'Entropy', tr: 'Entropi' }, family: 'weighting-objective', status: 'available', year: 1981 },
   { id: 'equal', name: { en: 'Equal weights', tr: 'Eşit ağırlık' }, family: 'weighting-objective', status: 'available', year: 1974 },
   { id: 'lopcow', name: { en: 'LOPCOW', tr: 'LOPCOW' }, family: 'weighting-objective', status: 'research', year: 2022 },
-  { id: 'mabac', name: { en: 'MABAC', tr: 'MABAC' }, family: 'ranking-distance', status: 'research', year: 2015 },
+  { id: 'mabac', name: { en: 'MABAC', tr: 'MABAC' }, family: 'ranking-distance', status: 'available', year: 2015 },
   { id: 'marcos', name: { en: 'MARCOS', tr: 'MARCOS' }, family: 'ranking-utility', status: 'available', year: 2020 },
   { id: 'merec', name: { en: 'MEREC', tr: 'MEREC' }, family: 'weighting-objective', status: 'available', year: 2021 },
   { id: 'moora', name: { en: 'MOORA', tr: 'MOORA' }, family: 'ranking-ratio', status: 'research', year: 2006 },

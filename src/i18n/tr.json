@@ -125,6 +125,12 @@
       },
       "cocoso": {
         "claim": "S, P, ka, kb, kc, k ve Tablo VI'nın yedi sırasının tamamı {{citation}} ile {{decimals}} basamakta örtüşüyor; makale k'yi başka bir aşamada yuvarladığı için k yalnız 0,0015 içinde."
+      },
+      "mabac": {
+        "claim": "Tablo 10 ve 12'deki sınır G, skorlar S ve yedi sıranın tamamı {{citation}} ile {{decimals}} basamakta örtüşüyor."
+      },
+      "bwm": {
+        "claim": "Doğrusal BWM ağırlıkları {{citation}} ile {{decimals}} basamağa kadar aynı."
       }
     },
     "catalogue": {
@@ -203,7 +209,8 @@
       "equal": "Eşit ağırlık",
       "manual": "Elle",
       "sd": "SD",
-      "merec": "MEREC"
+      "merec": "MEREC",
+      "bwm": "BWM"
     },
     "rankingMethod": {
       "label": "Sıralama yöntemi",
@@ -214,7 +221,8 @@
       "waspas": "WASPAS",
       "copras": "COPRAS",
       "marcos": "MARCOS",
-      "cocoso": "CoCoSo"
+      "cocoso": "CoCoSo",
+      "mabac": "MABAC"
     },
     "params": {
       "entropy": {
@@ -368,7 +376,8 @@
         "equal": "Her kriter aynı ağırlığı alır.",
         "manual": "Ağırlıkları kendiniz girin. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli.",
         "sd": "Her kriterin değerlerinin alternatifler arasında ne kadar yayıldığına bakan nesnel ağırlıklar.",
-        "merec": "Ağırlığı, kriteri çıkarmanın neyi değiştirdiğinden bulur. Her değer 0'dan büyük olmalı."
+        "merec": "Ağırlığı, kriteri çıkarmanın neyi değiştirdiğinden bulur. Her değer 0'dan büyük olmalı.",
+        "bwm": "En önemli ve en önemsiz kriteri seçin, diğer her kriteri bu ikisiyle karşılaştırın (1‑9); 2n - 3 yanıt ağırlıkları verir."
       },
       "columns": {
         "criterion": "Kriter",
@@ -406,7 +415,8 @@
         "waspas": "Ağırlıklı toplamı, çok zayıf bir değeri daha sert cezalandıran ağırlıklı çarpımla karıştırır; Q büyüdükçe sıra yükselir.",
         "copras": "Her alternatifin fayda kriterlerindeki ağırlıklı payını toplar, maliyet payı küçüldükçe büyüyen bir puan ekler; Q büyüdükçe sıra yükselir.",
         "marcos": "Her ağırlıklı toplamı hayali bir ideal ve anti-ideal satırla ölçer; f(K) büyüdükçe sıra yükselir, sıra SAW (Doğrusal) ile aynıdır.",
-        "cocoso": "Ağırlıklı toplam S ile üs toplamı P'yi üç biçimde okuyup birleştirir; k büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir."
+        "cocoso": "Ağırlıklı toplam S ile üs toplamı P'yi üç biçimde okuyup birleştirir; k büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
+        "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir."
       },
       "columns": {
         "rank": "Sıra",
@@ -464,6 +474,11 @@
           "name": "Birleşik puan k",
           "title": "CoCoSo birleşik puanı k",
           "symbol": "k"
+        },
+        "mabac": {
+          "name": "Sınıra uzaklık S",
+          "title": "MABAC sınıra uzaklık S",
+          "symbol": "S"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -644,6 +659,20 @@
         "kc": "En iyiye göre kc",
         "scores": "Birleşik puan k",
         "lambdaSweep": "Her λ için k"
+      },
+      "mabac": {
+        "normalized": "Normalize (min-maks)",
+        "weighted": "Ağırlıklı V = w(t + 1)",
+        "border": "Sınır G",
+        "distance": "Uzaklık Q",
+        "scores": "Sınıra uzaklık S"
+      },
+      "bwm": {
+        "bestToOthers": "En iyinin diğerlerine üstünlüğü a_B",
+        "othersToWorst": "Diğerlerinin en kötüye üstünlüğü a_W",
+        "consistencyLocal": "Tutarlılık CR^I_j",
+        "xi": "Sapma ξ",
+        "weights": "Ağırlıklar w"
       }
     },
     "issues": {
@@ -798,6 +827,21 @@
         "lambdaTitle": "λ değiştikçe puan k",
         "axis": "λ: kc'de S'nin payı",
         "point": "{{alternative}}, λ = {{lambda}}: k = {{value}}, {{rank}}. sıra"
+      },
+      "mabac": {
+        "title": "Sınırın üstünde mi, altında mı",
+        "caption": "Her çubuk bir kriter: yukarı üst bölgeye (en iyi değere doğru), aşağı alt bölgeye. S bunları toplar.",
+        "row": "{{alternative}}: S = {{score}}, {{n}} kriterin {{above}} tanesinde sınırın üstünde"
+      },
+      "bwm": {
+        "title": "Yanıtlarınız tek ölçekte",
+        "axis": "En kötü kriterin katı",
+        "fromBest": "En iyiden",
+        "toWorst": "En kötüye",
+        "weight": "Ağırlık",
+        "best": "En iyi",
+        "worst": "En kötü",
+        "flagged": "En az uyan"
       }
     },
     "flow": {
@@ -875,6 +919,12 @@
         "ka": "Üç okuma",
         "scores": "k",
         "lambdaSweep": "λ taraması"
+      },
+      "mabac": {
+        "normalized": "Normalize",
+        "border": "Sınır G",
+        "distance": "Q",
+        "scores": "S"
       }
     },
     "pipeline": {
@@ -886,7 +936,54 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, MEREC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS ya da CoCoSo ile sıralayın ve hesabın her adımını görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, MEREC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo ya da MABAC ile sıralayın ve hesabın her adımını görün."
+    },
+    "pairwise": {
+      "question": "Hangisi daha önemli?",
+      "fixed": "{{a}}, {{b}} kriterinden kaç kat daha önemli?",
+      "sides": "Hangisi daha önemli",
+      "values": "Kaç kat",
+      "equal": "Eşit önemde",
+      "words": {
+        "1": "eşit",
+        "3": "biraz",
+        "5": "güçlü",
+        "7": "çok güçlü",
+        "9": "son derece"
+      },
+      "valueName": "{{value}}",
+      "valueNameWord": "{{value}}, {{word}}",
+      "progress": "{{index}} / {{total}}",
+      "back": "Geri",
+      "atMost": "En çok {{cap}}",
+      "suggest": "Diğer yanıtlarınız {{answer}} değerini öneriyor",
+      "use": "{{value}} kullanın",
+      "allEqual": "Hepsi eşit önemde",
+      "anchors": {
+        "best": "En önemli (en iyi)",
+        "worst": "En önemsiz (en kötü)"
+      },
+      "sections": {
+        "bestToOthers": "En iyinin diğerlerine üstünlüğü",
+        "othersToWorst": "Diğerlerinin en kötüye üstünlüğü"
+      },
+      "panel": {
+        "title": "Ağırlıklar",
+        "provisional": "Geçici, yeni yanıtlar ağırlıkları netleştirir",
+        "consistency": "Tutarlılık (CR)",
+        "notApplicable": "uygulanmaz",
+        "value": "CR {{value}}, eşik {{threshold}}",
+        "valueApproximate": "CR {{value}}, eşik yaklaşık {{threshold}}",
+        "valueNoThreshold": "CR {{value}}",
+        "ok": "Tutarlı",
+        "warning": "Tutarlılık uyarısı: {{criterion}}",
+        "warningUnnamed": "Tutarlılık uyarısı"
+      },
+      "list": {
+        "title": "Tüm çiftler",
+        "pair": "{{a}} ve {{b}}",
+        "flagged": "bu yanıtı gözden geçirin"
+      }
     }
   },
   "methods": {
@@ -910,7 +1007,9 @@
       "waspas": "WASPAS",
       "copras": "COPRAS",
       "marcos": "MARCOS",
-      "cocoso": "CoCoSo"
+      "cocoso": "CoCoSo",
+      "mabac": "MABAC",
+      "bwm": "BWM"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -971,7 +1070,9 @@
         "waspas": "Ağırlıklı toplamı ağırlıklı çarpımla karıştırır.",
         "copras": "Fayda paylarını toplar, küçük maliyet payını ödüllendirir.",
         "marcos": "Hayali bir ideal ve anti-ideale göre ölçer.",
-        "cocoso": "Bir toplamın ve bir üs toplamının üç okuması, birleşik."
+        "cocoso": "Bir toplamın ve bir üs toplamının üç okuması, birleşik.",
+        "mabac": "Her kriterde bir sınırın üstüne ya da altına uzaklık.",
+        "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1061,11 +1162,22 @@
           "entropy": "Entropi e",
           "weight": "Ağırlık w",
           "share": "Pay p",
-          "caption": "Her çubuk, bir alternatifin sütun toplamındaki payıdır."
+          "caption": "Her çubuk, bir alternatifin sütun toplamındaki payıdır.",
+          "steps": {
+            "s1": "Paylar: her çubuk bir alternatifin sütundaki payıdır. Kesikli çizgi eşit paylaşımdır.",
+            "s2": "Entropi e: paylar ne kadar eşitse e o kadar 1'e yakındır.",
+            "s3": "1 − e, eşit bir sütunda bulunmayan bilgidir; eşitsiz kriterde daha fazladır.",
+            "s4": "Ağırlık w: 1 − e, tüm kriterlerin toplamına bölünür."
+          }
         },
         "saw": {
           "title": "Skorun her parçasının bir kriteri var",
-          "caption": "Her parça bir kriterin ağırlığı ile normalize değerinin çarpımı; çubuk S değerinde biter."
+          "caption": "Her parça bir kriterin ağırlığı ile normalize değerinin çarpımı; çubuk S değerinde biter.",
+          "steps": {
+            "s1": "Ölçekleme: her değer ortak bir 0 ile 1 ölçeğine gelir (r), böylece kriterler toplanabilir.",
+            "s2": "Ağırlıklandırma: her parça kriterinin ağırlığıyla çarpılır; önemli kriter çubuktan daha çok pay alır.",
+            "s3": "Toplama: çubuk S skorunda biter, en uzun çubuk birinci olur."
+          }
         },
         "steps": {
           "start": "Fikri adım adım izle",
@@ -1082,14 +1194,24 @@
         },
         "edas": {
           "title": "Kriter kriter ortalamadan iyi mi, kötü mü",
-          "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık; AS her birini en büyük SP ya da SN'ye böler."
+          "caption": "Çizginin sağı ortalamanın üstündeki, solu altındaki ağırlıklı uzaklık; AS her birini en büyük SP ya da SN'ye böler.",
+          "steps": {
+            "s1": "Uzaklık: çizginin sağı ortalamanın üstünü, solu altını gösterir (PDA ve NDA).",
+            "s2": "Ağırlık: her uzaklık kriterinin ağırlığıyla çarpılır; yığınlar SP ve SN'de biter.",
+            "s3": "Değerlendirme: AS, SP ile SN'yi tek puanda birleştirir; en yüksek AS birinci sırada."
+          }
         },
         "sd": {
           "title": "Geniş yayılım, çok ağırlık",
           "spread": "Yayılım σ",
           "weight": "Ağırlık",
           "caption": "Her nokta 0 ile 1 ölçeğinde bir alternatif; noktaların altındaki cetvel σ.",
-          "weightHead": "Ağırlık = σ / {{total}}"
+          "weightHead": "Ağırlık = σ / {{total}}",
+          "steps": {
+            "s1": "Her nokta bir alternatifin değeri, min-maks ile 0 ile 1 arasına ölçeklenmiş.",
+            "s2": "Yayılım σ: noktaların standart sapması, aynı ölçekte 0'dan çizilir.",
+            "s3": "Ağırlık w = σ / Σσ: cetvel toplama bölünür, ağırlıkların toplamı 1 olur."
+          }
         },
         "merec": {
           "title": "Bir kriteri çıkarın, puanların ne kadar düştüğüne bakın",
@@ -1097,7 +1219,13 @@
           "effect": "Çıkarma etkisi E",
           "weight": "Ağırlık",
           "caption": "Her parça, kriter çıkarılınca bir alternatifin genel performansındaki düşüştür; parçaların toplamı E eder.",
-          "weightHead": "Ağırlık = E / {{total}}"
+          "weightHead": "Ağırlık = E / {{total}}",
+          "steps": {
+            "s1": "Her satır bir kriter. Kriteri çıkarın, puanlara ne olduğuna bakın.",
+            "s2": "Düşüşler: bu kriter olmadan her alternatifin genel performansı S'den kaybettiği pay.",
+            "s3": "Düşüşlerin toplamı çıkarma etkisi E eder.",
+            "s4": "Ağırlık w = E / ΣE: toplam etkideki pay, ağırlıkların toplamı 1 olur."
+          }
         },
         "waspas": {
           "title": "Toplam mı çarpım mı: karışımı λ belirler",
@@ -1105,7 +1233,13 @@
         },
         "copras": {
           "title": "Fayda payı artı düşük maliyet puanı",
-          "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır, maliyet payı S- küçüldükçe puan büyür; çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir."
+          "caption": "Her çubuk S+ (fayda payı) artı maliyet puanıdır, maliyet payı S- küçüldükçe puan büyür; çubuk Q'da biter, ardından en iyinin yüzdesi olarak N gelir.",
+          "steps": {
+            "s1": "Fayda payı S+: her çubuk, alternatifin fayda kriterlerindeki payıdır.",
+            "s2": "Maliyet bonusu: maliyet payı S− (yazılı) ne kadar küçükse bonus o kadar uzundur.",
+            "s3": "Q, S+ ile bonusun toplamıdır; en uzun çubuk birinci sırada.",
+            "s4": "N: her Q, en iyi Q'nun yüzdesi olarak gösterilir."
+          }
         },
         "marcos": {
           "title": "Ölçü için iki hayali satır",
@@ -1114,12 +1248,54 @@
           "sawCaption": "Her nokta 0'dan geçen tek bir doğru üzerinde; bu yüzden hiçbir iki alternatif yer değiştiremez.",
           "sawX": "SAW (Doğrusal) skoru S",
           "sawY": "MARCOS f(K)",
-          "sawLine": "f(K) = c · S, c = {{c}}"
+          "sawLine": "f(K) = c · S, c = {{c}}",
+          "steps": {
+            "s1": "Ağırlıklı toplam S: her çubuk alternatifin ağırlıklı toplamıdır; hepsi tek ölçekte.",
+            "s2": "İki hayali satır: ideal AI (her kriterin en iyisi) ve anti-ideal AAI (en kötüsü) uçları belirler.",
+            "s3": "Fayda f(K): her çubuk iki satırla karşılaştırılır (K− ve K+); f(K) en yüksek olan birinci."
+          }
         },
         "cocoso": {
           "title": "İki puan, üç okuma",
           "caption": "ka toplam içindeki pay, kb en zayıf firmaya göre büyüklük, kc en iyiye göre λ karışımı; k üçünü birleştirir.",
-          "lambdaCaption": "λ yalnız kc'yi değiştirir, bu yüzden çizgiler pek bükülmez: burada hiçbir λ'da iki firma yer değiştirmiyor."
+          "lambdaCaption": "λ yalnız kc'yi değiştirir, bu yüzden çizgiler pek bükülmez: burada hiçbir λ'da iki firma yer değiştirmiyor.",
+          "steps": {
+            "s1": "ka: her firmanın S ve P toplamındaki payı.",
+            "s2": "kb: her firmanın en zayıf firmanın ne kadar üstünde olduğu.",
+            "s3": "kc: her firmanın S ile P'nin en iyi karışımına göre durumu.",
+            "s4": "k üç okumayı birleştirir; en uzun çubuk ilk sırada."
+          }
+        },
+        "mabac": {
+          "title": "Her kritere bir sınır",
+          "caption": "Her satırdaki çizgi sınır G, yani forkliftlerin geometrik ortalaması. Üstü üst bölge, altı alt bölge; S çubukları toplar.",
+          "sumTitle": "Min-maks ağırlıklı toplamla aynı sıra",
+          "sumCaption": "Her nokta tek bir doğru üzerinde, bu yüzden hiçbir iki forklift yer değiştiremez; G yalnız S'nin işaretini belirler.",
+          "sumX": "Min-maks ağırlıklı toplam",
+          "sumY": "MABAC S",
+          "sumLine": "S = toplam - B, B = {{border}}",
+          "steps": {
+            "s1": "Her satırdaki çizgi sınır G; üstü üst bölge, altı alt bölge.",
+            "s2": "Her kriterin G'ye uzaklığı bir çubuktur: forklift G'den iyiyse yukarı, kötüyse aşağı.",
+            "s3": "Çubukları toplayın: çubuk skor S'dir, en yüksek S ilk sırada."
+          }
+        },
+        "bwm": {
+          "title": "İki cetvel, tek ölçek",
+          "caption": "Dolu işaretler her kriteri en iyi kritere ilişkin yanıtlara, boş işaretler en kötüye ilişkin yanıtlara göre yerleştirir; nokta ağırlıktır, en kötü kriterin ağırlığının katı olarak; burada tüm yanıtlar tutarlılık eşiğinin içinde (CR {{cr}}, eşik {{threshold}}), bu yüzden çalışma alanı uyarı vermez.",
+          "axis": "En kötü kriterin katı",
+          "fromBest": "En iyiden",
+          "toWorst": "En kötüye",
+          "weight": "Ağırlık",
+          "best": "En iyi",
+          "worst": "En kötü",
+          "flagged": "En az uyan",
+          "steps": {
+            "s1": "Önce iki çapa: en önemli ve en önemsiz kriter, ve birincinin kaç kat önemli olduğu.",
+            "s2": "Her \"en iyi bundan x kat önemli\" yanıtı kriteri ölçekte bir yere koyar.",
+            "s3": "En kötüyle ilgili yanıtlar kriteri ikinci kez yerleştirir. İki yer farklıysa yanıtlarınız çelişir; işaretli olan en az uyandır.",
+            "s4": "BWM bu aralıkların en büyüğünü olabildiğince küçük tutan ağırlıkları seçer."
+          }
         }
       }
     }
@@ -1234,6 +1410,20 @@
       "kc": "kc = (λ S + (1 - λ) P) / (λ maks S + (1 - λ) maks P). En iyi karışım 1 alır.",
       "scores": "Birleşik puan k = (ka kb kc)^(1/3) + (ka + kb + kc) / 3. Değer büyüdükçe sıra yükselir.",
       "lambdaSweep": "λ = 0; 0,1; ...; 1 için k: λ değiştikçe iki alternatifin nerede yer değiştirdiğini gösterir."
+    },
+    "mabac": {
+      "normalized": "Min-maks normalizasyonu: her sütunun en kötü değeri 0, en iyisi 1 olur; maliyet kriterinde tersi. Negatif ve sıfır değerler de olur.",
+      "weighted": "Ağırlıklı matris V: her normalize değere 1 eklenip kriter ağırlığıyla çarpılır; sonuç w ile 2w arasındadır.",
+      "border": "Sınır G: V'nin her sütununun geometrik ortalaması; yüzlerce alternatifte 0'a düşmesin diye logaritmayla hesaplanır.",
+      "distance": "Uzaklık Q = V - G: üst bölgede (en iyi değere doğru) pozitif, alt bölgede negatif.",
+      "scores": "Sınıra uzaklık S: Q'nun satır toplamı. Büyük olan önde sıralanır; S, min-maks ağırlıklı toplamdan tek bir sabit çıkarılarak bulunur, bu yüzden sıra o toplamın sırasıdır."
+    },
+    "bwm": {
+      "bestToOthers": "En iyinin diğerlerine üstünlüğü: en iyi kriter her birinden kaç kat önemli, 1‑9.",
+      "othersToWorst": "Diğerlerinin en kötüye üstünlüğü: her kriter en kötüden kaç kat önemli, 1‑9.",
+      "consistencyLocal": "Kriter başına tutarlılık: a_Bj ile a_jW çarpımı a_BW değerinden ne kadar uzak.",
+      "xi": "Sapma: yanıtlarla uyarlanan ağırlıklar arasındaki en büyük fark.",
+      "weights": "BWM ağırlıkları: doğrusal model, kapalı biçimde çözülür, toplamı 1."
     }
   },
   "validation": {
@@ -1257,7 +1447,9 @@
       "negative-weight": "{{criterion}} ağırlığı {{value}}. Ağırlıklar negatif olamaz.",
       "weights-sum": "Ağırlıkların toplamı {{value}}, toplam 1 olmalı.",
       "non-positive-average": "{{criterion}} kriterinin ortalaması {{value}}. EDAS her kriterin ortalamasına böler, bu yüzden ortalama 0'dan büyük olmalı.",
-      "all-worst-alternative": "{{alternative}}, ağırlığı olan her kriterde en kötü; S ve P değeri 0 olur ve CoCoSo 0'a bölerdi. Bu alternatifi çıkarın ya da başka bir yöntem seçin."
+      "all-worst-alternative": "{{alternative}}, ağırlığı olan her kriterde en kötü; S ve P değeri 0 olur ve CoCoSo 0'a bölerdi. Bu alternatifi çıkarın ya da başka bir yöntem seçin.",
+      "judgements-incomplete": "Soruların {{value}} tanesi yanıtlandı; ağırlıkları görmek için kalanları yanıtlayın.",
+      "anchors-missing": "Önce en iyi ve en kötü kriteri seçin."
     }
   },
   "warnings": {
@@ -1309,6 +1501,13 @@
     },
     "cocoso": {
       "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin."
+    },
+    "mabac": {
+      "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin."
+    },
+    "bwm": {
+      "inconsistent": "{{criterion}} hakkındaki yanıtlarınız en az tutarlı olanlar; ağırlıklar yine de hesaplanır.",
+      "threshold-approximate": "9'dan fazla kriterde tutarlılık eşiği yaklaşıktır (9 kriterlik değer kullanılır)."
     }
   }
 }

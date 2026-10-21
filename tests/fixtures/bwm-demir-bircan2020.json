@@ -1,0 +1,12 @@
+{
+  "id": "bwm-demir-bircan-2020-school",
+  "source": "Demir & Bircan 2020, Sivas Cumhuriyet Univ. IIBF Dergisi 21(2):170-185, DOI 10.37880/cumuiibf.616766, Tables 5-7",
+  "criteria": ["K1 butce", "K2 ulasim", "K3 vizyon/misyon", "K4 egitim programlari", "K5 akademik kadro", "K6 fiziksel ozellikler", "K7 yabanci dil egitimi", "K8 basari durumu", "K9 ek hizmetler"],
+  "best": 7, "worst": 2,
+  "bestToOthers": [2, 5, 9, 3, 4, 7, 6, 1, 8],
+  "othersToWorst": [6, 4, 1, 7, 3, 2, 8, 9, 5],
+  "published": {"weights": [0.1991, 0.0796, 0.0212, 0.1327, 0.0996, 0.0569, 0.0664, 0.2947, 0.0498], "xiL": 0.1040, "cr_paper": 0.020},
+  "expected": {"weights": [0.199109, 0.079644, 0.021238, 0.132739, 0.099554, 0.056888, 0.066370, 0.294681, 0.049777], "xiL": 0.103537,
+               "crInput": 0.541667, "threshold": 0.3662, "acceptable": false, "mostInconsistent": 6},
+  "tolerance_vs_published": {"weights": 6e-5, "xiL": 5e-4}
+}

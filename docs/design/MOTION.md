@@ -12,9 +12,17 @@ the animation is not needed.
 | State change of one control | tab indicator, open/close of a disclosure or a floating layer | Yes, short |
 | Feedback that a value was recomputed | short accent tint on a changed cell | Yes, colour only |
 | Explain: a user-triggered, one-off teaching moment | "Step through" a method's idea: each step transforms the picture into the next | Yes, `--dur-explain`, at most two phases (the second after `--delay-explain`, 700 ms in all); never automatic, never looped |
+| Progress of a calculation that is really running: the Monte Carlo heat map fills from partial counts while the draws accumulate, with "3,000 / 10,000" | Random weights, Robustness | Yes, only after the job has run longer than `SLOW_MS` (250 ms); a faster job shows its result at once. Colour change only (`fade`, `--dur`), no movement |
 | Entry of a page, section or card; scroll reveal; stagger | | No |
 | Count-up numbers, typewriter, looping pulse, shimmer, parallax, hover lift, glow | | No |
 | First paint of a chart (bars growing from zero) | | No: data is shown, not performed |
+
+Progress is a state, not a performance. It does not conflict with "count-up numbers" and "first paint of a chart":
+the numbers are the partial counts of a calculation the worker is actually doing (each snapshot is the result's own
+statistic over the draws so far, and the last snapshot is the result), not an animation of a finished value. A job
+that finishes within `SLOW_MS` never draws a partial picture, so nothing flashes, and under `prefers-reduced-motion`
+the cells change colour at once (`--dur` is 0). The status in words ("Calculating") stays the only `aria-live` text;
+the counter is `aria-hidden`.
 
 Frequency rule: the more often a thing happens, the shorter and quieter its motion. Keyboard-driven, high-frequency
 actions (typing in the grid, arrowing through cells) get none.

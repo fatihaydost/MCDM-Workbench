@@ -18,6 +18,8 @@ export type ValidationCode =
   | 'invalid-weight'
   | 'negative-weight'
   | 'weights-sum'
+  | 'judgements-incomplete'
+  | 'anchors-missing'
 
 export type ValidationIssue = {
   code: ValidationCode
