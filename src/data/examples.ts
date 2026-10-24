@@ -1009,6 +1009,47 @@ export const examples: readonly ExampleDataset[] = [
       { label: 'promethee-ii.netFlow', values: [-0.45738, -0.10015, 0.18343, 0.55909, 0.17125, -0.35624], decimals: 5 },
     ],
   },
+  {
+    id: 'kersuliene-2010-dispute',
+    name: {
+      en: 'Dispute resolution (Keršulienė et al. 2010)',
+      tr: 'Uyuşmazlık çözümü (Keršulienė vd. 2010)',
+    },
+    buttonLabel: { en: 'Dispute resolution', tr: 'Uyuşmazlık çözümü' },
+    summary: {
+      en: 'Four commercial dispute resolution methods on six criteria ordered from most important (expedition) to least important (legal advice). The paper introduces SWARA and reports the step-down ratios, coefficients, recalculated weights and final weights in Table 1.',
+      tr: 'En önemliden (çözüm hızı) en az önemliye (hukuki danışmanlık) sıralanmış altı kriterde dört ticari uyuşmazlık çözüm yöntemi. Makale SWARA yöntemini tanıtır ve Tablo 1 içinde ardışık oranları, katsayıları, yeniden hesaplanan ağırlıkları ve nihai ağırlıkları verir.',
+    },
+    referenceFor: ['swara'],
+    citation: {
+      authors: 'Keršulienė, V.; Zavadskas, E.K.; Turskis, Z.',
+      year: 2010,
+      title: 'Selection of rational dispute resolution method by applying new step-wise weight assessment ratio analysis (SWARA)',
+      venue: 'Journal of Business Economics and Management 11(2), 243-258',
+      doi: '10.3846/jbem.2010.12',
+      tables: {
+        en: 'Figures 3 and 4 (alternatives and criteria), Table 1 (SWARA weights)',
+        tr: 'Şekil 3 ve 4 (alternatifler ve kriterler), Tablo 1 (SWARA ağırlıkları)',
+      },
+    },
+    alternatives: ['Negotiation', 'Mediation', 'Arbitration', 'Litigation'],
+    localAlternatives: { tr: ['Müzakere', 'Arabuluculuk', 'Tahkim', 'Dava'] },
+    criteria: [
+      { name: { en: 'Expedition of dispute resolution', tr: 'Uyuşmazlık çözüm hızı' }, type: 'benefit' },
+      { name: { en: 'Price of dispute resolution', tr: 'Uyuşmazlık çözüm maliyeti' }, type: 'cost' },
+      { name: { en: 'Possibility to appeal', tr: 'Temyiz olanağı' }, type: 'benefit' },
+      { name: { en: 'Assurance of confidentiality', tr: 'Gizlilik güvencesi' }, type: 'benefit' },
+      { name: { en: 'Authority of person solving the dispute', tr: 'Çözümleyicinin yetkinliği' }, type: 'benefit' },
+      { name: { en: 'Legal advice', tr: 'Hukuki danışmanlık' }, type: 'benefit' },
+    ],
+    matrix: [
+      [9, 1, 1, 9, 5, 4],
+      [8, 2, 2, 8, 7, 6],
+      [6, 5, 3, 7, 8, 8],
+      [3, 9, 9, 2, 9, 9],
+    ],
+    published: [{ label: 'swara.weights', values: [0.22, 0.19, 0.18, 0.14, 0.14, 0.13], decimals: 2 }],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

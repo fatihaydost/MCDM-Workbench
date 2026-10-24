@@ -30,7 +30,7 @@ const ROWS: readonly MethodMeta[] = [
   { id: 'roc', name: { en: 'ROC', tr: 'ROC' }, family: 'weighting-subjective', status: 'available', year: 1996 },
   { id: 'saw', name: { en: 'SAW', tr: 'SAW' }, family: 'ranking-utility', status: 'available', year: 1954 },
   { id: 'sd', name: { en: 'SD', tr: 'SD' }, family: 'weighting-objective', status: 'available', year: 1995 },
-  { id: 'swara', name: { en: 'SWARA', tr: 'SWARA' }, family: 'weighting-subjective', status: 'research', year: 2010 },
+  { id: 'swara', name: { en: 'SWARA', tr: 'SWARA' }, family: 'weighting-subjective', status: 'available', year: 2010 },
   { id: 'topsis', name: { en: 'TOPSIS', tr: 'TOPSIS' }, family: 'ranking-distance', status: 'available', year: 1981 },
   { id: 'vikor', name: { en: 'VIKOR', tr: 'VIKOR' }, family: 'ranking-distance', status: 'available', year: 1998 },
   { id: 'waspas', name: { en: 'WASPAS', tr: 'WASPAS' }, family: 'ranking-utility', status: 'available', year: 2012 },

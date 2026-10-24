@@ -26,6 +26,7 @@ export {
 } from './methods/promethee-ii'
 export { roc, strictRankWeights, type RocFormula, type RocParams } from './methods/roc'
 export { sd } from './methods/sd'
+export { swara, swaraWeights, SWARA_STEP_RATIOS, type SwaraParams, type SwaraStepRatio, type SwaraSteps } from './methods/swara'
 export { saw, type SawNormalization, type SawParams } from './methods/saw'
 export { topsis } from './methods/topsis'
 export { vikor, vikorCompromise, vikorFlat, vikorTerm, VIKOR_DEFAULT_V, type VikorCompromise, type VikorParams } from './methods/vikor'

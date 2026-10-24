@@ -155,6 +155,9 @@
       },
       "promethee-ii": {
         "claim": "Tablo 13, 15, 16 ve 18 içindeki π, φ⁺, φ⁻, φ değerleri ve altı sıranın tamamı {{citation}} ile {{decimals}} basamağa kadar aynı; 1986 hidroelektrik örneği de örtüşüyor."
+      },
+      "swara": {
+        "claim": "Tablo 1 içindeki s, k, q ve altı ağırlığın tamamı {{citation}} ile {{decimals}} basamağa kadar aynı; 2017 tekstil tedarikçisi SWARA ağırlıkları da örtüşüyor."
       }
     },
     "catalogue": {
@@ -238,7 +241,8 @@
       "cilos": "CILOS",
       "bwm": "BWM",
       "ahp": "AHP",
-      "roc": "ROC"
+      "roc": "ROC",
+      "swara": "SWARA"
     },
     "rankingMethod": {
       "label": "Sıralama yöntemi",
@@ -350,6 +354,24 @@
           "roc": "ROC",
           "rs": "RS",
           "rr": "RR"
+        }
+      },
+      "swara": {
+        "stepRatio": "Adım oranı s",
+        "stepRatioOptions": {
+          "moderate": "Orta (s = 0,15)",
+          "gentle": "Yumuşak (s = 0,10)",
+          "steep": "Dik (s = 0,25)"
+        },
+        "stepRatioHints": {
+          "moderate": "Her kriter bir üstündekinden %15 daha az önemlidir (k = 1,15; q_j = q_{j-1} / 1,15).",
+          "gentle": "Her kriter bir üstündekinden %10 daha az önemlidir (k = 1,10; daha yatay ağırlık azalması).",
+          "steep": "Her kriter bir üstündekinden %25 daha az önemlidir (k = 1,25; üst sıralarda daha dik yoğunlaşma)."
+        },
+        "stepRatioVariant": {
+          "moderate": "s = 0,15",
+          "gentle": "s = 0,10",
+          "steep": "s = 0,25"
         }
       },
       "promethee-ii": {
@@ -475,7 +497,8 @@
         "cilos": "Her kriterin en iyi alternatifi seçildiğinde diğer kriterlerin uğradığı etki kaybından F w = 0 doğrusal sistemiyle bulunan nesnel ağırlıklar. Her değer 0'dan büyük olmalı.",
         "bwm": "En önemli ve en önemsiz kriteri seçin, diğer her kriteri bu ikisiyle karşılaştırın (1‑9); 2n - 3 yanıt ağırlıkları verir.",
         "ahp": "Kriterleri 1‑9 ölçeğinde ikişer ikişer karşılaştırın; tüm n(n - 1) / 2 yanıt ağırlıkları ve tutarlılık oranı CR'yi verir.",
-        "roc": "Kriterlerin önem sırasından (1. sütun en önemliden n. sütun en önemsize) ROC, Sıra Toplamı ya da Ters Sıra formülüyle öznel ağırlıklar."
+        "roc": "Kriterlerin önem sırasından (1. sütun en önemliden n. sütun en önemsize) ROC, Sıra Toplamı ya da Ters Sıra formülüyle öznel ağırlıklar.",
+        "swara": "Sütun sırasındaki ardışık kriterler arasındaki göreceli önem oranları s_j üzerinden öznel ağırlıklar (k_j = 1 + s_j, q_j = q_{j-1} / k_j)."
       },
       "columns": {
         "criterion": "Kriter",
@@ -490,7 +513,9 @@
         "removalEffect": "Çıkarma etkisi E",
         "rms": "RMS",
         "pv": "Yüzde değer PV",
-        "criterionRank": "Sıra r"
+        "criterionRank": "Sıra r",
+        "stepRatio": "Adım oranı s",
+        "recalculatedWeight": "Yeniden hesaplanan q"
       },
       "tableTitle": "Kriter ağırlıkları",
       "chartTitle": "Kriter ağırlıkları",
@@ -869,6 +894,12 @@
         "ranks": "Kriter sıraları r",
         "weights": "Ağırlıklar w"
       },
+      "swara": {
+        "s": "Göreceli önem oranı s",
+        "k": "Katsayı k",
+        "q": "Yeniden hesaplanan ağırlık q",
+        "weights": "Ağırlıklar w"
+      },
       "promethee-ii": {
         "preferenceMatrix": "Tercih matrisi π",
         "positiveFlow": "Pozitif akış φ⁺",
@@ -1099,6 +1130,13 @@
         "rr": "RR",
         "weight": "Ağırlık w"
       },
+      "swara": {
+        "title": "Adım oranları zincirlenerek kriter ağırlığına dönüşür",
+        "s": "Oran s",
+        "k": "Katsayı k",
+        "q": "Zincir q",
+        "weight": "Ağırlık w"
+      },
       "promethee-ii": {
         "title": "Pozitif akış φ⁺, negatif akış φ⁻ ve net akış φ",
         "caption": "Sol: ikili tercih derecelerinden pozitif akış φ⁺ (üst) ve negatif akış φ⁻ (alt). Sağ: sıfır etrafında net üstünlük akışı φ = φ⁺ - φ⁻.",
@@ -1229,6 +1267,12 @@
         "ranks": "Sıralar",
         "weights": "Ağırlıklar"
       },
+      "swara": {
+        "s": "Adım oranı s",
+        "k": "Katsayı k",
+        "q": "Zincir q",
+        "weights": "Ağırlıklar"
+      },
       "promethee-ii": {
         "preferenceMatrix": "İkili π",
         "positiveFlow": "φ⁺ ve φ⁻",
@@ -1325,6 +1369,7 @@
       "aras": "ARAS",
       "codas": "CODAS",
       "roc": "ROC",
+      "swara": "SWARA",
       "promethee-ii": "PROMETHEE II"
     },
     "fullNames": {
@@ -1396,6 +1441,7 @@
         "aras": "Her ağırlıklı pay toplamını bir optimal satırla oranlar.",
         "codas": "Negatif-ideal noktaya Öklid ve Taxicab uzaklıklarını ikili karşılaştırmada birleştirir.",
         "roc": "Kriterlerin önem sırasından ağırlıklar.",
+        "swara": "Sıralı kriterler arasındaki ardışık önem oranlarını zincirleyerek ağırlığa dönüştürür.",
         "promethee-ii": "İkili tercih fonksiyonları ve pozitif eksi negatif üstünlük akışları."
       },
       "groups": {
@@ -1713,6 +1759,19 @@
             "s2": "Negatif akış φ⁻: ikili tercih derecelerinin sütun ortalaması; diğerlerinin her modele ortalama üstünlüğünü gösterir.",
             "s3": "Net akış φ = φ⁺ - φ⁻: sıfır etrafında pozitif eksi negatif akış; en yüksek φ birinci sırada yer alır."
           }
+        },
+        "swara": {
+          "title": "Adım oranları zincirlenerek kriter ağırlığına dönüşür",
+          "caption": "En önemli kriterde q₁ = 1 ile başlayarak her sonraki kriter bir önceki q değerini k_j = 1 + s_j katsayısına böler; sağdaki çubuklar q değerlerini toplamı 1 olan w ağırlıklarına normalize eder.",
+          "s": "Oran s",
+          "k": "Katsayı k",
+          "q": "Zincir q",
+          "weight": "Ağırlık w",
+          "steps": {
+            "s1": "Kriterleri en önemliden en az önemliye dizin ve her adım oranını s_j (ilk kriter için 0) belirterek k_j = 1 + s_j katsayısını oluşturun.",
+            "s2": "q₁ = 1 değerinden başlayıp her önceki değeri k_j katsayısına bölerek yeniden hesaplanan ağırlıkları zincirleyin: q_j = q_{j-1} / (1 + s_j).",
+            "s3": "Her q_j değerini Σq toplamına bölerek sağda toplamı 1 olan nihai ağırlık çubukları w değerlerini elde edin."
+          }
         }
       }
     }
@@ -1890,6 +1949,12 @@
     "roc": {
       "ranks": "1 (en önemli) ile n (en önemsiz) arasındaki kriter sıraları r.",
       "weights": "Seçilen formülden (ROC ağırlık merkezi, Sıra Toplamı ya da Ters Sıra) elde edilen ve toplamı 1 olan sıra ağırlıkları w."
+    },
+    "swara": {
+      "s": "j kriterinin j - 1 kriterinden ne kadar daha az önemli olduğunu gösteren göreceli önem oranı s_j (ilk kriter için 0).",
+      "k": "Adım katsayısı k_j = 1 + s_j (en önemli kriter için 1).",
+      "q": "q_1 = 1 değerinden başlayarak adım oranlarını zincirleyen yeniden hesaplanan ağırlık q_j = q_{j-1} / k_j.",
+      "weights": "Toplamı 1 olan normalize SWARA ağırlıkları w_j = q_j / Σq_r."
     },
     "promethee-ii": {
       "preferenceMatrix": "Toplam tercih matrisi π: her sıralı (a, b) çifti için tek kriterli tercih dereceleri P_j(a, b) değerlerinin ağırlıklı toplamı.",

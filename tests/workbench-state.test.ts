@@ -34,6 +34,7 @@ import arasBA from './fixtures/aras-bakir-atalik2018.json'
 import codasG from './fixtures/codas-ghorabaee2016.json'
 import prometheeB from './fixtures/promethee-ii-brans1986.json'
 import rosz from './fixtures/roc-roszkowska2013.json'
+import swaraK from './fixtures/swara-kersuliene2010.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -248,6 +249,15 @@ describe('examples match the published fixtures', () => {
       { label: 'promethee-ii.negativeFlow', values: prometheeB.goswami2020.negativeFlow, decimals: 5 },
       { label: 'promethee-ii.netFlow', values: prometheeB.goswami2020.netFlow, decimals: 5 },
     ])
+  })
+  it('Keršulienė et al. 2010 (SWARA, dispute resolution)', () => {
+    const ex = getExample('kersuliene-2010-dispute')!
+    expect(ex.referenceFor).toEqual(['swara'])
+    expect(ex.matrix).toEqual(swaraK.matrix)
+    expect(ex.alternatives).toEqual(swaraK.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(swaraK.types)
+    expect(ex.weights).toBeUndefined()
+    expect(ex.published).toEqual([{ label: 'swara.weights', values: swaraK.published.weights, decimals: 2 }])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {

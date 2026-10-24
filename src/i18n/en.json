@@ -155,6 +155,9 @@
       },
       "promethee-ii": {
         "claim": "π, φ⁺, φ⁻, φ and all six ranks of Tables 13, 15, 16 and 18 match {{citation}} to {{decimals}} decimals; the 1986 hydroelectric example matches too."
+      },
+      "swara": {
+        "claim": "s, k, q and all six weights of Table 1 match {{citation}} to {{decimals}} decimals; the 2017 textile supplier SWARA weights match too."
       }
     },
     "catalogue": {
@@ -238,7 +241,8 @@
       "cilos": "CILOS",
       "bwm": "BWM",
       "ahp": "AHP",
-      "roc": "ROC"
+      "roc": "ROC",
+      "swara": "SWARA"
     },
     "rankingMethod": {
       "label": "Ranking method",
@@ -350,6 +354,24 @@
           "roc": "ROC",
           "rs": "RS",
           "rr": "RR"
+        }
+      },
+      "swara": {
+        "stepRatio": "Step-down ratio s",
+        "stepRatioOptions": {
+          "moderate": "Moderate (s = 0.15)",
+          "gentle": "Gentle (s = 0.10)",
+          "steep": "Steep (s = 0.25)"
+        },
+        "stepRatioHints": {
+          "moderate": "Each criterion is 15% less important than the one above it (k = 1.15, q_j = q_{j-1} / 1.15).",
+          "gentle": "Each criterion is 10% less important than the one above it (k = 1.10, flatter weight decay).",
+          "steep": "Each criterion is 25% less important than the one above it (k = 1.25, steeper top-rank concentration)."
+        },
+        "stepRatioVariant": {
+          "moderate": "s = 0.15",
+          "gentle": "s = 0.10",
+          "steep": "s = 0.25"
         }
       },
       "promethee-ii": {
@@ -475,7 +497,8 @@
         "cilos": "Objective weights from the impact loss other criteria suffer when each criterion's best alternative is chosen, solved by F w = 0. Every value must be above 0.",
         "bwm": "Pick the most and least important criterion, then compare every other with these two (1‑9); 2n - 3 answers give the weights.",
         "ahp": "Compare the criteria two at a time on the 1‑9 scale; all n(n - 1) / 2 answers give the weights and the consistency ratio CR.",
-        "roc": "Subjective weights from the importance order of the criteria (column 1 most important to column n least important), via ROC, Rank Sum or Rank Reciprocal."
+        "roc": "Subjective weights from the importance order of the criteria (column 1 most important to column n least important), via ROC, Rank Sum or Rank Reciprocal.",
+        "swara": "Subjective weights from step-down importance ratios s_j between adjacent criteria in column order (k_j = 1 + s_j, q_j = q_{j-1} / k_j)."
       },
       "columns": {
         "criterion": "Criterion",
@@ -490,7 +513,9 @@
         "removalEffect": "Removal effect E",
         "rms": "RMS",
         "pv": "Percentage value PV",
-        "criterionRank": "Rank r"
+        "criterionRank": "Rank r",
+        "stepRatio": "Step ratio s",
+        "recalculatedWeight": "Recalculated q"
       },
       "tableTitle": "Weights by criterion",
       "chartTitle": "Criterion weights",
@@ -869,6 +894,12 @@
         "ranks": "Criterion ranks r",
         "weights": "Weights w"
       },
+      "swara": {
+        "s": "Comparative importance s",
+        "k": "Coefficient k",
+        "q": "Recalculated weight q",
+        "weights": "Weights w"
+      },
       "promethee-ii": {
         "preferenceMatrix": "Preference matrix π",
         "positiveFlow": "Leaving flow φ⁺",
@@ -1099,6 +1130,13 @@
         "rr": "RR",
         "weight": "Weight w"
       },
+      "swara": {
+        "title": "Step-down ratios chain into criterion weights",
+        "s": "Step s",
+        "k": "Coeff. k",
+        "q": "Chain q",
+        "weight": "Weight w"
+      },
       "promethee-ii": {
         "title": "Leaving flow φ⁺, entering flow φ⁻, and net flow φ",
         "caption": "Left: leaving flow φ⁺ (top) and entering flow φ⁻ (bottom) from pairwise preference degrees. Right: net outranking flow φ = φ⁺ - φ⁻ around zero.",
@@ -1229,6 +1267,12 @@
         "ranks": "Ranks",
         "weights": "Weights"
       },
+      "swara": {
+        "s": "Step ratio s",
+        "k": "Coefficient k",
+        "q": "Chain q",
+        "weights": "Weights"
+      },
       "promethee-ii": {
         "preferenceMatrix": "Pairwise π",
         "positiveFlow": "φ⁺ and φ⁻",
@@ -1325,6 +1369,7 @@
       "aras": "ARAS",
       "codas": "CODAS",
       "roc": "ROC",
+      "swara": "SWARA",
       "promethee-ii": "PROMETHEE II"
     },
     "fullNames": {
@@ -1396,6 +1441,7 @@
         "aras": "Measures each weighted share total against an optimal row.",
         "codas": "Combines Euclidean and Taxicab distances from the negative-ideal across pairs.",
         "roc": "Weights from the importance rank order of criteria.",
+        "swara": "Chains step-down importance ratios between ordered criteria into weights.",
         "promethee-ii": "Pairwise preference functions and leaving minus entering outranking flows."
       },
       "groups": {
@@ -1713,6 +1759,19 @@
             "s2": "Entering flow φ⁻: the column average of pairwise preference degrees, showing how strongly the others beat each model.",
             "s3": "Net flow φ = φ⁺ - φ⁻: leaving minus entering flow around zero; the highest φ ranks first."
           }
+        },
+        "swara": {
+          "title": "Step-down ratios chain into criterion weights",
+          "caption": "Starting from q₁ = 1 on the most important criterion, each next criterion divides the previous q by k_j = 1 + s_j; the bars on the right normalize q into weights w summing to 1.",
+          "s": "Step s",
+          "k": "Coeff. k",
+          "q": "Chain q",
+          "weight": "Weight w",
+          "steps": {
+            "s1": "Order the criteria from most to least important and state each step-down ratio s_j (0 for the first criterion) to form the coefficient k_j = 1 + s_j.",
+            "s2": "Chain the recalculated weights from q₁ = 1 by dividing each previous value by k_j: q_j = q_{j-1} / (1 + s_j).",
+            "s3": "Divide each q_j by the total Σq so the final weight bars w on the right sum to 1."
+          }
         }
       }
     }
@@ -1890,6 +1949,12 @@
     "roc": {
       "ranks": "Criterion ranks r from 1 (most important) to n (least important).",
       "weights": "Rank-order weights w from the selected formula (ROC centroid, Rank Sum or Rank Reciprocal), summing to 1."
+    },
+    "swara": {
+      "s": "Comparative importance ratio s_j stating how much less important criterion j is than criterion j - 1 (0 for the first criterion).",
+      "k": "Step coefficient k_j = 1 + s_j (1 for the most important criterion).",
+      "q": "Recalculated weight q_j = q_{j-1} / k_j, chaining the step-down ratios from q_1 = 1.",
+      "weights": "Normalized SWARA weights w_j = q_j / Σq_r, summing to 1."
     },
     "promethee-ii": {
       "preferenceMatrix": "Aggregated preference matrix π: for each ordered pair (a, b), the weighted sum of unicriterion preference degrees P_j(a, b).",

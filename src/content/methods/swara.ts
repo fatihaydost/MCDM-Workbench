@@ -6,7 +6,7 @@ export const swara: MethodContent = {
   name: { en: 'SWARA', tr: 'SWARA' },
   fullName: { en: 'Step-wise Weight Assessment Ratio Analysis', tr: 'Adım adım ağırlık değerlendirme oran analizi' },
   family: 'weighting-subjective',
-  status: 'research',
+  status: 'available',
   year: 2010,
   origin: {
     authors: 'Keršulienė, V.; Zavadskas, E.K.; Turskis, Z.',
@@ -69,8 +69,8 @@ export const swara: MethodContent = {
     doi: '10.3846/jbem.2010.12',
     match: 'match',
     note: {
-      en: 'Published example (Table 1); this method is not computed here yet, only recomputed during research. Six criteria for choosing a dispute resolution method. k, q and w match the printed 2 decimals (largest gap 0.0028 on w).',
-      tr: 'Yayımlanmış örnek (Tablo 1); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Uyuşmazlık çözüm yöntemi seçimi için altı kriter. k, q ve w basılı 2 basamakta örtüşüyor (w üzerinde en büyük fark 0,0028).',
+      en: 'Published example (Table 1): six criteria for choosing a dispute resolution method. k, q and w match the printed 2 decimals (largest gap 0.0028 on w).',
+      tr: 'Yayımlanmış örnek (Tablo 1): uyuşmazlık çözüm yöntemi seçimi için altı kriter. k, q ve w basılı 2 basamakta örtüşüyor (w üzerinde en büyük fark 0,0028).',
     },
   },
   sources: [

@@ -20,6 +20,7 @@ import { prometheeII } from './promethee-ii'
 import { roc } from './roc'
 import { saw } from './saw'
 import { sd } from './sd'
+import { swara } from './swara'
 import { topsis } from './topsis'
 import type { MethodView } from './types'
 import { vikor } from './vikor'
@@ -49,6 +50,7 @@ export const methodViews: Readonly<Views> = {
   bwm,
   ahp,
   roc,
+  swara,
   topsis,
   saw,
   vikor,

@@ -27,7 +27,7 @@ type ComputedMethod = Exclude<WeightMethodId, 'manual'>
 
 const WEIGHT_FAMILIES: readonly { key: 'objective' | 'subjective' | 'direct'; ids: readonly WeightMethodId[] }[] = [
   { key: 'objective', ids: ['critic', 'entropy', 'sd', 'merec', 'lopcow', 'cilos'] },
-  { key: 'subjective', ids: ['bwm', 'ahp', 'roc'] },
+  { key: 'subjective', ids: ['bwm', 'ahp', 'swara', 'roc'] },
   { key: 'direct', ids: ['equal', 'manual'] },
 ]
 
