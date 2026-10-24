@@ -155,6 +155,9 @@
       },
       "promethee-ii": {
         "claim": "π, φ⁺, φ⁻, φ and all six ranks of Tables 13, 15, 16 and 18 match {{citation}} to {{decimals}} decimals; the 1986 hydroelectric example matches too."
+      },
+      "electre-i": {
+        "claim": "Concordance C, discordance D, outranking graph S and kernel {A2, A3, A5} match {{citation}} Section 3.1 to {{decimals}} decimals; Soner and Önüt (2006) net concordance matches too."
       }
     },
     "catalogue": {
@@ -254,7 +257,8 @@
       "moora": "MOORA",
       "aras": "ARAS",
       "codas": "CODAS",
-      "promethee-ii": "PROMETHEE II"
+      "promethee-ii": "PROMETHEE II",
+      "electre-i": "ELECTRE I"
     },
     "params": {
       "entropy": {
@@ -372,6 +376,33 @@
           "level": "level",
           "gaussian": "Gaussian"
         }
+      },
+      "electre-i": {
+        "discordanceScale": "Discordance scale",
+        "discordanceScaleOptions": {
+          "global": "Global span δ",
+          "range": "Criterion range Rⱼ"
+        },
+        "discordanceScaleHints": {
+          "global": "Roy (1968): divides every deficit by the largest span across all criteria; assumes a common scale.",
+          "range": "Divides each deficit by its own criterion range (max - min), so mixed units are comparable."
+        },
+        "discordanceScaleVariant": {
+          "global": "global δ",
+          "range": "per-criterion Rⱼ"
+        },
+        "cHat": "Concordance threshold ĉ",
+        "cHatEnds": {
+          "min": "0.50: simple majority",
+          "max": "1.00: unanimity"
+        },
+        "cHatVariant": "ĉ = {{value}}",
+        "dHat": "Discordance threshold d̂",
+        "dHatEnds": {
+          "min": "0: strict veto",
+          "max": "1: no veto"
+        },
+        "dHatVariant": "d̂ = {{value}}"
       }
     },
     "example": {
@@ -526,7 +557,8 @@
         "moora": "Divides each value by the Euclidean length of its column, adds the weighted benefit ratios and subtracts the weighted cost ratios; a higher y is better. Zeros and negative values are allowed.",
         "aras": "Prepends an optimal row, adds up each alternative's weighted shares of the m + 1 column totals and divides by the optimal row's total; a higher K is better.",
         "codas": "Scores each alternative by its Euclidean and Taxicab distances from the negative-ideal point, compared across every pair; a higher H is better.",
-        "promethee-ii": "Compares every pair of alternatives on each criterion with a preference function and subtracts the entering flow from the leaving flow; a higher φ is better. Zeros and negative values are allowed."
+        "promethee-ii": "Compares every pair of alternatives on each criterion with a preference function and subtracts the entering flow from the leaving flow; a higher φ is better. Zeros and negative values are allowed.",
+        "electre-i": "Tests every pair of alternatives for majority concordance (C ≥ ĉ) and bounded discordance (D ≤ d̂) to find the outranking kernel K, and ranks alternatives by normalized net concordance minus net discordance Φ. Zeros and negative values are allowed."
       },
       "columns": {
         "rank": "Rank",
@@ -548,7 +580,10 @@
         "euclidean": "Euclidean E",
         "taxicab": "Taxicab T",
         "positiveFlow": "Leaving flow φ⁺",
-        "negativeFlow": "Entering flow φ⁻"
+        "negativeFlow": "Entering flow φ⁻",
+        "electreIKernel": "Kernel K",
+        "electreINetConcordance": "Net concordance Cₐ",
+        "electreINetDiscordance": "Net discordance Dₐ"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -616,6 +651,11 @@
           "name": "Net flow φ",
           "title": "PROMETHEE II net flow φ",
           "symbol": "φ"
+        },
+        "electre-i": {
+          "name": "Net score Φ",
+          "title": "ELECTRE I net outranking score Φ",
+          "symbol": "Φ"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -874,6 +914,16 @@
         "positiveFlow": "Leaving flow φ⁺",
         "negativeFlow": "Entering flow φ⁻",
         "netFlow": "Net flow φ"
+      },
+      "electre-i": {
+        "oriented": "Oriented matrix g",
+        "concordance": "Concordance matrix C",
+        "discordance": "Discordance matrix D",
+        "outranking": "Outranking matrix S",
+        "kernel": "Kernel membership K",
+        "netConcordance": "Net concordance Cₐ",
+        "netDiscordance": "Net discordance Dₐ",
+        "netScore": "Net outranking score Φ"
       }
     },
     "issues": {
@@ -1103,6 +1153,11 @@
         "title": "Leaving flow φ⁺, entering flow φ⁻, and net flow φ",
         "caption": "Left: leaving flow φ⁺ (top) and entering flow φ⁻ (bottom) from pairwise preference degrees. Right: net outranking flow φ = φ⁺ - φ⁻ around zero.",
         "row": "{{alternative}}: φ⁺ = {{pos}}, φ⁻ = {{neg}}, φ = {{score}}"
+      },
+      "electre-i": {
+        "title": "Net concordance Cₐ, net discordance Dₐ, kernel K, and net score Φ",
+        "caption": "Left: net concordance Cₐ (top) and opposite net discordance -Dₐ (bottom); [K] marks members of the outranking kernel. Right: normalized net outranking score Φ around zero.",
+        "row": "{{alternative}}: Cₐ = {{netC}}, Dₐ = {{netD}}, K = {{kernel}}, Φ = {{score}}"
       }
     },
     "flow": {
@@ -1233,6 +1288,12 @@
         "preferenceMatrix": "Pairwise π",
         "positiveFlow": "φ⁺ and φ⁻",
         "netFlow": "φ"
+      },
+      "electre-i": {
+        "oriented": "Orient",
+        "concordance": "C and D",
+        "outranking": "S and K",
+        "netScore": "Net Φ"
       }
     },
     "pipeline": {
@@ -1325,7 +1386,8 @@
       "aras": "ARAS",
       "codas": "CODAS",
       "roc": "ROC",
-      "promethee-ii": "PROMETHEE II"
+      "promethee-ii": "PROMETHEE II",
+      "electre-i": "ELECTRE I"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1396,7 +1458,8 @@
         "aras": "Measures each weighted share total against an optimal row.",
         "codas": "Combines Euclidean and Taxicab distances from the negative-ideal across pairs.",
         "roc": "Weights from the importance rank order of criteria.",
-        "promethee-ii": "Pairwise preference functions and leaving minus entering outranking flows."
+        "promethee-ii": "Pairwise preference functions and leaving minus entering outranking flows.",
+        "electre-i": "Majority concordance and bounded discordance veto to select the outranking kernel."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1713,6 +1776,15 @@
             "s2": "Entering flow φ⁻: the column average of pairwise preference degrees, showing how strongly the others beat each model.",
             "s3": "Net flow φ = φ⁺ - φ⁻: leaving minus entering flow around zero; the highest φ ranks first."
           }
+        },
+        "electre-i": {
+          "title": "Concordance majority, discordance veto, and outranking kernel",
+          "caption": "Each Galway plant site is compared pair by pair: net concordance Cₐ and net discordance Dₐ summarize pairwise support and opposition, [K] marks the non-outranked kernel after condensing the {A2, A3} cycle, and Φ orders the sites.",
+          "steps": {
+            "s1": "Concordance Cₐ and discordance Dₐ: for each site, sum how strongly it beats rivals on weighted criteria versus its largest scaled deficit.",
+            "s2": "Outranking kernel K: pairs with C ≥ 0.75 and D ≤ 0.50 form the outranking graph; condensing the {A2, A3} cycle leaves the kernel {A2, A3, A5} marked with [K].",
+            "s3": "Net outranking score Φ = (Cₐ - Dₐ) / (2(m - 1)): combines high net concordance and low net discordance into a complete ranking."
+          }
         }
       }
     }
@@ -1896,6 +1968,16 @@
       "positiveFlow": "Leaving (positive) flow φ⁺: the row average of π over all other alternatives, measuring how strongly each alternative outranks the rest.",
       "negativeFlow": "Entering (negative) flow φ⁻: the column average of π over all other alternatives, measuring how strongly the rest outrank each alternative.",
       "netFlow": "Net outranking flow φ = φ⁺ - φ⁻: a higher value ranks higher, and the net flows sum to 0."
+    },
+    "electre-i": {
+      "oriented": "Oriented matrix g: benefit criteria stay as given and cost criteria are negated so larger values are always better.",
+      "concordance": "Concordance matrix C: for each pair (a, b), the share of total weight on criteria where a is at least as good as b.",
+      "discordance": "Discordance matrix D: for each pair (a, b), the largest scaled deficit where a falls behind b on any criterion.",
+      "outranking": "Outranking matrix S: S(a, b) = 1 when C(a, b) ≥ ĉ and D(a, b) ≤ d̂.",
+      "kernel": "Kernel membership K: 1 for alternatives in the outranking kernel after condensing mutual outranking cycles, 0 otherwise.",
+      "netConcordance": "Net concordance Cₐ: outgoing minus incoming concordance across all other alternatives.",
+      "netDiscordance": "Net discordance Dₐ: outgoing minus incoming discordance across all other alternatives; lower values are better.",
+      "netScore": "Net outranking score Φ = (Cₐ - Dₐ) / (2(m - 1)): normalized net concordance minus net discordance in [-1, 1]."
     }
   },
   "validation": {

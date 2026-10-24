@@ -85,7 +85,20 @@
 
 ## Implementation notes
 - pyDecision: `pyDecision.algorithm.electre_i(dataset, W, remove_cycles=False, c_hat=0.75, d_hat=0.50, graph=True)` → `(concordance, discordance, dominance, kernel, dominated)`; benefit-only; δ = max column range.
-- Our TypeScript: `variant: "roy" | "hwang_yoon"`; for "roy" options `discordance_scale: "global_range" | "per_criterion_range"`; for "hwang_yoon" options `discordance: "max_ratio" | "sum_ratio"`, `cost_normalization: "reciprocal" | "orient_first"`; always return S, kernel (after SCC condensation) and, for variant B, net indices. Default site label: "ELECTRE I (Roy)" and "ELECTRE (Hwang–Yoon, net indices)" as two entries, so Turkish users recognise the second.
+- Our TypeScript (`src/core/methods/electre-i.ts`):
+  - `ElectreIParams`:
+    - `discordanceScale?: 'global' | 'range'` (choice parameter, default `'global'`: Roy 1968 common-scale maximum span $\delta = \max_j (\max_i g_{ij} - \min_i g_{ij})$, which reproduces the Wang & Triantaphyllou 2008 §3.1 fixture identically; `'range'`: per-criterion span $\max_j \frac{g_j(b) - g_j(a)}{\text{range}_j}$, which prevents scale distortion when criteria have different units).
+    - `cHat?: number` (concordance threshold $\hat{c} \in (0, 1]$, default `0.75`).
+    - `dHat?: number` (discordance / veto threshold $\hat{d} \in [0, 1]$, default `0.50`).
+  - Steps emitted (`Step[]`):
+    1. `electre-i.oriented` (`matrix`, `axes: ['alternatives', 'criteria']`): $g_j(a) = +x_{aj}$ for benefit, $-x_{aj}$ for cost.
+    2. `electre-i.concordance` (`matrix`, `axes: ['alternatives', 'alternatives']`): $C(a,b) = \sum_{j: g_j(a) \ge g_j(b) - 10^{-12}} w_j / \sum_j w_j$, with $C(a,a) = 1$.
+    3. `electre-i.discordance` (`matrix`, `axes: ['alternatives', 'alternatives']`): $D(a,b)$ under `'global'` or `'range'`, with $D(a,a) = 0$.
+    4. `electre-i.outranking` (`matrix`, `axes: ['alternatives', 'alternatives']`): $S(a,b) = 1 \iff a \ne b \land C(a,b) \ge \hat{c} - 10^{-12} \land D(a,b) \le \hat{d} + 10^{-12}$, $S(a,a) = 0$.
+    5. `electre-i.kernel` (`vector`, `axes: 'alternatives'`): kernel membership ($1$ if in $K$, $0$ if outranked/eliminated), computed by `electreIKernel(S)` after condensing strongly connected components (cycles) of $S$ into single equivalence classes and iteratively selecting classes with zero incoming arcs and deleting the classes they directly outrank.
+    6. `electre-i.netConcordance` (`vector`, `axes: 'alternatives'`): $C_{\text{net}}(a) = \sum_{b \ne a} (C(a,b) - C(b,a))$.
+    7. `electre-i.netDiscordance` (`vector`, `axes: 'alternatives'`): $D_{\text{net}}(a) = \sum_{b \ne a} (D(a,b) - D(b,a))$.
+    8. `electre-i.netScore` (`vector`, `axes: 'alternatives'`): normalized net outranking score $\Phi(a) = \frac{1}{2(m-1)}(C_{\text{net}}(a) - D_{\text{net}}(a)) \in [-1, 1]$ (`scores` and `ranking` via `rankScores(scores, 'desc')`).
 
 ## Sources
 - Roy (1968), RIRO 2(8), 57–75, DOI 10.1051/ro/196802V100571.
