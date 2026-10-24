@@ -72,7 +72,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { ahp, aras, bwm, judgementsFromBwm, judgementsFromUpper, cocoso, codas, copras, critic, edas, entropy, lopcow, mabac, marcos, merec, moora, saw, sd, topsis, vikor, waspas } = await import('../src/core')
+    const { ahp, aras, bwm, judgementsFromBwm, judgementsFromUpper, cilos, cocoso, codas, copras, critic, edas, entropy, lopcow, mabac, marcos, merec, moora, saw, sd, topsis, vikor, waspas } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -128,6 +128,32 @@ describe('i18n resources', () => {
     ]
     expect(new Set(lp.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
       new Set(['lopcow.constant-column', 'lopcow.near-constant-column', 'lopcow.two-alternatives', 'lopcow.all-constant-equal-weights']),
+    )
+    // CILOS: constant column, near-constant column, partial shared optimum, total shared optimum (P = 0, F = 0), all constant.
+    const ci = [
+      cilos.compute(p, {}),
+      cilos.compute(nearConstant, {}),
+      cilos.compute(
+        {
+          alternatives: ['A', 'B', 'C'],
+          criteria: [
+            { name: 'c1', type: 'benefit' as const },
+            { name: 'c2', type: 'benefit' as const },
+            { name: 'c3', type: 'benefit' as const },
+          ],
+          matrix: [
+            [10, 10, 2],
+            [5, 6, 9],
+            [3, 4, 5],
+          ],
+        },
+        {},
+      ),
+      cilos.compute({ ...p, matrix: [[10, 1], [5, 2], [2, 5]] }, {}), // A wins both c1 (max=10) and c2 (min=1) -> P=0, F=0
+      cilos.compute({ ...p, matrix: [[1, 1], [1, 1], [1, 1]] }, {}),
+    ]
+    expect(new Set(ci.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
+      new Set(['cilos.constant-column', 'cilos.near-constant-column', 'cilos.shared-optimum', 'cilos.zero-loss-equal-weights', 'cilos.all-constant-equal-weights']),
     )
     // SAW: both normalizations (it emits no warnings of its own; its data errors are validation codes).
     const sw = [saw.compute(p, [0.5, 0.5], {}), saw.compute(p, [0.5, 0.5], { normalization: 'sum' })]
@@ -195,7 +221,7 @@ describe('i18n resources', () => {
       ahp.compute(bwmProblem(8), {}, judgementsFromUpper(8, new Array<number>(28).fill(1))),
     ]
     expect(new Set(ah.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(new Set(['ahp.inconsistent', 'ahp.many-criteria']))
-    const steps = [...ah.flatMap((x) => x.steps), ...ar.steps, ...cd.steps, ...bw.flatMap((x) => x.steps), ...mo.flatMap((x) => x.steps), ...mb.flatMap((x) => x.steps), ...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...lp.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
+    const steps = [...ah.flatMap((x) => x.steps), ...ar.steps, ...cd.steps, ...bw.flatMap((x) => x.steps), ...mo.flatMap((x) => x.steps), ...mb.flatMap((x) => x.steps), ...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...lp.flatMap((x) => x.steps), ...ci.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),
@@ -203,6 +229,7 @@ describe('i18n resources', () => {
       ...sdr.flatMap((x) => x.warnings ?? []),
       ...mr.flatMap((x) => x.warnings ?? []),
       ...lp.flatMap((x) => x.warnings ?? []),
+      ...ci.flatMap((x) => x.warnings ?? []),
       ...sw.flatMap((x) => x.warnings ?? []),
       ...vk.flatMap((x) => x.warnings ?? []),
       ...ed.flatMap((x) => x.warnings ?? []),
