@@ -2,6 +2,7 @@ import { ahp } from './methods/ahp'
 import { aras } from './methods/aras'
 import { bwm } from './methods/bwm'
 import { cocoso } from './methods/cocoso'
+import { codas } from './methods/codas'
 import { copras } from './methods/copras'
 import { critic } from './methods/critic'
 import { edas } from './methods/edas'
@@ -21,13 +22,13 @@ import type { Method, RankingMethod, WeightingMethod } from './types'
 
 /** The ids of the registered methods, in registry order. The store's method id types derive from these. */
 export const WEIGHTING_IDS = ['critic', 'entropy', 'sd', 'merec', 'lopcow', 'equal', 'bwm', 'ahp'] as const
-export const RANKING_IDS = ['topsis', 'saw', 'vikor', 'edas', 'waspas', 'copras', 'marcos', 'cocoso', 'mabac', 'moora', 'aras'] as const
+export const RANKING_IDS = ['topsis', 'saw', 'vikor', 'edas', 'waspas', 'copras', 'marcos', 'cocoso', 'mabac', 'moora', 'aras', 'codas'] as const
 export type WeightingId = (typeof WEIGHTING_IDS)[number]
 export type RankingId = (typeof RANKING_IDS)[number]
 
 // Records, so an id without its method (or a method without its id) does not compile.
 const weightingById: Record<WeightingId, WeightingMethod> = { critic, entropy, sd, merec, lopcow, equal, bwm, ahp }
-const rankingById: Record<RankingId, RankingMethod> = { topsis, saw, vikor, edas, waspas, copras, marcos, cocoso, mabac, moora, aras }
+const rankingById: Record<RankingId, RankingMethod> = { topsis, saw, vikor, edas, waspas, copras, marcos, cocoso, mabac, moora, aras, codas }
 // Pure: a bundle that uses only one kind (the robustness worker: ranking) drops the other kind's methods.
 const weighting: WeightingMethod[] = /* @__PURE__ */ WEIGHTING_IDS.map((id) => weightingById[id])
 const ranking: RankingMethod[] = /* @__PURE__ */ RANKING_IDS.map((id) => rankingById[id])

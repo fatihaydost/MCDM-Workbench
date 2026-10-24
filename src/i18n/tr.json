@@ -143,6 +143,9 @@
       },
       "aras": {
         "claim": "Tablo 11'deki S₀, S, K ve 11 sıranın tamamı {{citation}} ile {{decimals}} basamağa kadar aynı; THY'nin yinelenen satırı düzeltilince Tablo 9 ve 10 da aynı."
+      },
+      "codas": {
+        "claim": "Tablo 3 ve 4 içindeki E, T, H değerleri ve altı sırasının tamamı {{citation}} ile {{decimals}} basamağa kadar aynı; 2016 özgün makalesinin iki örneği de örtüşüyor."
       }
     },
     "catalogue": {
@@ -238,7 +241,8 @@
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
       "moora": "MOORA",
-      "aras": "ARAS"
+      "aras": "ARAS",
+      "codas": "CODAS"
     },
     "params": {
       "entropy": {
@@ -309,6 +313,14 @@
           "eigenvector": "özvektör",
           "geometric": "geometrik ortalama"
         }
+      },
+      "codas": {
+        "tau": "Eşik τ",
+        "tauEnds": {
+          "min": "0,01: daha küçük E farklarında Taxicab",
+          "max": "0,10: daha büyük E farklarında Taxicab"
+        },
+        "tauVariant": "τ = {{value}}"
       }
     },
     "example": {
@@ -453,7 +465,8 @@
         "cocoso": "Ağırlıklı toplam S ile üs toplamı P'yi üç biçimde okuyup birleştirir; k büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
         "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir.",
         "moora": "Her değeri sütununun Öklid uzunluğuna böler, ağırlıklı fayda oranlarını toplar ve ağırlıklı maliyet oranlarını çıkarır; y büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
-        "aras": "Başa bir optimal satır ekler, her alternatifin m + 1 satırlık sütun toplamlarındaki ağırlıklı paylarını toplar ve optimal satırın toplamına böler; K büyüdükçe sıra yükselir."
+        "aras": "Başa bir optimal satır ekler, her alternatifin m + 1 satırlık sütun toplamlarındaki ağırlıklı paylarını toplar ve optimal satırın toplamına böler; K büyüdükçe sıra yükselir.",
+        "codas": "Her alternatifi negatif-ideal noktaya Öklid ve Taxicab uzaklıklarıyla bütün çiftler üzerinden karşılaştırarak puanlar; yüksek H daha iyidir."
       },
       "columns": {
         "rank": "Sıra",
@@ -471,7 +484,9 @@
         "powerSum": "Üs toplamı P",
         "benefitSum": "Fayda toplamı S+",
         "costSum": "Maliyet toplamı S-",
-        "arasOptimality": "Optimalite S"
+        "arasOptimality": "Optimalite S",
+        "euclidean": "Öklid E",
+        "taxicab": "Taxicab T"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -529,6 +544,11 @@
           "name": "Fayda derecesi K",
           "title": "ARAS fayda derecesi K",
           "symbol": "K"
+        },
+        "codas": {
+          "name": "Değerlendirme H",
+          "title": "CODAS değerlendirme skoru H",
+          "symbol": "H"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -752,6 +772,15 @@
         "optimalScore": "Optimal skor S₀",
         "optimality": "Optimalite fonksiyonu S",
         "utilityDegree": "Fayda derecesi K"
+      },
+      "codas": {
+        "normalized": "Normalize matris n",
+        "weighted": "Ağırlıklı matris r",
+        "negativeIdeal": "Negatif-ideal ns",
+        "euclidean": "Öklid uzaklığı E",
+        "taxicab": "Taxicab uzaklığı T",
+        "relativeAssessment": "Göreli değerlendirme Ra",
+        "score": "Değerlendirme skoru H"
       }
     },
     "issues": {
@@ -957,6 +986,11 @@
         "optimal": "Optimal A₀",
         "bar": "{{alternative}}: S = {{total}}, S₀ = {{optimalTotal}}, K = {{score}}",
         "readout": "{{alternative}}: S₀ = {{optimalTotal}} içinde S = {{total}}, K = {{score}}"
+      },
+      "codas": {
+        "title": "Negatif-idealden E ve T uzaklıkları ile H skoru",
+        "caption": "Sol: negatif-ideal nokta ns üzerinden Öklid uzaklığı E (üst) ve Taxicab uzaklığı T (alt). Sağ: sıfır etrafında değerlendirme skoru H.",
+        "row": "{{alternative}}: E = {{e}}, T = {{t}}, H = {{score}}"
       }
     },
     "flow": {
@@ -1063,6 +1097,14 @@
         "normalized": "Paylar",
         "optimalScore": "Toplamlar S",
         "utilityDegree": "K"
+      },
+      "codas": {
+        "normalized": "Normalizasyon",
+        "weighted": "Ağırlıklı",
+        "negativeIdeal": "Negatif-ideal",
+        "euclidean": "E ve T",
+        "relativeAssessment": "İkili Ra",
+        "score": "H"
       }
     },
     "pipeline": {
@@ -1151,7 +1193,8 @@
       "bwm": "BWM",
       "ahp": "AHP",
       "moora": "MOORA",
-      "aras": "ARAS"
+      "aras": "ARAS",
+      "codas": "CODAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1218,7 +1261,8 @@
         "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar.",
         "ahp": "Her kriter çiftini karşılaştırarak ağırlık.",
         "moora": "Vektör normalizasyonu sonrası fayda oranları eksi maliyet oranları.",
-        "aras": "Her ağırlıklı pay toplamını bir optimal satırla oranlar."
+        "aras": "Her ağırlıklı pay toplamını bir optimal satırla oranlar.",
+        "codas": "Negatif-ideal noktaya Öklid ve Taxicab uzaklıklarını ikili karşılaştırmada birleştirir."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1489,6 +1533,15 @@
             "s2": "Optimal satır A₀: sütunların en iyi değerleri aynı ölçekte kendi toplamı S₀ değerini alır.",
             "s3": "Fayda derecesi K = S / S₀: her çubuk S₀ değerine bölünür, en yüksek K ilk sırada yer alır."
           }
+        },
+        "codas": {
+          "title": "En kötü noktadan iki uzaklık, tek ikili skor",
+          "caption": "Her tedarikçi negatif-ideal nokta ns üzerinden Öklid uzaklığı E ve Taxicab uzaklığı T ile ölçülür; H ikili farkları toplar.",
+          "steps": {
+            "s1": "Öklid uzaklığı E: her tedarikçinin negatif-ideal nokta ns üzerinden düz çizgi uzaklığı.",
+            "s2": "Taxicab uzaklığı T: ns noktasına kriter farklarının toplamı; Öklid farkı en az τ olduğunda eklenir.",
+            "s3": "Değerlendirme skoru H: ikili karşılaştırmaların satır toplamı; en yüksek H birinci olur."
+          }
         }
       }
     }
@@ -1646,6 +1699,15 @@
       "optimalScore": "Optimal skor S₀: optimal satır A₀ için ağırlıklı satır toplamı, tüm alternatiflerin kıyas noktası.",
       "optimality": "Optimalite fonksiyonu S: her alternatifin ağırlıklı satır toplamı.",
       "utilityDegree": "Fayda derecesi K = S / S₀: her alternatifin optimalitesinin optimal skora oranı. Değer büyüdükçe sıra yükselir."
+    },
+    "codas": {
+      "normalized": "Doğrusal maks normalizasyonu: her değer sütun maksimumuna bölünür; maliyet kriterinde sütun minimumu değere bölünür, böylece en iyi değer 1 olur.",
+      "weighted": "Ağırlıklı normalize matris r = w n: her normalize değer kriter ağırlığıyla çarpılır.",
+      "negativeIdeal": "Negatif-ideal çözüm ns: her kriter sütunundaki en küçük ağırlıklı değer.",
+      "euclidean": "Her alternatifin negatif-ideal çözüme Öklid uzaklığı E.",
+      "taxicab": "Taxicab uzaklığı T: negatif-ideal çözüme mutlak farkların toplamı.",
+      "relativeAssessment": "Göreli değerlendirme matrisi Ra: her (i, k) çifti için |E_i - E_k| en az τ ise (E_i - E_k) + (T_i - T_k), değilse yalnız (E_i - E_k).",
+      "score": "Değerlendirme skoru H: Ra satır toplamı. Yüksek değer daha üstte yer alır ve skorların toplamı 0 olur."
     }
   },
   "validation": {

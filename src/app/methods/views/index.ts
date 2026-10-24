@@ -3,6 +3,7 @@ import { ahp } from './ahp'
 import { aras } from './aras'
 import { bwm } from './bwm'
 import { cocoso } from './cocoso'
+import { codas } from './codas'
 import { copras } from './copras'
 import { critic } from './critic'
 import { edas } from './edas'
@@ -54,6 +55,7 @@ export const methodViews: Readonly<Views> = {
   mabac,
   moora,
   aras,
+  codas,
 }
 
 const ids = Object.keys(methodViews) as ViewId[]

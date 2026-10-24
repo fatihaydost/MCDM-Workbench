@@ -143,6 +143,9 @@
       },
       "aras": {
         "claim": "S₀, S, K and all 11 ranks of Table 11 match {{citation}} to {{decimals}} decimals, with Tables 9 and 10 once THY's reprinted row is corrected."
+      },
+      "codas": {
+        "claim": "E, T, H and all six ranks of Tables 3 and 4 match {{citation}} to {{decimals}} decimals; the two examples of the 2016 origin paper match too."
       }
     },
     "catalogue": {
@@ -238,7 +241,8 @@
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
       "moora": "MOORA",
-      "aras": "ARAS"
+      "aras": "ARAS",
+      "codas": "CODAS"
     },
     "params": {
       "entropy": {
@@ -309,6 +313,14 @@
           "eigenvector": "eigenvector",
           "geometric": "geometric mean"
         }
+      },
+      "codas": {
+        "tau": "Threshold τ",
+        "tauEnds": {
+          "min": "0.01: Taxicab on smaller E gaps",
+          "max": "0.10: Taxicab on larger E gaps"
+        },
+        "tauVariant": "τ = {{value}}"
       }
     },
     "example": {
@@ -453,7 +465,8 @@
         "cocoso": "Reads a weighted sum S and a power sum P three ways and combines them; a higher k is better. Zeros and negative values are allowed.",
         "mabac": "Adds up how far each alternative lies above or below a border, the geometric mean of every criterion; a higher S is better, in the same order as a min-max weighted sum. Zeros and negative values are allowed.",
         "moora": "Divides each value by the Euclidean length of its column, adds the weighted benefit ratios and subtracts the weighted cost ratios; a higher y is better. Zeros and negative values are allowed.",
-        "aras": "Prepends an optimal row, adds up each alternative's weighted shares of the m + 1 column totals and divides by the optimal row's total; a higher K is better."
+        "aras": "Prepends an optimal row, adds up each alternative's weighted shares of the m + 1 column totals and divides by the optimal row's total; a higher K is better.",
+        "codas": "Scores each alternative by its Euclidean and Taxicab distances from the negative-ideal point, compared across every pair; a higher H is better."
       },
       "columns": {
         "rank": "Rank",
@@ -471,7 +484,9 @@
         "powerSum": "Power sum P",
         "benefitSum": "Benefit sum S+",
         "costSum": "Cost sum S-",
-        "arasOptimality": "Optimality S"
+        "arasOptimality": "Optimality S",
+        "euclidean": "Euclidean E",
+        "taxicab": "Taxicab T"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -529,6 +544,11 @@
           "name": "Utility degree K",
           "title": "ARAS utility degree K",
           "symbol": "K"
+        },
+        "codas": {
+          "name": "Assessment H",
+          "title": "CODAS assessment score H",
+          "symbol": "H"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -752,6 +772,15 @@
         "optimalScore": "Optimal score S₀",
         "optimality": "Optimality function S",
         "utilityDegree": "Utility degree K"
+      },
+      "codas": {
+        "normalized": "Normalized matrix n",
+        "weighted": "Weighted matrix r",
+        "negativeIdeal": "Negative-ideal ns",
+        "euclidean": "Euclidean distance E",
+        "taxicab": "Taxicab distance T",
+        "relativeAssessment": "Relative assessment Ra",
+        "score": "Assessment score H"
       }
     },
     "issues": {
@@ -957,6 +986,11 @@
         "optimal": "Optimal A₀",
         "bar": "{{alternative}}: S = {{total}}, S₀ = {{optimalTotal}}, K = {{score}}",
         "readout": "{{alternative}}: S = {{total}} of S₀ = {{optimalTotal}}, K = {{score}}"
+      },
+      "codas": {
+        "title": "Distances E and T from the negative-ideal, and score H",
+        "caption": "Left: Euclidean distance E (top) and Taxicab distance T (bottom) from the negative-ideal point ns. Right: assessment score H around zero.",
+        "row": "{{alternative}}: E = {{e}}, T = {{t}}, H = {{score}}"
       }
     },
     "flow": {
@@ -1063,6 +1097,14 @@
         "normalized": "Shares",
         "optimalScore": "Totals S",
         "utilityDegree": "K"
+      },
+      "codas": {
+        "normalized": "Normalize",
+        "weighted": "Weighted",
+        "negativeIdeal": "Negative-ideal",
+        "euclidean": "E and T",
+        "relativeAssessment": "Pairwise Ra",
+        "score": "H"
       }
     },
     "pipeline": {
@@ -1151,7 +1193,8 @@
       "bwm": "BWM",
       "ahp": "AHP",
       "moora": "MOORA",
-      "aras": "ARAS"
+      "aras": "ARAS",
+      "codas": "CODAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1218,7 +1261,8 @@
         "bwm": "Weights from your answers to a few comparisons.",
         "ahp": "Weights from comparing every pair of criteria.",
         "moora": "Benefit ratios minus cost ratios after vector normalization.",
-        "aras": "Measures each weighted share total against an optimal row."
+        "aras": "Measures each weighted share total against an optimal row.",
+        "codas": "Combines Euclidean and Taxicab distances from the negative-ideal across pairs."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1489,6 +1533,15 @@
             "s2": "Optimal row A₀: the column-best values get their own total S₀ on the same scale.",
             "s3": "Utility degree K = S / S₀: each bar is divided by S₀, and the highest K ranks first."
           }
+        },
+        "codas": {
+          "title": "Two distances from the worst point, one pairwise score",
+          "caption": "Each supplier is measured from the negative-ideal point ns by Euclidean distance E and Taxicab distance T; H sums the pairwise margins.",
+          "steps": {
+            "s1": "Euclidean distance E: how far each supplier stands from the negative-ideal point ns.",
+            "s2": "Taxicab distance T: the sum of criterion gaps from ns, added when the Euclidean gap is at least τ.",
+            "s3": "Assessment score H: the row sum of pairwise comparisons; the highest H ranks first."
+          }
         }
       }
     }
@@ -1646,6 +1699,15 @@
       "optimalScore": "Optimal score S₀: the weighted row sum of the optimal row A₀, the benchmark for every alternative.",
       "optimality": "Optimality function S: the weighted row sum of each alternative.",
       "utilityDegree": "Utility degree K = S / S₀: each alternative's optimality divided by the optimal score. A higher value ranks higher."
+    },
+    "codas": {
+      "normalized": "Linear max normalization: each value divided by the column maximum, or for a cost criterion the column minimum divided by the value, so the best value is 1.",
+      "weighted": "Weighted normalized matrix r = w n: each normalized value multiplied by its criterion weight.",
+      "negativeIdeal": "Negative-ideal solution ns: the smallest weighted value in each criterion column.",
+      "euclidean": "Euclidean distance E of each alternative from the negative-ideal solution.",
+      "taxicab": "Taxicab distance T: the sum of absolute differences from the negative-ideal solution.",
+      "relativeAssessment": "Relative assessment matrix Ra: for each pair (i, k), (E_i - E_k) plus (T_i - T_k) when |E_i - E_k| is at least τ.",
+      "score": "Assessment score H: the row sum of Ra. A higher value ranks higher, and the scores sum to 0."
     }
   },
   "validation": {

@@ -52,13 +52,13 @@ describe('kendallW', () => {
 })
 
 describe('compareRankings', () => {
-  it('reference example: eleven rankings, MARCOS echoes SAW and is counted once in Borda, W and first place; CoCoSo, MABAC, MOORA and ARAS count', () => {
+  it('reference example: twelve rankings, MARCOS echoes SAW and is counted once in Borda, W and first place; CoCoSo, MABAC, MOORA, ARAS and CODAS count', () => {
     const c = compareRankings(problem(), ex.weights!, allRuns)
     const all = c.runs.map((r) => r.result!.ranking)
     expect(all[6]).toEqual(all[1]) // MARCOS = SAW (Linear)
     expect(c.echoes).toEqual([{ methodId: 'marcos', of: 'saw' }])
-    expect(c.ranked).toHaveLength(11)
-    const rankings = [...all.slice(0, 6), all[7]!, all[8]!, all[9]!, all[10]!]
+    expect(c.ranked).toHaveLength(12)
+    const rankings = [...all.slice(0, 6), all[7]!, all[8]!, all[9]!, all[10]!, all[11]!]
     expect(c.comparable).toBe(true)
     expect(rankings).toEqual([
       [1, 4, 6, 10, 7, 8, 2, 3, 5, 9],
@@ -71,12 +71,13 @@ describe('compareRankings', () => {
       [1, 5, 7, 10, 6, 8, 2, 3, 4, 9], // MABAC = min-max weighted sum, here CoCoSo's order too
       [1, 4, 6, 10, 7, 8, 2, 3, 5, 9], // MOORA
       [1, 2, 6, 10, 7, 8, 3, 4, 5, 9], // ARAS
+      [1, 2, 6, 9, 7, 8, 3, 4, 5, 10], // CODAS
     ])
-    expect(c.borda!.points[0]).toBe(89)
-    expect(c.borda!.points[6]).toBe(80)
+    expect(c.borda!.points[0]).toBe(98)
+    expect(c.borda!.points[6]).toBe(87)
     expect(c.borda!.ranking[0]).toBe(1)
     expect(c.borda!.ranking[6]).toBe(2)
-    expect(c.firstPlace).toEqual({ alternative: 0, methods: 9, of: 10 })
+    expect(c.firstPlace).toEqual({ alternative: 0, methods: 10, of: 11 })
     expect(c.kendallW).toBe(kendallW(rankings))
     expect(c.kendallW!).toBeGreaterThan(0.9)
     expect(c.kendallW!).toBeLessThanOrEqual(1)
@@ -88,7 +89,7 @@ describe('compareRankings', () => {
     const saw = c.runs.find((r) => r.methodId === 'saw')!
     expect(saw.result).toBeNull()
     expect(saw.issues.some((i) => i.code === 'non-positive-value')).toBe(true)
-    // SAW, WASPAS, COPRAS, MARCOS and ARAS all need positive values; CoCoSo, MABAC and MOORA rank the zero.
+    // SAW, WASPAS, COPRAS, MARCOS, ARAS and CODAS all need positive values; CoCoSo, MABAC and MOORA rank the zero.
     expect(c.runs.find((r) => r.methodId === 'cocoso')!.result).not.toBeNull()
     expect(c.runs.find((r) => r.methodId === 'mabac')!.result).not.toBeNull()
     expect(c.runs.find((r) => r.methodId === 'moora')!.result).not.toBeNull()
@@ -96,6 +97,7 @@ describe('compareRankings', () => {
     expect(c.runs.find((r) => r.methodId === 'copras')!.result).toBeNull()
     expect(c.runs.find((r) => r.methodId === 'marcos')!.result).toBeNull()
     expect(c.runs.find((r) => r.methodId === 'aras')!.result).toBeNull()
+    expect(c.runs.find((r) => r.methodId === 'codas')!.result).toBeNull()
     expect(c.echoes).toEqual([])
     expect(c.ranked).toHaveLength(6)
     expect(c.firstPlace!.of).toBe(6)
@@ -119,7 +121,7 @@ describe('compareRankings with method options', () => {
     const runs = allRuns.map((r) => (r.methodId === 'saw' ? { ...r, params: { normalization: 'sum' } } : r))
     const c = compareRankings(problem(), ex.weights!, runs)
     expect(c.echoes).toEqual([])
-    expect(c.firstPlace!.of).toBe(10)
+    expect(c.firstPlace!.of).toBe(12)
     // MARCOS is an independent method in the pair facts too (it can disagree with SAW 'sum').
     const f = pairFacts(problem(), ex.weights!, c, 0, 1)
     expect(f.methods.map((m) => m.methodId)).toContain('marcos')
@@ -168,6 +170,7 @@ describe('pair facts', () => {
       { methodId: 'mabac', higher: 'a' },
       { methodId: 'moora', higher: 'a' },
       { methodId: 'aras', higher: 'a' },
+      { methodId: 'codas', higher: 'a' },
     ])
     // MARCOS echoes SAW, so it is not a second voice in the pair's method list.
     expect(f.unanimous).toBe(false)
