@@ -34,7 +34,7 @@ export const leaders = (result: RankingResult): number[] => rankOrder(result).fi
 const RANKING_FAMILIES: readonly { key: 'distance' | 'additive' | 'outranking'; ids: readonly RankingMethodId[] }[] = [
   { key: 'distance', ids: ['topsis', 'vikor', 'codas', 'mabac'] },
   { key: 'additive', ids: ['saw', 'waspas', 'copras', 'moora', 'aras', 'marcos', 'edas', 'cocoso'] },
-  { key: 'outranking', ids: ['promethee-ii'] },
+  { key: 'outranking', ids: ['promethee-ii', 'electre-iii'] },
 ]
 
 /**

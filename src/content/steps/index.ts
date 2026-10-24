@@ -7,6 +7,7 @@ import { codas } from './codas'
 import { copras } from './copras'
 import { critic } from './critic'
 import { edas } from './edas'
+import { electreIII } from './electre-iii'
 import { entropy } from './entropy'
 import { equal } from './equal'
 import { lopcow } from './lopcow'
@@ -30,7 +31,33 @@ export type { FlowNode, MethodSteps, StepContent } from './types'
  * Every method's step module (`src/content/steps/<id>.ts`), by method id. Import this index only from
  * lazy code (WorkedCalculation): the TeX must stay out of the main chunk.
  */
-const modules = { critic, entropy, sd, merec, lopcow, cilos, equal, manual, bwm, ahp, roc, topsis, saw, vikor, edas, waspas, copras, marcos, cocoso, mabac, moora, aras, codas, 'promethee-ii': prometheeII }
+const modules = {
+  critic,
+  entropy,
+  sd,
+  merec,
+  lopcow,
+  cilos,
+  equal,
+  manual,
+  bwm,
+  ahp,
+  roc,
+  topsis,
+  saw,
+  vikor,
+  edas,
+  waspas,
+  copras,
+  marcos,
+  cocoso,
+  mabac,
+  moora,
+  aras,
+  codas,
+  'promethee-ii': prometheeII,
+  'electre-iii': electreIII,
+}
 type Modules = typeof modules
 
 export type StepKey = { [M in keyof Modules]: keyof Modules[M]['steps'] & string }[keyof Modules]

@@ -72,7 +72,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { ahp, aras, bwm, judgementsFromBwm, judgementsFromUpper, cilos, cocoso, codas, copras, critic, edas, entropy, lopcow, mabac, marcos, merec, moora, prometheeII, roc, saw, sd, topsis, vikor, waspas } = await import('../src/core')
+    const { ahp, aras, bwm, judgementsFromBwm, judgementsFromUpper, cilos, cocoso, codas, copras, critic, edas, electreIII, entropy, lopcow, mabac, marcos, merec, moora, prometheeII, roc, saw, sd, topsis, vikor, waspas } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -195,6 +195,11 @@ describe('i18n resources', () => {
       prometheeII.compute(p, [0.5, 0.5], { preferenceFunction: 'level' }),
       prometheeII.compute(p, [0.5, 0.5], { preferenceFunction: 'gaussian' }),
     ]
+    const el = [
+      electreIII.compute(p, [0.5, 0.5], {}),
+      electreIII.compute(p, [0.5, 0.5], { thresholdPreset: 'strict' }),
+      electreIII.compute(p, [0.5, 0.5], { thresholdPreset: 'veto' }),
+    ]
     // CoCoSo: negatives allowed, and its one notice (a near-constant column).
     const cc = [
       cocoso.compute({ ...p, matrix: [[-1, 2], [3, -1], [2, 3]] }, [0.5, 0.5], { lambda: 0.3 }),
@@ -232,7 +237,7 @@ describe('i18n resources', () => {
       roc.compute(p, { formula: 'rs' }),
       roc.compute(p, { formula: 'rr' }),
     ]
-    const steps = [...ah.flatMap((x) => x.steps), ...rc.flatMap((x) => x.steps), ...ar.steps, ...cd.steps, ...pr.flatMap((x) => x.steps), ...bw.flatMap((x) => x.steps), ...mo.flatMap((x) => x.steps), ...mb.flatMap((x) => x.steps), ...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...lp.flatMap((x) => x.steps), ...ci.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
+    const steps = [...ah.flatMap((x) => x.steps), ...rc.flatMap((x) => x.steps), ...ar.steps, ...cd.steps, ...pr.flatMap((x) => x.steps), ...el.flatMap((x) => x.steps), ...bw.flatMap((x) => x.steps), ...mo.flatMap((x) => x.steps), ...mb.flatMap((x) => x.steps), ...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...lp.flatMap((x) => x.steps), ...ci.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),

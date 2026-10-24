@@ -1009,6 +1009,61 @@ export const examples: readonly ExampleDataset[] = [
       { label: 'promethee-ii.netFlow', values: [-0.45738, -0.10015, 0.18343, 0.55909, 0.17125, -0.35624], decimals: 5 },
     ],
   },
+  {
+    id: 'wang-2008-waste-incineration',
+    name: {
+      en: 'Waste incineration strategy (Wang and Triantaphyllou 2008)',
+      tr: 'Atık yakma stratejisi (Wang ve Triantaphyllou 2008)',
+    },
+    summary: {
+      en: 'Eleven municipal waste management strategies in eastern Switzerland evaluated across eleven environmental, economic and technical criteria. The paper reports the ELECTRE III credibility matrix and the descending and ascending distillation pre-orders.',
+      tr: 'Doğu İsviçre’de on bir çevresel, ekonomik ve teknik kritere göre değerlendirilen on bir kentsel atık yönetimi stratejisi. Makale ELECTRE III güvenilirlik matrisini ve azalan ile artan damıtma ön-sıralamalarını veriyor.',
+    },
+    referenceFor: ['electre-iii'],
+    citation: {
+      authors: 'Wang, X.; Triantaphyllou, E.',
+      year: 2008,
+      title: 'Ranking irregularities when evaluating alternatives by using some ELECTRE methods',
+      venue: 'Omega 36(1), 45-63',
+      doi: '10.1016/j.omega.2005.12.003',
+      tables: {
+        en: 'Section 3.2, Tables 2 and 3, pp. 51-53',
+        tr: 'Bölüm 3.2, Tablo 2 ve 3, s. 51-53',
+      },
+    },
+    alternatives: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11'],
+    criteria: [
+      { name: { en: 'C1', tr: 'C1' }, type: 'cost' },
+      { name: { en: 'C2', tr: 'C2' }, type: 'benefit' },
+      { name: { en: 'C3', tr: 'C3' }, type: 'cost' },
+      { name: { en: 'C4', tr: 'C4' }, type: 'cost' },
+      { name: { en: 'C5', tr: 'C5' }, type: 'cost' },
+      { name: { en: 'C6', tr: 'C6' }, type: 'benefit' },
+      { name: { en: 'C7', tr: 'C7' }, type: 'benefit' },
+      { name: { en: 'C8', tr: 'C8' }, type: 'cost' },
+      { name: { en: 'C9', tr: 'C9' }, type: 'cost' },
+      { name: { en: 'C10', tr: 'C10' }, type: 'cost' },
+      { name: { en: 'C11', tr: 'C11' }, type: 'cost' },
+    ],
+    matrix: [
+      [125, 866, 9.81, 218, 1.41, 542, 483, 23, 1.5, 1, 1],
+      [11980, 900, 11.45, 189, 1.45, 452, 303, 12, 1.5, 6, 6],
+      [31054, 883, 9.86, 172, 1.82, 341, 311, 0, 0, 3, 3],
+      [28219, 840, 10.38, 171, 1.95, 339, 318, 0, 0, 3, 3],
+      [31579, 903, 10.74, 165, 1.7, 312, 281, 0, 0, 5, 5],
+      [39364, 922, 13.87, 167, 1.65, 287, 269, 0, 0, 8, 7],
+      [125, 769, 9.33, 182, 1.64, 458, 180, 0, 1.5, 1, 1],
+      [8075, 896, 9.82, 172, 1.7, 408, 121, 0, 1.5, 6, 6],
+      [3089, 770, 9.39, 177, 1.9, 430, 228, 0, 1, 2, 2],
+      [6449, 766, 7.22, 172, 1.65, 401, 157, 0, 1, 4, 4],
+      [12074, 897, 10.61, 169, 1.65, 378, 162, 0, 1, 7, 6],
+    ],
+    weights: [0.16, 0.033, 0.033, 0.097, 0.097, 0.16, 0.097, 0.16, 0.033, 0.033, 0.097],
+    published: [
+      { label: 'electre-iii.descending', values: [9, 10, 5, 2, 5, 11, 3, 5, 1, 4, 5], decimals: 0 },
+      { label: 'electre-iii.ascending', values: [1, 6, 8, 4, 6, 11, 1, 10, 3, 5, 8], decimals: 0 },
+    ],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

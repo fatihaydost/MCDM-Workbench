@@ -8,6 +8,7 @@ import { codas } from './codas'
 import { copras } from './copras'
 import { critic } from './critic'
 import { edas } from './edas'
+import { electreIII } from './electre-iii'
 import { entropy } from './entropy'
 import { equal } from './equal'
 import { lopcow } from './lopcow'
@@ -62,6 +63,7 @@ export const methodViews: Readonly<Views> = {
   aras,
   codas,
   'promethee-ii': prometheeII,
+  'electre-iii': electreIII,
 }
 
 const ids = Object.keys(methodViews) as ViewId[]

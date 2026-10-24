@@ -128,17 +128,17 @@ const makeConsistentBwmJudgements = () => {
   return judgementsFromBwm(3, 0, 2, [1, 2, 4], [4, 2, 1])
 }
 
-describe('Registry Invariants (all 23 methods)', () => {
-  it('lists exactly 10 weighting and 13 ranking methods with unique ids', () => {
+describe('Registry Invariants (all 24 methods)', () => {
+  it('lists exactly 10 weighting and 14 ranking methods with unique ids', () => {
     expect(WEIGHTING_IDS).toHaveLength(10)
-    expect(RANKING_IDS).toHaveLength(13)
+    expect(RANKING_IDS).toHaveLength(14)
     expect(listMethods('weighting')).toHaveLength(10)
-    expect(listMethods('ranking')).toHaveLength(13)
-    expect(listMethods()).toHaveLength(23)
+    expect(listMethods('ranking')).toHaveLength(14)
+    expect(listMethods()).toHaveLength(24)
 
     const allIds = listMethods().map((m) => m.id)
     const uniqueIds = new Set(allIds)
-    expect(uniqueIds.size).toBe(23)
+    expect(uniqueIds.size).toBe(24)
 
     for (const id of WEIGHTING_IDS) {
       expect(getWeightingMethod(id)?.id).toBe(id)

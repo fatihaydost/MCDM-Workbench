@@ -32,7 +32,8 @@
       "moora": "MOORA vektör normalize fayda oranlarını toplar ve maliyet oranlarını çıkarır; bu yüzden Öklid ölçeğinde güçlü yanlar zayıflığı doğrusal olarak telafi eder.",
       "aras": "ARAS, optimal satırın da katıldığı ağırlıklı sütun paylarını toplar; bu yüzden güçlü yanlar bir zayıflığı tamamen telafi eder.",
       "codas": "CODAS her çift için en kötü ağırlıklı değere Öklid ve Taxicab uzaklığını ölçer, bu yüzden en kötü değerin çok üstünde olan tek bir kriter, birkaç küçük farktan daha fazla Öklid uzaklığı kazandırır.",
-      "promethee-ii": "PROMETHEE II alternatifleri 1 ile sınırlı bir tercih fonksiyonuyla ikişer ikişer karşılaştırır; bir farkın ne kadar sayılacağı seçilen tercih eğrisine bağlıdır."
+      "promethee-ii": "PROMETHEE II alternatifleri 1 ile sınırlı bir tercih fonksiyonuyla ikişer ikişer karşılaştırır; bir farkın ne kadar sayılacağı seçilen tercih eğrisine bağlıdır.",
+      "electre-iii": "ELECTRE III farksızlık, tercih ve veto eşikleriyle bulanık bir geçiş güvenilirlik matrisi kurar; ardından azalan ve artan ön-sıralamaları damıtır."
     },
     "unanimous": "{{n}} yöntemin hepsi {{a}} alternatifini {{b}} alternatifinin üstüne koyuyor.",
     "crossings": "Başka bir çifti görmek için grafikte bir kesişim seçin.",

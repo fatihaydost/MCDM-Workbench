@@ -79,7 +79,14 @@ Write $\Delta_j(a,b)$ for the advantage of b over a on criterion j: $g_j(b) - g_
 
 ## Implementation notes
 - pyDecision: `pyDecision.algorithm.electre_iii(dataset, P, Q, V, W, graph)` → `(global_concordance, credibility, rank_D, rank_A, rank_M, rank_P)`; constant thresholds, benefit-only (negate costs), s(λ) = 0.3 − 0.15·λ_max inside `qualification`.
-- Our TypeScript choices: thresholds as `{abs}` or `{rel, ref: "direct"|"inverse"}`; α, β configurable with the defaults above; `s_argument` setting (`sigma_ab` default); full-precision σ; return both pre-orders, the final P/I/R matrix and the list of incomparable pairs; an optional clearly-labelled "net credibility" complete ranking.
+- Our TypeScript choices:
+  - Interactive `thresholdPreset?: 'standard' | 'strict' | 'veto'` (default `'standard'`) derived from each criterion's column range $\text{range}_j = \max_i x_{ij} - \min_i x_{ij}$:
+    - `'standard'`: $q_j = 0.10 \cdot \text{range}_j$, $p_j = 0.25 \cdot \text{range}_j$, $v_j = \text{null}$
+    - `'strict'`: $q_j = 0.05 \cdot \text{range}_j$, $p_j = 0.15 \cdot \text{range}_j$, $v_j = \text{null}$
+    - `'veto'`: $q_j = 0.10 \cdot \text{range}_j$, $p_j = 0.25 \cdot \text{range}_j$, $v_j = 0.60 \cdot \text{range}_j$
+  - Programmatic per-criterion thresholds `ThresholdSpec = number | { abs: number } | { rel: number; ref?: 'direct' | 'inverse' }` via `q`, `p`, `v`, plus configurable distillation parameters `alpha` (default `0.30`) and `beta` (default `-0.15`).
+  - Full-precision $\sigma(a,b)$; `electreIIIDistill` returns 1-based competition ranks `descending` ($r_D$) and `ascending` ($r_A$), equivalence classes `descendingClasses` and `ascendingClasses`, and `incomparablePairs` (`electreIIIIncomparablePairs`).
+  - Steps emitted: `electre-iii.concordance`, `electre-iii.credibility`, `electre-iii.descending`, `electre-iii.ascending`, `electre-iii.netCredibility` ($\Phi(a) = \frac{1}{m-1}\sum_{b \neq a} (\sigma(a,b) - \sigma(b,a))$). Overall `ranking` is `rankScores(meanRank, 'asc')` where $\bar{r}(a) = \frac{1}{2}(r_D(a) + r_A(a))$.
 - Validate q ≤ p ≤ v per criterion and warn when p > column range (criterion can never express strict preference).
 
 ## Sources

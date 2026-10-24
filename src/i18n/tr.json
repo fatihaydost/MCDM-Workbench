@@ -155,6 +155,9 @@
       },
       "promethee-ii": {
         "claim": "Tablo 13, 15, 16 ve 18 içindeki π, φ⁺, φ⁻, φ değerleri ve altı sıranın tamamı {{citation}} ile {{decimals}} basamağa kadar aynı; 1986 hidroelektrik örneği de örtüşüyor."
+      },
+      "electre-iii": {
+        "claim": "Tablo 3 içindeki 121 güvenilirlik değerinin tamamı ve iki damıtma zinciri {{citation}} ile 0,005 fark içinde örtüşüyor."
       }
     },
     "catalogue": {
@@ -254,7 +257,8 @@
       "moora": "MOORA",
       "aras": "ARAS",
       "codas": "CODAS",
-      "promethee-ii": "PROMETHEE II"
+      "promethee-ii": "PROMETHEE II",
+      "electre-iii": "ELECTRE III"
     },
     "params": {
       "entropy": {
@@ -371,6 +375,24 @@
           "usual": "olağan",
           "level": "kademeli",
           "gaussian": "Gauss"
+        }
+      },
+      "electre-iii": {
+        "thresholdPreset": "Eşik ön ayarı",
+        "thresholdPresetOptions": {
+          "standard": "Standart (q = %10, p = %25 açıklık, vetosuz)",
+          "strict": "Sıkı (q = %5, p = %15 açıklık, vetosuz)",
+          "veto": "Vetolu (q = %10, p = %25, v = %60 açıklık)"
+        },
+        "thresholdPresetHints": {
+          "standard": "Sütun açıklığının %10'una kadar farklar farksız sayılır, %25'ine kadar kısmi tercih oluşturur, üstü vetosuz tam tercih verir.",
+          "strict": "Her sütun açıklığında vetosuz daha dar farksızlık (%5) ve tercih (%15) bölgeleri kullanır.",
+          "veto": "Sütun açıklığının %60'ına bir veto eşiği ekler; tek bir kriterdeki büyük gerilik güvenilirlik σ(a, b) değerini 0'a indirir."
+        },
+        "thresholdPresetVariant": {
+          "standard": "standart",
+          "strict": "sıkı",
+          "veto": "vetolu"
         }
       }
     },
@@ -526,7 +548,8 @@
         "moora": "Her değeri sütununun Öklid uzunluğuna böler, ağırlıklı fayda oranlarını toplar ve ağırlıklı maliyet oranlarını çıkarır; y büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
         "aras": "Başa bir optimal satır ekler, her alternatifin m + 1 satırlık sütun toplamlarındaki ağırlıklı paylarını toplar ve optimal satırın toplamına böler; K büyüdükçe sıra yükselir.",
         "codas": "Her alternatifi negatif-ideal noktaya Öklid ve Taxicab uzaklıklarıyla bütün çiftler üzerinden karşılaştırarak puanlar; yüksek H daha iyidir.",
-        "promethee-ii": "Her alternatif çiftini her kriterde bir tercih fonksiyonuyla karşılaştırır ve pozitif akıştan negatif akışı çıkarır; φ büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir."
+        "promethee-ii": "Her alternatif çiftini her kriterde bir tercih fonksiyonuyla karşılaştırır ve pozitif akıştan negatif akışı çıkarır; φ büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
+        "electre-iii": "Her çifti farksızlık, tercih ve veto eşikleriyle sınayarak bulanık güvenilirlik σ(a, b) matrisini kurar, azalan ve artan damıtma sıralarını çıkarır; net güvenilirlik Φ büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir."
       },
       "columns": {
         "rank": "Sıra",
@@ -548,7 +571,9 @@
         "euclidean": "Öklid E",
         "taxicab": "Taxicab T",
         "positiveFlow": "Pozitif akış φ⁺",
-        "negativeFlow": "Negatif akış φ⁻"
+        "negativeFlow": "Negatif akış φ⁻",
+        "descendingRank": "Azalan sıra r↓",
+        "ascendingRank": "Artan sıra r↑"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -616,6 +641,11 @@
           "name": "Net akış φ",
           "title": "PROMETHEE II net akışı φ",
           "symbol": "φ"
+        },
+        "electre-iii": {
+          "name": "Net güvenilirlik Φ",
+          "title": "ELECTRE III net güvenilirliği Φ",
+          "symbol": "Φ"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -874,6 +904,13 @@
         "positiveFlow": "Pozitif akış φ⁺",
         "negativeFlow": "Negatif akış φ⁻",
         "netFlow": "Net akış φ"
+      },
+      "electre-iii": {
+        "concordance": "Uyum matrisi C",
+        "credibility": "Güvenilirlik matrisi σ",
+        "descending": "Azalan sıra r↓",
+        "ascending": "Artan sıra r↑",
+        "netCredibility": "Net güvenilirlik Φ"
       }
     },
     "issues": {
@@ -1103,6 +1140,11 @@
         "title": "Pozitif akış φ⁺, negatif akış φ⁻ ve net akış φ",
         "caption": "Sol: ikili tercih derecelerinden pozitif akış φ⁺ (üst) ve negatif akış φ⁻ (alt). Sağ: sıfır etrafında net üstünlük akışı φ = φ⁺ - φ⁻.",
         "row": "{{alternative}}: φ⁺ = {{pos}}, φ⁻ = {{neg}}, φ = {{score}}"
+      },
+      "electre-iii": {
+        "title": "Azalan sıra r↓, artan sıra r↑ ve net güvenilirlik Φ",
+        "caption": "Sol: azalan sıra r↓ (üst, düşük daha iyi) ve artan sıra r↑ (alt, düşük daha iyi). Sağ: sıfır etrafında net güvenilirlik akışı Φ.",
+        "row": "{{alternative}}: r↓ = {{pos}}, r↑ = {{neg}}, Φ = {{score}}"
       }
     },
     "flow": {
@@ -1233,6 +1275,12 @@
         "preferenceMatrix": "İkili π",
         "positiveFlow": "φ⁺ ve φ⁻",
         "netFlow": "φ"
+      },
+      "electre-iii": {
+        "concordance": "Uyum C",
+        "credibility": "Güvenilirlik σ",
+        "descending": "r↓ ve r↑",
+        "netCredibility": "Net Φ"
       }
     },
     "pipeline": {
@@ -1325,7 +1373,8 @@
       "aras": "ARAS",
       "codas": "CODAS",
       "roc": "ROC",
-      "promethee-ii": "PROMETHEE II"
+      "promethee-ii": "PROMETHEE II",
+      "electre-iii": "ELECTRE III"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1396,7 +1445,8 @@
         "aras": "Her ağırlıklı pay toplamını bir optimal satırla oranlar.",
         "codas": "Negatif-ideal noktaya Öklid ve Taxicab uzaklıklarını ikili karşılaştırmada birleştirir.",
         "roc": "Kriterlerin önem sırasından ağırlıklar.",
-        "promethee-ii": "İkili tercih fonksiyonları ve pozitif eksi negatif üstünlük akışları."
+        "promethee-ii": "İkili tercih fonksiyonları ve pozitif eksi negatif üstünlük akışları.",
+        "electre-iii": "Farksızlık, tercih ve veto eşikli sözde kriterler, bulanık güvenilirlik ve damıtma."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1713,6 +1763,15 @@
             "s2": "Negatif akış φ⁻: ikili tercih derecelerinin sütun ortalaması; diğerlerinin her modele ortalama üstünlüğünü gösterir.",
             "s3": "Net akış φ = φ⁺ - φ⁻: sıfır etrafında pozitif eksi negatif akış; en yüksek φ birinci sırada yer alır."
           }
+        },
+        "electre-iii": {
+          "title": "Azalan damıtma, artan damıtma ve net güvenilirlik",
+          "caption": "Her atık işleme seçeneği bulanık güvenilirlik σ(a, b) ile karşılaştırılır: azalan damıtma r↓ yukarıdan aşağıya seçer, artan damıtma r↑ aşağıdan yukarıya eler, Φ ise net güvenilirliği gösterir.",
+          "steps": {
+            "s1": "Azalan sıra r↓: en yüksek güvenilirlik kesiminden aşağıya doğru yinelemeli nitelik kazandırma, en güçlü seçenekleri önce seçer.",
+            "s2": "Artan sıra r↑: en zayıf seçeneklerden yukarıya doğru yinelemeli eleme; r↓ ile r↑ çeliştiğinde çift karşılaştırılamaz olur.",
+            "s3": "Net güvenilirlik Φ: sıfır etrafında çıkan eksi giren güvenilirlik; seçenekler ortalama damıtma sırası (r↓ + r↑) / 2 ile dizilir, eşitlikleri Φ bozar."
+          }
         }
       }
     }
@@ -1896,6 +1955,13 @@
       "positiveFlow": "Pozitif (çıkan) akış φ⁺: π matrisinin diğer tüm alternatifler üzerindeki satır ortalaması; her alternatifin diğerlerine ortalama üstünlüğünü ölçer.",
       "negativeFlow": "Negatif (giren) akış φ⁻: π matrisinin diğer tüm alternatifler üzerindeki sütun ortalaması; diğerlerinin her alternatife ortalama üstünlüğünü ölçer.",
       "netFlow": "Net üstünlük akışı φ = φ⁺ - φ⁻: yüksek değer daha üstte yer alır ve net akışların toplamı 0 olur."
+    },
+    "electre-iii": {
+      "concordance": "Uyum matrisi C: her sıralı (a, b) çifti için farksızlık ve tercih eşiklerinden bulunan tek kriterli uyum dereceleri c_j(a, b) değerlerinin ağırlıklı toplamı.",
+      "credibility": "Güvenilirlik matrisi σ: uyum C(a, b) değerinin, uyumsuzluğu d_j(a, b) > C(a, b) olan kriterlerce zayıflatılmış hali; veto eşiğine ulaşan gerilik σ(a, b) değerini 0'a indirir.",
+      "descending": "Azalan damıtma sırası r↓: güvenilirlik matrisi üzerinde yukarıdan aşağıya nitelik kazandırmadan elde edilen sıra.",
+      "ascending": "Artan damıtma sırası r↑: güvenilirlik matrisi üzerinde aşağıdan yukarıya elemeden elde edilen sıra.",
+      "netCredibility": "Net güvenilirlik akışı Φ: diğer tüm alternatifler üzerinden çıkan eksi giren ortalama güvenilirlik."
     }
   },
   "validation": {

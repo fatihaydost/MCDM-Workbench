@@ -24,6 +24,15 @@ export {
   type PrometheeParams,
   type PrometheePreferenceFunction,
 } from './methods/promethee-ii'
+export {
+  electreIII,
+  electreIIIDistill,
+  electreIIIIncomparablePairs,
+  type ElectreIIIDistillationResult,
+  type ElectreIIIParams,
+  type ElectreIIIThresholdPreset,
+  type ThresholdSpec,
+} from './methods/electre-iii'
 export { roc, strictRankWeights, type RocFormula, type RocParams } from './methods/roc'
 export { sd } from './methods/sd'
 export { saw, type SawNormalization, type SawParams } from './methods/saw'
