@@ -1,0 +1,25 @@
+{
+  "id": "ahp-doguc-2022-recruitment",
+  "source": "Doğuç 2022, Ekonomi, İşletme ve Maliye Araştırmaları Dergisi 4(2):126-145, DOI 10.38009/ekimad.1142952, Tables 4-7",
+  "criteria": ["Bilisim/Teknik Bilgi", "Is Tecrubesi", "Egitim Duzeyi", "Yetenek/Kisilik", "Performans"],
+  "upper": [0.3333333333333333, 3.0, 0.5, 0.3333333333333333, 4.0, 3.0, 0.5, 0.5, 0.3333333333333333, 0.5],
+  "published": {
+    "weights_additive": [0.1239, 0.3001, 0.0746, 0.1567, 0.3447],
+    "lambda_approx": 5.2693,
+    "ci": 0.0673,
+    "cr": 0.0601
+  },
+  "expected": {
+    "weights_eigenvector": [0.1201443, 0.3024408, 0.07259, 0.1549524, 0.3498726],
+    "weights_geometric": [0.1189219, 0.3033519, 0.0723479, 0.1569184, 0.3484598],
+    "weights_additive": [0.1238894, 0.3001023, 0.0745791, 0.1567191, 0.3447101],
+    "lambda_max": 5.2672363,
+    "ci": 0.0668091,
+    "ri": 1.12,
+    "cr": 0.059651,
+    "worst_pair": [0, 2],
+    "epsilon_max": 1.8125708,
+    "suggested": 2.0
+  },
+  "tolerance_vs_published": 0.00005
+}

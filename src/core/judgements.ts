@@ -13,6 +13,22 @@ export function toScale(v: unknown): Ratio | null {
   return SCALE.find((s) => Math.abs(s - v) < 1e-9) ?? null
 }
 
+/** Closest Saaty scale value to a positive ratio (log-distance so 1 / v maps to the reciprocal of v). */
+export function nearestScale(v: number): Ratio {
+  if (!(v > 0) || !Number.isFinite(v)) return 1
+  const target = Math.log(v)
+  let best = 1
+  let bestDist = Math.abs(target)
+  for (const s of SCALE) {
+    const dist = Math.abs(Math.log(s) - target)
+    if (dist < bestDist - 1e-12 || (Math.abs(dist - bestDist) <= 1e-12 && Math.abs(Math.log(s)) < Math.abs(Math.log(best)))) {
+      best = s
+      bestDist = dist
+    }
+  }
+  return best
+}
+
 const reciprocal = (v: Ratio): Ratio => toScale(1 / v) ?? 1 / v
 
 export function emptyJudgements(n: number): Judgements {
@@ -76,5 +92,18 @@ export function judgementsFromBwm(
     if (k !== best) j = setPair(j, best, k, bestToOthers[k]!)
     if (k !== worst) j = setPair(j, k, worst, othersToWorst[k]!)
   }
+  return j
+}
+
+/** Upper-triangle row-by-row values (length n(n - 1) / 2; null = unanswered) as pairwise answers. */
+export function judgementsFromUpper(n: number, upper: readonly (number | null | undefined)[]): Judgements {
+  let j = emptyJudgements(n)
+  let at = 0
+  for (let i = 0; i < n; i++)
+    for (let k = i + 1; k < n; k++) {
+      const raw = upper[at++]
+      const v = raw === null || raw === undefined ? null : (toScale(raw) ?? raw)
+      if (v !== null) j = setPair(j, i, k, v)
+    }
   return j
 }

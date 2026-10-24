@@ -131,6 +131,9 @@
       },
       "bwm": {
         "claim": "Doğrusal BWM ağırlıkları {{citation}} ile {{decimals}} basamağa kadar aynı."
+      },
+      "ahp": {
+        "claim": "Özvektör ağırlıkları ve tutarlılık oranları {{citation}} ile {{decimals}} basamağa kadar aynı."
       }
     },
     "catalogue": {
@@ -210,7 +213,8 @@
       "manual": "Elle",
       "sd": "SD",
       "merec": "MEREC",
-      "bwm": "BWM"
+      "bwm": "BWM",
+      "ahp": "AHP"
     },
     "rankingMethod": {
       "label": "Sıralama yöntemi",
@@ -278,6 +282,21 @@
           "max": "1: yalnız S"
         },
         "lambdaVariant": "λ = {{value}}"
+      },
+      "ahp": {
+        "aggregation": "Öncelik vektörü",
+        "aggregationOptions": {
+          "eigenvector": "Temel özvektör",
+          "geometric": "Geometrik ortalama (LLSM)"
+        },
+        "aggregationHints": {
+          "eigenvector": "Saaty'nin sağ temel özvektörü (A w = λmaks w); özgün AHP literatürüyle örtüşür.",
+          "geometric": "Normalize satır geometrik ortalamaları; 3 kriterde özvektörle aynıdır ve kapalı biçimde çözülür."
+        },
+        "aggregationVariant": {
+          "eigenvector": "özvektör",
+          "geometric": "geometrik ortalama"
+        }
       }
     },
     "example": {
@@ -377,7 +396,8 @@
         "manual": "Ağırlıkları kendiniz girin. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli.",
         "sd": "Her kriterin değerlerinin alternatifler arasında ne kadar yayıldığına bakan nesnel ağırlıklar.",
         "merec": "Ağırlığı, kriteri çıkarmanın neyi değiştirdiğinden bulur. Her değer 0'dan büyük olmalı.",
-        "bwm": "En önemli ve en önemsiz kriteri seçin, diğer her kriteri bu ikisiyle karşılaştırın (1‑9); 2n - 3 yanıt ağırlıkları verir."
+        "bwm": "En önemli ve en önemsiz kriteri seçin, diğer her kriteri bu ikisiyle karşılaştırın (1‑9); 2n - 3 yanıt ağırlıkları verir.",
+        "ahp": "Kriterleri 1‑9 ölçeğinde ikişer ikişer karşılaştırın; tüm n(n - 1) / 2 yanıt ağırlıkları ve tutarlılık oranı CR'yi verir."
       },
       "columns": {
         "criterion": "Kriter",
@@ -673,6 +693,13 @@
         "consistencyLocal": "Tutarlılık CR^I_j",
         "xi": "Sapma ξ",
         "weights": "Ağırlıklar w"
+      },
+      "ahp": {
+        "pairwiseMatrix": "Karşılaştırma matrisi A",
+        "lambdaMax": "Temel özdeğer λmaks",
+        "consistencyIndex": "Tutarlılık indeksi CI",
+        "consistencyRatio": "Tutarlılık oranı CR",
+        "weights": "Ağırlıklar w"
       }
     },
     "issues": {
@@ -842,10 +869,22 @@
         "best": "En iyi",
         "worst": "En kötü",
         "flagged": "En az uyan"
+      },
+      "ahp": {
+        "title": "Karşılaştırmalarınız ve uydurulan ağırlıklar",
+        "matrix": "İkili oranlar a_ik",
+        "fitted": "Uydurulan w_i / w_k",
+        "weight": "Ağırlık",
+        "flagged": "En büyük fark"
       }
     },
     "flow": {
       "nav": "Hesap adımları",
+      "ahp": {
+        "pairwiseMatrix": "Matris A",
+        "lambdaMax": "Tutarlılık",
+        "weights": "Ağırlıklar"
+      },
       "critic": {
         "normalized": "Normalize et",
         "sigma": "Kontrast",
@@ -1009,7 +1048,8 @@
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
-      "bwm": "BWM"
+      "bwm": "BWM",
+      "ahp": "AHP"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1072,7 +1112,8 @@
         "marcos": "Hayali bir ideal ve anti-ideale göre ölçer.",
         "cocoso": "Bir toplamın ve bir üs toplamının üç okuması, birleşik.",
         "mabac": "Her kriterde bir sınırın üstüne ya da altına uzaklık.",
-        "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar."
+        "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar.",
+        "ahp": "Her kriter çiftini karşılaştırarak ağırlık."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1296,6 +1337,20 @@
             "s3": "En kötüyle ilgili yanıtlar kriteri ikinci kez yerleştirir. İki yer farklıysa yanıtlarınız çelişir; işaretli olan en az uyandır.",
             "s4": "BWM bu aralıkların en büyüğünü olabildiğince küçük tutan ağırlıkları seçer."
           }
+        },
+        "ahp": {
+          "title": "Oranlar matrisi ve ona uyan tek vektör",
+          "caption": "Üst hücreler karşılaştırmaları, alt hücreler terslerini tutar; sağdaki çubuklar özvektör ağırlıklarını gösterir (CR {{cr}}, eşik {{threshold}}).",
+          "matrix": "İkili oranlar a_ik",
+          "fitted": "Uydurulan w_i / w_k",
+          "weight": "Ağırlık",
+          "flagged": "En büyük fark",
+          "steps": {
+            "s1": "Her hücre satırın sütundan kaç kat önemli olduğunu yanıtlar; üst yarıyı siz doldurursunuz, alt yarı onun aynasıdır.",
+            "s2": "Yanıtlar tam tutarlı olsaydı her hücre w_satır / w_sütun olurdu: tek bir ağırlık takımı bütün tabloyu açıklardı.",
+            "s3": "AHP tabloya en iyi uyan ağırlıkları (temel özvektör) bulur ve çubuk olarak çizer.",
+            "s4": "Bir yanıt ile uydurulan oran en çok nerede ayrışıyorsa hücre işaretlenir; tutarlılık oranı CR tüm ayrışmaları 0,10 sınırına göre özetler."
+          }
         }
       }
     }
@@ -1424,6 +1479,13 @@
       "consistencyLocal": "Kriter başına tutarlılık: a_Bj ile a_jW çarpımı a_BW değerinden ne kadar uzak.",
       "xi": "Sapma: yanıtlarla uyarlanan ağırlıklar arasındaki en büyük fark.",
       "weights": "BWM ağırlıkları: doğrusal model, kapalı biçimde çözülür, toplamı 1."
+    },
+    "ahp": {
+      "pairwiseMatrix": "İkili karşılaştırma matrisi: üst üçgende yanıtlarınız, alt üçgende tersleri ve köşegende 1 yer alır.",
+      "lambdaMax": "Temel özdeğer λmaks: ağırlıklı satır toplamı (Aw)_i değerinin ilgili ağırlık w_i değerine oranlarının ortalaması.",
+      "consistencyIndex": "Tutarlılık indeksi CI = (λmaks - n) / (n - 1): karşılaştırmalar tam tutarlı olduğunda 0'dır.",
+      "consistencyRatio": "Tutarlılık oranı CR = CI / RI_n: CI değerini Saaty'nin rastgele indeksiyle karşılaştırır; 0,10'a kadar olağan sınırdır.",
+      "weights": "AHP ağırlıkları: temel özvektör ya da satır geometrik ortalamasından elde edilen normalize öncelik vektörü."
     }
   },
   "validation": {
@@ -1508,6 +1570,10 @@
     "bwm": {
       "inconsistent": "{{criterion}} hakkındaki yanıtlarınız en az tutarlı olanlar; ağırlıklar yine de hesaplanır.",
       "threshold-approximate": "9'dan fazla kriterde tutarlılık eşiği yaklaşıktır (9 kriterlik değer kullanılır)."
+    },
+    "ahp": {
+      "inconsistent": "Tutarlılık oranı CR 0,10 veya üzerinde; ağırlıklar yine de hesaplanır, ancak işaretlenen çifti kontrol edin.",
+      "many-criteria": "8 veya daha fazla kriterde AHP en az 28 karşılaştırma ister ve tutarlılığı korumak zorlaşır; daha az soru için BWM'yi düşünebilirsiniz."
     }
   }
 }

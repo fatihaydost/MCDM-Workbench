@@ -75,9 +75,9 @@ describe('rankScores', () => {
 
 describe('registry', () => {
   it('lists methods by id and kind', () => {
-    expect(listMethods().map((m) => m.id)).toEqual(['critic', 'entropy', 'sd', 'merec', 'equal', 'bwm', 'topsis', 'saw', 'vikor', 'edas', 'waspas', 'copras', 'marcos', 'cocoso', 'mabac'])
+    expect(listMethods().map((m) => m.id)).toEqual(['critic', 'entropy', 'sd', 'merec', 'equal', 'bwm', 'ahp', 'topsis', 'saw', 'vikor', 'edas', 'waspas', 'copras', 'marcos', 'cocoso', 'mabac'])
     expect(listMethods('ranking').map((m) => m.id)).toEqual(['topsis', 'saw', 'vikor', 'edas', 'waspas', 'copras', 'marcos', 'cocoso', 'mabac'])
-    expect(listMethods('weighting').map((m) => m.id)).toEqual(['critic', 'entropy', 'sd', 'merec', 'equal', 'bwm'])
+    expect(listMethods('weighting').map((m) => m.id)).toEqual(['critic', 'entropy', 'sd', 'merec', 'equal', 'bwm', 'ahp'])
     expect(getMethod('topsis')?.kind).toBe('ranking')
     expect(getMethod('nope')).toBeUndefined()
   })

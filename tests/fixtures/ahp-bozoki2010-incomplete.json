@@ -1,0 +1,25 @@
+{
+  "id": "ahp-bozoki-2010-incomplete",
+  "source": "Bozóki, Fülöp & Rónyai 2010, Math. Comput. Modelling 52:318-333, DOI 10.1016/j.mcm.2010.02.047, Example 2 (Eq. 32-33) and Section 5",
+  "criteria": ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8"],
+  "upper": [
+    5.0, 3.0, 7.0, 6.0, 6.0, 0.3333333333333333, 0.25,
+    null, 5.0, null, 3.0, null, 0.14285714285714285,
+    null, 3.0, null, 6.0, null,
+    null, 0.25, null, 0.125,
+    null, 0.2, null,
+    null, 0.16666666666666666,
+    null
+  ],
+  "published": {
+    "weights_llsm": [0.1770, 0.0676, 0.1770, 0.0197, 0.0367, 0.0415, 0.1422, 0.3385],
+    "lambda_max_em_completion": 9.2981,
+    "weights_em_completion": [0.1894, 0.0567, 0.2116, 0.0175, 0.0319, 0.0354, 0.1509, 0.3066]
+  },
+  "expected": {
+    "weights_llsm": [0.17695, 0.0676431, 0.17695, 0.0196777, 0.0367073, 0.041452, 0.1421667, 0.3384532],
+    "known_pairs": 16,
+    "total_pairs": 28
+  },
+  "tolerance_vs_published": 0.00005
+}
