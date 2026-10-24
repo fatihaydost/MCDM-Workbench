@@ -2,6 +2,7 @@
  * Pure data for the method illustrations. Everything is read from the core's own steps, so a
  * picture can never disagree with the worked calculation. No DOM.
  */
+import { aras, type ArasParams } from '../../core/methods/aras'
 import { copras } from '../../core/methods/copras'
 import { critic } from '../../core/methods/critic'
 import { edas } from '../../core/methods/edas'
@@ -736,6 +737,43 @@ export function marcosParts(problem: Problem, weights: readonly number[]): Marco
     sAi: scalar('marcos.sAi'),
     c: result.diagnostics!.c!,
     saw: saw.compute(problem, [...weights], { normalization: 'linearMax' }).scores,
+    order: result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b),
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// ARAS
+// ---------------------------------------------------------------------------------------------
+
+export type ArasParts = {
+  result: RankingResult
+  /** Optimal benchmark row x_{0j} (length n). */
+  optimalRow: number[]
+  /** Optimal benchmark score S_0 = \sum_j w_j \bar{x}_{0j}. */
+  optimalScore: number
+  /** Optimality function S_i = \sum_j \hat{x}_{ij} for each alternative. */
+  optimality: number[]
+  /** Utility degree K_i = S_i / S_0 (= result.scores). */
+  scores: number[]
+  /** Alternatives in rank order (ties keep input order). */
+  order: number[]
+}
+
+/** The core's ARAS result for its picture, or null when ARAS cannot run on the data. */
+export function arasParts(problem: Problem, weights: readonly number[], params: ArasParams = {}): ArasParts | null {
+  let result: RankingResult
+  try {
+    result = aras.compute(problem, [...weights], params)
+  } catch {
+    return null
+  }
+  const optimalScore = result.steps.find((x) => x.key === 'aras.optimalScore')!.scalar!
+  return {
+    result,
+    optimalRow: stepVector(result.steps, 'aras.optimalRow'),
+    optimalScore,
+    optimality: stepVector(result.steps, 'aras.optimality'),
+    scores: result.scores,
     order: result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b),
   }
 }

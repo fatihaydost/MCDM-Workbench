@@ -131,6 +131,9 @@
       },
       "bwm": {
         "claim": "Doğrusal BWM ağırlıkları {{citation}} ile {{decimals}} basamağa kadar aynı."
+      },
+      "aras": {
+        "claim": "Tablo 11'deki S₀, S, K ve 11 sıranın tamamı {{citation}} ile {{decimals}} basamağa kadar aynı; THY'nin yinelenen satırı düzeltilince Tablo 9 ve 10 da aynı."
       }
     },
     "catalogue": {
@@ -222,7 +225,8 @@
       "copras": "COPRAS",
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
-      "mabac": "MABAC"
+      "mabac": "MABAC",
+      "aras": "ARAS"
     },
     "params": {
       "entropy": {
@@ -416,7 +420,8 @@
         "copras": "Her alternatifin fayda kriterlerindeki ağırlıklı payını toplar, maliyet payı küçüldükçe büyüyen bir puan ekler; Q büyüdükçe sıra yükselir.",
         "marcos": "Her ağırlıklı toplamı hayali bir ideal ve anti-ideal satırla ölçer; f(K) büyüdükçe sıra yükselir, sıra SAW (Doğrusal) ile aynıdır.",
         "cocoso": "Ağırlıklı toplam S ile üs toplamı P'yi üç biçimde okuyup birleştirir; k büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
-        "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir."
+        "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir.",
+        "aras": "Başa bir optimal satır ekler, her alternatifin m + 1 satırlık sütun toplamlarındaki ağırlıklı paylarını toplar ve optimal satırın toplamına böler; K büyüdükçe sıra yükselir."
       },
       "columns": {
         "rank": "Sıra",
@@ -431,7 +436,8 @@
         "wpm": "Çarpım Q2",
         "utility": "Fayda derecesi N (%)",
         "weightedSum": "Ağırlıklı toplam S",
-        "powerSum": "Üs toplamı P"
+        "powerSum": "Üs toplamı P",
+        "arasOptimality": "Optimalite S"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -479,6 +485,11 @@
           "name": "Sınıra uzaklık S",
           "title": "MABAC sınıra uzaklık S",
           "symbol": "S"
+        },
+        "aras": {
+          "name": "Fayda derecesi K",
+          "title": "ARAS fayda derecesi K",
+          "symbol": "K"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -673,6 +684,14 @@
         "consistencyLocal": "Tutarlılık CR^I_j",
         "xi": "Sapma ξ",
         "weights": "Ağırlıklar w"
+      },
+      "aras": {
+        "optimalRow": "Optimal alternatif A₀",
+        "normalized": "A₀ dahil sütun payları x̄",
+        "weighted": "Ağırlıklı paylar x̂",
+        "optimalScore": "Optimal skor S₀",
+        "optimality": "Optimalite fonksiyonu S",
+        "utilityDegree": "Fayda derecesi K"
       }
     },
     "issues": {
@@ -842,6 +861,13 @@
         "best": "En iyi",
         "worst": "En kötü",
         "flagged": "En az uyan"
+      },
+      "aras": {
+        "title": "Optimal satırdaki pay",
+        "caption": "Kesikli satır A₀: her kriterin en iyi değeri, aynı m + 1 satırlık sütun toplamlarında normalize edilmiştir. Her çubuk S₀ ile karşılaştırılan S'dir; sağda K = S / S₀.",
+        "optimal": "Optimal A₀",
+        "bar": "{{alternative}}: S = {{total}}, S₀ = {{optimalTotal}}, K = {{score}}",
+        "readout": "{{alternative}}: S₀ = {{optimalTotal}} içinde S = {{total}}, K = {{score}}"
       }
     },
     "flow": {
@@ -925,6 +951,12 @@
         "border": "Sınır G",
         "distance": "Q",
         "scores": "S"
+      },
+      "aras": {
+        "optimalRow": "Optimal satır",
+        "normalized": "Paylar",
+        "optimalScore": "Toplamlar S",
+        "utilityDegree": "K"
       }
     },
     "pipeline": {
@@ -1009,7 +1041,8 @@
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
-      "bwm": "BWM"
+      "bwm": "BWM",
+      "aras": "ARAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1072,7 +1105,8 @@
         "marcos": "Hayali bir ideal ve anti-ideale göre ölçer.",
         "cocoso": "Bir toplamın ve bir üs toplamının üç okuması, birleşik.",
         "mabac": "Her kriterde bir sınırın üstüne ya da altına uzaklık.",
-        "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar."
+        "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar.",
+        "aras": "Her ağırlıklı pay toplamını bir optimal satırla oranlar."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1296,6 +1330,15 @@
             "s3": "En kötüyle ilgili yanıtlar kriteri ikinci kez yerleştirir. İki yer farklıysa yanıtlarınız çelişir; işaretli olan en az uyandır.",
             "s4": "BWM bu aralıkların en büyüğünü olabildiğince küçük tutan ağırlıkları seçer."
           }
+        },
+        "aras": {
+          "title": "Optimal satırdaki pay",
+          "caption": "Kesikli satır A₀: her kriterin en iyi değeri, aynı m + 1 satırlık sütun toplamlarında normalize edilmiştir. Her çubuk S₀ ile karşılaştırılan S'dir; sağda K = S / S₀.",
+          "steps": {
+            "s1": "Optimalite S: her çubuk bir alternatifin m + 1 satırlık sütun paylarının ağırlıklı toplamıdır.",
+            "s2": "Optimal satır A₀: sütunların en iyi değerleri aynı ölçekte kendi toplamı S₀ değerini alır.",
+            "s3": "Fayda derecesi K = S / S₀: her çubuk S₀ değerine bölünür, en yüksek K ilk sırada yer alır."
+          }
         }
       }
     }
@@ -1424,6 +1467,14 @@
       "consistencyLocal": "Kriter başına tutarlılık: a_Bj ile a_jW çarpımı a_BW değerinden ne kadar uzak.",
       "xi": "Sapma: yanıtlarla uyarlanan ağırlıklar arasındaki en büyük fark.",
       "weights": "BWM ağırlıkları: doğrusal model, kapalı biçimde çözülür, toplamı 1."
+    },
+    "aras": {
+      "optimalRow": "Optimal satır A₀: normalizasyondan önce başa eklenen, her kriterin en iyi değeri (fayda için en büyük, maliyet için en küçük).",
+      "normalized": "Normalize paylar x̄: maliyet kriterleri 1 / x ile ters çevrilir, ardından her değer m + 1 satırın (A₀ ve m alternatif) toplamına bölünür.",
+      "weighted": "Ağırlıklı paylar x̂ = w x̄: her normalize pay kriter ağırlığıyla çarpılır.",
+      "optimalScore": "Optimal skor S₀: optimal satır A₀ için ağırlıklı satır toplamı, tüm alternatiflerin kıyas noktası.",
+      "optimality": "Optimalite fonksiyonu S: her alternatifin ağırlıklı satır toplamı.",
+      "utilityDegree": "Fayda derecesi K = S / S₀: her alternatifin optimalitesinin optimal skora oranı. Değer büyüdükçe sıra yükselir."
     }
   },
   "validation": {

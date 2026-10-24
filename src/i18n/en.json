@@ -131,6 +131,9 @@
       },
       "bwm": {
         "claim": "Linear BWM weights match {{citation}} to {{decimals}} decimals."
+      },
+      "aras": {
+        "claim": "S₀, S, K and all 11 ranks of Table 11 match {{citation}} to {{decimals}} decimals, with Tables 9 and 10 once THY's reprinted row is corrected."
       }
     },
     "catalogue": {
@@ -222,7 +225,8 @@
       "copras": "COPRAS",
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
-      "mabac": "MABAC"
+      "mabac": "MABAC",
+      "aras": "ARAS"
     },
     "params": {
       "entropy": {
@@ -416,7 +420,8 @@
         "copras": "Adds up each alternative's weighted share of the benefit criteria plus a bonus that grows as its cost share shrinks; a higher Q is better.",
         "marcos": "Measures each weighted total against an imaginary ideal and anti-ideal row; a higher f(K) is better, in the same order as SAW (Linear).",
         "cocoso": "Reads a weighted sum S and a power sum P three ways and combines them; a higher k is better. Zeros and negative values are allowed.",
-        "mabac": "Adds up how far each alternative lies above or below a border, the geometric mean of every criterion; a higher S is better, in the same order as a min-max weighted sum. Zeros and negative values are allowed."
+        "mabac": "Adds up how far each alternative lies above or below a border, the geometric mean of every criterion; a higher S is better, in the same order as a min-max weighted sum. Zeros and negative values are allowed.",
+        "aras": "Prepends an optimal row, adds up each alternative's weighted shares of the m + 1 column totals and divides by the optimal row's total; a higher K is better."
       },
       "columns": {
         "rank": "Rank",
@@ -431,7 +436,8 @@
         "wpm": "Product Q2",
         "utility": "Utility degree N (%)",
         "weightedSum": "Weighted sum S",
-        "powerSum": "Power sum P"
+        "powerSum": "Power sum P",
+        "arasOptimality": "Optimality S"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -479,6 +485,11 @@
           "name": "Distance to border S",
           "title": "MABAC distance to border S",
           "symbol": "S"
+        },
+        "aras": {
+          "name": "Utility degree K",
+          "title": "ARAS utility degree K",
+          "symbol": "K"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -673,6 +684,14 @@
         "consistencyLocal": "Consistency CR^I_j",
         "xi": "Deviation ξ",
         "weights": "Weights w"
+      },
+      "aras": {
+        "optimalRow": "Optimal alternative A₀",
+        "normalized": "Shares with A₀ in the total x̄",
+        "weighted": "Weighted shares x̂",
+        "optimalScore": "Optimal score S₀",
+        "optimality": "Optimality function S",
+        "utilityDegree": "Utility degree K"
       }
     },
     "issues": {
@@ -842,6 +861,13 @@
         "best": "Best",
         "worst": "Worst",
         "flagged": "Fits worst"
+      },
+      "aras": {
+        "title": "Share of the optimal row",
+        "caption": "The dashed row is A₀: the best value of every criterion, normalized in the same m + 1 column totals. Each bar is S, read against S₀; K = S / S₀ on the right.",
+        "optimal": "Optimal A₀",
+        "bar": "{{alternative}}: S = {{total}}, S₀ = {{optimalTotal}}, K = {{score}}",
+        "readout": "{{alternative}}: S = {{total}} of S₀ = {{optimalTotal}}, K = {{score}}"
       }
     },
     "flow": {
@@ -925,6 +951,12 @@
         "border": "Border G",
         "distance": "Q",
         "scores": "S"
+      },
+      "aras": {
+        "optimalRow": "Optimal row",
+        "normalized": "Shares",
+        "optimalScore": "Totals S",
+        "utilityDegree": "K"
       }
     },
     "pipeline": {
@@ -1009,7 +1041,8 @@
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
-      "bwm": "BWM"
+      "bwm": "BWM",
+      "aras": "ARAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1072,7 +1105,8 @@
         "marcos": "Measures against an imaginary ideal and anti-ideal.",
         "cocoso": "Three readings of a sum and a power sum, combined.",
         "mabac": "Distance above or below a border per criterion.",
-        "bwm": "Weights from your answers to a few comparisons."
+        "bwm": "Weights from your answers to a few comparisons.",
+        "aras": "Measures each weighted share total against an optimal row."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1296,6 +1330,15 @@
             "s3": "The answers about the worst criterion place it a second time. Where the two places differ, your answers disagree; the marked one fits worst.",
             "s4": "BWM picks the weights that keep the largest of these gaps as small as possible."
           }
+        },
+        "aras": {
+          "title": "Share of the optimal row",
+          "caption": "The dashed row is A₀: the best value of every criterion, normalized in the same m + 1 column totals. Each bar is S, read against S₀; K = S / S₀ on the right.",
+          "steps": {
+            "s1": "Optimality S: each bar is an alternative's weighted sum of the m + 1 column shares.",
+            "s2": "Optimal row A₀: the column-best values get their own total S₀ on the same scale.",
+            "s3": "Utility degree K = S / S₀: each bar is divided by S₀, and the highest K ranks first."
+          }
         }
       }
     }
@@ -1424,6 +1467,14 @@
       "consistencyLocal": "Consistency per criterion: how far a_Bj times a_jW is from a_BW.",
       "xi": "Deviation: the largest gap between the answers and the fitted weights.",
       "weights": "BWM weights: the linear model, solved in closed form, summing to 1."
+    },
+    "aras": {
+      "optimalRow": "Optimal row A₀: the best value of each criterion (the maximum for a benefit, the minimum for a cost), prepended before normalizing.",
+      "normalized": "Normalized shares x̄: cost criteria are inverted with 1 / x, then each value is divided by the total of all m + 1 rows (A₀ plus the m alternatives).",
+      "weighted": "Weighted shares x̂ = w x̄: each normalized share multiplied by its criterion weight.",
+      "optimalScore": "Optimal score S₀: the weighted row sum of the optimal row A₀, the benchmark for every alternative.",
+      "optimality": "Optimality function S: the weighted row sum of each alternative.",
+      "utilityDegree": "Utility degree K = S / S₀: each alternative's optimality divided by the optimal score. A higher value ranks higher."
     }
   },
   "validation": {

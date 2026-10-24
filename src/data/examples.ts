@@ -649,6 +649,70 @@ export const examples: readonly ExampleDataset[] = [
     // Table 12 as printed.
     published: [{ label: 'mabac.scores', values: [0.0826, 0.2183, -0.0488, 0.0246, -0.0704, 0.0465, 0.0464], decimals: 4 }],
   },
+  {
+    id: 'bakir-atalik-2018-airlines',
+    name: { en: 'Airlines (Bakır and Atalık 2018)', tr: 'Havayolları (Bakır ve Atalık 2018)' },
+    buttonLabel: { en: 'Airlines', tr: 'Havayolları' },
+    summary: {
+      en: 'Eleven airlines rated on seven Skytrax Business Class service-quality criteria, weighted by Entropy and ranked with ARAS against the column-best benchmark A0.',
+      tr: 'Yedi Skytrax Business Class hizmet kalitesi kriterinde değerlendirilen on bir havayolu; Entropi ile ağırlıklandırılıp sütun en iyisi kıyas satırı A0 üzerinden ARAS ile sıralanır.',
+    },
+    referenceFor: ['aras'],
+    citation: {
+      authors: 'Bakır, M.; Atalık, Ö.',
+      year: 2018,
+      title: 'Entropi ve Aras Yöntemleriyle Havayolu İşletmelerinde Hizmet Kalitesinin Değerlendirilmesi',
+      venue: 'İşletme Araştırmaları Dergisi 10(1), 617-638',
+      doi: '10.20491/isarder.2018.410',
+      tables: {
+        en: 'Table 3 (input), Table 7 (Entropy weights), Table 11 (output)',
+        tr: 'Tablo 3 (girdi), Tablo 7 (Entropi ağırlıkları), Tablo 11 (çıktı)',
+      },
+    },
+    alternatives: [
+      'Air China',
+      'Air France',
+      'ANA',
+      'British Airways',
+      'China Southern',
+      'Emirates',
+      'Hainan',
+      'LATAM',
+      'Lufthansa',
+      'Qantas',
+      'THY',
+    ],
+    criteria: [
+      { name: { en: 'Airport services', tr: 'Havalimanı hizmetleri' }, type: 'benefit' },
+      { name: { en: 'Lounge physical facilities', tr: 'Lounge fiziksel unsurları' }, type: 'benefit' },
+      { name: { en: 'Lounge staff service', tr: 'Lounge hizmet personeli' }, type: 'benefit' },
+      { name: { en: 'Cabin comfort', tr: 'Uçak içi konfor' }, type: 'benefit' },
+      { name: { en: 'In-flight catering', tr: 'Uçak içi ikramlar' }, type: 'benefit' },
+      { name: { en: 'In-flight entertainment', tr: 'Uçak içi eğlence' }, type: 'benefit' },
+      { name: { en: 'Cabin crew service', tr: 'Kabin ekibi hizmetleri' }, type: 'benefit' },
+    ],
+    matrix: [
+      [3.1, 2.714, 2.75, 3.5, 3.167, 2.7, 3.219],
+      [3.75, 3.929, 4.0, 3.938, 3.667, 3.75, 3.563],
+      [4.75, 4.125, 4.0, 4.8, 4.5, 4.625, 4.8],
+      [3.5, 3.25, 3.75, 3.3, 3.0, 3.375, 4.2],
+      [3.9, 4.071, 4.125, 4.0, 3.667, 3.5, 3.907],
+      [3.5, 4.071, 3.75, 3.688, 3.667, 4.417, 3.625],
+      [4.25, 3.571, 3.875, 4.875, 4.5, 3.875, 4.187],
+      [2.8, 3.0, 3.0, 3.25, 2.667, 3.5, 3.0],
+      [3.75, 4.143, 3.375, 4.0, 3.667, 3.8, 3.687],
+      [3.9, 4.214, 4.0, 4.125, 4.0, 4.125, 3.969],
+      [3.5, 4.429, 3.75, 3.875, 4.0, 4.1, 3.844],
+    ],
+    weights: [0.146829, 0.166067, 0.111597, 0.128694, 0.179882, 0.146586, 0.120345],
+    published: [
+      {
+        label: 'aras.utilityDegree',
+        values: [0.657578, 0.828118, 0.98382, 0.749814, 0.8439, 0.834926, 0.906781, 0.657482, 0.82661, 0.884063, 0.861889],
+        decimals: 6,
+      },
+    ],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

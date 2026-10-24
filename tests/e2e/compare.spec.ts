@@ -69,7 +69,7 @@ test('compare: the why panel opens on A1 and A7, and a crossing changes the pair
   await expect(title).not.toHaveText('A1 or A7?')
 })
 
-test('compare: a zero cell leaves SAW, WASPAS, COPRAS and MARCOS out with their reason, CoCoSo still ranks', async ({ page }) => {
+test('compare: a zero cell leaves SAW, WASPAS, COPRAS, MARCOS and ARAS out with their reason, CoCoSo still ranks', async ({ page }) => {
   await page.goto('/app?example=keshavarz-2015-ten-alternatives&stage=data')
   await page.locator('#wb-cell-0-0').click()
   await page.keyboard.type('0')
@@ -81,10 +81,11 @@ test('compare: a zero cell leaves SAW, WASPAS, COPRAS and MARCOS out with their 
   await expect(page.locator('[data-testid="rank-column"][data-method="waspas"] [data-rank]')).toHaveCount(0)
   await expect(page.locator('[data-testid="rank-column"][data-method="copras"] [data-rank]')).toHaveCount(0)
   await expect(page.locator('[data-testid="rank-column"][data-method="marcos"] [data-rank]')).toHaveCount(0)
+  await expect(page.locator('[data-testid="rank-column"][data-method="aras"] [data-rank]')).toHaveCount(0)
   await expect(page.getByTestId('marcos-badge')).toHaveCount(0)
   // CoCoSo normalizes by min-max, so the zero cell is an ordinary value for it.
   await expect(page.locator('[data-testid="rank-column"][data-method="cocoso"] [data-rank]')).toHaveCount(10)
-  await expect(page.getByTestId('compare-summary')).toContainText(`${N - 4} of ${N} methods ranked`)
+  await expect(page.getByTestId('compare-summary')).toContainText(`${N - 5} of ${N} methods ranked`)
 })
 
 test('compare: Turkish', async ({ page }) => {

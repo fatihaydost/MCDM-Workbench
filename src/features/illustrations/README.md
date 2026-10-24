@@ -257,6 +257,17 @@ numbers in the readout. Numbers from `cocoso.compute`; renders nothing when CoCo
 Use: `/methods/cocoso` "The idea" (Yazdani et al. 2019, seven logistics providers, both pictures); workbench Ranking
 stage when the method is CoCoSo (both pictures; they replace the score chart).
 
+## ArasOptimalBar
+
+ARAS as a picture: the optimal benchmark row A_0 at the top with a dashed bar reaching S_0 and a vertical dotted line
+at S_0 dropping through every row, and one horizontal bar per alternative below in rank order showing its weighted sum
+S_i against S_0 (the winner in the accent) with S_i printed after the bar and the utility degree K_i = S_i / S_0 on the
+right. Hover or focus a row for its S_i, S_0, K_i and rank in the readout. Numbers from `arasParts(problem, weights)`.
+Table: A_0 and the alternatives in rank order with S, S_0, K.
+
+Use: `/methods/aras` "The idea" (Bakır and Atalık 2018, 11 airlines); workbench Ranking stage when the method is ARAS
+(it replaces the score chart).
+
 ## StepFlow
 
 Map of the worked calculation: numbered square nodes on a hairline, the active one in the accent,

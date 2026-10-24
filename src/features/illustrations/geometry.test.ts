@@ -6,6 +6,7 @@ import { topsis as topsisSteps } from '../../content/steps/topsis'
 import { getExample } from '../../data/examples'
 import {
   argMax,
+  arasParts,
   coprasParts,
   marcosParts,
   divergingSegments,
@@ -435,6 +436,20 @@ describe('MARCOS parts', () => {
   })
   it('is null when MARCOS cannot run', () => {
     expect(marcosParts({ ...p, matrix: p.matrix.map((r, i) => (i === 0 ? [0, ...r.slice(1)] : r)) }, ex.weights!)).toBeNull()
+  })
+})
+
+describe('ARAS parts', () => {
+  const ex = getExample('bakir-atalik-2018-airlines')!
+  const p: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  it('places every alternative at K = S / S₀ under the optimal row, rows in rank order', () => {
+    const parts = arasParts(p, ex.weights!)!
+    parts.scores.forEach((k, i) => expect(k).toBeCloseTo(parts.optimality[i]! / parts.optimalScore, 14))
+    expect(parts.optimalScore).toBeCloseTo(0.099651, 6)
+    expect(ex.alternatives[parts.order[0]!]).toBe('ANA')
+  })
+  it('is null when ARAS cannot run', () => {
+    expect(arasParts({ ...p, matrix: p.matrix.map((r, i) => (i === 0 ? [0, ...r.slice(1)] : r)) }, ex.weights!)).toBeNull()
   })
 })
 

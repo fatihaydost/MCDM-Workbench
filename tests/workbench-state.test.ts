@@ -27,6 +27,7 @@ import coprasOC from './fixtures/copras-ozcan-celik2021.json'
 import marcosSB from './fixtures/marcos-stevic-brkovic2020.json'
 import cocosoY from './fixtures/cocoso-yazdani2019-logistics.json'
 import mabacPC from './fixtures/mabac-pamucar-cirovic2015-forklifts.json'
+import arasBA from './fixtures/aras-bakir-atalik2018.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -168,6 +169,15 @@ describe('examples match the published fixtures', () => {
     expect(ex.criteria.map((c) => c.type)).toEqual(mabacPC.types)
     expect(ex.weights).toEqual(mabacPC.weights)
     expect(ex.published).toEqual([{ label: 'mabac.scores', values: mabacPC.published.S, decimals: 4 }])
+  })
+  it('Bakır and Atalık 2018 (ARAS, airlines)', () => {
+    const ex = getExample('bakir-atalik-2018-airlines')!
+    expect(ex.referenceFor).toEqual(['aras'])
+    expect(ex.matrix).toEqual(arasBA.matrix)
+    expect(ex.alternatives).toEqual(arasBA.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(arasBA.types)
+    expect(ex.weights).toEqual(arasBA.weights)
+    expect(ex.published).toEqual([{ label: 'aras.utilityDegree', values: arasBA.published.K, decimals: 6 }])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
@@ -464,6 +474,18 @@ describe('store actions', () => {
     const r = computeRanking(s)
     expectClose(r.value!.scores, mabacPC.published.S, mabacPC.expected.tolerance_vs_published.S)
     expect(r.value!.ranking).toEqual(mabacPC.published.ranking)
+  })
+
+  it('ARAS through the store: the airlines open with ARAS and the paper weights', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.loadExample('bakir-atalik-2018-airlines', 'en')
+    const s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('aras')
+    expect(s.weightMethod).toBe('manual')
+    const r = computeRanking(s)
+    expectClose(r.value!.scores, arasBA.published.K, arasBA.expected.tolerance_vs_published.K)
+    expect(r.value!.ranking).toEqual(arasBA.published.ranking)
   })
 
   it('EDAS through the store: the 47 items open with EDAS and equal weights, the ten alternatives through the method page link', () => {
