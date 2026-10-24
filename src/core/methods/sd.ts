@@ -33,6 +33,8 @@ export const sd: WeightingMethod = {
     const allConstant = constant.every(Boolean)
     if (allConstant) warnings.push({ code: 'sd.all-constant-equal-weights' })
     const weights = allConstant ? new Array<number>(n).fill(1 / n) : sigma.map((s) => s / total)
+    const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
+    if (!allConstant && weights[top]! > 0.5) warnings.push({ code: 'sd.dominant-weight', col: top })
 
     return {
       weights,

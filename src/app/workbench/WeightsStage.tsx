@@ -19,6 +19,7 @@ import { methodViews, WEIGHTING_VIEW_IDS } from '../methods/views'
 import { MethodParams } from './MethodParams'
 import { useWorkbenchNav } from './nav'
 import { JudgementWeights } from './JudgementWeights'
+import { OrdinalWeights } from './OrdinalWeights'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
 import { criterionName, DECIMALS, findStep, ids, placeIssue, sumDecimals, tr, weightMethodLabel } from './shared'
 
@@ -107,7 +108,10 @@ export function WeightsStage() {
       ) : weightMethod === 'bwm' || weightMethod === 'ahp' ? (
         <JudgementWeights problem={problem} method={weightMethod} result={weights} />
       ) : weights.value ? (
-        <ComputedWeights problem={problem} method={weightMethod} result={weights.value} />
+        <>
+          {(weightMethod === 'swara' || weightMethod === 'roc') && <OrdinalWeights problem={problem} method={weightMethod} />}
+          <ComputedWeights problem={problem} method={weightMethod} result={weights.value} />
+        </>
       ) : null}
 
       {fromAnswers && !dataBlocked && attempted.weights && weights.value === null && (

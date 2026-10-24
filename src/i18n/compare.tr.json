@@ -53,6 +53,13 @@
     "vikorRegretEqual": "VIKOR'un en büyük pişmanlıkları {{a}} ve {{b}} için eşit."
   },
   "echo": "{{method}}: {{of}} ile aynı sıra, bir kez sayılır",
+  "echoNote": {
+    "copras_saw": "Etkin maliyet kriteri olmayan (ya da tek maliyet kriterli) COPRAS, SAW (Toplam) ile aynı hesaba indirgenir ve bir kez sayılır.",
+    "copras_ahp-ranking": "Tek etkin maliyet kriterli COPRAS ile tablodan türetilen AHP yerel öncelikleri aynı ağırlıklı payları hesaplar ve bir kez sayılır.",
+    "ahp-ranking_copras": "Tablodan türetilen AHP yerel öncelikleri ile tek etkin maliyet kriterli COPRAS aynı ağırlıklı payları hesaplar ve bir kez sayılır.",
+    "vikor_mabac": "v = 1 (salt grup faydası S) ayarındaki VIKOR ile MABAC aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır.",
+    "mabac_vikor": "MABAC ile v = 1 (salt grup faydası S) ayarındaki VIKOR aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır."
+  },
   "sawLinear": "SAW (Doğrusal)",
   "sawSum": "SAW (Toplam)",
   "pair": {

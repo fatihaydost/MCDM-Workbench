@@ -120,7 +120,6 @@ export function MarcosRows({ problem, weights, format = defaultFormat, labels, s
   const rowStep = stacked ? STACKED_ROW : ROW
   const barY = stacked ? NAME_LINE : (ROW - BAR) / 2
   const height = rows.length * rowStep
-  const best = order[0]!
   const focus = Math.min(focusRow, m - 1)
   const xAai = plotLeft + sAai * pxPerUnit
   const xAi = plotLeft + sAi * pxPerUnit
@@ -135,6 +134,7 @@ export function MarcosRows({ problem, weights, format = defaultFormat, labels, s
   }
 
   const move = (e: KeyboardEvent<SVGGElement>) => {
+    if (stepping) return
     let next = focus
     if (e.key === 'ArrowDown') next = Math.min(m - 1, focus + 1)
     else if (e.key === 'ArrowUp') next = Math.max(0, focus - 1)
@@ -150,7 +150,8 @@ export function MarcosRows({ problem, weights, format = defaultFormat, labels, s
     e.currentTarget.querySelector<SVGElement>(`[data-row="${next}"]`)?.focus()
   }
 
-  const shown = active === null ? null : order[active]!
+  const activeRow = stepping ? null : active
+  const shown = activeRow === null ? null : order[activeRow]!
 
   return (
     <ChartFigure titleId={`${uid}-title`} tableId={`${uid}-table`} title={l.title} showTable={l.showTable} table={table} plotRef={plotRef} className={className}>
@@ -174,12 +175,13 @@ export function MarcosRows({ problem, weights, format = defaultFormat, labels, s
             const row = k - 1
             const short = truncate(r.name, stacked ? W - valueWidth - rightWidth : labelWidth - GAP, FONT)
             const end = plotLeft + r.total * pxPerUnit
+            const isBest = !r.ghost && parts.result.ranking[r.i] === 1 && stage >= 2
             return (
               <g
                 key={r.key}
                 className={s.sawRow}
                 style={{ transform: `translate(0px, ${k * rowStep}px)` }}
-                data-highlight={(r.i === best && stage >= 2) || undefined}
+                data-highlight={isBest || undefined}
                 data-ghost={r.ghost || undefined}
                 data-testid={r.ghost ? 'marcos-ghost' : 'marcos-bar'}
               >
@@ -192,23 +194,27 @@ export function MarcosRows({ problem, weights, format = defaultFormat, labels, s
                 ) : (
                   <rect
                     className={s.marcosBar}
-                    data-on={active === row || undefined}
-                    data-highlight={(r.i === best && stage >= 2) || undefined}
+                    data-on={activeRow === row || undefined}
+                    data-highlight={isBest || undefined}
                     data-row={row}
                     x={0}
                     y={barY}
                     width={1}
                     height={BAR}
                     style={{ transform: `translate(${plotLeft}px, 0px) scale(${Math.max(end - plotLeft, 0.01)}, 1)` }}
-                    tabIndex={focus === row ? 0 : -1}
+                    tabIndex={!stepping && focus === row ? 0 : -1}
                     role="img"
                     aria-label={l.bar(r.name, texts[k]!, f3(kMinus[r.i]!), f3(kPlus[r.i]!), right[r.i]!)}
-                    onMouseEnter={() => setActive(row)}
-                    onFocus={() => {
-                      setFocusRow(row)
-                      setActive(row)
-                    }}
-                    onBlur={() => setActive(null)}
+                    onMouseEnter={stepping ? undefined : () => setActive(row)}
+                    onFocus={
+                      stepping
+                        ? undefined
+                        : () => {
+                            setFocusRow(row)
+                            setActive(row)
+                          }
+                    }
+                    onBlur={stepping ? undefined : () => setActive(null)}
                   />
                 )}
                 <text
@@ -297,7 +303,6 @@ export function MarcosSawLine({ problem, weights, format = defaultFormat, labels
   const x = (v: number) => PAD.left + v * side
   const y = (v: number) => PAD.top + (1 - v) * side
   const ticks = [0, 0.5, 1]
-  const best = order[0]!
   const lineLabel = l.line(format(c, 4))
 
   const table: ChartTable = {
@@ -334,7 +339,7 @@ export function MarcosSawLine({ problem, weights, format = defaultFormat, labels
             {lineLabel}
           </text>
           {names.map((name, i) => (
-            <circle key={i} className={s.marcosDot} data-highlight={i === best || undefined} data-testid="marcos-dot" cx={x(saw[i]!)} cy={y(scores[i]!)} r={4}>
+            <circle key={i} className={s.marcosDot} data-highlight={parts.result.ranking[i] === 1 || undefined} data-testid="marcos-dot" cx={x(saw[i]!)} cy={y(scores[i]!)} r={4}>
               <title>{`${name}: S = ${format(saw[i]!, 4)}, f(K) = ${format(scores[i]!, 4)}`}</title>
             </circle>
           ))}

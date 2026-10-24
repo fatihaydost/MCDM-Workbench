@@ -110,6 +110,8 @@ describe('CRITIC: edge cases', () => {
   it('warns below 4 alternatives', () => {
     const res = critic.compute(makeProblem([[1, 2], [3, 1], [2, 5]], ['benefit', 'benefit']), {})
     expect(res.warnings?.map((w) => w.code)).toContain('critic.few-alternatives')
+    const two = critic.compute(makeProblem([[1, 2], [3, 1]], ['benefit', 'benefit']), {})
+    expect(two.warnings?.map((w) => w.code)).toContain('critic.two-alternatives')
   })
 
   it('single alternative is rejected instead of producing NaN', () => {

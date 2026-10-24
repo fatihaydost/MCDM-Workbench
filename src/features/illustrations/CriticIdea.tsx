@@ -114,6 +114,7 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
   const pad = 6
   const strip = scaleLinear([0, 1], [x0 + pad, x0 + stripW - pad])
   const maxConflict = Math.max(...parts.conflict) || 1
+  const maxInfo = Math.max(...parts.information, 0)
   const maxWeight = Math.max(...parts.weights) || 1
   const table: ChartTable = {
     corner: l.criterion,
@@ -184,14 +185,15 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
         {problem.criteria.map((c, j) => {
           const y = HEAD + j * ROW + ROW / 2
           const col = parts.normalized.map((row) => row[j]!)
-          const mean = col.reduce((a, b) => a + b, 0) / col.length
           const sg = parts.sigma[j]!
           // σ as a ruler from 0, on the strip's scale: its true length (a sample SD of values in 0..1 is at most
           // about 0.71), comparable from row to row. Not mean ± σ, which the 0..1 strip would have to cut off.
           const lo = strip(0)
           const hiX = strip(sg)
           const cw = (parts.conflict[j]! / maxConflict) * conflictW
+          const iw = maxInfo > 0 ? (parts.information[j]! / maxInfo) * weightW : 0
           const ww = (parts.weights[j]! / maxWeight) * weightW
+          const bw = stage === 2 ? iw : ww
           const on = j === hi && stage === 3
           const short = truncate(c.name, nameW - 12, 13)
           return (
@@ -230,12 +232,15 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
                 width={1}
                 height={1}
                 style={{
-                  transform: stage >= 2 ? `translate(${x2}px, ${y - 7}px) scale(${Math.max(ww, 1)}, 14)` : `translate(${x1}px, ${y - 5}px) scale(${Math.max(cw, 1)}, 10)`,
+                  transform:
+                    stage >= 2
+                      ? `translate(${x2}px, ${y - 7}px) scale(${bw > 0 ? Math.max(bw, 1) : 0}, 14)`
+                      : `translate(${x1}px, ${y - 5}px) scale(${Math.max(cw, 1)}, 10)`,
                 }}
               />
               {/* Information C at step 2, the weight after it: two texts that cross-fade, not one that swaps. */}
               {steppable ? (
-                <text className={`${s.barValue} ${s.stageItem} ${s.criticValue}`} data-off={only(2)} x={x2 + ww + 6} y={y} dominantBaseline="central">
+                <text className={`${s.barValue} ${s.stageItem} ${s.criticValue}`} data-off={only(2)} x={x2 + iw + 6} y={y} dominantBaseline="central">
                   {informationTexts[j]}
                 </text>
               ) : null}

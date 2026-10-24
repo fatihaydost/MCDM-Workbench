@@ -56,7 +56,12 @@ export function switchMarks(intervals: readonly StableInterval[], scoresAt: (wk:
     const sorted = changed.slice().sort((p, q) => s[p]! - s[q]!)
     let best = 0
     for (let m = 1; m + 1 < sorted.length; m++) if (s[sorted[m + 1]!]! - s[sorted[m]!]! < s[sorted[best + 1]!]! - s[sorted[best]!]!) best = m
-    out.push({ x: a.to, y: (s[sorted[best]!]! + s[sorted[best + 1]!]!) / 2 })
+    const p = sorted[best]!
+    const q = sorted[best + 1]!
+    const sp = s[p] ?? 0
+    const sq = s[q] ?? 0
+    const y = Math.abs(sp - sq) > 1e-6 ? (b.ranking[p]! < b.ranking[q]! ? sp : sq) : (sp + sq) / 2
+    out.push({ x: a.to, y })
   }
   return out
 }
@@ -69,10 +74,16 @@ export function topSwitchMarks(intervals: readonly StableInterval[], scoresAt: (
   const out: Mark[] = []
   for (let k = 0; k + 1 < intervals.length; k++) {
     const a = intervals[k]!
-    const players = [...new Set([...a.top, ...intervals[k + 1]!.top])]
+    const b = intervals[k + 1]!
+    const players = [...new Set([...a.top, ...b.top])]
     if (players.length < 2) continue
     const s = scoresAt(a.to)
-    out.push({ x: a.to, y: players.reduce((sum, i) => sum + s[i]!, 0) / players.length })
+    const p = a.top[0]!
+    const q = b.top.find((i) => !a.top.includes(i)) ?? b.top[0]!
+    const sp = s[p] ?? 0
+    const sq = s[q] ?? 0
+    const y = Math.abs(sp - sq) > 1e-6 ? sq : players.reduce((sum, i) => sum + s[i]!, 0) / players.length
+    out.push({ x: a.to, y })
   }
   return out
 }
@@ -163,7 +174,7 @@ export function formatDelta(delta: number, lang: Lang): string {
  * the user's answers are not recomputed (no answers exist for the reduced set), so their weights are renormalized.
  */
 export function recomputable(weightMethod: WeightMethodId): WeightingMethod | undefined {
-  if (weightMethod === 'equal' || weightMethod === 'roc' || weightMethod === 'swara') return undefined
+  if (weightMethod === 'equal') return undefined
   const method = getWeightingMethod(weightMethod)
   return method?.reads === 'judgements' ? undefined : method
 }

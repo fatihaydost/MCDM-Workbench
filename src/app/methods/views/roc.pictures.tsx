@@ -15,11 +15,13 @@ export function Stage({ problem, params }: StagePictureProps) {
   const nf = useNumberFormat(DECIMALS.weight)
   const format = useCallback((v: number) => nf.format(v), [nf])
   const formula: RocFormula = params.formula === 'rs' || params.formula === 'rr' ? params.formula : 'roc'
+  const ranks = Array.isArray(params.ranks) ? (params.ranks as readonly number[]) : undefined
   return (
     <ChartTableModeProvider value="screen-reader">
       <RocIdea
         problem={problem}
         formula={formula}
+        ranks={ranks}
         format={format}
         labels={{
           title: t('workbench.visual.roc.title'),

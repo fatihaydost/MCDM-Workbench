@@ -49,6 +49,7 @@ export type RankingMethodId = RankingId
  * Options chosen per method id (Entropy's normalization, later VIKOR's v ...). A missing method or key means the
  * method's default; values are checked against the method's descriptor before a method sees them.
  */
+export type MethodParamEntry = MethodParamValue | readonly (number | string | null | undefined | Record<string, unknown>)[]
 export type MethodParamsState = Partial<Record<string, Record<string, MethodParamValue>>>
 
 /** Raw user input. A null cell is an empty cell (never read as 0). */
@@ -56,6 +57,7 @@ export type DraftProblem = {
   alternatives: string[]
   criteria: Criterion[]
   matrix: (number | null)[][]
+  weights?: number[]
 }
 
 export type WorkbenchData = {
@@ -86,7 +88,7 @@ export type WorkbenchActions = {
    */
   setProblem: (problem: DraftProblem) => void
   /** Replaces the problem with one read from a file and remembers the file name as the source. */
-  importProblem: (problem: DraftProblem, fileName: string) => void
+  importProblem: (problem: DraftProblem, fileName: string, weights?: number[]) => void
   /** Loads a published example; criterion names in `lang`. Sets manual weights when the paper gives them. */
   /**
    * Loads a published example. `method` (a ranking method id the example is a reference for) picks which of its
@@ -116,7 +118,7 @@ export type WorkbenchActions = {
   setAlternativeJudgement: (col: number, i: number, k: number, value: Ratio | null) => void
   setRankingMethod: (method: RankingMethodId) => void
   /** Sets one option of one method (weighting or ranking), e.g. ('entropy', 'normalization', 'minmax'). */
-  setMethodParam: (methodId: string, key: string, value: MethodParamValue) => void
+  setMethodParam: (methodId: string, key: string, value: MethodParamEntry | undefined) => void
   reset: () => void
 }
 
@@ -412,6 +414,128 @@ export function isLocalization(p: Pick<DraftProblem, 'alternatives' | 'criteria'
   return localizations.get(p.alternatives) === p.criteria
 }
 
+const importedWeightsByMatrix = new WeakMap<object, number[]>()
+
+export function registerImportedWeights(matrix: object, weights: number[] | undefined): void {
+  if (weights && weights.length > 0) importedWeightsByMatrix.set(matrix, weights)
+}
+
+/**
+ * Cleans per-criterion array parameters in `methodParams` so their lengths always match `n` criteria.
+ * Invalid or stale-length array parameters are dropped so methods fall back cleanly to their defaults/presets.
+ */
+export function sanitizeMethodParams(params: MethodParamsState | undefined, n: number): MethodParamsState {
+  if (!params || typeof params !== 'object') return {}
+  const out: MethodParamsState = {}
+  for (const [methodId, raw] of Object.entries(params)) {
+    if (!raw || typeof raw !== 'object') continue
+    const next: Record<string, unknown> = { ...raw }
+    if (methodId === 'swara') {
+      if (Array.isArray(next.order)) {
+        const ord = next.order
+        const validOrder =
+          ord.length === n &&
+          ord.every((idx) => typeof idx === 'number' && Number.isInteger(idx) && idx >= 0 && idx < n) &&
+          new Set(ord).size === n
+        if (!validOrder) delete next.order
+      }
+      if (Array.isArray(next.s)) {
+        const sArr = next.s
+        const validS =
+          n >= 1 &&
+          (sArr.length === n || sArr.length === n - 1) &&
+          sArr.every((v, idx) => (sArr.length === n && idx === 0 && (v === null || v === undefined)) || (typeof v === 'number' && Number.isFinite(v) && v >= 0))
+        if (!validS) delete next.s
+      }
+    } else if (methodId === 'roc') {
+      if (Array.isArray(next.ranks)) {
+        const rArr = next.ranks
+        const validRanks = rArr.length === n && rArr.every((r) => typeof r === 'number' && Number.isFinite(r))
+        if (!validRanks) delete next.ranks
+      }
+    } else if (methodId === 'electre-iii') {
+      for (const k of ['q', 'p', 'v', 'mode'] as const) {
+        if (Array.isArray(next[k]) && (next[k] as unknown[]).length !== n) {
+          delete next[k]
+        }
+      }
+    } else if (methodId === 'promethee-ii') {
+      if (Array.isArray(next.criteriaFunctions) && (next.criteriaFunctions as unknown[]).length !== n) {
+        delete next.criteriaFunctions
+      }
+    }
+    out[methodId] = next as Record<string, MethodParamValue>
+  }
+  return out
+}
+
+/**
+ * Resizes or drops per-criterion array parameters in `methodParams` when the criterion count changes from `prevN` to `nextN`.
+ * When a single criterion at `deletedIndex` is removed, `swara.order`, `swara.s`, `roc.ranks`, `electre-iii.{q,p,v,mode}`,
+ * and `promethee-ii.criteriaFunctions` are adjusted in place so remaining criteria keep their settings without off-by-one shifts.
+ */
+export function resizeMethodParamsOnCriterionChange(
+  params: MethodParamsState | undefined,
+  prevN: number,
+  nextN: number,
+  deletedIndex?: number,
+): MethodParamsState {
+  if (!params || typeof params !== 'object') return {}
+  if (prevN === nextN) return sanitizeMethodParams(params, nextN)
+  const next: Record<string, Record<string, unknown>> = {}
+  for (const [methodId, raw] of Object.entries(params)) {
+    if (!raw || typeof raw !== 'object') continue
+    next[methodId] = { ...raw }
+  }
+  if (deletedIndex !== undefined && deletedIndex >= 0 && deletedIndex < prevN && nextN === prevN - 1 && nextN >= 1) {
+    if (next.swara) {
+      const sw = { ...next.swara }
+      const oldOrder =
+        Array.isArray(sw.order) && sw.order.length === prevN
+          ? (sw.order as number[])
+          : Array.from({ length: prevN }, (_, j) => j)
+      const delRankIdx = oldOrder.indexOf(deletedIndex)
+      if (Array.isArray(sw.order) && sw.order.length === prevN) {
+        sw.order = oldOrder.filter((idx) => idx !== deletedIndex).map((idx) => (idx > deletedIndex ? idx - 1 : idx))
+      }
+      if (Array.isArray(sw.s) && (sw.s.length === prevN || sw.s.length === prevN - 1)) {
+        const fullS = sw.s.length === prevN ? [...(sw.s as number[])] : [0, ...(sw.s as number[])]
+        const rmIdx = delRankIdx >= 0 ? delRankIdx : deletedIndex
+        const nextS = fullS.filter((_, r) => r !== rmIdx)
+        if (nextS.length > 0) nextS[0] = 0
+        sw.s = nextS
+      }
+      next.swara = sw
+    }
+    if (next.roc && Array.isArray(next.roc.ranks) && next.roc.ranks.length === prevN) {
+      const oldRanks = next.roc.ranks as number[]
+      const rDel = oldRanks[deletedIndex]!
+      const remaining = oldRanks.filter((_, j) => j !== deletedIndex)
+      const hasTie = remaining.includes(rDel)
+      next.roc = {
+        ...next.roc,
+        ranks: remaining.map((r) => Math.min(nextN, Math.max(1, !hasTie && r > rDel ? r - 1 : r))),
+      }
+    }
+    if (next['electre-iii']) {
+      const el = { ...next['electre-iii'] }
+      for (const k of ['q', 'p', 'v', 'mode'] as const) {
+        if (Array.isArray(el[k]) && (el[k] as unknown[]).length === prevN) {
+          el[k] = (el[k] as unknown[]).filter((_, j) => j !== deletedIndex)
+        }
+      }
+      next['electre-iii'] = el
+    }
+    if (next['promethee-ii'] && Array.isArray(next['promethee-ii'].criteriaFunctions) && (next['promethee-ii'].criteriaFunctions as unknown[]).length === prevN) {
+      next['promethee-ii'] = {
+        ...next['promethee-ii'],
+        criteriaFunctions: (next['promethee-ii'].criteriaFunctions as unknown[]).filter((_, j) => j !== deletedIndex),
+      }
+    }
+  }
+  return sanitizeMethodParams(next as MethodParamsState, nextN)
+}
+
 function recall(p: DraftProblem): Setup | undefined {
   const r = leftSetups.get(p.matrix)
   return r && r.alternatives === p.alternatives && r.criteria === p.criteria ? r.setup : undefined
@@ -437,25 +561,49 @@ export const useWorkbench = create<WorkbenchState>()(
             return {
               problem,
               ...back,
+              methodParams: sanitizeMethodParams(back.methodParams, n),
               manualWeights: fitWeights(back.manualWeights, n),
               judgements: back.judgements ?? emptyJudgements(n),
               alternativeJudgements: sanitizeAlternativeJudgements(back.alternativeJudgements, m, n),
             }
-          return { problem, exampleId: null, importedFrom: null, manualWeights, judgements, alternativeJudgements }
+          const prevN = s.problem.criteria.length
+          let deletedIndex: number | undefined
+          if (n === prevN - 1) {
+            const critMap = matchCriteria(s.problem.criteria, problem.criteria, true)
+            const kept = new Set(critMap.filter((idx): idx is number => idx !== undefined))
+            if (kept.size === n) {
+              deletedIndex = Array.from({ length: prevN }, (_, j) => j).find((j) => !kept.has(j))
+            }
+          }
+          const methodParams = resizeMethodParamsOnCriterionChange(s.methodParams, prevN, n, deletedIndex)
+          return { problem, exampleId: null, importedFrom: null, methodParams, manualWeights, judgements, alternativeJudgements }
         }),
 
-      importProblem: (problem, fileName) =>
+      importProblem: (problem, fileName, weights) =>
         set((s) => {
           remember(s, true)
-          // A new file: weights follow criteria of the same name only, never a column position.
-          const manualWeights = carryWeights(s.problem.criteria, s.manualWeights, problem.criteria, false)
+          const importedWeights = weights ?? problem.weights ?? importedWeightsByMatrix.get(problem.matrix)
+          const n = problem.criteria.length
+          const hasValidWeights =
+            Array.isArray(importedWeights) &&
+            importedWeights.length === n &&
+            importedWeights.every((w) => typeof w === 'number' && Number.isFinite(w) && w >= 0) &&
+            importedWeights.reduce((a, b) => a + b, 0) > 0
+          // A new file: weights follow criteria of the same name only, never a column position, unless the file brought its own weights.
+          const manualWeights = hasValidWeights
+            ? [...importedWeights]
+            : carryWeights(s.problem.criteria, s.manualWeights, problem.criteria, false)
           const judgements = carryJudgements(s.problem.criteria, s.judgements, problem.criteria, false)
           const alternativeJudgements = carryAlternativeJudgements(s.problem, s.alternativeJudgements, problem, false)
+          if (Object.prototype.propertyIsEnumerable.call(problem, 'weights')) {
+            delete (problem as { weights?: number[] }).weights
+          }
           return {
             problem,
             exampleId: null,
             importedFrom: fileName,
             methodParams: {},
+            ...(hasValidWeights ? { weightMethod: 'manual' as const } : {}),
             manualWeights,
             judgements,
             alternativeJudgements,
@@ -471,11 +619,17 @@ export const useWorkbench = create<WorkbenchState>()(
         // for a ranking method opens with that method, also in its default variant; otherwise the ranking method stays.
         // When it is a reference for several ranking methods: the one asked for, else the current one if it is among
         // them, else the first listed.
-        const reference = ex.referenceFor.find((m) => getWeightingMethod(m) !== undefined) as WeightMethodId | undefined
+        const weightRefs = ex.referenceFor.filter((m) => getWeightingMethod(m) !== undefined) as WeightMethodId[]
+        const reference = weightRefs.find((m) => m === method) ?? weightRefs[0]
         const rankingRefs = ex.referenceFor.filter((m) => getRankingMethod(m) !== undefined) as RankingMethodId[]
         const current = get().rankingMethod
+        const hasNonPositive = ex.matrix.some((row) => row.some((v) => v <= 0))
+        const currentBlocked = hasNonPositive && Boolean(getRankingMethod(current)?.requires?.positiveValues)
         const ranking =
-          rankingRefs.find((m) => m === method) ?? (rankingRefs.includes(current) ? current : undefined) ?? rankingRefs[0]
+          rankingRefs.find((m) => m === method) ??
+          (rankingRefs.includes(current) ? current : undefined) ??
+          rankingRefs[0] ??
+          (currentBlocked ? 'topsis' : undefined)
         remember(get(), true)
         memorize(get().problem.criteria, get().manualWeights)
         memorizeJudgements(get().problem.criteria, judgementsOf(get()))
@@ -507,14 +661,28 @@ export const useWorkbench = create<WorkbenchState>()(
         const ex = s.exampleId ? getExample(s.exampleId) : undefined
         if (!ex) return
         const alternatives = alternativeNames(ex, lang)
+        const altEn = alternativeNames(ex, 'en')
+        const altTr = alternativeNames(ex, 'tr')
         const names = ex.criteria.map((c) => c.name[lang])
         const p = s.problem
         if (p.alternatives.length !== alternatives.length || p.criteria.length !== names.length) return
-        if (p.alternatives.every((a, i) => a === alternatives[i]) && p.criteria.every((c, j) => c.name === names[j])) return
+        const nextAlternatives = p.alternatives.map((a, i) =>
+          a === altEn[i] || a === altTr[i] ? alternatives[i]! : a,
+        )
+        const nextCriteria = p.criteria.map((c, j) => {
+          const exCrit = ex.criteria[j]
+          const isKnown = exCrit !== undefined && (c.name === exCrit.name.en || c.name === exCrit.name.tr)
+          return isKnown ? { ...c, name: names[j]! } : c
+        })
+        if (
+          p.alternatives.every((a, i) => a === nextAlternatives[i]) &&
+          p.criteria.every((c, j) => c.name === nextCriteria[j]!.name)
+        )
+          return
         remember(s, false)
         const problem = {
-          alternatives: [...alternatives],
-          criteria: p.criteria.map((c, j) => ({ ...c, name: names[j]! })),
+          alternatives: nextAlternatives,
+          criteria: nextCriteria,
           matrix: p.matrix,
         }
         localizations.set(problem.alternatives, problem.criteria)
@@ -601,29 +769,36 @@ export const useWorkbench = create<WorkbenchState>()(
         }),
 
       addCriterion: (criterion) =>
-        set((s) => ({
-          exampleId: null,
-          importedFrom: null,
-          problem: {
-            ...s.problem,
-            criteria: [...s.problem.criteria, criterion],
-            matrix: s.problem.matrix.map((r) => [...r, null]),
-          },
-          manualWeights: [...fitWeights(s.manualWeights, s.problem.criteria.length), null],
-          judgements: remapJudgements(judgementsOf(s), [...s.problem.criteria.keys(), undefined]),
-          alternativeJudgements: remapAlternativeJudgements(
-            s.alternativeJudgements,
-            [...s.problem.criteria.keys(), undefined],
-            [...s.problem.alternatives.keys()],
-            s.problem.alternatives.length,
-          ),
-        })),
+        set((s) => {
+          const prevN = s.problem.criteria.length
+          const nextN = prevN + 1
+          return {
+            exampleId: null,
+            importedFrom: null,
+            problem: {
+              ...s.problem,
+              criteria: [...s.problem.criteria, criterion],
+              matrix: s.problem.matrix.map((r) => [...r, null]),
+            },
+            methodParams: resizeMethodParamsOnCriterionChange(s.methodParams, prevN, nextN),
+            manualWeights: [...fitWeights(s.manualWeights, prevN), null],
+            judgements: remapJudgements(judgementsOf(s), [...s.problem.criteria.keys(), undefined]),
+            alternativeJudgements: remapAlternativeJudgements(
+              s.alternativeJudgements,
+              [...s.problem.criteria.keys(), undefined],
+              [...s.problem.alternatives.keys()],
+              s.problem.alternatives.length,
+            ),
+          }
+        }),
 
       removeCriterion: (col) =>
         set((s) => {
           memorize(s.problem.criteria, s.manualWeights)
           memorizeJudgements(s.problem.criteria, judgementsOf(s))
           memorizeAlternativeJudgements(s.problem, s.alternativeJudgements)
+          const prevN = s.problem.criteria.length
+          const nextN = Math.max(0, prevN - 1)
           return {
             exampleId: null,
             importedFrom: null,
@@ -632,7 +807,8 @@ export const useWorkbench = create<WorkbenchState>()(
               criteria: s.problem.criteria.filter((_, j) => j !== col),
               matrix: s.problem.matrix.map((r) => r.filter((_, j) => j !== col)),
             },
-            manualWeights: fitWeights(s.manualWeights, s.problem.criteria.length).filter((_, j) => j !== col),
+            methodParams: resizeMethodParamsOnCriterionChange(s.methodParams, prevN, nextN, col),
+            manualWeights: fitWeights(s.manualWeights, prevN).filter((_, j) => j !== col),
             judgements: remapJudgements(
               judgementsOf(s),
               [...s.problem.criteria.keys()].filter((j) => j !== col),
@@ -654,7 +830,27 @@ export const useWorkbench = create<WorkbenchState>()(
         })),
 
       setJudgement: (i, k, value) =>
-        set((s) => (i === k ? {} : { judgements: setPair(judgementsOf(s), i, k, value) })),
+        set((s) => {
+          if (i === k) return {}
+          let next = setPair(judgementsOf(s), i, k, value)
+          const { best, worst } = next
+          if (
+            s.weightMethod !== 'ahp' &&
+            value === 1 &&
+            best !== null &&
+            worst !== null &&
+            ((i === best && k === worst) || (i === worst && k === best))
+          ) {
+            const n = s.problem.criteria.length
+            for (let j = 0; j < n; j++) {
+              if (j !== best && j !== worst) {
+                next = setPair(next, best, j, 1)
+                next = setPair(next, j, worst, 1)
+              }
+            }
+          }
+          return { judgements: next }
+        }),
 
       setAnchors: (best, worst) =>
         set((s) => ({ judgements: { ...judgementsOf(s), best, worst: best !== null && best === worst ? null : worst } })),
@@ -690,7 +886,26 @@ export const useWorkbench = create<WorkbenchState>()(
       setRankingMethod: (rankingMethod) => set({ rankingMethod }),
 
       setMethodParam: (methodId, key, value) =>
-        set((s) => ({ methodParams: { ...s.methodParams, [methodId]: { ...s.methodParams?.[methodId], [key]: value } } })),
+        set((s) => {
+          const nextMethod: Record<string, unknown> = { ...s.methodParams?.[methodId] }
+          if (value === undefined) {
+            delete nextMethod[key]
+          } else {
+            nextMethod[key] = value
+          }
+          if (methodId === 'swara' && key === 'stepRatio') {
+            delete nextMethod.s
+          } else if (methodId === 'electre-iii' && (key === 'thresholdPreset' || key === 'thresholds')) {
+            if (key === 'thresholds' && value !== undefined) nextMethod.thresholdPreset = value
+            delete nextMethod.q
+            delete nextMethod.p
+            delete nextMethod.v
+            delete nextMethod.mode
+          } else if (methodId === 'promethee-ii' && key === 'preferenceFunction') {
+            delete nextMethod.criteriaFunctions
+          }
+          return { methodParams: { ...s.methodParams, [methodId]: nextMethod as Record<string, MethodParamValue> } }
+        }),
 
       reset: () => {
         remember(get(), true)
@@ -719,14 +934,23 @@ export const useWorkbench = create<WorkbenchState>()(
       // Saved state is a trust boundary (hand-edited or stale localStorage): refit the judgements to the criteria.
       merge: (persisted, current) => {
         const p = { ...(persisted ?? {}) } as Partial<WorkbenchData>
-        // A problem without a criteria list cannot be shown or refitted: keep the current one.
-        if (!Array.isArray(p.problem?.criteria)) delete p.problem
+        // A problem without valid criteria, alternatives or matrix shape cannot be shown or refitted: keep the current one.
+        if (
+          !Array.isArray(p.problem?.criteria) ||
+          !Array.isArray(p.problem?.alternatives) ||
+          !Array.isArray(p.problem?.matrix) ||
+          p.problem.matrix.length !== p.problem.alternatives.length
+        ) {
+          delete p.problem
+        }
         const prob = p.problem ?? current.problem
         const m = prob.alternatives.length
         const n = prob.criteria.length
         return {
           ...current,
           ...p,
+          manualWeights: fitWeights(Array.isArray(p.manualWeights) ? p.manualWeights : current.manualWeights, n),
+          methodParams: sanitizeMethodParams(p.methodParams ?? current.methodParams, n),
           judgements: sanitizeJudgements(p.judgements, n),
           alternativeJudgements: sanitizeAlternativeJudgements(p.alternativeJudgements, m, n),
         }
@@ -786,15 +1010,15 @@ export function computeWeights(
 
   if (data.weightMethod === 'manual') {
     const weights = fitWeights(data.manualWeights, n).map((w) => (w === null ? Number.NaN : w))
-    const wIssues = [...issues, ...validateWeights(weights, n)]
+    const wIssues = [...(n < 2 ? issues.filter((x) => x.code === 'too-few-criteria') : []), ...validateWeights(weights, n)]
     if (hasErrors(wIssues)) return { value: null, issues: wIssues }
     return { value: { weights, steps: [{ key: 'manual.weights', vector: weights, axes: 'criteria' }] }, issues: wIssues }
   }
 
   if (data.weightMethod === 'equal') {
-    if (hasErrors(issues)) return { value: null, issues }
+    if (n < 2) return { value: null, issues: issues.filter((x) => x.code === 'too-few-criteria') }
     const weights = new Array<number>(n).fill(1 / n)
-    return { value: { weights, steps: [{ key: 'equal.weights', vector: weights, axes: 'criteria' }] }, issues }
+    return { value: { weights, steps: [{ key: 'equal.weights', vector: weights, axes: 'criteria' }] }, issues: [] }
   }
 
   const method = getWeightingMethod(data.weightMethod)
@@ -808,6 +1032,7 @@ export function computeWeights(
       return { value: method.compute(problem, paramsFor(data, method.id), judgements), issues: [] }
     } catch (err) {
       if (err instanceof ProblemValidationError) return { value: null, issues: err.issues }
+      if (err instanceof RangeError) return { value: null, issues }
       throw err
     }
   }
@@ -816,6 +1041,7 @@ export function computeWeights(
     return { value: method.compute(problem, paramsFor(data, method.id)), issues }
   } catch (err) {
     if (err instanceof ProblemValidationError) return { value: null, issues: err.issues }
+    if (err instanceof RangeError) return { value: null, issues }
     throw err
   }
 }
@@ -834,7 +1060,13 @@ export function computeRanking(
     const seen = new Set(issues.map((x) => JSON.stringify(x)))
     return { value: null, issues: [...issues, ...weights.issues.filter((x) => !seen.has(JSON.stringify(x)))] }
   }
-  return rank ? rank(weights.value.weights) : { value: null, issues }
+  try {
+    return rank ? rank(weights.value.weights) : { value: null, issues }
+  } catch (err) {
+    if (err instanceof ProblemValidationError) return { value: null, issues: err.issues }
+    if (err instanceof RangeError) return { value: null, issues }
+    throw err
+  }
 }
 
 /** Validation issues of the current matrix (errors and warnings). */

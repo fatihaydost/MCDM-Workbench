@@ -1,5 +1,5 @@
 import { useId, useMemo, useState, type KeyboardEvent } from 'react'
-import { prometheeII, type PrometheePreferenceFunction } from '../../core/methods/promethee-ii'
+import { prometheeII, type PrometheeCriterionFunction, type PrometheePreferenceFunction } from '../../core/methods/promethee-ii'
 import type { Problem } from '../../core/types'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
 import { estimateTextWidth, truncate } from '../charts/layout'
@@ -11,6 +11,7 @@ export type PrometheeParts = {
   positiveFlow: number[]
   negativeFlow: number[]
   scores: number[]
+  ranking: number[]
   order: number[]
 }
 
@@ -19,17 +20,21 @@ export function prometheeParts(
   problem: Problem,
   weights: readonly number[],
   preferenceFunction: PrometheePreferenceFunction = 'v-shape',
+  criteriaFunctions?: readonly PrometheeCriterionFunction[],
 ): PrometheeParts | null {
   let res
   try {
-    res = prometheeII.compute(problem, [...weights], { preferenceFunction })
+    res = prometheeII.compute(problem, [...weights], {
+      preferenceFunction,
+      ...(criteriaFunctions !== undefined ? { criteriaFunctions } : {}),
+    })
   } catch {
     return null
   }
   const positiveFlow = res.steps.find((x) => x.key === 'promethee-ii.positiveFlow')!.vector!
   const negativeFlow = res.steps.find((x) => x.key === 'promethee-ii.negativeFlow')!.vector!
   const order = res.scores.map((_, i) => i).sort((x, y) => res.ranking[x]! - res.ranking[y]! || x - y)
-  return { positiveFlow, negativeFlow, scores: res.scores, order }
+  return { positiveFlow, negativeFlow, scores: res.scores, ranking: res.ranking, order }
 }
 
 const defaultFormat = (v: number, d: number) => v.toFixed(d)
@@ -61,6 +66,7 @@ export type PrometheeIdeaProps = {
   problem: Problem
   weights: readonly number[]
   preferenceFunction?: PrometheePreferenceFunction | undefined
+  criteriaFunctions?: readonly PrometheeCriterionFunction[] | undefined
   format?: ((value: number, decimals: number) => string) | undefined
   labels?: Partial<PrometheeIdeaLabels>
   /**
@@ -91,6 +97,7 @@ export function PrometheeIdea({
   problem,
   weights,
   preferenceFunction = 'v-shape',
+  criteriaFunctions,
   format = defaultFormat,
   labels,
   step,
@@ -101,7 +108,10 @@ export function PrometheeIdea({
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const animate = useAnimateValues(width)
-  const parts = useMemo(() => prometheeParts(problem, weights, preferenceFunction), [problem, weights, preferenceFunction])
+  const parts = useMemo(
+    () => prometheeParts(problem, weights, preferenceFunction, criteriaFunctions),
+    [problem, weights, preferenceFunction, criteriaFunctions],
+  )
   const [activeRow, setActive] = useState<number | null>(null)
   const [focusRow, setFocusRow] = useState(0)
   if (!parts) return null
@@ -112,7 +122,7 @@ export function PrometheeIdea({
   const negOff = stage >= 1 ? undefined : ''
   const scoreOff = stage >= 2 ? undefined : ''
 
-  const { positiveFlow, negativeFlow, scores, order } = parts
+  const { positiveFlow, negativeFlow, scores, ranking, order } = parts
   const names = problem.alternatives
   const m = names.length
   const W = Math.max(width, 240)
@@ -201,7 +211,7 @@ export function PrometheeIdea({
                 key={i}
                 className={s.sawRow}
                 style={{ transform: `translate(0px, ${HEAD + row * rowStep}px)` }}
-                data-highlight={row === 0 || undefined}
+                data-highlight={ranking[i] === 1 || undefined}
                 data-testid="promethee-ii-row"
               >
                 <text className={s.sawName} x={0} y={stacked ? NAME_LINE / 2 : mid} dominantBaseline="central">

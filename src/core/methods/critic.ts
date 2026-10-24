@@ -57,6 +57,7 @@ export const critic: WeightingMethod = {
     const total = sum(information)
     const allConstant = constant.every(Boolean)
     const varying = constant.filter((c) => !c).length
+    if (m === 2 && !allConstant) warnings.push({ code: 'critic.two-alternatives' })
     let weights: number[]
     if (allConstant) {
       warnings.push({ code: 'critic.all-constant-equal-weights' })
@@ -69,6 +70,9 @@ export const critic: WeightingMethod = {
     } else {
       weights = information.map((c) => c / total)
     }
+
+    const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
+    if (!allConstant && weights[top]! > 0.5) warnings.push({ code: 'critic.dominant-weight', col: top })
 
     return {
       weights,

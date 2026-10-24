@@ -262,6 +262,7 @@ describe('CODAS - algebraic properties and edge cases', () => {
     const res = codas.compute(pEq, [0.4, 0.6], {})
     expect(res.scores).toEqual([0, 0, 0])
     expect(res.ranking).toEqual([1, 1, 1])
+    expect(res.warnings).toContainEqual({ code: 'codas.no-spread' })
   })
 
   it('validates tau in [0.01, 0.1] and rejects non-positive matrix entries', () => {

@@ -584,7 +584,8 @@
         "pv": "Yüzde değer PV",
         "criterionRank": "Sıra r",
         "stepRatio": "Adım oranı s",
-        "recalculatedWeight": "Yeniden hesaplanan q"
+        "recalculatedWeight": "Yeniden hesaplanan q",
+        "totalLoss": "Toplam kayıp |f_jj|"
       },
       "tableTitle": "Kriter ağırlıkları",
       "chartTitle": "Kriter ağırlıkları",
@@ -826,7 +827,23 @@
       "decimals": "Ondalık",
       "decimals2": "2 hane",
       "decimals4": "4 hane",
-      "highlightCols": "Sütun en büyüğünü vurgula"
+      "highlightCols": "Sütun en iyisini vurgula"
+    },
+    "calculation": {
+      "highlightMax": "Sütun en iyisini vurgula"
+    },
+    "ordinal": {
+      "title": "Önem sırası",
+      "hintSwara": "Kriterleri en önemliden (1. sıra) en az önemliye dizin ve her adım oranını s girin.",
+      "swaraHint": "Kriterleri en önemliden (1. sıra) en az önemliye dizin ve her adım oranını s girin.",
+      "hintRoc": "Kriterleri önem sırasına dizin ya da 1..n arası tam sayı sıralar verin (eşit sıralar ortalama ağırlığı paylaşır).",
+      "rocHint": "Kriterleri önem sırasına dizin ya da 1..n arası tam sayı sıralar verin (eşit sıralar ortalama ağırlığı paylaşır).",
+      "moveUp": "{{criterion}} kriterini yukarı taşı",
+      "moveDown": "{{criterion}} kriterini aşağı taşı",
+      "rank": "Sıra",
+      "order": "Sırala",
+      "stepRatio": "Karşılaştırmalı oran s",
+      "reset": "Sırayı sıfırla"
     },
     "stepNames": {
       "critic": {
@@ -914,6 +931,7 @@
         "squareMatrix": "Kazananlar matrisi A",
         "lossMatrix": "Göreli kayıp matrisi P",
         "systemMatrix": "Kayıp sistem matrisi F",
+        "totalLoss": "Toplam etki kaybı |f_jj|",
         "weights": "Ağırlıklar w"
       },
       "waspas": {
@@ -988,7 +1006,9 @@
       },
       "aras": {
         "optimalRow": "Optimal alternatif A₀",
+        "optimalNormalized": "Normalize optimal satır x̄₀",
         "normalized": "A₀ dahil sütun payları x̄",
+        "optimalWeighted": "Ağırlıklı optimal satır x̂₀",
         "weighted": "Ağırlıklı paylar x̂",
         "optimalScore": "Optimal skor S₀",
         "optimality": "Optimalite fonksiyonu S",
@@ -1352,6 +1372,7 @@
         "squareMatrix": "Kazananlar A",
         "lossMatrix": "Kayıplar P",
         "systemMatrix": "Sistem F",
+        "totalLoss": "Toplam kayıp",
         "weights": "Ağırlıklar"
       },
       "waspas": {
@@ -1418,7 +1439,9 @@
       },
       "aras": {
         "optimalRow": "Optimal satır",
+        "optimalNormalized": "Optimal x̄₀",
         "normalized": "Paylar",
+        "optimalWeighted": "Optimal x̂₀",
         "optimalScore": "Toplamlar S",
         "utilityDegree": "K"
       },
@@ -2081,9 +2104,10 @@
     },
     "cilos": {
       "normalized": "Toplam normalizasyonu: maliyet kriterleri önce min x / x ile ters çevrilir, ardından her değer sütun toplamına bölünür; payların toplamı 1 olur.",
-      "squareMatrix": "Kare matris A: i satırı, i kriterinde en yüksek değere ulaşan alternatifin normalize satırını kopyalar.",
+      "squareMatrix": "Kare matris A: i satırı, i kriterinde en yüksek değere ulaşan alternatiflerin normalize satırlarının ortalamasını alır (tek kazanan varsa doğrudan o satırı kopyalar).",
       "lossMatrix": "Göreli etki kaybı matrisi P: i kriterinin kazanan alternatifi seçildiğinde j kriterinin kendi maksimumu a_jj değerine göre ne kadar kaybettiği.",
       "systemMatrix": "Kayıp sistem matrisi F: P matrisinin köşegenine ilgili sütun toplamının negatifi yazılır; böylece F'nin her sütununun toplamı 0 olur.",
+      "totalLoss": "Toplam etki kaybı |f_jj|: diğer kriterlerin kazanan alternatifleri seçildiğinde j kriterinin uğradığı göreli kayıpların toplamı.",
       "weights": "CILOS ağırlıkları: toplamı 1 koşuluyla F w = 0 homojen doğrusal sistemini çözen tekil w vektörü."
     },
     "waspas": {
@@ -2158,7 +2182,9 @@
     },
     "aras": {
       "optimalRow": "Optimal satır A₀: normalizasyondan önce başa eklenen, her kriterin en iyi değeri (fayda için en büyük, maliyet için en küçük).",
+      "optimalNormalized": "Normalize optimal satır x̄₀: optimal satırın genişletilmiş m + 1 satırlık her sütun toplamındaki payı.",
       "normalized": "Normalize paylar x̄: maliyet kriterleri 1 / x ile ters çevrilir, ardından her değer m + 1 satırın (A₀ ve m alternatif) toplamına bölünür.",
+      "optimalWeighted": "Ağırlıklı optimal satır x̂₀ = w x̄₀: her normalize kıyas payının kendi kriter ağırlığıyla çarpımı.",
       "weighted": "Ağırlıklı paylar x̂ = w x̄: her normalize pay kriter ağırlığıyla çarpılır.",
       "optimalScore": "Optimal skor S₀: optimal satır A₀ için ağırlıklı satır toplamı, tüm alternatiflerin kıyas noktası.",
       "optimality": "Optimalite fonksiyonu S: her alternatifin ağırlıklı satır toplamı.",
@@ -2238,9 +2264,11 @@
     "critic": {
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden CRITIC ağırlığı 0.",
       "few-alternatives": "4'ten az alternatifle korelasyonlar kararsızdır. CRITIC ağırlıklarını dikkatle yorumlayın.",
+      "two-alternatives": "2 alternatifle değişen her sütun {0, 1} değerlerine normalize olur ve korelasyonlar yalnızca +1 veya -1 çıkar; CRITIC ağırlıkları yalnız yön işaretine bağlı kalır.",
       "no-conflict-equal-weights": "Değişen kriterler arasında çatışma yok (yalnız biri değişiyor ya da birlikte hareket ediyorlar), bu yüzden ağırlığı eşit paylaşıyorlar.",
       "all-constant-equal-weights": "Bütün kriterler sabit, ağırlıklandırılacak bilgi yok. Bunun yerine eşit ağırlık kullanıldı.",
-      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin."
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
+      "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; kontrast ve çatışmasının gerçek olup olmadığına bakın."
     },
     "entropy": {
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden Entropi ağırlığı 0.",
@@ -2252,7 +2280,9 @@
     },
     "topsis": {
       "zero-column": "{{criterion}} kriterinin bütün değerleri 0, bu yüzden sıralamayı etkilemiyor.",
-      "zero-distance": "Bazı alternatifler hem ideal hem negatif ideal çözümle çakışıyor. Bunların yakınlık katsayısı 0,5."
+      "zero-distance": "Bazı alternatifler hem ideal hem negatif ideal çözümle çakışıyor. Bunların yakınlık katsayısı 0,5.",
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, yine de TOPSIS A+ ve A- değerlerini bu uçlara yerleştiriyor. Farkın gerçek olup olmadığını kontrol edin.",
+      "negative-values": "{{criterion}} negatif değerler içeriyor; vektör normalizasyonu sütun normunda karelerini alır ve işaretlerini korur."
     },
     "vikor": {
       "constant-column": "{{criterion}} kriterinin bütün değerleri aynı; S'ye ve R'ye bir şey katmıyor.",
@@ -2272,7 +2302,8 @@
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden SD ağırlığı 0.",
       "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
       "two-alternatives": "2 alternatifle, sabit olmayan her kriter aynı SD ağırlığını alır.",
-      "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı."
+      "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı.",
+      "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; yayılımın gerçek olup olmadığına bakın."
     },
     "merec": {
       "constant-column": "{{criterion}} her alternatifte aynı değerde; çıkarılması hiçbir şeyi değiştirmez, MEREC ağırlığı 0 olur.",
@@ -2285,17 +2316,24 @@
       "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
       "two-alternatives": "2 alternatifle her değişken sütunda karesel ortalama örneklem standart sapmasına eşittir (PV = 0), bu yüzden eşit ağırlık kullanıldı.",
       "zero-pv-column": "{{criterion}} kriterinde karesel ortalama örneklem standart sapmasına eşittir (PV = 0), bu yüzden LOPCOW ağırlığı 0.",
-      "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı."
+      "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı.",
+      "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; RMS ve yayılım oranının gerçek olup olmadığına bakın."
     },
     "cilos": {
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden CILOS ağırlığı 0.",
       "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, yine de CILOS bu küçük kayıpları sistemin geri kalanıyla oranlıyor. Farkın gerçek olup olmadığını kontrol edin.",
       "shared-optimum": "İki ya da daha fazla kriter en iyi değerine aynı alternatifte ulaşıyor; A matrisinin ilgili satırları çakışır ve aralarındaki göreli kayıp 0 olur.",
       "zero-loss-equal-weights": "Tek bir alternatif değişen her kriterde aynı anda en iyidir (ya da kayıp sistemi dejeneredir); tüm göreli kayıplar sıfırlanır (P = 0, F = 0) ve etkin kriterler ağırlığı eşit paylaşır.",
-      "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı."
+      "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı.",
+      "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; düşük etki kaybının gerçek olup olmadığına bakın."
     },
     "copras": {
-      "no-cost-criteria": "Ağırlığı 0'dan büyük maliyet kriteri yok; bu yüzden Q = S+ ve COPRAS, SAW'ın toplam seçeneğiyle aynı sonucu veriyor."
+      "no-cost-criteria": "Ağırlığı 0'dan büyük maliyet kriteri yok; bu yüzden Q = S+ ve COPRAS, SAW'ın toplam seçeneğiyle aynı sonucu veriyor.",
+      "single-cost-criterion": "Tek bir etkin maliyet kriteri olduğunda sütun toplamı 1 / S- içinde sadeleşir ve maliyet doğrudan 1 / x ters değerleriyle hesaba katılır."
+    },
+    "codas": {
+      "no-spread": "Bütün alternatiflerin negatif-ideal çözüme Öklid uzaklığı 0 olduğundan hepsi 1. sırayı paylaşıyor.",
+      "taxicab-inactive": "Hiçbir alternatif çiftinin Öklid uzaklığı farkı τ eşiğine ulaşmadığından Taxicab uzaklıkları devreye girmiyor ve CODAS yalnız Öklid uzaklığıyla sıralıyor."
     },
     "cocoso": {
       "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",

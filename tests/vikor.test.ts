@@ -201,21 +201,24 @@ describe('VIKOR: v, guards and edge cases', () => {
     const prob = makeProblem([[1, 0], [0, 1], [0.5, 0.5]], ['benefit', 'benefit'])
     const res = vikor.compute(prob, w, {})
     expect(new Set(vec(res, 'vikor.groupUtility')).size).toBe(1)
-    expect(res.scores).toEqual([0.5, 0.5, 0])
+    expect(res.scores).toEqual([1, 1, 0])
     expect(res.warnings).toEqual([{ code: 'vikor.equal-group-utility' }])
     expect(vikor.compute(prob, w, { v: 0 }).warnings).toEqual([])
+    const c = compromiseOf(res)
+    expect([c.bestByS, c.bestByR, c.c2]).toEqual([false, true, true])
   })
   it('every R equal: the R term is 0, Q comes from S alone, with a notice when v < 1 (and no equal-regret notice at v = 1)', () => {
     // d = [.5, 0], [.5, .5], [0, .5]: R = .5 for all, S = .5, 1, .5.
     const prob = makeProblem([[0, 1], [0, 0], [1, 0]], ['benefit', 'benefit'])
     const res = vikor.compute(prob, w, {})
-    expect(res.scores).toEqual([0, 0.5, 0])
+    expect(res.scores).toEqual([0, 1, 0])
     expect(res.warnings).toContainEqual({ code: 'vikor.equal-regret' })
     expect(vikor.compute(prob, w, { v: 1 }).warnings).not.toContainEqual({ code: 'vikor.equal-regret' })
     // A1 and A3 tie for first: reported, both in the compromise set, A1 first by input order.
     expect(res.warnings).toContainEqual({ code: 'vikor.tie-for-first' })
     const c = compromiseOf(res)
     expect([c.first, c.second, c.tieAtTop, c.c1]).toEqual([0, 2, true, false])
+    expect([c.bestByS, c.bestByR, c.c2]).toEqual([true, false, true])
     expect(c.set).toEqual([0, 2])
   })
   it('every S equal up to rounding (non-dyadic weights): still flat, not rounding noise stretched to [0, 1]', () => {
@@ -226,12 +229,12 @@ describe('VIKOR: v, guards and edge cases', () => {
     const res = vikor.compute(makeProblem([[0, 0, 1, 5], [1, 1, 0, 5], [0.5, 0.5, 0.5, 5]], types), ws, {})
     const S = vec(res, 'vikor.groupUtility')
     expect(new Set(S).size).toBeGreaterThan(1) // the noise is really there
-    expectClose(res.scores, [0.5 * (0.05 / 0.15), 0.5, 0], 1e-12)
+    expectClose(res.scores, [0.05 / 0.15, 1, 0], 1e-12)
     expect(res.ranking).toEqual([2, 3, 1])
     expect(res.warnings).toContainEqual({ code: 'vikor.equal-group-utility' })
     // Two alternatives: A1 is better by R, not a tie.
     const two = vikor.compute(makeProblem([[0, 0, 1, 5], [1, 1, 0, 5]], types), ws, {})
-    expectClose(two.scores, [0, 0.5], 1e-12)
+    expectClose(two.scores, [0, 1], 1e-12)
     expect(two.ranking).toEqual([1, 2])
   })
   it('Q values that differ only by rounding are a tie for first, ordered by input index', () => {

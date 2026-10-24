@@ -7,7 +7,7 @@ import { validateAlternativeJudgements } from './methods/ahp'
 import { resolveParams } from './params'
 import { getRankingMethod } from './registry'
 import { hasErrors, ProblemValidationError, validateProblem, validateRequirements, type ValidationIssue } from './validate'
-import type { AlternativeJudgements, MethodParams, Problem, RankingResult } from './types'
+import type { AlternativeJudgements, MethodParams, MethodParamValue, Problem, RankingResult } from './types'
 
 /** Which ranking method to run and with which options (raw or resolved: defaults are filled in on prepare). */
 export type RankingRun = { methodId: string; params: MethodParams; judgements?: AlternativeJudgements | undefined }
@@ -50,15 +50,28 @@ export type Ranker = (weights: number[]) => RankingResult
 /** What robustness analyses take: the ranker for a problem (the reduced one, for criterion removal). */
 export type RankerFor = (problem: Problem, removed?: number) => Ranker
 
+const PER_CRITERION_ARRAY_KEYS = ['q', 'p', 'v', 'mode', 'criteriaFunctions'] as const
+
 /** The throwing form for analyses: an unknown method is an Error, blocking issues a ProblemValidationError. */
 export const rankerFor =
   (run: RankingRun): RankerFor =>
   (problem, removed) => {
     if (!getRankingMethod(run.methodId)) throw new Error(`unknown ranking method ${run.methodId}`)
-    const effectiveRun =
-      removed !== undefined && run.judgements
-        ? { ...run, judgements: run.judgements.filter((_, idx) => idx !== removed) }
-        : run
+    let effectiveRun = run
+    if (removed !== undefined) {
+      const nextParams: Record<string, MethodParamValue> = { ...run.params }
+      for (const key of PER_CRITERION_ARRAY_KEYS) {
+        const val = run.params[key]
+        if (Array.isArray(val)) {
+          nextParams[key] = val.filter((_, idx) => idx !== removed) as unknown as MethodParamValue
+        }
+      }
+      effectiveRun = {
+        ...run,
+        params: nextParams,
+        ...(run.judgements ? { judgements: run.judgements.filter((_, idx) => idx !== removed) } : {}),
+      }
+    }
     const { issues, rank } = prepareRanking(problem, effectiveRun)
     if (!rank) throw new ProblemValidationError(issues)
     return (weights) => {

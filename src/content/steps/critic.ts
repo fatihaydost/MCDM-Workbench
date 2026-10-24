@@ -66,8 +66,8 @@ export const critic = {
       tr: 'CRITIC ağırlıkları: her kriterin toplam bilgi içindeki payı.',
       tex: String.raw`w_j = \frac{C_j}{\sum_{k=1}^{n} C_k}`,
       edgeCase: {
-        en: 'If the total is 0 (every column constant), every weight is 1/n.',
-        tr: 'Toplam 0 ise (bütün sütunlar sabit) her ağırlık 1/n olur.',
+        en: 'All-constant columns get 1/n; with zero conflict, varying columns share 1/k equally.',
+        tr: 'Tüm sütunlar sabitse 1/n; çatışma sıfırsa değişen k sütun 1/k paylaşır.',
       },
       symbol: 'w',
       texSymbol: '$w_j$',

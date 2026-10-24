@@ -28,6 +28,8 @@ export type SweepChartProps = {
   rankingBand: [number, number]
   /** Alternatives drawn in the accent (first place at the cursor). */
   highlight: readonly number[]
+  /** Score orientation: 'asc' (VIKOR Q, lower is better) inverts the y-axis so the winner sits at the top. */
+  order?: 'desc' | 'asc' | undefined
   /** Closeness in the table (4 decimals). */
   format: (value: number) => string
   /** Axis tick label with the given decimals. */
@@ -75,6 +77,7 @@ export function SweepChart({
   pending = false,
   rankingBand,
   highlight,
+  order,
   format,
   formatTick,
   formatWeight,
@@ -88,8 +91,8 @@ export function SweepChart({
   const animate = useAnimateValues(width)
   // The cursor's exact values lie inside the range of the grid's; they never re-layout the chart.
   const layout = useMemo(
-    () => layoutSweep({ width, labelled: endLabels, plotHeight: width < 480 ? 200 : 240, xs, series, labels }),
-    [width, endLabels, xs, series, labels],
+    () => layoutSweep({ width, labelled: endLabels, plotHeight: width < 480 ? 200 : 240, xs, series, order, labels }),
+    [width, endLabels, xs, series, order, labels],
   )
   const { x, y, left, right, top, bottom } = layout
   const hi = new Set(highlight)

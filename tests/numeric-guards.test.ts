@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { critic, entropy, ProblemValidationError, saw, topsis, validateProblem, vikor, type CriterionType } from '../src/core'
-import { isConstant, maxOf, minOf } from '../src/core/math'
+import { isConstant, isNearConstant, maxOf, minOf } from '../src/core/math'
 import { makeProblem } from './helpers'
 
 const codes = (xs: { code: string }[] | undefined) => (xs ?? []).map((x) => x.code)
@@ -72,7 +72,14 @@ describe('a column constant up to rounding counts as constant', () => {
   it('isConstant is relative and has no floor', () => {
     expect(isConstant([0.3, 0.1 + 0.2])).toBe(true)
     expect(isConstant([0, 0, 0])).toBe(true)
+    expect(isConstant([-1e-15, 1e-15, 0])).toBe(true)
+    expect(isConstant([0, 1e-100, 0])).toBe(true)
     expect(isConstant([1e-13, 2e-13])).toBe(false)
+    expect(isConstant([1e-17, 1e-16, 2e-16])).toBe(false)
+    expect(isConstant([0, 2e-13, 8e-13])).toBe(false)
+    expect(isNearConstant([1e-17, 1e-16, 2e-16])).toBe(false)
+    expect(isNearConstant([0, 2e-13, 8e-13])).toBe(false)
+    expect(isNearConstant([-1e-10, 1e-10, 0])).toBe(true)
     expect(isConstant([1, 1 + 1e-9])).toBe(false)
   })
   it('validateProblem warns about it', () => {

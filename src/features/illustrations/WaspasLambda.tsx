@@ -109,8 +109,11 @@ export function WaspasLambda({
   const sweep = useMemo(() => res?.steps.find((x) => x.key === `${method}.lambdaSweep`)?.matrix ?? null, [method, res])
   const xs = WASPAS_LAMBDA_GRID as number[]
   const layout = useMemo(
-    () => (sweep ? layoutSweep({ width, plotHeight: width < 480 ? 200 : 240, xs, series: sweep, labels: names }) : null),
-    [width, sweep, xs, names],
+    () =>
+      sweep && res
+        ? layoutSweep({ width, plotHeight: width < 480 ? 200 : 240, xs, series: sweep, extra: res.scores, labels: names })
+        : null,
+    [width, sweep, res, xs, names],
   )
   if (!res || !sweep || !layout) return null
 
@@ -238,9 +241,9 @@ export function WaspasLambda({
           <text
             className={`${r.tick} ${s.stageItem}`}
             data-off={off(2)}
-            x={Math.min(Math.max(cx, left + 30), right - 30)}
+            x={cx}
             y={top - 12}
-            textAnchor="middle"
+            textAnchor={lambda <= 0.1 ? 'start' : lambda >= 0.9 ? 'end' : 'middle'}
             dominantBaseline="central"
           >
             {l.current}

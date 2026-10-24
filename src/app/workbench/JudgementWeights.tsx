@@ -121,6 +121,14 @@ export function JudgementWeights({ problem, method, result }: Props) {
   const answer = (v: Ratio) => {
     if (!question || index === null) return
     setJudgement(question.a, question.b, v)
+    if (!isAhp && v === 1 && best !== null && worst !== null && ((question.a === best && question.b === worst) || (question.a === worst && question.b === best))) {
+      for (let j = 0; j < n; j++) {
+        if (j !== best && j !== worst) {
+          setJudgement(best, j, 1)
+          setJudgement(j, worst, 1)
+        }
+      }
+    }
     const next = useWorkbench.getState().judgements ?? judgements
     setAt({ key, index: nextUnanswered(questions, next.pairs, (q) => qMode(q, next), index) })
   }
@@ -187,11 +195,12 @@ export function JudgementWeights({ problem, method, result }: Props) {
     flagged: t('workbench.pairwise.list.flagged'),
   }
 
+  const aBW = !isAhp && worst !== null ? (answers?.bestToOthers[worst] ?? null) : null
   const consistency: Consistency | null = isAhp
     ? ahpProg && ahpProg.cr !== null && ahpProg.threshold !== null
       ? { value: ahpProg.cr, threshold: ahpProg.threshold, approximate: false, inclusive: true }
       : null
-    : bwmProg && bwmProg.crInput !== null && bwmProg.threshold
+    : bwmProg && bwmProg.crInput !== null && bwmProg.threshold !== null && aBW !== 1
       ? { value: bwmProg.crInput, threshold: bwmProg.threshold.value, approximate: bwmProg.threshold.approximate }
       : null
 

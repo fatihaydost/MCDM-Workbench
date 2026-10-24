@@ -271,27 +271,39 @@ export function RankingStage() {
       ) : (
         <>
           <MethodWarnings warnings={result.warnings} problem={problem} />
-          <p className="text-20 font-semibold text-text" data-testid="best-sentence">
-            {(() => {
-              const firsts = leaders(result)
-              if (firsts.length > 1) {
-                const leaderScores = firsts.map((i) => result.scores[i]!).filter(Number.isFinite)
-                const minL = Math.min(...leaderScores)
-                const maxL = Math.max(...leaderScores)
-                const val = leaderScores.length > 1 && maxL - minL > 1e-9 ? `${nf.format(minL)} .. ${nf.format(maxL)}` : nf.format(result.scores[best])
-                return t('workbench.ranking.bestTied', {
-                  names: firsts.map((i) => alternativeName(problem, i, t)).join(', '),
+          <div className="flex flex-col gap-1">
+            <p className="text-20 font-semibold text-text" data-testid="best-sentence">
+              {(() => {
+                const firsts = leaders(result)
+                if (firsts.length > 1) {
+                  const leaderScores = firsts.map((i) => result.scores[i]!).filter(Number.isFinite)
+                  const minL = Math.min(...leaderScores)
+                  const maxL = Math.max(...leaderScores)
+                  const val = leaderScores.length > 1 && maxL - minL > 1e-9 ? `${nf.format(minL)} .. ${nf.format(maxL)}` : nf.format(result.scores[best])
+                  return t('workbench.ranking.bestTied', {
+                    names: firsts.map((i) => alternativeName(problem, i, t)).join(', '),
+                    symbol: scoreWords(rankingMethod, t).symbol,
+                    value: val,
+                  })
+                }
+                return t('workbench.ranking.best', {
+                  name: alternativeName(problem, best, t),
                   symbol: scoreWords(rankingMethod, t).symbol,
-                  value: val,
+                  value: nf.format(result.scores[best]),
                 })
-              }
-              return t('workbench.ranking.best', {
-                name: alternativeName(problem, best, t),
-                symbol: scoreWords(rankingMethod, t).symbol,
-                value: nf.format(result.scores[best]),
-              })
+              })()}
+            </p>
+            {(() => {
+              const altNames = problem.alternatives.map((_, i) => alternativeName(problem, i, t))
+              const verdict = view.verdict?.(result, altNames, t, (v) => nf.format(v)) ?? null
+              if (!verdict || verdict.failed.length === 0) return null
+              return (
+                <p className="max-w-[70ch] text-15 text-text" data-testid="ranking-vikor-verdict">
+                  {verdict.failed.join(' ')} <span className="font-semibold">{verdict.result}.</span>
+                </p>
+              )
             })()}
-          </p>
+          </div>
           <div className={cn('grid grid-cols-1 items-start gap-8', !pictureShowsScores && 'xl:grid-cols-2')}>
             {!pictureShowsScores && <ScoreChart problem={problem} result={result} method={rankingMethod} className="min-w-0" />}
             {weights.value && Picture && (

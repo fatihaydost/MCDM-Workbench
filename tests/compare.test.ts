@@ -26,8 +26,9 @@ describe('bordaCount', () => {
   it('sums n - rank', () => {
     expect(bordaCount([[1, 2, 3], [2, 1, 3], [1, 3, 2]])).toEqual({ points: [5, 3, 1], ranking: [1, 2, 3] })
   })
-  it('shares tied ranks', () => {
+  it('shares tied ranks using mid-ranks', () => {
     expect(bordaCount([[1, 2], [2, 1]])).toEqual({ points: [1, 1], ranking: [1, 1] })
+    expect(bordaCount([[1, 1, 3]])).toEqual({ points: [1.5, 1.5, 0], ranking: [1, 1, 3] })
   })
 })
 
@@ -80,8 +81,8 @@ describe('compareRankings', () => {
       [1, 5, 7, 9, 6, 8, 1, 3, 4, 9], // ELECTRE III
       [1, 2, 6, 10, 7, 8, 3, 4, 5, 9], // AHP (sum normalization from matrix)
     ])
-    expect(c.borda!.points[0]).toBe(125)
-    expect(c.borda!.points[6]).toBe(111)
+    expect(c.borda!.points[0]).toBe(124.5)
+    expect(c.borda!.points[6]).toBe(110.5)
     expect(c.borda!.ranking[0]).toBe(1)
     expect(c.borda!.ranking[6]).toBe(2)
     expect(c.firstPlace).toEqual({ alternative: 0, methods: 13, of: 14 })
@@ -185,6 +186,38 @@ describe('compareRankings with method options', () => {
     ])
     expect(usual.echoes).toEqual([])
     expect(usual.comparable).toBe(true)
+  })
+  it('COPRAS with at most 1 active cost criterion echoes SAW (sum) or AHP, and VIKOR with v = 1 echoes MABAC', () => {
+    const oneCost: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'cost' },
+      ],
+      matrix: [
+        [10, 4],
+        [20, 8],
+        [15, 5],
+      ],
+    }
+    const w = [0.6, 0.4]
+    const coprasSaw = compareRankings(oneCost, w, [
+      { methodId: 'saw', params: { normalization: 'sum' } },
+      { methodId: 'copras', params: {} },
+    ])
+    expect(coprasSaw.echoes).toEqual([{ methodId: 'copras', of: 'saw' }])
+
+    const coprasAhp = compareRankings(oneCost, w, [
+      { methodId: 'ahp-ranking', params: {} },
+      { methodId: 'copras', params: {} },
+    ])
+    expect(coprasAhp.echoes).toEqual([{ methodId: 'copras', of: 'ahp-ranking' }])
+
+    const vikorMabac = compareRankings(problem(), ex.weights!, [
+      { methodId: 'mabac', params: {} },
+      { methodId: 'vikor', params: { v: 1 } },
+    ])
+    expect(vikorMabac.echoes).toEqual([{ methodId: 'vikor', of: 'mabac' }])
   })
   it('has an EN and a TR message for the one-ranking case', () => {
     expect(en.onlyOneRanking).toMatch(/^Only one ranking: MARCOS/)

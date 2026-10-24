@@ -11,6 +11,7 @@ export type CodasParts = {
   euclidean: number[]
   taxicab: number[]
   scores: number[]
+  ranking: number[]
   order: number[]
 }
 
@@ -25,7 +26,7 @@ export function codasParts(problem: Problem, weights: readonly number[], tau: nu
   const euclidean = res.steps.find((x) => x.key === 'codas.euclidean')!.vector!
   const taxicab = res.steps.find((x) => x.key === 'codas.taxicab')!.vector!
   const order = res.scores.map((_, i) => i).sort((x, y) => res.ranking[x]! - res.ranking[y]! || x - y)
-  return { euclidean, taxicab, scores: res.scores, order }
+  return { euclidean, taxicab, scores: res.scores, ranking: res.ranking, order }
 }
 
 const defaultFormat = (v: number, d: number) => v.toFixed(d)
@@ -108,7 +109,7 @@ export function CodasIdea({
   const taxicabOff = stage >= 1 ? undefined : ''
   const scoreOff = stage >= 2 ? undefined : ''
 
-  const { euclidean, taxicab, scores, order } = parts
+  const { euclidean, taxicab, scores, ranking, order } = parts
   const names = problem.alternatives
   const m = names.length
   const W = Math.max(width, 240)
@@ -120,14 +121,16 @@ export function CodasIdea({
   const rowText = (i: number) => l.row(names[i]!, eTexts[i]!, tTexts[i]!, sTexts[i]!)
 
   const valueWidth = Math.ceil(Math.max(...sTexts.map((t) => estimateTextWidth(t, FONT)))) + GAP
-  const scoreWidth = Math.round(Math.min(150, Math.max(64, W * 0.24)))
   const maxName = Math.max(...names.map((x) => estimateTextWidth(x, FONT)))
   const labelWidth = stacked ? 0 : Math.ceil(Math.min(maxName + GAP * 2, Math.max(W * 0.24, 56)))
 
+  const avail = Math.max(80, W - labelWidth - valueWidth - GAP * 4)
+  const scoreWidth = Math.round(Math.min(150, Math.max(40, avail * 0.38)))
+  const distWidth = Math.max(40, avail - scoreWidth)
   const distLeft = labelWidth
-  const distRight = Math.max(distLeft + 40, W - valueWidth - scoreWidth - GAP * 3)
+  const distRight = distLeft + distWidth
   const maxDist = Math.max(...euclidean, ...taxicab, 1e-12)
-  const unitDist = (distRight - distLeft) / maxDist
+  const unitDist = distWidth / maxDist
 
   const sLeft = distRight + GAP * 3
   const neg = Math.max(-Math.min(...scores), 0)
@@ -197,7 +200,7 @@ export function CodasIdea({
                 key={i}
                 className={s.sawRow}
                 style={{ transform: `translate(0px, ${HEAD + row * rowStep}px)` }}
-                data-highlight={row === 0 || undefined}
+                data-highlight={ranking[i] === 1 || undefined}
                 data-testid="codas-row"
               >
                 <text className={s.sawName} x={0} y={stacked ? NAME_LINE / 2 : mid} dominantBaseline="central">

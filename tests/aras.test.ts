@@ -60,7 +60,9 @@ describe('ARAS: Bakır and Atalık 2018 (İşletme Araştırmaları Dergisi 10(1
   it('emits its steps in order, with extended column sums equal to 1 and diagnostics', () => {
     expect(res.steps.map((s) => s.key)).toEqual([
       'aras.optimalRow',
+      'aras.optimalNormalized',
       'aras.normalized',
+      'aras.optimalWeighted',
       'aras.weighted',
       'aras.optimalScore',
       'aras.optimality',

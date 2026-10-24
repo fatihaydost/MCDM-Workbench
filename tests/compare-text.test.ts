@@ -25,7 +25,12 @@ const labels: Record<string, string> = { topsis: 'TOPSIS', saw: 'SAW', 'ahp-rank
 
 async function ctx(lang: 'en' | 'tr', p: Problem, identical = false): Promise<WhyContext> {
   const i = i18next.createInstance()
-  await i.init({ lng: lang, resources: { en: { compare: en }, tr: { compare: tr } }, ns: ['compare'] })
+  await i.init({
+    lng: lang,
+    resources: { en: { compare: en }, tr: { compare: tr } },
+    ns: ['compare'],
+    interpolation: { escapeValue: false },
+  })
   return {
     names: p.alternatives,
     criteria: p.criteria.map((c) => c.name),
@@ -79,12 +84,32 @@ describe('whySentences', () => {
     expect(await ctxAndRun('tr', { ...flipSides, vikorRegret: { a: 2, b: 0, ra: 0.03, rb: 0.04 } })).toBe(
       "VIKOR'un en büyük pişmanlığı A1 için C3, A7 için C1 kriterinde, daha büyüğü A7 için.",
     )
-    expect(await ctxAndRun('en', { ...f, vikorRegret: { a: 2, b: 1, ra: 0.03, rb: 0.03 } })).toBe(
-      "VIKOR's largest regrets for A1 and A7 are equal.",
-    )
+    const equalRegretSentences = whySentences({ ...f, vikorRegret: { a: 2, b: 1, ra: 0.03, rb: 0.03 } }, await ctx('en', p))
+    expect(equalRegretSentences.at(-1)).toBe("VIKOR's largest regrets for A1 and A7 are equal.")
+    expect(equalRegretSentences.some((s) => s.startsWith('VIKOR weighs the total against the single largest regret'))).toBe(false)
     // When VIKOR ranks A7 (b) above A1 (a) via S despite A7 having larger R, omit the misleading regret sentence.
     const contradicted = whySentences({ ...f, vikorRegret: { a: 2, b: 0, ra: 0.03, rb: 0.04 } }, await ctx('en', p))
     expect(contradicted.some((s) => s.includes('largest regret for'))).toBe(false)
+  })
+
+  it('deduplicates SAW and AHP additive-sum character sentences so another minority method gets a voice', async () => {
+    const f: PairFacts = {
+      ...pairFacts(p, ex.weights!, c, 0, 6),
+      vikorRegret: null,
+      methods: [
+        { methodId: 'topsis', higher: 'a' },
+        { methodId: 'vikor', higher: 'a' },
+        { methodId: 'edas', higher: 'a' },
+        { methodId: 'moora', higher: 'a' },
+        { methodId: 'saw', higher: 'b' },
+        { methodId: 'ahp-ranking', higher: 'b' },
+        { methodId: 'waspas', higher: 'b' },
+      ],
+    }
+    const s = whySentences(f, await ctx('en', p))
+    expect(s.some((x) => x.startsWith('SAW adds up the weighted values'))).toBe(true)
+    expect(s.some((x) => x.startsWith("AHP adds up each criterion's local priorities"))).toBe(false)
+    expect(s.some((x) => x.startsWith('WASPAS blends a sum with a product'))).toBe(true)
   })
 
   it('a 2-2 split explains both sides within five sentences', async () => {

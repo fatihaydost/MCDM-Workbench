@@ -54,6 +54,8 @@ export const lopcow: WeightingMethod = {
       : total === 0
         ? constant.map((c) => (c ? 0 : 1 / varying))
         : pv.map((v) => v / total)
+    const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
+    if (!allConstant && weights[top]! > 0.5) warnings.push({ code: 'lopcow.dominant-weight', col: top })
 
     return {
       weights,

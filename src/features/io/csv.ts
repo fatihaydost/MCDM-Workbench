@@ -1,5 +1,6 @@
 import { gridToProblem, problemToGrid, type GridImportOptions, type ImportedProblem, type ImportResult, type TypeWords } from './grid'
 import { formatNumber, type DecimalSeparator } from './numbers'
+import { isWeightRowLabel, parseCellNumber } from './xlsx'
 
 export type Delimiter = ',' | ';' | '\t'
 
@@ -112,7 +113,10 @@ export type CsvImportOptions = GridImportOptions & {
   delimiter?: Delimiter
 }
 
-export type CsvImportResult = ImportResult & { delimiter: Delimiter }
+export type CsvImportResult = Omit<ImportResult, 'problem'> & {
+  problem: ImportedProblem & { weights?: number[] }
+  delimiter: Delimiter
+}
 
 /**
  * Reads a decision matrix from CSV or TSV text (comma, semicolon or tab; quoted fields; BOM;
@@ -120,10 +124,52 @@ export type CsvImportResult = ImportResult & { delimiter: Delimiter }
  */
 export function importCsv(text: string, opts: CsvImportOptions = {}): CsvImportResult {
   const delimiter = opts.delimiter ?? detectDelimiter(text)
-  const rows = parseDelimited(text, delimiter)
+  const rawRows = parseDelimited(text, delimiter)
+  let skip = Infinity
+  for (const r of rawRows) {
+    const k = r.findIndex((c) => c.trim() !== '')
+    if (k >= 0) skip = Math.min(skip, k)
+  }
+  if (!Number.isFinite(skip)) skip = 0
+
+  let weightRowCells: string[] | null = null
+  const rows: (string | number)[][] = []
+  for (const r of rawRows) {
+    if (weightRowCells === null && isWeightRowLabel(r[skip])) {
+      weightRowCells = r.slice(skip + 1)
+      continue
+    }
+    rows.push(
+      r.map((cell) => {
+        if (cell.includes('.') && cell.includes(',')) {
+          const parsed = parseCellNumber(cell)
+          if (parsed !== null) return parsed
+        }
+        return cell
+      }),
+    )
+  }
   const fallback: DecimalSeparator = opts.decimalFallback ?? (delimiter === ';' ? ',' : '.')
   const result = gridToProblem(rows, { ...opts, decimalFallback: fallback })
-  return { ...result, delimiter }
+  const n = result.problem.criteria.length
+  let extractedWeights: number[] | undefined
+  if (n > 0 && weightRowCells !== null) {
+    const parsed = Array.from({ length: n }, (_, j) => parseCellNumber(weightRowCells![j], result.decimal))
+    if (parsed.every((w): w is number => w !== null && Number.isFinite(w) && w >= 0)) {
+      const sum = parsed.reduce((a, b) => a + b, 0)
+      if (sum > 0) extractedWeights = parsed
+    }
+  }
+  const problemWithWeights: ImportedProblem & { weights?: number[] } = { ...result.problem }
+  if (extractedWeights) {
+    Object.defineProperty(problemWithWeights, 'weights', {
+      value: extractedWeights,
+      enumerable: false,
+      configurable: true,
+      writable: true,
+    })
+  }
+  return { ...result, problem: problemWithWeights, delimiter }
 }
 
 export type CsvExportOptions = {

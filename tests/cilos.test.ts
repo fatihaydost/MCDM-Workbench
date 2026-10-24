@@ -60,12 +60,13 @@ describe('CILOS: Zavadskas et al. 2017 Social block (Table 4 & Table 10, 21 elde
     expect(res.diagnostics?.sharedOptimum).toBe(1)
   })
 
-  it('emits normalized, squareMatrix, lossMatrix, systemMatrix, and weights steps in order', () => {
+  it('emits normalized, squareMatrix, lossMatrix, systemMatrix, totalLoss, and weights steps in order', () => {
     expect(res.steps.map((s) => s.key)).toEqual([
       'cilos.normalized',
       'cilos.squareMatrix',
       'cilos.lossMatrix',
       'cilos.systemMatrix',
+      'cilos.totalLoss',
       'cilos.weights',
     ])
   })
@@ -351,5 +352,35 @@ describe('CILOS: mathematical properties and edge cases', () => {
     expect(withConst.warnings).toContainEqual({ code: 'cilos.zero-loss-equal-weights' })
     expect(withConst.diagnostics?.zeroLoss).toBe(1)
     assertAllFinite(withConst.steps, withConst.weights)
+  })
+
+  it('prevents absorbing criterion collapse (f_jj = 0 on one active criterion) by assigning equal weights across active criteria', () => {
+    // C2 is tied at the top on rows 0 and 1, which are the unique winners of C0 and C1.
+    // Thus column 2 of P has 0 loss (f_22 = 0), which would otherwise absorb all weight into C2.
+    const res3 = run(
+      [
+        [10, 4, 10],
+        [4, 10, 10],
+        [2, 2, 2],
+      ],
+      ['benefit', 'benefit', 'benefit'],
+    )
+    expectClose(res3.weights, [1 / 3, 1 / 3, 1 / 3], 1e-15)
+    expect(res3.warnings).toContainEqual({ code: 'cilos.shared-optimum' })
+    expect(res3.warnings).toContainEqual({ code: 'cilos.zero-loss-equal-weights' })
+    expect(res3.diagnostics?.zeroLoss).toBe(1)
+
+    const res2 = run(
+      [
+        [10, 10],
+        [8, 10],
+        [2, 2],
+      ],
+      ['benefit', 'benefit'],
+    )
+    expectClose(res2.weights, [0.5, 0.5], 1e-15)
+    expect(res2.warnings).toContainEqual({ code: 'cilos.shared-optimum' })
+    expect(res2.warnings).toContainEqual({ code: 'cilos.zero-loss-equal-weights' })
+    expect(res2.diagnostics?.zeroLoss).toBe(1)
   })
 })

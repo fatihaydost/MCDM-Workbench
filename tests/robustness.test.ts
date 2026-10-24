@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { critic, entropy, equal, merec, rankScores, roc, saw, swara, topsis, type MethodParams, type Problem, type RankingMethod } from '../src/core'
+import { critic, electreIII, entropy, equal, merec, rankerFor, rankScores, roc, saw, swara, topsis, type MethodParams, type Problem, type RankingMethod } from '../src/core'
 import {
   createRng,
   DEFAULT_DELTAS,
@@ -724,10 +724,10 @@ describe('monteCarlo progress', () => {
 })
 
 describe('robustness helpers and chart layout', () => {
-  it('recomputable disables recompute for equal, roc, swara and judgement-based methods', () => {
+  it('recomputable disables recompute for equal and judgement-based methods while allowing objective, roc and swara', () => {
     expect(recomputable('equal')).toBeUndefined()
-    expect(recomputable('roc')).toBeUndefined()
-    expect(recomputable('swara')).toBeUndefined()
+    expect(recomputable('roc')?.id).toBe('roc')
+    expect(recomputable('swara')?.id).toBe('swara')
     expect(recomputable('ahp')).toBeUndefined()
     expect(recomputable('bwm')).toBeUndefined()
     expect(recomputable('critic')?.id).toBe('critic')
@@ -743,12 +743,12 @@ describe('robustness helpers and chart layout', () => {
     ]
     const marks = switchMarks(intervals, (wk) => [wk, 1 - wk, 0.2])
     expect(marks).toEqual([
-      { x: 0.4, y: 0.5 },
-      { x: 0.6, y: 0.5 },
+      { x: 0.4, y: 0.6 },
+      { x: 0.6, y: 0.6 },
     ])
   })
 
-  it('removeCriteria returns [] when base ranking fails validation, and slices array weightingParams', () => {
+  it('removeCriteria returns [] when base ranking fails validation, and slices array weightingParams and ranking params', () => {
     const p = makeProblem([[0, 2, 3], [2, 1, 4], [1, 3, 2]], ['benefit', 'benefit', 'benefit'])
     expect(removeCriteria(p, [0.4, 0.3, 0.3], (q) => (w) => saw.compute(q, w, {}))).toEqual([])
 
@@ -771,6 +771,20 @@ describe('robustness helpers and chart layout', () => {
     }).filter((r) => r.mode === 'recompute')
     expect(rocRows).toHaveLength(3)
     expectClose(rocRows[0]!.weights, [0, 0.75, 0.25], 1e-12)
+
+    const wangEx = examples.find((e) => e.id === 'wang-2008-waste-incineration')!
+    const wangProb: Problem = {
+      alternatives: wangEx.alternatives,
+      criteria: wangEx.criteria.map((c) => ({ name: c.name.en, type: c.type })),
+      matrix: wangEx.matrix,
+    }
+    const wangRun = {
+      methodId: electreIII.id,
+      params: wangEx.methodParams!['electre-iii'] as unknown as MethodParams,
+    }
+    const wangRows = removeCriteria(wangProb, wangEx.weights!, rankerFor(wangRun))
+    expect(wangRows).toHaveLength(11)
+    expect(wangRows.every((r) => !r.blocked && r.ranking.length === 11)).toBe(true)
   })
 
   it('layoutSweep keeps x domain at [0, 1] and clamps extreme endpoint spikes in y', () => {

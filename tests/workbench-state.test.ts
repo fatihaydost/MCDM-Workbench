@@ -906,19 +906,62 @@ describe('examples with methodParams, lifecycle resets, alternativeJudgements un
     expect(st().methodParams).toEqual({})
   })
 
-  it('computeWeights blocks on an invalid matrix cell even in manual and equal modes', () => {
+  it('computeWeights does not block manual or equal modes on an invalid matrix cell, while computeRanking still blocks', () => {
     const p = draftOf('opricovic-tzeng-2004-f')
     const matrix = p.matrix.map((r) => [...r]) as (number | null)[][]
     matrix[0]![0] = null
     const draft = { ...p, matrix }
 
     const wManual = computeWeights({ problem: draft, weightMethod: 'manual', manualWeights: [0.5, 0.5] })
-    expect(wManual.value).toBeNull()
-    expect(wManual.issues).toContainEqual({ code: 'invalid-cell', severity: 'error', row: 0, col: 0 })
+    expect(wManual.value).not.toBeNull()
+    expect(wManual.value!.weights).toEqual([0.5, 0.5])
 
     const wEqual = computeWeights({ problem: draft, weightMethod: 'equal', manualWeights: [] })
-    expect(wEqual.value).toBeNull()
-    expect(wEqual.issues).toContainEqual({ code: 'invalid-cell', severity: 'error', row: 0, col: 0 })
+    expect(wEqual.value).not.toBeNull()
+    expect(wEqual.value!.weights).toEqual([0.5, 0.5])
+
+    const rEqual = computeRanking({ problem: draft, weightMethod: 'equal', manualWeights: [], rankingMethod: 'topsis' })
+    expect(rEqual.value).toBeNull()
+    expect(rEqual.issues).toContainEqual({ code: 'invalid-cell', severity: 'error', row: 0, col: 0 })
+  })
+
+  it('setMethodParam clears custom per-criterion arrays when preset/function changes, and criterion edits resize methodParams cleanly', () => {
+    const st = () => useWorkbench.getState()
+    st().loadExample('kersuliene-2010-dispute', 'en')
+    expect(st().methodParams?.swara?.s).toBeDefined()
+    st().setMethodParam('swara', 'stepRatio', 'gentle')
+    expect(st().methodParams?.swara?.s).toBeUndefined()
+    expect(computeWeights(st()).value).not.toBeNull()
+
+    // Deleting or adding a criterion with custom swara.s / roc.ranks never throws RangeError
+    st().loadExample('kersuliene-2010-dispute', 'en')
+    st().removeCriterion(2)
+    expect(computeWeights(st()).value).not.toBeNull()
+    st().addCriterion({ name: 'Extra', type: 'benefit' })
+    st().setCell(0, 5, 1)
+    st().setCell(1, 5, 2)
+    st().setCell(2, 5, 3)
+    st().setCell(3, 5, 4)
+    expect(computeWeights(st()).value).not.toBeNull()
+
+    // ELECTRE III preset switch clears custom q, p, v, mode
+    st().loadExample('wang-2008-waste-incineration', 'en')
+    expect(st().methodParams?.['electre-iii']?.q).toBeDefined()
+    st().setMethodParam('electre-iii', 'thresholdPreset', 'strict')
+    expect(st().methodParams?.['electre-iii']?.q).toBeUndefined()
+    expect(computeRanking(st()).value).not.toBeNull()
+  })
+
+  it('localizeExample preserves user-customized alternative and criterion names', () => {
+    const st = () => useWorkbench.getState()
+    st().loadExample('podvezko-2011-baltic', 'en')
+    st().setAlternativeName(0, 'My Custom Country')
+    st().setCriterion(0, { name: 'My Custom Criterion' })
+    st().localizeExample('tr')
+    expect(st().problem.alternatives[0]).toBe('My Custom Country')
+    expect(st().problem.alternatives[1]).toBe('Letonya')
+    expect(st().problem.criteria[0]!.name).toBe('My Custom Criterion')
+    expect(st().problem.criteria[3]!.name).toBe('İşsizlik oranı (%)')
   })
 
   it('restores alternativeJudgements after deleting a criterion or alternative and undoing via setProblem', () => {

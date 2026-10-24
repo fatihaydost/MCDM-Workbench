@@ -9,7 +9,7 @@ import { isEmptyProblem, useRanking, useWeights, useWorkbench } from '../../stat
 import { Button, EmptyState, Notice } from '../../ui'
 import { methodViews } from '../methods/views'
 import { useWorkbenchNav } from './nav'
-import { BlockedByIssues, CalculationToggle, ContinueBar, SectionTitle } from './parts'
+import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
 import { bestIndex, leaders, RankingTable } from './RankingStage'
 import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, rankingMethodFullLabel, scoreWords, stepName, weightMethodFullLabel } from './shared'
 import { WeightsChart } from './WeightsStage'
@@ -162,6 +162,7 @@ export function ResultsStage() {
 
   return (
     <div className="flex flex-col gap-10 pt-4">
+      <MethodWarnings warnings={result.warnings} problem={problem} />
       <section aria-labelledby="wb-results-headline" className="flex flex-col gap-5">
         <div className="flex flex-col gap-1">
           <p id="wb-results-headline" className="text-24 font-semibold text-text">

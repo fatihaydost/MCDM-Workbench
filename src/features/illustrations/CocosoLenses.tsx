@@ -96,7 +96,6 @@ export function CocosoLenses({ problem, weights, lambda, format = defaultFormat,
   const names = problem.alternatives
   const m = names.length
   const order = names.map((_, i) => i).sort((a, b) => res.ranking[a]! - res.ranking[b]! || a - b)
-  const best = order[0]!
   const W = Math.max(width, 240)
   const stacked = W < STACK_BELOW
   const kText = res.scores.map((v) => format(v, 4))
@@ -119,6 +118,7 @@ export function CocosoLenses({ problem, weights, lambda, format = defaultFormat,
   }
 
   const move = (e: KeyboardEvent<SVGGElement>) => {
+    if (stepping) return
     let next = focus
     if (e.key === 'ArrowDown') next = Math.min(m - 1, focus + 1)
     else if (e.key === 'ArrowUp') next = Math.max(0, focus - 1)
@@ -158,12 +158,13 @@ export function CocosoLenses({ problem, weights, lambda, format = defaultFormat,
         <g onKeyDown={move} onMouseLeave={() => setActive(null)}>
           {order.map((i, row) => {
             const short = truncate(names[i]!, stacked ? W - valueWidth : labelWidth - GAP, FONT)
+            const isBest = res.ranking[i] === 1
             return (
               <g
                 key={i}
                 className={s.sawRow}
                 style={{ transform: `translate(0px, ${HEAD + row * rowStep}px)` }}
-                data-highlight={i === best || undefined}
+                data-highlight={isBest || undefined}
                 data-testid="cocoso-row"
                 onMouseEnter={stepping ? undefined : () => setActive(row)}
               >
@@ -177,7 +178,7 @@ export function CocosoLenses({ problem, weights, lambda, format = defaultFormat,
                     className={`${s.marcosBar} ${s.stageItem}`}
                     data-on={active === row || undefined}
                     data-off={off(c)}
-                    data-highlight={(c === 3 && i === best) || undefined}
+                    data-highlight={(c === 3 && isBest) || undefined}
                     x={0}
                     y={barY}
                     width={1}

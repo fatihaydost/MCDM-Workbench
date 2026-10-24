@@ -15,6 +15,7 @@ export const cilos: MethodView<'weighting'> = {
     const weights = method.compute(problem('zavadskas-2017-vilnius-social'), {}).weights
     return { kind: 'bars', values: weights, highlight: geometry.argMax(weights) }
   },
+  columns: [{ step: 'cilos.totalLoss', label: 'workbench.weights.columns.totalLoss', decimals: 4 }],
   stage: preloadable(() => pictures().then((m) => ({ default: m.Stage }))),
   ledger: {
     example: 'zavadskas-2017-vilnius-social',

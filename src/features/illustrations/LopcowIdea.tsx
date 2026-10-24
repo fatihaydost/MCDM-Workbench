@@ -72,7 +72,8 @@ export function LopcowIdea({ problem, format = defaultFormat, labels, step, expl
   if (!parts) return null
 
   const n = problem.criteria.length
-  const hi = argMax(parts.weights)
+  const hasSpread = parts.weights.length > 1 && Math.max(...parts.weights) - Math.min(...parts.weights) > 1e-12
+  const hi = hasSpread ? argMax(parts.weights) : -1
   const weightTexts = parts.weights.map((w) => format(w))
   const pvTexts = parts.pv.map((v) => format(v))
   const stepping = step !== null && step !== undefined
@@ -95,6 +96,7 @@ export function LopcowIdea({ problem, format = defaultFormat, labels, step, expl
   const x1 = x0 + stripW + OP
   const pad = 6
   const strip = scaleLinear([0, 1], [x0 + pad, x0 + stripW - pad])
+  const maxPv = Math.max(...parts.pv, 0)
   const maxWeight = Math.max(...parts.weights) || 1
   const height = HEAD + n * ROW
   const table: ChartTable = {
@@ -145,7 +147,9 @@ export function LopcowIdea({ problem, format = defaultFormat, labels, step, expl
           const lo = strip(0)
           const rmsX = strip(q)
           const sdX = strip(sg)
+          const pvw = maxPv > 0 ? (parts.pv[j]! / maxPv) * weightW : 0
           const ww = (parts.weights[j]! / maxWeight) * weightW
+          const bw = stage === 2 ? pvw : ww
           const on = j === hi && stage === 3
           const short = truncate(c.name, nameW - 12, 13)
           return (
@@ -191,12 +195,12 @@ export function LopcowIdea({ problem, format = defaultFormat, labels, step, expl
                 style={{
                   transform:
                     stage >= 2
-                      ? `translate(${x1}px, ${y - 7}px) scale(${Math.max(ww, 1)}, 14)`
+                      ? `translate(${x1}px, ${y - 7}px) scale(${bw > 0 ? Math.max(bw, 1) : 0}, 14)`
                       : `translate(${lo}px, ${y + 1}px) scale(${Math.max(rmsX - lo, 1)}, 4)`,
                 }}
               />
               {steppable ? (
-                <text className={`${s.barValue} ${s.stageItem} ${s.criticValue}`} data-off={only(2)} x={x1 + ww + 6} y={y} dominantBaseline="central">
+                <text className={`${s.barValue} ${s.stageItem} ${s.criticValue}`} data-off={only(2)} x={x1 + pvw + 6} y={y} dominantBaseline="central">
                   {pvTexts[j]}
                 </text>
               ) : null}

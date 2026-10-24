@@ -30,10 +30,10 @@ export const cilos: MethodContent = {
     },
     {
       title: { en: 'Matrix of column winners', tr: 'Sütun birincileri matrisi' },
-      tex: String.raw`k_j = \arg\max_i \bar x_{ij}, \qquad a_{ij} = \bar x_{k_i j}`,
+      tex: String.raw`W_i = \arg\max_r \bar x_{ri}, \qquad a_{ij} = \frac{1}{|W_i|}\sum_{r \in W_i} \bar x_{rj}`,
       note: {
-        en: 'Row i of the n x n matrix A is the alternative that is best on criterion i, so a_ii is the column maximum (ties: first occurrence).',
-        tr: 'n x n boyutlu A matrisinin i. satırı, i. kriterde en iyi olan alternatiftir; yani a_ii sütunun en büyük değeridir (eşitlikte ilk bulunan alınır).',
+        en: 'Row i of the n x n matrix A is the winning row on criterion i (ties are averaged for row-order invariance), so a_ii is the column maximum.',
+        tr: 'n x n boyutlu A matrisinin i. satırı, i. kriterde birinci olan satırdır (sıra bağımsızlığı için eşitliklerin ortalaması alınır); yani a_ii sütunun en büyük değeridir.',
       },
     },
     {
@@ -122,7 +122,7 @@ export const cilos: MethodContent = {
     ],
     pitfalls: [
       'A constant column makes the system rank-deficient; it is dropped (weight 0) with a warning and the rest is solved.',
-      'Ties for the column maximum change the matrix A; the first occurrence is taken.',
+      'Ties for the column maximum are averaged across all tied winners so alternative order never alters the weights.',
       'If one alternative is best on every varying criterion, all losses in P are 0 (F = 0), so the varying criteria share the weight equally with a warning.',
     ],
   },
@@ -145,7 +145,7 @@ export const cilos: MethodContent = {
     ],
     pitfalls: [
       'Sabit sütun sistemin rankını düşürür; o sütun çıkarılır (ağırlık 0), uyarı verilir ve kalanlar çözülür.',
-      'Sütun maksimumunda eşitlik A matrisini değiştirir; ilk bulunan alınır.',
+      'Sütun maksimumundaki eşitliklerde tüm eş birincilerin ortalaması alınır; böylece alternatif sırası ağırlıkları değiştirmez.',
       'Tek bir alternatif değişen her kriterde en iyiyse P içindeki tüm kayıplar 0 olur (F = 0); değişen kriterler uyarı verilerek ağırlığı eşit paylaşır.',
     ],
   },

@@ -103,9 +103,16 @@ export function SwaraIdea({
   if (!computed) return null
 
   const n = problem.criteria.length
+  const perm =
+    order &&
+    order.length === n &&
+    order.every((idx) => Number.isInteger(idx) && idx >= 0 && idx < n) &&
+    new Set(order).size === n
+      ? order
+      : problem.criteria.map((_, j) => j)
   const hi = argMax(computed.weights)
   const weightTexts = computed.weights.map((w) => format(w))
-  const sTexts = computed.s.map((v, j) => (j === 0 && v === 0 ? '0' : format(v)))
+  const sTexts = computed.s.map((v, j) => (perm.indexOf(j) === 0 && v === 0 ? '0' : format(v)))
 
   // Columns: name | s_j | strip (q_j chain in 0..1) | -> | weight + value.
   const W = Math.max(width, 280)
@@ -173,8 +180,10 @@ export function SwaraIdea({
         <line className={s.rowRule} x1={0} x2={W} y1={HEAD - 0.5} y2={HEAD - 0.5} />
         {problem.criteria.map((c, j) => {
           const y = HEAD + j * ROW + ROW / 2
+          const rankIdx = perm.indexOf(j)
+          const isFirstRank = rankIdx === 0
           const qVal = computed.q[j]!
-          const prevQ = j > 0 ? computed.q[j - 1]! : qVal
+          const prevQ = !isFirstRank && rankIdx > 0 ? computed.q[perm[rankIdx - 1]!]! : qVal
           const xZero = strip(0)
           const xQ = strip(Math.min(1, Math.max(0, qVal)))
           const xPrevQ = strip(Math.min(1, Math.max(0, prevQ)))
@@ -191,8 +200,8 @@ export function SwaraIdea({
                 {sTexts[j]}
               </text>
               <line className={s.stripBase} x1={xZero} x2={strip(1)} y1={y} y2={y} />
-              {/* Stage 1+: step-down guide from q_{j-1} and q_j ruler */}
-              {j > 0 && xPrevQ > xQ + 0.5 ? (
+              {/* Stage 1+: step-down guide from previous ranked criterion's q and q_j ruler */}
+              {!isFirstRank && xPrevQ > xQ + 0.5 ? (
                 <path
                   className={`${s.op} ${s.stageItem}`}
                   data-off={off(1)}

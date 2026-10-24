@@ -2,7 +2,8 @@
 // so this module only needs its types and the library stays out of the main bundle.
 import type * as XLSX from 'xlsx'
 import { AHP_MAX_PAIRWISE_ALTERNATIVES, type AlternativeJudgements, type Judgements, type RankingResult, type Step, type WeightingResult } from '../../core'
-import { gridToProblem, problemToGrid, type GridImportOptions, type ImportedProblem, type ImportResult, type TypeWords } from './grid'
+import { gridToProblem, problemToGrid, tokenKey, type GridImportOptions, type ImportedProblem, type ImportResult, type TypeWords } from './grid'
+import { parseNumber, type DecimalSeparator } from './numbers'
 import { stepToTable, tableToCells, type Cell, type StepLabels } from './table'
 
 /** The part of the SheetJS module this file uses. */
@@ -12,11 +13,67 @@ export type WorkBook = XLSX.WorkBook
 // ---------------------------------------------------------------- import
 
 export type XlsxImportOptions = GridImportOptions & {
-  /** Sheet name or 0-based index; the first sheet when omitted. */
+  /** Sheet name or 0-based index; prefers 'Decision Matrix' / 'Karar Matrisi', else the first sheet when omitted. */
   sheet?: string | number
 }
 
-export type XlsxImportResult = ImportResult & { sheet: string }
+export type XlsxImportResult = Omit<ImportResult, 'problem'> & {
+  problem: ImportedProblem & { weights?: number[] }
+  sheet: string
+}
+
+const PREFERRED_SHEET_KEYS = new Set(['decision matrix', 'karar matrisi'])
+const WEIGHT_SHEET_KEYS = new Set(['weights', 'weight', 'agirliklar', 'agirlik'])
+const WEIGHT_MARKS = /^(?:weights?|agirlik(?:lar)?|ağirlik(?:lar)?|ağırlık(?:lar)?)(?:\s*\(.*\))?$/i
+
+export function isWeightRowLabel(cell: unknown): boolean {
+  if (typeof cell !== 'string') return false
+  const trimmed = cell.trim()
+  if (WEIGHT_MARKS.test(trimmed)) return true
+  const k = tokenKey(trimmed)
+  return (
+    k === 'weight' ||
+    k === 'weights' ||
+    k.startsWith('weight ') ||
+    k.startsWith('weights ') ||
+    k === 'agirlik' ||
+    k === 'agirliklar' ||
+    k.startsWith('agirlik ') ||
+    k.startsWith('agirliklar ')
+  )
+}
+
+/**
+ * Parses a numeric cell or locale-formatted text number. When a text number contains both '.' and ',',
+ * the separator that appears last is treated as the decimal separator and the earlier one as thousands grouping
+ * ('1.250,50' -> 1250.5, '1,250.50' -> 1250.5).
+ */
+export function parseCellNumber(cell: unknown, decimal: DecimalSeparator = '.'): number | null {
+  if (typeof cell === 'number') return Number.isFinite(cell) ? cell : null
+  if (typeof cell !== 'string') return null
+  const s = cell
+    .trim()
+    .replace(/[\s\u00a0\u202f\u2009']/g, '')
+    .replace(/[−‒–]/g, '-')
+  if (!s || !/\d/.test(s)) return null
+  const lastDot = s.lastIndexOf('.')
+  const lastComma = s.lastIndexOf(',')
+  if (lastDot >= 0 && lastComma >= 0) {
+    const normalized =
+      lastComma > lastDot ? s.replace(/\./g, '').replace(/,/g, '.') : s.replace(/,/g, '')
+    if (!/^[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(normalized)) return null
+    const n = Number(normalized)
+    return Number.isFinite(n) ? n : null
+  }
+  return parseNumber(s, decimal) ?? (decimal === '.' && s.includes(',') ? parseNumber(s, ',') : null)
+}
+
+function pickSheetName(wb: WorkBook, sheet?: string | number): string | undefined {
+  if (typeof sheet === 'number') return wb.SheetNames[sheet]
+  if (sheet !== undefined) return sheet
+  const preferred = wb.SheetNames.find((s) => PREFERRED_SHEET_KEYS.has(tokenKey(s)))
+  return preferred ?? wb.SheetNames[0]
+}
 
 /** Parses .xlsx / .xls / .ods bytes. */
 export function readWorkbook(X: SheetJS, data: ArrayBuffer | Uint8Array): WorkBook {
@@ -29,8 +86,7 @@ export function readWorkbook(X: SheetJS, data: ArrayBuffer | Uint8Array): WorkBo
  * first fully empty row or summary row. Issue positions are 0-based sheet rows and columns.
  */
 export function importWorkbook(X: SheetJS, wb: WorkBook, opts: XlsxImportOptions = {}): XlsxImportResult {
-  const name =
-    typeof opts.sheet === 'number' ? wb.SheetNames[opts.sheet] : opts.sheet ?? wb.SheetNames[0]
+  const name = pickSheetName(wb, opts.sheet)
   const ws = name === undefined ? undefined : wb.Sheets[name]
   if (name === undefined || ws === undefined) {
     return {
@@ -41,16 +97,102 @@ export function importWorkbook(X: SheetJS, wb: WorkBook, opts: XlsxImportOptions
     }
   }
   const ref = ws['!ref']
-  const rows: unknown[][] = ref
+  const rawRows: unknown[][] = ref
     ? X.utils.sheet_to_json<unknown[]>(ws, { header: 1, raw: true, defval: null, blankrows: true })
     : []
   const start = ref ? X.utils.decode_range(ref).s : { r: 0, c: 0 }
+
+  // Find leftmost non-empty column offset (skip) to detect Weights (...) rows before gridToProblem.
+  let skip = Infinity
+  for (const r of rawRows) {
+    const k = r.findIndex((c) => c !== null && c !== undefined && String(c).trim() !== '')
+    if (k >= 0) skip = Math.min(skip, k)
+  }
+  if (!Number.isFinite(skip)) skip = 0
+
+  let weightRowCells: unknown[] | null = null
+  let votedComma = false
+  const cleanedRows: (string | number | boolean | Date | null)[][] = []
+  for (const r of rawRows) {
+    const label = r[skip]
+    if (weightRowCells === null && isWeightRowLabel(label)) {
+      weightRowCells = r.slice(skip + 1)
+      continue
+    }
+    cleanedRows.push(
+      r.map((cell) => {
+        if (typeof cell === 'string' && cell.includes('.') && cell.includes(',')) {
+          const parsed = parseCellNumber(cell)
+          if (parsed !== null) {
+            if (cell.lastIndexOf(',') > cell.lastIndexOf('.')) votedComma = true
+            return parsed
+          }
+        }
+        return (cell ?? null) as string | number | boolean | Date | null
+      }),
+    )
+  }
+
   const { sheet: _sheet, ...gridOpts } = opts
-  const result = gridToProblem(rows as (string | number | boolean | Date | null)[][], {
+  const result = gridToProblem(cleanedRows, {
     ...gridOpts,
+    ...(gridOpts.decimalFallback === undefined && votedComma ? { decimalFallback: ',' as const } : {}),
     origin: { row: start.r, col: start.c },
   })
-  return { ...result, sheet: name }
+
+  const n = result.problem.criteria.length
+  let extractedWeights: number[] | undefined
+  if (n > 0 && weightRowCells !== null) {
+    const parsed = Array.from({ length: n }, (_, j) => parseCellNumber(weightRowCells![j], result.decimal))
+    if (parsed.every((w): w is number => w !== null && Number.isFinite(w) && w >= 0)) {
+      const sum = parsed.reduce((a, b) => a + b, 0)
+      if (sum > 0) extractedWeights = parsed
+    }
+  }
+
+  // Also check if the workbook has a companion Weights / Ağırlıklar sheet (from buildWorkbook).
+  if (extractedWeights === undefined && n > 0) {
+    const weightSheetName = wb.SheetNames.find((s) => s !== name && WEIGHT_SHEET_KEYS.has(tokenKey(s)))
+    const wWs = weightSheetName ? wb.Sheets[weightSheetName] : undefined
+    if (wWs && wWs['!ref']) {
+      const wRows = X.utils.sheet_to_json<unknown[]>(wWs, { header: 1, raw: true, defval: null, blankrows: true })
+      // In buildWorkbook, row 2 is [Criterion, Type, ..., Weight] and rows 3..3+n-1 hold the criteria.
+      const headerRowIdx = wRows.findIndex(
+        (r) => Array.isArray(r) && r.length >= 3 && r.some((c) => isWeightRowLabel(c)),
+      )
+      if (headerRowIdx >= 0 && wRows.length >= headerRowIdx + 1 + n) {
+        const headerRow = wRows[headerRowIdx]!
+        let weightCol = -1
+        for (let c = headerRow.length - 1; c >= 0; c--) {
+          if (isWeightRowLabel(headerRow[c])) {
+            weightCol = c
+            break
+          }
+        }
+        if (weightCol >= 0) {
+          const parsed = Array.from({ length: n }, (_, j) =>
+            parseCellNumber(wRows[headerRowIdx + 1 + j]?.[weightCol], result.decimal),
+          )
+          if (parsed.every((w): w is number => w !== null && Number.isFinite(w) && w >= 0)) {
+            const sum = parsed.reduce((a, b) => a + b, 0)
+            if (sum > 0) extractedWeights = parsed
+          }
+        }
+      }
+    }
+  }
+
+  const problemWithWeights: ImportedProblem & { weights?: number[] } = { ...result.problem }
+  if (extractedWeights) {
+    Object.defineProperty(problemWithWeights, 'weights', {
+      value: extractedWeights,
+      enumerable: false,
+      configurable: true,
+      writable: true,
+    })
+  }
+
+  return { ...result, problem: problemWithWeights, sheet: name }
 }
 
 /** `readWorkbook` + `importWorkbook`. */

@@ -1,6 +1,6 @@
-import { column, linearMaxNormalize, minOf, zeros } from '../math'
+import { column, linearMaxNormalize, maxOf, minOf, zeros } from '../math'
 import { rankScores } from '../rank'
-import type { Problem, RankingMethod, RankingResult, Step } from '../types'
+import type { MethodWarning, Problem, RankingMethod, RankingResult, Step } from '../types'
 import { assertValid, hasErrors, validateProblem, validateRequirements, validateWeights } from '../validate'
 
 export const CODAS_DEFAULT_TAU = 0.02
@@ -83,6 +83,7 @@ export const codas: RankingMethod<CodasParams> = {
     }
 
     // Step 5 (Eqs. 7-8): Relative assessment matrix h_ik = (E_i - E_k) + psi(E_i - E_k) * (T_i - T_k)
+    let taxicabActive = false
     const relativeAssessment = zeros(m, m)
     for (let i = 0; i < m; i++) {
       for (let k = 0; k < m; k++) {
@@ -92,9 +93,18 @@ export const codas: RankingMethod<CodasParams> = {
         }
         const dE = euclidean[i]! - euclidean[k]!
         const dT = taxicab[i]! - taxicab[k]!
-        const psi = Math.abs(dE) >= tau ? 1 : 0
+        const psi = Math.abs(dE) + 1e-12 >= tau ? 1 : 0
+        if (psi === 1) taxicabActive = true
         relativeAssessment[i]![k] = dE + psi * dT + 0
       }
+    }
+
+    const warnings: MethodWarning[] = []
+    const maxE = maxOf(euclidean)
+    if (maxE <= 1e-12) {
+      warnings.push({ code: 'codas.no-spread' })
+    } else if (m >= 2 && !taxicabActive) {
+      warnings.push({ code: 'codas.taxicab-inactive' })
     }
 
     // Step 6 (Eq. 9): Assessment score H_i = sum_k h_ik
@@ -122,7 +132,7 @@ export const codas: RankingMethod<CodasParams> = {
       order: 'desc',
       ranking: rankScores(scores, 'desc'),
       steps,
-      warnings: [],
+      warnings,
     }
   },
 }

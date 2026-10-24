@@ -53,6 +53,13 @@
     "vikorRegretEqual": "VIKOR's largest regrets for {{a}} and {{b}} are equal."
   },
   "echo": "{{method}}: same order as {{of}}, counted once",
+  "echoNote": {
+    "copras_saw": "COPRAS with no active cost criterion (or a single cost criterion) reduces to SAW (Sum), so it is counted once.",
+    "copras_ahp-ranking": "COPRAS with a single active cost criterion and table-derived AHP local priorities compute the same weighted shares, so they are counted once.",
+    "ahp-ranking_copras": "AHP with table-derived local priorities and COPRAS with a single active cost criterion compute the same weighted shares, so they are counted once.",
+    "vikor_mabac": "VIKOR at v = 1 (pure group utility S) and MABAC both rank by the 0-1 weighted sum, so they are counted once.",
+    "mabac_vikor": "MABAC and VIKOR at v = 1 (pure group utility S) both rank by the 0-1 weighted sum, so they are counted once."
+  },
   "sawLinear": "SAW (Linear)",
   "sawSum": "SAW (Sum)",
   "pair": {

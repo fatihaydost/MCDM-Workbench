@@ -33,10 +33,11 @@ export function isConstant(xs: readonly number[]): boolean {
   const lo = minOf(xs)
   const span = hi - lo
   const scale = Math.max(Math.abs(hi), Math.abs(lo))
+  if (scale === 0) return true
   return (
     span <= CONSTANT_TOLERANCE * scale ||
-    span <= Number.EPSILON ||
-    (lo <= 0 && hi >= 0 && span <= CONSTANT_TOLERANCE)
+    (lo < 0 && hi > 0 && span <= CONSTANT_TOLERANCE) ||
+    ((lo === 0 || hi === 0) && scale <= Number.EPSILON)
   )
 }
 
@@ -55,7 +56,7 @@ export function isNearConstant(xs: readonly number[]): boolean {
   const scale = Math.max(Math.abs(hi), Math.abs(lo))
   return (
     span <= NEAR_CONSTANT_TOLERANCE * scale ||
-    (lo <= 0 && hi >= 0 && span <= NEAR_CONSTANT_TOLERANCE)
+    (lo < 0 && hi > 0 && span <= NEAR_CONSTANT_TOLERANCE)
   )
 }
 

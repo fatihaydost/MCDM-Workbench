@@ -56,11 +56,11 @@ export default function CompareStage() {
     const firstEcho = comparison?.echoes[0]
     const onlyEcho = !!comparison && !!firstEcho && comparison.ranked.length - comparison.echoes.length === 1
     const echoSummary = firstEcho
-      ? tc('echo', {
+      ? tc('onlyOneRankingEcho', {
           method: tr(t, `workbench.rankingMethod.${firstEcho.methodId}`),
           of:
             firstEcho.of === 'saw'
-              ? tc(firstEcho.methodId === 'ahp-ranking' ? 'sawSum' : 'sawLinear')
+              ? tc(firstEcho.methodId === 'ahp-ranking' || firstEcho.methodId === 'copras' ? 'sawSum' : 'sawLinear')
               : tr(t, `workbench.rankingMethod.${firstEcho.of}`),
         })
       : ''
@@ -144,7 +144,7 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
               method: tr(t, `workbench.rankingMethod.${e.methodId}`),
               of:
                 e.of === 'saw'
-                  ? tc(e.methodId === 'ahp-ranking' ? 'sawSum' : 'sawLinear')
+                  ? tc(e.methodId === 'ahp-ranking' || e.methodId === 'copras' ? 'sawSum' : 'sawLinear')
                   : tr(t, `workbench.rankingMethod.${e.of}`),
             })}
           </span>
@@ -259,9 +259,17 @@ function CompareRankMatrix({
               return (
                 <tr
                   key={altIdx}
+                  tabIndex={0}
+                  aria-selected={isSelected}
                   onClick={() => onSelectRow(altIdx)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onSelectRow(altIdx)
+                    }
+                  }}
                   className={cn(
-                    'cursor-pointer transition-colors hover:bg-surface-2/70',
+                    'cursor-pointer transition-colors hover:bg-surface-2/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent',
                     isSelected && 'bg-accent-bg/35',
                   )}
                 >

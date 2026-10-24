@@ -123,7 +123,7 @@ export const cilos: WeightingMethod = {
     }
 
     // 3. Square matrix A (n × n): row i is the mean of winning rows r in argmax_r x̄_ri (exact row when unique, permutation-invariant on ties).
-    const winnerKeys = new Array<string>(n).fill('0')
+    const winners: number[][] = Array.from({ length: n }, () => [])
     const squareMatrix = zeros(n, n)
     for (let i = 0; i < n; i++) {
       if (constant[i]) {
@@ -135,7 +135,7 @@ export const cilos: WeightingMethod = {
       for (let r = 0; r < m; r++) {
         if (tied(normalized[r]![i]!, maxVal)) winRows.push(r)
       }
-      winnerKeys[i] = winRows.join(',')
+      winners[i] = winRows
       for (let j = 0; j < n; j++) {
         squareMatrix[i]![j] = mean(winRows.map((r) => normalized[r]![j]!))
       }
@@ -165,8 +165,17 @@ export const cilos: WeightingMethod = {
     // 6. Solve F q = 0, Σ_j q_j = 1 on the active (non-constant) criteria.
     const active = Array.from({ length: n }, (_, j) => j).filter((j) => !constant[j])
     const allConstant = active.length === 0
-    const activeWinners = active.map((j) => winnerKeys[j]!)
-    const sharedOptimum = active.length >= 2 && new Set(activeWinners).size < active.length
+    let sharedOptimum = false
+    for (let a = 0; a < active.length && !sharedOptimum; a++) {
+      const winA = winners[active[a]!]!
+      for (let b = a + 1; b < active.length; b++) {
+        const winB = winners[active[b]!]!
+        if (winA.some((r) => winB.includes(r))) {
+          sharedOptimum = true
+          break
+        }
+      }
+    }
     if (sharedOptimum) warnings.push({ code: 'cilos.shared-optimum' })
 
     let zeroLoss = false
@@ -178,8 +187,9 @@ export const cilos: WeightingMethod = {
       weights = constant.map((c) => (c ? 0 : 1))
     } else {
       const fActive = active.map((i) => active.map((j) => systemMatrix[i]![j]!))
-      const solved = solveCilosSystem(fActive)
-      if (solved === null) {
+      const hasZeroDiag = fActive.some((row, k) => Math.abs(row[k]!) <= PIVOT_TOL)
+      const solved = hasZeroDiag ? null : solveCilosSystem(fActive)
+      if (solved === null || solved.some((w) => w <= PIVOT_TOL)) {
         zeroLoss = true
         warnings.push({ code: 'cilos.zero-loss-equal-weights' })
         weights = constant.map((c) => (c ? 0 : 1 / active.length))
@@ -191,6 +201,9 @@ export const cilos: WeightingMethod = {
       }
     }
 
+    const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
+    if (!allConstant && weights[top]! > 0.5) warnings.push({ code: 'cilos.dominant-weight', col: top })
+
     return {
       weights,
       steps: [
@@ -198,6 +211,7 @@ export const cilos: WeightingMethod = {
         { key: 'cilos.squareMatrix', matrix: squareMatrix, axes: ['criteria', 'criteria'] },
         { key: 'cilos.lossMatrix', matrix: lossMatrix, axes: ['criteria', 'criteria'] },
         { key: 'cilos.systemMatrix', matrix: systemMatrix, axes: ['criteria', 'criteria'] },
+        { key: 'cilos.totalLoss', vector: systemMatrix.map((row, j) => Math.abs(row[j]!)), axes: 'criteria' },
         { key: 'cilos.weights', vector: weights, axes: 'criteria' },
       ],
       diagnostics: {

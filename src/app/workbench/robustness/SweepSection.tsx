@@ -80,6 +80,7 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
     }
   }, [run, problem, weights, k, wk])
   const atRes = at instanceof ProblemValidationError ? null : at
+  const scoreOrder: 'asc' | 'desc' = atRes?.order ?? (run.methodId === 'vikor' ? 'asc' : 'desc')
   const atRanking = atRes?.ranking ?? NO_LINES
   const atScores = atRes?.scores ?? NO_LINES
   const order = rankOrder(atRanking)
@@ -189,6 +190,7 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
             topBand={sweep ? [sweep.baseTopInterval.from, sweep.baseTopInterval.to] : [base, base]}
             rankingBand={sweep ? [sweep.baseRankingInterval.from, sweep.baseRankingInterval.to] : [base, base]}
             highlight={current ? leaders : []}
+            order={scoreOrder}
             format={format4}
             formatTick={formatTick}
             formatWeight={formatWeight}

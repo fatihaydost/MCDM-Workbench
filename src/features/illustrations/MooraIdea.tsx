@@ -137,8 +137,8 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
   )
   const drawAbove = stage === 0 ? normBenefit : benefit
   const drawBelow = stage === 0 ? normCost : cost
-  const drawSp = stage === 0 ? drawAbove.map(sum) : sPlus
-  const drawSn = stage === 0 ? drawBelow.map(sum) : sMinus
+  const drawSp = drawAbove.map(sum)
+  const drawSn = drawBelow.map(sum)
   const m = problem.alternatives.length
   const n = problem.criteria.length
   const names = problem.alternatives
@@ -160,7 +160,6 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
   const rowStep = stacked ? STACKED_ROW : ROW
   const barY = stacked ? NAME_LINE : (ROW - BAR) / 2
   const height = HEAD + m * rowStep + 4
-  const best = order[0]!
   const focus = { row: Math.min(focusKey.row, m - 1), col: Math.min(focusKey.col, n - 1) }
   const colour = (j: number) => (j < SAW_CATEGORY_COLOURS ? String(j + 1) : 'other')
   const full =
@@ -203,12 +202,15 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
     el?.focus()
   }
 
-  const shown = active ? { i: order[active.row]!, j: active.col } : null
+  const shown = active && !stepping ? { i: order[active.row]!, j: active.col } : null
   const legendCols = Array.from({ length: Math.min(n, SAW_CATEGORY_COLOURS) }, (_, j) => j)
   const readout = (i: number, j: number) => {
-    if (benefit[i]![j]! > 0) return l.readoutBenefit(names[i]!, critNames[j]!, format(benefit[i]![j]!))
-    if (cost[i]![j]! > 0) return l.readoutCost(names[i]!, critNames[j]!, format(cost[i]![j]!))
-    return l.readoutZero(names[i]!, critNames[j]!)
+    const val = stage === 0 ? normalized[i]![j]! : parts.weighted[i]![j]!
+    if (val === 0) return l.readoutZero(names[i]!, critNames[j]!)
+    const isCostCol = problem.criteria[j]?.type === 'cost'
+    return isCostCol
+      ? l.readoutCost(names[i]!, critNames[j]!, format(val))
+      : l.readoutBenefit(names[i]!, critNames[j]!, format(val))
   }
 
   return (
@@ -242,7 +244,7 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
         <g onKeyDown={move} onMouseLeave={() => setActive(null)} data-dimmed={active ? '' : undefined} className={s.sawPlot}>
           {order.map((i, row) => {
             const segs = divergingSegments(drawAbove[i]!, drawBelow[i]!, center, pxPerUnit)
-            const first = i === best && stage >= 2
+            const first = parts.result.ranking[i] === 1 && stage >= 2
             const place = stage >= 2 ? row : i
             const name = names[i]!
             const short = truncate(name, stacked ? W - valueWidth : labelWidth - GAP, FONT)
@@ -263,13 +265,15 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
                 </text>
                 {segs.map((g) => {
                   const on = shown?.j === g.col
-                  const tabbable = focus.row === row && focus.col === g.col
+                  const tabbable = !stepping && focus.row === row && focus.col === g.col
+                  const isCostCol = problem.criteria[g.col]?.type === 'cost'
+                  const rawVal = stage === 0 ? normalized[i]![g.col]! : parts.weighted[i]![g.col]!
                   const label =
-                    g.side === 'above'
-                      ? l.segmentBenefit(name, critNames[g.col]!, format(g.value), texts[i]!)
-                      : g.side === 'below'
-                        ? l.segmentCost(name, critNames[g.col]!, format(g.value), texts[i]!)
-                        : l.segmentZero(name, critNames[g.col]!, texts[i]!)
+                    g.side === 'at'
+                      ? l.segmentZero(name, critNames[g.col]!, texts[i]!)
+                      : isCostCol
+                        ? l.segmentCost(name, critNames[g.col]!, format(rawVal), texts[i]!)
+                        : l.segmentBenefit(name, critNames[g.col]!, format(rawVal), texts[i]!)
                   return (
                     <rect
                       key={g.col}

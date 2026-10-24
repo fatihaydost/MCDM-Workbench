@@ -584,7 +584,8 @@
         "pv": "Percentage value PV",
         "criterionRank": "Rank r",
         "stepRatio": "Step ratio s",
-        "recalculatedWeight": "Recalculated q"
+        "recalculatedWeight": "Recalculated q",
+        "totalLoss": "Total loss |f_jj|"
       },
       "tableTitle": "Weights by criterion",
       "chartTitle": "Criterion weights",
@@ -826,7 +827,23 @@
       "decimals": "Decimals",
       "decimals2": "2 digits",
       "decimals4": "4 digits",
-      "highlightCols": "Highlight column max"
+      "highlightCols": "Highlight column best"
+    },
+    "calculation": {
+      "highlightMax": "Highlight column best"
+    },
+    "ordinal": {
+      "title": "Importance order",
+      "hintSwara": "Order criteria from most important (rank 1) to least important, and set each step-down ratio s.",
+      "swaraHint": "Order criteria from most important (rank 1) to least important, and set each step-down ratio s.",
+      "hintRoc": "Order criteria by importance or assign integer ranks 1..n (equal ranks share the average weight).",
+      "rocHint": "Order criteria by importance or assign integer ranks 1..n (equal ranks share the average weight).",
+      "moveUp": "Move {{criterion}} up",
+      "moveDown": "Move {{criterion}} down",
+      "rank": "Rank",
+      "order": "Order",
+      "stepRatio": "Comparative ratio s",
+      "reset": "Reset order"
     },
     "stepNames": {
       "critic": {
@@ -914,6 +931,7 @@
         "squareMatrix": "Winner matrix A",
         "lossMatrix": "Relative loss matrix P",
         "systemMatrix": "Loss system matrix F",
+        "totalLoss": "Total impact loss |f_jj|",
         "weights": "Weights w"
       },
       "waspas": {
@@ -988,7 +1006,9 @@
       },
       "aras": {
         "optimalRow": "Optimal alternative A₀",
+        "optimalNormalized": "Normalized optimal row x̄₀",
         "normalized": "Shares with A₀ in the total x̄",
+        "optimalWeighted": "Weighted optimal row x̂₀",
         "weighted": "Weighted shares x̂",
         "optimalScore": "Optimal score S₀",
         "optimality": "Optimality function S",
@@ -1352,6 +1372,7 @@
         "squareMatrix": "Winners A",
         "lossMatrix": "Losses P",
         "systemMatrix": "System F",
+        "totalLoss": "Total loss",
         "weights": "Weights"
       },
       "waspas": {
@@ -1418,7 +1439,9 @@
       },
       "aras": {
         "optimalRow": "Optimal row",
+        "optimalNormalized": "Optimal x̄₀",
         "normalized": "Shares",
+        "optimalWeighted": "Optimal x̂₀",
         "optimalScore": "Totals S",
         "utilityDegree": "K"
       },
@@ -2081,9 +2104,10 @@
     },
     "cilos": {
       "normalized": "Sum normalization: cost criteria are inverted with min x / x first, then each value is divided by its column total so the shares add up to 1.",
-      "squareMatrix": "Square matrix A: row i copies the normalized row of the alternative that reaches the maximum on criterion i.",
+      "squareMatrix": "Square matrix A: row i averages the normalized rows of the alternatives that reach the maximum on criterion i (exact winning row when unique).",
       "lossMatrix": "Relative impact-loss matrix P: how much criterion j loses relative to its maximum a_jj when criterion i's winning alternative is chosen.",
       "systemMatrix": "Loss system matrix F: P with each diagonal entry set to the negative sum of its column, so every column of F adds up to 0.",
+      "totalLoss": "Total impact loss |f_jj|: the sum of relative losses on criterion j across all other criteria's winning alternatives.",
       "weights": "CILOS weights: the unique vector w with sum 1 that solves the homogeneous linear system F w = 0."
     },
     "waspas": {
@@ -2158,7 +2182,9 @@
     },
     "aras": {
       "optimalRow": "Optimal row A₀: the best value of each criterion (the maximum for a benefit, the minimum for a cost), prepended before normalizing.",
+      "optimalNormalized": "Normalized optimal row x̄₀: the optimal row's share in each extended m + 1 column total.",
       "normalized": "Normalized shares x̄: cost criteria are inverted with 1 / x, then each value is divided by the total of all m + 1 rows (A₀ plus the m alternatives).",
+      "optimalWeighted": "Weighted optimal row x̂₀ = w x̄₀: each normalized benchmark share multiplied by its criterion weight.",
       "weighted": "Weighted shares x̂ = w x̄: each normalized share multiplied by its criterion weight.",
       "optimalScore": "Optimal score S₀: the weighted row sum of the optimal row A₀, the benchmark for every alternative.",
       "optimality": "Optimality function S: the weighted row sum of each alternative.",
@@ -2238,9 +2264,11 @@
     "critic": {
       "constant-column": "{{criterion}} has the same value for every alternative, so its CRITIC weight is 0.",
       "few-alternatives": "With fewer than 4 alternatives the correlations are unstable. Read the CRITIC weights with care.",
+      "two-alternatives": "With 2 alternatives, every varying column normalizes to {0, 1} with correlation +1 or -1, so CRITIC weights depend only on sign direction.",
       "no-conflict-equal-weights": "The criteria that vary carry no conflict with each other (only one varies, or they move together), so they share the weight equally.",
       "all-constant-equal-weights": "Every criterion is constant, so there is no information to weigh. Equal weights are used instead.",
-      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real."
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",
+      "dominant-weight": "{{criterion}} takes more than half of the weight, so check whether its contrast and conflict are real."
     },
     "entropy": {
       "constant-column": "{{criterion}} has the same value for every alternative, so its Entropy weight is 0.",
@@ -2252,7 +2280,9 @@
     },
     "topsis": {
       "zero-column": "Every value of {{criterion}} is 0, so it does not affect the ranking.",
-      "zero-distance": "Some alternatives coincide with both the ideal and the anti-ideal solution. They get a closeness of 0.5."
+      "zero-distance": "Some alternatives coincide with both the ideal and the anti-ideal solution. They get a closeness of 0.5.",
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet TOPSIS places A+ and A- at its extremes. Check whether the difference is real.",
+      "negative-values": "{{criterion}} has negative values; vector normalization squares them in the column norm while keeping their sign."
     },
     "vikor": {
       "constant-column": "Every value of {{criterion}} is the same, so it adds nothing to S or R.",
@@ -2272,7 +2302,8 @@
       "constant-column": "{{criterion}} has the same value for every alternative, so its SD weight is 0.",
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",
       "two-alternatives": "With 2 alternatives, every criterion that is not constant gets the same SD weight.",
-      "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead."
+      "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead.",
+      "dominant-weight": "{{criterion}} takes more than half of the weight, so check whether its spread is real."
     },
     "merec": {
       "constant-column": "{{criterion}} has the same value for every alternative, so removing it changes nothing and its MEREC weight is 0.",
@@ -2285,17 +2316,24 @@
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",
       "two-alternatives": "With 2 alternatives, every varying column has RMS equal to its sample standard deviation (PV = 0), so equal weights are used instead.",
       "zero-pv-column": "{{criterion}} has RMS equal to its sample standard deviation (PV = 0), so its LOPCOW weight is 0.",
-      "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead."
+      "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead.",
+      "dominant-weight": "{{criterion}} takes more than half of the weight, so check whether its log RMS-to-spread ratio is real."
     },
     "cilos": {
       "constant-column": "{{criterion}} has the same value for every alternative, so its CILOS weight is 0.",
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet CILOS normalizes its tiny losses against the rest of the system. Check whether the difference is real.",
       "shared-optimum": "Two or more criteria reach their best value on the same alternative, so the corresponding rows of A coincide and the relative loss between them is 0.",
       "zero-loss-equal-weights": "One alternative is simultaneously the best on every varying criterion (or the loss system is degenerate), so all relative losses vanish (P = 0, F = 0) and active criteria share the weight equally.",
-      "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead."
+      "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead.",
+      "dominant-weight": "{{criterion}} takes more than half of the weight, so check whether its low impact loss is real."
     },
     "copras": {
-      "no-cost-criteria": "There is no cost criterion with a weight above 0, so Q = S+ and COPRAS gives the same result as SAW with the sum option."
+      "no-cost-criteria": "There is no cost criterion with a weight above 0, so Q = S+ and COPRAS gives the same result as SAW with the sum option.",
+      "single-cost-criterion": "With a single active cost criterion, the column sum cancels out in 1 / S-, so cost enters through raw reciprocals 1 / x."
+    },
+    "codas": {
+      "no-spread": "Every alternative has Euclidean distance 0 from the negative-ideal solution, so all alternatives tie at rank 1.",
+      "taxicab-inactive": "No pair of alternatives differs in Euclidean distance by at least τ, so Taxicab distances never activate and CODAS ranks by Euclidean distance alone."
     },
     "cocoso": {
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",

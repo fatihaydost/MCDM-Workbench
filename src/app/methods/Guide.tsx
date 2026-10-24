@@ -22,17 +22,27 @@ import { SourceItem, StatusLabel } from './shared'
 
 type Answer = { node: GuideNode; option: GuideOption }
 
+const NON_POSITIVE_OPTIONS = new Set(['negatives', 'zeros', 'rank-negatives', 'rank-zeros'])
+
 /**
  * A risk applies when the path recommends at least two of its methods (a weighting and a ranking
  * method, or two rankers across separate steps), or its only method (or any ratio-based method for ratio-shifted).
  */
-export function risksFor(picked: Set<MethodId>, rankingStages = 1): RiskyCombination[] {
+export function risksFor(
+  picked: Set<MethodId>,
+  rankingStages = 1,
+  answers?: readonly { option: { id: string } }[],
+): RiskyCombination[] {
+  const hasNonPositive = answers ? answers.some((a) => NON_POSITIVE_OPTIONS.has(a.option.id)) : true
   return riskyCombinations.filter((r) => {
     if (r.id === 'chaining-rankers') {
       return rankingStages >= 2 && r.methodIds.filter((id) => picked.has(id)).length >= 2
     }
+    if (r.id === 'weights-twice') {
+      return rankingStages >= 2 && picked.has('ahp')
+    }
     if (r.id === 'ratio-shifted') {
-      return r.methodIds.some((id) => picked.has(id))
+      return hasNonPositive && r.methodIds.some((id) => picked.has(id))
     }
     const wIds = r.methodIds.filter((id) => methodMeta[id].family.startsWith('weighting'))
     const rIds = r.methodIds.filter((id) => !methodMeta[id].family.startsWith('weighting'))
@@ -66,8 +76,8 @@ export function Guide() {
   const risks = useMemo(() => {
     const picked = new Set<MethodId>(recommendations.flatMap((r) => r.rec.methodIds))
     const rankingStages = recommendations.filter((r) => r.stage === 'ranking').length
-    return risksFor(picked, rankingStages)
-  }, [recommendations])
+    return risksFor(picked, rankingStages, path)
+  }, [recommendations, path])
 
   const answer = (node: GuideNode, option: GuideOption) => {
     setPath((p) => [...p, { node, option }])

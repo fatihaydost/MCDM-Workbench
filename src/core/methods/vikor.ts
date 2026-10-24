@@ -69,10 +69,12 @@ export function vikorCompromise(S: readonly number[], R: readonly number[], Q: r
   const c1 = advantage >= dq - DQ_TOLERANCE
   const rankS = rankScores([...S], 'asc')
   const rankR = rankScores([...R], 'asc')
+  const sFlat = vikorFlat(S)
+  const rFlat = vikorFlat(R)
   const tiedFirst = order.filter((i) => tied(Q[i]!, Q[first]!))
-  const bestByS = tiedFirst.some((i) => rankS[i] === 1)
-  const bestByR = tiedFirst.some((i) => rankR[i] === 1)
-  const c2 = bestByS || bestByR
+  const bestByS = !sFlat && tiedFirst.some((i) => rankS[i] === 1)
+  const bestByR = !rFlat && tiedFirst.some((i) => rankR[i] === 1)
+  const c2 = (sFlat && rFlat) || bestByS || bestByR
   const set = c1 ? (c2 ? [first] : [first, second]) : order.filter((i) => Q[i]! - Q[first]! < dq - DQ_TOLERANCE)
   return { order, first, second, dq, advantage, c1, c2, bestByS, bestByR, tieAtTop: qRank[second] === qRank[first], set }
 }
@@ -139,7 +141,12 @@ export const vikor: RankingMethod<VikorParams> = {
     if (rFlat && !sFlat && v < 1) warnings.push({ code: 'vikor.equal-regret' })
     const sTerm = vikorTerm(S)
     const rTerm = vikorTerm(R)
-    const Q = S.map((_, i) => v * sTerm[i]! + (1 - v) * rTerm[i]!)
+    const Q = S.map((_, i) => {
+      if (sFlat && rFlat) return 0
+      if (sFlat) return rTerm[i]!
+      if (rFlat) return sTerm[i]!
+      return v * sTerm[i]! + (1 - v) * rTerm[i]!
+    })
 
     // 5. Acceptance conditions; a tie for first by Q is reported (the order between the tied is the input order).
     const c = vikorCompromise(S, R, Q)

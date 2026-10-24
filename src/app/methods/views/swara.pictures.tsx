@@ -19,11 +19,15 @@ export function Stage({ problem, params }: StagePictureProps) {
   const format = useCallback((v: number) => nf.format(v), [nf])
   const stepRatio: SwaraStepRatio =
     params.stepRatio === 'gentle' || params.stepRatio === 'steep' ? params.stepRatio : 'moderate'
+  const s = Array.isArray(params.s) ? (params.s as readonly (number | null | undefined)[]) : undefined
+  const order = Array.isArray(params.order) ? (params.order as readonly number[]) : undefined
   return (
     <ChartTableModeProvider value="screen-reader">
       <SwaraIdea
         problem={problem}
         stepRatio={stepRatio}
+        s={s}
+        order={order}
         format={format}
         labels={{
           title: t('workbench.visual.swara.title'),

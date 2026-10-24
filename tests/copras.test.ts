@@ -165,6 +165,7 @@ describe('COPRAS properties', () => {
       expectClose(c.scores, s.scores, 1e-15)
       expect(c.ranking).toEqual(s.ranking)
     }
+    expect(copras.compute(oneCost, f6Weights, {}).warnings).toContainEqual({ code: 'copras.single-cost-criterion' })
   })
   it('differs from SAW sum with two or more cost criteria (the main example has four)', () => {
     const c = copras.compute(f6, f6Weights, {})

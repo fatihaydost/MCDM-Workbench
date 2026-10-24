@@ -48,24 +48,43 @@ export type Echo = { methodId: string; of: string }
  * PROMETHEE II with a linear ('v-shape') preference function over the full criterion range (p_j = max - min) is an
  * affine transform of MABAC (Mareschal 2015), so it echoes MABAC when no per-criterion function overrides it.
  */
-function findEchoes(runs: readonly RankingRun[], ranked: ReadonlySet<string>, m: number): Echo[] {
+function findEchoes(
+  runs: readonly RankingRun[],
+  ranked: ReadonlySet<string>,
+  problem: Problem,
+  weights: readonly number[],
+): Echo[] {
+  const m = problem.alternatives.length
   const echoes: Echo[] = []
   const sawLinear =
     ranked.has('saw') && runs.some((r) => r.methodId === 'saw' && (r.params.normalization ?? 'linearMax') === 'linearMax')
+  const sawSum =
+    ranked.has('saw') && runs.some((r) => r.methodId === 'saw' && r.params.normalization === 'sum')
+  const ahpRun = runs.find((r) => r.methodId === 'ahp-ranking')
+  const hasPairwise = m <= AHP_MAX_PAIRWISE_ALTERNATIVES && Boolean(ahpRun?.judgements?.some((mat) => mat != null))
+  const ahpFromTable = ranked.has('ahp-ranking') && !hasPairwise
   if (ranked.has('marcos') && sawLinear) {
     echoes.push({ methodId: 'marcos', of: 'saw' })
   }
-  if (ranked.has('ahp-ranking') && ranked.has('saw')) {
-    const sawSum = runs.some((r) => r.methodId === 'saw' && r.params.normalization === 'sum')
-    const ahpRun = runs.find((r) => r.methodId === 'ahp-ranking')
-    const hasPairwise = m <= AHP_MAX_PAIRWISE_ALTERNATIVES && Boolean(ahpRun?.judgements?.some((mat) => mat != null))
-    if (sawSum && !hasPairwise) echoes.push({ methodId: 'ahp-ranking', of: 'saw' })
+  if (ahpFromTable && sawSum) {
+    echoes.push({ methodId: 'ahp-ranking', of: 'saw' })
   }
   if (ranked.has('waspas')) {
     const waspasRun = runs.find((r) => r.methodId === 'waspas')
     if (waspasRun?.params.lambda === 1) {
       if (sawLinear) echoes.push({ methodId: 'waspas', of: 'saw' })
       else if (ranked.has('marcos')) echoes.push({ methodId: 'waspas', of: 'marcos' })
+    }
+  }
+  const activeCostCount = problem.criteria.filter((c, j) => c.type === 'cost' && (weights[j] ?? 0) > 0).length
+  if (activeCostCount <= 1 && ranked.has('copras')) {
+    if (sawSum) echoes.push({ methodId: 'copras', of: 'saw' })
+    else if (ahpFromTable) echoes.push({ methodId: 'copras', of: 'ahp-ranking' })
+  }
+  if (ranked.has('vikor') && ranked.has('mabac')) {
+    const vikorRun = runs.find((r) => r.methodId === 'vikor')
+    if (vikorRun && Number(vikorRun.params.v ?? 0.5) === 1) {
+      echoes.push({ methodId: 'vikor', of: 'mabac' })
     }
   }
   if (ranked.has('promethee-ii') && ranked.has('mabac')) {
@@ -92,11 +111,11 @@ export type Comparison = {
   firstPlace: { alternative: number; methods: number; of: number } | null
 }
 
-/** Points per alternative = Σ over rankings of (n − rank); the Borda ranking shares ties. */
+/** Points per alternative = Σ over rankings of (n − midRank); the Borda ranking shares ties. */
 export function bordaCount(rankings: number[][]): { points: number[]; ranking: number[] } {
   const n = rankings[0]?.length ?? 0
   const points = new Array<number>(n).fill(0)
-  for (const r of rankings) r.forEach((rank, i) => (points[i]! += n - rank))
+  for (const r of rankings) midRanks(r).forEach((rank, i) => (points[i]! += n - rank))
   return { points, ranking: rankScores(points, 'desc') }
 }
 
@@ -118,7 +137,7 @@ export function kendallW(rankings: number[][]): number {
     for (const t of counts.values()) T += t ** 3 - t
   }
   const denom = m * m * (n ** 3 - n) - m * T
-  return denom === 0 ? 1 : (12 * S) / denom // every ranking all tied: identical, full agreement
+  return denom === 0 ? 1 : Math.max(0, Math.min(1, (12 * S) / denom)) // every ranking all tied: identical, full agreement
 }
 
 export function compareRankings(problem: Problem, weights: number[], runs: RankingRun[]): Comparison {
@@ -129,7 +148,7 @@ export function compareRankings(problem: Problem, weights: number[], runs: Ranki
     return { methodId: run.methodId, result: res.value, issues: res.issues }
   })
   const done = results.filter((r): r is MethodRun & { result: RankingResult } => r.result !== null)
-  const echoes = findEchoes(runs, new Set(done.map((r) => r.methodId)), problem.alternatives.length)
+  const echoes = findEchoes(runs, new Set(done.map((r) => r.methodId)), problem, weights)
   const counted = done.filter((r) => !echoes.some((e) => e.methodId === r.methodId))
   const rankings = counted.map((r) => r.result.ranking)
   const comparable = counted.length >= 2

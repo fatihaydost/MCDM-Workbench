@@ -4,6 +4,7 @@ import { removeCriteria, type RemovalRow } from '../../../core/robustness'
 import { rankerFor, type RankerFor, type RankingRun } from '../../../core/run'
 import type { MethodParams, MethodParamValue, Problem, WeightingMethod } from '../../../core/types'
 import { useNumberFormat } from '../../../i18n'
+import { useWorkbench } from '../../../state/workbench'
 import { cn, Notice, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../../ui'
 import { blockedNames } from './helpers'
 import s from './robustness.module.css'
@@ -34,6 +35,11 @@ export function RemovalSection({ problem, weights, run, weighting, weightingPara
   const nf = useNumberFormat(4)
   const uid = useId()
   const [mode, setMode] = useState<RemovalRow['mode']>('renormalize')
+  const rawWeightingParams = useWorkbench((st) => (weighting ? st.methodParams?.[weighting.id] : undefined))
+  const effectiveWeightingParams = useMemo(
+    () => ({ ...rawWeightingParams, ...weightingParams }),
+    [rawWeightingParams, weightingParams],
+  )
   const rows = useMemo(() => {
     const baseRankFor = rankerFor(run)
     const n = problem.criteria.length
@@ -48,8 +54,8 @@ export function RemovalSection({ problem, weights, run, weighting, weightingPara
       }
       return rankerFor({ ...run, params: nextParams })(p, removed)
     }
-    return removeCriteria(problem, weights, adjustedRankFor, weighting, { weightingParams })
-  }, [problem, weights, run, weighting, weightingParams])
+    return removeCriteria(problem, weights, adjustedRankFor, weighting, { weightingParams: effectiveWeightingParams })
+  }, [problem, weights, run, weighting, effectiveWeightingParams])
   const shown = rows.filter((r) => r.mode === (weighting ? mode : 'renormalize'))
   const leader = (ranking: readonly number[]) =>
     ranking

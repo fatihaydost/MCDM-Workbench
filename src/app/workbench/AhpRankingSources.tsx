@@ -236,7 +236,6 @@ export function AhpRankingSources({
   const m = problem.alternatives.length
   const altNames = useMemo(() => problem.alternatives.map((_, i) => alternativeName(problem, i, t)), [problem, t])
   const critNames = useMemo(() => problem.criteria.map((_, j) => criterionName(problem.criteria, j, t)), [problem.criteria, t])
-  const hasStoredPairwise = Boolean(alternativeJudgements?.some((mat) => mat != null))
 
   return (
     <div className="flex flex-col gap-5">
@@ -259,9 +258,7 @@ export function AhpRankingSources({
       )}
 
       {m > AHP_MAX_PAIRWISE_ALTERNATIVES ? (
-        hasStoredPairwise ? (
-          <Notice tone="info">{t('workbench.ranking.ahp.capNotice', { max: AHP_MAX_PAIRWISE_ALTERNATIVES })}</Notice>
-        ) : null
+        <Notice tone="info">{t('workbench.ranking.ahp.capNotice', { max: AHP_MAX_PAIRWISE_ALTERNATIVES })}</Notice>
       ) : (
         <section className="flex flex-col gap-4" aria-labelledby="wb-ahp-sources-title">
           <div className="flex flex-col gap-1">

@@ -78,6 +78,9 @@ describe('TOPSIS: edge cases', () => {
     expect(res.scores.every(Number.isFinite)).toBe(true)
     expect(res.ranking).toEqual([3, 2, 1])
     expect(res.warnings).toContainEqual({ code: 'topsis.zero-column', col: 0 })
+    const nearAndNeg = topsis.compute(makeProblem([[-2, 1], [3, 1 + 1e-10], [4, 1]], ['benefit', 'benefit']), [0.5, 0.5], {})
+    expect(nearAndNeg.warnings).toContainEqual({ code: 'topsis.negative-values', col: 0 })
+    expect(nearAndNeg.warnings).toContainEqual({ code: 'topsis.near-constant-column', col: 1 })
   })
 
   it('single alternative is rejected', () => {

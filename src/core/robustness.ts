@@ -215,13 +215,14 @@ export function sweepWeight(
         if (s === 0) continue
         const L = i > 0 && st[i - 1] === s ? i - 1 : i
         const R = i < last && st[i + 1] === s ? i + 1 : i
-        if (L === R || f[i]! > f[L]! || f[i]! > f[R]!) continue
+        if (L === R || f[L]! < 0 || f[i]! < 0 || f[R]! < 0 || f[i]! > f[L]! || f[i]! > f[R]!) continue
         // Three samples for the parabola: the window itself, or the window extended on its open side.
         let idx: number[]
         if (R - L === 2) idx = [L, i, R]
         else if (L === i && R + 1 <= last && st[R + 1] === s) idx = [L, R, R + 1]
         else if (R === i && L - 1 >= 0 && st[L - 1] === s) idx = [L - 1, L, R]
         else idx = []
+        if (idx.some((j) => f[j]! < 0)) continue
         const predicted =
           idx.length === 3 ? parabolaMin(idx.map((j) => [grid[j]!.t, f[j]!]), grid[L]!.t, grid[R]!.t) : -Infinity
         if (predicted > 0.5 * f[i]!) continue
@@ -740,7 +741,7 @@ export function spearman(x: readonly number[], y: readonly number[]): number {
   }
   if (sxx === 0 && syy === 0) return 1
   if (sxx === 0 || syy === 0) return 0
-  return sxy / Math.sqrt(sxx * syy)
+  return Math.max(-1, Math.min(1, sxy / Math.sqrt(sxx * syy)))
 }
 
 /**
@@ -770,7 +771,7 @@ export function kendallTauB(x: readonly number[], y: readonly number[]): number 
   const n0 = (n * (n - 1)) / 2
   const den = Math.sqrt((n0 - n1) * (n0 - n2))
   if (den === 0) return n1 === n0 && n2 === n0 ? 1 : 0
-  return (nc - nd) / den
+  return Math.max(-1, Math.min(1, (nc - nd) / den))
 }
 
 /**

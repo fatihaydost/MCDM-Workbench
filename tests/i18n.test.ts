@@ -107,7 +107,7 @@ describe('i18n resources', () => {
       critic.compute(nearConstant, {}),
     ]
     expect(new Set(sdr.flatMap((x) => x.warnings ?? []).map((x) => x.code).filter((c) => c.endsWith('near-constant-column') || c.startsWith('sd.')))).toEqual(
-      new Set(['sd.constant-column', 'sd.near-constant-column', 'sd.two-alternatives', 'sd.all-constant-equal-weights', 'critic.near-constant-column']),
+      new Set(['sd.constant-column', 'sd.near-constant-column', 'sd.two-alternatives', 'sd.all-constant-equal-weights', 'sd.dominant-weight', 'critic.near-constant-column']),
     )
     // MEREC: constant column, all constant, dominant weight (C1 from 5 to 450 against a narrow C2).
     const mr = [
@@ -127,7 +127,7 @@ describe('i18n resources', () => {
       lopcow.compute({ ...p, matrix: [[1, 1], [1, 1], [1, 1]] }, {}),
     ]
     expect(new Set(lp.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
-      new Set(['lopcow.constant-column', 'lopcow.near-constant-column', 'lopcow.two-alternatives', 'lopcow.all-constant-equal-weights']),
+      new Set(['lopcow.constant-column', 'lopcow.near-constant-column', 'lopcow.two-alternatives', 'lopcow.all-constant-equal-weights', 'lopcow.dominant-weight']),
     )
     // CILOS: constant column, near-constant column, partial shared optimum, total shared optimum (P = 0, F = 0), all constant.
     const ci = [
@@ -153,7 +153,7 @@ describe('i18n resources', () => {
       cilos.compute({ ...p, matrix: [[1, 1], [1, 1], [1, 1]] }, {}),
     ]
     expect(new Set(ci.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
-      new Set(['cilos.constant-column', 'cilos.near-constant-column', 'cilos.shared-optimum', 'cilos.zero-loss-equal-weights', 'cilos.all-constant-equal-weights']),
+      new Set(['cilos.constant-column', 'cilos.near-constant-column', 'cilos.shared-optimum', 'cilos.zero-loss-equal-weights', 'cilos.all-constant-equal-weights', 'cilos.dominant-weight']),
     )
     // SAW: both normalizations (it emits no warnings of its own; its data errors are validation codes).
     const sw = [saw.compute(p, [0.5, 0.5], {}), saw.compute(p, [0.5, 0.5], { normalization: 'sum' })]
@@ -179,9 +179,9 @@ describe('i18n resources', () => {
     // WASPAS: no warnings of its own (zeros and negatives are validation codes, as for SAW).
     const wp = waspas.compute(p, [0.5, 0.5], { lambda: 0.3 })
     expect(wp.warnings).toEqual([])
-    // COPRAS: with a cost criterion, and its one notice (no cost criterion).
+    // COPRAS: with a single cost criterion, and no cost criterion.
     const cp = [copras.compute(p, [0.5, 0.5], {}), copras.compute({ ...p, criteria: [p.criteria[0]!, { ...p.criteria[0]!, name: 'y' }] }, [0.5, 0.5], {})]
-    expect(cp.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual(['copras.no-cost-criteria'])
+    expect(cp.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual(['copras.single-cost-criterion', 'copras.no-cost-criteria'])
     // MARCOS, ARAS and CODAS: no warnings of their own (zeros and negatives are validation codes, as for SAW).
     const mc = marcos.compute(p, [0.5, 0.5], {})
     expect(mc.warnings).toEqual([])

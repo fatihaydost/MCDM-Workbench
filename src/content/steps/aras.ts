@@ -5,7 +5,7 @@ export const aras = {
   /** ARAS in four nodes: Optimal row, Normalize & weight, Optimality S, Utility degree K. */
   flow: [
     { key: 'aras.optimalRow', stepKeys: ['aras.optimalRow'] },
-    { key: 'aras.normalized', stepKeys: ['aras.normalized', 'aras.weighted'] },
+    { key: 'aras.normalized', stepKeys: ['aras.optimalNormalized', 'aras.normalized', 'aras.optimalWeighted', 'aras.weighted'] },
     { key: 'aras.optimalScore', stepKeys: ['aras.optimalScore', 'aras.optimality'] },
     { key: 'aras.utilityDegree', stepKeys: ['aras.utilityDegree'] },
   ],
@@ -17,10 +17,24 @@ export const aras = {
       symbol: 'A0',
       texSymbol: '$x_{0j}$',
     },
+    'aras.optimalNormalized': {
+      en: 'Normalized optimal row: the benchmark share in each extended column sum.',
+      tr: 'Normalize optimal satır: genişletilmiş her sütun toplamındaki kıyas payı.',
+      tex: String.raw`\bar{x}_{0j} = \frac{x^{*}_{0j}}{\sum_{k=0}^{m} x^{*}_{kj}}, \qquad x^{*}_{0j} = \begin{cases} x_{0j} & j \in J^{+} \\[1ex] \dfrac{1}{x_{0j}} & j \in J^{-} \end{cases}`,
+      symbol: 'r0',
+      texSymbol: String.raw`$\bar{x}_{0j}$`,
+    },
     'aras.normalized': {
       en: 'Cost values are inverted with 1/x, then each extended column sums to 1.',
       tr: 'Maliyet değerleri 1/x ile ters çevrilir; ardından genişletilmiş her sütunun toplamı 1 olur.',
       tex: String.raw`\bar{x}_{ij} = \frac{x^{*}_{ij}}{\sum_{k=0}^{m} x^{*}_{kj}}, \qquad x^{*}_{ij} = \begin{cases} x_{ij} & j \in J^{+} \\[1ex] \dfrac{1}{x_{ij}} & j \in J^{-} \end{cases}`,
+    },
+    'aras.optimalWeighted': {
+      en: 'Weighted optimal row: each normalized benchmark share multiplied by its weight.',
+      tr: 'Ağırlıklı optimal satır: her normalize kıyas payı kendi ağırlığıyla çarpılır.',
+      tex: String.raw`\hat{x}_{0j} = w_j\, \bar{x}_{0j}`,
+      symbol: 'v0',
+      texSymbol: String.raw`$\hat{x}_{0j}$`,
     },
     'aras.weighted': {
       en: 'Weighted normalized values: each normalized share multiplied by its criterion weight.',

@@ -45,7 +45,7 @@ export function PerturbSection({ problem, weights, run, names, criteria }: Props
   const rows = useMemo(() => perturbWeights(problem, weights, rankerFor(run), DEFAULT_DELTAS), [problem, weights, run])
   const grid = useMemo(() => perturbGrid(rows, criteria.length, DEFAULT_DELTAS), [rows, criteria.length])
   const { held, total } = heldCount(rows, weights)
-  const anyZero = rows.some((r) => !applicable(r, weights))
+  const anyZero = weights.some((w) => w <= 1e-12) || rows.some((r) => !applicable(r, weights))
   const leader = (ranking: readonly number[]) =>
     ranking
       .map((r, i) => (r === 1 ? names[i] : null))

@@ -1,7 +1,8 @@
 import * as XLSX from 'xlsx'
 import { describe, expect, it } from 'vitest'
 import { aras, bwm, electreI, electreIII, judgementsFromBwm, marcos, roc, type Problem } from '../src/core'
-import { buildWorkbook, COMPUTED_NUMBER_FORMAT, importWorkbook, INTEGER_NUMBER_FORMAT } from '../src/features/io/xlsx'
+import { buildWorkbook, COMPUTED_NUMBER_FORMAT, importWorkbook, INTEGER_NUMBER_FORMAT, parseCellNumber } from '../src/features/io/xlsx'
+import { useWorkbench } from '../src/state/workbench'
 
 const problem: Problem = {
   alternatives: ['A1', 'A2', 'A3'],
@@ -94,5 +95,100 @@ describe('xlsx export and import', () => {
     const imported = importWorkbook(XLSX, wb)
     expect(imported.issues).toEqual([])
     expect(imported.problem).toEqual(problem)
+  })
+
+  it('parses numbers containing both . and , by checking which separator appears last', () => {
+    expect(parseCellNumber('1.250,50')).toBe(1250.5)
+    expect(parseCellNumber('1,250.50')).toBe(1250.5)
+    expect(parseCellNumber('1.234.567,89')).toBe(1234567.89)
+    expect(parseCellNumber('1,234,567.89')).toBe(1234567.89)
+
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet([
+      ['Alternative', 'Price', 'Quality'],
+      ['Type', 'cost', 'benefit'],
+      ['A1', '1.250,50', '8,5'],
+      ['A2', '1,500.25', '9,25'],
+    ])
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
+    const imported = importWorkbook(XLSX, wb)
+    expect(imported.issues).toEqual([])
+    expect(imported.problem.matrix).toEqual([
+      [1250.5, 8.5],
+      [1500.25, 9.25],
+    ])
+  })
+
+  it('prefers Decision Matrix or Karar Matrisi in a multi-sheet workbook', () => {
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Overview'], ['Not a matrix']]), 'Summary')
+    XLSX.utils.book_append_sheet(
+      wb,
+      XLSX.utils.aoa_to_sheet([
+        ['Alternative', 'Price', 'Quality', 'Speed'],
+        ['Type', 'cost', 'benefit', 'benefit'],
+        ['A1', 100, 8, 50],
+        ['A2', 120, 9, 60],
+        ['A3', 90, 7, 55],
+      ]),
+      'Decision Matrix',
+    )
+    const imported = importWorkbook(XLSX, wb)
+    expect(imported.sheet).toBe('Decision Matrix')
+    expect(imported.issues).toEqual([])
+    expect(imported.problem).toEqual(problem)
+
+    const wbTr = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wbTr, XLSX.utils.aoa_to_sheet([['Özet']]), 'Kapak')
+    XLSX.utils.book_append_sheet(
+      wbTr,
+      XLSX.utils.aoa_to_sheet([
+        ['Alternatif', 'Price', 'Quality', 'Speed'],
+        ['Tür', 'maliyet', 'fayda', 'fayda'],
+        ['A1', 100, 8, 50],
+        ['A2', 120, 9, 60],
+        ['A3', 90, 7, 55],
+      ]),
+      'Karar Matrisi',
+    )
+    const importedTr = importWorkbook(XLSX, wbTr)
+    expect(importedTr.sheet).toBe('Karar Matrisi')
+    expect(importedTr.issues).toEqual([])
+    expect(importedTr.problem).toEqual(problem)
+  })
+
+  it('extracts weights from a Weights (...) row or exported Weights sheet and populates manualWeights on importProblem', () => {
+    // 1. Inline Weights (...) row in the sheet
+    const wbInline = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(
+      wbInline,
+      XLSX.utils.aoa_to_sheet([
+        ['Alternative', 'Price', 'Quality', 'Speed'],
+        ['Type', 'cost', 'benefit', 'benefit'],
+        ['Weights (CRITIC)', 0.25, 0.45, 0.3],
+        ['A1', 100, 8, 50],
+        ['A2', 120, 9, 60],
+        ['A3', 90, 7, 55],
+      ]),
+      'Decision Matrix',
+    )
+    const inlineRes = importWorkbook(XLSX, wbInline)
+    expect(inlineRes.issues).toEqual([])
+    expect(inlineRes.problem.alternatives).toEqual(['A1', 'A2', 'A3'])
+    expect(inlineRes.problem.weights).toEqual([0.25, 0.45, 0.3])
+
+    // 2. Round-trip from buildWorkbook with weighting
+    const wbExported = buildWorkbook(XLSX, {
+      problem,
+      weighting: { method: 'Manual', result: { weights: [0.2, 0.5, 0.3], steps: [] } },
+    })
+    const roundTrip = importWorkbook(XLSX, wbExported)
+    expect(roundTrip.issues).toEqual([])
+    expect(roundTrip.problem.weights).toEqual([0.2, 0.5, 0.3])
+
+    useWorkbench.getState().importProblem(roundTrip.problem, 'exported.xlsx')
+    const st = useWorkbench.getState()
+    expect(st.manualWeights).toEqual([0.2, 0.5, 0.3])
+    expect(st.weightMethod).toBe('manual')
   })
 })

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import type { ElectreIIIParams } from '../../../core/methods/electre-iii'
+import type { ElectreIIIParams, ThresholdSpec } from '../../../core/methods/electre-iii'
 import { ELECTRE_III_IDEA_STEPS, ElectreIIIIdea, type ElectreIIIIdeaLabels } from '../../../features/illustrations/ElectreIIIIdea'
 import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
 import { useNumberFormat } from '../../../i18n'
@@ -54,11 +54,28 @@ function useElectreIIILabels(): ElectreIIIIdeaLabels {
 export function Stage({ problem, weights, params, className }: StagePictureProps) {
   const labels = useElectreIIILabels()
   const { format } = useNumberFormat(4)
+  const thresholdPreset =
+    params.thresholdPreset === 'strict' || params.thresholdPreset === 'veto' ? params.thresholdPreset : 'standard'
+  const mode = Array.isArray(params.mode) ? (params.mode as readonly ('direct' | 'inverse' | 'abs' | 'rel')[]) : undefined
+  const mapThresholds = (arr: readonly unknown[]): readonly ThresholdSpec[] =>
+    arr.map((x, j) => (typeof x === 'number' && mode?.[j] === 'rel' ? { rel: x } : (x as ThresholdSpec)))
+  const q = Array.isArray(params.q) ? mapThresholds(params.q) : undefined
+  const p = Array.isArray(params.p) ? mapThresholds(params.p) : undefined
+  const v = Array.isArray(params.v) ? (params.v as readonly (ThresholdSpec | null)[]) : undefined
   return (
     <ElectreIIIIdea
       problem={problem}
       weights={weights}
-      params={params as ElectreIIIParams}
+      params={
+        {
+          ...(params as ElectreIIIParams),
+          thresholdPreset,
+          ...(q !== undefined ? { q } : {}),
+          ...(p !== undefined ? { p } : {}),
+          ...(v !== undefined ? { v } : {}),
+          ...(mode !== undefined ? { mode } : {}),
+        } as ElectreIIIParams
+      }
       format={format}
       labels={labels}
       className={cn('max-w-[760px]', className)}

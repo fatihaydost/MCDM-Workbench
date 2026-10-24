@@ -1,6 +1,7 @@
 import { importCsv, importXlsx, type ImportIssue, type ImportResult } from '../../features/io'
+import { registerImportedWeights } from '../../state/workbench'
 
-export type FileImport = ImportResult & { kind: 'csv' | 'xlsx'; sheet?: string }
+export type FileImport = ImportResult & { kind: 'csv' | 'xlsx'; sheet?: string; weights?: number[] }
 
 const SPREADSHEET = /\.(xlsx|xlsm|xls|ods)$/i
 
@@ -12,9 +13,21 @@ export async function readDecisionFile(file: File): Promise<FileImport> {
   if (SPREADSHEET.test(file.name)) {
     const X = await import('xlsx')
     const result = importXlsx(X, new Uint8Array(await file.arrayBuffer()))
-    return { ...result, kind: 'xlsx', sheet: result.sheet }
+    registerImportedWeights(result.problem.matrix, result.problem.weights)
+    return {
+      ...result,
+      kind: 'xlsx',
+      sheet: result.sheet,
+      ...(result.problem.weights ? { weights: result.problem.weights } : {}),
+    }
   }
-  return { ...importCsv(await file.text()), kind: 'csv' }
+  const csvResult = importCsv(await file.text())
+  registerImportedWeights(csvResult.problem.matrix, csvResult.problem.weights)
+  return {
+    ...csvResult,
+    kind: 'csv',
+    ...(csvResult.problem.weights ? { weights: csvResult.problem.weights } : {}),
+  }
 }
 
 /** "C5" from a 0-based sheet row and column. */

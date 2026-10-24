@@ -166,8 +166,11 @@ export function VikorIdea({
     order,
     { fontSize: FONT, dotRadius: 5, obstacles },
   )
-  const seg = isoQSegment(parts.v, Math.min(thr, 1))
-  const region = thr >= 1 ? isoQRegion(parts.v, 1.0000001) : isoQRegion(parts.v, thr)
+  const sFlat = S.length > 0 && Math.max(...S) - Math.min(...S) <= 1e-12
+  const rFlat = R.length > 0 && Math.max(...R) - Math.min(...R) <= 1e-12
+  const effV = sFlat && !rFlat ? 0 : rFlat && !sFlat ? 1 : parts.v
+  const seg = isoQSegment(effV, Math.min(thr, 1))
+  const region = thr >= 1 ? isoQRegion(effV, 1.0000001) : isoQRegion(effV, thr)
   const regionPath = region.length > 2 ? `M${region.map((p) => `${px(p.x)} ${py(p.y)}`).join('L')}Z` : ''
   const linePathD = seg && thr <= 1 ? `M${px(seg[0].x)} ${py(seg[0].y)}L${px(seg[1].x)} ${py(seg[1].y)}` : ''
 

@@ -6,6 +6,7 @@ export const cilos = {
     { key: 'cilos.squareMatrix', stepKeys: ['cilos.squareMatrix'] },
     { key: 'cilos.lossMatrix', stepKeys: ['cilos.lossMatrix'] },
     { key: 'cilos.systemMatrix', stepKeys: ['cilos.systemMatrix'] },
+    { key: 'cilos.totalLoss', stepKeys: ['cilos.totalLoss'] },
     { key: 'cilos.weights', stepKeys: ['cilos.weights'] },
   ],
   steps: {
@@ -19,12 +20,12 @@ export const cilos = {
       },
     },
     'cilos.squareMatrix': {
-      en: 'Take the normalized row of the winning alternative for each criterion.',
-      tr: 'Her kriter için en yüksek paylı alternatifin normalize satırını alın.',
-      tex: 'a_{ij} = \\bar{x}_{k_i j}, \\qquad k_i = \\arg\\max_{1 \\le r \\le m} \\bar{x}_{ri}, \\qquad a_{ii} = \\max_{1 \\le r \\le m} \\bar{x}_{ri}',
+      en: 'Average the normalized rows of the winning alternatives for each criterion.',
+      tr: 'Her kriter için en yüksek paylı alternatiflerin normalize satır ortalamasını alın.',
+      tex: 'W_i = \\arg\\max_{1 \\le r \\le m} \\bar{x}_{ri}, \\qquad a_{ij} = \\frac{1}{|W_i|} \\sum_{r \\in W_i} \\bar{x}_{rj}, \\qquad a_{ii} = \\max_{1 \\le r \\le m} \\bar{x}_{ri}',
       edgeCase: {
-        en: 'Ties for the column maximum use the first matching alternative.',
-        tr: 'Sütun maksimumundaki eşitliklerde ilk sıradaki alternatif seçilir.',
+        en: 'Tied winning rows are averaged so row order never changes the matrix.',
+        tr: 'Eşit birinci satırların ortalaması alınır; satır sırası matrisi değiştirmez.',
       },
     },
     'cilos.lossMatrix': {
@@ -36,6 +37,13 @@ export const cilos = {
       en: 'Place the negative column sums of P on the main diagonal to form F.',
       tr: 'F matrisini kurmak için P sütun toplamlarının negatifini ana köşegene yazın.',
       tex: 'f_{ij} = p_{ij}\\;(i \\neq j), \\qquad f_{jj} = -\\sum_{i \\neq j} p_{ij}',
+    },
+    'cilos.totalLoss': {
+      en: 'Total impact loss of each criterion: the absolute diagonal entry of F.',
+      tr: 'Her kriterin toplam etki kaybı: F matrisinin mutlak köşegen değeri.',
+      tex: '|f_{jj}| = \\sum_{i \\neq j} p_{ij}',
+      symbol: '|f_jj|',
+      texSymbol: '$|f_{jj}|$',
     },
     'cilos.weights': {
       en: 'Solve the homogeneous linear system F q = 0 with weights summing to 1.',

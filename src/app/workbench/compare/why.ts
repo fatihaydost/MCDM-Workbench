@@ -85,9 +85,21 @@ export function whySentences(f: PairFacts, ctx: WhyContext): string[] {
           ? t('why.vikorRegretSame', { a, b, c: ctx.criteria[v.a]!, larger: v.ra > v.rb ? a : b })
           : t('why.vikorRegret', { a, b, ca: ctx.criteria[v.a]!, cb: ctx.criteria[v.b]!, larger: v.ra > v.rb ? a : b }),
       ]
-  // Prioritize VIKOR in character sentences and reserve space for its regret explanation on asymmetric splits;
-  // when a tie sentence is present, keep room for at least one character sentence.
-  const prioritized = shown.includes('vikor') ? ['vikor', ...shown.filter((x) => x !== 'vikor')] : shown
+  // Prioritize VIKOR in character sentences (unless its largest regrets are equal, in which case S decided the pair)
+  // and reserve space for its regret explanation on asymmetric splits; avoid pairing both SAW and AHP additive-sum
+  // character sentences when another distinct method is available.
+  const equalVikorRegret = Boolean(v && Math.abs(v.ra - v.rb) < 1e-12)
+  const rawPrioritized = shown.includes('vikor')
+    ? [...(equalVikorRegret ? [] : ['vikor']), ...shown.filter((x) => x !== 'vikor')]
+    : shown
+  let seenAdditiveSum = false
+  const prioritized = rawPrioritized.filter((id) => {
+    if (id === 'saw' || id === 'ahp-ranking') {
+      if (seenAdditiveSum) return false
+      seenAdditiveSum = true
+    }
+    return true
+  })
   const limit = MAX_SENTENCES + ties.length
   const reserve = na !== nb ? regret.length : 0
   const characters = prioritized

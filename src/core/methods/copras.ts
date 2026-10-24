@@ -37,10 +37,12 @@ export const copras: RankingMethod = {
     const sMinus = d.map((row) => sum(row.filter((_, j) => isCost[j])))
 
     // 3. Relative significance (Eq. 5, simplified): the cost weight W_C handed out by the reciprocal of each S-.
+    const activeCostCount = weights.filter((w, j) => isCost[j] && w > 0).length
     const wCost = sum(weights.filter((_, j) => isCost[j]))
     const sMax = Math.max(...sMinus)
     let scores: number[]
     if (wCost > 0 && sMax > 0 && sMinus.every((s) => s > 0)) {
+      if (activeCostCount === 1) warnings.push({ code: 'copras.single-cost-criterion' })
       const inv = sMinus.map((s) => sMax / s)
       const invTotal = sum(inv)
       scores = sPlus.map((sp, i) => sp + (wCost * inv[i]!) / invTotal)

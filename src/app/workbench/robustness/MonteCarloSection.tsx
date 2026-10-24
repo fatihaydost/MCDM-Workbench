@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { RankingRun } from '../../../core/run'
 import type { Problem } from '../../../core/types'
 import { Heatmap } from '../../../features/charts'
-import { RankIntervalChart } from '../../../features/charts/RankIntervalChart'
+import { RankIntervalChart, type RankIntervalChartProps } from '../../../features/charts/RankIntervalChart'
 import { useNumberFormat } from '../../../i18n'
 import { useElementWidth } from '../../../features/charts/useElementWidth'
 import { Notice, SegmentedControl, Select, Skeleton } from '../../../ui'
@@ -127,6 +127,7 @@ export function MonteCarloSection({ problem, weights, run, names, baseRanking }:
                   interval={r.rankInterval}
                   ranks={m}
                   highlight={baseTop}
+                  {...({ order: rowOrder } as Partial<RankIntervalChartProps>)}
                   format={formatMean}
                   formatRank={formatRank}
                   tableLabels={{

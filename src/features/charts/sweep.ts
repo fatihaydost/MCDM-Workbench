@@ -42,6 +42,8 @@ export type SweepLayoutInput = {
   series: readonly (readonly number[])[]
   /** Values the y domain must include besides the series (the cursor's exact scores). */
   extra?: readonly number[]
+  /** Score orientation: 'asc' (VIKOR Q, lower is better) puts 0 at the top so the 1st-place winner stays on top. */
+  order?: 'desc' | 'asc' | undefined
   labels: readonly string[]
   fontSize?: number
 }
@@ -80,7 +82,17 @@ export function linePath(points: readonly (readonly [number, number])[]): string
   return points.map(([x, y], k) => `${k === 0 ? 'M' : 'L'}${num(x)} ${num(y)}`).join('')
 }
 
-export function layoutSweep({ width, labelled, plotHeight = 240, xs, series, extra = [], labels, fontSize = 12 }: SweepLayoutInput): SweepLayout {
+export function layoutSweep({
+  width,
+  labelled,
+  plotHeight = 240,
+  xs,
+  series,
+  extra = [],
+  order = 'desc',
+  labels,
+  fontSize = 12,
+}: SweepLayoutInput): SweepLayout {
   const top = 22
   const bottom = top + plotHeight
   const left = AXIS_LEFT
@@ -104,7 +116,7 @@ export function layoutSweep({ width, labelled, plotHeight = 240, xs, series, ext
   const hi = rawHi <= 1 ? Math.min(1, rawHi + pad) : rawHi + pad
   const yDomain: Domain = niceDomain(lo, hi, 4)
   const x = scaleLinear([0, 1], [left, right])
-  const rawY = scaleLinear(yDomain, [bottom, top])
+  const rawY = scaleLinear(yDomain, order === 'asc' ? [top, bottom] : [bottom, top])
   const y: LinearScale = Object.assign((v: number) => Math.min(bottom, Math.max(top, rawY(v))), rawY)
 
   const paths = series.map((s) => linePath(xs.map((w, p) => [x(w), y(s[p] ?? Number.NaN)] as const).filter(([, py]) => Number.isFinite(py))))

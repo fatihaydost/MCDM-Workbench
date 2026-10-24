@@ -387,7 +387,7 @@ describe('VIKOR picture data', () => {
     }
     const p = vikorParts(flat, [0.1, 0.2, 0.3, 0.4])!
     expect(p.sTerm).toEqual([0, 0, 0])
-    p.Q.forEach((q, i) => expect(0.5 * p.sTerm[i]! + 0.5 * p.rTerm[i]!).toBeCloseTo(q, 14))
+    p.Q.forEach((q, i) => expect(p.rTerm[i]!).toBeCloseTo(q, 14))
     expect(p.order).toEqual([2, 0, 1])
   })
   it('returns null when VIKOR cannot run', () => {

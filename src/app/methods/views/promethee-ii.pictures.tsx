@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import type { PrometheePreferenceFunction } from '../../../core/methods/promethee-ii'
+import type { PrometheeCriterionFunction, PrometheePreferenceFunction } from '../../../core/methods/promethee-ii'
 import { PROMETHEE_IDEA_STEPS, PrometheeIdea, type PrometheeIdeaLabels } from '../../../features/illustrations/PrometheeIdea'
 import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
 import { useNumberFormat } from '../../../i18n'
@@ -29,11 +29,15 @@ export function Stage({ problem, weights, params, className }: StagePictureProps
     typeof params.preferenceFunction === 'string'
       ? (params.preferenceFunction as PrometheePreferenceFunction)
       : 'v-shape'
+  const criteriaFunctions = Array.isArray(params.criteriaFunctions)
+    ? (params.criteriaFunctions as readonly PrometheeCriterionFunction[])
+    : undefined
   return (
     <PrometheeIdea
       problem={problem}
       weights={weights}
       preferenceFunction={preferenceFunction}
+      criteriaFunctions={criteriaFunctions}
       format={format}
       labels={labels}
       className={cn('max-w-[760px]', className)}

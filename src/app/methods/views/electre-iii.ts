@@ -1,8 +1,37 @@
-import { electreIII as electreIIIMethod } from '../../../core'
+import { electreIII as electreIIIMethod, type ElectreIIIParams } from '../../../core'
 import { preloadable } from '../../preloadable'
 import type { MethodView } from './types'
 
 const pictures = () => import('./electre-iii.pictures')
+
+const WANG_2008_PARAMS: ElectreIIIParams = {
+  q: [
+    { abs: 1000 },
+    { rel: 0.1 },
+    { rel: 0.1 },
+    { abs: 5 },
+    { rel: 0.1 },
+    { rel: 0.1 },
+    { rel: 0.1 },
+    { abs: 2 },
+    { abs: 0.2 },
+    { abs: 0 },
+    { abs: 0 },
+  ],
+  p: [
+    { abs: 2000 },
+    { rel: 0.2 },
+    { rel: 0.2 },
+    { abs: 10 },
+    { rel: 0.2 },
+    { rel: 0.2 },
+    { rel: 0.2 },
+    { abs: 4 },
+    { abs: 0.4 },
+    { abs: 1 },
+    { abs: 1 },
+  ],
+}
 
 export const electreIII: MethodView<'ranking'> = {
   kind: 'ranking',
@@ -14,7 +43,7 @@ export const electreIII: MethodView<'ranking'> = {
     const p = problem('wang-2008-waste-incineration')
     const w = weights('wang-2008-waste-incineration')
     try {
-      const res = electreIIIMethod.compute(p, w, {})
+      const res = electreIIIMethod.compute(p, w, WANG_2008_PARAMS)
       const cred = res.steps.find((s) => s.key === 'electre-iii.credibility')?.matrix ?? []
       const m = cred.length
       const denom = Math.max(1, m - 1)

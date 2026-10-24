@@ -123,7 +123,6 @@ export function ArasOptimalBar({
   const rowStep = stacked ? STACKED_ROW : ROW
   const barY = stacked ? NAME_LINE : (ROW - BAR) / 2
   const height = rows.length * rowStep
-  const best = order[0]!
   const focus = Math.min(focusRow, m - 1)
   const xOpt = plotLeft + optimalScore * pxPerUnit
   const s0Text = f4(optimalScore)
@@ -138,6 +137,7 @@ export function ArasOptimalBar({
   }
 
   const move = (e: KeyboardEvent<SVGGElement>) => {
+    if (stepping) return
     let next = focus
     if (e.key === 'ArrowDown') next = Math.min(m - 1, focus + 1)
     else if (e.key === 'ArrowUp') next = Math.max(0, focus - 1)
@@ -153,7 +153,8 @@ export function ArasOptimalBar({
     e.currentTarget.querySelector<SVGElement>(`[data-row="${next}"]`)?.focus()
   }
 
-  const shown = active === null ? null : order[active]!
+  const activeRow = stepping ? null : active
+  const shown = activeRow === null ? null : order[activeRow]!
 
   return (
     <ChartFigure
@@ -192,12 +193,13 @@ export function ArasOptimalBar({
             const row = k - 1
             const short = truncate(r.name, stacked ? W - valueWidth - rightWidth : labelWidth - GAP, FONT)
             const end = plotLeft + r.total * pxPerUnit
+            const isBest = !r.ghost && parts.result.ranking[r.i] === 1 && stage >= 2
             return (
               <g
                 key={r.key}
                 className={s.sawRow}
                 style={{ transform: `translate(0px, ${k * rowStep}px)` }}
-                data-highlight={(r.i === best && stage >= 2) || undefined}
+                data-highlight={isBest || undefined}
                 data-ghost={r.ghost || undefined}
                 data-testid={r.ghost ? 'aras-optimal' : 'aras-bar'}
               >
@@ -224,23 +226,27 @@ export function ArasOptimalBar({
                 ) : (
                   <rect
                     className={s.marcosBar}
-                    data-on={active === row || undefined}
-                    data-highlight={(r.i === best && stage >= 2) || undefined}
+                    data-on={activeRow === row || undefined}
+                    data-highlight={isBest || undefined}
                     data-row={row}
                     x={0}
                     y={barY}
                     width={1}
                     height={BAR}
                     style={{ transform: `translate(${plotLeft}px, 0px) scale(${Math.max(end - plotLeft, 0.01)}, 1)` }}
-                    tabIndex={focus === row ? 0 : -1}
+                    tabIndex={!stepping && focus === row ? 0 : -1}
                     role="img"
                     aria-label={l.bar(r.name, texts[k]!, s0Text, right[r.i]!)}
-                    onMouseEnter={() => setActive(row)}
-                    onFocus={() => {
-                      setFocusRow(row)
-                      setActive(row)
-                    }}
-                    onBlur={() => setActive(null)}
+                    onMouseEnter={stepping ? undefined : () => setActive(row)}
+                    onFocus={
+                      stepping
+                        ? undefined
+                        : () => {
+                            setFocusRow(row)
+                            setActive(row)
+                          }
+                    }
+                    onBlur={stepping ? undefined : () => setActive(null)}
                   />
                 )}
                 <text
@@ -277,7 +283,7 @@ export function ArasOptimalBar({
             {l.readout(names[shown]!, f4(totals[shown]!), s0Text, right[shown]!)}
           </span>
         ) : (
-          l.caption
+          <span className={stage >= 2 ? undefined : 'invisible'}>{l.caption ?? ' '}</span>
         )}
       </p>
     </ChartFigure>

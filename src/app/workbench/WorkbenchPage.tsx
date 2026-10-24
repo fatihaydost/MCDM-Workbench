@@ -22,6 +22,28 @@ import { WeightsStage } from './WeightsStage'
 
 const isStage = (v: string | null): v is Stage => v !== null && (STAGES as readonly string[]).includes(v)
 
+// Robustness (its charts, texts and the Monte Carlo worker) is a chunk of its own: /app does not load it up front.
+// Once loaded it renders directly, not through lazy(): a lazy component suspends again on every mount, and React holds
+// a Suspense reveal back for a moment, so the stage would open empty and the focus moved into it would find nothing.
+type StageComponent = (typeof import('./robustness/RobustnessStage'))['default']
+let LoadedRobustness: StageComponent | null = null
+const loadRobustness = () =>
+  import('./robustness/RobustnessStage').then((m) => {
+    LoadedRobustness = m.default
+    return m
+  })
+const RobustnessStage = lazy(loadRobustness)
+
+// Compare is a chunk of its own too (its chart and texts); the rail line below needs only the core.
+type CompareComponent = (typeof import('./compare/CompareStage'))['default']
+let LoadedCompare: CompareComponent | null = null
+const loadCompare = () =>
+  import('./compare/CompareStage').then((m) => {
+    LoadedCompare = m.default
+    return m
+  })
+const CompareStage = lazy(loadCompare)
+
 /**
  * Warms only the active weighting and ranking methods' cards and stage pictures up front; the rest of the 26
  * cards and stage pictures wait for idle time. When the URL or saved state opens directly on Weights or Ranking,
@@ -49,32 +71,12 @@ function preloadInitialStage(): Promise<unknown> {
     if (id !== 'manual') void loadMethod(pageIdOf(id))
   }
   const pictures = preloadActiveStagePictures([...activeIds])
+  if (activeStage === 'compare') return loadCompare()
+  if (activeStage === 'robustness') return loadRobustness()
   return activeStage === 'weights' || activeStage === 'ranking' ? pictures : Promise.resolve()
 }
 
 const stagePictures = preloadInitialStage()
-
-// Robustness (its charts, texts and the Monte Carlo worker) is a chunk of its own: /app does not load it up front.
-// Once loaded it renders directly, not through lazy(): a lazy component suspends again on every mount, and React holds
-// a Suspense reveal back for a moment, so the stage would open empty and the focus moved into it would find nothing.
-type StageComponent = (typeof import('./robustness/RobustnessStage'))['default']
-let LoadedRobustness: StageComponent | null = null
-const loadRobustness = () =>
-  import('./robustness/RobustnessStage').then((m) => {
-    LoadedRobustness = m.default
-    return m
-  })
-const RobustnessStage = lazy(loadRobustness)
-
-// Compare is a chunk of its own too (its chart and texts); the rail line below needs only the core.
-type CompareComponent = (typeof import('./compare/CompareStage'))['default']
-let LoadedCompare: CompareComponent | null = null
-const loadCompare = () =>
-  import('./compare/CompareStage').then((m) => {
-    LoadedCompare = m.default
-    return m
-  })
-const CompareStage = lazy(loadCompare)
 
 /** Layout-shaped placeholder while the compare chunk loads: a chart and a text block. */
 function CompareSkeleton() {

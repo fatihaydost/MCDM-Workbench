@@ -96,7 +96,7 @@ export const entropy: WeightingMethod<EntropyParams> = {
 
     if (variant === 'minmax' && m === 2) warnings.push({ code: 'entropy.two-alternatives-minmax' })
     const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
-    if (weights[top]! > ENTROPY_DOMINANT_WEIGHT) warnings.push({ code: 'entropy.dominant-weight', col: top })
+    if (!allConstant && weights[top]! > ENTROPY_DOMINANT_WEIGHT) warnings.push({ code: 'entropy.dominant-weight', col: top })
 
     return {
       weights,

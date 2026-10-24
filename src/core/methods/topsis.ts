@@ -1,4 +1,4 @@
-import { column, isConstant, maxOf, minOf, sum, vectorNormalize } from '../math'
+import { column, isConstant, isNearConstant, maxOf, minOf, sum, vectorNormalize } from '../math'
 import { rankScores } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, validateProblem, validateWeights } from '../validate'
@@ -23,15 +23,21 @@ export const topsis: RankingMethod = {
     const v = r.map((row) => row.map((x, j) => x * weights[j]!))
 
     // 3. Ideal (A+) and anti-ideal (A-) per criterion direction; a constant column (up to rounding) has A+ = A-.
+    const m = matrix.length
     const best = new Array<number>(n)
     const worst = new Array<number>(n)
     for (let j = 0; j < n; j++) {
+      const rawCol = column(matrix, j)
       const col = column(v, j)
-      if (isConstant(column(matrix, j))) {
+      const w = weights[j]!
+      if (isConstant(rawCol)) {
+        for (let i = 0; i < m; i++) v[i]![j] = col[0]!
         best[j] = col[0]!
         worst[j] = col[0]!
         continue
       }
+      if (w > 0 && isNearConstant(rawCol)) warnings.push({ code: 'topsis.near-constant-column', col: j })
+      if (w > 0 && rawCol.some((x) => x < 0)) warnings.push({ code: 'topsis.negative-values', col: j })
       const hi = maxOf(col)
       const lo = minOf(col)
       const isCost = criteria[j]!.type === 'cost'

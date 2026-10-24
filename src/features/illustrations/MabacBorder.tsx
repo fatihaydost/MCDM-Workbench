@@ -13,6 +13,8 @@ export type MabacParts = {
   q: number[][]
   /** Score S per alternative. */
   scores: number[]
+  /** 1-based competition ranks per alternative. */
+  ranking: number[]
   /** The min-max weighted sum per alternative (= S + B). */
   sum: number[]
   /** The constant B every S is shifted by from the min-max weighted sum. */
@@ -32,7 +34,7 @@ export function mabacParts(problem: Problem, weights: readonly number[]): MabacP
   const q = res.steps.find((x) => x.key === 'mabac.distance')!.matrix!
   const sum = minMaxNormalize(problem).r.map((row) => row.reduce((a, t, j) => a + t * weights[j]!, 0))
   const order = res.scores.map((_, i) => i).sort((x, y) => res.ranking[x]! - res.ranking[y]! || x - y)
-  return { q, scores: res.scores, sum, border: res.diagnostics!.border as number, order }
+  return { q, scores: res.scores, ranking: res.ranking, sum, border: res.diagnostics!.border as number, order }
 }
 
 const defaultFormat = (v: number, d: number) => v.toFixed(d)
@@ -112,7 +114,7 @@ export function MabacBorder({ problem, weights, format = defaultFormat, labels, 
   const sticksOff = stage >= 1 ? undefined : ''
   const scoreOff = stage >= 2 ? undefined : ''
 
-  const { q, scores, order } = parts
+  const { q, scores, ranking, order } = parts
   const names = problem.alternatives
   const crit = problem.criteria.map((c) => c.name)
   const m = names.length
@@ -205,7 +207,7 @@ export function MabacBorder({ problem, weights, format = defaultFormat, labels, 
                 key={i}
                 className={s.sawRow}
                 style={{ transform: `translate(0px, ${HEAD + row * rowStep}px)` }}
-                data-highlight={row === 0 || undefined}
+                data-highlight={ranking[i] === 1 || undefined}
                 data-testid="mabac-row"
               >
                 <text className={s.sawName} x={0} y={stacked ? NAME_LINE / 2 : mid} dominantBaseline="central">
@@ -359,7 +361,7 @@ export function MabacSumLine({ problem, weights, format = defaultFormat, labels,
               </text>
             </g>
           ))}
-          {[-border, 0, 1 - border].map((v, k) => (
+          {(Math.abs(border) <= 1e-9 ? [0, 1] : [-border, 0, 1 - border]).map((v, k) => (
             <text key={k} className={s.colHead} x={x(0) - 6} y={y(v)} textAnchor="end" dominantBaseline="central">
               {v === 0 ? format(0, 0) : signed(format, v, 2)}
             </text>

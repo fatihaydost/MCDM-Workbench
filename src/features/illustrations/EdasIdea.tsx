@@ -151,7 +151,6 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, ste
   const rowStep = stacked ? STACKED_ROW : ROW
   const barY = stacked ? NAME_LINE : (ROW - BAR) / 2
   const height = HEAD + m * rowStep + 4
-  const best = order[0]!
   const focus = { row: Math.min(focusKey.row, m - 1), col: Math.min(focusKey.col, n - 1) }
   const colour = (j: number) => (j < SAW_CATEGORY_COLOURS ? String(j + 1) : 'other')
   // The side heads sit against the line; when either full head would be cut, both shorten to "← SN" and "SP →".
@@ -172,6 +171,7 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, ste
   }
 
   const move = (e: KeyboardEvent<SVGGElement>) => {
+    if (stepping) return
     const next = { ...focus }
     if (e.key === 'ArrowRight') next.col = Math.min(n - 1, focus.col + 1)
     else if (e.key === 'ArrowLeft') next.col = Math.max(0, focus.col - 1)
@@ -190,11 +190,11 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, ste
     el?.focus()
   }
 
-  const shown = active ? { i: order[active.row]!, j: active.col } : null
+  const shown = active && !stepping ? { i: stage >= 2 ? order[active.row]! : active.row, j: active.col } : null
   const legendCols = Array.from({ length: Math.min(n, SAW_CATEGORY_COLOURS) }, (_, j) => j)
   const readout = (i: number, j: number) => {
-    if (above[i]![j]! > 0) return l.readoutAbove(names[i]!, critNames[j]!, format(above[i]![j]!))
-    if (below[i]![j]! > 0) return l.readoutBelow(names[i]!, critNames[j]!, format(below[i]![j]!))
+    if (drawAbove[i]![j]! > 0) return l.readoutAbove(names[i]!, critNames[j]!, format(drawAbove[i]![j]!))
+    if (drawBelow[i]![j]! > 0) return l.readoutBelow(names[i]!, critNames[j]!, format(drawBelow[i]![j]!))
     return l.readoutAt(names[i]!, critNames[j]!)
   }
 
@@ -226,10 +226,10 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, ste
             {aboveText}
           </text>
         </g>
-        <g onKeyDown={move} onMouseLeave={() => setActive(null)} data-dimmed={active ? '' : undefined} className={s.sawPlot}>
+        <g onKeyDown={move} onMouseLeave={() => setActive(null)} data-dimmed={shown ? '' : undefined} className={s.sawPlot}>
           {order.map((i, row) => {
             const segs = divergingSegments(drawAbove[i]!, drawBelow[i]!, center, pxPerUnit)
-            const first = i === best && stage >= 2
+            const first = parts.result.ranking[i] === 1 && stage >= 2
             // Until the last step the rows keep the order of the table; then they slide to the rank order.
             const place = stage >= 2 ? row : i
             const name = names[i]!
@@ -251,7 +251,7 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, ste
                 </text>
                 {segs.map((g) => {
                   const on = shown?.j === g.col
-                  const tabbable = focus.row === row && focus.col === g.col
+                  const tabbable = !stepping && focus.row === place && focus.col === g.col
                   const label =
                     g.side === 'above'
                       ? l.segmentAbove(name, critNames[g.col]!, format(g.value), texts[i]!)
@@ -264,7 +264,7 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, ste
                       className={s.sawSeg}
                       data-cat={colour(g.col)}
                       data-on={on || undefined}
-                      data-row={row}
+                      data-row={place}
                       data-col={g.col}
                       data-side={g.side}
                       data-value={g.value}
@@ -277,12 +277,16 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, ste
                       tabIndex={tabbable ? 0 : -1}
                       role="img"
                       aria-label={label}
-                      onMouseEnter={() => setActive({ row, col: g.col })}
-                      onFocus={() => {
-                        setFocusKey({ row, col: g.col })
-                        setActive({ row, col: g.col })
-                      }}
-                      onBlur={() => setActive(null)}
+                      onMouseEnter={stepping ? undefined : () => setActive({ row: place, col: g.col })}
+                      onFocus={
+                        stepping
+                          ? undefined
+                          : () => {
+                              setFocusKey({ row: place, col: g.col })
+                              setActive({ row: place, col: g.col })
+                            }
+                      }
+                      onBlur={stepping ? undefined : () => setActive(null)}
                     />
                   )
                 })}

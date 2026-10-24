@@ -211,7 +211,7 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, cri
       const withPlaceholder = stepToTable(step, labels, { valueLabel: PLACEHOLDER })
       const symbol = content?.texSymbol
       const body = tableToLatex(withPlaceholder, { digits: DECIMALS.step })
-      text = `% ${name}\n${symbol ? body.replace(PLACEHOLDER, symbol) : body.replace(PLACEHOLDER, escapeLatex(name))}`
+      text = `% ${name}\n${body.replace(PLACEHOLDER, () => symbol ?? escapeLatex(name))}`
     }
     let result: Copied = format
     try {
@@ -321,6 +321,7 @@ const NO_PEAK_STEPS = new Set<string>([
   'electre-i.concordance',
   'electre-i.discordance',
   'electre-i.outranking',
+  'electre-i.kernel',
   'electre-iii.concordance',
   'electre-iii.credibility',
   'promethee-ii.preferenceMatrix',
@@ -332,6 +333,8 @@ const NO_PEAK_STEPS = new Set<string>([
   'cilos.squareMatrix',
   'cilos.lossMatrix',
   'cilos.systemMatrix',
+  'ahp.pairwiseMatrix',
+  'equal.weights',
 ])
 
 const MIN_PEAK_STEPS = new Set<string>([
@@ -346,11 +349,18 @@ const MIN_PEAK_STEPS = new Set<string>([
   'edas.sn',
   'copras.sMinus',
   'moora.costSum',
+  'promethee.negativeFlow',
   'promethee-ii.negativeFlow',
+  'electre-i.discordance',
   'electre-i.netDiscordance',
   'electre-iii.descending',
   'electre-iii.ascending',
-  'electre-iii.meanRank',
+  'entropy.entropy',
+  'cilos.relativeLoss',
+  'bwm.consistencyLocal',
+  'ahpRanking.consistency',
+  'roc.ranks',
+  'swara.s',
 ])
 
 const UNORIENTED_MATRIX_STEPS = new Set<string>([
@@ -361,6 +371,7 @@ const UNORIENTED_MATRIX_STEPS = new Set<string>([
   'copras.normalizedSum',
   'copras.weighted',
   'electre-i.oriented',
+  'entropy.proportionsSum',
 ])
 
 /**
@@ -387,20 +398,31 @@ function StepTableView({
   const [hover, setHover] = useState<Hover>(null)
 
   const colPeaks = useMemo(() => {
-    if (!highlightCols || table.values.length < 2) return null
+    if (!highlightCols || table.values.length < 1) return null
     const cols = table.values[0]?.length ?? 0
     if (stepKey !== undefined && NO_PEAK_STEPS.has(stepKey)) return Array.from({ length: cols }, () => NaN)
     const lowerIsBetterStep = stepKey !== undefined && MIN_PEAK_STEPS.has(stepKey)
     const unorientedMatrix = stepKey !== undefined && UNORIENTED_MATRIX_STEPS.has(stepKey)
+    if (table.values.length === 1) {
+      const finite = (table.values[0] ?? []).filter(Number.isFinite)
+      if (finite.length < 2) return null
+      const min = Math.min(...finite)
+      const max = Math.max(...finite)
+      const peak = lowerIsBetterStep ? min : max
+      if (max - min <= 1e-12 * Math.max(1, Math.abs(peak))) return null
+      return Array.from({ length: cols }, () => peak)
+    }
     return Array.from({ length: cols }, (_, c) => {
       const colVals = table.values.map((r) => r[c]!).filter(Number.isFinite)
       if (colVals.length < 2) return null
       const min = Math.min(...colVals)
       const max = Math.max(...colVals)
-      if (max - min <= 1e-12) return null
-      if (lowerIsBetterStep) return min
-      if (unorientedMatrix && stepKey !== 'electre-i.oriented' && criteria?.[c]?.type === 'cost') return min
-      return max
+      const wantMin =
+        lowerIsBetterStep ||
+        (unorientedMatrix && stepKey !== 'electre-i.oriented' && criteria?.[c]?.type === 'cost')
+      const peak = wantMin ? min : max
+      if (max - min <= 1e-12 * Math.max(1, Math.abs(peak))) return null
+      return peak
     })
   }, [highlightCols, table.values, stepKey, criteria])
 
@@ -452,7 +474,12 @@ function StepTableView({
               </th>
               {row.map((v, c) => {
                 const peak = colPeaks?.[c]
-                const isPeak = peak !== null && peak !== undefined && Number.isFinite(v) && Math.abs(v - peak) < 1e-12
+                const isPeak =
+                  peak !== null &&
+                  peak !== undefined &&
+                  Number.isFinite(peak) &&
+                  Number.isFinite(v) &&
+                  Math.abs(v - peak) <= 1e-12 * Math.max(1, Math.abs(peak))
                 return (
                   <td
                     key={c}

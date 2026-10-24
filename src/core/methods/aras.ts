@@ -103,7 +103,9 @@ function compute(problem: Problem, weights: number[], params: ArasParams = {}): 
     ranking: rankScores(utilityDegree, 'desc'),
     steps: [
       { key: 'aras.optimalRow', vector: optimalRow, axes: 'criteria' },
+      { key: 'aras.optimalNormalized', vector: r0, axes: 'criteria' },
       { key: 'aras.normalized', matrix: normalized, axes: ['alternatives', 'criteria'] },
+      { key: 'aras.optimalWeighted', vector: r0.map((v, j) => v * (weights[j] ?? 0)), axes: 'criteria' },
       { key: 'aras.weighted', matrix: weighted, axes: ['alternatives', 'criteria'] },
       { key: 'aras.optimalScore', scalar: optimalScore },
       { key: 'aras.optimality', vector: optimality, axes: 'alternatives' },

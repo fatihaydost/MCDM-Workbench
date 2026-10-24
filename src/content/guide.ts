@@ -663,8 +663,8 @@ export const riskyCombinations: readonly RiskyCombination[] = [
       tr: "İlgili bulgular: ağırlıklar ancak kullanılan normalizasyon ve aralıklara göre anlam taşır (Choo, Schoner ve Wedley 1999). Entropi ağırlıkları çok duyarlıdır: Mukhametzyanov (2021) tek bir değeri 85'ten 72'ye değiştirmenin bir kriterin ağırlığını 0,146'dan 0,231'e çıkardığını ve sıralamayı değiştirdiğini, SD ağırlıklarının ise %0,1 oynadığını yazar; makalenin verisiyle yeniden hesaplandığında bu değişiklik 0,196 (+%34) verir ve SD ağırlığı %0,3 düşer, yani Entropi yine çok daha fazla oynar. Normalizasyon Entropi-TOPSIS sonuçlarını değiştirir (Chen 2019).",
     },
     siteRule: {
-      en: 'With objective weights, always show an equal-weights run and the Monte Carlo panel next to the main result, and warn when one criterion takes more than half of the weight.',
-      tr: 'Nesnel ağırlık kullanıldığında ana sonucun yanında her zaman eşit ağırlıklı bir çalıştırma ve Monte Carlo paneli gösterilir; bir kriter ağırlığın yarısından fazlasını alırsa uyarı çıkar.',
+      en: 'With objective dispersion weights, check the Robustness (Monte Carlo and weight sweep) and Compare stages, and watch for the dominant-weight (> 0.50) warning.',
+      tr: 'Yayılıma dayalı nesnel ağırlıklarla Sağlamlık (Monte Carlo ve ağırlık taraması) ile Karşılaştırma aşamalarını inceleyin ve baskın ağırlık (> 0,50) uyarısına dikkat edin.',
     },
     methodIds: ['entropy', 'sd', 'critic', 'lopcow', 'merec', 'cilos', 'topsis', 'vikor', 'mabac', 'cocoso'],
     sources: [
@@ -707,8 +707,8 @@ export const riskyCombinations: readonly RiskyCombination[] = [
     },
     basis: 'analysis',
     siteRule: {
-      en: 'The import screen asks whether the values are raw performances or weighted scores.',
-      tr: 'İçe aktarma ekranı değerlerin ham performans mı yoksa ağırlıklı skor mu olduğunu sorar.',
+      en: 'Feed raw performance values into the decision matrix, not pre-weighted scores exported from another tool.',
+      tr: 'Karar matrisine başka bir araçtan dışa aktarılmış önceden ağırlıklandırılmış skorları değil, ham performans değerlerini girin.',
     },
     methodIds: ['ahp'],
     sources: [],
