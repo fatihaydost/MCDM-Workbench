@@ -9,7 +9,7 @@ export const prometheeII: MethodContent = {
     tr: 'Değerlendirmeleri zenginleştirmek için tercih sıralama yöntemi II',
   },
   family: 'ranking-outranking',
-  status: 'research',
+  status: 'available',
   year: 1986,
   origin: {
     authors: 'Brans, J.-P.; Vincke, Ph.; Mareschal, B.',
@@ -102,8 +102,8 @@ export const prometheeII: MethodContent = {
     doi: '10.1016/0377-2217(86)90044-5',
     match: 'match',
     note: {
-      en: 'Published example (hydroelectric power station, input from Mareschal 2019, Table 1); this method is not computed here yet, only recomputed during research. Six projects, six criteria, one preference type per criterion. The ranking a5 > a2 > a4 > a6 > a3 > a1 matches; pi differs by at most 0.001 and the summed net flow by 0.002, because the source rounds pi before summing. PROMETHEE I also shows a1 and a2 as incomparable, as the source says. pyDecision agrees to 1e-16.',
-      tr: "Yayımlanmış örnek (hidroelektrik santral, girdi Mareschal 2019, Tablo 1); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Altı proje, altı kriter, her kriter için bir tercih türü. a5 > a2 > a4 > a6 > a3 > a1 sıralaması örtüşüyor; kaynak pi değerlerini toplamadan önce yuvarladığı için pi en fazla 0,001, toplam net akış 0,002 farklı. PROMETHEE I de kaynağın dediği gibi a1 ile a2'yi kıyaslanamaz gösteriyor. pyDecision 1e-16 düzeyinde uyuşuyor.",
+      en: 'Tested against the published hydroelectric power station example (six projects, six criteria, one preference type per criterion; input in Mareschal 2019, Table 1) and the Goswami (2020) laptop selection problem (Tables 13-18). The ranking a5 > a2 > a4 > a6 > a3 > a1 matches; pi differs by at most 0.001 and the summed net flow by 0.002 because the 1986 table rounds pi to 3 decimals before summing. Goswami (2020) matches to 0.00001, and pyDecision agrees to 1e-16.',
+      tr: 'Yayımlanmış hidroelektrik santral örneği (altı proje, altı kriter, her kriter için bir tercih türü; girdi Mareschal 2019, Tablo 1) ve Goswami (2020) dizüstü bilgisayar seçimi problemi (Tablo 13-18) ile test edildi. a5 > a2 > a4 > a6 > a3 > a1 sıralaması örtüşüyor; 1986 tablosu pi değerlerini toplamadan önce 3 ondalığa yuvarladığı için pi en fazla 0,001, toplam net akış 0,002 farklı. Goswami (2020) 0,00001, pyDecision ise 1e-16 düzeyinde uyuşuyor.',
     },
   },
   sources: [
@@ -112,6 +112,7 @@ export const prometheeII: MethodContent = {
     { label: 'Brans & Mareschal (2005), PROMETHEE methods', doi: '10.1007/0-387-23081-5_5' },
     { label: 'Mareschal (2015), Note on the PROMETHEE net flow computation', url: 'https://bertrand.mareschal.web.ulb.be/PG2024/assets/promethee_net_flow.pdf' },
     { label: 'Mareschal (2019), Exercises with Visual PROMETHEE', url: 'https://bertrand.mareschal.web.ulb.be/PG2024/assets/exercises-vp-2019.pdf' },
+    { label: 'Goswami (2020), Foundations of Management 12(1), 93-110', doi: '10.2478/fman-2020-0008' },
     { label: 'Behzadian et al. (2010), 217 PROMETHEE papers reviewed, EJOR 200(1), 198-215', doi: '10.1016/j.ejor.2009.01.021' },
     { label: 'De Keyser & Peeters (1996), EJOR 89, 457-461', doi: '10.1016/0377-2217(94)00307-6' },
     { label: 'Verly & De Smet (2013), IJMCDM 3(4), 325-345', doi: '10.1504/IJMCDM.2013.056781' },

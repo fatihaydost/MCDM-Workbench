@@ -871,29 +871,35 @@ test('ARAS: the method page opens the airlines with ARAS; published K, S₀ once
   await expect(page.getByTestId('ranking-row')).toHaveCount(0)
 })
 
-test('the ranking control is three full rows of four at 375 px', async ({ page }) => {
+test('the ranking control is four rows of up to four at 375 px', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await page.goto('/app?example=pamucar-cirovic-2015-forklifts&stage=ranking')
   const radios = page.locator('[aria-label="Ranking method"]').getByRole('radio')
-  await expect(radios).toHaveCount(12)
+  await expect(radios).toHaveCount(13)
   const boxes = await radios.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).map((r) => ({ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) })))
   const rows = [...new Set(boxes.map((b) => b.y))]
-  expect(rows).toHaveLength(3)
-  for (const y of rows) expect(boxes.filter((b) => b.y === y)).toHaveLength(4)
+  expect(rows).toHaveLength(4)
+  expect(boxes.filter((b) => b.y === rows[0])).toHaveLength(4)
+  expect(boxes.filter((b) => b.y === rows[1])).toHaveLength(4)
+  expect(boxes.filter((b) => b.y === rows[2])).toHaveLength(4)
+  expect(boxes.filter((b) => b.y === rows[3])).toHaveLength(1)
   const widths = new Set(boxes.map((b) => b.w))
   expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(1)
   for (const b of boxes) expect(b.x + b.w).toBeLessThanOrEqual(375)
 })
 
-test('the weighting control is three full rows of three at 375 px', async ({ page }) => {
+test('the weighting control is four rows of up to three at 375 px', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await page.goto('/app?example=krishnan-2021-smartphones&stage=weights')
   const radios = page.locator('[aria-label="Weighting method"]').getByRole('radio')
-  await expect(radios).toHaveCount(9)
+  await expect(radios).toHaveCount(11)
   const boxes = await radios.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).map((r) => ({ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) })))
   const rows = [...new Set(boxes.map((b) => b.y))]
-  expect(rows).toHaveLength(3)
-  for (const y of rows) expect(boxes.filter((b) => b.y === y)).toHaveLength(3)
+  expect(rows).toHaveLength(4)
+  expect(boxes.filter((b) => b.y === rows[0])).toHaveLength(3)
+  expect(boxes.filter((b) => b.y === rows[1])).toHaveLength(3)
+  expect(boxes.filter((b) => b.y === rows[2])).toHaveLength(3)
+  expect(boxes.filter((b) => b.y === rows[3])).toHaveLength(2)
   for (const b of boxes) expect(b.x + b.w).toBeLessThanOrEqual(375)
 })
 

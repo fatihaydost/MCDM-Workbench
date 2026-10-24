@@ -962,6 +962,53 @@ export const examples: readonly ExampleDataset[] = [
     ],
     published: [{ label: 'roc.weights', values: [0.4567, 0.2567, 0.1567, 0.09, 0.04], decimals: 4 }],
   },
+  {
+    id: 'goswami-2020-laptops',
+    name: {
+      en: 'Laptop selection (Goswami 2020)',
+      tr: 'Dizüstü bilgisayar seçimi (Goswami 2020)',
+    },
+    summary: {
+      en: 'Six laptop models rated on processor, hard disk, operating system, RAM, screen size, brand and color, with AHP weights. The paper reports the PROMETHEE I and II leaving, entering and net flows.',
+      tr: 'İşlemci, sabit disk, işletim sistemi, RAM, ekran boyutu, marka ve renk kriterlerinde değerlendirilen altı dizüstü bilgisayar modeli, AHP ağırlıklarıyla. Makale PROMETHEE I ve II pozitif, negatif ve net akışlarını veriyor.',
+    },
+    referenceFor: ['promethee-ii'],
+    citation: {
+      authors: 'Goswami, S.S.',
+      year: 2020,
+      title: 'Outranking Methods: Promethee I and Promethee II',
+      venue: 'Foundations of Management 12(1), 93-110',
+      doi: '10.2478/fman-2020-0008',
+      tables: {
+        en: 'Tables 4 and 7 (weights and input), Tables 13, 15, 16 and 18 (output)',
+        tr: 'Tablo 4 ve 7 (ağırlıklar ve girdi), Tablo 13, 15, 16 ve 18 (çıktı)',
+      },
+    },
+    alternatives: ['Model 1', 'Model 2', 'Model 3', 'Model 4', 'Model 5', 'Model 6'],
+    criteria: [
+      { name: { en: 'Processor (1-9)', tr: 'İşlemci (1-9)' }, type: 'benefit' },
+      { name: { en: 'Hard disk capacity (1-9)', tr: 'Sabit disk kapasitesi (1-9)' }, type: 'benefit' },
+      { name: { en: 'Operating system (1-9)', tr: 'İşletim sistemi (1-9)' }, type: 'benefit' },
+      { name: { en: 'RAM (1-9)', tr: 'RAM (1-9)' }, type: 'benefit' },
+      { name: { en: 'Screen size (1-9)', tr: 'Ekran boyutu (1-9)' }, type: 'benefit' },
+      { name: { en: 'Brand (1-9)', tr: 'Marka (1-9)' }, type: 'benefit' },
+      { name: { en: 'Color (1-9)', tr: 'Renk (1-9)' }, type: 'benefit' },
+    ],
+    matrix: [
+      [3, 5, 3, 5, 3, 9, 3],
+      [5, 7, 5, 5, 7, 3, 3],
+      [5, 9, 9, 7, 7, 7, 5],
+      [7, 9, 9, 9, 9, 2, 9],
+      [5, 7, 9, 7, 7, 9, 9],
+      [3, 5, 5, 5, 7, 5, 3],
+    ],
+    weights: [0.37657, 0.09395, 0.04529, 0.21594, 0.16932, 0.07647, 0.02246],
+    published: [
+      { label: 'promethee-ii.positiveFlow', values: [0.04151, 0.12188, 0.2687, 0.60934, 0.26058, 0.03652], decimals: 5 },
+      { label: 'promethee-ii.negativeFlow', values: [0.49889, 0.22204, 0.08527, 0.05025, 0.08933, 0.39276], decimals: 5 },
+      { label: 'promethee-ii.netFlow', values: [-0.45738, -0.10015, 0.18343, 0.55909, 0.17125, -0.35624], decimals: 5 },
+    ],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

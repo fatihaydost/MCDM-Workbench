@@ -20,7 +20,7 @@ test('compare: one column per ranking method, VIKOR\'s A7 first, Borda at the en
 
   const columns = page.getByTestId('rank-column')
   await expect(columns).toHaveCount(N)
-  expect(await columns.evaluateAll((els) => els.map((el) => el.getAttribute('data-label')))).toEqual(ORDER.map((id) => (id === 'cocoso' ? 'CoCoSo' : id.toUpperCase())))
+  expect(await columns.evaluateAll((els) => els.map((el) => el.getAttribute('data-label')))).toEqual(ORDER.map((id) => (id === 'cocoso' ? 'CoCoSo' : id.replace('-', ' ').toUpperCase())))
   const firstOf = async (k: number) => columns.nth(k).locator('[data-rank="1"]').first().getAttribute('data-name')
   for (let k = 0; k < N; k++) expect(await firstOf(k)).toBe(firsts[k])
   expect(firsts[ORDER.indexOf('vikor')]).toBe('A7')

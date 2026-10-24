@@ -152,6 +152,9 @@
       },
       "roc": {
         "claim": "ROC, RS ve RR ağırlıkları {{citation}} Tablo 4 ve 6 ile {{decimals}} basamağa kadar aynı, SAW sıralamaları da aynı."
+      },
+      "promethee-ii": {
+        "claim": "Tablo 13, 15, 16 ve 18 içindeki π, φ⁺, φ⁻, φ değerleri ve altı sıranın tamamı {{citation}} ile {{decimals}} basamağa kadar aynı; 1986 hidroelektrik örneği de örtüşüyor."
       }
     },
     "catalogue": {
@@ -250,7 +253,8 @@
       "mabac": "MABAC",
       "moora": "MOORA",
       "aras": "ARAS",
-      "codas": "CODAS"
+      "codas": "CODAS",
+      "promethee-ii": "PROMETHEE II"
     },
     "params": {
       "entropy": {
@@ -346,6 +350,27 @@
           "roc": "ROC",
           "rs": "RS",
           "rr": "RR"
+        }
+      },
+      "promethee-ii": {
+        "preferenceFunction": "Tercih fonksiyonu",
+        "preferenceFunctionOptions": {
+          "v-shape": "V biçimli (doğrusal, p = açıklık)",
+          "usual": "Olağan (her fark > 0)",
+          "level": "Kademeli (q = %20, p = %60 açıklık)",
+          "gaussian": "Gauss (s = %50 açıklık)"
+        },
+        "preferenceFunctionHints": {
+          "v-shape": "Tercih 0'dan sütun açıklığına kadar doğrusal artar; min-maks ağırlıklı toplamla aynı sırayı verir.",
+          "usual": "Her pozitif fark tam tercih (1) sayılır; ağırlıklı Borda puanıyla aynı sırayı verir.",
+          "level": "Sütun açıklığının %20'sine kadar farklar yok sayılır, %60'ına kadar 0,5, üstü 1 sayılır.",
+          "gaussian": "Bükülme noktası sütun açıklığının yarısında olan yumuşak S biçimli tercih eğrisi."
+        },
+        "preferenceFunctionVariant": {
+          "v-shape": "V biçimli",
+          "usual": "olağan",
+          "level": "kademeli",
+          "gaussian": "Gauss"
         }
       }
     },
@@ -495,7 +520,8 @@
         "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir.",
         "moora": "Her değeri sütununun Öklid uzunluğuna böler, ağırlıklı fayda oranlarını toplar ve ağırlıklı maliyet oranlarını çıkarır; y büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
         "aras": "Başa bir optimal satır ekler, her alternatifin m + 1 satırlık sütun toplamlarındaki ağırlıklı paylarını toplar ve optimal satırın toplamına böler; K büyüdükçe sıra yükselir.",
-        "codas": "Her alternatifi negatif-ideal noktaya Öklid ve Taxicab uzaklıklarıyla bütün çiftler üzerinden karşılaştırarak puanlar; yüksek H daha iyidir."
+        "codas": "Her alternatifi negatif-ideal noktaya Öklid ve Taxicab uzaklıklarıyla bütün çiftler üzerinden karşılaştırarak puanlar; yüksek H daha iyidir.",
+        "promethee-ii": "Her alternatif çiftini her kriterde bir tercih fonksiyonuyla karşılaştırır ve pozitif akıştan negatif akışı çıkarır; φ büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir."
       },
       "columns": {
         "rank": "Sıra",
@@ -515,7 +541,9 @@
         "costSum": "Maliyet toplamı S-",
         "arasOptimality": "Optimalite S",
         "euclidean": "Öklid E",
-        "taxicab": "Taxicab T"
+        "taxicab": "Taxicab T",
+        "positiveFlow": "Pozitif akış φ⁺",
+        "negativeFlow": "Negatif akış φ⁻"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -578,6 +606,11 @@
           "name": "Değerlendirme H",
           "title": "CODAS değerlendirme skoru H",
           "symbol": "H"
+        },
+        "promethee-ii": {
+          "name": "Net akış φ",
+          "title": "PROMETHEE II net akışı φ",
+          "symbol": "φ"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -821,6 +854,12 @@
       "roc": {
         "ranks": "Kriter sıraları r",
         "weights": "Ağırlıklar w"
+      },
+      "promethee-ii": {
+        "preferenceMatrix": "Tercih matrisi π",
+        "positiveFlow": "Pozitif akış φ⁺",
+        "negativeFlow": "Negatif akış φ⁻",
+        "netFlow": "Net akış φ"
       }
     },
     "issues": {
@@ -1045,6 +1084,11 @@
         "rs": "RS",
         "rr": "RR",
         "weight": "Ağırlık w"
+      },
+      "promethee-ii": {
+        "title": "Pozitif akış φ⁺, negatif akış φ⁻ ve net akış φ",
+        "caption": "Sol: ikili tercih derecelerinden pozitif akış φ⁺ (üst) ve negatif akış φ⁻ (alt). Sağ: sıfır etrafında net üstünlük akışı φ = φ⁺ - φ⁻.",
+        "row": "{{alternative}}: φ⁺ = {{pos}}, φ⁻ = {{neg}}, φ = {{score}}"
       }
     },
     "flow": {
@@ -1170,6 +1214,11 @@
       "roc": {
         "ranks": "Sıralar",
         "weights": "Ağırlıklar"
+      },
+      "promethee-ii": {
+        "preferenceMatrix": "İkili π",
+        "positiveFlow": "φ⁺ ve φ⁻",
+        "netFlow": "φ"
       }
     },
     "pipeline": {
@@ -1261,7 +1310,8 @@
       "moora": "MOORA",
       "aras": "ARAS",
       "codas": "CODAS",
-      "roc": "ROC"
+      "roc": "ROC",
+      "promethee-ii": "PROMETHEE II"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1331,7 +1381,8 @@
         "moora": "Vektör normalizasyonu sonrası fayda oranları eksi maliyet oranları.",
         "aras": "Her ağırlıklı pay toplamını bir optimal satırla oranlar.",
         "codas": "Negatif-ideal noktaya Öklid ve Taxicab uzaklıklarını ikili karşılaştırmada birleştirir.",
-        "roc": "Kriterlerin önem sırasından ağırlıklar."
+        "roc": "Kriterlerin önem sırasından ağırlıklar.",
+        "promethee-ii": "İkili tercih fonksiyonları ve pozitif eksi negatif üstünlük akışları."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1639,6 +1690,15 @@
             "s2": "Üç sıra formülünü aynı ölçekte karşılaştırın: RS (kare) doğrusal azalır, RR (eşkenar dörtgen) 1. sırada en dik yoğunlaşır, ROC ise ikisinin arasında simpleks ağırlık merkezinde durur.",
             "s3": "Seçilen formül her kriterin sırasını sağdaki ağırlık çubuğu w değerine dönüştürür; ağırlıkların toplamı 1 olur."
           }
+        },
+        "promethee-ii": {
+          "title": "Pozitif akış, negatif akış ve net üstünlük akışı",
+          "caption": "Her dizüstü bilgisayar modeli kriterlerde ikişer ikişer karşılaştırılır: pozitif akış φ⁺ (diğerlerine üstünlüğü) eksi negatif akış φ⁻ (diğerlerinin üstünlüğü) net akış φ değerini verir.",
+          "steps": {
+            "s1": "Pozitif akış φ⁺: ikili tercih derecelerinin satır ortalaması; her modelin diğerlerine ortalama üstünlüğünü gösterir.",
+            "s2": "Negatif akış φ⁻: ikili tercih derecelerinin sütun ortalaması; diğerlerinin her modele ortalama üstünlüğünü gösterir.",
+            "s3": "Net akış φ = φ⁺ - φ⁻: sıfır etrafında pozitif eksi negatif akış; en yüksek φ birinci sırada yer alır."
+          }
         }
       }
     }
@@ -1816,6 +1876,12 @@
     "roc": {
       "ranks": "1 (en önemli) ile n (en önemsiz) arasındaki kriter sıraları r.",
       "weights": "Seçilen formülden (ROC ağırlık merkezi, Sıra Toplamı ya da Ters Sıra) elde edilen ve toplamı 1 olan sıra ağırlıkları w."
+    },
+    "promethee-ii": {
+      "preferenceMatrix": "Toplam tercih matrisi π: her sıralı (a, b) çifti için tek kriterli tercih dereceleri P_j(a, b) değerlerinin ağırlıklı toplamı.",
+      "positiveFlow": "Pozitif (çıkan) akış φ⁺: π matrisinin diğer tüm alternatifler üzerindeki satır ortalaması; her alternatifin diğerlerine ortalama üstünlüğünü ölçer.",
+      "negativeFlow": "Negatif (giren) akış φ⁻: π matrisinin diğer tüm alternatifler üzerindeki sütun ortalaması; diğerlerinin her alternatife ortalama üstünlüğünü ölçer.",
+      "netFlow": "Net üstünlük akışı φ = φ⁺ - φ⁻: yüksek değer daha üstte yer alır ve net akışların toplamı 0 olur."
     }
   },
   "validation": {

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { isStepKey, stepContent, stepFlow } from '../../content/steps'
 import type { Step } from '../../core'
 import { StepFlow } from '../../features/illustrations/StepFlow'
-import { stepToTable, tableToLatex, tableToTsv, type StepTable } from '../../features/io'
+import { escapeLatex, stepToTable, tableToLatex, tableToTsv, type StepTable } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
 import type { DraftProblem } from '../../state/workbench'
 import { Button, cn, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, IconButton, Tooltip } from '../../ui'
@@ -156,7 +156,7 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, hea
       const withPlaceholder = stepToTable(step, labels, { valueLabel: PLACEHOLDER })
       const symbol = content?.texSymbol
       const body = tableToLatex(withPlaceholder, { digits: DECIMALS.step })
-      text = `% ${name}\n${symbol ? body.replace(PLACEHOLDER, symbol) : body.replace(PLACEHOLDER, name)}`
+      text = `% ${name}\n${symbol ? body.replace(PLACEHOLDER, symbol) : body.replace(PLACEHOLDER, escapeLatex(name))}`
     }
     let result: Copied = format
     try {

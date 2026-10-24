@@ -31,7 +31,8 @@
       "mabac": "MABAC adds up how far each 0-1 value lies above or below a border, so strengths make up for a weakness fully, as in a 0-1 weighted sum.",
       "moora": "MOORA adds the vector-normalized benefit ratios and subtracts the cost ratios, so strengths make up for a weakness linearly on the Euclidean scale.",
       "aras": "ARAS adds up the weighted column shares with the optimal row in the total, so strengths make up for a weakness fully.",
-      "codas": "CODAS measures the Euclidean and Taxicab distances from the worst weighted value across every pair, so one large lead above the worst value boosts Euclidean distance more than several small ones."
+      "codas": "CODAS measures the Euclidean and Taxicab distances from the worst weighted value across every pair, so one large lead above the worst value boosts Euclidean distance more than several small ones.",
+      "promethee-ii": "PROMETHEE II compares alternatives pair by pair through a preference function capped at 1, so how much a difference counts depends on the chosen preference curve."
     },
     "unanimous": "All {{n}} methods put {{a}} above {{b}}.",
     "crossings": "Select a crossing in the chart to see another pair.",

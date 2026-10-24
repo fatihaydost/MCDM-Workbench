@@ -152,6 +152,9 @@
       },
       "roc": {
         "claim": "ROC, RS and RR weights match {{citation}} Tables 4 and 6 to {{decimals}} decimals, with the same SAW rankings."
+      },
+      "promethee-ii": {
+        "claim": "π, φ⁺, φ⁻, φ and all six ranks of Tables 13, 15, 16 and 18 match {{citation}} to {{decimals}} decimals; the 1986 hydroelectric example matches too."
       }
     },
     "catalogue": {
@@ -250,7 +253,8 @@
       "mabac": "MABAC",
       "moora": "MOORA",
       "aras": "ARAS",
-      "codas": "CODAS"
+      "codas": "CODAS",
+      "promethee-ii": "PROMETHEE II"
     },
     "params": {
       "entropy": {
@@ -346,6 +350,27 @@
           "roc": "ROC",
           "rs": "RS",
           "rr": "RR"
+        }
+      },
+      "promethee-ii": {
+        "preferenceFunction": "Preference function",
+        "preferenceFunctionOptions": {
+          "v-shape": "V-shape (linear, p = range)",
+          "usual": "Usual (any difference > 0)",
+          "level": "Level (q = 20%, p = 60% of range)",
+          "gaussian": "Gaussian (s = 50% of range)"
+        },
+        "preferenceFunctionHints": {
+          "v-shape": "Preference grows linearly from 0 to the column range; gives the same order as a min-max weighted sum.",
+          "usual": "Any positive difference counts as full preference (1); gives the same order as a weighted Borda count.",
+          "level": "Differences up to 20% of the column range are ignored, up to 60% count as 0.5, and larger differences count as 1.",
+          "gaussian": "Smooth S-shaped preference curve with inflection point at half the column range."
+        },
+        "preferenceFunctionVariant": {
+          "v-shape": "V-shape",
+          "usual": "usual",
+          "level": "level",
+          "gaussian": "Gaussian"
         }
       }
     },
@@ -495,7 +520,8 @@
         "mabac": "Adds up how far each alternative lies above or below a border, the geometric mean of every criterion; a higher S is better, in the same order as a min-max weighted sum. Zeros and negative values are allowed.",
         "moora": "Divides each value by the Euclidean length of its column, adds the weighted benefit ratios and subtracts the weighted cost ratios; a higher y is better. Zeros and negative values are allowed.",
         "aras": "Prepends an optimal row, adds up each alternative's weighted shares of the m + 1 column totals and divides by the optimal row's total; a higher K is better.",
-        "codas": "Scores each alternative by its Euclidean and Taxicab distances from the negative-ideal point, compared across every pair; a higher H is better."
+        "codas": "Scores each alternative by its Euclidean and Taxicab distances from the negative-ideal point, compared across every pair; a higher H is better.",
+        "promethee-ii": "Compares every pair of alternatives on each criterion with a preference function and subtracts the entering flow from the leaving flow; a higher φ is better. Zeros and negative values are allowed."
       },
       "columns": {
         "rank": "Rank",
@@ -515,7 +541,9 @@
         "costSum": "Cost sum S-",
         "arasOptimality": "Optimality S",
         "euclidean": "Euclidean E",
-        "taxicab": "Taxicab T"
+        "taxicab": "Taxicab T",
+        "positiveFlow": "Leaving flow φ⁺",
+        "negativeFlow": "Entering flow φ⁻"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -578,6 +606,11 @@
           "name": "Assessment H",
           "title": "CODAS assessment score H",
           "symbol": "H"
+        },
+        "promethee-ii": {
+          "name": "Net flow φ",
+          "title": "PROMETHEE II net flow φ",
+          "symbol": "φ"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -821,6 +854,12 @@
       "roc": {
         "ranks": "Criterion ranks r",
         "weights": "Weights w"
+      },
+      "promethee-ii": {
+        "preferenceMatrix": "Preference matrix π",
+        "positiveFlow": "Leaving flow φ⁺",
+        "negativeFlow": "Entering flow φ⁻",
+        "netFlow": "Net flow φ"
       }
     },
     "issues": {
@@ -1045,6 +1084,11 @@
         "rs": "RS",
         "rr": "RR",
         "weight": "Weight w"
+      },
+      "promethee-ii": {
+        "title": "Leaving flow φ⁺, entering flow φ⁻, and net flow φ",
+        "caption": "Left: leaving flow φ⁺ (top) and entering flow φ⁻ (bottom) from pairwise preference degrees. Right: net outranking flow φ = φ⁺ - φ⁻ around zero.",
+        "row": "{{alternative}}: φ⁺ = {{pos}}, φ⁻ = {{neg}}, φ = {{score}}"
       }
     },
     "flow": {
@@ -1170,6 +1214,11 @@
       "roc": {
         "ranks": "Ranks",
         "weights": "Weights"
+      },
+      "promethee-ii": {
+        "preferenceMatrix": "Pairwise π",
+        "positiveFlow": "φ⁺ and φ⁻",
+        "netFlow": "φ"
       }
     },
     "pipeline": {
@@ -1261,7 +1310,8 @@
       "moora": "MOORA",
       "aras": "ARAS",
       "codas": "CODAS",
-      "roc": "ROC"
+      "roc": "ROC",
+      "promethee-ii": "PROMETHEE II"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1331,7 +1381,8 @@
         "moora": "Benefit ratios minus cost ratios after vector normalization.",
         "aras": "Measures each weighted share total against an optimal row.",
         "codas": "Combines Euclidean and Taxicab distances from the negative-ideal across pairs.",
-        "roc": "Weights from the importance rank order of criteria."
+        "roc": "Weights from the importance rank order of criteria.",
+        "promethee-ii": "Pairwise preference functions and leaving minus entering outranking flows."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1639,6 +1690,15 @@
             "s2": "Compare the three rank-order rules on one scale: RS (square) decays linearly, RR (diamond) concentrates steepest on rank 1, and ROC sits at the simplex centroid between them.",
             "s3": "The chosen formula turns each criterion's rank into its weight bar w on the right, summing to 1."
           }
+        },
+        "promethee-ii": {
+          "title": "Leaving flow, entering flow, and net outranking flow",
+          "caption": "Each laptop model is compared pair by pair across criteria: leaving flow φ⁺ (how much it beats others) minus entering flow φ⁻ (how much others beat it) gives the net flow φ.",
+          "steps": {
+            "s1": "Leaving flow φ⁺: the row average of pairwise preference degrees, showing how strongly each model beats the others.",
+            "s2": "Entering flow φ⁻: the column average of pairwise preference degrees, showing how strongly the others beat each model.",
+            "s3": "Net flow φ = φ⁺ - φ⁻: leaving minus entering flow around zero; the highest φ ranks first."
+          }
         }
       }
     }
@@ -1816,6 +1876,12 @@
     "roc": {
       "ranks": "Criterion ranks r from 1 (most important) to n (least important).",
       "weights": "Rank-order weights w from the selected formula (ROC centroid, Rank Sum or Rank Reciprocal), summing to 1."
+    },
+    "promethee-ii": {
+      "preferenceMatrix": "Aggregated preference matrix π: for each ordered pair (a, b), the weighted sum of unicriterion preference degrees P_j(a, b).",
+      "positiveFlow": "Leaving (positive) flow φ⁺: the row average of π over all other alternatives, measuring how strongly each alternative outranks the rest.",
+      "negativeFlow": "Entering (negative) flow φ⁻: the column average of π over all other alternatives, measuring how strongly the rest outrank each alternative.",
+      "netFlow": "Net outranking flow φ = φ⁺ - φ⁻: a higher value ranks higher, and the net flows sum to 0."
     }
   },
   "validation": {

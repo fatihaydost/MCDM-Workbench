@@ -14,6 +14,7 @@ import {
   bwmProgress,
   bwmSolve,
   bwmSuggestion,
+  cilos,
   cocoso,
   codas,
   compareRankings,
@@ -127,17 +128,17 @@ const makeConsistentBwmJudgements = () => {
   return judgementsFromBwm(3, 0, 2, [1, 2, 4], [4, 2, 1])
 }
 
-describe('Registry Invariants (all 20 methods)', () => {
-  it('lists exactly 8 weighting and 12 ranking methods with unique ids', () => {
-    expect(WEIGHTING_IDS).toHaveLength(8)
-    expect(RANKING_IDS).toHaveLength(12)
-    expect(listMethods('weighting')).toHaveLength(8)
-    expect(listMethods('ranking')).toHaveLength(12)
-    expect(listMethods()).toHaveLength(20)
+describe('Registry Invariants (all 23 methods)', () => {
+  it('lists exactly 10 weighting and 13 ranking methods with unique ids', () => {
+    expect(WEIGHTING_IDS).toHaveLength(10)
+    expect(RANKING_IDS).toHaveLength(13)
+    expect(listMethods('weighting')).toHaveLength(10)
+    expect(listMethods('ranking')).toHaveLength(13)
+    expect(listMethods()).toHaveLength(23)
 
     const allIds = listMethods().map((m) => m.id)
     const uniqueIds = new Set(allIds)
-    expect(uniqueIds.size).toBe(20)
+    expect(uniqueIds.size).toBe(23)
 
     for (const id of WEIGHTING_IDS) {
       expect(getWeightingMethod(id)?.id).toBe(id)
@@ -150,13 +151,14 @@ describe('Registry Invariants (all 20 methods)', () => {
   })
 })
 
-describe('Weighting Methods Invariants (all 8 methods)', () => {
+describe('Weighting Methods Invariants (all 10 methods)', () => {
   const objectiveWeightingMethods: WeightingMethod<any>[] = [
     critic,
     entropy,
     sd,
     merec,
     lopcow,
+    cilos,
     equal,
   ]
 
