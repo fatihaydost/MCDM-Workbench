@@ -11,6 +11,7 @@ export { entropy, ENTROPY_DOMINANT_WEIGHT, type EntropyNormalization, type Entro
 export { equal } from './methods/equal'
 export { marcos } from './methods/marcos'
 export { merec, MEREC_DOMINANT_WEIGHT } from './methods/merec'
+export { moora } from './methods/moora'
 export { sd } from './methods/sd'
 export { saw, type SawNormalization, type SawParams } from './methods/saw'
 export { topsis } from './methods/topsis'

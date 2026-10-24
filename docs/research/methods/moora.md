@@ -1,84 +1,117 @@
-# Multi-Objective Optimization on the basis of Ratio Analysis (MOORA) — ratio system
+# Multi-Objective Optimization on the basis of Ratio Analysis (MOORA) — Ratio System
 
-- **Family:** ranking (compensatory / ratio — vector-normalized additive)
-- **Origin:** Brauers, W.K.M.; Zavadskas, E.K. (2006). The MOORA method and its application to privatization in a transition economy. *Control and Cybernetics* 35(2):445–469 (EuDML: https://eudml.org/doc/209425; **no DOI**; not opened). Ratio system first in Brauers (2004, book). Reference example from the method authors' open-access paper Brauers & Zavadskas (2010), doi:10.3846/tede.2010.01.
-- **Popularity:** Crossref cited-by: 575 for Brauers & Zavadskas 2010 (MULTIMOORA), 156 for Brauers et al. 2008 (contractors) (checked 2026-09-29); the 2006 origin has no DOI (Exa's index lists ~976 citations).
+**Re-verified 2026-10-24** against primary sources (full texts of Brauers & Zavadskas 2006 origin paper, Brauers & Zavadskas 2010 / 2012 MULTIMOORA project-selection papers, Brauers et al. 2008 contractor paper, Vujičić et al. 2017, Hafezalkotob et al. 2019 survey). Five published fixtures recomputed independently (`docs/research/scripts/moora.py`, output in `docs/research/scripts/moora.out`): **MATCH**. See "Changes on re-verification" at the end.
 
-## For users (site copy)
-- **EN:** MOORA divides each value by the "length" of its criterion column, then adds up the benefit ratios and subtracts the cost ratios. The alternative with the highest net ratio wins. It is quick, needs no reference point, and optional weights (importance coefficients) can be applied.
-- **TR:** MOORA her değeri kendi kriter sütununun "uzunluğuna" böler, sonra fayda oranlarını toplayıp maliyet oranlarını çıkarır. Net oranı en yüksek olan alternatif kazanır. Hızlıdır, referans nokta gerektirmez; istenirse önem katsayıları (ağırlıklar) uygulanabilir.
+## 1. Identity
+- **Family:** ranking (compensatory, ratio system on vector-normalized matrix)
+- **Origin:** Brauers, W.K.M.; Zavadskas, E.K. (2006). The MOORA method and its application to privatization in a transition economy. *Control and Cybernetics* 35(2):445–469 (full PDF read via Biblioteka Nauki: https://bibliotekanauki.pl/articles/969961.pdf; EuDML: https://eudml.org/doc/209425; no DOI). Weighted form (significance coefficients $w_j$) in Brauers & Zavadskas (2006, §4, p. 456–457), Brauers & Zavadskas (2009), *Technological and Economic Development of Economy* 15(2):352–375, doi:10.3846/1392-8619.2009.15.352-375, and Brauers & Zavadskas (2010), *Technological and Economic Development of Economy* 16(1):5–24, doi:10.3846/tede.2010.01.
+- **Popularity:** Crossref cited-by: 575 for Brauers & Zavadskas 2010 (MULTIMOORA), 156 for Brauers et al. 2008 (contractors); the 2006 origin paper has ~976 citations in Exa/Biblioteka Nauki. In Kocatürk Çetin (2023, *SDÜ İİBF Dergisi* 28(3):365–385, Tablo 8), MOORA appears 14 times among 196 Turkish MCDM articles of 2021.
 
-## When to use / when not
-- Use: many objectives, quick screening, want the same normalization as TOPSIS but an additive score.
-- Avoid / warn: the net score can be negative (costs dominate) — fine for ranking, confusing for users; vector normalization is not invariant to affine unit changes (same caveat as TOPSIS).
+## 2. Plain-language explanation
+- **EN:** MOORA divides each value by the Euclidean length of its column, multiplies by the criterion weight, adds the weighted benefit values and subtracts the weighted cost values:
+  - What it takes in: a table of alternatives and criteria (benefit or cost) and criterion weights $w_j$ summing to 1.
+  - What it does: divides every value by the square root of the sum of squares of its column ($x^*_{ij} = x_{ij} / \sqrt{\sum_i x_{ij}^2}$), multiplies by the criterion weight ($v_{ij} = w_j x^*_{ij}$), adds the benefit columns ($S^+_i$) and subtracts the cost columns ($S^-_i$).
+  - What comes out: a net assessment score $y_i = S^+_i - S^-_i$ for each alternative (which can be negative when cost criteria outweigh benefit criteria); higher $y_i$ ranks better.
+- **TR:** MOORA her değeri sütununun Öklid uzunluğuna böler, kriter ağırlığıyla çarpar, ağırlıklı fayda değerlerini toplar ve ağırlıklı maliyet değerlerini çıkarır:
+  - Ne alır: alternatif-kriter tablosu (fayda veya maliyet yönlü) ve toplamı 1 olan kriter ağırlıkları $w_j$.
+  - Ne yapar: her değeri sütunundaki kareler toplamının kareköküne böler ($x^*_{ij} = x_{ij} / \sqrt{\sum_i x_{ij}^2}$), kriter ağırlığıyla çarpar ($v_{ij} = w_j x^*_{ij}$), fayda sütunlarını toplar ($S^+_i$) ve maliyet sütunlarını çıkarır ($S^-_i$).
+  - Ne çıkarır: her alternatif için $y_i = S^+_i - S^-_i$ net değerlendirme skoru (maliyet kriterleri ağır bastığında negatif olabilir); büyük $y_i$ daha üst sırada yer alır.
 
-## Inputs
-- Decision matrix `X` (m × n); types `benefit|cost`; optional weights (importance coefficients) `w` — the origin uses **no weights** (w = 1) and prefers splitting an important objective into sub-objectives.
-- No parameters.
+## 3. When to use / When not to use
+- **Use when:**
+  - Criteria are measured in incompatible units (currency, percentages, years, headcount) and you want a fast, transparent ratio score without ideal/anti-ideal distance calculations (Brauers & Zavadskas 2006, §1.2, §3).
+  - The matrix contains zeros or negative values (e.g. net profit/loss or balance-of-payments changes, as in Brauers & Zavadskas 2006 Table 3a, p. 454; 2012 §7.1, p. 33) where reciprocal cost normalizations ($min/x$) or multiplicative forms fail.
+  - All criteria are benefit or all criteria are cost: unlike COPRAS, MOORA subtracts $S^-_i$ from $S^+_i$ and never divides by the cost sum.
+- **Do not use when:**
+  - Strong non-compensation is required so that a severe weakness on one criterion cannot be offset by gains on others — the Ratio System is fully compensatory; use the Reference Point ($L_\infty$) approach, VIKOR, or an outranking method instead (Brauers & Zavadskas 2006, §5–7; Hafezalkotob et al. 2019, §2.2).
+  - Criteria are measured on arbitrary interval scales where shifting a column by a constant ($x_{ij} \to x_{ij} + b_j$) should leave the ranking unchanged — vector normalization is scale-invariant for $a_j > 0$ ($x_{ij} \to a_j x_{ij}$), but not shift-invariant.
 
-## Algorithm (ratio system)
-1. $x^*_{ij} = x_{ij} / \sqrt{\sum_{i=1}^{m} x_{ij}^2}$.
-2. $y^*_i = \sum_{j \in B} w_j x^*_{ij} - \sum_{j \in C} w_j x^*_{ij}$ (w = 1 by default).
-3. Rank by decreasing $y^*_i$.
+## 4. Mathematical specification
+Given decision matrix $X = (x_{ij}) \in \mathbb{R}^{m \times n}$ ($m \ge 2$ alternatives, $n \ge 1$ criteria), criterion types $t_j \in \{\text{benefit}, \text{cost}\}$ partitioning $\{1,\dots,n\}$ into benefit set $B$ and cost set $C$, and weights $w_j \ge 0$ with $\sum_{j=1}^n w_j = 1$:
 
-**Reference point part (second half of MOORA):** $r_j = \max_i x^*_{ij}$ (benefit) / $\min_i x^*_{ij}$ (cost); score $\max_j |r_j - x^*_{ij}|$ (Tchebycheff), rank ascending.
+1. **Vector normalization** (Van Delft & Nijkamp 1977; Brauers & Zavadskas 2006, Eq. 2):
+   $$x^*_{ij} = \frac{x_{ij}}{\sqrt{\sum_{k=1}^{m} x_{kj}^2}}, \quad i=1,\dots,m,\; j=1,\dots,n$$
+   If a column is all zeros ($\sqrt{\sum_{k=1}^m x_{kj}^2} = 0$), set $x^*_{ij} = 0$ for all $i$ and emit warning `moora.zero-column`. For non-negative data $x^*_{ij} \in [0, 1]$; when negative entries are present $x^*_{ij} \in [-1, 1]$ (Brauers & Zavadskas 2012, p. 33).
 
-**MULTIMOORA (short note):** MOORA ratio system + reference point + **full multiplicative form** $U_i = \prod_{j\in B} x_{ij} / \prod_{j\in C} x_{ij}$ (on raw data, no normalization, no weights); the three rankings are merged into one final ranking (Brauers & Zavadskas 2010, Table 1, done by inspection; later MULTIMOORA papers formalize this as "dominance theory" — not opened here). pyDecision `multimoora_method` returns the three scores but **not** the dominance aggregation. Out of scope for v1; the fixture below includes all three parts so it can be added later.
+2. **Weighted normalized matrix** (Brauers & Zavadskas 2006, §4; 2009; 2010; 2012 Eq. 2bis; Vujičić et al. 2017, Eq. 12; Hafezalkotob et al. 2019, Eq. 3):
+   $$v_{ij} = w_j \, x^*_{ij}$$
+   *(Note: In unweighted presentations where $w_j = 1$ for all $j$, $y^*_i = \sum_{j \in B} x^*_{ij} - \sum_{j \in C} x^*_{ij}$. Under normalized equal weights $w_j = 1/n$, $v_{ij} = x^*_{ij}/n$, scaling $S^+_i, S^-_i, y_i$ by $1/n$ while preserving every ratio and rank identically.)*
 
-## Commonly combined with
-- Sub-objectives instead of weights (Brauers et al. 2008; Brauers & Zavadskas 2010).
-- Weighted MOORA with AHP/entropy weights is common in manufacturing applications (e.g. works by Chakraborty et al.) — not verified individually here.
-- Used as a comparison method in MABAC (2015) and CoCoSo (2019).
+3. **Benefit and cost sums per alternative**:
+   $$S^+_i = \sum_{j \in B} v_{ij}, \qquad S^-_i = \sum_{j \in C} v_{ij}$$
+   (with $S^+_i = 0$ if $B = \emptyset$ and $S^-_i = 0$ if $C = \emptyset$).
 
-## Pitfalls
-- Negative net scores; the 2008 paper adds a constant to make the smallest sum = 1 for readability — do not do this silently.
-- All-zero column → norm 0 (guard r = 0).
-- Unit dependence of vector normalization (rank changes under φ = a·f + b).
-- Unweighted by default in the origin; pyDecision `moora_method` requires weights → pass ones to reproduce the origin.
-- Internal inconsistency in Brauers et al. (2008) contractor example (see below) — do not use it as a fixture.
+4. **Net assessment score (Ratio System)** (Brauers & Zavadskas 2006, Eq. 3; 2010 Eq. 2):
+   $$y_i = S^+_i - S^-_i = \sum_{j \in B} w_j x^*_{ij} - \sum_{j \in C} w_j x^*_{ij}$$
 
-## Reference example (test fixture)
-- **Source:** Brauers, W.K.M.; Zavadskas, E.K. (2010). Project management by MULTIMOORA as an instrument for transition economies. *Technological and Economic Development of Economy* 16(1):5–24. doi:10.3846/tede.2010.01 (DOI printed in the PDF; open access). **Appendix C, Table 2** (2a matrix, 2b roots, 2c ratios and sums, 2d–2e reference point), **Appendix D, Table 3** (full multiplicative form), **Table 1** (rankings).
+5. **Ranking**: Sort alternatives by $y_i$ in **descending** order (largest $y_i$ gets rank 1; ties within `RANK_TIE_TOLERANCE = 1e-9` share the top rank of the tied group, Competition `1224` ranking).
 
-```json
-{
-  "id": "moora-brauers-zavadskas-2010",
-  "alternatives": ["A", "B", "C"],
-  "criteria": ["NPV", "IRR", "payback", "government income", "employment", "value added", "risk", "balance of payments", "investment"],
-  "types": ["benefit", "benefit", "cost", "benefit", "benefit", "benefit", "cost", "benefit", "benefit"],
-  "weights": [1, 1, 1, 1, 1, 1, 1, 1, 1],
-  "matrix": [
-    [1, 14, 9, 200, 600, 20, 20, 3.5, 2.5],
-    [1.6, 16, 7, 150, 800, 13.5, 25, 4, 1.5],
-    [2, 17, 5, 80, 1200, 10, 30, 3.8, 1.25]
-  ],
-  "expected": {
-    "roots": [2.749545, 27.221, 12.45, 262.4881, 1562.05, 26.12, 43.875, 6.533758, 3.1721444],
-    "y": [2.93480, 2.723, 2.698],
-    "ranking_ratio": [1, 2, 3],
-    "refpoint_max_dev": [0.38411, 0.3152442, 0.4571636],
-    "ranking_refpoint": [2, 1, 3],
-    "full_multiplicative": [1633333, 1421897, 1033600],
-    "ranking_multiplicative": [1, 2, 3],
-    "ranking_multimoora": [1, 2, 3],
-    "tolerance": 0.0005
-  }
-}
-```
+### Algebraic properties (verified in `docs/research/scripts/moora.py` across 2,000 random matrices)
+- **Column positive-scale invariance:** Rescaling column $j$ by $a_j > 0$ ($x_{ij} \to a_j x_{ij}$) leaves $x^*_{ij}$, $v_{ij}$, $S^+_i$, $S^-_i$, and $y_i$ identical ($\max|\Delta y| = 2.2 \times 10^{-16}$).
+- **Weight proportionality:** Scaling all weights by $c > 0$ ($w \to c w$) scales $S^+_i$, $S^-_i$, and $y_i$ by $c$ ($\max|y(cw) - c y(w)| = 2.7 \times 10^{-15}$) and leaves rankings invariant. In particular, equal weights $w_j = 1/n$ give $y_i = y^*_i / n$.
+- **Reduction to vector-normalized WSM on all-benefit problems:** When $C = \emptyset$, $S^-_i = 0$ and $y_i = \sum_{j=1}^n w_j x^*_{ij}$.
+- **Shift non-invariance:** Adding a positive constant $b_j$ to column $j$ ($x_{ij} \to x_{ij} + b_j$) changes the column norm $\sqrt{\sum_i (x_{ij} + b_j)^2}$ non-linearly and changed the ranking in 1,090 / 2,000 (54.5%) random test problems.
 
-- **Published outputs:** ratio sums 2.93480, 2.723, 2.698 (A ≻ B ≻ C); reference point max deviations 0.38411, 0.3152442, 0.4571636 (B ≻ A ≻ C); full multiplicative 1,633,333; 1,421,897; 1,033,600 (A ≻ B ≻ C); MULTIMOORA A ≻ B ≻ C.
-- **Recomputed (numpy):** roots 2.7495, 27.2213, 12.4499, 262.4881, 1562.0499, 26.1199, 43.8748, 6.5338, 3.1721; y* = 2.93480, 2.72315, 2.69803 — **MATCH** (max abs diff 0.00015; the paper prints B/C to 3 dp); reference point 0.38411, 0.31524, 0.45716 — **MATCH** (1e-6); full multiplicative 1,633,333.3; 1,421,897.1; 1,033,600 — **MATCH** (paper truncates decimals).
-- **pyDecision 5.1.1:** `moora_method(X, weights=ones, types)` → y* **MATCH** (0.00015). `multimoora_method` → ratio, reference-point and multiplicative rankings **MATCH** ([1,2,3], [2,1,3], [1,2,3]); it returns each score divided by its max.
-- **Rejected candidate:** Brauers, Zavadskas, Turskis, Vilutienė (2008), JBEM 9(4):245–255, doi:10.3846/1611-1699.2008.9.245-255 (15 contractors × 9 objectives). Its reference-point ranking reproduces 15/15 (max dev diff 0.001), but the ratio-system sums do **not** (max abs diff 0.051; a4/a10 swap): Appendix B Table 1b squares were computed from data that differ from Table 2/1a (e.g. a10: x8 0.2 vs 0.23, x9 0.7 vs 0.73, x2 13.5 vs 13.47). **MISMATCH due to internal inconsistency of the paper.**
+## 5. Variants & parameters
+- **Implemented:** Weighted MOORA **Ratio System** ($y_i = S^+_i - S^-_i$, no extra method parameters; uses the workbench criterion weights $w_j$).
+- **Not implemented as separate parameters (documented on the method card):**
+  - **Reference Point approach** (Brauers & Zavadskas 2006, Eq. 4): maximal objective reference point $r_j = \max_i x^*_{ij}$ for $j \in B$, $\min_i x^*_{ij}$ for $j \in C$; Tchebycheff ($L_\infty$) deviation $z_i = \max_j w_j |r_j - x^*_{ij}|$, ranked ascending.
+  - **Full Multiplicative Form & MULTIMOORA** (Brauers & Zavadskas 2010): $U'_i = \prod_{j \in B} x_{ij}^{w_j} / \prod_{j \in C} x_{ij}^{w_j}$, combined with Ratio System and Reference Point via dominance theory.
 
-## Implementation notes
-- pyDecision: `moora_method(dataset, weights, criterion_type, graph, verbose)` (weights required); `multimoora_method(dataset, criterion_type, graph)` (unweighted; returns `(flow_1, flow_2, flow_3)`).
-- Our v1: ratio system with optional weights (default 1 → matches origin); also return the reference-point score (cheap) so the site can show "two MOORA views".
-- MULTIMOORA later: implement dominance-based aggregation explicitly (not rank averaging).
+## 6. Commonly combined with
+- **Equal weights:** Used in the foundational simulations of Brauers & Zavadskas (2006, Tables 1 and 5) and Brauers & Zavadskas (2010, Appendix C Table 2; 2012, Appendix C Table 5).
+- **Entropy and CRITIC:** Vujičić, Papić & Blagojević (2017), *Tehnika* 72(3):422–429, doi:10.5937/tehnika1703422V, pair both Entropy (Table 7a) and CRITIC (Table 7b) with MOORA for air-conditioner selection. In Hafezalkotob et al. (2019, *Information Fusion* 51:145–177, Table 3), Entropy is the single most frequent weighting method paired with MOORA/MULTIMOORA, and CRITIC is among the main statistical objective weighting methods.
+- **AHP and BWM:** Hafezalkotob et al. (2019, Table 3) report AHP as the most frequent subjective weighting method paired with MOORA/MULTIMOORA (e.g. Chakraborty 2011, *Int J Adv Manuf Technol* 54:1155–1166), alongside BWM and SWARA.
+- **Compared side by side with:** SAW (Vujičić et al. 2017), TOPSIS (Brauers & Zavadskas 2006, §5.3), MABAC and COPRAS and VIKOR (Pamučar & Ćirović 2015, *Expert Systems with Applications* 42(6):3016–3028, Tables 16–20), CoCoSo and WASPAS and EDAS (Yazdani et al. 2019, *Management Decision* 57(9):2501–2519, Tables IX & XI).
 
-## Sources
-- Brauers & Zavadskas 2010, TEDE 16(1):5–24, doi:10.3846/tede.2010.01, PDF: https://journals.vilniustech.lt/index.php/TEDE/article/download/5832/5078/13168 (Table 1; Appendix C Table 2; Appendix D Table 3).
-- Brauers et al. 2008, JBEM 9(4):245–255, doi:10.3846/1611-1699.2008.9.245-255, PDF: https://journals.vilniustech.lt/index.php/JBEM/article/download/6885/5946 (Tables 2–3, Appendix B).
-- Brauers & Zavadskas 2006, Control and Cybernetics 35(2):445–469, https://eudml.org/doc/209425 (origin; not opened).
-- pyDecision 5.1.1, `pyDecision/algorithm/moora.py`, `multimoora.py`.
-- Recompute script: `scratchpad/mcdm/siralama/scripts/moora_mabac_marcos_cocoso.py`.
+## 7. Known pitfalls & edge cases
+1. **Negative net scores $y_i < 0$ are normal when cost criteria carry more weight than benefit criteria:** Because $y_i = S^+_i - S^-_i$, whenever $\sum_{j \in C} w_j > \sum_{j \in B} w_j$ (as in Vujičić et al. 2017, where 3 of 5 criteria are cost with total weight 0.790 under Entropy and 0.582 under CRITIC), every alternative has $y_i < 0$. Alternatives are still ranked by $y_i$ descending (closest to zero / least negative is best).
+2. **All-zero column:** If $\sum_{i=1}^m x_{ij}^2 = 0$, the Euclidean norm is 0. Following `topsis.zero-column`, the column is left as all zeros and `moora.zero-column` is emitted as a warning.
+3. **Negative and zero matrix values:** Allowed without restriction (unlike SAW `linearMax`, WASPAS, COPRAS, MARCOS, or MEREC). A negative entry on a benefit criterion reduces $S^+_i$; a negative entry on a cost criterion reduces $S^-_i$ (increasing $y_i = S^+_i - S^-_i$).
+4. **Equal-weight scaling ($w_j = 1/n$ vs $w_j = 1$):** Unweighted MOORA papers sum unscaled $x^*_{ij}$ ($w_j = 1$), producing $y^*_i = n \cdot y_i$ where $y_i$ uses normalized equal weights $w_j = 1/n$. Rankings and relative score ratios are identical.
+
+## 8. Worked numerical examples (fixtures)
+
+### Fixture 1 (Primary workbench example): Brauers & Zavadskas (2010), Appendix C Table 2 — Project management
+- **Citation:** Brauers, W.K.M.; Zavadskas, E.K. (2010). Project management by MULTIMOORA as an instrument for transition economies. *Technological and Economic Development of Economy* 16(1):5–24, doi:10.3846/tede.2010.01, Appendix C Table 2 (2a raw matrix, 2b sum of squares and square roots, 2c objectives divided by their square roots and MOORA). Reprinted identically in Brauers & Zavadskas (2012), *E+M Ekonomie a Management* 15(1):28–43, Appendix C Table 5.
+- **Setup:** 3 projects (`Project A`, `Project B`, `Project C`) × 9 objectives (7 benefit, 2 cost: Payback period and Risk), equal weights ($w_j = 1/9$ in the workbench; $w_j = 1$ in the printed table).
+- **Fixture file:** `tests/fixtures/moora-brauers-zavadskas2010.json`
+  - Matrix:
+    - Project A: `[1, 14, 9, 200, 600, 20, 20, 3.5, 2.5]`
+    - Project B: `[1.6, 16, 7, 150, 800, 13.5, 25, 4, 1.5]`
+    - Project C: `[2, 17, 5, 80, 1200, 10, 30, 3.8, 1.25]`
+  - Unweighted ($w_j = 1$): $S^+ = [4.113538, 3.855209, 3.783400]$, $S^- = [1.178740, 1.132056, 1.085373]$, $y^* = [2.934799, 2.723153, 2.698027]$ vs published `[2.93480, 2.723, 2.698]` ($\max|\Delta| = 1.53 \times 10^{-4}$, matching every printed digit).
+  - Equal weights ($w_j = 1/9$): $S^+ = [0.457060, 0.428357, 0.420378]$, $S^- = [0.130971, 0.125784, 0.120597]$, $y = [0.326089, 0.302573, 0.299781]$, ranks `[1, 2, 3]` (**MATCH**).
+
+### Fixture 2 (Origin paper): Brauers & Zavadskas (2006), Tables 1 and 5 — Privatization in a transition economy
+- **Citation:** Brauers, W.K.M.; Zavadskas, E.K. (2006). The MOORA method and its application to privatization in a transition economy. *Control and Cybernetics* 35(2):445–469, Table 1 (p. 450, welfare economy, 3 projects × 7 objectives: 6 benefit, 1 cost) and Table 5 (p. 464, wellbeing economy, 3 projects × 8 objectives: 6 benefit, 2 cost).
+- **Fixture file:** `tests/fixtures/moora-brauers-zavadskas2010.json` (`origin2006_table1`, `origin2006_table5`)
+  - **Table 1:** Unweighted $y^* = [3.167587, 2.742483, 2.493144]$ vs published `[3.16759, 2.74248, 2.49314]` ($\max|\Delta| = 3.1 \times 10^{-6}$); equal-weight ($w_j = 1/7$) $y = [0.452512, 0.391783, 0.356163]$, ranks `[1, 2, 3]` (**MATCH**).
+  - **Table 5:** Unweighted $y^* = [2.4802701, 2.1516959, 2.1260073]$ vs published `[2.4802701, 2.151696, 2.126007]` ($\max|\Delta| = 3.1 \times 10^{-7}$); equal-weight ($w_j = 1/8$) $y = [0.310034, 0.268962, 0.265751]$, ranks `[1, 2, 3]` (**MATCH**).
+
+### Fixture 3 (Secondary weighted fixtures): Vujičić, Papić & Blagojević (2017), Tables 7a and 7b Variant 1 — Air conditioners
+- **Citation:** Vujičić, M.D.; Papić, M.Z.; Blagojević, M.D. (2017). Comparative analysis of objective techniques for criteria weighing in two MCDM methods on example of an air conditioner selection. *Tehnika* 72(3):422–429, doi:10.5937/tehnika1703422V, Table 2 (9 air conditioners × 5 criteria: 2 benefit, 3 cost), Table 4 (Entropy weights), Table 6 (CRITIC weights), Table 7a Variant 1 (MOORA–Entropy), Table 7b Variant 1 (MOORA–CRITIC).
+- **Fixture file:** `tests/fixtures/moora-vujicic2017.json`
+  - **Table 7a Variant 1 (Entropy → MOORA):** $S^+ = [0.065071, 0.068616, 0.068716, 0.058035, 0.065596, 0.074551, 0.066849, 0.066694, 0.090947]$, $S^- = [0.230667, 0.288938, 0.222548, 0.287716, 0.311804, 0.235452, 0.186831, 0.278759, 0.292806]$, $y = [-0.165597, -0.220322, -0.153831, -0.229681, -0.246208, -0.160900, -0.119982, -0.212065, -0.201859]$, ranks `[4, 7, 2, 8, 9, 3, 1, 6, 5]` vs published `[4, 7, 2, 8, 9, 3, 1, 6, 5]` (**9/9 MATCH**, also identical when using the 3 d.p. printed Entropy weights).
+  - **Table 7b Variant 1 (CRITIC → MOORA):** $S^+ = [0.131570, 0.136886, 0.137978, 0.132637, 0.126188, 0.146037, 0.139837, 0.138148, 0.158127]$, $S^- = [0.169892, 0.208899, 0.171444, 0.210506, 0.220936, 0.178982, 0.142379, 0.202228, 0.219344]$, $y = [-0.038322, -0.072013, -0.033466, -0.077869, -0.094748, -0.032945, -0.002542, -0.064079, -0.061217]$, ranks `[4, 7, 3, 8, 9, 2, 1, 6, 5]` vs published `[4, 7, 3, 8, 9, 2, 1, 6, 5]` (**9/9 MATCH**).
+
+### Rejected candidate: Brauers, Zavadskas, Turskis & Vilutienė (2008), Table 2 — Contractor ranking
+- **Citation:** Brauers, W.K.M.; Zavadskas, E.K.; Turskis, Z.; Vilutienė, T. (2008). Multi-objective contractor's ranking by applying the MOORA method. *Journal of Business Economics and Management* 9(4):245–255, doi:10.3846/1611-1699.2008.9.245-255.
+- **Reason for rejection as test fixture:** Internally inconsistent between Table 2a (raw inputs) and Table 2b (normalized values). For column $x_2$, Table 2a has $\sqrt{\sum_i x_{i2}^2} = 2695.904$, giving $x^*_{1,2} = 1995 / 2695.904 = 0.7400$, whereas Table 2b prints $0.8586$ (implying a denominator of $\approx 2323.5$). Columns $x_6, x_7, x_8$ show similar denominator discrepancies, shifting the top-3 ranking from the paper's printed `A12 > A7 > A1` to `A1 > A7 > A12` when recomputed from Table 2a. Documented in `docs/research/scripts/moora.py` and in the method card's `reference.note`.
+
+## 9. Python reference implementation
+See `docs/research/scripts/moora.py` (output saved in `docs/research/scripts/moora.out`).
+
+## 10. Sources
+- Brauers, W.K.M.; Zavadskas, E.K. (2006). The MOORA method and its application to privatization in a transition economy. *Control and Cybernetics* 35(2):445–469. Full PDF: https://bibliotekanauki.pl/articles/969961.pdf (EuDML: https://eudml.org/doc/209425).
+- Brauers, W.K.M.; Zavadskas, E.K. (2009). Robustness of the multi-objective MOORA method with a test for the facilities sector. *Technological and Economic Development of Economy* 15(2):352–375, doi:10.3846/1392-8619.2009.15.352-375.
+- Brauers, W.K.M.; Zavadskas, E.K. (2010). Project management by MULTIMOORA as an instrument for transition economies. *Technological and Economic Development of Economy* 16(1):5–24, doi:10.3846/tede.2010.01.
+- Brauers, W.K.M.; Zavadskas, E.K. (2012). A multi-objective decision support system for project selection with an application for the Tunisian textile industry. *E+M Ekonomie a Management* 15(1):28–43.
+- Brauers, W.K.M.; Zavadskas, E.K.; Turskis, Z.; Vilutienė, T. (2008). Multi-objective contractor's ranking by applying the MOORA method. *Journal of Business Economics and Management* 9(4):245–255, doi:10.3846/1611-1699.2008.9.245-255.
+- Vujičić, M.D.; Papić, M.Z.; Blagojević, M.D. (2017). Comparative analysis of objective techniques for criteria weighing in two MCDM methods on example of an air conditioner selection. *Tehnika* 72(3):422–429, doi:10.5937/tehnika1703422V.
+- Hafezalkotob, A.; Hafezalkotob, A.; Liao, H.; Herrera, F. (2019). An overview of MULTIMOORA for multi-criteria decision-making: Theory, developments, applications, and challenges. *Information Fusion* 51:145–177, doi:10.1016/j.inffus.2018.12.002.
+
+## 11. Changes on re-verification (2026-10-24)
+- **Origin paper (Brauers & Zavadskas 2006) read in full** (`bibliotekanauki.pl/articles/969961.pdf`): extracted and verified both privatization simulations (Table 1 welfare economy, 3×7, max diff `3.1e-6`; Table 5 wellbeing economy, 3×8, max diff `3.1e-7`).
+- **Corrected Fixture 1 input matrix in `moora.md`:** The draft `moora.md` had paired the raw matrix from Table 1 of Brauers & Zavadskas (2010) (`[[800, 0.14, 0.25, ...]]`, used in the paper's text only for the Multiplicative Form) with the MOORA Ratio System scores $y^* = [2.93480, 2.723, 2.698]$ and Reference Point deviations $[0.38411, 0.315244, 0.457164]$ from Appendix C Table 2 (`[[1, 14, 9, 200, 600, 20, 20, 3.5, 2.5], [1.6, 16, 7, 150, 800, 13.5, 25, 4, 1.5], [2, 17, 5, 80, 1200, 10, 30, 3.8, 1.25]]`, reprinted in Brauers & Zavadskas 2012 Appendix C Table 5). Replaced with the true Appendix C Table 2 matrix, which reproduces every printed norm, normalized cell, $y^* = [2.93480, 2.723, 2.698]$ (to `1.5e-4`), and Reference Point deviation (`[0.384111, 0.315244, 0.457164]`).
+- **Added secondary weighted fixtures (`tests/fixtures/moora-vujicic2017.json`):** Vujičić et al. (2017) Table 7a Variant 1 (Entropy → MOORA, 9/9 rank match) and Table 7b Variant 1 (CRITIC → MOORA, 9/9 rank match).

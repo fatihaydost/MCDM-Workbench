@@ -129,6 +129,9 @@
       "mabac": {
         "claim": "The border G, the scores S and all seven ranks of Tables 10 and 12 match {{citation}} to {{decimals}} decimals."
       },
+      "moora": {
+        "claim": "All nine column norms, every normalized cell and the three ratio-system scores match {{citation}} to {{decimals}} decimals, with the same three ranks."
+      },
       "bwm": {
         "claim": "Linear BWM weights match {{citation}} to {{decimals}} decimals."
       }
@@ -222,7 +225,8 @@
       "copras": "COPRAS",
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
-      "mabac": "MABAC"
+      "mabac": "MABAC",
+      "moora": "MOORA"
     },
     "params": {
       "entropy": {
@@ -416,7 +420,8 @@
         "copras": "Adds up each alternative's weighted share of the benefit criteria plus a bonus that grows as its cost share shrinks; a higher Q is better.",
         "marcos": "Measures each weighted total against an imaginary ideal and anti-ideal row; a higher f(K) is better, in the same order as SAW (Linear).",
         "cocoso": "Reads a weighted sum S and a power sum P three ways and combines them; a higher k is better. Zeros and negative values are allowed.",
-        "mabac": "Adds up how far each alternative lies above or below a border, the geometric mean of every criterion; a higher S is better, in the same order as a min-max weighted sum. Zeros and negative values are allowed."
+        "mabac": "Adds up how far each alternative lies above or below a border, the geometric mean of every criterion; a higher S is better, in the same order as a min-max weighted sum. Zeros and negative values are allowed.",
+        "moora": "Divides each value by the Euclidean length of its column, adds the weighted benefit ratios and subtracts the weighted cost ratios; a higher y is better. Zeros and negative values are allowed."
       },
       "columns": {
         "rank": "Rank",
@@ -431,7 +436,9 @@
         "wpm": "Product Q2",
         "utility": "Utility degree N (%)",
         "weightedSum": "Weighted sum S",
-        "powerSum": "Power sum P"
+        "powerSum": "Power sum P",
+        "benefitSum": "Benefit sum S+",
+        "costSum": "Cost sum S-"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -479,6 +486,11 @@
           "name": "Distance to border S",
           "title": "MABAC distance to border S",
           "symbol": "S"
+        },
+        "moora": {
+          "name": "Net score y",
+          "title": "MOORA net assessment y",
+          "symbol": "y"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -667,6 +679,13 @@
         "distance": "Distance Q",
         "scores": "Distance to border S"
       },
+      "moora": {
+        "normalized": "Vector-normalized x*",
+        "weighted": "Weighted ratios v",
+        "benefitSum": "Benefit sum S+",
+        "costSum": "Cost sum S-",
+        "score": "Net score y"
+      },
       "bwm": {
         "bestToOthers": "Best over others a_B",
         "othersToWorst": "Others over worst a_W",
@@ -833,6 +852,21 @@
         "caption": "Each stick is one criterion: up into the upper area (towards the best value), down into the lower area. S adds them up.",
         "row": "{{alternative}}: S = {{score}}, above the border on {{above}} of {{n}} criteria"
       },
+      "moora": {
+        "title": "Benefit sum minus cost sum",
+        "benefitHead": "Benefit sum: S+",
+        "costHead": "Cost sum: S-",
+        "zero": "Zero",
+        "legend": "Criteria",
+        "others": "Other criteria",
+        "caption": "Right of the zero line: weighted benefit ratios adding to S+; left: weighted cost ratios adding to S-; y = S+ - S-.",
+        "segmentBenefit": "{{alternative}}, {{criterion}}: +{{value}} benefit ratio (y = {{score}})",
+        "segmentCost": "{{alternative}}, {{criterion}}: -{{value}} cost ratio (y = {{score}})",
+        "segmentZero": "{{alternative}}, {{criterion}}: 0 contribution (y = {{score}})",
+        "readoutBenefit": "{{alternative}}: {{criterion}} adds {{value}} to S+",
+        "readoutCost": "{{alternative}}: {{criterion}} subtracts {{value}} via S-",
+        "readoutZero": "{{alternative}}: {{criterion}} contributes 0"
+      },
       "bwm": {
         "title": "Your answers on one scale",
         "axis": "Times the worst criterion",
@@ -925,6 +959,12 @@
         "border": "Border G",
         "distance": "Q",
         "scores": "S"
+      },
+      "moora": {
+        "normalized": "Normalize",
+        "weighted": "Weight",
+        "benefitSum": "S+ and S-",
+        "score": "y"
       }
     },
     "pipeline": {
@@ -1009,6 +1049,7 @@
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
+      "moora": "MOORA",
       "bwm": "BWM"
     },
     "fullNames": {
@@ -1072,6 +1113,7 @@
         "marcos": "Measures against an imaginary ideal and anti-ideal.",
         "cocoso": "Three readings of a sum and a power sum, combined.",
         "mabac": "Distance above or below a border per criterion.",
+        "moora": "Benefit ratios minus cost ratios after vector normalization.",
         "bwm": "Weights from your answers to a few comparisons."
       },
       "groups": {
@@ -1280,6 +1322,15 @@
             "s3": "Add the sticks up: the bar is the score S, and the highest S ranks first."
           }
         },
+        "moora": {
+          "title": "Benefit ratios pulling right, cost ratios pulling left",
+          "caption": "Right of the zero line: weighted benefit ratios adding to S+; left: weighted cost ratios adding to S-; y = S+ - S-.",
+          "steps": {
+            "s1": "Normalize: divide each value by its column length, benefit ratios to the right of 0 and cost ratios to the left.",
+            "s2": "Weight: multiply each ratio by its criterion weight; the stacks end at S+ and S-.",
+            "s3": "Subtract: y = S+ - S- is the net score, and the highest y ranks first."
+          }
+        },
         "bwm": {
           "title": "Two rulers, one scale",
           "caption": "Filled marks place each criterion by the answers about the best criterion, hollow marks by the answers about the worst; the dot is the weight, in times the worst criterion's weight; here every answer stays within the consistency threshold (CR {{cr}}, threshold {{threshold}}), so the workbench would not warn.",
@@ -1418,6 +1469,13 @@
       "distance": "Distance Q = V - G: positive in the upper area (towards the best value), negative in the lower area.",
       "scores": "Distance to border S: the row sum of Q. A higher value ranks higher; S is the min-max weighted sum minus one constant, so the order is that sum's."
     },
+    "moora": {
+      "normalized": "Vector normalization: each value divided by the Euclidean length of its column.",
+      "weighted": "Weighted normalized matrix v: each normalized ratio multiplied by its criterion weight.",
+      "benefitSum": "Benefit sum S+: the weighted ratios of the benefit criteria, added up.",
+      "costSum": "Cost sum S-: the weighted ratios of the cost criteria, added up.",
+      "score": "Net assessment score y = S+ - S-. A higher value ranks higher, and negative values are normal when cost weights dominate."
+    },
     "bwm": {
       "bestToOthers": "Best over others: how much more important the best criterion is than each, 1‑9.",
       "othersToWorst": "Others over worst: how much more important each criterion is than the worst, 1‑9.",
@@ -1504,6 +1562,9 @@
     },
     "mabac": {
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real."
+    },
+    "moora": {
+      "zero-column": "Every value of {{criterion}} is 0, so it does not affect the ranking."
     },
     "bwm": {
       "inconsistent": "Answers about {{criterion}} fit worst; the weights are still computed.",

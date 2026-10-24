@@ -129,6 +129,9 @@
       "mabac": {
         "claim": "Tablo 10 ve 12'deki sınır G, skorlar S ve yedi sıranın tamamı {{citation}} ile {{decimals}} basamakta örtüşüyor."
       },
+      "moora": {
+        "claim": "Dokuz sütun normunun tamamı, her normalize hücre ve üç oran sistemi skoru {{citation}} ile {{decimals}} basamağa kadar aynı, üç sıra da aynı."
+      },
       "bwm": {
         "claim": "Doğrusal BWM ağırlıkları {{citation}} ile {{decimals}} basamağa kadar aynı."
       }
@@ -222,7 +225,8 @@
       "copras": "COPRAS",
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
-      "mabac": "MABAC"
+      "mabac": "MABAC",
+      "moora": "MOORA"
     },
     "params": {
       "entropy": {
@@ -416,7 +420,8 @@
         "copras": "Her alternatifin fayda kriterlerindeki ağırlıklı payını toplar, maliyet payı küçüldükçe büyüyen bir puan ekler; Q büyüdükçe sıra yükselir.",
         "marcos": "Her ağırlıklı toplamı hayali bir ideal ve anti-ideal satırla ölçer; f(K) büyüdükçe sıra yükselir, sıra SAW (Doğrusal) ile aynıdır.",
         "cocoso": "Ağırlıklı toplam S ile üs toplamı P'yi üç biçimde okuyup birleştirir; k büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
-        "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir."
+        "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir.",
+        "moora": "Her değeri sütununun Öklid uzunluğuna böler, ağırlıklı fayda oranlarını toplar ve ağırlıklı maliyet oranlarını çıkarır; y büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir."
       },
       "columns": {
         "rank": "Sıra",
@@ -431,7 +436,9 @@
         "wpm": "Çarpım Q2",
         "utility": "Fayda derecesi N (%)",
         "weightedSum": "Ağırlıklı toplam S",
-        "powerSum": "Üs toplamı P"
+        "powerSum": "Üs toplamı P",
+        "benefitSum": "Fayda toplamı S+",
+        "costSum": "Maliyet toplamı S-"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -479,6 +486,11 @@
           "name": "Sınıra uzaklık S",
           "title": "MABAC sınıra uzaklık S",
           "symbol": "S"
+        },
+        "moora": {
+          "name": "Net skor y",
+          "title": "MOORA net değerlendirme y",
+          "symbol": "y"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -667,6 +679,13 @@
         "distance": "Uzaklık Q",
         "scores": "Sınıra uzaklık S"
       },
+      "moora": {
+        "normalized": "Vektör normalize x*",
+        "weighted": "Ağırlıklı oranlar v",
+        "benefitSum": "Fayda toplamı S+",
+        "costSum": "Maliyet toplamı S-",
+        "score": "Net skor y"
+      },
       "bwm": {
         "bestToOthers": "En iyinin diğerlerine üstünlüğü a_B",
         "othersToWorst": "Diğerlerinin en kötüye üstünlüğü a_W",
@@ -833,6 +852,21 @@
         "caption": "Her çubuk bir kriter: yukarı üst bölgeye (en iyi değere doğru), aşağı alt bölgeye. S bunları toplar.",
         "row": "{{alternative}}: S = {{score}}, {{n}} kriterin {{above}} tanesinde sınırın üstünde"
       },
+      "moora": {
+        "title": "Fayda toplamı eksi maliyet toplamı",
+        "benefitHead": "Fayda toplamı: S+",
+        "costHead": "Maliyet toplamı: S-",
+        "zero": "Sıfır",
+        "legend": "Kriterler",
+        "others": "Diğer kriterler",
+        "caption": "Sıfır çizgisinin sağı S+'ya eklenen ağırlıklı fayda oranları, solu S-'ye eklenen ağırlıklı maliyet oranları; y = S+ - S-.",
+        "segmentBenefit": "{{alternative}}, {{criterion}}: +{{value}} fayda oranı (y = {{score}})",
+        "segmentCost": "{{alternative}}, {{criterion}}: -{{value}} maliyet oranı (y = {{score}})",
+        "segmentZero": "{{alternative}}, {{criterion}}: 0 katkı (y = {{score}})",
+        "readoutBenefit": "{{alternative}}: {{criterion}}, S+ değerine {{value}} ekler",
+        "readoutCost": "{{alternative}}: {{criterion}}, S- üzerinden {{value}} düşer",
+        "readoutZero": "{{alternative}}: {{criterion}} katkısı 0"
+      },
       "bwm": {
         "title": "Yanıtlarınız tek ölçekte",
         "axis": "En kötü kriterin katı",
@@ -925,6 +959,12 @@
         "border": "Sınır G",
         "distance": "Q",
         "scores": "S"
+      },
+      "moora": {
+        "normalized": "Normalize",
+        "weighted": "Ağırlıklandır",
+        "benefitSum": "S+ ve S-",
+        "score": "y"
       }
     },
     "pipeline": {
@@ -1009,6 +1049,7 @@
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
+      "moora": "MOORA",
       "bwm": "BWM"
     },
     "fullNames": {
@@ -1072,6 +1113,7 @@
         "marcos": "Hayali bir ideal ve anti-ideale göre ölçer.",
         "cocoso": "Bir toplamın ve bir üs toplamının üç okuması, birleşik.",
         "mabac": "Her kriterde bir sınırın üstüne ya da altına uzaklık.",
+        "moora": "Vektör normalizasyonu sonrası fayda oranları eksi maliyet oranları.",
         "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar."
       },
       "groups": {
@@ -1280,6 +1322,15 @@
             "s3": "Çubukları toplayın: çubuk skor S'dir, en yüksek S ilk sırada."
           }
         },
+        "moora": {
+          "title": "Fayda oranları sağa, maliyet oranları sola çeker",
+          "caption": "Sıfır çizgisinin sağı S+'ya eklenen ağırlıklı fayda oranları, solu S-'ye eklenen ağırlıklı maliyet oranları; y = S+ - S-.",
+          "steps": {
+            "s1": "Normalizasyon: her değeri sütun uzunluğuna bölün; fayda oranları 0'ın sağına, maliyet oranları soluna yerleşir.",
+            "s2": "Ağırlıklandırma: her oranı kriter ağırlığıyla çarpın; yığınlar S+ ve S- değerlerinde biter.",
+            "s3": "Çıkarma: y = S+ - S- net skordur ve en yüksek y birinci sırada yer alır."
+          }
+        },
         "bwm": {
           "title": "İki cetvel, tek ölçek",
           "caption": "Dolu işaretler her kriteri en iyi kritere ilişkin yanıtlara, boş işaretler en kötüye ilişkin yanıtlara göre yerleştirir; nokta ağırlıktır, en kötü kriterin ağırlığının katı olarak; burada tüm yanıtlar tutarlılık eşiğinin içinde (CR {{cr}}, eşik {{threshold}}), bu yüzden çalışma alanı uyarı vermez.",
@@ -1418,6 +1469,13 @@
       "distance": "Uzaklık Q = V - G: üst bölgede (en iyi değere doğru) pozitif, alt bölgede negatif.",
       "scores": "Sınıra uzaklık S: Q'nun satır toplamı. Büyük olan önde sıralanır; S, min-maks ağırlıklı toplamdan tek bir sabit çıkarılarak bulunur, bu yüzden sıra o toplamın sırasıdır."
     },
+    "moora": {
+      "normalized": "Vektör normalizasyonu: her değer kendi sütununun Öklid uzunluğuna bölünür.",
+      "weighted": "Ağırlıklı normalize matris v: her normalize oran kendi kriter ağırlığıyla çarpılır.",
+      "benefitSum": "Fayda toplamı S+: fayda kriterlerinin ağırlıklı oranları toplanır.",
+      "costSum": "Maliyet toplamı S-: maliyet kriterlerinin ağırlıklı oranları toplanır.",
+      "score": "Net değerlendirme skoru y = S+ - S-. Değer büyüdükçe sıra yükselir; maliyet ağırlıkları baskın olduğunda negatif değerler normaldir."
+    },
     "bwm": {
       "bestToOthers": "En iyinin diğerlerine üstünlüğü: en iyi kriter her birinden kaç kat önemli, 1‑9.",
       "othersToWorst": "Diğerlerinin en kötüye üstünlüğü: her kriter en kötüden kaç kat önemli, 1‑9.",
@@ -1504,6 +1562,9 @@
     },
     "mabac": {
       "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin."
+    },
+    "moora": {
+      "zero-column": "{{criterion}} kriterinin bütün değerleri 0, bu yüzden sıralamayı etkilemiyor."
     },
     "bwm": {
       "inconsistent": "{{criterion}} hakkındaki yanıtlarınız en az tutarlı olanlar; ağırlıklar yine de hesaplanır.",

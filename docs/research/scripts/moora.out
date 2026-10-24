@@ -1,0 +1,48 @@
+== F1 Brauers & Zavadskas 2010, Appendix C Table 2 (3 projects x 9 criteria)
+  norms max|ours - pub| = 3.15e-04
+  r     max|ours - pub| = 3.21e-04
+  unweighted S+ [4.113538, 3.855209, 3.783400]  S- [1.178740, 1.132056, 1.085373]
+  unweighted y* [2.934799, 2.723153, 2.698027]  max|ours - pub| = 0.00015
+  equal-w (1/9) S+ [0.457060, 0.428357, 0.420378]  S- [0.130971, 0.125784, 0.120597]
+  equal-w (1/9) y  [0.326089, 0.302573, 0.299781]  max|n*y - y*| = 1.3e-15
+  ranking ours [1, 2, 3] MATCH (published [1, 2, 3])
+== F2a Brauers & Zavadskas 2006 (origin), Table 1 (welfare economy, 3 projects x 7 criteria)
+  norms max|ours - pub| = 2.73e-05
+  unweighted S+ [3.593215, 3.338363, 3.174150]  S- [0.425628, 0.595880, 0.681005]
+  unweighted y* [3.167587, 2.742483, 2.493144]  max|ours - pub| = 0.00000
+  equal-w (1/7) S+ [0.513316, 0.476909, 0.453450]  S- [0.060804, 0.085126, 0.097286]
+  equal-w (1/7) y  [0.452512, 0.391783, 0.356163]  max|n*y - y*| = 8.9e-16
+  ranking ours [1, 2, 3] MATCH (published [1, 2, 3])
+== F2b Brauers & Zavadskas 2006 (origin), Table 5 (wellbeing economy, 3 projects x 8 criteria)
+  norms max|ours - pub| = 2.73e-05
+  unweighted S+ [3.641113, 3.262226, 3.248141]  S- [1.160843, 1.110530, 1.122134]
+  unweighted y* [2.480270, 2.151696, 2.126007]  max|ours - pub| = 0.00000
+  equal-w (1/8) S+ [0.455139, 0.407778, 0.406018]  S- [0.145105, 0.138816, 0.140267]
+  equal-w (1/8) y  [0.310034, 0.268962, 0.265751]  max|n*y - y*| = 0.0e+00
+  ranking ours [1, 2, 3] MATCH (published [1, 2, 3])
+== F3a Vujicic et al. 2017, Table 7a Variant 1 (Entropy -> MOORA, 9 air conditioners x 5 criteria)
+  sum w = 1.000000
+  S+ [0.065071, 0.068616, 0.068716, 0.058035, 0.065596, 0.074551, 0.066849, 0.066694, 0.090947]
+  S- [0.230667, 0.288938, 0.222548, 0.287716, 0.311804, 0.235452, 0.186831, 0.278759, 0.292806]
+  y  [-0.165597, -0.220322, -0.153831, -0.229681, -0.246208, -0.160900, -0.119982, -0.212065, -0.201859]
+  ranking ours [4, 7, 2, 8, 9, 3, 1, 6, 5] MATCH (published [4, 7, 2, 8, 9, 3, 1, 6, 5])
+  ranking with printed 3 d.p. weights (normalized): [4, 7, 2, 8, 9, 3, 1, 6, 5] == [4, 7, 2, 8, 9, 3, 1, 6, 5]: True
+== F3b Vujicic et al. 2017, Table 7b Variant 1 (CRITIC -> MOORA, 9 air conditioners x 5 criteria)
+  sum w = 1.000000
+  S+ [0.131570, 0.136886, 0.137978, 0.132637, 0.126188, 0.146037, 0.139837, 0.138148, 0.158127]
+  S- [0.169892, 0.208899, 0.171444, 0.210506, 0.220936, 0.178982, 0.142379, 0.202228, 0.219344]
+  y  [-0.038322, -0.072013, -0.033466, -0.077869, -0.094748, -0.032945, -0.002542, -0.064079, -0.061217]
+  ranking ours [4, 7, 3, 8, 9, 2, 1, 6, 5] MATCH (published [4, 7, 3, 8, 9, 2, 1, 6, 5])
+== Brauers, Zavadskas, Turskis & Vilutiene (2008) Table 2 audit
+  col x2 norm from Table 2a = 2695.9043; A1 x*_12 = 0.7400 (Table 2b prints 0.8586, implying norm ~2323.5)
+  recomputed from Table 2a top-3: ['A1', 'A7', 'A12'] (Table 2b prints A12 > A7 > A1)
+== libraries
+  pyDecision not available: ModuleNotFoundError
+  pymcdm not available: ModuleNotFoundError
+  pyrepo-mcda not available: ModuleNotFoundError
+== properties across 2,000 random problems
+  column positive-scale invariance max|y(a*X) - y(X)| = 2.2e-16
+  weight-factor proportionality   max|y(c*w) - c*y(w)| = 2.7e-15
+  column shift changes ranks in 1090/2000 problems (54.5%)
+  negative matrix values finite in 2000/2000 problems
+  all-benefit equals vector-normalized WSM in 2000/2000 problems

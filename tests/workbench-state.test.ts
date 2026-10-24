@@ -27,6 +27,7 @@ import coprasOC from './fixtures/copras-ozcan-celik2021.json'
 import marcosSB from './fixtures/marcos-stevic-brkovic2020.json'
 import cocosoY from './fixtures/cocoso-yazdani2019-logistics.json'
 import mabacPC from './fixtures/mabac-pamucar-cirovic2015-forklifts.json'
+import mooraBZ from './fixtures/moora-brauers-zavadskas2010.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -168,6 +169,19 @@ describe('examples match the published fixtures', () => {
     expect(ex.criteria.map((c) => c.type)).toEqual(mabacPC.types)
     expect(ex.weights).toEqual(mabacPC.weights)
     expect(ex.published).toEqual([{ label: 'mabac.scores', values: mabacPC.published.S, decimals: 4 }])
+  })
+  it('Brauers and Zavadskas 2010 (MOORA, transition projects)', () => {
+    const ex = getExample('brauers-zavadskas-2010-projects')!
+    expect(ex.referenceFor).toEqual(['moora'])
+    expect(ex.matrix).toEqual(mooraBZ.matrix)
+    expect(ex.alternatives).toEqual(mooraBZ.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(mooraBZ.types)
+    expect(ex.weights).toBeUndefined()
+    expect(ex.equalWeights).toBe(true)
+    expect(ex.published).toEqual([
+      { label: 'moora.score', values: mooraBZ.expected.equalWeights.scores.map((v) => Number(v.toFixed(4))), decimals: 4 },
+      { label: 'moora.unweighted', values: mooraBZ.published.y_star_unweighted, decimals: 4 },
+    ])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
@@ -464,6 +478,19 @@ describe('store actions', () => {
     const r = computeRanking(s)
     expectClose(r.value!.scores, mabacPC.published.S, mabacPC.expected.tolerance_vs_published.S)
     expect(r.value!.ranking).toEqual(mabacPC.published.ranking)
+  })
+
+  it('MOORA through the store: the transition projects open with MOORA and equal weights', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.loadExample('brauers-zavadskas-2010-projects', 'en')
+    const s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('moora')
+    expect(s.weightMethod).toBe('equal')
+    const r = computeRanking(s)
+    expectClose(r.value!.scores, mooraBZ.expected.equalWeights.scores, mooraBZ.expected.tolerance_exact)
+    expectClose(r.value!.scores.map((y) => y * 9), mooraBZ.published.y_star_unweighted, mooraBZ.expected.tolerance_vs_published_unweighted)
+    expect(r.value!.ranking).toEqual(mooraBZ.published.ranking)
   })
 
   it('EDAS through the store: the 47 items open with EDAS and equal weights, the ten alternatives through the method page link', () => {

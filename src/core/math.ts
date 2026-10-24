@@ -122,3 +122,33 @@ export function pearson(xs: number[], ys: number[]): number {
 }
 
 export const zeros = (m: number, n: number): number[][] => Array.from({ length: m }, () => new Array<number>(n).fill(0))
+
+/**
+ * Vector (Euclidean) column normalization: x*_ij = x_ij / sqrt(sum_i x_ij^2).
+ * All-zero columns cannot be scaled: they remain 0 and their column indices are reported.
+ */
+export function vectorNormalize(matrix: number[][]): { normalized: number[][]; zeroCols: number[] } {
+  const m = matrix.length
+  const n = matrix[0]?.length ?? 0
+  const normalized = zeros(m, n)
+  const zeroCols: number[] = []
+
+  for (let j = 0; j < n; j++) {
+    let sumSq = 0
+    for (let i = 0; i < m; i++) {
+      const x = matrix[i]![j]!
+      sumSq += x * x
+    }
+    const norm = Math.sqrt(sumSq)
+    if (norm === 0) {
+      zeroCols.push(j)
+      continue
+    }
+    for (let i = 0; i < m; i++) {
+      normalized[i]![j] = matrix[i]![j]! / norm
+    }
+  }
+
+  return { normalized, zeroCols }
+}
+
