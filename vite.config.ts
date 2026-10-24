@@ -129,9 +129,9 @@ function injectPrerender(html: string, en: string, tr: string, base: string, pat
     </script>`
   const out = html.replace(
     '<div id="root"></div>',
-    // Charts measure their container in the browser; the server draws them at the 640 px fallback,
-    // so they stay hidden (at their final height, no layout shift) until the app has measured.
-    `<style>#root[data-prerender] svg[width="640"] { visibility: hidden; max-width: 100%; }</style>\n    ` +
+    // Charts measure their container in the browser; the server draws them at the 640 px fallback with a
+    // 640 px viewBox, so they scale cleanly to their container before the app has loaded.
+    `<style>#root[data-prerender] svg[width="640"] { width: 100%; height: auto; display: block; }</style>\n    ` +
       `<div id="root" data-prerender>${en}</div>\n    <template id="prerender-tr">${tr}</template>\n    ${swap}`,
   )
   if (out === html) throw new Error('prerender: <div id="root"></div> not found in index.html')
@@ -193,7 +193,16 @@ function criticalPreloads(): Plugin {
         const font = (subset: string, weight: number) =>
           Object.keys(bundle).find((f) => new RegExp(`ibm-plex-sans-${subset}-${weight}-normal-[^/]*\\.woff2$`).test(f))
         const fonts = (subset: string) => [400, 500, 600].map((w) => font(subset, w)).filter((f): f is string => !!f).map(url)
-        const data = JSON.stringify({ latin: fonts('latin'), ext: fonts('latin-ext') })
+        const chunk = (suffix: string) =>
+          Object.values(bundle).find((c): c is Rollup.OutputChunk => c.type === 'chunk' && !!c.facadeModuleId?.endsWith(suffix))?.fileName
+        const enChunk = chunk('/src/i18n/en.json')
+        const trChunk = chunk('/src/i18n/tr.json')
+        const data = JSON.stringify({
+          latin: fonts('latin'),
+          ext: fonts('latin-ext'),
+          en: enChunk ? url(enChunk) : undefined,
+          tr: trChunk ? url(trChunk) : undefined,
+        })
         const script = `<script>
       // Critical preloads (vite.config.ts criticalPreloads).
       ;(function (p) {
@@ -204,10 +213,16 @@ function criticalPreloads(): Plugin {
           l.href = href
           if (as) l.as = as
           if (as === 'font') { l.type = 'font/woff2'; l.crossOrigin = '' }
+          else if (rel === 'modulepreload') l.crossOrigin = ''
           h.appendChild(l)
         }
         p.latin.forEach(function (f) { add('preload', f, 'font') })
-        if (document.documentElement.lang === 'tr') p.ext.forEach(function (f) { add('preload', f, 'font') })
+        if (document.documentElement.lang === 'tr') {
+          p.ext.forEach(function (f) { add('preload', f, 'font') })
+          if (p.tr) add('modulepreload', p.tr)
+        } else if (p.en) {
+          add('modulepreload', p.en)
+        }
       })(${data})
     </script>`
         // After the theme and language script, so <html lang> is already set.

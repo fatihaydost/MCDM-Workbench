@@ -180,7 +180,7 @@ export function DecisionGrid({
   const editRef = useRef<Editing | null>(null)
   editRef.current = editing
   const dragging = useRef(false)
-  const leaving = useRef(false)
+  const leaving = useRef(true)
   /** Whether the pressed cell was already the active one: a click there opens the direction menu. */
   const pressedActive = useRef(false)
 
@@ -205,6 +205,7 @@ export function DecisionGrid({
     if (!wantFocus.current || editing) return
     wantFocus.current = false
     cells.current.get(key(cursor))?.focus()
+    leaving.current = false
   })
 
   useEffect(() => {
@@ -622,6 +623,11 @@ export function DecisionGrid({
           aria-rowcount={size.rows}
           aria-colcount={size.cols}
           aria-multiselectable
+          onFocus={(e) => {
+            if (!dragging.current && (!e.relatedTarget || !e.currentTarget.contains(e.relatedTarget as Node))) {
+              leaving.current = true
+            }
+          }}
           onKeyDown={onGridKeyDown}
           onCopy={onCopy}
           onCut={onCut}
@@ -698,6 +704,7 @@ export function DecisionGrid({
                           onCloseAutoFocus={(e) => {
                             e.preventDefault()
                             cells.current.get(key(pos))?.focus()
+                            leaving.current = false
                           }}
                           // A press on its own cell is handled by the cell (it closes the menu there).
                           onInteractOutside={(e) => {

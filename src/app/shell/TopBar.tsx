@@ -1,25 +1,26 @@
 import { Desktop, GithubLogo, Moon, Sun } from '@phosphor-icons/react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useRoute } from 'wouter'
-import { LANGS, useLang, type Lang } from '../../i18n'
+import { LANGS, preloadLanguages, useLang, type Lang } from '../../i18n'
 import { useThemeMode, type ThemeMode } from '../../state/theme'
-import {
-  cn,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-  IconButton,
-  iconButtonClasses,
-  SegmentedControl,
-} from '../../ui'
+import { cn } from '../../ui/cn'
+import { IconButton, iconButtonClasses } from '../../ui/IconButton'
+import { SegmentedControl } from '../../ui/SegmentedControl'
 import { LogoMark } from './LogoMark'
 
 export const REPO_URL = 'https://github.com/fatihaydost/MCDM-Workbench'
 
 const themeIcons: Record<ThemeMode, typeof Sun> = { system: Desktop, light: Sun, dark: Moon }
+
+type ThemeDropdownComponent = (typeof import('./ThemeDropdown'))['default']
+let LoadedThemeDropdown: ThemeDropdownComponent | null = null
+let loadingThemeDropdown: Promise<ThemeDropdownComponent> | null = null
+const loadThemeDropdown = () =>
+  (loadingThemeDropdown ??= import('./ThemeDropdown').then((m) => {
+    LoadedThemeDropdown = m.default
+    return m.default
+  }))
 
 function NavLink({ href, children }: { href: string; children: string }) {
   const [active] = useRoute(`${href}/*?`)
@@ -41,45 +42,48 @@ function LanguageSwitch() {
   const { t } = useTranslation()
   const [lang, setLang] = useLang()
   return (
-    <SegmentedControl<Lang>
-      aria-label={t('nav.language')}
-      value={lang}
-      onValueChange={setLang}
-      options={LANGS.map((l) => ({
-        value: l,
-        label: l.toUpperCase(),
-        // Starts with the visible text (WCAG 2.5.3 label in name), then the language's own name.
-        ariaLabel: t(`nav.languageNames.${l}`),
-      }))}
-    />
+    <div onPointerEnter={preloadLanguages} onFocus={preloadLanguages}>
+      <SegmentedControl<Lang>
+        aria-label={t('nav.language')}
+        value={lang}
+        onValueChange={setLang}
+        options={LANGS.map((l) => ({
+          value: l,
+          label: l.toUpperCase(),
+          // Starts with the visible text (WCAG 2.5.3 label in name), then the language's own name.
+          ariaLabel: t(`nav.languageNames.${l}`),
+        }))}
+      />
+    </div>
   )
 }
 
 function ThemeMenu() {
   const { t } = useTranslation()
-  const [mode, setMode] = useThemeMode()
+  const [mode] = useThemeMode()
+  const [state, setState] = useState<{ Comp: ThemeDropdownComponent | null; defaultOpen: boolean }>(() => ({
+    Comp: LoadedThemeDropdown,
+    defaultOpen: false,
+  }))
+  if (state.Comp) return <state.Comp defaultOpen={state.defaultOpen} />
   const Icon = themeIcons[mode]
   const modeLabel = t(`nav.theme.${mode}`)
+  const warm = () => {
+    void loadThemeDropdown().then((Comp) => setState((s) => (s.Comp ? s : { Comp, defaultOpen: false })))
+  }
+  const open = () => {
+    void loadThemeDropdown().then((Comp) => setState({ Comp, defaultOpen: true }))
+  }
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <IconButton aria-label={t('nav.theme.button', { mode: modeLabel })} icon={<Icon />} />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuLabel>{t('nav.theme.label')}</DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={mode} onValueChange={(v) => setMode(v as ThemeMode)}>
-          {(['system', 'light', 'dark'] as const).map((m) => {
-            const I = themeIcons[m]
-            return (
-              <DropdownMenuRadioItem key={m} value={m}>
-                <I aria-hidden />
-                {t(`nav.theme.${m}`)}
-              </DropdownMenuRadioItem>
-            )
-          })}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <IconButton
+      aria-label={t('nav.theme.button', { mode: modeLabel })}
+      aria-haspopup="menu"
+      aria-expanded={false}
+      icon={<Icon />}
+      onPointerEnter={warm}
+      onFocus={warm}
+      onClick={open}
+    />
   )
 }
 

@@ -1,10 +1,9 @@
 import i18n from 'i18next'
 import { useCallback, useMemo } from 'react'
 import { initReactI18next, useTranslation } from 'react-i18next'
-import en from './en.json'
+import type en from './en.json'
 import type compare from './compare.en.json'
 import type robustness from './robustness.en.json'
-import tr from './tr.json'
 import { detectLanguage, isLang, LANG_STORAGE_KEY, type Lang } from './lang'
 import { formatNumber, formatRaw, isAmbiguousNumber, parseLocaleNumber } from './number'
 
@@ -19,6 +18,36 @@ declare module 'i18next' {
   }
 }
 
+const bundles: Partial<Record<Lang, typeof en>> = {}
+const loading: Partial<Record<Lang, Promise<typeof en>>> = {}
+
+/** Loads a language bundle on demand so the initial page load fetches only the active language. */
+export function loadLanguage(lang: Lang): Promise<typeof en> {
+  if (bundles[lang]) return Promise.resolve(bundles[lang]!)
+  loading[lang] ??= (lang === 'tr' ? import('./tr.json') : import('./en.json')).then((m) => {
+    const data = m.default as typeof en
+    bundles[lang] = data
+    if (i18n.isInitialized) i18n.addResourceBundle(lang, 'translation', data, true, true)
+    return data
+  })
+  return loading[lang]!
+}
+
+/** Starts loading both language bundles in the background (e.g. when pointing at the language switch). */
+export function preloadLanguages(): void {
+  void loadLanguage('en')
+  void loadLanguage('tr')
+}
+
+/** Registers preloaded language bundles synchronously (used by the build-time SSR prerender). */
+export function registerLanguages(resources: Partial<Record<Lang, typeof en>>): void {
+  for (const [l, data] of Object.entries(resources) as [Lang, typeof en][]) {
+    if (!data) continue
+    bundles[l] = data
+    if (i18n.isInitialized) i18n.addResourceBundle(l, 'translation', data, true, true)
+  }
+}
+
 function applyToDocument(lang: Lang): void {
   if (typeof document === 'undefined') return
   document.documentElement.lang = lang
@@ -27,15 +56,28 @@ function applyToDocument(lang: Lang): void {
 /** Initializes i18next once. Called from main.tsx before the first render. */
 export function initI18n(lang: Lang = detectLanguage()): typeof i18n {
   if (!i18n.isInitialized) {
-    void i18n.use(initReactI18next).init({
-      resources: { en: { translation: en }, tr: { translation: tr } },
-      lng: lang,
-      fallbackLng: 'en',
-      supportedLngs: ['en', 'tr'],
-      interpolation: { escapeValue: false },
-      returnNull: false,
-      initAsync: false,
-    })
+    const resources: Record<string, { translation: typeof en }> = {}
+    if (bundles.en) resources.en = { translation: bundles.en }
+    if (bundles.tr) resources.tr = { translation: bundles.tr }
+    void i18n
+      .use({
+        type: 'backend' as const,
+        read(language: string, _ns: string, cb: (err: unknown, data: unknown) => void) {
+          if (isLang(language)) loadLanguage(language).then((d) => cb(null, d), (e) => cb(e, null))
+          else cb(null, {})
+        },
+      })
+      .use(initReactI18next)
+      .init({
+        resources,
+        partialBundledLanguages: true,
+        lng: lang,
+        fallbackLng: false,
+        supportedLngs: ['en', 'tr'],
+        interpolation: { escapeValue: false },
+        returnNull: false,
+        initAsync: false,
+      })
     applyToDocument(lang)
     i18n.on('languageChanged', (l) => {
       if (isLang(l)) applyToDocument(l)
@@ -51,7 +93,11 @@ export function setLanguage(lang: Lang): void {
   } catch {
     // Storage blocked: the choice lasts for this page view only.
   }
-  void i18n.changeLanguage(lang)
+  if (bundles[lang] || i18n.hasResourceBundle(lang, 'translation')) {
+    void i18n.changeLanguage(lang)
+  } else {
+    void loadLanguage(lang).then(() => i18n.changeLanguage(lang))
+  }
 }
 
 /** Active language and a setter. Re-renders on change. */

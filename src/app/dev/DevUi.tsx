@@ -39,6 +39,7 @@ import {
   Th,
   THead,
   Tooltip,
+  TooltipProvider,
   Tr,
   type TableDensity,
 } from '../../ui'
@@ -249,6 +250,7 @@ export default function DevUi() {
   const best = ranking.value ? ranking.value.ranking.indexOf(1) : -1
 
   return (
+    <TooltipProvider>
     <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1200px] px-4 pb-24 outline-none md:px-8">
       <header className="py-8">
         <h1 className="text-24 font-semibold text-text">UI primitives</h1>
@@ -588,5 +590,6 @@ export default function DevUi() {
         <PairwiseDemo />
       </Section>
     </main>
+    </TooltipProvider>
   )
 }

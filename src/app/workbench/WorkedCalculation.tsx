@@ -7,7 +7,7 @@ import { StepFlow } from '../../features/illustrations/StepFlow'
 import { escapeLatex, stepToTable, tableToLatex, tableToTsv, type StepTable } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
 import type { DraftProblem } from '../../state/workbench'
-import { Button, cn, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, IconButton, Tooltip } from '../../ui'
+import { Button, cn, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, IconButton, Tooltip, TooltipProvider } from '../../ui'
 // Direct import, not the barrel: KaTeX must stay out of the main chunk.
 import { Formula } from '../../ui/Formula'
 import type { CalcGroup } from './parts'
@@ -73,7 +73,8 @@ export default function WorkedCalculation({ groups, problem, headingLevel = 'h3'
 
   let n = 0
   return (
-    <div ref={root} className="flex flex-col gap-8">
+    <TooltipProvider>
+      <div ref={root} className="flex flex-col gap-8">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-control border border-line bg-surface px-3 py-2 text-13">
         <div className="flex items-center gap-2">
           <span className="font-medium text-text-2">{t('workbench.calc.decimals')}:</span>
@@ -149,7 +150,8 @@ export default function WorkedCalculation({ groups, problem, headingLevel = 'h3'
           </div>
         )
       })}
-    </div>
+      </div>
+    </TooltipProvider>
   )
 }
 

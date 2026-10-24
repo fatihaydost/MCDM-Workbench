@@ -151,11 +151,19 @@ test('the stage heading is inside main, so the skip link lands on it', async ({ 
   await expect(page.locator('#main')).toBeFocused()
 })
 
-test('grid: Escape then Tab leaves the grid instead of moving cell by cell', async ({ page }) => {
+test('grid: single tab stop when tabbing through the page; Tab moves cell by cell once active, Escape then Tab leaves', async ({ page }) => {
   await page.goto('/app?example=krishnan-2021-smartphones&stage=data')
+  // Tabbing into the grid from the toolbar button before it and pressing Tab again leaves in one tab stop.
+  await page.getByRole('button', { name: /^Delete criterion/ }).focus()
+  await page.keyboard.press('Tab')
+  await expect(page.locator('#wb-cell-0-0')).toBeFocused()
+  await page.keyboard.press('Tab')
+  expect(await page.evaluate(() => Boolean(document.activeElement?.closest('[role="grid"]')))).toBe(false)
+
+  // Clicking a cell (or using arrow keys inside the grid) enters spreadsheet Tab navigation; Escape then Tab leaves.
   await page.locator('#wb-cell-0-0').click()
   await page.keyboard.press('Tab')
-  await expect(page.locator('#wb-cell-0-1')).toBeFocused() // Tab alone still moves like a spreadsheet
+  await expect(page.locator('#wb-cell-0-1')).toBeFocused()
   await page.keyboard.press('Escape')
   await page.keyboard.press('Tab')
   expect(await page.evaluate(() => Boolean(document.activeElement?.closest('[role="grid"]')))).toBe(false)

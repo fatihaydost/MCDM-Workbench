@@ -16,7 +16,8 @@ import {
 import { methodMeta } from '../../content/methods/catalog'
 import type { MethodId } from '../../content/types'
 import { useLang } from '../../i18n'
-import { Button, cn } from '../../ui'
+import { Button } from '../../ui/Button'
+import { cn } from '../../ui/cn'
 import { SourceItem, StatusLabel } from './shared'
 
 type Answer = { node: GuideNode; option: GuideOption }

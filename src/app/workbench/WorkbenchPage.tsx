@@ -1,13 +1,14 @@
 import { CheckCircle, WarningCircle } from '@phosphor-icons/react'
 import { lazy, Suspense, use, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { loadMethod } from '../../content/methods/load'
 import { getExample } from '../../data/examples'
 import { useLang } from '../../i18n'
 import { compareRankings, getRankingMethod, rankingMethods } from '../../core'
 import { isEmptyProblem, paramsFor, STAGES, toProblem, useMethodParams, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
-import { Skeleton } from '../../ui'
+import { Skeleton } from '../../ui/Skeleton'
 import { usePageMeta } from '../landing/usePageMeta'
-import { methodViews, preloadStagePictures } from '../methods/views'
+import { methodViews, preloadActiveStagePictures, preloadStagePictures, type ViewId } from '../methods/views'
 import { WorkbenchLayout } from '../shell/WorkbenchLayout'
 import { DataStage } from './DataStage'
 import { ExplanationPanel, preloadPanelCards } from './ExplanationPanel'
@@ -19,11 +20,39 @@ import { useRobustnessSummary } from './robustnessSummary'
 import { alternativeName, rankingMethodFullLabel, weightMethodFullLabel } from './shared'
 import { WeightsStage } from './WeightsStage'
 
-// The panel's method cards load alongside this chunk, not after the first render.
-preloadPanelCards()
-// The stages' pictures (chunks of their own) load alongside too, and the page waits for them (`use` below, under the
-// route's skeleton): a deep link to Weights or Ranking renders its picture in the first frame, so the table never shifts.
-const stagePictures = preloadStagePictures()
+const isStage = (v: string | null): v is Stage => v !== null && (STAGES as readonly string[]).includes(v)
+
+/**
+ * Warms only the active weighting and ranking methods' cards and stage pictures up front; the rest of the 26
+ * cards and stage pictures wait for idle time. When the URL or saved state opens directly on Weights or Ranking,
+ * the page waits for those active pictures (`use` below) so the first frame already has the picture and the
+ * table below never shifts.
+ */
+function preloadInitialStage(): Promise<unknown> {
+  if (typeof window === 'undefined') return Promise.resolve()
+  const state = useWorkbench.getState()
+  const params = new URLSearchParams(window.location.search)
+  const exId = params.get('example')
+  const methodParam = params.get('method')
+  const stageParam = params.get('stage')
+  const ex = exId ? getExample(exId) : undefined
+  const activeStage: Stage = isStage(stageParam) ? stageParam : ex ? 'data' : state.stage
+  const activeIds = new Set<ViewId>([state.weightMethod, state.rankingMethod])
+  if (ex) {
+    activeIds.add(ex.equalWeights ? 'equal' : 'critic')
+    for (const ref of ex.referenceFor) {
+      if (Object.hasOwn(methodViews, ref)) activeIds.add(ref as ViewId)
+    }
+  }
+  if (methodParam && Object.hasOwn(methodViews, methodParam)) activeIds.add(methodParam as ViewId)
+  for (const id of activeIds) {
+    if (id !== 'manual') void loadMethod(id)
+  }
+  const pictures = preloadActiveStagePictures([...activeIds])
+  return activeStage === 'weights' || activeStage === 'ranking' ? pictures : Promise.resolve()
+}
+
+const stagePictures = preloadInitialStage()
 
 // Robustness (its charts, texts and the Monte Carlo worker) is a chunk of its own: /app does not load it up front.
 // Once loaded it renders directly, not through lazy(): a lazy component suspends again on every mount, and React holds
@@ -72,8 +101,6 @@ function RobustnessSkeleton() {
     </div>
   )
 }
-
-const isStage = (v: string | null): v is Stage => v !== null && (STAGES as readonly string[]).includes(v)
 
 /**
  * `?example=<id>&method=<id>&stage=<stage>` loads a published example (with the ranking method asked for, when the
@@ -197,10 +224,15 @@ export default function WorkbenchPage() {
     return () => cancelAnimationFrame(raf)
   }, [focusTick])
 
-  // Warm the calculation chunk (KaTeX) and the robustness stage once the page is idle, so "Show the calculation" and
-  // the Robustness stage open at once (and the rail can say how robust the ranking is).
+  // Warm the remaining method cards, stage pictures, calculation chunk (KaTeX) and secondary stages once the page is
+  // idle (and has a problem or has left the initial empty Data stage), so switching methods, "Show the calculation"
+  // and the Robustness / Compare stages open at once.
+  const empty = isEmptyProblem(problem)
   useEffect(() => {
+    if (empty && stage === 'data') return
     const load = () => {
+      preloadPanelCards()
+      void preloadStagePictures()
       void import('./WorkedCalculation')
       void loadRobustness()
       void loadCompare()
@@ -211,7 +243,7 @@ export default function WorkbenchPage() {
     }
     const id = setTimeout(load, 500)
     return () => clearTimeout(id)
-  }, [])
+  }, [empty, stage])
 
   const nav = useMemo<WorkbenchNav>(
     () => ({
