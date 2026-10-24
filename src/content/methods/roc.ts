@@ -9,7 +9,7 @@ export const roc: MethodContent = {
     tr: 'Sıraya dayalı ağırlıklar: sıra merkezi (ROC), sıra toplamı, ters sıra',
   },
   family: 'weighting-subjective',
-  status: 'research',
+  status: 'available',
   year: 1996,
   origin: {
     authors: 'Barron, F.H.; Barrett, B.E.',
@@ -18,8 +18,8 @@ export const roc: MethodContent = {
     venue: 'Management Science 42(11), 1515-1523',
     doi: '10.1287/mnsc.42.11.1515',
     note: {
-      en: 'Roszkowska (2013) also credits Solymosi & Dombi (1985) for centroid weights, and Rank Sum and Rank Reciprocal come from Stillwell, Seaver & Edwards (1981); the formulas follow Roszkowska (2013).',
-      tr: 'Roszkowska (2013) merkez ağırlıkları için Solymosi ve Dombi (1985) kaynağını da anar; sıra toplamı ve ters sıra Stillwell, Seaver ve Edwards (1981) kaynaklıdır, formüller Roszkowska (2013) anlatımını izler.',
+      en: 'Roszkowska (2013) also credits Solymosi & Dombi (1986) for centroid weights, and Rank Sum and Rank Reciprocal come from Stillwell, Seaver & Edwards (1981); the formulas follow Roszkowska (2013).',
+      tr: 'Roszkowska (2013) merkez ağırlıkları için Solymosi ve Dombi (1986) kaynağını da anar; sıra toplamı ve ters sıra Stillwell, Seaver ve Edwards (1981) kaynaklıdır, formüller Roszkowska (2013) anlatımını izler.',
     },
   },
   steps: [
@@ -60,13 +60,14 @@ export const roc: MethodContent = {
     doi: '10.15290/ose.2013.05.65.02',
     match: 'match',
     note: {
-      en: 'Published example (Table 4, row n = 4); this method is not computed here yet, only recomputed during research. For n = 4, ROC, RS and RR match the printed 2 decimals. Other rows of the same table contain rounding errors (for n = 3 the ROC row sums to 1.02), so only n = 4 is used.',
-      tr: "Yayımlanmış örnek (Tablo 4, n = 4 satırı); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. n = 4 için ROC, RS ve RR basılı 2 basamakta örtüşüyor. Aynı tablonun diğer satırlarında yuvarlama hataları var (n = 3 için ROC satırı 1,02'ye toplanıyor), bu yüzden yalnız n = 4 kullanıldı.",
+      en: 'Published example (Table 4, row n = 4, and Tables 5-6, n = 5). For n = 4, ROC, RS and RR match the printed 2 decimals (0.52, 0.27, 0.15, 0.06; 0.40, 0.30, 0.20, 0.10; 0.48, 0.24, 0.16, 0.12). In the 5 x 5 case study (Tables 5-6), ROC weights give the same SAW ranking A4 > A2 > A5 > A1 > A3.',
+      tr: 'Yayımlanmış örnek (Tablo 4, n = 4 satırı ve Tablo 5-6, n = 5). n = 4 için ROC, RS ve RR basılı 2 basamakta örtüşüyor (0,52, 0,27, 0,15, 0,06; 0,40, 0,30, 0,20, 0,10; 0,48, 0,24, 0,16, 0,12). 5 x 5 örnekte (Tablo 5-6) ROC ağırlıkları SAW ile aynı A4 > A2 > A5 > A1 > A3 sıralamasını verir.',
     },
   },
   sources: [
     { label: 'Barron & Barrett (1996), Management Science 42(11), 1515-1523', doi: '10.1287/mnsc.42.11.1515' },
     { label: 'Stillwell, Seaver & Edwards (1981), Organizational Behavior and Human Performance 28(1), 62-77', doi: '10.1016/0030-5073(81)90015-5' },
+    { label: 'Solymosi & Dombi (1986), European Journal of Operational Research 26(1), 35-41', doi: '10.1016/0377-2217(86)90157-8' },
     { label: 'Roszkowska (2013), Optimum. Studia Ekonomiczne 5(65), 14-33', doi: '10.15290/ose.2013.05.65.02' },
     { label: 'pyDecision 5.1.1, roc_method and rsw_method', url: 'https://github.com/Valdecy/pyDecision' },
   ],

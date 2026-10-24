@@ -925,6 +925,43 @@ export const examples: readonly ExampleDataset[] = [
       { label: 'codas.score', values: [1.3914, 0.3411, -0.217, -0.5381, -0.7292, -0.2481], decimals: 4 },
     ],
   },
+  {
+    id: 'roszkowska-2013-rank-weights',
+    name: {
+      en: 'Five alternatives, five ranked criteria (Roszkowska 2013)',
+      tr: 'Beş alternatif, beş sıralı kriter (Roszkowska 2013)',
+    },
+    buttonLabel: { en: 'Illustrative example', tr: 'Açıklayıcı örnek' },
+    summary: {
+      en: 'Five alternatives on three benefit and two cost criteria ordered from most important (C1) to least important (C5). The paper compares ROC, Rank Reciprocal, Rank Sum and equal weights.',
+      tr: 'En önemliden (C1) en önemsize (C5) sıralanmış üç fayda ve iki maliyet kriterinde beş alternatif. Makale ROC, ters sıra, sıra toplamı ve eşit ağırlıkları karşılaştırır.',
+    },
+    referenceFor: ['roc'],
+    citation: {
+      authors: 'Roszkowska, E.',
+      year: 2013,
+      title: 'Rank Ordering Criteria Weighting Methods: a Comparative Overview',
+      venue: 'Optimum. Studia Ekonomiczne 5(65), 14-33',
+      doi: '10.15290/ose.2013.05.65.02',
+      tables: { en: 'Table 4 (weights) and Tables 5-6 (case study)', tr: 'Tablo 4 (ağırlıklar) ve Tablo 5-6 (örnek)' },
+    },
+    alternatives: ['A1', 'A2', 'A3', 'A4', 'A5'],
+    criteria: [
+      { name: { en: 'C1', tr: 'C1' }, type: 'benefit' },
+      { name: { en: 'C2', tr: 'C2' }, type: 'benefit' },
+      { name: { en: 'C3', tr: 'C3' }, type: 'benefit' },
+      { name: { en: 'C4', tr: 'C4' }, type: 'cost' },
+      { name: { en: 'C5', tr: 'C5' }, type: 'cost' },
+    ],
+    matrix: [
+      [15, 5, 3, 6, 10],
+      [20, 3, 7, 4, 25],
+      [10, 2, 20, 1, 10],
+      [20, 10, 3, 3, 20],
+      [15, 8, 7, 4, 10],
+    ],
+    published: [{ label: 'roc.weights', values: [0.4567, 0.2567, 0.1567, 0.09, 0.04], decimals: 4 }],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

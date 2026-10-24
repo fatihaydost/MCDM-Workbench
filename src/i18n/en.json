@@ -149,6 +149,9 @@
       },
       "codas": {
         "claim": "E, T, H and all six ranks of Tables 3 and 4 match {{citation}} to {{decimals}} decimals; the two examples of the 2016 origin paper match too."
+      },
+      "roc": {
+        "claim": "ROC, RS and RR weights match {{citation}} Tables 4 and 6 to {{decimals}} decimals, with the same SAW rankings."
       }
     },
     "catalogue": {
@@ -231,7 +234,8 @@
       "lopcow": "LOPCOW",
       "cilos": "CILOS",
       "bwm": "BWM",
-      "ahp": "AHP"
+      "ahp": "AHP",
+      "roc": "ROC"
     },
     "rankingMethod": {
       "label": "Ranking method",
@@ -325,6 +329,24 @@
           "max": "0.10: Taxicab on larger E gaps"
         },
         "tauVariant": "τ = {{value}}"
+      },
+      "roc": {
+        "formula": "Rank formula",
+        "formulaOptions": {
+          "roc": "ROC (centroid)",
+          "rs": "RS (rank sum)",
+          "rr": "RR (reciprocal)"
+        },
+        "formulaHints": {
+          "roc": "Harmonic tail sum 1 / n · Σ 1 / k; centroid of the ordered weight simplex (Barron and Barrett 1996).",
+          "rs": "Linear decay 2(n + 1 - r) / (n(n + 1)); flattest spread across ranks (Stillwell et al. 1981).",
+          "rr": "Normalized reciprocal (1 / r) / H_n; steepest top-rank concentration (Stillwell et al. 1981)."
+        },
+        "formulaVariant": {
+          "roc": "ROC",
+          "rs": "RS",
+          "rr": "RR"
+        }
       }
     },
     "example": {
@@ -427,7 +449,8 @@
         "lopcow": "Objective weights from the log ratio of each criterion's root-mean-square to its sample standard deviation after min-max scaling.",
         "cilos": "Objective weights from the impact loss other criteria suffer when each criterion's best alternative is chosen, solved by F w = 0. Every value must be above 0.",
         "bwm": "Pick the most and least important criterion, then compare every other with these two (1‑9); 2n - 3 answers give the weights.",
-        "ahp": "Compare the criteria two at a time on the 1‑9 scale; all n(n - 1) / 2 answers give the weights and the consistency ratio CR."
+        "ahp": "Compare the criteria two at a time on the 1‑9 scale; all n(n - 1) / 2 answers give the weights and the consistency ratio CR.",
+        "roc": "Subjective weights from the importance order of the criteria (column 1 most important to column n least important), via ROC, Rank Sum or Rank Reciprocal."
       },
       "columns": {
         "criterion": "Criterion",
@@ -441,7 +464,8 @@
         "spread": "Spread σ",
         "removalEffect": "Removal effect E",
         "rms": "RMS",
-        "pv": "Percentage value PV"
+        "pv": "Percentage value PV",
+        "criterionRank": "Rank r"
       },
       "tableTitle": "Weights by criterion",
       "chartTitle": "Criterion weights",
@@ -793,6 +817,10 @@
         "taxicab": "Taxicab distance T",
         "relativeAssessment": "Relative assessment Ra",
         "score": "Assessment score H"
+      },
+      "roc": {
+        "ranks": "Criterion ranks r",
+        "weights": "Weights w"
       }
     },
     "issues": {
@@ -1009,6 +1037,14 @@
         "title": "Distances E and T from the negative-ideal, and score H",
         "caption": "Left: Euclidean distance E (top) and Taxicab distance T (bottom) from the negative-ideal point ns. Right: assessment score H around zero.",
         "row": "{{alternative}}: E = {{e}}, T = {{t}}, H = {{score}}"
+      },
+      "roc": {
+        "title": "Ordinal ranks become cardinal weights",
+        "rank": "Rank r",
+        "roc": "ROC",
+        "rs": "RS",
+        "rr": "RR",
+        "weight": "Weight w"
       }
     },
     "flow": {
@@ -1130,6 +1166,10 @@
         "euclidean": "E and T",
         "relativeAssessment": "Pairwise Ra",
         "score": "H"
+      },
+      "roc": {
+        "ranks": "Ranks",
+        "weights": "Weights"
       }
     },
     "pipeline": {
@@ -1220,7 +1260,8 @@
       "ahp": "AHP",
       "moora": "MOORA",
       "aras": "ARAS",
-      "codas": "CODAS"
+      "codas": "CODAS",
+      "roc": "ROC"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1289,7 +1330,8 @@
         "ahp": "Weights from comparing every pair of criteria.",
         "moora": "Benefit ratios minus cost ratios after vector normalization.",
         "aras": "Measures each weighted share total against an optimal row.",
-        "codas": "Combines Euclidean and Taxicab distances from the negative-ideal across pairs."
+        "codas": "Combines Euclidean and Taxicab distances from the negative-ideal across pairs.",
+        "roc": "Weights from the importance rank order of criteria."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1583,6 +1625,20 @@
             "s2": "Taxicab distance T: the sum of criterion gaps from ns, added when the Euclidean gap is at least τ.",
             "s3": "Assessment score H: the row sum of pairwise comparisons; the highest H ranks first."
           }
+        },
+        "roc": {
+          "title": "Ordinal ranks become cardinal weights",
+          "caption": "Circles mark ROC (simplex centroid), squares mark RS (linear) and diamonds mark RR (reciprocal) on the same scale; the bars on the right show the active formula's weights.",
+          "rank": "Rank r",
+          "roc": "ROC",
+          "rs": "RS",
+          "rr": "RR",
+          "weight": "Weight w",
+          "steps": {
+            "s1": "Order the criteria from rank 1 (most important) to rank n (least important); the circle shows the ROC harmonic centroid weight.",
+            "s2": "Compare the three rank-order rules on one scale: RS (square) decays linearly, RR (diamond) concentrates steepest on rank 1, and ROC sits at the simplex centroid between them.",
+            "s3": "The chosen formula turns each criterion's rank into its weight bar w on the right, summing to 1."
+          }
         }
       }
     }
@@ -1756,6 +1812,10 @@
       "taxicab": "Taxicab distance T: the sum of absolute differences from the negative-ideal solution.",
       "relativeAssessment": "Relative assessment matrix Ra: for each pair (i, k), (E_i - E_k) plus (T_i - T_k) when |E_i - E_k| is at least τ.",
       "score": "Assessment score H: the row sum of Ra. A higher value ranks higher, and the scores sum to 0."
+    },
+    "roc": {
+      "ranks": "Criterion ranks r from 1 (most important) to n (least important).",
+      "weights": "Rank-order weights w from the selected formula (ROC centroid, Rank Sum or Rank Reciprocal), summing to 1."
     }
   },
   "validation": {

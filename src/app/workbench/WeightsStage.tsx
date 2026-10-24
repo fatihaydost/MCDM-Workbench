@@ -153,7 +153,7 @@ export function ComputedWeights({ problem, method, result }: { problem: DraftPro
                   </Td>
                   {extra.map((c) => (
                     <Td key={c.step} numeric className="hidden sm:table-cell">
-                      {nf.format(c.values?.[j])}
+                      {nf.format(c.values?.[j], c.decimals)}
                     </Td>
                   ))}
                   <Td numeric className="font-medium">
