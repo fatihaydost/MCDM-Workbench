@@ -21,7 +21,7 @@ const ROWS: readonly MethodMeta[] = [
   { id: 'electre-iii', name: { en: 'ELECTRE III', tr: 'ELECTRE III' }, family: 'ranking-outranking', status: 'research', year: 1978 },
   { id: 'entropy', name: { en: 'Entropy', tr: 'Entropi' }, family: 'weighting-objective', status: 'available', year: 1981 },
   { id: 'equal', name: { en: 'Equal weights', tr: 'Eşit ağırlık' }, family: 'weighting-objective', status: 'available', year: 1974 },
-  { id: 'lopcow', name: { en: 'LOPCOW', tr: 'LOPCOW' }, family: 'weighting-objective', status: 'research', year: 2022 },
+  { id: 'lopcow', name: { en: 'LOPCOW', tr: 'LOPCOW' }, family: 'weighting-objective', status: 'available', year: 2022 },
   { id: 'mabac', name: { en: 'MABAC', tr: 'MABAC' }, family: 'ranking-distance', status: 'available', year: 2015 },
   { id: 'marcos', name: { en: 'MARCOS', tr: 'MARCOS' }, family: 'ranking-utility', status: 'available', year: 2020 },
   { id: 'merec', name: { en: 'MEREC', tr: 'MEREC' }, family: 'weighting-objective', status: 'available', year: 2021 },

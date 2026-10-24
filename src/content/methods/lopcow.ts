@@ -9,7 +9,7 @@ export const lopcow: MethodContent = {
     tr: 'Logaritmik yüzde değişime dayalı nesnel ağırlıklandırma',
   },
   family: 'weighting-objective',
-  status: 'research',
+  status: 'available',
   year: 2022,
   origin: {
     authors: 'Ecer, F.; Pamucar, D.',
@@ -73,8 +73,8 @@ export const lopcow: MethodContent = {
     doi: '10.25287/ohuiibf.1239201',
     match: 'match',
     note: {
-      en: 'Published example (Tables 6, 7 and 8); this method is not computed here yet, only recomputed during research. Fifteen cities, three criteria sets (6, 8 and 14 criteria). Weights match the printed 3 decimals in all three tables with the sample standard deviation; the population form misses by up to 0.0045. LOPCOW weights published by Dua et al. (2024) could not be reproduced with either form.',
-      tr: "Yayımlanmış örnek (Tablo 6, 7 ve 8); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. On beş şehir, üç kriter kümesi (6, 8 ve 14 kriter). Örneklem standart sapmasıyla ağırlıklar üç tabloda da basılı 3 basamakta örtüşüyor; anakütle biçimi 0,0045'e kadar sapıyor. Dua vd. (2024) tarafından yayımlanan LOPCOW ağırlıkları iki biçimle de elde edilemedi.",
+      en: 'Published example (Tables 6, 7 and 8): fifteen cities, three criteria sets (6, 8 and 14 criteria). Weights match the printed 3 decimals in all three tables with the sample standard deviation (divisor m - 1); the population form misses by up to 0.0045. LOPCOW weights published by Dua et al. (2024) could not be reproduced with either form.',
+      tr: "Yayımlanmış örnek (Tablo 6, 7 ve 8): on beş şehir, üç kriter kümesi (6, 8 ve 14 kriter). Örneklem standart sapmasıyla (payda m - 1) ağırlıklar üç tabloda da basılı 3 basamakta örtüşüyor; anakütle biçimi 0,0045'e kadar sapıyor. Dua vd. (2024) tarafından yayımlanan LOPCOW ağırlıkları iki biçimle de elde edilemedi.",
     },
   },
   sources: [
@@ -92,6 +92,7 @@ export const lopcow: MethodContent = {
       'Paired with newer ranking methods (EDAS, CRADIS, RAM, DOBI).',
     ],
     whenNot: [
+      'Only two alternatives: every varying column gets PV = 0.',
       'A criterion is constant: its standard deviation is 0.',
       'You need a well-studied method: LOPCOW is new, described only empirically.',
     ],
@@ -102,7 +103,7 @@ export const lopcow: MethodContent = {
     ],
     pitfalls: [
       'A constant column has undefined PV; weight 0 with a warning is a choice no source covers.',
-      'A varying column whose RMS equals its standard deviation gets PV = 0 and weight 0, an artefact of the absolute log.',
+      'A column with one best alternative and all others tied at worst has RMS equal to standard deviation, so PV = 0 (always true at m = 2).',
       'Sample and population standard deviation differ by 0.3-0.5 percentage points per weight; state which one is used.',
     ],
   },
@@ -115,6 +116,7 @@ export const lopcow: MethodContent = {
       'Yeni sıralama yöntemleriyle birlikte (EDAS, CRADIS, RAM, DOBI).',
     ],
     whenNot: [
+      'Yalnız iki alternatif var: her değişken sütun PV = 0 alır.',
       "Bir kriter sabit: standart sapması 0'dır.",
       'Çok çalışılmış bir yöntem gerekiyor: LOPCOW yeni, yalnız deneysel olarak anlatılmış.',
     ],
@@ -125,7 +127,7 @@ export const lopcow: MethodContent = {
     ],
     pitfalls: [
       'Sabit sütunda PV tanımsızdır; uyarıyla ağırlık 0 almak hiçbir kaynağın ele almadığı bir tercihtir.',
-      'Karesel ortalaması standart sapmasına eşit olan değişken bir sütun PV = 0 ve ağırlık 0 alır; bu mutlak logaritmanın yan etkisidir.',
+      'Tek bir en iyi alternatifi olup diğerleri en kötüde eşitlenen sütunda karesel ortalama standart sapmaya eşittir ve PV = 0 olur (m = 2 için her zaman).',
       'Örneklem ve anakütle standart sapması ağırlık başına 0,3-0,5 yüzde puan fark verir; hangisinin kullanıldığını belirtin.',
     ],
   },

@@ -131,6 +131,9 @@
       },
       "bwm": {
         "claim": "Doğrusal BWM ağırlıkları {{citation}} ile {{decimals}} basamağa kadar aynı."
+      },
+      "lopcow": {
+        "claim": "Ağırlıklar örneklem standart sapmasıyla üç kriter kümesinde de {{citation}} ile {{decimals}} basamağa kadar aynı."
       }
     },
     "catalogue": {
@@ -210,6 +213,7 @@
       "manual": "Elle",
       "sd": "SD",
       "merec": "MEREC",
+      "lopcow": "LOPCOW",
       "bwm": "BWM"
     },
     "rankingMethod": {
@@ -377,6 +381,7 @@
         "manual": "Ağırlıkları kendiniz girin. Her biri 0 ya da daha büyük olmalı, toplamları 1 etmeli.",
         "sd": "Her kriterin değerlerinin alternatifler arasında ne kadar yayıldığına bakan nesnel ağırlıklar.",
         "merec": "Ağırlığı, kriteri çıkarmanın neyi değiştirdiğinden bulur. Her değer 0'dan büyük olmalı.",
+        "lopcow": "Min-maks ölçeklemesinden sonra her kriterin karesel ortalamasının örneklem standart sapmasına logaritmik oranından bulunan nesnel ağırlıklar.",
         "bwm": "En önemli ve en önemsiz kriteri seçin, diğer her kriteri bu ikisiyle karşılaştırın (1‑9); 2n - 3 yanıt ağırlıkları verir."
       },
       "columns": {
@@ -389,7 +394,9 @@
         "diversification": "Çeşitlenme d",
         "weight": "Ağırlık w",
         "spread": "Yayılım σ",
-        "removalEffect": "Çıkarma etkisi E"
+        "removalEffect": "Çıkarma etkisi E",
+        "rms": "RMS",
+        "pv": "Yüzde değer PV"
       },
       "tableTitle": "Kriter ağırlıkları",
       "chartTitle": "Kriter ağırlıkları",
@@ -623,6 +630,13 @@
         "removalEffect": "Çıkarma etkisi E",
         "weights": "Ağırlıklar w"
       },
+      "lopcow": {
+        "normalized": "Normalize matris r (min-maks)",
+        "rms": "Karesel ortalama RMS",
+        "stdDev": "Yayılım σ (örneklem SS)",
+        "pv": "Yüzde değer PV",
+        "weights": "Ağırlıklar w"
+      },
       "waspas": {
         "normalized": "Normalize matris x̄",
         "wsm": "Ağırlıklı toplam Q1",
@@ -793,6 +807,13 @@
         "effect": "Çıkarma etkisi E",
         "weight": "Ağırlık"
       },
+      "lopcow": {
+        "title": "Karesel ortalamanın yayılıma logaritmik oranı ağırlığı verir",
+        "rms": "RMS",
+        "stdDev": "Yayılım σ",
+        "pv": "Yüzde değer PV",
+        "weight": "Ağırlık"
+      },
       "waspas": {
         "title": "λ değiştikçe skor Q",
         "axis": "λ: ağırlıklı toplamın payı",
@@ -893,6 +914,12 @@
         "performance": "Performans",
         "performanceRemoved": "j olmadan",
         "removalEffect": "Çıkarma etkisi",
+        "weights": "Ağırlıklar"
+      },
+      "lopcow": {
+        "normalized": "Normalize",
+        "rms": "RMS ve σ",
+        "pv": "PV",
         "weights": "Ağırlıklar"
       },
       "waspas": {
@@ -1004,6 +1031,7 @@
       "edas": "EDAS",
       "sd": "SD",
       "merec": "MEREC",
+      "lopcow": "LOPCOW",
       "waspas": "WASPAS",
       "copras": "COPRAS",
       "marcos": "MARCOS",
@@ -1067,6 +1095,7 @@
         "edas": "Ortalamanın üstündeki ve altındaki uzaklığı ölçer.",
         "sd": "Ağırlığı verinin ne kadar geniş yayıldığından bulur.",
         "merec": "Kriteri çıkarmanın neyi değiştirdiğinden ağırlık.",
+        "lopcow": "Karesel ortalamanın yayılıma logaritmik oranından ağırlık.",
         "waspas": "Ağırlıklı toplamı ağırlıklı çarpımla karıştırır.",
         "copras": "Fayda paylarını toplar, küçük maliyet payını ödüllendirir.",
         "marcos": "Hayali bir ideal ve anti-ideale göre ölçer.",
@@ -1227,6 +1256,21 @@
             "s4": "Ağırlık w = E / ΣE: toplam etkideki pay, ağırlıkların toplamı 1 olur."
           }
         },
+        "lopcow": {
+          "title": "Karesel ortalamanın yayılıma logaritmik oranı ağırlığı verir",
+          "rms": "RMS",
+          "stdDev": "Yayılım σ",
+          "pv": "Yüzde değer PV",
+          "weight": "Ağırlık",
+          "caption": "Her nokta 0 ile 1 ölçeğinde bir şehir; üstteki cetvel RMS, alttaki cetvel örneklem σ.",
+          "weightHead": "Ağırlık = PV / {{total}}",
+          "steps": {
+            "s1": "Her nokta bir şehrin min-maks ile 0 ile 1 arasına ölçeklenmiş değeri; üstteki cetvel karesel ortalama RMS.",
+            "s2": "Yayılım σ: örneklem standart sapması (payda m - 1), aynı ölçekte RMS'nin altında 0'dan çizilir.",
+            "s3": "Yüzde değer PV = |ln(RMS / σ) × 100|: iki cetvel arasındaki logaritmik fark.",
+            "s4": "Ağırlık w = PV / ΣPV: toplam yüzde değer içindeki pay, ağırlıkların toplamı 1 olur."
+          }
+        },
         "waspas": {
           "title": "Toplam mı çarpım mı: karışımı λ belirler",
           "caption": "Her çizgi bir alternatif; iki çizginin kesiştiği yerde sıraları yer değiştirir. Dikey çizgi λ = 0,5 değerini gösterir."
@@ -1374,6 +1418,13 @@
       "removalEffect": "Çıkarma etkisi: kriter çıkarılınca tüm alternatiflerde performansın toplam düşüşü.",
       "weights": "MEREC ağırlıkları: her kriterin toplam çıkarma etkisi içindeki payı."
     },
+    "lopcow": {
+      "normalized": "Min-maks normalizasyonu: her sütun 0 ile 1 arasına ölçeklenir, maliyet kriterleri ters çevrilir; böylece 1 her zaman en iyi değerdir.",
+      "rms": "Karesel ortalama RMS: normalize edilmiş her sütundaki değerlerin karelerinin ortalamasının karekökü.",
+      "stdDev": "Yayılım σ: normalize edilmiş her sütunun örneklem standart sapması (payda m - 1).",
+      "pv": "Yüzde değer PV: karesel ortalamanın standart sapmaya oranının mutlak doğal logaritmasının 100 katı.",
+      "weights": "LOPCOW ağırlıkları: her kriterin toplam yüzde değer içindeki payı."
+    },
     "waspas": {
       "normalized": "Doğrusal maks normalizasyonu: her değer sütun maksimumuna bölünür, maliyet kriterinde sütun minimumu değere bölünür; böylece en iyi değer 1 olur.",
       "wsm": "Ağırlıklı toplam Q1: her normalize değer kriter ağırlığıyla çarpılıp toplanır.",
@@ -1495,6 +1546,12 @@
       "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanılıyor.",
       "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; aralığın gerçek olup olmadığına bakın.",
       "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, yine de MEREC ona bir çıkarma etkisi veriyor. Farkın gerçek olup olmadığına bakın."
+    },
+    "lopcow": {
+      "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden LOPCOW ağırlığı 0.",
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
+      "two-alternatives": "2 alternatifle her değişken sütunda karesel ortalama örneklem standart sapmasına eşittir (PV = 0), bu yüzden eşit ağırlık kullanıldı.",
+      "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı."
     },
     "copras": {
       "no-cost-criteria": "Ağırlığı 0'dan büyük maliyet kriteri yok; bu yüzden Q = S+ ve COPRAS, SAW'ın toplam seçeneğiyle aynı sonucu veriyor."

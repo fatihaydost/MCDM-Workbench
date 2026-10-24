@@ -17,6 +17,7 @@ import {
   criticParts,
   defaultAxes,
   sdParts,
+  lopcowParts,
   merecParts,
   entropyParts,
   distancePoints,
@@ -322,6 +323,24 @@ describe('merecParts', () => {
   })
   it('is null when MEREC cannot run (a zero cell)', () => {
     expect(merecParts({ ...problem, matrix: problem.matrix.map((r, i) => (i === 0 ? [0, ...r.slice(1)] : r)) })).toBeNull()
+  })
+})
+
+describe('lopcowParts', () => {
+  const ex = getExample('keles-2023-cities')!
+  const problem: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+
+  it('carries the core normalized matrix, RMS, sample SD, PV, and weights', () => {
+    const parts = lopcowParts(problem)!
+    expect(parts.weights).toEqual(parts.result.weights)
+    expect(parts.normalized).toHaveLength(15)
+    expect(parts.rms).toHaveLength(6)
+    expect(parts.stdDev).toHaveLength(6)
+    expect(parts.pv).toHaveLength(6)
+    expect(parts.weights.map((w) => Number(w.toFixed(3)))).toEqual(ex.published[0]!.values)
+  })
+  it('is null when LOPCOW cannot run', () => {
+    expect(lopcowParts({ ...problem, matrix: [[1, 2, 3, 4, 5, 6]] })).toBeNull()
   })
 })
 

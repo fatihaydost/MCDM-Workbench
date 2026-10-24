@@ -8,6 +8,7 @@ import { edas } from '../../core/methods/edas'
 import { marcos } from '../../core/methods/marcos'
 import { maxOf } from '../../core/math'
 import { entropy, type EntropyParams } from '../../core/methods/entropy'
+import { lopcow } from '../../core/methods/lopcow'
 import { merec } from '../../core/methods/merec'
 import { sd } from '../../core/methods/sd'
 import { saw, type SawParams } from '../../core/methods/saw'
@@ -297,6 +298,38 @@ export function sdParts(problem: Problem): SdParts | null {
     result,
     normalized: stepMatrix(result.steps, 'sd.normalized'),
     sigma: stepVector(result.steps, 'sd.sigma'),
+    weights: result.weights,
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// LOPCOW parts
+// ---------------------------------------------------------------------------------------------
+
+export type LopcowParts = {
+  result: WeightingResult
+  /** Min-max normalized matrix r_ij (1 = best). */
+  normalized: number[][]
+  rms: number[]
+  stdDev: number[]
+  pv: number[]
+  weights: number[]
+}
+
+/** LOPCOW through the core, with the steps the illustration draws. Null when it cannot run. */
+export function lopcowParts(problem: Problem): LopcowParts | null {
+  let result: WeightingResult
+  try {
+    result = lopcow.compute(problem, {})
+  } catch {
+    return null
+  }
+  return {
+    result,
+    normalized: stepMatrix(result.steps, 'lopcow.normalized'),
+    rms: stepVector(result.steps, 'lopcow.rms'),
+    stdDev: stepVector(result.steps, 'lopcow.stdDev'),
+    pv: stepVector(result.steps, 'lopcow.pv'),
     weights: result.weights,
   }
 }

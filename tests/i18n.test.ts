@@ -72,7 +72,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { bwm, judgementsFromBwm, cocoso, copras, critic, edas, entropy, mabac, marcos, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
+    const { bwm, judgementsFromBwm, cocoso, copras, critic, edas, entropy, lopcow, mabac, marcos, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -118,6 +118,16 @@ describe('i18n resources', () => {
     ]
     expect(new Set(mr.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
       new Set(['merec.constant-column', 'merec.all-constant-equal-weights', 'merec.dominant-weight', 'merec.near-constant-column']),
+    )
+    // LOPCOW: constant column, near-constant column, m = 2, all constant.
+    const lp = [
+      lopcow.compute(p, {}),
+      lopcow.compute(nearConstant, {}),
+      lopcow.compute({ ...p, alternatives: ['A', 'B'], matrix: [[1, 2], [3, 1]] }, {}),
+      lopcow.compute({ ...p, matrix: [[1, 1], [1, 1], [1, 1]] }, {}),
+    ]
+    expect(new Set(lp.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(
+      new Set(['lopcow.constant-column', 'lopcow.near-constant-column', 'lopcow.two-alternatives', 'lopcow.all-constant-equal-weights']),
     )
     // SAW: both normalizations (it emits no warnings of its own; its data errors are validation codes).
     const sw = [saw.compute(p, [0.5, 0.5], {}), saw.compute(p, [0.5, 0.5], { normalization: 'sum' })]
@@ -169,13 +179,14 @@ describe('i18n resources', () => {
       bwm.compute(bwmProblem(10), {}, judgementsFromBwm(10, 0, 9, ones, ones)),
     ]
     expect(new Set(bw.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(new Set(['bwm.inconsistent', 'bwm.threshold-approximate']))
-    const steps = [...bw.flatMap((x) => x.steps), ...mb.flatMap((x) => x.steps), ...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
+    const steps = [...bw.flatMap((x) => x.steps), ...mb.flatMap((x) => x.steps), ...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...lp.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),
       ...e.flatMap((x) => x.warnings ?? []),
       ...sdr.flatMap((x) => x.warnings ?? []),
       ...mr.flatMap((x) => x.warnings ?? []),
+      ...lp.flatMap((x) => x.warnings ?? []),
       ...sw.flatMap((x) => x.warnings ?? []),
       ...vk.flatMap((x) => x.warnings ?? []),
       ...ed.flatMap((x) => x.warnings ?? []),

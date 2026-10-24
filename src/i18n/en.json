@@ -131,6 +131,9 @@
       },
       "bwm": {
         "claim": "Linear BWM weights match {{citation}} to {{decimals}} decimals."
+      },
+      "lopcow": {
+        "claim": "Weights match {{citation}} to {{decimals}} decimals across all three criteria sets with the sample standard deviation."
       }
     },
     "catalogue": {
@@ -210,6 +213,7 @@
       "manual": "Manual",
       "sd": "SD",
       "merec": "MEREC",
+      "lopcow": "LOPCOW",
       "bwm": "BWM"
     },
     "rankingMethod": {
@@ -377,6 +381,7 @@
         "manual": "Enter your own weights. They must be 0 or more and sum to 1.",
         "sd": "Objective weights from how widely each criterion's values spread over the alternatives.",
         "merec": "Objective weights from how much the alternatives' overall performance drops when each criterion is removed. Every value must be above 0.",
+        "lopcow": "Objective weights from the log ratio of each criterion's root-mean-square to its sample standard deviation after min-max scaling.",
         "bwm": "Pick the most and least important criterion, then compare every other with these two (1‑9); 2n - 3 answers give the weights."
       },
       "columns": {
@@ -389,7 +394,9 @@
         "diversification": "Diversification d",
         "weight": "Weight w",
         "spread": "Spread σ",
-        "removalEffect": "Removal effect E"
+        "removalEffect": "Removal effect E",
+        "rms": "RMS",
+        "pv": "Percentage value PV"
       },
       "tableTitle": "Weights by criterion",
       "chartTitle": "Criterion weights",
@@ -623,6 +630,13 @@
         "removalEffect": "Removal effect E",
         "weights": "Weights w"
       },
+      "lopcow": {
+        "normalized": "Normalized matrix r (min-max)",
+        "rms": "Root-mean-square RMS",
+        "stdDev": "Spread σ (sample SD)",
+        "pv": "Percentage value PV",
+        "weights": "Weights w"
+      },
       "waspas": {
         "normalized": "Normalized matrix x̄",
         "wsm": "Weighted sum Q1",
@@ -793,6 +807,13 @@
         "effect": "Removal effect E",
         "weight": "Weight"
       },
+      "lopcow": {
+        "title": "Log ratio of root-mean-square to spread gives the weight",
+        "rms": "RMS",
+        "stdDev": "Spread σ",
+        "pv": "Percentage value PV",
+        "weight": "Weight"
+      },
       "waspas": {
         "title": "Score Q as λ moves",
         "axis": "λ: share of the weighted sum",
@@ -893,6 +914,12 @@
         "performance": "Performance",
         "performanceRemoved": "Without j",
         "removalEffect": "Removal effect",
+        "weights": "Weights"
+      },
+      "lopcow": {
+        "normalized": "Normalize",
+        "rms": "RMS and σ",
+        "pv": "PV",
         "weights": "Weights"
       },
       "waspas": {
@@ -1004,6 +1031,7 @@
       "edas": "EDAS",
       "sd": "SD",
       "merec": "MEREC",
+      "lopcow": "LOPCOW",
       "waspas": "WASPAS",
       "copras": "COPRAS",
       "marcos": "MARCOS",
@@ -1067,6 +1095,7 @@
         "edas": "Measures the distance above and below the average.",
         "sd": "Weights from how widely the data spread.",
         "merec": "Weights from what removing a criterion changes.",
+        "lopcow": "Weights from the log ratio of root-mean-square to spread.",
         "waspas": "Blends a weighted sum with a weighted product.",
         "copras": "Adds benefit shares and a bonus for a small cost share.",
         "marcos": "Measures against an imaginary ideal and anti-ideal.",
@@ -1227,6 +1256,21 @@
             "s4": "Weight w = E / ΣE: the share of the total effect, so the weights add up to 1."
           }
         },
+        "lopcow": {
+          "title": "Log ratio of root-mean-square to spread gives the weight",
+          "rms": "RMS",
+          "stdDev": "Spread σ",
+          "pv": "Percentage value PV",
+          "weight": "Weight",
+          "caption": "Each dot is one city on the 0 to 1 scale; the upper ruler is RMS, the lower ruler is sample σ.",
+          "weightHead": "Weight = PV / {{total}}",
+          "steps": {
+            "s1": "Each dot is one city's value, min-max scaled to 0 to 1; the upper ruler from 0 is its root-mean-square RMS.",
+            "s2": "Spread σ: the sample standard deviation (divisor m - 1), drawn from 0 below RMS on the same scale.",
+            "s3": "Percentage value PV = |ln(RMS / σ) × 100|: the log gap between the two rulers.",
+            "s4": "Weight w = PV / ΣPV: the share of the total percentage value, so the weights add up to 1."
+          }
+        },
         "waspas": {
           "title": "Sum or product: λ sets the blend",
           "caption": "Each line is one alternative; where two lines cross, they swap places. The vertical line marks λ = 0.5."
@@ -1374,6 +1418,13 @@
       "removalEffect": "Removal effect: the total drop in performance over all alternatives when the criterion is removed.",
       "weights": "MEREC weights: each criterion's share of the total removal effect."
     },
+    "lopcow": {
+      "normalized": "Min-max normalization: each column is rescaled to the range 0 to 1, with cost criteria reversed so that 1 is always the best value.",
+      "rms": "Root-mean-square RMS: the square root of the mean of squared normalized values in each column.",
+      "stdDev": "Spread σ: the sample standard deviation (divisor m - 1) of each normalized column.",
+      "pv": "Percentage value PV: the absolute natural logarithm of RMS over σ, multiplied by 100.",
+      "weights": "LOPCOW weights: each criterion's share of the total percentage value."
+    },
     "waspas": {
       "normalized": "Linear max normalization: each value divided by the column maximum, or for a cost criterion the column minimum divided by the value, so the best value is 1.",
       "wsm": "Weighted sum Q1: each normalized value times its criterion weight, added up.",
@@ -1495,6 +1546,12 @@
       "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead.",
       "dominant-weight": "{{criterion}} takes more than half of the weight, so check that its range is real.",
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet MEREC gives it a removal effect. Check whether the difference is real."
+    },
+    "lopcow": {
+      "constant-column": "{{criterion}} has the same value for every alternative, so its LOPCOW weight is 0.",
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",
+      "two-alternatives": "With 2 alternatives, every varying column has RMS equal to its sample standard deviation (PV = 0), so equal weights are used instead.",
+      "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead."
     },
     "copras": {
       "no-cost-criteria": "There is no cost criterion with a weight above 0, so Q = S+ and COPRAS gives the same result as SAW with the sum option."

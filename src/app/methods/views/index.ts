@@ -6,6 +6,7 @@ import { critic } from './critic'
 import { edas } from './edas'
 import { entropy } from './entropy'
 import { equal } from './equal'
+import { lopcow } from './lopcow'
 import { manual } from './manual'
 import { marcos } from './marcos'
 import { mabac } from './mabac'
@@ -34,6 +35,7 @@ export const methodViews: Readonly<Views> = {
   entropy,
   sd,
   merec,
+  lopcow,
   equal,
   manual,
   bwm,

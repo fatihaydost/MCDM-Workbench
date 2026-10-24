@@ -20,6 +20,7 @@ import phi from './fixtures/opricovic-tzeng-2004-phi.json'
 import podvezko from './fixtures/saw-podvezko2011.json'
 import diak from './fixtures/sd-diakoulaki1995.json'
 import merecK from './fixtures/merec-keshavarz2021-illustrative.json'
+import lopcowK from './fixtures/lopcow-keles2023.json'
 import vikorKG from './fixtures/vikor-keshavarz2015.json'
 import vikorOT from './fixtures/vikor-opricovic-tzeng2004.json'
 import waspasA from './fixtures/waspas-adali2017.json'
@@ -67,6 +68,14 @@ describe('examples match the published fixtures', () => {
       { label: 'merec.removalEffect', values: merecK.expected.E_printed, decimals: 2 },
       { label: 'merec.weights', values: merecK.expected.weights, decimals: 4 },
     ])
+  })
+  it('Keleş 2023 (LOPCOW, Table 6)', () => {
+    const ex = getExample('keles-2023-cities')!
+    expect(ex.referenceFor).toEqual(['lopcow'])
+    expect(ex.matrix).toEqual(lopcowK.matrix)
+    expect(ex.alternatives).toEqual(lopcowK.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(lopcowK.types)
+    expect(ex.published).toEqual([{ label: 'lopcow.weights', values: lopcowK.published.weights, decimals: 3 }])
   })
   for (const [id, fx] of [['opricovic-tzeng-2004-f', f], ['opricovic-tzeng-2004-phi', phi]] as const) {
     it(id, () => {
@@ -220,6 +229,11 @@ describe('derived results', () => {
   it('MEREC weights reproduce Keshavarz-Ghorabaee et al. 2021 through the store', () => {
     const w = computeWeights({ problem: draftOf('keshavarz-2021-merec'), weightMethod: 'merec', manualWeights: [] })
     expectClose(w.value!.weights, merecK.expected.weights, merecK.expected.tolerance.weights)
+  })
+
+  it('LOPCOW weights reproduce Keleş 2023 Table 6 through the store', () => {
+    const w = computeWeights({ problem: draftOf('keles-2023-cities'), weightMethod: 'lopcow', manualWeights: [] })
+    expectClose(w.value!.weights, lopcowK.published.weights, lopcowK.expected.tolerance_vs_published)
   })
 
   it('MEREC blocks a zero cell with non-positive-value at that cell', () => {
