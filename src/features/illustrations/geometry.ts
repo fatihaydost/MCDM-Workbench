@@ -2,6 +2,7 @@
  * Pure data for the method illustrations. Everything is read from the core's own steps, so a
  * picture can never disagree with the worked calculation. No DOM.
  */
+import { ahpRanking, type AhpParams } from '../../core/methods/ahp'
 import { aras, type ArasParams } from '../../core/methods/aras'
 import { cilos } from '../../core/methods/cilos'
 import { copras } from '../../core/methods/copras'
@@ -17,7 +18,7 @@ import { sd } from '../../core/methods/sd'
 import { saw, type SawParams } from '../../core/methods/saw'
 import { topsis } from '../../core/methods/topsis'
 import { vikor, vikorCompromise, vikorTerm, type VikorCompromise, type VikorParams } from '../../core/methods/vikor'
-import type { Problem, RankingResult, Step, WeightingResult } from '../../core/types'
+import type { AlternativeJudgements, Problem, RankingResult, Step, WeightingResult } from '../../core/types'
 import { scaleLinear, type Domain, type LinearScale } from '../charts/scale'
 
 const stepMatrix = (steps: Step[], key: string): number[][] => {
@@ -478,6 +479,29 @@ export function sawParts(problem: Problem, weights: readonly number[], params: S
   const order = result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b)
   const normalizedKey = result.steps.find((st) => st.key.startsWith('saw.normalized'))!.key
   return { result, contributions: stepMatrix(result.steps, 'saw.weighted'), normalized: stepMatrix(result.steps, normalizedKey), scores: result.scores, order }
+}
+
+/** The core's AHP ranking result for the picture of its contributions, or null when AHP cannot run on the data. */
+export function ahpRankingParts(
+  problem: Problem,
+  weights: readonly number[],
+  params: AhpParams = {},
+  judgements?: AlternativeJudgements,
+): SawParts | null {
+  let result: RankingResult
+  try {
+    result = ahpRanking.compute(problem, [...weights], params, judgements)
+  } catch {
+    return null
+  }
+  const order = result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b)
+  return {
+    result,
+    contributions: stepMatrix(result.steps, 'ahpRanking.weighted'),
+    normalized: stepMatrix(result.steps, 'ahpRanking.local'),
+    scores: result.scores,
+    order,
+  }
 }
 
 // ---------------------------------------------------------------------------------------------

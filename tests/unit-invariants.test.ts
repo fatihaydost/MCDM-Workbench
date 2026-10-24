@@ -128,17 +128,17 @@ const makeConsistentBwmJudgements = () => {
   return judgementsFromBwm(3, 0, 2, [1, 2, 4], [4, 2, 1])
 }
 
-describe('Registry Invariants (all 26 methods)', () => {
-  it('lists exactly 11 weighting and 15 ranking methods with unique ids', () => {
+describe('Registry Invariants (all 27 methods)', () => {
+  it('lists exactly 11 weighting and 16 ranking methods with unique ids', () => {
     expect(WEIGHTING_IDS).toHaveLength(11)
-    expect(RANKING_IDS).toHaveLength(15)
+    expect(RANKING_IDS).toHaveLength(16)
     expect(listMethods('weighting')).toHaveLength(11)
-    expect(listMethods('ranking')).toHaveLength(15)
-    expect(listMethods()).toHaveLength(26)
+    expect(listMethods('ranking')).toHaveLength(16)
+    expect(listMethods()).toHaveLength(27)
 
     const allIds = listMethods().map((m) => m.id)
     const uniqueIds = new Set(allIds)
-    expect(uniqueIds.size).toBe(26)
+    expect(uniqueIds.size).toBe(27)
 
     for (const id of WEIGHTING_IDS) {
       expect(getWeightingMethod(id)?.id).toBe(id)
@@ -392,8 +392,9 @@ describe('Ranking Methods Invariants (all 12 methods)', () => {
 describe('Step Metadata and Dimensions Verification', () => {
   function verifySteps(steps: Step[], m: number, n: number, methodId: string) {
     expect(steps.length, `${methodId} has steps`).toBeGreaterThan(0)
+    const prefix = methodId === 'ahp-ranking' ? 'ahpRanking.' : `${methodId}.`
     for (const s of steps) {
-      expect(s.key.startsWith(`${methodId}.`), `step key ${s.key} starts with ${methodId}.`).toBe(true)
+      expect(s.key.startsWith(prefix), `step key ${s.key} starts with ${prefix}`).toBe(true)
 
       if (s.matrix) {
         expect(s.axes, `step ${s.key} matrix axes length`).toHaveLength(2)

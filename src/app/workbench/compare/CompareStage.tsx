@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { compareRankings, defaultPair, rankingMethods, type Comparison } from '../../../core'
+import { COMPARE_ORDER, compareRankings, defaultPair, type Comparison } from '../../../core'
 import { RankLines, type RankLinesColumn } from '../../../features/illustrations/RankLines'
 import { useNumberFormat } from '../../../i18n'
-import { isEmptyProblem, paramsFor, toProblem, useWeights, useWorkbench } from '../../../state/workbench'
+import { isEmptyProblem, runFor, toProblem, useWeights, useWorkbench } from '../../../state/workbench'
 import { Button, cn, EmptyState } from '../../../ui'
 import { viewOf } from '../../methods/views'
 import { useWorkbenchNav } from '../nav'
@@ -11,9 +11,6 @@ import { BlockedByIssues } from '../parts'
 import { alternativeName, placeIssue, tr } from '../shared'
 import { useCompareText } from './text'
 import { WhyPanel } from './WhyPanel'
-
-/** Registry order, but MARCOS next to SAW: it orders like SAW (Linear), so the lines between the two run straight. */
-const COMPARE_ORDER = rankingMethods.map((m) => m.id).flatMap((id) => (id === 'marcos' ? [] : id === 'saw' ? ['saw', 'marcos'] : [id]))
 
 /**
  * Compare: every ranking method on the same data and weights, each with its own saved options. Read only: nothing
@@ -24,6 +21,7 @@ export default function CompareStage() {
   const { t: tc } = useCompareText()
   const draft = useWorkbench((s) => s.problem)
   const methodParams = useWorkbench((s) => s.methodParams)
+  const alternativeJudgements = useWorkbench((s) => s.alternativeJudgements)
   const weights = useWeights()
   const { goTo } = useWorkbenchNav()
   const w = weights.value?.weights
@@ -34,10 +32,10 @@ export default function CompareStage() {
         ? compareRankings(
             toProblem(draft),
             w,
-            COMPARE_ORDER.map((id) => ({ methodId: id, params: paramsFor({ methodParams }, id) })),
+            COMPARE_ORDER.map((id) => runFor({ methodParams, alternativeJudgements }, id)),
           )
         : null,
-    [draft, w, methodParams],
+    [draft, w, methodParams, alternativeJudgements],
   )
 
   if (isEmptyProblem(draft)) {
@@ -124,7 +122,10 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
             className="inline-flex h-5 items-center rounded-control border border-line-strong px-1.5 text-12 font-medium whitespace-nowrap text-text"
             data-testid={`${e.methodId}-badge`}
           >
-            {tc('echo', { method: tr(t, `workbench.rankingMethod.${e.methodId}`), of: tc('sawLinear') })}
+            {tc('echo', {
+              method: tr(t, `workbench.rankingMethod.${e.methodId}`),
+              of: tc(e.methodId === 'ahp-ranking' ? 'sawSum' : 'sawLinear'),
+            })}
           </span>
         ))}
         {kendallW !== null && <span>{tc('summary.w', { w: nf.format(kendallW, 2) })}</span>}

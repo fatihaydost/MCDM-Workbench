@@ -1,7 +1,7 @@
 // Excel import and export. SheetJS is passed in by the caller (a dynamic `import('xlsx')` in the UI),
 // so this module only needs its types and the library stays out of the main bundle.
 import type * as XLSX from 'xlsx'
-import type { RankingResult, Step, WeightingResult } from '../../core'
+import { AHP_MAX_PAIRWISE_ALTERNATIVES, type AlternativeJudgements, type Judgements, type RankingResult, type Step, type WeightingResult } from '../../core'
 import { gridToProblem, problemToGrid, type GridImportOptions, type ImportedProblem, type ImportResult, type TypeWords } from './grid'
 import { stepToTable, tableToCells, type Cell, type StepLabels } from './table'
 
@@ -61,7 +61,7 @@ export function importXlsx(X: SheetJS, data: ArrayBuffer | Uint8Array, opts: Xls
 // ---------------------------------------------------------------- export
 
 export type WorkbookLabels = {
-  sheets: { data: string; weights: string; ranking: string; calculation: string }
+  sheets: { data: string; weights: string; ranking: string; calculation: string; judgements?: string }
   alternative: string
   criterion: string
   type: string
@@ -78,7 +78,7 @@ export type WorkbookLabels = {
 }
 
 export const DEFAULT_WORKBOOK_LABELS: WorkbookLabels = {
-  sheets: { data: 'Data', weights: 'Weights', ranking: 'Ranking', calculation: 'Calculation' },
+  sheets: { data: 'Data', weights: 'Weights', ranking: 'Ranking', calculation: 'Calculation', judgements: 'Judgements' },
   alternative: 'Alternative',
   criterion: 'Criterion',
   type: 'Type',
@@ -94,6 +94,8 @@ export type WorkbookInput = {
   problem: ImportedProblem
   weighting?: { method: string; result: Pick<WeightingResult, 'weights' | 'steps'> }
   ranking?: { method: string; result: Pick<RankingResult, 'scores' | 'ranking' | 'steps'> }
+  judgements?: Judgements
+  alternativeJudgements?: AlternativeJudgements
   labels?: Partial<WorkbookLabels>
   /**
    * Provenance written as a last sheet (tool, address, date, data source, methods), so a file
@@ -235,6 +237,50 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
     }
     add(rows, L.sheets.calculation, COMPUTED_NUMBER_FORMAT)
   }
+
+  // Judgements: criterion pairwise matrix (AHP / BWM) and/or per-criterion alternative pairwise matrices (AHP ranking).
+  const jRows: Cell[][] = []
+  if (input.judgements && input.judgements.pairs.length === problem.criteria.length) {
+    const critNames = problem.criteria.map((c) => c.name)
+    jRows.push(
+      [input.weighting?.method ? `${input.weighting.method}: ${L.criterion}` : L.criterion],
+      [L.criterion, ...critNames],
+      ...critNames.map((name, i): Cell[] => [
+        name,
+        ...critNames.map((_, k) => {
+          if (i === k) return 1
+          const direct = input.judgements!.pairs[i]?.[k] ?? null
+          if (direct !== null) return finite(direct)
+          const inv = input.judgements!.pairs[k]?.[i] ?? null
+          return inv !== null ? finite(1 / inv) : null
+        }),
+      ]),
+      [],
+    )
+  }
+  if (input.alternativeJudgements && problem.alternatives.length <= AHP_MAX_PAIRWISE_ALTERNATIVES) {
+    const altNames = problem.alternatives
+    problem.criteria.forEach((c, j) => {
+      const mat = input.alternativeJudgements?.[j]
+      if (!mat || mat.length !== altNames.length) return
+      jRows.push(
+        [input.ranking?.method ? `${input.ranking.method}: ${c.name}` : c.name],
+        [L.alternative, ...altNames],
+        ...altNames.map((name, i): Cell[] => [
+          name,
+          ...altNames.map((_, k) => {
+            if (i === k) return 1
+            const direct = mat[i]?.[k] ?? null
+            if (direct !== null) return finite(direct)
+            const inv = mat[k]?.[i] ?? null
+            return inv !== null ? finite(1 / inv) : null
+          }),
+        ]),
+        [],
+      )
+    })
+  }
+  if (jRows.length > 0) add(jRows, L.sheets.judgements ?? 'Judgements', COMPUTED_NUMBER_FORMAT)
 
   if (input.about) add(input.about.rows.map(([k, v]): Cell[] => [k, v]), input.about.sheet)
 

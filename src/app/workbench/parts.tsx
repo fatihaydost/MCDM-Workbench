@@ -100,7 +100,7 @@ export function BlockedByIssues({ issues, problem }: { issues: readonly Validati
   const { goTo, setAttempted } = useWorkbenchNav()
   const placed = issues.filter((x) => x.severity === 'error').map((x) => placeIssue(x, problem, t, nf.format))
   const groups: { stage: Stage; items: PlacedIssue[] }[] = []
-  for (const stage of ['data', 'weights'] as const) {
+  for (const stage of ['data', 'weights', 'ranking'] as const) {
     const items = placed.filter((p) => p.stage === stage)
     if (items.length > 0) groups.push({ stage, items })
   }
@@ -114,7 +114,17 @@ export function BlockedByIssues({ issues, problem }: { issues: readonly Validati
   return (
     <div className="flex flex-col gap-3">
       {groups.map(({ stage, items }) => (
-        <Notice key={stage} tone="danger" title={stage === 'data' ? t('workbench.issues.dataTitle') : t('workbench.issues.weightsTitle')}>
+        <Notice
+          key={stage}
+          tone="danger"
+          title={
+            stage === 'data'
+              ? t('workbench.issues.dataTitle')
+              : stage === 'weights'
+                ? t('workbench.issues.weightsTitle')
+                : t('workbench.issues.rankingTitle')
+          }
+        >
           <ul className="mt-1 flex flex-col gap-1">
             {items.slice(0, MAX_LISTED).map((p, k) => (
               <li key={`${p.targetId}-${k}`}>
@@ -133,7 +143,11 @@ export function BlockedByIssues({ issues, problem }: { issues: readonly Validati
           </ul>
           <div className="mt-2">
             <Button size="sm" onClick={() => open(items[0]!)}>
-              {stage === 'data' ? t('workbench.issues.goToData') : t('workbench.issues.goToWeights')}
+              {stage === 'data'
+                ? t('workbench.issues.goToData')
+                : stage === 'weights'
+                  ? t('workbench.issues.goToWeights')
+                  : t('workbench.issues.goToRanking')}
             </Button>
           </div>
         </Notice>
@@ -149,11 +163,17 @@ export function MethodWarnings({ warnings, problem }: { warnings: readonly Metho
   return (
     <Notice tone="warning">
       <ul className="flex flex-col gap-1 text-text">
-        {warnings.map((w, k) => (
-          <li key={`${w.code}-${k}`}>
-            {tr(t, `warnings.${w.code}`, { criterion: w.col !== undefined ? criterionName(problem.criteria, w.col, t) : '' })}
-          </li>
-        ))}
+        {warnings.map((w, k) => {
+          const code = w.code === 'ahp.inconsistent' && w.col !== undefined ? 'ahp.inconsistent-criterion' : w.code
+          return (
+            <li key={`${w.code}-${k}`}>
+              {tr(t, `warnings.${code}`, {
+                criterion: w.col !== undefined ? criterionName(problem.criteria, w.col, t) : '',
+                ...(w.extra ?? {}),
+              })}
+            </li>
+          )
+        })}
       </ul>
     </Notice>
   )

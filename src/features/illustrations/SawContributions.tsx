@@ -5,7 +5,7 @@ import type { Problem } from '../../core/types'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
 import { estimateTextWidth, truncate } from '../charts/layout'
 import { useAnimateValues, useElementWidth } from '../charts/useElementWidth'
-import { sawParts, stackSegments } from './geometry'
+import { sawParts, stackSegments, type SawParts } from './geometry'
 import s from './illustrations.module.css'
 
 export type SawContributionsLabels = {
@@ -44,6 +44,8 @@ export type SawContributionsProps = {
   weights: readonly number[]
   /** The SAW options the numbers come from (default: linear max). */
   params?: SawParams | undefined
+  /** Precomputed contributions (e.g. AHP synthesis with pairwise criteria); defaults to SAW on `problem`. */
+  parts?: SawParts | null | undefined
   /** Number format for S, the contributions and the table (active locale, 4 decimals). */
   format?: ((value: number) => string) | undefined
   labels?: Partial<SawContributionsLabels>
@@ -91,13 +93,16 @@ type Active = { row: number; col: number }
  * the segments and rows move to their new places (MOTION.md object constancy, --dur-data), never on mount.
  * Every number comes from the core's SAW steps.
  */
-export function SawContributions({ problem, weights, params, format = defaultFormat, labels, step, explain = false, className }: SawContributionsProps) {
+export function SawContributions({ problem, weights, params, parts: partsProp, format = defaultFormat, labels, step, explain = false, className }: SawContributionsProps) {
   const l = { ...SAW_CONTRIBUTIONS_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const animate = useAnimateValues(width)
   const normalization = params?.normalization
-  const parts = useMemo(() => sawParts(problem, weights, normalization ? { normalization } : {}), [problem, weights, normalization])
+  const parts = useMemo(
+    () => (partsProp !== undefined ? partsProp : sawParts(problem, weights, normalization ? { normalization } : {})),
+    [partsProp, problem, weights, normalization],
+  )
   const [active, setActive] = useState<Active | null>(null)
   const [focusKey, setFocusKey] = useState<Active>({ row: 0, col: 0 })
   if (!parts) return null

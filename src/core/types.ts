@@ -30,6 +30,8 @@ export type MethodWarning = {
   col?: number
   /** Alternative index, when the warning is about one row. */
   row?: number
+  /** Optional numeric diagnostics (e.g. CR, threshold, worst pair indices and ratios). */
+  extra?: Record<string, number>
 }
 
 export type WeightingResult = {
@@ -90,13 +92,20 @@ export type RankingResult = {
   warnings?: MethodWarning[]
 }
 
+/**
+ * Optional pairwise alternative comparison matrices per criterion (length n).
+ * Entry j is `null` when criterion j takes its local priorities from the decision matrix,
+ * or an m×m upper-triangular matrix of Saaty ratios when criterion j is compared pairwise.
+ */
+export type AlternativeJudgements = readonly ((Ratio | null)[][] | null)[]
+
 export interface RankingMethod<P = {}> {
   id: string
   kind: 'ranking'
   requires?: { positiveValues?: boolean }
   /** Options the method takes; absent when it has none. */
   params?: readonly ParamDescriptor[]
-  compute(problem: Problem, weights: number[], params: P): RankingResult
+  compute(problem: Problem, weights: number[], params: P, judgements?: AlternativeJudgements): RankingResult
 }
 
 export type Method = WeightingMethod | RankingMethod

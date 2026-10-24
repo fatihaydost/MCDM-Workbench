@@ -9,8 +9,8 @@ import xlsx from '../../../tests/fixtures/critic-xlsx.json'
 import { methodViews, type ViewId } from '../methods/views'
 import { textLink } from './usePageMeta'
 
-/** Every method view with a `ledger` (all but Equal and Manual) has a published result to check against. */
-type Row = { method: Exclude<ViewId, 'equal' | 'manual'>; citation: Citation; tolerance: number }
+/** Every method view with a `ledger` (all but Equal, Manual and AHP ranking) has a published result to check against. */
+type Row = { method: Exclude<ViewId, 'equal' | 'manual' | 'ahp-ranking'>; citation: Citation; tolerance: number }
 
 /** ±0.00005 in the active locale, with as many decimals as the tolerance needs. */
 function formatTolerance(tol: number, lang: Lang): string {

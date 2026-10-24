@@ -21,6 +21,7 @@ export const ids = {
   normalize: 'wb-normalize',
   weightMethod: 'wb-weight-method',
   pairwise: 'wb-pairwise',
+  altPairwise: (j: number) => `wb-alt-pairwise-${j}`,
 } as const
 
 /**
@@ -151,7 +152,20 @@ export function placeIssue(
     case 'weights-length-mismatch':
       return { ...base, stage: 'weights', targetId: ids.weightMethod }
     case 'anchors-missing':
+      return { ...base, stage: 'weights', targetId: ids.pairwise }
     case 'judgements-incomplete':
+      if (col !== undefined) {
+        return {
+          ...base,
+          message: t('validation.codes.alt-judgements-incomplete', {
+            criterion,
+            value: vars.value,
+            total: (problem.alternatives.length * (problem.alternatives.length - 1)) / 2,
+          }),
+          stage: 'ranking',
+          targetId: ids.altPairwise(col),
+        }
+      }
       return { ...base, stage: 'weights', targetId: ids.pairwise }
   }
 }

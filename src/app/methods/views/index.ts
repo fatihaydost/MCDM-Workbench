@@ -1,5 +1,6 @@
 import type { RankingMethodId, WeightMethodId } from '../../../state/workbench'
 import { ahp } from './ahp'
+import { ahpRanking } from './ahp-ranking'
 import { aras } from './aras'
 import { bwm } from './bwm'
 import { cilos } from './cilos'
@@ -55,6 +56,7 @@ export const methodViews: Readonly<Views> = {
   swara,
   topsis,
   saw,
+  'ahp-ranking': ahpRanking,
   vikor,
   edas,
   waspas,

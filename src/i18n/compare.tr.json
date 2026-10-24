@@ -34,7 +34,8 @@
       "codas": "CODAS her çift için en kötü ağırlıklı değere Öklid ve Taxicab uzaklığını ölçer, bu yüzden en kötü değerin çok üstünde olan tek bir kriter, birkaç küçük farktan daha fazla Öklid uzaklığı kazandırır.",
       "promethee-ii": "PROMETHEE II alternatifleri 1 ile sınırlı bir tercih fonksiyonuyla ikişer ikişer karşılaştırır; bir farkın ne kadar sayılacağı seçilen tercih eğrisine bağlıdır.",
       "electre-i": "ELECTRE I her çiftte çoğunluk uyumunu en büyük tekil uyumsuzluk farkıyla dengeler; böylece tek bir kriterdeki ağır gerilik, çoğu ağırlıkta önde olunsa bile alternatifi aşağı çeker.",
-      "electre-iii": "ELECTRE III farksızlık, tercih ve veto eşikleriyle bulanık bir geçiş güvenilirlik matrisi kurar; ardından azalan ve artan ön-sıralamaları damıtır."
+      "electre-iii": "ELECTRE III farksızlık, tercih ve veto eşikleriyle bulanık bir geçiş güvenilirlik matrisi kurar; ardından azalan ve artan ön-sıralamaları damıtır.",
+      "ahp-ranking": "AHP her kriterdeki yerel öncelikleri kriter ağırlıklarıyla çarpıp toplar; böylece bir kriterdeki güçlü yan başka bir kriterdeki zayıflığı telafi eder."
     },
     "unanimous": "{{n}} yöntemin hepsi {{a}} alternatifini {{b}} alternatifinin üstüne koyuyor.",
     "crossings": "Başka bir çifti görmek için grafikte bir kesişim seçin.",
@@ -52,6 +53,7 @@
   },
   "echo": "{{method}}: {{of}} ile aynı sıra, bir kez sayılır",
   "sawLinear": "SAW (Doğrusal)",
+  "sawSum": "SAW (Toplam)",
   "pair": {
     "label": "Karşılaştırılan çift",
     "vs": "ile",

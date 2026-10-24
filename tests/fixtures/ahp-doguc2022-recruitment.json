@@ -21,5 +21,19 @@
     "epsilon_max": 1.8125708,
     "suggested": 2.0
   },
+  "synthesis": {
+    "alternatives": ["Aday 1", "Aday 2", "Aday 3"],
+    "criteria_uppers": [
+      [3.0, 2.0, 0.5],
+      [0.5, 2.0, 3.0],
+      [1.0, 3.0, 3.0],
+      [0.3333333333333333, 0.5, 2.0],
+      [2.0, 4.0, 2.0]
+    ],
+    "expected": {
+      "global_scores_eigenvector": [0.411005, 0.3975241, 0.191471],
+      "ranking": [1, 2, 3]
+    }
+  },
   "tolerance_vs_published": 0.00005
 }

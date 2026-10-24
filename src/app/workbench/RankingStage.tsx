@@ -1,6 +1,6 @@
 import { Suspense, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getRankingMethod, type RankingResult } from '../../core'
+import { AHP_MAX_PAIRWISE_ALTERNATIVES, getRankingMethod, type AhpAggregation, type RankingResult } from '../../core'
 import { BarChart } from '../../features/charts'
 import { useNumberFormat } from '../../i18n'
 import {
@@ -15,6 +15,7 @@ import {
 } from '../../state/workbench'
 import { Button, cn, EmptyState, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../ui'
 import { methodViews, RANKING_VIEW_IDS } from '../methods/views'
+import { AhpRankingSources } from './AhpRankingSources'
 import { MethodParams } from './MethodParams'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
@@ -33,7 +34,7 @@ export const leaders = (result: RankingResult): number[] => rankOrder(result).fi
 
 const RANKING_FAMILIES: readonly { key: 'distance' | 'additive' | 'outranking'; ids: readonly RankingMethodId[] }[] = [
   { key: 'distance', ids: ['topsis', 'vikor', 'codas', 'mabac'] },
-  { key: 'additive', ids: ['saw', 'waspas', 'copras', 'moora', 'aras', 'marcos', 'edas', 'cocoso'] },
+  { key: 'additive', ids: ['saw', 'ahp-ranking', 'waspas', 'copras', 'moora', 'aras', 'marcos', 'edas', 'cocoso'] },
   { key: 'outranking', ids: ['promethee-ii', 'electre-i', 'electre-iii'] },
 ]
 
@@ -176,10 +177,11 @@ export function RankingStage() {
   const weightParams = useWorkbench((s) => s.methodParams?.[s.weightMethod])
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
   const setRankingMethod = useWorkbench((s) => s.setRankingMethod)
+  const alternativeJudgements = useWorkbench((s) => s.alternativeJudgements)
   const rankingParams = useMethodParams(rankingMethod)
   const ranking = useRanking()
   const weights = useWeights()
-  const { goTo } = useWorkbenchNav()
+  const { goTo, attempted, setAttempted } = useWorkbenchNav()
   const core = useMemo(() => toProblem(problem), [problem])
 
   if (isEmptyProblem(problem)) {
@@ -197,11 +199,29 @@ export function RankingStage() {
   const view = methodViews[rankingMethod]
   const Picture = view.stage?.Component
   const pictureShowsScores = view.pictureShowsScores === true
+  const isAhpRanking = rankingMethod === 'ahp-ranking'
+  const hasActivePairwise =
+    isAhpRanking &&
+    problem.alternatives.length <= AHP_MAX_PAIRWISE_ALTERNATIVES &&
+    Boolean(alternativeJudgements?.some((mat) => mat != null))
+  const onlyAltJudgementsIncomplete =
+    isAhpRanking &&
+    result === null &&
+    ranking.issues.length > 0 &&
+    ranking.issues.every((x) => x.severity !== 'error' || (x.code === 'judgements-incomplete' && x.col !== undefined))
+
+  const onContinue = () => {
+    if (result === null) {
+      setAttempted('ranking', true)
+      return
+    }
+    goTo('results')
+  }
 
   return (
     <div className="flex flex-col gap-6 pt-4">
       <div className="flex flex-col gap-2">
-        {/* Fifteen methods do not fit one row: 4-col below sm, 5-col on sm..lg (3×5), 8-col on lg+. */}
+        {/* Sixteen methods do not fit one row: 4-col below sm, 5-col on sm..lg, 8-col on lg+. */}
         <SegmentedControl<RankingMethodId>
           aria-label={t('workbench.rankingMethod.label')}
           value={rankingMethod}
@@ -226,8 +246,10 @@ export function RankingStage() {
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>
-        {/* TOPSIS, EDAS, COPRAS, MARCOS, MABAC, MOORA and ARAS have no options; SAW shows its normalization here, VIKOR its v, WASPAS and CoCoSo their λ. */}
-        <MethodParams methodId={rankingMethod} descriptors={getRankingMethod(rankingMethod)?.params} />
+        {/* TOPSIS, EDAS, COPRAS, MARCOS, MABAC, MOORA and ARAS have no options; SAW shows its normalization here, VIKOR its v, WASPAS and CoCoSo their λ, AHP its derivation when any criterion is pairwise. */}
+        {(!isAhpRanking || hasActivePairwise) && (
+          <MethodParams methodId={rankingMethod} descriptors={getRankingMethod(rankingMethod)?.params} />
+        )}
         <p className="flex flex-wrap items-center gap-x-2 text-13 text-text-2">
           <span>{t('workbench.ranking.weightsUsed', { method: weightMethodFullLabel(weightMethod, weightParams, t) })}</span>
           <button type="button" className="text-accent underline underline-offset-2 hover:no-underline" onClick={() => goTo('weights')}>
@@ -236,8 +258,16 @@ export function RankingStage() {
         </p>
       </div>
 
+      {isAhpRanking && (result !== null || onlyAltJudgementsIncomplete) && (
+        <AhpRankingSources
+          problem={problem}
+          alternativeJudgements={alternativeJudgements}
+          aggregation={((rankingParams.aggregation as AhpAggregation | undefined) ?? 'eigenvector')}
+        />
+      )}
+
       {!result ? (
-        <BlockedByIssues issues={ranking.issues} problem={problem} />
+        (!onlyAltJudgementsIncomplete || attempted.ranking) && <BlockedByIssues issues={ranking.issues} problem={problem} />
       ) : (
         <>
           <MethodWarnings warnings={result.warnings} problem={problem} />
@@ -258,7 +288,13 @@ export function RankingStage() {
             {!pictureShowsScores && <ScoreChart problem={problem} result={result} method={rankingMethod} className="min-w-0" />}
             {weights.value && Picture && (
               <Suspense fallback={null}>
-                <Picture problem={core} weights={weights.value.weights} params={rankingParams} className="min-w-0" />
+                <Picture
+                  problem={core}
+                  weights={weights.value.weights}
+                  params={rankingParams}
+                  {...(alternativeJudgements ? { alternativeJudgements } : {})}
+                  className="min-w-0"
+                />
               </Suspense>
             )}
           </div>
@@ -272,7 +308,7 @@ export function RankingStage() {
         </>
       )}
 
-      {result && <ContinueBar to="results" onContinue={() => goTo('results')} />}
+      {(result || onlyAltJudgementsIncomplete) && <ContinueBar to="results" onContinue={onContinue} />}
     </div>
   )
 }

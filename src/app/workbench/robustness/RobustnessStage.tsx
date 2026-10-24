@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { DEFAULT_DELTAS, perturbWeights } from '../../../core/robustness'
 import { getRankingMethod } from '../../../core/registry'
 import { rankerFor, type RankingRun } from '../../../core/run'
-import { isEmptyProblem, toProblem, useMethodParams, useRanking, useWeights, useWorkbench } from '../../../state/workbench'
+import { isEmptyProblem, runFor, toProblem, useMethodParams, useRanking, useWeights, useWorkbench } from '../../../state/workbench'
 import { Button, EmptyState } from '../../../ui'
 import { useWorkbenchNav } from '../nav'
 import { BlockedByIssues, ContinueBar } from '../parts'
@@ -30,7 +30,8 @@ export default function RobustnessStage() {
   const draft = useWorkbench((s) => s.problem)
   const weightMethod = useWorkbench((s) => s.weightMethod)
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
-  const rankingParams = useMethodParams(rankingMethod)
+  const methodParams = useWorkbench((s) => s.methodParams)
+  const alternativeJudgements = useWorkbench((s) => s.alternativeJudgements)
   const weightingParams = useMethodParams(weightMethod)
   const weightRaw = useWorkbench((s) => s.methodParams?.[s.weightMethod])
   const weights = useWeights()
@@ -42,7 +43,10 @@ export default function RobustnessStage() {
   const criteria = useMemo(() => draft.criteria.map((_, j) => criterionName(draft.criteria, j, t)), [draft, t])
   const method = getRankingMethod(rankingMethod)
   // One run for the four checks below, built once from the store.
-  const run = useMemo((): RankingRun => ({ methodId: rankingMethod, params: rankingParams }), [rankingMethod, rankingParams])
+  const run = useMemo(
+    (): RankingRun => runFor({ methodParams, alternativeJudgements }, rankingMethod),
+    [rankingMethod, methodParams, alternativeJudgements],
+  )
   const w = weights.value?.weights
 
   if (isEmptyProblem(draft)) {

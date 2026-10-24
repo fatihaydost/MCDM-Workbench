@@ -1,6 +1,28 @@
 import { nearestScale, toScale } from '../judgements'
-import type { Judgements, MethodWarning, Problem, Ratio, Step, WeightingMethod, WeightingResult } from '../types'
-import { ProblemValidationError } from '../validate'
+import { sum, zeros } from '../math'
+import { rankScores } from '../rank'
+import type {
+  AlternativeJudgements,
+  Judgements,
+  MethodWarning,
+  Problem,
+  RankingMethod,
+  RankingResult,
+  Ratio,
+  Step,
+  WeightingMethod,
+  WeightingResult,
+} from '../types'
+import {
+  assertValid,
+  hasErrors,
+  ProblemValidationError,
+  validateProblem,
+  validateRequirements,
+  validateWeights,
+  type ValidationIssue,
+} from '../validate'
+import { sawSumNormalize } from './saw'
 
 export type AhpAggregation = 'eigenvector' | 'geometric'
 
@@ -362,6 +384,138 @@ export const ahp: WeightingMethod<AhpParams> = {
       steps,
       ...(warnings.length > 0 && { warnings }),
       diagnostics: { lambdaMax, ci, cr },
+    }
+  },
+}
+
+/** Maximum alternative count where pairwise alternative comparisons are active in AHP ranking. */
+export const AHP_MAX_PAIRWISE_ALTERNATIVES = 7
+
+/** Checks completeness of pairwise alternative comparison matrices when m <= 7. */
+export function validateAlternativeJudgements(
+  m: number,
+  n: number,
+  judgements: AlternativeJudgements | undefined,
+): ValidationIssue[] {
+  if (m < 2 || m > AHP_MAX_PAIRWISE_ALTERNATIVES || !judgements) return []
+  const total = (m * (m - 1)) / 2
+  for (let j = 0; j < n; j++) {
+    const rawMat = judgements[j]
+    if (!rawMat) continue
+    let answered = 0
+    let firstMissingI: number | undefined
+    for (let i = 0; i < m; i++) {
+      for (let k = i + 1; k < m; k++) {
+        const v = Array.isArray(rawMat[i]) ? toScale(rawMat[i]![k]) : null
+        if (v !== null) {
+          answered++
+        } else if (firstMissingI === undefined) {
+          firstMissingI = i
+        }
+      }
+    }
+    if (rawMat.length !== m || answered !== total) {
+      return [
+        {
+          code: 'judgements-incomplete',
+          severity: 'error',
+          col: j,
+          ...(firstMissingI !== undefined ? { row: firstMissingI } : {}),
+          value: answered,
+        },
+      ]
+    }
+  }
+  return []
+}
+
+/**
+ * Analytic Hierarchy Process as a ranking method (Saaty 1980, 2008):
+ * For each criterion j, local priorities p_ij come either from an m × m pairwise comparison matrix A_j
+ * (when m <= 7 and judgements[j] is non-null) or from column-sum normalization of the decision matrix
+ * (benefit x_ij / Σ_i x_ij, cost (1 / x_ij) / Σ_i (1 / x_ij)).
+ * Global priorities are S_i = Σ_j w_j p_ij, ranked descending.
+ */
+export const ahpRanking: RankingMethod<AhpParams> = {
+  id: 'ahp-ranking',
+  kind: 'ranking',
+  requires: { positiveValues: true },
+  params: ahp.params!,
+  compute(
+    problem: Problem,
+    weights: number[],
+    params: AhpParams = {},
+    judgements?: AlternativeJudgements,
+  ): RankingResult {
+    const aggregation = params?.aggregation ?? 'eigenvector'
+    if (aggregation !== 'eigenvector' && aggregation !== 'geometric') {
+      throw new RangeError(`unknown AHP aggregation ${String(aggregation)}`)
+    }
+    const m = problem.alternatives.length
+    const n = problem.criteria.length
+    const issues = validateProblem(problem)
+    const cells = hasErrors(issues) ? [] : validateRequirements(problem, ahpRanking)
+    const jIssues = hasErrors(issues) ? [] : validateAlternativeJudgements(m, n, judgements)
+    assertValid([...issues, ...cells, ...validateWeights(weights, n), ...jIssues])
+
+    const matrixLocals = sawSumNormalize(problem)
+    const local = zeros(m, n)
+    const warnings: MethodWarning[] = []
+
+    for (let j = 0; j < n; j++) {
+      const rawMat = m <= AHP_MAX_PAIRWISE_ALTERNATIVES ? judgements?.[j] : null
+      if (rawMat) {
+        const A: number[][] = Array.from({ length: m }, (_, i) =>
+          Array.from({ length: m }, (_, k) => (i === k ? 1 : 0)),
+        )
+        for (let i = 0; i < m; i++) {
+          for (let k = i + 1; k < m; k++) {
+            const v = toScale(rawMat[i]![k])!
+            A[i]![k] = v
+            A[k]![i] = 1 / v
+          }
+        }
+        const { weights: pj, cr } = solveMatrix(A, params)
+        for (let i = 0; i < m; i++) local[i]![j] = pj[i]!
+        if (m >= 3 && cr >= AHP_CR_THRESHOLD) {
+          const worst = ahpWorstPair(A, pj)
+          warnings.push({
+            code: 'ahp.inconsistent',
+            col: j,
+            ...(worst
+              ? {
+                  extra: {
+                    cr,
+                    threshold: AHP_CR_THRESHOLD,
+                    i: worst.i,
+                    k: worst.k,
+                    actual: worst.actual,
+                    suggested: worst.suggested,
+                  },
+                }
+              : {}),
+          })
+        }
+      } else {
+        for (let i = 0; i < m; i++) local[i]![j] = matrixLocals[i]![j]!
+      }
+    }
+
+    const weighted = local.map((row) => row.map((pij, j) => weights[j]! * pij))
+    const scores = weighted.map((row) => sum(row))
+
+    const steps: Step[] = [
+      { key: 'ahpRanking.local', matrix: local, axes: ['alternatives', 'criteria'] },
+      { key: 'ahpRanking.weighted', matrix: weighted, axes: ['alternatives', 'criteria'] },
+      { key: 'ahpRanking.scores', vector: scores, axes: 'alternatives' },
+    ]
+
+    return {
+      scores,
+      order: 'desc',
+      ranking: rankScores(scores, 'desc'),
+      steps,
+      warnings,
     }
   },
 }

@@ -2,18 +2,24 @@ import { useMemo } from 'react'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import {
+  emptyAlternativeJudgements,
   emptyJudgements,
   getRankingMethod,
   getWeightingMethod,
   hasErrors,
   prepareRanking,
   ProblemValidationError,
+  remapAlternativeJudgements,
   remapJudgements,
   resolveParams,
+  sanitizeAlternativeJudgements,
   sanitizeJudgements,
+  setAlternativePair,
+  setAlternativeSource,
   setPair,
   validateProblem,
   validateWeights,
+  type AlternativeJudgements,
   type Computed,
   type Criterion,
   type Judgements,
@@ -67,6 +73,8 @@ export type WorkbenchData = {
   methodParams?: MethodParamsState | undefined
   /** Pairwise answers about the criteria (AHP, BWM), n × n for the current criteria; travels like manualWeights. */
   judgements?: Judgements | undefined
+  /** Optional pairwise alternative comparison matrices per criterion (AHP ranking, m <= 7). */
+  alternativeJudgements?: AlternativeJudgements | undefined
 }
 
 export type WorkbenchActions = {
@@ -102,6 +110,10 @@ export type WorkbenchActions = {
   setJudgement: (i: number, k: number, value: Ratio | null) => void
   /** BWM's best and worst criteria; when both are the same index, worst becomes null. */
   setAnchors: (best: number | null, worst: number | null) => void
+  /** Switches criterion `col` between decision-matrix values ('table' / 'matrix') and pairwise alternative comparisons ('pairwise'). */
+  setCriterionSource: (col: number, source: 'table' | 'matrix' | 'pairwise') => void
+  /** Writes the pairwise comparison for alternatives i over k on criterion `col` and its reciprocal. */
+  setAlternativeJudgement: (col: number, i: number, k: number, value: Ratio | null) => void
   setRankingMethod: (method: RankingMethodId) => void
   /** Sets one option of one method (weighting or ranking), e.g. ('entropy', 'normalization', 'minmax'). */
   setMethodParam: (methodId: string, key: string, value: MethodParamValue) => void
@@ -155,10 +167,14 @@ export const initialWorkbench = (): WorkbenchData => ({
   importedFrom: null,
   methodParams: {},
   judgements: emptyJudgements(0),
+  alternativeJudgements: emptyAlternativeJudgements(0),
 })
 
 const judgementsOf = (s: Pick<WorkbenchData, 'problem' | 'judgements'>): Judgements =>
   s.judgements ?? emptyJudgements(s.problem.criteria.length)
+
+const altJudgementsOf = (s: Pick<WorkbenchData, 'problem' | 'alternativeJudgements'>): AlternativeJudgements =>
+  s.alternativeJudgements ?? emptyAlternativeJudgements(s.problem.criteria.length)
 
 const fitWeights = (w: (number | null)[], n: number): (number | null)[] =>
   Array.from({ length: n }, (_, j) => w[j] ?? null)
@@ -270,7 +286,43 @@ function carryJudgements(
 }
 
 /** What a loaded example or import brought with it besides the table. */
-type Setup = Pick<WorkbenchData, 'weightMethod' | 'manualWeights' | 'judgements' | 'rankingMethod' | 'methodParams' | 'exampleId' | 'importedFrom'>
+type Setup = Pick<
+  WorkbenchData,
+  'weightMethod' | 'manualWeights' | 'judgements' | 'alternativeJudgements' | 'rankingMethod' | 'methodParams' | 'exampleId' | 'importedFrom'
+>
+
+export function matchAlternatives(
+  oldAlternatives: readonly string[],
+  next: readonly string[],
+  byPosition: boolean,
+): (number | undefined)[] {
+  const used = new Set<number>()
+  const take = (i: number) => {
+    used.add(i)
+    return i
+  }
+  const out: (number | undefined)[] = next.map((a) => {
+    const i = oldAlternatives.findIndex((o, k) => !used.has(k) && o === a)
+    return i >= 0 ? take(i) : undefined
+  })
+  if (byPosition && next.length === oldAlternatives.length) {
+    next.forEach((_, i) => {
+      if (out[i] === undefined && !used.has(i)) out[i] = take(i)
+    })
+  }
+  return out
+}
+
+function carryAlternativeJudgements(
+  oldProblem: DraftProblem,
+  old: AlternativeJudgements | undefined,
+  nextProblem: DraftProblem,
+  byPosition: boolean,
+): AlternativeJudgements {
+  const critMap = matchCriteria(oldProblem.criteria, nextProblem.criteria, byPosition)
+  const altMap = matchAlternatives(oldProblem.alternatives, nextProblem.alternatives, byPosition)
+  return remapAlternativeJudgements(old, critMap, altMap, nextProblem.alternatives.length)
+}
 
 /**
  * Setups of tables that were replaced, keyed by the table's matrix (the alternatives and criteria must be the same
@@ -289,6 +341,7 @@ function remember(s: WorkbenchData, always: boolean): void {
       weightMethod: s.weightMethod,
       manualWeights: [...s.manualWeights],
       judgements: judgementsOf(s),
+      alternativeJudgements: altJudgementsOf(s),
       rankingMethod: s.rankingMethod,
       methodParams: s.methodParams ?? {},
       exampleId: s.exampleId,
@@ -326,7 +379,9 @@ export const useWorkbench = create<WorkbenchState>()(
           const back = recall(problem)
           const manualWeights = carryWeights(s.problem.criteria, s.manualWeights, problem.criteria, true)
           const judgements = carryJudgements(s.problem.criteria, s.judgements, problem.criteria, true)
+          const alternativeJudgements = carryAlternativeJudgements(s.problem, s.alternativeJudgements, problem, true)
           remember(s, false)
+          const m = problem.alternatives.length
           const n = problem.criteria.length
           if (back)
             return {
@@ -334,8 +389,9 @@ export const useWorkbench = create<WorkbenchState>()(
               ...back,
               manualWeights: fitWeights(back.manualWeights, n),
               judgements: back.judgements ?? emptyJudgements(n),
+              alternativeJudgements: sanitizeAlternativeJudgements(back.alternativeJudgements, m, n),
             }
-          return { problem, exampleId: null, importedFrom: null, manualWeights, judgements }
+          return { problem, exampleId: null, importedFrom: null, manualWeights, judgements, alternativeJudgements }
         }),
 
       importProblem: (problem, fileName) =>
@@ -344,7 +400,8 @@ export const useWorkbench = create<WorkbenchState>()(
           // A new file: weights follow criteria of the same name only, never a column position.
           const manualWeights = carryWeights(s.problem.criteria, s.manualWeights, problem.criteria, false)
           const judgements = carryJudgements(s.problem.criteria, s.judgements, problem.criteria, false)
-          return { problem, exampleId: null, importedFrom: fileName, manualWeights, judgements }
+          const alternativeJudgements = carryAlternativeJudgements(s.problem, s.alternativeJudgements, problem, false)
+          return { problem, exampleId: null, importedFrom: fileName, manualWeights, judgements, alternativeJudgements }
         }),
 
       loadExample: (id, lang, method) => {
@@ -379,6 +436,7 @@ export const useWorkbench = create<WorkbenchState>()(
           weightMethod: reference ?? (ex.weights ? 'manual' : ex.equalWeights ? 'equal' : 'critic'),
           manualWeights: ex.weights ? [...ex.weights] : new Array<number | null>(ex.criteria.length).fill(null),
           judgements: emptyJudgements(ex.criteria.length),
+          alternativeJudgements: emptyAlternativeJudgements(ex.criteria.length),
         }))
       },
 
@@ -415,6 +473,7 @@ export const useWorkbench = create<WorkbenchState>()(
           importedFrom: null,
           manualWeights: new Array<number | null>(n).fill(null),
           judgements: emptyJudgements(n),
+          alternativeJudgements: emptyAlternativeJudgements(n),
         })
       },
 
@@ -449,6 +508,12 @@ export const useWorkbench = create<WorkbenchState>()(
             alternatives: [...s.problem.alternatives, name],
             matrix: [...s.problem.matrix, new Array<number | null>(s.problem.criteria.length).fill(null)],
           },
+          alternativeJudgements: remapAlternativeJudgements(
+            s.alternativeJudgements,
+            [...s.problem.criteria.keys()],
+            [...s.problem.alternatives.keys(), undefined],
+            s.problem.alternatives.length + 1,
+          ),
         })),
 
       removeAlternative: (row) =>
@@ -460,6 +525,12 @@ export const useWorkbench = create<WorkbenchState>()(
             alternatives: s.problem.alternatives.filter((_, i) => i !== row),
             matrix: s.problem.matrix.filter((_, i) => i !== row),
           },
+          alternativeJudgements: remapAlternativeJudgements(
+            s.alternativeJudgements,
+            [...s.problem.criteria.keys()],
+            [...s.problem.alternatives.keys()].filter((i) => i !== row),
+            Math.max(0, s.problem.alternatives.length - 1),
+          ),
         })),
 
       addCriterion: (criterion) =>
@@ -473,6 +544,12 @@ export const useWorkbench = create<WorkbenchState>()(
           },
           manualWeights: [...fitWeights(s.manualWeights, s.problem.criteria.length), null],
           judgements: remapJudgements(judgementsOf(s), [...s.problem.criteria.keys(), undefined]),
+          alternativeJudgements: remapAlternativeJudgements(
+            s.alternativeJudgements,
+            [...s.problem.criteria.keys(), undefined],
+            [...s.problem.alternatives.keys()],
+            s.problem.alternatives.length,
+          ),
         })),
 
       removeCriterion: (col) =>
@@ -489,6 +566,12 @@ export const useWorkbench = create<WorkbenchState>()(
             judgementsOf(s),
             [...s.problem.criteria.keys()].filter((j) => j !== col),
           ),
+          alternativeJudgements: remapAlternativeJudgements(
+            s.alternativeJudgements,
+            [...s.problem.criteria.keys()].filter((j) => j !== col),
+            [...s.problem.alternatives.keys()],
+            s.problem.alternatives.length,
+          ),
         })),
 
       setWeightMethod: (weightMethod) => set({ weightMethod }),
@@ -503,6 +586,34 @@ export const useWorkbench = create<WorkbenchState>()(
 
       setAnchors: (best, worst) =>
         set((s) => ({ judgements: { ...judgementsOf(s), best, worst: best !== null && best === worst ? null : worst } })),
+
+      setCriterionSource: (col, source) =>
+        set((s) => ({
+          alternativeJudgements: setAlternativeSource(
+            s.alternativeJudgements,
+            s.problem.alternatives.length,
+            s.problem.criteria.length,
+            col,
+            source,
+          ),
+        })),
+
+      setAlternativeJudgement: (col, i, k, value) =>
+        set((s) =>
+          i === k
+            ? {}
+            : {
+                alternativeJudgements: setAlternativePair(
+                  s.alternativeJudgements,
+                  s.problem.alternatives.length,
+                  s.problem.criteria.length,
+                  col,
+                  i,
+                  k,
+                  value,
+                ),
+              },
+        ),
 
       setRankingMethod: (rankingMethod) => set({ rankingMethod }),
 
@@ -530,14 +641,22 @@ export const useWorkbench = create<WorkbenchState>()(
         importedFrom: s.importedFrom ?? null,
         methodParams: s.methodParams ?? {},
         judgements: judgementsOf(s),
+        alternativeJudgements: altJudgementsOf(s),
       }),
       // Saved state is a trust boundary (hand-edited or stale localStorage): refit the judgements to the criteria.
       merge: (persisted, current) => {
         const p = { ...(persisted ?? {}) } as Partial<WorkbenchData>
         // A problem without a criteria list cannot be shown or refitted: keep the current one.
         if (!Array.isArray(p.problem?.criteria)) delete p.problem
-        const n = (p.problem ?? current.problem).criteria.length
-        return { ...current, ...p, judgements: sanitizeJudgements(p.judgements, n) }
+        const prob = p.problem ?? current.problem
+        const m = prob.alternatives.length
+        const n = prob.criteria.length
+        return {
+          ...current,
+          ...p,
+          judgements: sanitizeJudgements(p.judgements, n),
+          alternativeJudgements: sanitizeAlternativeJudgements(p.alternativeJudgements, m, n),
+        }
       },
     },
   ),
@@ -570,9 +689,18 @@ export function paramsFor(data: Pick<WorkbenchData, 'methodParams'>, methodId: s
   return resolveParams(method?.params, data.methodParams?.[methodId])
 }
 
+/** The run for any ranking method: its resolved options, plus alternative judgements when methodId === 'ahp-ranking'. */
+export function runFor(data: Pick<WorkbenchData, 'methodParams' | 'alternativeJudgements'>, methodId: string): RankingRun {
+  return {
+    methodId,
+    params: paramsFor(data, methodId),
+    ...(methodId === 'ahp-ranking' ? { judgements: data.alternativeJudgements } : {}),
+  }
+}
+
 /** The run the workbench ranks with: the selected ranking method and its resolved options. */
-export function rankingRunFor(data: Pick<WorkbenchData, 'rankingMethod' | 'methodParams'>): RankingRun {
-  return { methodId: data.rankingMethod, params: paramsFor(data, data.rankingMethod) }
+export function rankingRunFor(data: Pick<WorkbenchData, 'rankingMethod' | 'methodParams' | 'alternativeJudgements'>): RankingRun {
+  return runFor(data, data.rankingMethod)
 }
 
 /** Weights for the selected method, or null plus the blocking issues. */
@@ -622,7 +750,10 @@ export function computeWeights(
 
 /** Ranking with the selected method on the computed weights, or null plus every blocking issue. */
 export function computeRanking(
-  data: Pick<WorkbenchData, 'problem' | 'weightMethod' | 'manualWeights' | 'rankingMethod' | 'methodParams' | 'judgements'>,
+  data: Pick<
+    WorkbenchData,
+    'problem' | 'weightMethod' | 'manualWeights' | 'rankingMethod' | 'methodParams' | 'judgements' | 'alternativeJudgements'
+  >,
   weights: Computed<WeightingResult> = computeWeights(data),
 ): Computed<RankingResult> {
   const problem = toProblem(data.problem)
@@ -662,9 +793,14 @@ export function useRanking(): Computed<RankingResult> {
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
   const methodParams = useWorkbench((s) => s.methodParams)
   const judgements = useWorkbench((s) => s.judgements)
+  const alternativeJudgements = useWorkbench((s) => s.alternativeJudgements)
   return useMemo(
-    () => computeRanking({ problem, weightMethod, manualWeights, rankingMethod, methodParams, judgements }, weights),
-    [problem, weightMethod, manualWeights, rankingMethod, methodParams, judgements, weights],
+    () =>
+      computeRanking(
+        { problem, weightMethod, manualWeights, rankingMethod, methodParams, judgements, alternativeJudgements },
+        weights,
+      ),
+    [problem, weightMethod, manualWeights, rankingMethod, methodParams, judgements, alternativeJudgements, weights],
   )
 }
 

@@ -3,17 +3,20 @@ import { Link } from 'wouter'
 import { Suspense, use } from 'react'
 import { RANKING_IDS, WEIGHTING_IDS, type RankingId, type WeightingId } from '../../core'
 import { loadMethod } from '../../content/methods/load'
-import { localizeMethod } from '../../content/types'
+import { localizeMethod, type MethodId } from '../../content/types'
 import { doiUrl, getExample, shortCitation } from '../../data/examples'
 import { useLang } from '../../i18n'
 import { useWorkbench, type Stage } from '../../state/workbench'
+import { viewOf } from '../methods/views'
 
 /** The methods the workbench runs (the core registry's). Their cards are chunks of their own (shared with method pages). */
 type PanelMethod = WeightingId | RankingId
 
+export const pageIdOf = (id: PanelMethod): MethodId => viewOf(id)?.page ?? (id as MethodId)
+
 /** Starts loading the workbench's method cards (WorkbenchPage calls it when its chunk loads). */
 export function preloadPanelCards(): void {
-  for (const id of [...WEIGHTING_IDS, ...RANKING_IDS]) void loadMethod(id)
+  for (const id of [...WEIGHTING_IDS, ...RANKING_IDS]) void loadMethod(pageIdOf(id))
 }
 
 const linkClass = 'text-accent underline underline-offset-2 hover:no-underline'
@@ -49,7 +52,8 @@ function MethodNote(props: { id: PanelMethod; brief?: boolean }) {
 function MethodNoteBody({ id, brief = false }: { id: PanelMethod; brief?: boolean }) {
   const { t } = useTranslation()
   const [lang] = useLang()
-  const m = localizeMethod(use(loadMethod(id)), lang)
+  const pageId = pageIdOf(id)
+  const m = localizeMethod(use(loadMethod(pageId)), lang)
   const pitfall = brief || !m.pitfalls[0] ? undefined : splitLabel(m.pitfalls[0])
   return (
     <section className="flex flex-col gap-2" aria-label={m.name}>
@@ -64,7 +68,7 @@ function MethodNoteBody({ id, brief = false }: { id: PanelMethod; brief?: boolea
           {pitfall.text}
         </p>
       )}
-      <Link href={`/methods/${id}`} className={`${linkClass} text-13`}>
+      <Link href={`/methods/${pageId}`} className={`${linkClass} text-13`}>
         {t('workbench.panel.methodPage', { method: m.name })}
       </Link>
     </section>

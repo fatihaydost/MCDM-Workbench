@@ -18,7 +18,8 @@ describe('method views', () => {
     const published = (id: string) => getExample(id) ?? getJudgementExample(id)
     for (const [id, v] of views) {
       if (id !== 'manual') {
-        expect(Boolean(v.idea || v.judgementIdea), `${id} idea`).toBe(true)
+        const pageView = v.page ? methodViews[v.page] : v
+        expect(Boolean(pageView.idea || pageView.judgementIdea), `${id} idea`).toBe(true)
         expect(v.stage, `${id} stage`).toBeDefined()
       }
       if (v.idea) expect(getExample(v.idea.example), id).toBeDefined()

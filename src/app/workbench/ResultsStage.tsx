@@ -26,6 +26,8 @@ export function ResultsStage() {
   const weightParams = useWorkbench((s) => s.methodParams?.[s.weightMethod])
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
   const rankingParams = useWorkbench((s) => s.methodParams?.[s.rankingMethod])
+  const judgements = useWorkbench((s) => s.judgements)
+  const alternativeJudgements = useWorkbench((s) => s.alternativeJudgements)
   const exampleId = useWorkbench((s) => s.exampleId)
   const importedFrom = useWorkbench((s) => s.importedFrom ?? null)
   const weights = useWeights()
@@ -73,6 +75,7 @@ export function ResultsStage() {
       weights: t('workbench.results.workbook.weights'),
       ranking: t('workbench.results.workbook.ranking'),
       calculation: t('workbench.results.workbook.calculation'),
+      judgements: t('workbench.results.workbook.judgements'),
     },
     alternative: t('workbench.alternative'),
     criterion: t('workbench.criterion'),
@@ -117,6 +120,8 @@ export function ResultsStage() {
         problem,
         weighting: { method: weightLabel, result: w },
         ranking: { method: rankingLabel, result },
+        ...((weightMethod === 'ahp' || weightMethod === 'bwm') && judgements ? { judgements } : {}),
+        ...(rankingMethod === 'ahp-ranking' && alternativeJudgements ? { alternativeJudgements } : {}),
         labels: workbookLabels(),
         about: { sheet: t('workbench.results.workbook.about'), rows: aboutRows() },
       })
