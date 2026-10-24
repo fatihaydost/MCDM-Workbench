@@ -505,7 +505,12 @@
       "sumOk": "Weights sum to 1.",
       "emptyWeight": "Enter a weight for {{criterion}}.",
       "fromPaper": "Weights as given in {{citation}}.",
-      "equalNote": "{{n}} criteria, so each weight is 1 / {{n}} = {{value}}."
+      "equalNote": "{{n}} criteria, so each weight is 1 / {{n}} = {{value}}.",
+      "families": {
+        "objective": "From data (objective)",
+        "subjective": "From judgements or order",
+        "direct": "Direct"
+      }
     },
     "ranking": {
       "methodHint": {
@@ -617,7 +622,12 @@
       "changeWeights": "Change weights",
       "best": "{{name}} ranks first ({{symbol}} = {{value}}).",
       "bestTied": "{{names}} share first place ({{symbol}} = {{value}}).",
-      "constants": "The same for every alternative: {{list}}"
+      "constants": "The same for every alternative: {{list}}",
+      "families": {
+        "distance": "Distance & compromise",
+        "additive": "Additive & ratio",
+        "outranking": "Pairwise outranking"
+      }
     },
     "results": {
       "sourceFile": "Imported from {{name}}",
@@ -679,7 +689,11 @@
       "tableLabel": "Step {{n}}: {{name}}",
       "edgeCase": "Edge case: {{text}}",
       "copy": "Copy",
-      "copyLabel": "Copy step {{n}}"
+      "copyLabel": "Copy step {{n}}",
+      "decimals": "Decimals",
+      "decimals2": "2 digits",
+      "decimals4": "4 digits",
+      "highlightCols": "Highlight column max"
     },
     "stepNames": {
       "critic": {

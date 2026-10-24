@@ -957,6 +957,13 @@
 
 /* Rank lines ---------------------------------------------------------------------------------- */
 
+.rankRowGuide {
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  opacity: 0.55;
+}
+
 .rankAxis {
   stroke: var(--line);
   stroke-width: 1;
@@ -1012,6 +1019,15 @@
 
 .rankPoint {
   fill: var(--c);
+  stroke: var(--bg);
+  stroke-width: 1.25;
+}
+
+.rankPointNum {
+  fill: var(--bg);
+  font-size: 10px;
+  font-weight: 700;
+  pointer-events: none;
 }
 
 /* The Borda rank in a quieter tone than the name beside it (names can be numbers too). */

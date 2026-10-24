@@ -34,6 +34,8 @@ export type HeatmapProps = {
   fade?: boolean
   /** Title over the column labels (e.g. "Rank" over 1..5); also prefixes the table's column headers. */
   columnsTitle?: string
+  /** Replaces exact zero cells in the SVG with a quiet middle dot so non-zero cells stand out. */
+  muteZero?: boolean
 }
 
 /**
@@ -42,11 +44,19 @@ export type HeatmapProps = {
  * the active theme; a fill on which neither reaches 4.5:1 moves slightly along the ramp
  * (see `heatPaint`), so every printed value stays readable in light and dark.
  */
-export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, format, emptyText = '', description, tableLabels, className, fade = false, columnsTitle }: HeatmapProps) {
+export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, format, emptyText = '', description, tableLabels, className, fade = false, columnsTitle, muteZero = false }: HeatmapProps) {
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const tokens = useHeatTokens()
   const text = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? format(v) : emptyText)
+  const rowPeaks = useMemo(
+    () =>
+      values.map((row) => {
+        const finite = row.filter((v): v is number => typeof v === 'number' && Number.isFinite(v))
+        return finite.length > 0 ? Math.max(...finite) : Number.NEGATIVE_INFINITY
+      }),
+    [values],
+  )
   // Short values ("44%") need no 44 px column: the narrowest cell that still holds the widest printed value, so ten
   // rank columns fit a 390 px phone instead of scrolling sideways.
   const widest = Math.max(0, ...values.flatMap((row) => row.map((v) => estimateTextWidth(text(v), 12))))
@@ -112,18 +122,27 @@ export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, fo
                   const v = values[i]?.[j]
                   const c = heatPaint(v, scale, domain, tokens)
                   const x = labelWidth + j * cellWidth
+                  const isZero = muteZero && typeof v === 'number' && Math.abs(v) < 1e-9
+                  const isPeak = scale === 'sequential' && typeof v === 'number' && v > 0 && Math.abs(v - (rowPeaks[i] ?? -Infinity)) < 1e-9
                   return (
                     <g key={j}>
                       <rect className={s.cell} x={x + 1} y={y + 1} width={cellWidth - 2} height={cellHeight - 2} style={{ fill: c.fill }} />
                       <text
-                        className={s.cellText}
-                        data-ink={c.ink}
+                        className={isZero ? s.cellTextMuted : s.cellText}
+                        data-ink={isZero ? undefined : c.ink}
+                        data-peak={isPeak || undefined}
                         x={x + cellWidth / 2}
                         y={y + cellHeight / 2}
                         textAnchor="middle"
                         dominantBaseline="central"
                       >
-                        {text(v)}
+                        {isZero ? (
+                          <>
+                            <title>{text(v)}</title>·
+                          </>
+                        ) : (
+                          text(v)
+                        )}
                       </text>
                     </g>
                   )

@@ -31,6 +31,12 @@ export const bestIndex = (result: RankingResult): number => rankOrder(result)[0]
 /** Every alternative ranked first, in input order (more than one when the best score is tied). */
 export const leaders = (result: RankingResult): number[] => rankOrder(result).filter((i) => result.ranking[i] === 1)
 
+const RANKING_FAMILIES: readonly { key: 'distance' | 'additive' | 'outranking'; ids: readonly RankingMethodId[] }[] = [
+  { key: 'distance', ids: ['topsis', 'vikor', 'codas', 'mabac'] },
+  { key: 'additive', ids: ['saw', 'waspas', 'copras', 'moora', 'aras', 'marcos', 'edas', 'cocoso'] },
+  { key: 'outranking', ids: ['promethee-ii'] },
+]
+
 /**
  * The ranking in rank order. `compact` keeps rank, name and the score (the Results summary); the full table on the
  * Ranking stage adds the method's own columns (TOPSIS: D+ and D-).
@@ -113,11 +119,11 @@ export function RankingTable({
                   </Td>
                 ))}
                 <Td numeric data-testid="closeness" className={cn(first ? 'font-semibold' : 'font-medium')}>
-                  {compact && topScore > 0 && (
+                  {topScore > 0 && (
                     <span aria-hidden className="mr-3 inline-block h-2 w-20 bg-surface-2 align-middle">
                       <span
                         className={cn('block h-full', first ? 'bg-accent' : 'bg-[var(--data-context)]')}
-                        style={{ width: `${(Math.max(result.scores[i]!, 0) / topScore) * 100}%` }}
+                        style={{ width: `${Math.min(100, (Math.max(result.scores[i]!, 0) / topScore) * 100)}%` }}
                       />
                     </span>
                   )}
@@ -204,6 +210,19 @@ export function RankingStage() {
           size="md"
           className="self-start max-sm:grid max-sm:grid-cols-4 max-sm:self-stretch max-sm:[&>*]:px-1.5 max-sm:[&>*]:text-13 sm:grid sm:grid-cols-5 lg:grid-cols-7"
         />
+        <div aria-hidden className="flex flex-wrap items-center gap-x-4 gap-y-1 text-12 text-text-3">
+          {RANKING_FAMILIES.map((f) => {
+            const active = f.ids.includes(rankingMethod)
+            return (
+              <span key={f.key} className={cn('inline-flex flex-wrap items-center gap-1', active && 'text-text-2')}>
+                <span className={cn('font-semibold', active ? 'text-accent' : 'text-text-3')}>
+                  {t(`workbench.ranking.families.${f.key}`)}:
+                </span>
+                <span>{f.ids.map((m) => t(`workbench.rankingMethod.${m}`)).join(' · ')}</span>
+              </span>
+            )
+          })}
+        </div>
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}
         </p>

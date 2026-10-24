@@ -4,7 +4,7 @@ import { compareRankings, defaultPair, rankingMethods, type Comparison } from '.
 import { RankLines, type RankLinesColumn } from '../../../features/illustrations/RankLines'
 import { useNumberFormat } from '../../../i18n'
 import { isEmptyProblem, paramsFor, toProblem, useWeights, useWorkbench } from '../../../state/workbench'
-import { Button, EmptyState } from '../../../ui'
+import { Button, cn, EmptyState } from '../../../ui'
 import { viewOf } from '../../methods/views'
 import { useWorkbenchNav } from '../nav'
 import { BlockedByIssues } from '../parts'
@@ -114,7 +114,7 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
           notRanked: tc('chart.notRanked'),
           crossing: (a, b, from, to) => tc('chart.crossing', { a, b, from, to }),
         }}
-        className="max-w-[880px]"
+        className="max-w-[1040px]"
       />
       <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-13 text-text-2" data-testid="compare-summary">
         {/* MARCOS = c x SAW (Linear): one order, counted once in Borda, W and the first place (decision 4, 18.10). */}
@@ -131,7 +131,157 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
         {firstPlace && <span>{tc('summary.first', { name: names[firstPlace.alternative]!, n: firstPlace.methods, of: firstPlace.of })}</span>}
         {ranked.length < runs.length && <span>{tc('summary.ranked', { n: ranked.length, of: runs.length })}</span>}
       </p>
+      {selected && names.length >= 2 && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 pt-1 text-13 text-text-2">
+          <span className="font-medium text-text">{tc('pair.label')}:</span>
+          <select
+            aria-label={`${tc('pair.label')} A`}
+            value={selected[0]}
+            onChange={(e) => {
+              const nextA = Number(e.target.value)
+              const nextB = nextA === selected[1] ? selected[0] : selected[1]
+              setSelected([nextA, nextB])
+            }}
+            className="h-7 rounded-control border border-line-strong bg-surface px-2 text-13 font-medium text-text"
+          >
+            {names.map((name, idx) => (
+              <option key={idx} value={idx}>
+                {name}
+              </option>
+            ))}
+          </select>
+          <span>{tc('pair.vs')}</span>
+          <select
+            aria-label={`${tc('pair.label')} B`}
+            value={selected[1]}
+            onChange={(e) => {
+              const nextB = Number(e.target.value)
+              const nextA = nextB === selected[0] ? selected[1] : selected[0]
+              setSelected([nextA, nextB])
+            }}
+            className="h-7 rounded-control border border-line-strong bg-surface px-2 text-13 font-medium text-text"
+          >
+            {names.map((name, idx) => (
+              <option key={idx} value={idx}>
+                {name}
+              </option>
+            ))}
+          </select>
+          <span className="text-12 text-text-3">{tc('pair.hint')}</span>
+        </div>
+      )}
       {selected && <WhyPanel comparison={comparison} weights={weights} pair={selected} names={names} />}
+      <CompareRankMatrix
+        columns={columns}
+        borda={comparison.borda?.ranking ?? null}
+        names={names}
+        selected={selected}
+        onSelectRow={(altIdx) => {
+          if (!selected) return
+          if (altIdx === selected[0] || altIdx === selected[1]) return
+          setSelected([selected[0], altIdx])
+        }}
+      />
     </div>
+  )
+}
+
+function CompareRankMatrix({
+  columns,
+  borda,
+  names,
+  selected,
+  onSelectRow,
+}: {
+  columns: RankLinesColumn[]
+  borda: number[] | null
+  names: string[]
+  selected: [number, number] | null
+  onSelectRow: (altIdx: number) => void
+}) {
+  const { t } = useTranslation()
+  const { t: tc } = useCompareText()
+  const rankedCols = columns.filter((c) => c.ranking !== null)
+  const order = borda
+    ? names.map((_, i) => i).sort((p, q) => borda[p]! - borda[q]! || p - q)
+    : names.map((_, i) => i)
+
+  return (
+    <section className="mt-3 flex max-w-[1040px] flex-col gap-2" data-testid="compare-matrix">
+      <div className="flex flex-col gap-0.5">
+        <h2 className="text-14 font-semibold text-text">{tc('matrix.title')}</h2>
+        <p className="text-13 text-text-2">{tc('matrix.description')}</p>
+      </div>
+      <div className="max-w-full overflow-x-auto rounded-control border border-line">
+        <table className="w-full border-separate border-spacing-0 text-13">
+          <thead>
+            <tr>
+              <th scope="col" className="sticky left-0 z-10 h-8 border-b border-line bg-surface-2 px-3 text-left text-12 font-medium whitespace-nowrap text-text-2">
+                {t('workbench.alternative')}
+              </th>
+              {rankedCols.map((c) => (
+                <th key={c.methodId} scope="col" className="h-8 border-b border-line bg-surface-2 px-2.5 text-center text-12 font-medium whitespace-nowrap text-text-2">
+                  {c.label}
+                </th>
+              ))}
+              {borda && (
+                <th scope="col" className="h-8 border-b border-l border-line bg-surface-2 px-3 text-center text-12 font-semibold whitespace-nowrap text-text">
+                  {tc('matrix.borda')}
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {order.map((altIdx) => {
+              const isSelected = selected !== null && (selected[0] === altIdx || selected[1] === altIdx)
+              return (
+                <tr
+                  key={altIdx}
+                  onClick={() => onSelectRow(altIdx)}
+                  className={cn(
+                    'cursor-pointer transition-colors hover:bg-surface-2/70',
+                    isSelected && 'bg-accent-bg/35',
+                  )}
+                >
+                  <th
+                    scope="row"
+                    className={cn(
+                      'sticky left-0 z-[1] h-8 border-b border-line px-3 text-left font-medium whitespace-nowrap',
+                      isSelected ? 'bg-accent-bg text-text font-semibold' : 'bg-bg text-text',
+                    )}
+                  >
+                    {names[altIdx]}
+                  </th>
+                  {rankedCols.map((c) => {
+                    const r = c.ranking![altIdx]!
+                    return (
+                      <td key={c.methodId} className="num h-8 border-b border-line px-2 text-center font-mono">
+                        <span
+                          className={cn(
+                            'inline-flex min-w-5 items-center justify-center rounded-xs px-1 py-0.5 text-12',
+                            r === 1
+                              ? 'bg-accent-bg font-semibold text-accent'
+                              : r <= 3
+                                ? 'font-medium text-text'
+                                : 'text-text-3',
+                          )}
+                        >
+                          {r}
+                        </span>
+                      </td>
+                    )
+                  })}
+                  {borda && (
+                    <td className="num h-8 border-b border-l border-line bg-surface/50 px-3 text-center font-mono font-semibold text-text">
+                      {borda[altIdx]}
+                    </td>
+                  )}
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
   )
 }

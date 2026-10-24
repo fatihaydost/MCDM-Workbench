@@ -115,6 +115,7 @@ export function MonteCarloSection({ problem, weights, run, names, baseRanking }:
                 format={share}
                 tableLabels={{ show: tw('workbench.chart.showTable'), corner: tw('workbench.alternative') }}
                 fade
+                muteZero
                 columnsTitle={t('monteCarlo.rankColumn')}
                 className="min-w-0"
               />

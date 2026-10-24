@@ -54,8 +54,8 @@ export type RankLinesProps = {
 
 const FONT = 13
 const HEAD_FONT = 12
-const HEAD = 28
-const ROW = 22
+const HEAD = 30
+const ROW = 28
 const GAP = 8
 const PAD = 12
 const HIT = 7
@@ -73,12 +73,14 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const [focusKey, setFocusKey] = useState(0)
+  const [hoverAlt, setHoverAlt] = useState<number | null>(null)
 
   const n = names.length
   const W = Math.max(width, 280)
   const ranked = columns.map((c, j) => (c.ranking ? j : -1)).filter((j) => j >= 0)
   const colour = (i: number) => (i < SAW_CATEGORY_COLOURS ? String(i + 1) : 'other')
-  const on = (i: number) => selected !== null && (selected[0] === i || selected[1] === i)
+  const inPair = (i: number) => selected !== null && (selected[0] === i || selected[1] === i)
+  const on = (i: number) => (hoverAlt !== null ? hoverAlt === i || inPair(i) : inPair(i))
   // The selected pair is coloured by slot, not by alternative (two category colours can be near twins): a and b.
   const pair = (i: number) => (selected === null ? undefined : selected[0] === i ? 'a' : selected[1] === i ? 'b' : undefined)
 
@@ -106,10 +108,11 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
   const heads = [...columns.map((c) => c.label), ...(borda ? [l.borda] : [])]
   const maxHeadW = maxOf(heads.map((h) => estimateTextWidth(h, HEAD_FONT)))
   const headRows = maxHeadW <= step - 4 ? 1 : maxHeadW <= 2 * step - 6 ? 2 : 3
-  const headH = headRows === 1 ? HEAD : headRows === 2 ? 36 : 48
-  const height = headH + n * ROW + 4
+  const headH = headRows === 1 ? HEAD : headRows === 2 ? 42 : 56
+  const height = headH + n * ROW + 6
   const yOf = (rank: number) => headH + (rank - 1) * ROW + ROW / 2
-  const headY = (slot: number) => (headRows === 1 ? headH / 2 - 2 : headRows === 2 ? (slot % 2 === 0 ? 8 : 22) : 8 + (slot % 3) * 13)
+  const headY = (slot: number) => (headRows === 1 ? headH / 2 - 2 : headRows === 2 ? (slot % 2 === 0 ? 9 : 25) : 9 + (slot % 3) * 15)
+  const showPointRanks = step >= 30
   const compactReason = step < 44
   const reasonW = compactReason ? Math.max(step - 2, 18) : Math.max(step - 4, 40)
 
@@ -181,17 +184,36 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
         aria-describedby={`${uid}-table`}
         data-testid="rank-lines"
       >
-        <g className={s.rankPlot} data-dimmed={selected ? '' : undefined}>
-          {columns.map((c, j) => (
-            <line key={j} className={s.rankAxis} x1={xOf(j)} x2={xOf(j)} y1={headH - 4} y2={height - 4} aria-hidden />
+        <g className={s.rankPlot} data-dimmed={selected || hoverAlt !== null ? '' : undefined} onMouseLeave={() => setHoverAlt(null)}>
+          {Array.from({ length: n }, (_, idx) => (
+            <line
+              key={`row-${idx}`}
+              className={s.rankRowGuide}
+              x1={x0}
+              x2={borda ? bordaX : x1}
+              y1={yOf(idx + 1)}
+              y2={yOf(idx + 1)}
+              aria-hidden
+            />
           ))}
-          {borda && <line className={s.rankAxis} x1={bordaX} x2={bordaX} y1={headH - 4} y2={height - 4} aria-hidden />}
+          {columns.map((_, j) => (
+            <line key={j} className={s.rankAxis} x1={xOf(j)} x2={xOf(j)} y1={headY(j) + 8} y2={height - 4} aria-hidden />
+          ))}
+          {borda && <line className={s.rankAxis} x1={bordaX} x2={bordaX} y1={headY(columns.length) + 8} y2={height - 4} aria-hidden />}
           <g aria-hidden>
             {lineOrder.map((i) => {
               const pts = ranked.map((j) => `${xOf(j)},${yOf(columns[j]!.ranking![i]!)}`).join(' ')
               const last = ranked.at(-1)
               return (
-                <g key={i} className={s.rankLine} data-cat={colour(i)} data-on={on(i) || undefined} data-pair={pair(i)} data-testid="rank-line">
+                <g
+                  key={i}
+                  className={s.rankLine}
+                  data-cat={colour(i)}
+                  data-on={on(i) || undefined}
+                  data-pair={pair(i)}
+                  data-testid="rank-line"
+                  onMouseEnter={() => setHoverAlt(i)}
+                >
                   <polyline points={pts} />
                   {borda && last !== undefined && (
                     <line
@@ -212,21 +234,37 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
                 {c.label}
               </text>
               {c.ranking
-                ? c.ranking.map((r, i) => (
-                    <circle
-                      key={i}
-                      className={s.rankPoint}
-                      data-cat={colour(i)}
-                      data-on={on(i) || undefined}
-                      data-pair={pair(i)}
-                      data-rank={r}
-                      data-name={names[i]}
-                      cx={xOf(j)}
-                      cy={yOf(r)}
-                      r={3}
-                      aria-hidden
-                    />
-                  ))
+                ? c.ranking.map((r, i) => {
+                    const active = on(i)
+                    return (
+                      <g key={i} onMouseEnter={() => setHoverAlt(i)}>
+                        <circle
+                          className={s.rankPoint}
+                          data-cat={colour(i)}
+                          data-on={active || undefined}
+                          data-pair={pair(i)}
+                          data-rank={r}
+                          data-name={names[i]}
+                          cx={xOf(j)}
+                          cy={yOf(r)}
+                          r={active && showPointRanks ? 7.5 : 3.25}
+                          aria-hidden
+                        />
+                        {active && showPointRanks && (
+                          <text
+                            className={s.rankPointNum}
+                            x={xOf(j)}
+                            y={yOf(r)}
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            aria-hidden
+                          >
+                            {r}
+                          </text>
+                        )}
+                      </g>
+                    )
+                  })
                 : c.reason && (
                     <foreignObject x={xOf(j) - reasonW / 2} y={headH} width={reasonW} height={height - headH}>
                       <p className={s.rankReason} data-compact={compactReason || undefined}>
@@ -253,6 +291,7 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
                   y={yOf(g.rank)}
                   textAnchor="end"
                   dominantBaseline="central"
+                  onMouseEnter={() => setHoverAlt(g.alts[0] ?? null)}
                 >
                   {short !== g.text ? <title>{g.text}</title> : null}
                   {short}
@@ -263,7 +302,7 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
             rightGroups.map((g) => {
               const short = truncate(g.text, rightW - rankWidth - 6 - GAP, FONT)
               return (
-                <g key={g.rank} className={s.rankName} data-on={g.alts.some(on) || undefined}>
+                <g key={g.rank} className={s.rankName} data-on={g.alts.some(on) || undefined} onMouseEnter={() => setHoverAlt(g.alts[0] ?? null)}>
                   {/* One rank per alternative for lookups; tied ones share the first one's place and ink. */}
                   {g.alts.map((i, k) => (
                     <text
@@ -289,7 +328,7 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
             })}
           <g onKeyDown={move}>
             {crossings.map((x, idx) => {
-              const pressed = on(x.i) && on(x.k)
+              const pressed = inPair(x.i) && inPair(x.k)
               return (
                 <circle
                   key={`${x.from}-${x.i}-${x.k}`}

@@ -49,5 +49,15 @@
     "vikorRegretEqual": "VIKOR'un en büyük pişmanlıkları {{a}} ve {{b}} için eşit."
   },
   "echo": "{{method}}: {{of}} ile aynı sıra, bir kez sayılır",
-  "sawLinear": "SAW (Doğrusal)"
+  "sawLinear": "SAW (Doğrusal)",
+  "pair": {
+    "label": "Karşılaştırılan çift",
+    "vs": "ile",
+    "hint": "Her yöntemdeki sırasını izlemek için bir alternatifin üzerine gelin ya da karşılaştırmak için iki alternatif seçin."
+  },
+  "matrix": {
+    "title": "Yöntemlere göre sıra matrisi",
+    "description": "Satırlar Borda uzlaşı sırasını izler, birinci sıralar vurgulanır ve bir satıra tıklamak onu yukarıda karşılaştırır.",
+    "borda": "Borda"
+  }
 }

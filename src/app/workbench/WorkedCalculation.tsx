@@ -37,6 +37,8 @@ const stepDomId = (key: string) => `wb-step-${key.replace(/\./g, '-')}`
 export default function WorkedCalculation({ groups, problem, headingLevel = 'h3' }: WorkedCalculationProps) {
   const { t } = useTranslation()
   const [current, setCurrent] = useState(0)
+  const [digits, setDigits] = useState<2 | 4>(DECIMALS.step as 4)
+  const [highlightCols, setHighlightCols] = useState(true)
   const labels = useMemo(() => stepAxisLabels(problem, t), [problem, t])
   const GroupHeading = headingLevel === 'h4' ? 'h3' : 'h2'
   const root = useRef<HTMLDivElement>(null)
@@ -71,7 +73,41 @@ export default function WorkedCalculation({ groups, problem, headingLevel = 'h3'
 
   let n = 0
   return (
-    <div ref={root} className="flex flex-col gap-10">
+    <div ref={root} className="flex flex-col gap-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-control border border-line bg-surface px-3 py-2 text-13">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-text-2">{t('workbench.calc.decimals')}:</span>
+          <div className="inline-flex rounded-control border border-line-strong bg-bg p-0.5">
+            {([2, 4] as const).map((d) => (
+              <button
+                key={d}
+                type="button"
+                tabIndex={-1}
+                onClick={() => setDigits(d)}
+                className={cn(
+                  'rounded-xs px-2 py-0.5 text-12 font-medium transition-colors',
+                  digits === d ? 'bg-accent text-bg' : 'text-text-2 hover:text-text',
+                )}
+              >
+                {t(d === 2 ? 'workbench.calc.decimals2' : 'workbench.calc.decimals4')}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-pressed={highlightCols}
+          onClick={() => setHighlightCols((v) => !v)}
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-control border px-2.5 py-1 text-12 font-medium transition-colors',
+            highlightCols ? 'border-accent bg-accent-bg text-text' : 'border-line-strong bg-bg text-text-2 hover:text-text',
+          )}
+        >
+          <span aria-hidden className={cn('size-2 rounded-full', highlightCols ? 'bg-accent' : 'bg-line-strong')} />
+          {t('workbench.calc.highlightCols')}
+        </button>
+      </div>
       {groups.map((g, gi) => {
         const flow = flowFor(g.steps)
         const first = n
@@ -104,6 +140,8 @@ export default function WorkedCalculation({ groups, problem, headingLevel = 'h3'
                     labels={labels}
                     heading={headingLevel}
                     name={stepName(step.key, t)}
+                    digits={digits}
+                    highlightCols={highlightCols}
                   />
                 )
               })}
@@ -125,11 +163,13 @@ type StepBlockProps = {
   labels: ReturnType<typeof stepAxisLabels>
   heading: 'h3' | 'h4'
   name: string
+  digits: 2 | 4
+  highlightCols: boolean
 }
 
-function StepBlock({ step, number, index, domId, current, onCurrent, labels, heading: H, name }: StepBlockProps) {
+function StepBlock({ step, number, index, domId, current, onCurrent, labels, heading: H, name, digits, highlightCols }: StepBlockProps) {
   const { t, i18n } = useTranslation()
-  const nf = useNumberFormat(DECIMALS.step)
+  const nf = useNumberFormat(digits)
   const lang = nf.lang
   const titleId = useId()
   const [copied, setCopied] = useState<Copied>(null)
@@ -245,6 +285,7 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, hea
           format={(v) => (Number.isFinite(v) ? nf.format(v) : t('workbench.calc.undefined'))}
           label={t('workbench.calc.tableLabel', { n: number, name })}
           signed={content?.signed}
+          highlightCols={highlightCols}
         />
       </div>
 
@@ -262,8 +303,32 @@ type Hover = { r: number; c: number } | null
  * Labelled matrix, vector or scalar in Plex Mono with fixed decimals. Hovering a cell tints its
  * row and column labels. Wide or tall tables scroll inside their own box, never the page.
  */
-function StepTableView({ table, format, label, signed }: { table: StepTable; format: (v: number) => string; label: string; signed?: true | undefined }) {
+function StepTableView({
+  table,
+  format,
+  label,
+  signed,
+  highlightCols = false,
+}: {
+  table: StepTable
+  format: (v: number) => string
+  label: string
+  signed?: true | undefined
+  highlightCols?: boolean | undefined
+}) {
   const [hover, setHover] = useState<Hover>(null)
+
+  const colPeaks = useMemo(() => {
+    if (!highlightCols || table.values.length < 2) return null
+    const cols = table.values[0]?.length ?? 0
+    return Array.from({ length: cols }, (_, c) => {
+      const colVals = table.values.map((r) => r[c]!).filter(Number.isFinite)
+      if (colVals.length < 2) return null
+      const min = Math.min(...colVals)
+      const max = Math.max(...colVals)
+      return max - min > 1e-12 ? max : null
+    })
+  }, [highlightCols, table.values])
 
   if (table.kind === 'scalar') {
     return (
@@ -278,8 +343,8 @@ function StepTableView({ table, format, label, signed }: { table: StepTable; for
   const rowOn = (r: number) => hover?.r === r
 
   return (
-    <div role="region" aria-label={label} tabIndex={0} className="max-h-[420px] max-w-full overflow-auto rounded-control">
-      <table className="border-separate border-spacing-0 text-13" onMouseLeave={() => setHover(null)}>
+    <div role="region" aria-label={label} tabIndex={0} className="max-h-[420px] max-w-full overflow-auto rounded-control border border-line">
+      <table className="w-auto min-w-full border-separate border-spacing-0 text-13" onMouseLeave={() => setHover(null)}>
         {table.colLabels && (
           <thead>
             <tr>
@@ -301,7 +366,7 @@ function StepTableView({ table, format, label, signed }: { table: StepTable; for
         )}
         <tbody>
           {table.values.map((row, r) => (
-            <tr key={r}>
+            <tr key={r} className="even:bg-surface/40">
               <th
                 scope="row"
                 className={cn(
@@ -311,24 +376,32 @@ function StepTableView({ table, format, label, signed }: { table: StepTable; for
               >
                 {table.rowLabels[r]}
               </th>
-              {row.map((v, c) => (
-                <td
-                  key={c}
-                  onMouseEnter={() => setHover({ r, c })}
-                  className={cn(
-                    'num h-8 border-b border-line px-3 text-right font-mono whitespace-nowrap text-text transition-colors',
-                    rowOn(r) && colOn(c) && 'bg-accent-bg',
-                  )}
-                >
-                  {/* Above or below a border (MABAC's Q): a triangle in the area's colour, so the sign reads without colour too. */}
-                  {signed && v !== 0 && (
-                    <span aria-hidden data-sign={v > 0 ? 'up' : 'down'} className={cn('mr-1.5 text-12', v > 0 ? 'text-data-accent' : 'text-data-negative')}>
-                      {v > 0 ? '▲' : '▼'}
-                    </span>
-                  )}
-                  {format(v)}
-                </td>
-              ))}
+              {row.map((v, c) => {
+                const peak = colPeaks?.[c]
+                const isPeak = peak !== null && peak !== undefined && Number.isFinite(v) && Math.abs(v - peak) < 1e-12
+                return (
+                  <td
+                    key={c}
+                    onMouseEnter={() => setHover({ r, c })}
+                    className={cn(
+                      'num h-8 border-b border-line px-3 text-right font-mono whitespace-nowrap transition-colors',
+                      rowOn(r) && colOn(c)
+                        ? 'bg-accent-bg text-text'
+                        : isPeak
+                          ? 'bg-accent-bg/30 font-semibold text-text'
+                          : 'text-text',
+                    )}
+                  >
+                    {/* Above or below a border (MABAC's Q): a triangle in the area's colour, so the sign reads without colour too. */}
+                    {signed && v !== 0 && (
+                      <span aria-hidden data-sign={v > 0 ? 'up' : 'down'} className={cn('mr-1.5 text-12', v > 0 ? 'text-data-accent' : 'text-data-negative')}>
+                        {v > 0 ? '▲' : '▼'}
+                      </span>
+                    )}
+                    {format(v)}
+                  </td>
+                )
+              })}
             </tr>
           ))}
         </tbody>

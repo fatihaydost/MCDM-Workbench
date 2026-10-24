@@ -111,6 +111,15 @@
   font-size: 12px;
 }
 
+.cellText[data-peak] {
+  font-weight: 600;
+}
+
+.cellTextMuted {
+  fill: var(--text-3);
+  font-size: 12px;
+}
+
 /* The ink per cell is chosen by measured contrast in heatPaint (layout.ts). */
 .cellText[data-ink='bg'] {
   fill: var(--bg);

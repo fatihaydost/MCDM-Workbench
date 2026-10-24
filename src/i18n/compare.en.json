@@ -49,5 +49,15 @@
     "vikorRegretEqual": "VIKOR's largest regrets for {{a}} and {{b}} are equal."
   },
   "echo": "{{method}}: same order as {{of}}, counted once",
-  "sawLinear": "SAW (Linear)"
+  "sawLinear": "SAW (Linear)",
+  "pair": {
+    "label": "Selected pair",
+    "vs": "vs",
+    "hint": "Hover any alternative to trace its rank across methods, or pick two alternatives to compare."
+  },
+  "matrix": {
+    "title": "Rank matrix by method",
+    "description": "Rows follow the Borda consensus order, rank 1 cells are highlighted, and clicking a row compares it above.",
+    "borda": "Borda"
+  }
 }

@@ -505,7 +505,12 @@
       "sumOk": "Ağırlıkların toplamı 1.",
       "emptyWeight": "{{criterion}} için bir ağırlık girin.",
       "fromPaper": "Ağırlıklar {{citation}} çalışmasındaki gibi.",
-      "equalNote": "{{n}} kriter var, her ağırlık 1 / {{n}} = {{value}}."
+      "equalNote": "{{n}} kriter var, her ağırlık 1 / {{n}} = {{value}}.",
+      "families": {
+        "objective": "Veriden (nesnel)",
+        "subjective": "Yargı ya da sıradan (öznel)",
+        "direct": "Doğrudan"
+      }
     },
     "ranking": {
       "methodHint": {
@@ -617,7 +622,12 @@
       "changeWeights": "Ağırlıkları değiştir",
       "best": "İlk sırada {{name}} ({{symbol}} = {{value}}).",
       "bestTied": "İlk sırayı {{names}} paylaşıyor ({{symbol}} = {{value}}).",
-      "constants": "Her alternatif için aynı: {{list}}"
+      "constants": "Her alternatif için aynı: {{list}}",
+      "families": {
+        "distance": "Uzaklık ve uzlaşı",
+        "additive": "Toplamsal ve oran",
+        "outranking": "İkili üstünlük"
+      }
     },
     "results": {
       "sourceFile": "{{name}} dosyasından içe aktarıldı",
@@ -679,7 +689,11 @@
       "tableLabel": "{{n}}. adım: {{name}}",
       "edgeCase": "Özel durum: {{text}}",
       "copy": "Kopyala",
-      "copyLabel": "{{n}}. adımı kopyala"
+      "copyLabel": "{{n}}. adımı kopyala",
+      "decimals": "Ondalık",
+      "decimals2": "2 hane",
+      "decimals4": "4 hane",
+      "highlightCols": "Sütun en büyüğünü vurgula"
     },
     "stepNames": {
       "critic": {

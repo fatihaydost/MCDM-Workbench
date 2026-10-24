@@ -25,6 +25,12 @@ import { criterionName, DECIMALS, findStep, ids, placeIssue, sumDecimals, tr, we
 /** A weighting method that the core computes (everything but manual). */
 type ComputedMethod = Exclude<WeightMethodId, 'manual'>
 
+const WEIGHT_FAMILIES: readonly { key: 'objective' | 'subjective' | 'direct'; ids: readonly WeightMethodId[] }[] = [
+  { key: 'objective', ids: ['critic', 'entropy', 'sd', 'merec', 'lopcow', 'cilos'] },
+  { key: 'subjective', ids: ['bwm', 'ahp', 'roc'] },
+  { key: 'direct', ids: ['equal', 'manual'] },
+]
+
 export function WeightsStage() {
   const { t } = useTranslation()
   const problem = useWorkbench((s) => s.problem)
@@ -74,6 +80,19 @@ export function WeightsStage() {
           // Eleven methods do not fit one row below xl: a 4-col grid below xl, 3-col below sm.
           className="self-start max-xl:grid max-xl:grid-cols-4 max-sm:grid-cols-3 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
         />
+        <div aria-hidden className="flex flex-wrap items-center gap-x-4 gap-y-1 text-12 text-text-3">
+          {WEIGHT_FAMILIES.map((f) => {
+            const active = f.ids.includes(weightMethod)
+            return (
+              <span key={f.key} className={cn('inline-flex flex-wrap items-center gap-1', active && 'text-text-2')}>
+                <span className={cn('font-semibold', active ? 'text-accent' : 'text-text-3')}>
+                  {t(`workbench.weights.families.${f.key}`)}:
+                </span>
+                <span>{f.ids.map((m) => weightMethodLabel(m, t)).join(' · ')}</span>
+              </span>
+            )
+          })}
+        </div>
         <span id={ids.weightMethod} tabIndex={-1} className="sr-only">
           {t('workbench.weightMethod.label')}
         </span>
@@ -143,24 +162,40 @@ export function ComputedWeights({ problem, method, result }: { problem: DraftPro
               </Tr>
             </THead>
             <TBody>
-              {problem.criteria.map((c, j) => (
-                <Tr key={j}>
-                  <Th scope="row" className="max-sm:whitespace-normal">
-                    {names[j]}
-                  </Th>
-                  <Td className="text-text-2">
-                    <DirectionLabel type={c.type} />
-                  </Td>
-                  {extra.map((c) => (
-                    <Td key={c.step} numeric className="hidden sm:table-cell">
-                      {nf.format(c.values?.[j], c.decimals)}
-                    </Td>
-                  ))}
-                  <Td numeric className="font-medium">
-                    {nf.format(result.weights[j])}
-                  </Td>
-                </Tr>
-              ))}
+              {(() => {
+                const maxW = Math.max(...result.weights.filter(Number.isFinite), 0)
+                const bestJ = argmax(result.weights)
+                return problem.criteria.map((c, j) => {
+                  const isTop = maxW > 0 && j === bestJ && problem.criteria.length > 1
+                  const wj = result.weights[j] ?? 0
+                  return (
+                    <Tr key={j} selected={isTop}>
+                      <Th scope="row" className={cn('max-sm:whitespace-normal', isTop && 'font-semibold')}>
+                        {names[j]}
+                      </Th>
+                      <Td className="text-text-2">
+                        <DirectionLabel type={c.type} />
+                      </Td>
+                      {extra.map((col) => (
+                        <Td key={col.step} numeric className="hidden sm:table-cell">
+                          {nf.format(col.values?.[j], col.decimals)}
+                        </Td>
+                      ))}
+                      <Td numeric className={cn(isTop ? 'font-semibold' : 'font-medium')}>
+                        {maxW > 0 && (
+                          <span aria-hidden className="mr-2.5 inline-block h-2 w-14 bg-surface-2 align-middle">
+                            <span
+                              className={cn('block h-full', isTop ? 'bg-accent' : 'bg-[var(--data-context)]')}
+                              style={{ width: `${Math.min(100, (Math.max(wj, 0) / maxW) * 100)}%` }}
+                            />
+                          </span>
+                        )}
+                        {nf.format(wj)}
+                      </Td>
+                    </Tr>
+                  )
+                })
+              })()}
             </TBody>
           </Table>
         </div>
