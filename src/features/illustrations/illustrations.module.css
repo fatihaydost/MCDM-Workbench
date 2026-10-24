@@ -1243,3 +1243,60 @@
   font-size: 12px;
   font-weight: 500;
 }
+
+/* AHP pairwise matrix + weight bars ------------------------------------------------------------ */
+
+.ahpCell {
+  fill: var(--bg-subtle);
+  stroke: var(--line);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.ahpCell[data-part='diag'] {
+  fill: var(--bg);
+}
+
+.ahpCell[data-part='lower'] {
+  fill: var(--bg);
+  stroke-dasharray: 2 2;
+}
+
+.ahpCell[data-flagged] {
+  fill: var(--accent-subtle);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: none;
+}
+
+.ahpCellText {
+  fill: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ahpCellText[data-part='lower'],
+.ahpCellText[data-part='diag'] {
+  fill: var(--text-3);
+}
+
+.ahpCellText[data-flagged] {
+  fill: var(--accent);
+  font-weight: 600;
+}
+
+.ahpRatioText {
+  fill: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ahpBar {
+  fill: var(--data-context);
+}
+
+.ahpBar[data-highlight] {
+  fill: var(--data-accent);
+}

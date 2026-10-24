@@ -98,6 +98,7 @@ describe('share texts', () => {
 
 describe('recomputable', () => {
   it('offers no recompute for equal weights or for weights from answers', () => {
+    expect(recomputable('ahp')).toBeUndefined()
     expect(recomputable('bwm')).toBeUndefined()
     expect(recomputable('equal')).toBeUndefined()
     expect(recomputable('critic')?.id).toBe('critic')

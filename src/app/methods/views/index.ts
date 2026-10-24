@@ -1,4 +1,5 @@
 import type { RankingMethodId, WeightMethodId } from '../../../state/workbench'
+import { ahp } from './ahp'
 import { bwm } from './bwm'
 import { cocoso } from './cocoso'
 import { copras } from './copras'
@@ -39,6 +40,7 @@ export const methodViews: Readonly<Views> = {
   equal,
   manual,
   bwm,
+  ahp,
   topsis,
   saw,
   vikor,

@@ -2,7 +2,7 @@ import { Check, WarningCircle } from '@phosphor-icons/react'
 import { useId } from 'react'
 import s from './pairwise.module.css'
 
-export type Consistency = { value: number; threshold: number | null; approximate: boolean }
+export type Consistency = { value: number; threshold: number | null; approximate: boolean; inclusive?: boolean | undefined }
 
 export type JudgementPanelLabels = {
   /** "Weights" */
@@ -31,16 +31,33 @@ export type JudgementPanelProps = {
   consistency: Consistency | null
   /** Criterion that causes the inconsistency, or null. */
   flagged: number | null
+  /** Optional explicit label for the flagged criterion or pair (overrides names[flagged]). */
+  flaggedLabel?: string | null | undefined
+  /** Optional click handler on the warning badge to jump to the flagged comparison. */
+  onFlagClick?: (() => void) | undefined
   labels: JudgementPanelLabels
   className?: string | undefined
 }
 
 /** Live weights (bars relative to the largest) and the consistency badge. */
-export function JudgementPanel({ names, weights, provisional, consistency, flagged, labels, className }: JudgementPanelProps) {
+export function JudgementPanel({
+  names,
+  weights,
+  provisional,
+  consistency,
+  flagged,
+  flaggedLabel,
+  onFlagClick,
+  labels,
+  className,
+}: JudgementPanelProps) {
   const id = useId()
   const max = weights ? Math.max(...weights.map((w) => w ?? 0), 1e-12) : 1
-  const over = consistency !== null && consistency.threshold !== null && consistency.value > consistency.threshold
-  const flaggedName = flagged === null ? null : (names[flagged] ?? null)
+  const over =
+    consistency !== null &&
+    consistency.threshold !== null &&
+    (consistency.inclusive ? consistency.value >= consistency.threshold : consistency.value > consistency.threshold)
+  const flaggedName = flaggedLabel !== undefined ? flaggedLabel : flagged === null ? null : (names[flagged] ?? null)
   // The live region only changes text when the state changes, never with each recomputed number.
   const live = consistency === null ? '' : over ? labels.warning(flaggedName) : labels.ok
 
@@ -74,6 +91,12 @@ export function JudgementPanel({ names, weights, provisional, consistency, flagg
         <span className={s.consistencyLabel}>{labels.consistency}</span>
         {consistency === null ? (
           <span className={s.badge}>{labels.notApplicable}</span>
+        ) : over && onFlagClick ? (
+          <button type="button" className={`${s.badge} ${s.badgeWarning} cursor-pointer`} onClick={onFlagClick}>
+            <WarningCircle aria-hidden weight="bold" />
+            <span className={s.badgeValue}>{labels.value(consistency)}</span>
+            <span>{labels.warning(flaggedName)}</span>
+          </button>
         ) : (
           <span className={`${s.badge} ${over ? s.badgeWarning : ''}`}>
             {over ? <WarningCircle aria-hidden weight="bold" /> : <Check aria-hidden weight="bold" />}

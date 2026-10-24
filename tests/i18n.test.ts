@@ -72,7 +72,7 @@ describe('i18n resources', () => {
   })
 
   it('cover every step key and warning code the core methods emit', async () => {
-    const { bwm, judgementsFromBwm, cocoso, copras, critic, edas, entropy, lopcow, mabac, marcos, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
+    const { ahp, bwm, judgementsFromBwm, judgementsFromUpper, cocoso, copras, critic, edas, entropy, lopcow, mabac, marcos, merec, saw, sd, topsis, vikor, waspas } = await import('../src/core')
     const p = {
       alternatives: ['A', 'B', 'C'],
       criteria: [
@@ -179,7 +179,13 @@ describe('i18n resources', () => {
       bwm.compute(bwmProblem(10), {}, judgementsFromBwm(10, 0, 9, ones, ones)),
     ]
     expect(new Set(bw.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(new Set(['bwm.inconsistent', 'bwm.threshold-approximate']))
-    const steps = [...bw.flatMap((x) => x.steps), ...mb.flatMap((x) => x.steps), ...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...lp.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
+    // AHP: inconsistent 3x3 (a_12 = 5, a_13 = 1/3, a_23 = 7) and n = 8 all ones (many-criteria).
+    const ah = [
+      ahp.compute(bwmProblem(3), {}, judgementsFromUpper(3, [5, 1 / 3, 7])),
+      ahp.compute(bwmProblem(8), {}, judgementsFromUpper(8, new Array<number>(28).fill(1))),
+    ]
+    expect(new Set(ah.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(new Set(['ahp.inconsistent', 'ahp.many-criteria']))
+    const steps = [...ah.flatMap((x) => x.steps), ...bw.flatMap((x) => x.steps), ...mb.flatMap((x) => x.steps), ...cc.flatMap((x) => x.steps), ...mc.steps, ...cp.flatMap((x) => x.steps), ...wp.steps, ...w.steps, ...r.steps, ...e.flatMap((x) => x.steps), ...sdr.flatMap((x) => x.steps), ...mr.flatMap((x) => x.steps), ...lp.flatMap((x) => x.steps), ...sw.flatMap((x) => x.steps), ...vk.flatMap((x) => x.steps), ...ed.flatMap((x) => x.steps)]
     const warnings = [
       ...(w.warnings ?? []),
       ...(r.warnings ?? []),
@@ -194,6 +200,7 @@ describe('i18n resources', () => {
       ...cc.flatMap((x) => x.warnings ?? []),
       ...mb.flatMap((x) => x.warnings ?? []),
       ...bw.flatMap((x) => x.warnings ?? []),
+      ...ah.flatMap((x) => x.warnings ?? []),
     ]
     expect(new Set(warnings.filter((x) => x.code.startsWith('entropy.')).map((x) => x.code))).toEqual(
       new Set(['entropy.constant-column', 'entropy.zeros-in-column', 'entropy.two-alternatives-minmax', 'entropy.all-constant-equal-weights', 'entropy.dominant-weight']),

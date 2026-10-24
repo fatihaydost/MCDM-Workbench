@@ -86,7 +86,7 @@ export function WeightsStage() {
         <ManualWeights problem={problem} issues={weights.issues} showErrors={attempted.weights} summaryRoot={summaryRoot} />
       ) : dataBlocked ? (
         <BlockedByIssues issues={weights.issues} problem={problem} />
-      ) : weightMethod === 'bwm' ? (
+      ) : weightMethod === 'bwm' || weightMethod === 'ahp' ? (
         <JudgementWeights problem={problem} method={weightMethod} result={weights} />
       ) : weights.value ? (
         <ComputedWeights problem={problem} method={weightMethod} result={weights.value} />

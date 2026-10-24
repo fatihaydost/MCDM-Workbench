@@ -8,7 +8,7 @@ import type { Bilingual, MethodContent, MethodFamily, MethodId } from '../types'
 export type MethodMeta = Pick<MethodContent, 'id' | 'family' | 'status' | 'year'> & { name: Bilingual }
 
 const ROWS: readonly MethodMeta[] = [
-  { id: 'ahp', name: { en: 'AHP', tr: 'AHP' }, family: 'weighting-subjective', status: 'research', year: 1977 },
+  { id: 'ahp', name: { en: 'AHP', tr: 'AHP' }, family: 'weighting-subjective', status: 'available', year: 1977 },
   { id: 'aras', name: { en: 'ARAS', tr: 'ARAS' }, family: 'ranking-utility', status: 'research', year: 2010 },
   { id: 'bwm', name: { en: 'BWM', tr: 'BWM' }, family: 'weighting-subjective', status: 'available', year: 2015 },
   { id: 'cilos', name: { en: 'CILOS', tr: 'CILOS' }, family: 'weighting-objective', status: 'research', year: 2016 },

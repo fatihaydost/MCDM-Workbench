@@ -6,7 +6,7 @@ export const ahp: MethodContent = {
   name: { en: 'AHP', tr: 'AHP' },
   fullName: { en: 'Analytic Hierarchy Process', tr: 'Analitik hiyerarşi süreci' },
   family: 'weighting-subjective',
-  status: 'research',
+  status: 'available',
   year: 1977,
   origin: {
     authors: 'Saaty, T.L.',
@@ -95,21 +95,24 @@ export const ahp: MethodContent = {
     doi: '10.1504/IJSSCI.2008.017590',
     match: 'match',
     note: {
-      en: 'Published example (Table 3 (job criteria), Table 4 (3 x 3), Table 2 (drinks)); this method is not computed here yet, only recomputed during research. Eigenvector weights match Tables 3 and 4 to the printed 3 decimals. The drinks matrix of Table 2 is not reciprocal as printed (Tea/Wine = 2 but Wine/Tea = 1/3); with Tea/Wine = 3 every published value and CR = 0.022 are reproduced, so the 2 is a typo.',
-      tr: "Yayımlanmış örnek (Tablo 3 (iş kriterleri), Tablo 4 (3 x 3), Tablo 2 (içecekler)); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Özvektör ağırlıkları Tablo 3 ve 4 ile basılı 3 basamakta örtüşüyor. Tablo 2'deki içecek matrisi basıldığı haliyle karşılıklı değil (Çay/Şarap = 2 ama Şarap/Çay = 1/3); Çay/Şarap = 3 alınınca yayımlanan tüm değerler ve CR = 0,022 elde ediliyor, yani 2 bir baskı hatası.",
+      en: 'Eigenvector weights match Saaty (2008) Table 3 (job criteria, 5 x 5) and Table 4 (3 x 3) to the printed 3 decimals. The drinks matrix of Table 2 (7 x 7) is not reciprocal as printed (Tea/Wine = 2 but Wine/Tea = 1/3); with Tea/Wine = 3 every published value and CR = 0.022 are reproduced, so the 2 is a typo. Also checked against Doğuç (2022) Tables 4-7 and the incomplete-matrix LLSM example of Bozóki, Fülöp & Rónyai (2010) Example 2.',
+      tr: "Özvektör ağırlıkları Saaty (2008) Tablo 3 (iş kriterleri, 5 x 5) ve Tablo 4 (3 x 3) ile basılı 3 basamakta örtüşüyor. Tablo 2'deki içecek matrisi (7 x 7) basıldığı haliyle karşılıklı değil (Çay/Şarap = 2 ama Şarap/Çay = 1/3); Çay/Şarap = 3 alınınca yayımlanan tüm değerler ve CR = 0,022 elde ediliyor, yani 2 bir baskı hatası. Ayrıca Doğuç (2022) Tablo 4-7 ve Bozóki, Fülöp ve Rónyai (2010) Örnek 2 eksik matris LLSM sonuçlarıyla doğrulandı.",
     },
   },
   sources: [
     { label: 'Saaty (1977), Journal of Mathematical Psychology 15(3), 234-281', doi: '10.1016/0022-2496(77)90033-5' },
     { label: 'Saaty (2008), International Journal of Services Sciences 1(1), 83-98', doi: '10.1504/IJSSCI.2008.017590' },
     { label: 'Crawford & Williams (1985), Journal of Mathematical Psychology 29(4), 387-405', doi: '10.1016/0022-2496(85)90002-1' },
+    { label: 'Alonso & Lamata (2006), International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems 14(4), 445-459', doi: '10.1142/S0218488506004114' },
+    { label: 'Bozóki, Fülöp & Rónyai (2010), Mathematical and Computer Modelling 52, 318-333', doi: '10.1016/j.mcm.2010.02.047' },
+    { label: 'Doğuç (2022), Ekonomi, İşletme ve Maliye Araştırmaları Dergisi 4(2), 126-145', doi: '10.38009/ekimad.1142952' },
     { label: 'Saaty (1988), How to make a decision: the analytic hierarchy process, ISAHP proceedings' },
     { label: 'Roszkowska (2013), Optimum. Studia Ekonomiczne 5(65), 14-33', doi: '10.15290/ose.2013.05.65.02' },
     { label: 'Çebi, Onar, Öztayşi & Kahraman (2022), Integration of AHP with other MCDM methods: a literature review, ISAHP 2022', url: 'https://isahp.org/uploads/36_001.pdf' },
   ],
   en: {
     summary:
-      'AHP turns pairwise judgements ("how much more important is A than B?", 1-9) into weights and a consistency ratio CR. Use it when experts can judge importance but cannot give numbers directly.',
+      'AHP turns pairwise judgements ("how much more important is A than B?", 1‑9) into weights and a consistency ratio CR. Use it when experts can judge importance but cannot give numbers directly.',
     whenToUse: [
       'Importance comes from people.',
       'Up to about 9 criteria: n(n-1)/2 comparisons, 36 at n = 9.',
@@ -121,8 +124,8 @@ export const ahp: MethodContent = {
       'Judges reject statements like "A is 3 times as important as B".',
     ],
     inputs: [
-      "Positive reciprocal n x n matrix: 1 on the diagonal, a_ji = 1/a_ij, values from Saaty's 1-9 scale and their reciprocals.",
-      'Method option: eigenvector (default), geometric mean or column-average approximation.',
+      "Positive reciprocal n x n matrix: 1 on the diagonal, a_ji = 1/a_ij, values from Saaty's 1‑9 scale and their reciprocals.",
+      'Method option: principal eigenvector (default) or row geometric mean (LLSM).',
       'Output: weights, λmax, CI and CR.',
     ],
     pitfalls: [
@@ -133,7 +136,7 @@ export const ahp: MethodContent = {
   },
   tr: {
     summary:
-      'AHP, ikili yargıları ("A, B\'den ne kadar önemli?", 1-9) ağırlığa ve bir tutarlılık oranına (CR) çevirir. Uzmanlar önemi yargılayabiliyor ama doğrudan sayı veremiyorsa kullanın.',
+      'AHP, ikili yargıları ("A, B\'den ne kadar önemli?", 1‑9) ağırlığa ve bir tutarlılık oranına (CR) çevirir. Uzmanlar önemi yargılayabiliyor ama doğrudan sayı veremiyorsa kullanın.',
     whenToUse: [
       'Önem kişilerin yargısından geliyor.',
       'En fazla 9 civarında kriter: n(n-1)/2 karşılaştırma, n = 9 için 36.',
@@ -145,8 +148,8 @@ export const ahp: MethodContent = {
       'Uzmanlar "A, B\'den 3 kat önemli" türü ifadeleri kabul etmiyor.',
     ],
     inputs: [
-      "Pozitif, karşılıklı n x n matris: köşegende 1, a_ji = 1/a_ij, değerler Saaty'nin 1-9 ölçeğinden ve bunların tersleri.",
-      'Yöntem seçeneği: özvektör (varsayılan), geometrik ortalama ya da sütun ortalaması yaklaşımı.',
+      "Pozitif, karşılıklı n x n matris: köşegende 1, a_ji = 1/a_ij, değerler Saaty'nin 1‑9 ölçeğinden ve bunların tersleri.",
+      'Yöntem seçeneği: temel özvektör (varsayılan) ya da satır geometrik ortalaması (LLSM).',
       'Çıktı: ağırlıklar, λmaks, CI ve CR.',
     ],
     pitfalls: [

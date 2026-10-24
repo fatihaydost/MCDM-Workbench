@@ -134,6 +134,9 @@
       },
       "lopcow": {
         "claim": "Weights match {{citation}} to {{decimals}} decimals across all three criteria sets with the sample standard deviation."
+      },
+      "ahp": {
+        "claim": "Eigenvector weights and consistency ratios match {{citation}} to {{decimals}} decimals."
       }
     },
     "catalogue": {
@@ -214,7 +217,8 @@
       "sd": "SD",
       "merec": "MEREC",
       "lopcow": "LOPCOW",
-      "bwm": "BWM"
+      "bwm": "BWM",
+      "ahp": "AHP"
     },
     "rankingMethod": {
       "label": "Ranking method",
@@ -282,6 +286,21 @@
           "max": "1: S only"
         },
         "lambdaVariant": "λ = {{value}}"
+      },
+      "ahp": {
+        "aggregation": "Priority vector",
+        "aggregationOptions": {
+          "eigenvector": "Principal eigenvector",
+          "geometric": "Geometric mean (LLSM)"
+        },
+        "aggregationHints": {
+          "eigenvector": "Saaty's right principal eigenvector (A w = λmax w); matches the original AHP literature.",
+          "geometric": "Normalized row geometric means; equals the eigenvector for 3 criteria and solves in closed form."
+        },
+        "aggregationVariant": {
+          "eigenvector": "eigenvector",
+          "geometric": "geometric mean"
+        }
       }
     },
     "example": {
@@ -382,7 +401,8 @@
         "sd": "Objective weights from how widely each criterion's values spread over the alternatives.",
         "merec": "Objective weights from how much the alternatives' overall performance drops when each criterion is removed. Every value must be above 0.",
         "lopcow": "Objective weights from the log ratio of each criterion's root-mean-square to its sample standard deviation after min-max scaling.",
-        "bwm": "Pick the most and least important criterion, then compare every other with these two (1‑9); 2n - 3 answers give the weights."
+        "bwm": "Pick the most and least important criterion, then compare every other with these two (1‑9); 2n - 3 answers give the weights.",
+        "ahp": "Compare the criteria two at a time on the 1‑9 scale; all n(n - 1) / 2 answers give the weights and the consistency ratio CR."
       },
       "columns": {
         "criterion": "Criterion",
@@ -687,6 +707,13 @@
         "consistencyLocal": "Consistency CR^I_j",
         "xi": "Deviation ξ",
         "weights": "Weights w"
+      },
+      "ahp": {
+        "pairwiseMatrix": "Comparison matrix A",
+        "lambdaMax": "Principal eigenvalue λmax",
+        "consistencyIndex": "Consistency index CI",
+        "consistencyRatio": "Consistency ratio CR",
+        "weights": "Weights w"
       }
     },
     "issues": {
@@ -863,6 +890,13 @@
         "best": "Best",
         "worst": "Worst",
         "flagged": "Fits worst"
+      },
+      "ahp": {
+        "title": "Your comparisons and the fitted weights",
+        "matrix": "Pairwise ratios a_ik",
+        "fitted": "Fitted w_i / w_k",
+        "weight": "Weight",
+        "flagged": "Largest gap"
       }
     },
     "flow": {
@@ -952,6 +986,11 @@
         "border": "Border G",
         "distance": "Q",
         "scores": "S"
+      },
+      "ahp": {
+        "pairwiseMatrix": "Matrix A",
+        "lambdaMax": "Consistency",
+        "weights": "Weights"
       }
     },
     "pipeline": {
@@ -1037,7 +1076,8 @@
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
-      "bwm": "BWM"
+      "bwm": "BWM",
+      "ahp": "AHP"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1101,7 +1141,8 @@
         "marcos": "Measures against an imaginary ideal and anti-ideal.",
         "cocoso": "Three readings of a sum and a power sum, combined.",
         "mabac": "Distance above or below a border per criterion.",
-        "bwm": "Weights from your answers to a few comparisons."
+        "bwm": "Weights from your answers to a few comparisons.",
+        "ahp": "Weights from comparing every pair of criteria."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1340,6 +1381,20 @@
             "s3": "The answers about the worst criterion place it a second time. Where the two places differ, your answers disagree; the marked one fits worst.",
             "s4": "BWM picks the weights that keep the largest of these gaps as small as possible."
           }
+        },
+        "ahp": {
+          "title": "A matrix of ratios, one vector that fits it",
+          "caption": "Upper cells hold the comparisons, lower cells their reciprocals, and the bars on the right show the eigenvector weights (CR {{cr}}, threshold {{threshold}}).",
+          "matrix": "Pairwise ratios a_ik",
+          "fitted": "Fitted w_i / w_k",
+          "weight": "Weight",
+          "flagged": "Largest gap",
+          "steps": {
+            "s1": "Each cell answers how many times more important the row is than the column; you fill the upper half and the lower half is its mirror.",
+            "s2": "If the answers were perfectly consistent, every cell would equal w_row / w_col: one set of weights would explain the whole table.",
+            "s3": "AHP finds the weights that fit the table best (the principal eigenvector) and draws them as bars.",
+            "s4": "Where an answer and its fitted ratio disagree most, the cell is marked; the consistency ratio CR summarizes all disagreements against the 0.10 limit."
+          }
         }
       }
     }
@@ -1475,6 +1530,13 @@
       "consistencyLocal": "Consistency per criterion: how far a_Bj times a_jW is from a_BW.",
       "xi": "Deviation: the largest gap between the answers and the fitted weights.",
       "weights": "BWM weights: the linear model, solved in closed form, summing to 1."
+    },
+    "ahp": {
+      "pairwiseMatrix": "Pairwise comparison matrix: upper-triangle answers with reciprocal lower half and 1 on the diagonal.",
+      "lambdaMax": "Principal eigenvalue λmax: the average ratio of each weighted row sum (Aw)_i to its weight w_i.",
+      "consistencyIndex": "Consistency index CI = (λmax - n) / (n - 1): 0 when the comparisons are perfectly consistent.",
+      "consistencyRatio": "Consistency ratio CR = CI / RI_n: compares CI against Saaty's random index; up to 0.10 is the usual limit.",
+      "weights": "AHP weights: the normalized priority vector from the principal eigenvector or the row geometric mean."
     }
   },
   "validation": {
@@ -1565,6 +1627,10 @@
     "bwm": {
       "inconsistent": "Answers about {{criterion}} fit worst; the weights are still computed.",
       "threshold-approximate": "With more than 9 criteria the consistency threshold is approximate (the 9-criteria value)."
+    },
+    "ahp": {
+      "inconsistent": "The consistency ratio CR is at or above 0.10; check the highlighted pair, though the weights are still computed.",
+      "many-criteria": "With 8 or more criteria AHP asks at least 28 comparisons and consistency is harder to keep; consider BWM for fewer questions."
     }
   }
 }

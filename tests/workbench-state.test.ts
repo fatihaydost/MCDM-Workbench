@@ -659,3 +659,27 @@ describe('BWM through the store', () => {
     expectClose(w.value!.weights, [0.229508, 0.448087, 0.114754, 0.153005, 0.054645], 1e-6)
   })
 })
+
+describe('AHP through the store', () => {
+  it('Saaty 2008 job answers on the Krishnan criteria give the eigenvector and geometric-mean weights; incomplete answers block with judgements-incomplete', () => {
+    const st = () => useWorkbench.getState()
+    st().loadExample('krishnan-2021-smartphones', 'en')
+    st().setWeightMethod('ahp')
+    st().setJudgement(0, 1, 1 / 4)
+    expect(computeRanking(st()).issues).toContainEqual({ code: 'judgements-incomplete', severity: 'error', value: 1 })
+    const upper = [1 / 4, 1 / 6, 1 / 4, 1 / 8, 1 / 3, 3, 1 / 7, 4, 1 / 2, 1 / 7]
+    let idx = 0
+    for (let i = 0; i < 5; i++) {
+      for (let k = i + 1; k < 5; k++) {
+        st().setJudgement(i, k, upper[idx++]!)
+      }
+    }
+    const w = computeWeights(st())
+    expect(w.value).not.toBeNull()
+    expectClose(w.value!.weights, [0.0360501, 0.1219027, 0.2618926, 0.0745529, 0.5056017], 1e-6)
+    st().setMethodParam('ahp', 'aggregation', 'geometric')
+    const g = computeWeights(st())
+    expect(g.value).not.toBeNull()
+    expectClose(g.value!.weights, [0.0351085, 0.1185434, 0.2714848, 0.0721176, 0.5027456], 1e-6)
+  })
+})

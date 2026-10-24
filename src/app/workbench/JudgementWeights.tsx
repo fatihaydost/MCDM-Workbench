@@ -1,7 +1,8 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { bwmAnswers, bwmProgress, emptyJudgements, type Ratio, type WeightingResult } from '../../core'
+import { ahpProgress, bwmAnswers, bwmProgress, emptyJudgements, type AhpParams, type Judgements, type Ratio, type WeightingResult } from '../../core'
 import {
+  ahpQuestions,
   AnchorPicker,
   answerOf,
   bwmQuestions,
@@ -13,6 +14,7 @@ import {
   withinCap,
   type Consistency,
   type JudgementPanelLabels,
+  type Mode,
   type PairListLabels,
   type PairwiseLabels,
   type Question,
@@ -25,11 +27,12 @@ import { methodViews } from '../methods/views'
 import { criterionName, DECIMALS, ids } from './shared'
 import { ComputedWeights } from './WeightsStage'
 
-type Props = { problem: DraftProblem; method: 'bwm'; result: Computed<WeightingResult> }
+type Props = { problem: DraftProblem; method: 'bwm' | 'ahp'; result: Computed<WeightingResult> }
 
 /**
- * BWM on the Weights stage: pick the anchors, then one question at a time with the live weights and consistency next
- * to it. Once every answer is in, the card area becomes the list of all pairs (tap one to edit) and the usual table.
+ * AHP and BWM on the Weights stage: for BWM pick the anchors first, then one question at a time with the live weights
+ * and consistency next to it. Once every answer is in, the card area becomes the list of all pairs (tap one to edit)
+ * and the usual weights table.
  */
 export function JudgementWeights({ problem, method, result }: Props) {
   const { t } = useTranslation()
@@ -44,36 +47,63 @@ export function JudgementWeights({ problem, method, result }: Props) {
   const names = problem.criteria.map((_, j) => criterionName(problem.criteria, j, t))
   const judgements = stored && stored.pairs.length === n ? stored : emptyJudgements(n)
   const { best, worst } = judgements
-  const anchored = best !== null && worst !== null && best !== worst && best < n && worst < n
-  const questions = useMemo(() => (anchored ? bwmQuestions(n, best, worst) : []), [anchored, n, best, worst])
-  const progress = bwmProgress(judgements, n)
+  const isAhp = method === 'ahp'
+  const anchored = isAhp || (best !== null && worst !== null && best !== worst && best < n && worst < n)
+  const questions = useMemo(
+    () => (isAhp ? ahpQuestions(n) : anchored ? bwmQuestions(n, best!, worst!) : []),
+    [isAhp, anchored, n, best, worst],
+  )
+  const bwmProg = useMemo(() => (isAhp ? null : bwmProgress(judgements, n)), [isAhp, judgements, n])
+  const ahpProg = useMemo(
+    () => (isAhp ? ahpProgress(core, judgements, params as AhpParams) : null),
+    [isAhp, core, judgements, params],
+  )
   const complete = result.value !== null
-  // A criterion with neither answer yet is left out of the provisional weights: the panel shows "—", not 0.
-  const answers = bwmAnswers(judgements)
-  const shown = progress.weights?.map((w, j) => (answers?.bestToOthers[j] === null && answers.othersToWorst[j] === null ? undefined : w)) ?? null
 
-  // The question on screen, valid only for these anchors; null: the first unanswered one (or the summary when complete).
-  const key = `${n}-${best}-${worst}`
+  const answers = isAhp ? null : bwmAnswers(judgements)
+  const rawWeights = isAhp ? (ahpProg?.weights ?? null) : (bwmProg?.weights ?? null)
+  const provisional = isAhp ? (ahpProg?.provisional ?? true) : (bwmProg?.provisional ?? false)
+  // A criterion with no comparison yet is left out of the provisional weights: the panel shows "—", not 0.
+  const shown =
+    rawWeights?.map((w, j) => {
+      if (isAhp) return Number.isFinite(w) ? w : undefined
+      return answers?.bestToOthers[j] === null && answers.othersToWorst[j] === null ? undefined : w
+    }) ?? null
+
+  const qMode = (q: Question, j: Judgements = judgements): Mode => (isAhp ? { kind: 'ahp' } : modeFor(q, j))
+
+  // The question on screen, valid only for this method and anchor pair; null: the first unanswered one (or summary).
+  const key = isAhp ? `ahp-${n}` : `bwm-${n}-${best}-${worst}`
   const [at, setAt] = useState<{ key: string; index: number | null }>({ key, index: null })
-  // New anchors start over at the first unanswered question (A, B, then A again does not reopen A's old card).
   if (at.key !== key) setAt({ key, index: null })
   const chosen = at.key === key && at.index !== null && at.index < questions.length ? at.index : null
-  const index = chosen ?? (complete ? null : nextUnanswered(questions, judgements.pairs, (q) => modeFor(q, judgements), -1))
+  const index = chosen ?? (complete ? null : nextUnanswered(questions, judgements.pairs, (q) => qMode(q), -1))
   const question = index === null ? undefined : questions[index]
-  const mode = question ? modeFor(question, judgements) : undefined
+  const mode = question ? qMode(question) : undefined
 
-  // The card for criterion `flagged` on the suggestion's side.
-  const { flagged, suggestion } = progress
-  const isFlagged = (q: Question) =>
-    flagged !== null &&
-    suggestion !== null &&
-    (suggestion.side === 'bestToOthers' ? q.a === best && q.b === flagged : q.a === flagged && q.b === worst)
+  const worstPair = isAhp && ahpProg?.inconsistent ? ahpProg.worstPair : null
+  const bwmFlagged = isAhp ? null : (bwmProg?.flagged ?? null)
+  const bwmSuggestion = isAhp ? null : (bwmProg?.suggestion ?? null)
+
+  const isFlagged = (q: Question) => {
+    if (isAhp) return worstPair !== null && q.a === worstPair.i && q.b === worstPair.k
+    return (
+      bwmFlagged !== null &&
+      bwmSuggestion !== null &&
+      (bwmSuggestion.side === 'bestToOthers' ? q.a === best && q.b === bwmFlagged : q.a === bwmFlagged && q.b === worst)
+    )
+  }
   const flaggedIndex = questions.findIndex(isFlagged)
   const value = question ? (judgements.pairs[question.a]?.[question.b] ?? null) : null
-  // Only a suggestion the card can take (within a_BW) and that changes the answer.
+  const suggestedValue = isAhp ? (worstPair?.suggested ?? null) : (bwmSuggestion?.value ?? null)
   const flag =
-    question && mode && suggestion && isFlagged(question) && withinCap(suggestion.value, mode) !== null && suggestion.value !== value
-      ? { suggestion: suggestion.value }
+    question &&
+    mode &&
+    suggestedValue !== null &&
+    isFlagged(question) &&
+    withinCap(suggestedValue, mode) !== null &&
+    Math.abs(suggestedValue - (value ?? 0)) > 1e-9
+      ? { suggestion: suggestedValue }
       : null
 
   // Answers commit synchronously: the card arms its focus move for this frame only.
@@ -81,7 +111,7 @@ export function JudgementWeights({ problem, method, result }: Props) {
     if (!question || index === null) return
     setJudgement(question.a, question.b, v)
     const next = useWorkbench.getState().judgements ?? judgements
-    setAt({ key, index: nextUnanswered(questions, next.pairs, (q) => modeFor(q, next), index) })
+    setAt({ key, index: nextUnanswered(questions, next.pairs, (q) => qMode(q, next), index) })
   }
 
   // Between the card and the summary list the focused element unmounts: hand focus to the one that replaces it.
@@ -94,7 +124,8 @@ export function JudgementWeights({ problem, method, result }: Props) {
     const el = slot.current
     const target = summary
       ? el?.querySelector<HTMLElement>('button')
-      : (el?.querySelector<HTMLElement>('[data-values] [aria-checked="true"]') ?? el?.querySelector<HTMLElement>('[data-values] button:not(:disabled)'))
+      : (el?.querySelector<HTMLElement>('[data-values] [aria-checked="true"]') ??
+        el?.querySelector<HTMLElement>('[data-values] button:not(:disabled)'))
     target?.focus()
   }, [summary])
 
@@ -120,7 +151,7 @@ export function JudgementWeights({ problem, method, result }: Props) {
     back: t('workbench.pairwise.back'),
     atMost: (cap) => t('workbench.pairwise.atMost', { cap }),
     suggest: (a) => t('workbench.pairwise.suggest', { answer: a }),
-    use: (value) => t('workbench.pairwise.use', { value }),
+    use: (v) => t('workbench.pairwise.use', { value: v }),
   }
   const panelLabels: JudgementPanelLabels = {
     title: t('workbench.pairwise.panel.title'),
@@ -128,12 +159,12 @@ export function JudgementWeights({ problem, method, result }: Props) {
     consistency: t('workbench.pairwise.panel.consistency'),
     notApplicable: t('workbench.pairwise.panel.notApplicable'),
     value: (c) => {
-      const value = nf.format(c.value, 2)
-      if (c.threshold === null) return t('workbench.pairwise.panel.valueNoThreshold', { value })
+      const val = nf.format(c.value, 2)
+      if (c.threshold === null) return t('workbench.pairwise.panel.valueNoThreshold', { value: val })
       const threshold = nf.format(c.threshold, 2)
       return c.approximate
-        ? t('workbench.pairwise.panel.valueApproximate', { value, threshold })
-        : t('workbench.pairwise.panel.value', { value, threshold })
+        ? t('workbench.pairwise.panel.valueApproximate', { value: val, threshold })
+        : t('workbench.pairwise.panel.value', { value: val, threshold })
     },
     ok: t('workbench.pairwise.panel.ok'),
     warning: (name) => (name ? t('workbench.pairwise.panel.warning', { criterion: name }) : t('workbench.pairwise.panel.warningUnnamed')),
@@ -145,16 +176,26 @@ export function JudgementWeights({ problem, method, result }: Props) {
     flagged: t('workbench.pairwise.list.flagged'),
   }
 
-  // n = 2 has no consistency (Liang's thresholds start at 3 criteria).
-  const consistency: Consistency | null =
-    progress.crInput !== null && progress.threshold
-      ? { value: progress.crInput, threshold: progress.threshold.value, approximate: progress.threshold.approximate }
+  const consistency: Consistency | null = isAhp
+    ? ahpProg && ahpProg.cr !== null && ahpProg.threshold !== null
+      ? { value: ahpProg.cr, threshold: ahpProg.threshold, approximate: false, inclusive: true }
       : null
+    : bwmProg && bwmProg.crInput !== null && bwmProg.threshold
+      ? { value: bwmProg.crInput, threshold: bwmProg.threshold.value, approximate: bwmProg.threshold.approximate }
+      : null
+
+  const flaggedCriterion = isAhp ? (worstPair ? worstPair.i : null) : bwmFlagged
+  const flaggedLabel = isAhp
+    ? worstPair
+      ? t('workbench.pairwise.list.pair', { a: names[worstPair.i], b: names[worstPair.k] })
+      : null
+    : undefined
+
   const jump = (i: number) => setAt({ key, index: i })
   const list = (className?: string) => (
     <PairList
       questions={questions}
-      answers={questions.map((q) => answerOf(q, judgements.pairs, modeFor(q, judgements)))}
+      answers={questions.map((q) => answerOf(q, judgements.pairs, qMode(q)))}
       current={index ?? -1}
       flagged={flaggedIndex < 0 ? null : flaggedIndex}
       names={names}
@@ -164,25 +205,33 @@ export function JudgementWeights({ problem, method, result }: Props) {
     />
   )
   const Picture = methodViews[method].stage?.Component
+  const showAllEqual = isAhp ? (ahpProg?.answered ?? 0) === 0 : !anchored
 
   return (
     <>
-      <section id={ids.pairwise} tabIndex={-1} aria-label={t('workbench.weightMethod.bwm')} className="flex flex-col gap-6 outline-none">
-        <AnchorPicker
-          names={names}
-          best={best}
-          worst={worst}
-          onChange={setAnchors}
-          labels={{ best: t('workbench.pairwise.anchors.best'), worst: t('workbench.pairwise.anchors.worst') }}
-        />
-        {!anchored && (
+      <section
+        id={ids.pairwise}
+        tabIndex={-1}
+        aria-label={t(`workbench.weightMethod.${method}`)}
+        className="flex flex-col gap-6 outline-none"
+      >
+        {!isAhp && (
+          <AnchorPicker
+            names={names}
+            best={best}
+            worst={worst}
+            onChange={setAnchors}
+            labels={{ best: t('workbench.pairwise.anchors.best'), worst: t('workbench.pairwise.anchors.worst') }}
+          />
+        )}
+        {showAllEqual && (
           <Button variant="ghost" className="self-start" onClick={() => setWeightMethod('equal')}>
             {t('workbench.pairwise.allEqual')}
           </Button>
         )}
-        {anchored && Picture && progress.weights && (
+        {anchored && Picture && rawWeights && (
           <Suspense fallback={null}>
-            <Picture problem={core} weights={progress.weights} params={params} judgements={judgements} />
+            <Picture problem={core} weights={rawWeights} params={params} judgements={judgements} />
           </Suspense>
         )}
         {anchored && (
@@ -204,15 +253,17 @@ export function JudgementWeights({ problem, method, result }: Props) {
                 list('max-w-[420px]')
               )}
             </div>
-            {(progress.weights || question) && (
+            {(rawWeights || question) && (
               <div className="flex max-w-[480px] min-w-0 flex-col gap-8">
-                {progress.weights && (
+                {rawWeights && (
                   <JudgementPanel
                     names={names}
                     weights={shown}
-                    provisional={progress.provisional}
+                    provisional={provisional}
                     consistency={consistency}
-                    flagged={flagged}
+                    flagged={flaggedCriterion}
+                    flaggedLabel={flaggedLabel}
+                    onFlagClick={flaggedIndex >= 0 ? () => jump(flaggedIndex) : undefined}
                     labels={panelLabels}
                   />
                 )}
