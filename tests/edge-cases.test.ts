@@ -708,7 +708,7 @@ describe('3. Constant, near-constant, and tied data states', () => {
       expect(res.warnings).toContainEqual({ code: 'topsis.zero-distance' })
     })
 
-    it('documents pairFacts sensitivity to ULP rounding noise on constant column', () => {
+    it('ignores ULP rounding noise on constant column in pairFacts', () => {
       const p = makeProblem(
         [
           [10, 0.3],
@@ -719,9 +719,9 @@ describe('3. Constant, near-constant, and tied data states', () => {
       )
       const cmp = compareRankings(p, w2, [{ methodId: 'saw', params: {} }])
       const facts = pairFacts(p, w2, cmp, 0, 1)
-      // Col 1 is constant up to ULP, but range === 0 is false, so diff / range evaluates to ~1.0:
+      // Col 1 is constant within CONSTANT_TOLERANCE, so it is not treated as a decisive criterion:
       const decisiveCol1 = facts.criteria.find((c) => c.col === 1)
-      expect(decisiveCol1).toBeDefined()
+      expect(decisiveCol1).toBeUndefined()
     })
 
     it('documents CoCoSo all-worst-alternative blocking at sweepWeight endpoints for n = 2', () => {
@@ -737,7 +737,7 @@ describe('3. Constant, near-constant, and tied data states', () => {
       expect(() => sweepWeight(p, w2, rankFor, 0, { steps: 2 })).toThrow(RangeError)
     })
 
-    it('documents removeCriteria error when used with subjective weighting methods without judgements', () => {
+    it('returns blocked recompute rows in removeCriteria when used with subjective weighting methods without judgements', () => {
       // 3 criteria problem: removing 1 criterion leaves n = 2, so recompute executes
       const p3 = makeProblem(
         [
@@ -747,17 +747,17 @@ describe('3. Constant, near-constant, and tied data states', () => {
         ['benefit', 'benefit', 'benefit'],
       )
       const w3 = [1 / 3, 1 / 3, 1 / 3]
-      // removeCriteria calls weighting.compute(reduced, {}) without judgements for BWM:
-      expect(() => removeCriteria(p3, w3, rankerOf(saw), bwm)).toThrow(ProblemValidationError)
-      try {
-        removeCriteria(p3, w3, rankerOf(saw), bwm)
-      } catch (e) {
-        expect((e as ProblemValidationError).issues.map((x) => x.code)).toContain('anchors-missing')
+      const rows = removeCriteria(p3, w3, rankerOf(saw), bwm)
+      const recomputeRows = rows.filter((r) => r.mode === 'recompute')
+      expect(recomputeRows).toHaveLength(3)
+      for (const r of recomputeRows) {
+        expect(r.ranking).toEqual([])
+        expect(r.blocked?.map((x) => x.code)).toContain('anchors-missing')
       }
     })
 
     describe('Mathematician 1 findings: weighting, judgements, and numerical stability', () => {
-      it('documents CRITIC / pearson rounding overflow rho > 1 on affine columns resulting in negative conflict', () => {
+      it('clamps CRITIC / pearson rounding on affine columns to [-1, 1] with non-negative conflict', () => {
         // C1 and C2 are strictly affine: C2 = 0.3 * C1 + 0.1
         const pAffine = makeProblem(
           [
@@ -775,25 +775,19 @@ describe('3. Constant, near-constant, and tied data states', () => {
         const info = step(res.steps, 'critic.information').vector!
         const infoTotal = step(res.steps, 'critic.informationTotal').scalar!
 
-        // Due to IEEE-754 rounding without clamping, rho > 1:
-        expect(rho[0]![1]).toBeGreaterThan(1)
-        expect(rho[0]![1]).toBe(1.0000000000000002)
-
-        // Consequently, 1 - rho is negative:
-        expect(conflict[0]).toBeLessThan(0)
-        expect(info[0]).toBeLessThan(0)
-        expect(infoTotal).toBeLessThan(0)
+        expect(rho[0]![1]).toBe(1)
+        expect(conflict[0]).toBe(0)
+        expect(info[0]).toBe(0)
+        expect(infoTotal).toBe(0)
       })
 
-      it('documents pearson overflow to 0 when columns have large magnitude ~ 1e80', () => {
-        // When variance is large, sxx * syy overflows 1.79e308 (Number.MAX_VALUE),
-        // making den = Infinity, so num / den evaluates to 0 despite perfect correlation.
+      it('prevents pearson overflow when columns have large magnitude ~ 1e80', () => {
         const xs = [1e80, 2e80, 3e80]
         const ys = [1e80, 2e80, 3e80]
-        expect(pearson(xs, ys)).toBe(0)
+        expect(pearson(xs, ys)).toBe(1)
       })
 
-      it('documents entropy sum mode 1 ppm spread triggering allConstant and giving 50% weight to constant column', () => {
+      it('keeps entropy constant column at 0 weight when varying column has 1 ppm spread (< ENTROPY_NO_INFORMATION)', () => {
         // Col 0 is strictly constant. Col 1 varies by 1 ppm (10^6 to 10^6 + 1).
         // Diversification d_1 ~ 1.8e-13 < ENTROPY_NO_INFORMATION (1e-12).
         const p1ppm = makeProblem(
@@ -808,8 +802,8 @@ describe('3. Constant, near-constant, and tied data states', () => {
         expect(res.warnings).toContainEqual({ code: 'entropy.all-constant-equal-weights' })
         expect(res.diagnostics?.constantColumns).toBe(1)
         expect(res.diagnostics?.allConstant).toBe(1)
-        // Col 0 receives equal weight 0.5 despite being completely constant:
-        expect(res.weights).toEqual([0.5, 0.5])
+        // Strictly constant Col 0 stays at 0; varying Col 1 gets 1:
+        expect(res.weights).toEqual([0, 1])
       })
 
       it('documents LOPCOW silent fallback to equal weights when single best alternative yields PV = 0', () => {
@@ -833,7 +827,7 @@ describe('3. Constant, near-constant, and tied data states', () => {
         expect(res.diagnostics?.allConstant).toBe(0)
       })
 
-      it('documents AHP worstPair tied epsilon and stuck boundary suggestion (suggested === actual)', () => {
+      it('prefers an actionable AHP worstPair where suggested !== actual on tied epsilon', () => {
         const p = makeProblem([[1, 2, 3], [4, 5, 6]], ['benefit', 'benefit', 'benefit'])
         let j = emptyJudgements(3)
         j = setPair(j, 0, 1, 1 / 9)
@@ -846,14 +840,13 @@ describe('3. Constant, near-constant, and tied data states', () => {
         const A = step(res.steps, 'ahp.pairwiseMatrix').matrix!
         const worst = ahpWorstPair(A, res.weights)
         expect(worst).not.toBeNull()
-        // Pair (0, 1) is chosen because all 3 pairs have the exact same epsilon (~1.442):
+        // Pair (0, 2) has actual = 1/9 and suggested = 1/6 (actionable instead of stuck (0, 1) at 1/9):
         expect(worst?.i).toBe(0)
-        expect(worst?.k).toBe(1)
-        // Suggested equals actual because ratio clamps to scale boundary 1/9:
-        expect(worst?.suggested).toBe(worst?.actual)
+        expect(worst?.k).toBe(2)
+        expect(worst?.suggested).not.toBe(worst?.actual)
       })
 
-      it('documents BWM dimension mismatch vulnerability when judgements dimension differs from problem', () => {
+      it('sanitizes BWM judgements when dimension differs from problem', () => {
         const p3 = makeProblem(
           [
             [1, 2, 3],
@@ -861,22 +854,19 @@ describe('3. Constant, near-constant, and tied data states', () => {
           ],
           ['benefit', 'benefit', 'benefit'],
         )
-        // Complete judgments for 4 criteria given to a 3-criteria problem:
+        // Judgements for 4 criteria with worst = 3 (out of bounds for n = 3) are sanitized to worst = null:
         const j4 = judgementsFromBwm(4, 0, 3, [1, 2, 3, 4], [4, 3, 2, 1])
-        // Falsely throws judgements-incomplete (value 5) instead of dimension mismatch:
         expect(() => bwm.compute(p3, {}, j4)).toThrow(ProblemValidationError)
         try {
           bwm.compute(p3, {}, j4)
         } catch (e) {
           expect((e as ProblemValidationError).issues).toContainEqual({
-            code: 'judgements-incomplete',
-            value: 5,
+            code: 'anchors-missing',
             severity: 'error',
           })
         }
 
-        // Even worse: when an n=6 judgment matrix has 5 answered comparisons (matching 2*4 - 3 = 5 for n=4 problem),
-        // bwm.compute completes without error and returns 6 weights for a 4-criteria problem:
+        // An n=6 judgment matrix passed to an n=4 problem is sanitized to n=4 (never returns 6 weights):
         const p4 = makeProblem(
           [
             [1, 2, 3, 4],
@@ -892,9 +882,7 @@ describe('3. Constant, near-constant, and tied data states', () => {
         j6 = setPair(j6, 0, 2, 3)
         j6 = setPair(j6, 2, 5, 3)
 
-        const resMismatched = bwm.compute(p4, {}, j6)
-        expect(resMismatched.weights).toHaveLength(6)
-        expect(p4.criteria).toHaveLength(4)
+        expect(() => bwm.compute(p4, {}, j6)).toThrow(ProblemValidationError)
       })
     })
   })

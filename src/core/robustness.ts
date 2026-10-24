@@ -628,7 +628,14 @@ export function removeCriteria(
     const restSum = rest.reduce((s, w) => s + w, 0)
     const renorm = restSum > 0 ? rest.map((w) => w / restSum) : rest.map(() => 1 / rest.length)
     rows.push(row(j, 'renormalize', reduced, renorm))
-    if (weighting) rows.push(row(j, 'recompute', reduced, weighting.compute(reduced, opts?.weightingParams ?? {}).weights))
+    if (weighting) {
+      try {
+        rows.push(row(j, 'recompute', reduced, weighting.compute(reduced, opts?.weightingParams ?? {}).weights))
+      } catch (err) {
+        if (!(err instanceof ProblemValidationError)) throw err
+        rows.push({ j, mode: 'recompute', weights: new Array<number>(n).fill(0), ...blockedRow(err) })
+      }
+    }
   }
   return rows
 }

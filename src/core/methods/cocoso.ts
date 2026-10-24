@@ -25,7 +25,8 @@ export const cocoso: RankingMethod<CocosoParams> = {
   compute(problem: Problem, weights: number[], params: CocosoParams = {}): RankingResult {
     const lambda = params.lambda ?? WASPAS_DEFAULT_LAMBDA
     if (!Number.isFinite(lambda) || lambda < 0 || lambda > 1) throw new RangeError('CoCoSo lambda must be in [0, 1]')
-    assertValid([...validateProblem(problem), ...validateWeights(weights, problem.criteria.length)])
+    const issues = [...validateProblem(problem), ...validateWeights(weights, problem.criteria.length)]
+    assertValid(issues)
 
     const { r, nearConstant } = minMaxNormalize(problem)
     const warnings: MethodWarning[] = []
@@ -33,9 +34,11 @@ export const cocoso: RankingMethod<CocosoParams> = {
 
     const s = r.map((row) => row.reduce((a, x, j) => a + x * weights[j]!, 0))
     const p = r.map((row) => row.reduce((a, x, j) => a + (weights[j]! > 0 ? x ** weights[j]! : 0), 0))
-    // S = 0 exactly when every weighted r is 0, and then P = 0 too.
-    const own: ValidationIssue[] = s.flatMap((x, i) => (x === 0 ? [{ code: 'all-worst-alternative' as const, severity: 'error' as const, row: i }] : []))
-    assertValid(own)
+    // S = 0 or P = 0 when every weighted r is 0 (or underflows to 0).
+    const own: ValidationIssue[] = s.flatMap((x, i) =>
+      x <= 0 || p[i]! <= 0 ? [{ code: 'all-worst-alternative' as const, severity: 'error' as const, row: i }] : [],
+    )
+    assertValid([...issues, ...own])
 
     const minS = minOf(s)
     const minP = minOf(p)

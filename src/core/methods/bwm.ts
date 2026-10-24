@@ -1,3 +1,4 @@
+import { sanitizeJudgements } from '../judgements'
 import type { Judgements, MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
 import { ProblemValidationError, type ValidationIssue } from '../validate'
 
@@ -37,12 +38,12 @@ const LIANG_CRI: readonly (readonly number[])[] = [
 /** The BWM view of the pairwise answers; an entry outside 1..cap (AHP direction, above a_BW) counts as unanswered. */
 export function bwmAnswers(j: Judgements): BwmAnswers | null {
   const { best: B, worst: W } = j
-  if (B === null || W === null || B === W) return null
+  const n = j.pairs.length
+  if (B === null || W === null || B === W || B < 0 || B >= n || W < 0 || W >= n) return null
   const at = (a: number, b: number) => j.pairs[a]?.[b] ?? null
   const ok = (v: number | null, cap: number) => (v !== null && Number.isInteger(v) && v >= 1 && v <= cap ? v : null)
   const aBW = ok(at(B, W), 9)
   const cap = aBW ?? 9
-  const n = j.pairs.length
   const bestToOthers = Array.from({ length: n }, (_, k) => (k === B ? 1 : k === W ? aBW : ok(at(B, k), cap)))
   const othersToWorst = Array.from({ length: n }, (_, k) => (k === W ? 1 : k === B ? aBW : ok(at(k, W), cap)))
   return { best: B, worst: W, bestToOthers, othersToWorst }
@@ -150,7 +151,7 @@ export function bwmSuggestion(
 export function bwmProgress(j: Judgements, n: number): BwmProgress {
   const total = Math.max(2 * n - 3, 0)
   const none: BwmProgress = { answered: 0, total, weights: null, provisional: false, crInput: null, threshold: null, flagged: null, suggestion: null }
-  const a = bwmAnswers(j)
+  const a = bwmAnswers(j.pairs.length === n ? j : sanitizeJudgements(j, n))
   if (!a) return none
   const { best: B, worst: W, bestToOthers: bo, othersToWorst: ow } = a
   const aBW = bo[W] ?? null
@@ -194,7 +195,8 @@ export const bwm: WeightingMethod = {
       throw new ProblemValidationError([{ ...issue, severity: 'error' }])
     }
     if (n < 2) fail({ code: 'too-few-criteria', value: n })
-    const a = judgements ? bwmAnswers(judgements) : null
+    const clean = judgements ? (judgements.pairs.length === n ? judgements : sanitizeJudgements(judgements, n)) : null
+    const a = clean ? bwmAnswers(clean) : null
     if (!a) return fail({ code: 'anchors-missing' })
     const answered = countAnswered(a)
     if (answered !== 2 * n - 3) fail({ code: 'judgements-incomplete', value: answered })

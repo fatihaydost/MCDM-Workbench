@@ -101,7 +101,7 @@ export function ahpGeometricMean(A: readonly (readonly number[])[]): { weights: 
     sum += gi
   }
   const weights = g.map((gi) => gi / sum)
-  return { weights, lambdaMax: rayleighLambdaMax(A, weights) }
+  return { weights, lambdaMax: ahpEigenvector(A).lambdaMax }
 }
 
 function solveLinearSystem(matrix: number[][], rhs: number[]): number[] {
@@ -218,28 +218,26 @@ export function ahpIncompleteLlsm(n: number, pairs: readonly (readonly (Ratio | 
 export function ahpWorstPair(A: readonly (readonly number[])[], weights: readonly number[]): AhpWorstPair | null {
   const n = A.length
   if (n < 3) return null
-  let bestI = -1
-  let bestK = -1
-  let bestEps = 1
+  let best: AhpWorstPair | null = null
   for (let i = 0; i < n; i++)
     for (let k = i + 1; k < n; k++) {
-      const actual = A[i]![k]!
+      const actual = A[i]![k]! as Ratio
       const ratio = weights[i]! / weights[k]!
       const eps = Math.max(actual / ratio, ratio / actual)
-      if (eps > bestEps + 1e-12) {
-        bestEps = eps
-        bestI = i
-        bestK = k
+      if (eps <= 1 + 1e-9) continue
+      const suggested = nearestScale(ratio)
+      const cand: AhpWorstPair = { i, k, epsilon: eps, actual, suggested }
+      if (
+        !best ||
+        eps > best.epsilon + 1e-12 ||
+        (Math.abs(eps - best.epsilon) <= 1e-12 &&
+          Math.abs(best.suggested - best.actual) <= 1e-9 &&
+          Math.abs(suggested - actual) > 1e-9)
+      ) {
+        best = cand
       }
     }
-  if (bestI < 0 || bestEps <= 1 + 1e-9) return null
-  return {
-    i: bestI,
-    k: bestK,
-    epsilon: bestEps,
-    actual: A[bestI]![bestK]!,
-    suggested: nearestScale(weights[bestI]! / weights[bestK]!),
-  }
+  return best
 }
 
 function buildMatrix(n: number, j: Judgements | undefined): { matrix: number[][] | null; answered: number; total: number } {

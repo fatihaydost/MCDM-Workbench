@@ -77,11 +77,16 @@ export const entropy: WeightingMethod<EntropyParams> = {
       if (variant === 'sum' && column(matrix, j).some((v) => v === 0)) warnings.push({ code: 'entropy.zeros-in-column', col: j })
     }
 
-    // 5. Weights; with no diversification at all there is nothing to weigh: equal weights.
+    // 5. Weights; with no diversification at all there is nothing to weigh: equal weights across varying columns (or all if all constant).
     const totalD = sum(d)
-    const allConstant = totalD < ENTROPY_NO_INFORMATION
+    const allConstant = constant.every(Boolean) || totalD < ENTROPY_NO_INFORMATION
     if (allConstant) warnings.push({ code: 'entropy.all-constant-equal-weights' })
-    const weights = allConstant ? new Array<number>(n).fill(1 / n) : d.map((x) => x / totalD)
+    const varying = constant.filter((c) => !c).length
+    const weights = allConstant
+      ? varying > 0
+        ? constant.map((c) => (c ? 0 : 1 / varying))
+        : new Array<number>(n).fill(1 / n)
+      : d.map((x) => x / totalD)
 
     if (variant === 'minmax' && m === 2) warnings.push({ code: 'entropy.two-alternatives-minmax' })
     const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)

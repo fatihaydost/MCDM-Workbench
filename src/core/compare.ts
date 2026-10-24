@@ -5,6 +5,7 @@
  * A method whose ranking is another run's by construction (an echo: MARCOS of SAW 'linearMax') is shown but counted
  * once, so it never adds a second agreeing vote.
  */
+import { isConstant, maxOf, minOf } from './math'
 import { rankScores } from './rank'
 import { midRanks } from './robustness'
 import { prepareRanking, type RankingRun } from './run'
@@ -137,7 +138,7 @@ export function pairFacts(problem: Problem, weights: number[], c: Comparison, i:
   const decisive = problem.criteria
     .map((crit, col) => {
       const column = rows.map((r) => r[col]!)
-      const range = Math.max(...column) - Math.min(...column)
+      const range = isConstant(column) ? 0 : maxOf(column) - minOf(column)
       const diff = rows[a]![col]! - rows[b]![col]!
       const value = range === 0 ? 0 : (weights[col]! * Math.abs(diff)) / range
       const aWins = crit.type === 'benefit' ? diff > 0 : diff < 0
@@ -160,7 +161,7 @@ export function pairFacts(problem: Problem, weights: number[], c: Comparison, i:
     criteria: decisive,
     methods,
     vikorRegret: d?.matrix
-      ? { a: argmax(d.matrix[a]!), b: argmax(d.matrix[b]!), ra: Math.max(...d.matrix[a]!), rb: Math.max(...d.matrix[b]!) }
+      ? { a: argmax(d.matrix[a]!), b: argmax(d.matrix[b]!), ra: maxOf(d.matrix[a]!), rb: maxOf(d.matrix[b]!) }
       : null,
     unanimous: methods.every((m) => m.higher === methods[0]!.higher),
   }

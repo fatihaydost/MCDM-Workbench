@@ -62,11 +62,6 @@ export function whySentences(f: PairFacts, ctx: WhyContext): string[] {
   const rep = (ids: string[]) => [ids.includes('vikor') ? 'vikor' : ids[0]!]
   const shown = na === nb ? [...(na ? rep(side('a')) : []), ...(nb ? rep(side('b')) : [])] : na < nb ? side('a') : side('b')
   const head = [...criteria, ...groups, ...ties]
-  // Every ranking method has its sentence at why.character.<id>.
-  const characters = shown
-    .filter(isRankingId)
-    .map((id) => t(`why.character.${id}`))
-    .slice(0, Math.max(0, MAX_SENTENCES - head.length))
   const v = shown.includes('vikor') ? f.vikorRegret : null
   const regret = !v ? [] : Math.abs(v.ra - v.rb) < 1e-12
     ? [t('why.vikorRegretEqual', { a, b })]
@@ -75,5 +70,12 @@ export function whySentences(f: PairFacts, ctx: WhyContext): string[] {
           ? t('why.vikorRegretSame', { a, b, c: ctx.criteria[v.a]!, larger: v.ra > v.rb ? a : b })
           : t('why.vikorRegret', { a, b, ca: ctx.criteria[v.a]!, cb: ctx.criteria[v.b]!, larger: v.ra > v.rb ? a : b }),
       ]
+  // Prioritize VIKOR in character sentences and reserve space for its regret explanation on asymmetric splits.
+  const prioritized = shown.includes('vikor') ? ['vikor', ...shown.filter((x) => x !== 'vikor')] : shown
+  const reserve = na !== nb ? regret.length : 0
+  const characters = prioritized
+    .filter(isRankingId)
+    .map((id) => t(`why.character.${id}`))
+    .slice(0, Math.max(0, MAX_SENTENCES - head.length - reserve))
   return [...head, ...characters, ...regret].slice(0, MAX_SENTENCES)
 }

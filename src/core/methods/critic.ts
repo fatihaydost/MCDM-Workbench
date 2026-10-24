@@ -49,7 +49,7 @@ export const critic: WeightingMethod = {
     //    Taking a constant column's ρ as 0 would add 1 to every other column's conflict and shift their weights,
     //    although the column carries no information; leaving it out gives the weights of the problem without it.
     //    A constant column is left out of its own sum too: conflict 0.
-    const conflict = rho.map((row, j) => (constant[j] ? 0 : sum(row.map((v, k) => (constant[k] ? 0 : 1 - v)))))
+    const conflict = rho.map((row, j) => (constant[j] ? 0 : sum(row.map((v, k) => (constant[k] ? 0 : Math.max(0, 1 - v))))))
     const information = sigma.map((s, j) => s * conflict[j]!)
 
     // 5. Weights. With no information at all: every column constant -> equal weights; otherwise the columns that vary

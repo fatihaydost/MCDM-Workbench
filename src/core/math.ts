@@ -117,8 +117,8 @@ export function pearson(xs: number[], ys: number[]): number {
     sxx += dx * dx
     syy += dy * dy
   }
-  const den = Math.sqrt(sxx * syy)
-  return den === 0 ? 0 : num / den
+  const den = Math.sqrt(sxx) * Math.sqrt(syy)
+  return den === 0 ? 0 : Math.max(-1, Math.min(1, num / den))
 }
 
 export const zeros = (m: number, n: number): number[][] => Array.from({ length: m }, () => new Array<number>(n).fill(0))

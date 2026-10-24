@@ -1017,7 +1017,7 @@ describe('Mathematician 2 Ranking Identities and Algebraic Conservation Laws', (
 })
 
 describe('Mathematician 1 Weighting, Judgements, and Numerical Algebra Audits', () => {
-  it('pearson on min-max normalized collinear floats exhibits 2.22e-16 overshoot above 1.0', () => {
+  it('pearson on min-max normalized collinear floats clamps 2.22e-16 overshoot to 1.0', () => {
     const xs = [0, 1, 2, 12, 61]
     const ys = [0.1, 0.4, 0.7, 3.7, 18.4]
     const minMax = (arr: number[]) => {
@@ -1029,11 +1029,8 @@ describe('Mathematician 1 Weighting, Judgements, and Numerical Algebra Audits', 
     const rys = minMax(ys)
     const p = pearson(rxs, rys)
 
-    // In IEEE 754 float64 arithmetic, p computes to 1.0000000000000002 (> 1.0)
-    expect(p).toBeGreaterThan(1.0)
-    expect(p - 1.0).toBeCloseTo(2.22e-16, 17)
-    // 1 - p produces small negative residue
-    expect(1.0 - p).toBeLessThan(0)
+    expect(p).toBe(1.0)
+    expect(1.0 - p).toBe(0)
   })
 
   it('vectorNormalize handles all-zero column and preserves norm on 1e-90 and 1e90 scales', () => {
@@ -1091,7 +1088,7 @@ describe('Mathematician 1 Weighting, Judgements, and Numerical Algebra Audits', 
     expect(rankScores(u2, 'desc')).toEqual([1, 1])
   })
 
-  it('entropy with normalization sum triggers all-constant fallback when total diversification < 1e-12', () => {
+  it('entropy with normalization sum keeps constant column at 0 when total diversification < 1e-12', () => {
     // Column 0 has tiny spread (1000000 to 1000002) giving d_0 < 1e-12, Column 1 is strictly constant (d_1 = 0)
     const p: Problem = {
       alternatives: ['A1', 'A2', 'A3'],
@@ -1109,7 +1106,7 @@ describe('Mathematician 1 Weighting, Judgements, and Numerical Algebra Audits', 
     const dStep = res.steps.find((s) => s.key === 'entropy.diversification')!
     expect(sum(dStep.vector!)).toBeLessThan(ENTROPY_NO_INFORMATION)
     expect(res.warnings?.some((w) => w.code === 'entropy.all-constant-equal-weights')).toBe(true)
-    expect(res.weights).toEqual([0.5, 0.5])
+    expect(res.weights).toEqual([1, 0])
   })
 
   it('LOPCOW algebraic identity RMS_j^2 - sigma_j^2 >= 0 holds to 1e-14 on arbitrary matrices', () => {
