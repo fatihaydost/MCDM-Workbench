@@ -1054,6 +1054,11 @@
         "weight": "Weight w",
         "share": "Share p"
       },
+      "equal": {
+        "title": "Every criterion gets 1/n",
+        "share": "equal share 1/n",
+        "weight": "Weight w"
+      },
       "topsis": {
         "title": "Distances to A+ and A−",
         "caption": "Closer to A+ and farther from A− gives a higher C.",
@@ -1653,6 +1658,17 @@
             "s4": "Weight w: 1 − e divided by the total over all criteria."
           }
         },
+        "equal": {
+          "title": "Equal share 1/n for every criterion",
+          "share": "equal share 1/n",
+          "weight": "Weight w",
+          "caption": "Five smartphone criteria: the unit total 1 is divided by n = 5, so every criterion receives w = 1/5 = 0.2000 regardless of its column values.",
+          "steps": {
+            "s1": "The smartphone problem has n = 5 criteria on a 0 to 1 weight track, and equal weighting reads only the count n rather than the decision matrix or pairwise judgments.",
+            "s2": "The vertical dashed reference line marks 1/n = 1/5 of the unit total, and every criterion's bar reaches that exact mark.",
+            "s3": "Every criterion receives the same weight w = 0.2000, summing to 1 with no parameter to tune and no single criterion highlighted above the rest."
+          }
+        },
         "saw": {
           "title": "Every part of the score has a criterion",
           "caption": "Each segment is one criterion's weight times its normalized value; the bar ends at S.",
@@ -1673,7 +1689,12 @@
         },
         "vikor": {
           "title": "Group utility or the largest regret: v sets the balance",
-          "caption": "Below the dashed line Q stays within DQ of the leader; without an acceptable advantage those alternatives form the compromise set."
+          "caption": "Below the dashed line Q stays within DQ of the leader; without an acceptable advantage those alternatives form the compromise set.",
+          "steps": {
+            "s1": "Each alternative sits in the rescaled (S, R) plane: group utility on the horizontal axis, individual regret on the vertical axis, and the ideal at the bottom-left corner (0, 0).",
+            "s2": "Strategy weight v = 0.5 tilts the dashed iso-Q threshold line Q(a') + DQ; alternatives inside the shaded triangle below it stay within DQ of the leader.",
+            "s3": "The right-hand bars rank all alternatives by Q = v(S − S*) / (S− − S*) + (1 − v)(R − R*) / (R− − R*) and check acceptable advantage (C1) and acceptable stability (C2) to name the compromise set."
+          }
         },
         "edas": {
           "title": "Better or worse than the average, criterion by criterion",
@@ -1741,7 +1762,12 @@
         },
         "waspas": {
           "title": "Sum or product: λ sets the blend",
-          "caption": "Each line is one alternative; where two lines cross, they swap places. The vertical line marks λ = 0.5."
+          "caption": "Each line is one alternative; where two lines cross, they swap places. The vertical line marks λ = 0.5.",
+          "steps": {
+            "s1": "Each alternative's score Q(λ) = λ Q₁ + (1 − λ) Q₂ is a straight line from the weighted product Q₂ at λ = 0 to the weighted sum Q₁ at λ = 1.",
+            "s2": "Wherever two straight lines cross, those two alternatives swap ranks at that exact blend λ.",
+            "s3": "The vertical cursor marks the chosen blend λ = 0.5, reading each alternative's combined score Q and highlighting the leader."
+          }
         },
         "copras": {
           "title": "Benefit share plus a bonus for low cost",

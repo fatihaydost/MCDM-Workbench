@@ -1054,6 +1054,11 @@
         "weight": "Ağırlık w",
         "share": "Pay p"
       },
+      "equal": {
+        "title": "Her kritere 1/n düşer",
+        "share": "eşit pay 1/n",
+        "weight": "Ağırlık w"
+      },
       "topsis": {
         "title": "A+ ve A−'ye uzaklık",
         "caption": "A+'ya yakın ve A−'den uzak olanın C değeri yüksektir.",
@@ -1653,6 +1658,17 @@
             "s4": "Ağırlık w: 1 − e, tüm kriterlerin toplamına bölünür."
           }
         },
+        "equal": {
+          "title": "Her kriter için eşit pay 1/n",
+          "share": "eşit pay 1/n",
+          "weight": "Ağırlık w",
+          "caption": "Beş akıllı telefon kriteri: birim toplam 1, n = 5'e bölünür; böylece sütun değerlerinden bağımsız olarak her kriter w = 1/5 = 0,2000 ağırlık alır.",
+          "steps": {
+            "s1": "Akıllı telefon probleminde 0 ile 1 ağırlık ekseninde n = 5 kriter yer alır; eşit ağırlıklandırma karar matrisini ya da ikili yargıları değil, yalnızca kriter sayısı n'yi okur.",
+            "s2": "Dikey kesikli referans çizgisi birim toplamın 1/n = 1/5 noktasını işaretler ve her kriterin çubuğu tam bu çizgiye ulaşır.",
+            "s3": "Her kriter w = 0,2000 ağırlık alır; toplamları 1 olur, ayarlanacak bir parametre yoktur ve hiçbir kriter diğerlerinin önüne çıkarılmaz."
+          }
+        },
         "saw": {
           "title": "Skorun her parçasının bir kriteri var",
           "caption": "Her parça bir kriterin ağırlığı ile normalize değerinin çarpımı; çubuk S değerinde biter.",
@@ -1673,7 +1689,12 @@
         },
         "vikor": {
           "title": "Grup faydası mı, en büyük pişmanlık mı: dengeyi v kurar",
-          "caption": "Kesikli çizginin altında Q, lidere DQ'dan yakın kalır; avantaj kabul edilebilir değilse bu alternatifler uzlaşık kümeyi oluşturur."
+          "caption": "Kesikli çizginin altında Q, lidere DQ'dan yakın kalır; avantaj kabul edilebilir değilse bu alternatifler uzlaşık kümeyi oluşturur.",
+          "steps": {
+            "s1": "Her alternatif yeniden ölçeklenmiş (S, R) düzlemine yerleşir: yatay eksende grup faydası, dikey eksende bireysel pişmanlık ve sol alt köşede (0, 0) ideal nokta bulunur.",
+            "s2": "Strateji ağırlığı v = 0,5 kesikli eş-Q eşik doğrusunu Q(a') + DQ konumunda eğer; altındaki taralı üçgende kalan alternatifler liderin DQ komşuluğundadır.",
+            "s3": "Sağdaki çubuklar alternatifleri Q = v(S − S*) / (S− − S*) + (1 − v)(R − R*) / (R− − R*) değerine göre sıralar; kabul edilebilir avantaj (C1) ve kabul edilebilir istikrar (C2) koşullarıyla uzlaşık kümeyi belirler."
+          }
         },
         "edas": {
           "title": "Kriter kriter ortalamadan iyi mi, kötü mü",
@@ -1741,7 +1762,12 @@
         },
         "waspas": {
           "title": "Toplam mı çarpım mı: karışımı λ belirler",
-          "caption": "Her çizgi bir alternatif; iki çizginin kesiştiği yerde sıraları yer değiştirir. Dikey çizgi λ = 0,5 değerini gösterir."
+          "caption": "Her çizgi bir alternatif; iki çizginin kesiştiği yerde sıraları yer değiştirir. Dikey çizgi λ = 0,5 değerini gösterir.",
+          "steps": {
+            "s1": "Her alternatifin Q(λ) = λ Q₁ + (1 − λ) Q₂ skoru, λ = 0'daki ağırlıklı çarpım Q₂'den λ = 1'deki ağırlıklı toplam Q₁'e uzanan bir doğrudur.",
+            "s2": "İki doğrunun kesiştiği her noktada, ilgili iki alternatif tam o λ karışımında sıra değiştirir.",
+            "s3": "Dikey imleç seçilen λ = 0,5 karışımını işaretler; her alternatifin birleşik Q skorunu okur ve birinciyi vurgular."
+          }
         },
         "copras": {
           "title": "Fayda payı artı düşük maliyet puanı",

@@ -20,6 +20,7 @@ export type WeightRangeProps = {
   onChange: (v: number, repeat: boolean) => void
   /** Name, when no `<label htmlFor>` points at the input. */
   label?: string
+  disabled?: boolean | undefined
   className?: string
   style?: CSSProperties
 }
@@ -28,8 +29,9 @@ export type WeightRangeProps = {
  * A weight as a native range input, 0..1 in 0.01 steps (or `step`), with a tick at the starting weight. Keys step from a value
  * off the grid onto the next grid point first (stepWeight), so the starting weight 0.1872 goes to 0.19 or 0.18.
  */
-export function WeightRange({ id, value, base, valueText, step = 0.01, onChange, label, className, style }: WeightRangeProps) {
+export function WeightRange({ id, value, base, valueText, step = 0.01, onChange, label, disabled, className, style }: WeightRangeProps) {
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (disabled) return
     if (e.key in KEY_STEPS) {
       e.preventDefault()
       onChange(stepWeight(value, KEY_STEPS[e.key]!, step), e.repeat)
@@ -49,6 +51,7 @@ export function WeightRange({ id, value, base, valueText, step = 0.01, onChange,
         max={1}
         step={step}
         value={value}
+        disabled={disabled}
         aria-label={label}
         aria-valuetext={valueText}
         onChange={(e) => onChange(snapWeight(Number(e.target.value), step), false)}

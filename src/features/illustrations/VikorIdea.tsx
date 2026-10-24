@@ -69,8 +69,15 @@ export type VikorIdeaProps = {
   /** Number format for S, R, Q, the gap and DQ (active locale, 4 decimals). */
   format?: ((value: number) => string) | undefined
   labels?: Partial<VikorIdeaLabels>
+  /** Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. VIKOR_IDEA_STEPS - 1 that step, the last being the full picture. */
+  step?: number | null | undefined
+  /** Move at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
+  explain?: boolean | undefined
   className?: string | undefined
 }
+
+/** The steps of the VIKOR idea: 0 the (S, R) plane and the ideal corner, 1 the iso-Q threshold line and compromise region, 2 the ranked Q bars and C1/C2 verdict. */
+export const VIKOR_IDEA_STEPS = 3
 
 const FONT = 12
 const NAME_FONT = 13
@@ -97,7 +104,16 @@ const defaultFormat = (v: number) => v.toFixed(4)
  * Under both, C1 (acceptable advantage) and C2 (acceptable stability) in words, then the compromise.
  * Static at first paint; a new v or new data turns the line and moves the bars (MOTION.md, --dur-data).
  */
-export function VikorIdea({ problem, weights, params, format = defaultFormat, labels, className }: VikorIdeaProps) {
+export function VikorIdea({
+  problem,
+  weights,
+  params,
+  format = defaultFormat,
+  labels,
+  step,
+  explain = false,
+  className,
+}: VikorIdeaProps) {
   const l = { ...VIKOR_IDEA_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
@@ -105,6 +121,10 @@ export function VikorIdea({ problem, weights, params, format = defaultFormat, la
   const v = params?.v
   const parts = useMemo(() => vikorParts(problem, weights, v === undefined ? {} : { v }), [problem, weights, v])
   if (!parts) return null
+
+  const stepping = step !== null && step !== undefined
+  const stage = stepping ? Math.min(Math.max(step, 0), VIKOR_IDEA_STEPS - 1) : VIKOR_IDEA_STEPS - 1
+  const off = (from: number) => (stage >= from ? undefined : '')
 
   const { S, R, Q, sTerm, rTerm, compromise, order } = parts
   const names = problem.alternatives
@@ -193,7 +213,7 @@ export function VikorIdea({ problem, weights, params, format = defaultFormat, la
       className={className}
     >
       <svg
-        className={animate ? `${s.svg} ${s.animate}` : s.svg}
+        className={[s.svg, animate && s.animate, explain && s.explain].filter(Boolean).join(' ')}
         width={W}
         height={height}
         viewBox={`0 0 ${W} ${height}`}
@@ -205,10 +225,25 @@ export function VikorIdea({ problem, weights, params, format = defaultFormat, la
       >
         {/* Plane of the two terms of Q. */}
         <g data-testid="vikor-plane">
-          {regionPath && <path className={s.vikorBand} d={regionPath} style={{ d: `path('${regionPath}')` }} />}
+          {regionPath && (
+            <path
+              className={`${s.vikorBand} ${s.stageItem}`}
+              data-off={off(1)}
+              d={regionPath}
+              style={{ d: `path('${regionPath}')` }}
+            />
+          )}
           <path className={s.axis} d={`M${px(0)} ${py(1)}V${py(0)}H${px(1)}`} />
           <path className={s.vikorFrame} d={`M${px(0)} ${py(1)}H${px(1)}V${py(0)}`} />
-          {linePathD && <path className={s.vikorLine} d={linePathD} style={{ d: `path('${linePathD}')` }} data-testid="vikor-threshold-line" />}
+          {linePathD && (
+            <path
+              className={`${s.vikorLine} ${s.stageItem}`}
+              data-off={off(1)}
+              d={linePathD}
+              style={{ d: `path('${linePathD}')` }}
+              data-testid="vikor-threshold-line"
+            />
+          )}
           {/* The plane is the rescaled terms: the far ends are the worst S and R (S-, R-), the corner the ideal. */}
           <text className={s.isoLabel} x={px(0) - 6} y={py(1)} textAnchor="end" dominantBaseline="central">
             {l.r}−
@@ -240,7 +275,7 @@ export function VikorIdea({ problem, weights, params, format = defaultFormat, la
         </g>
 
         {/* Q in rank order, with the same band. */}
-        <g data-testid="vikor-bars">
+        <g className={s.stageItem} data-off={off(2)} data-testid="vikor-bars">
           <text className={s.axisName} x={barsLeft} y={barsTop + 12}>
             {l.barsTitle}
           </text>

@@ -1,13 +1,14 @@
 import { useCallback, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { VIKOR_DEFAULT_V } from '../../../core/methods/vikor'
-import { VikorIdea } from '../../../features/illustrations/VikorIdea'
+import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
+import { VIKOR_IDEA_STEPS, VikorIdea } from '../../../features/illustrations/VikorIdea'
 import { useNumberFormat } from '../../../i18n'
 import { cn } from '../../../ui'
 import { WeightRange } from '../../ranking/WeightRange'
 import { DECIMALS } from '../../workbench/shared'
 import { useVikorLabels } from '../../workbench/vikorLabels'
-import { IdeaSource } from './parts'
+import { IdeaSource, useStepLabels } from './parts'
 import type { IdeaPictureProps, StagePictureProps } from './types'
 
 /** Ranking stage: S against R with the DQ threshold line, Q with the DQ band, C1 and C2 in words. */
@@ -21,8 +22,7 @@ export function Stage({ problem, weights, params, className }: StagePictureProps
 
 /**
  * Method page: the picture on ten alternatives, where no leader is clearly ahead, so the compromise set and the DQ
- * line show. Its own v slider (the page's state, not the workbench's) instead of a step-through story, since turning
- * the threshold line is its idea.
+ * line show. Its own v slider (locked to v = 0.5 while stepping) plus a step-through story.
  */
 export function Idea({ example, problem }: IdeaPictureProps) {
   const { t } = useTranslation()
@@ -30,7 +30,11 @@ export function Idea({ example, problem }: IdeaPictureProps) {
   const [v, setV] = useState(0.5)
   const id = useId()
   const labels = useVikorLabels('methods.page.idea.vikor.title')
-  const vText = format(v, 2)
+  const steps = useIdeaSteps(VIKOR_IDEA_STEPS)
+  const stepLabels = useStepLabels()
+  const sentences = (['s1', 's2', 's3'] as const).map((k) => t(`methods.page.idea.vikor.steps.${k}`))
+  const shownV = steps.step !== null ? 0.5 : v
+  const vText = format(shownV, 2)
   return (
     <div className="flex flex-col gap-3">
       <div className="flex w-full max-w-[360px] flex-col gap-1">
@@ -42,7 +46,7 @@ export function Idea({ example, problem }: IdeaPictureProps) {
             {vText}
           </output>
         </div>
-        <WeightRange id={id} value={v} base={0.5} valueText={vText} onChange={setV} />
+        <WeightRange id={id} value={shownV} base={0.5} valueText={vText} onChange={setV} disabled={steps.step !== null} />
         <div className="flex justify-between gap-4 text-12 text-text-3">
           <span>{t('workbench.params.vikor.vEnds.min')}</span>
           <span className="text-right">{t('workbench.params.vikor.vEnds.max')}</span>
@@ -51,11 +55,14 @@ export function Idea({ example, problem }: IdeaPictureProps) {
       <VikorIdea
         problem={problem}
         weights={example.weights ?? []}
-        params={{ v }}
+        params={{ v: shownV }}
         format={(x) => format(x, 4)}
         labels={{ ...labels, caption: t('methods.page.idea.vikor.caption'), showTable: t('methods.page.idea.showTable'), alternative: t('methods.page.idea.alternative') }}
+        step={steps.step}
+        explain={steps.explain}
         className="max-w-[880px]"
       />
+      <IdeaSteps control={steps} sentences={sentences} labels={stepLabels} />
       <IdeaSource example={example} />
     </div>
   )

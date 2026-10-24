@@ -899,6 +899,18 @@
   }
 }
 
+.explain .vikorLine,
+.explain path.vikorBand {
+  transition: opacity var(--dur-explain) var(--ease);
+}
+
+.explain .vikorLine[data-off],
+.explain path.vikorBand[data-off] {
+  transition:
+    opacity var(--dur-explain) var(--ease),
+    visibility var(--dur-explain) var(--ease);
+}
+
 .animate .vikorMove,
 .animate .vikorBar,
 .animate rect.vikorBand,

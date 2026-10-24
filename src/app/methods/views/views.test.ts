@@ -17,6 +17,10 @@ describe('method views', () => {
   it('draws ideas and ledger rows on published examples', () => {
     const published = (id: string) => getExample(id) ?? getJudgementExample(id)
     for (const [id, v] of views) {
+      if (id !== 'manual') {
+        expect(Boolean(v.idea || v.judgementIdea), `${id} idea`).toBe(true)
+        expect(v.stage, `${id} stage`).toBeDefined()
+      }
       if (v.idea) expect(getExample(v.idea.example), id).toBeDefined()
       if (v.judgementIdea) expect(getJudgementExample(v.judgementIdea.example), id).toBeDefined()
       if (v.ledger) expect(published(v.ledger.example), id).toBeDefined()

@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { WASPAS_DEFAULT_LAMBDA } from '../../../core/methods/waspas'
-import { WaspasLambda, type WaspasLambdaLabels } from '../../../features/illustrations/WaspasLambda'
+import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
+import { WASPAS_IDEA_STEPS, WaspasLambda, type WaspasLambdaLabels } from '../../../features/illustrations/WaspasLambda'
 import { useNumberFormat } from '../../../i18n'
 import { cn } from '../../../ui'
-import { IdeaSource } from './parts'
+import { IdeaSource, useStepLabels } from './parts'
 import type { IdeaPictureProps, StagePictureProps } from './types'
 
 function useWaspasLabels(): WaspasLambdaLabels {
@@ -29,11 +30,14 @@ export function Stage({ problem, weights, params, className }: StagePictureProps
   return <WaspasLambda problem={problem} weights={weights} lambda={lambda} format={format} labels={labels} className={cn('max-w-[880px]', className)} />
 }
 
-/** Method page: the same chart on the supplier example, the default λ = 0.5 marked. */
+/** Method page: the same chart on the supplier example, the default λ = 0.5 marked, with a step-through story. */
 export function Idea({ example, problem }: IdeaPictureProps) {
   const { t } = useTranslation()
   const { format } = useNumberFormat(4)
   const labels = useWaspasLabels()
+  const steps = useIdeaSteps(WASPAS_IDEA_STEPS)
+  const stepLabels = useStepLabels()
+  const sentences = (['s1', 's2', 's3'] as const).map((k) => t(`methods.page.idea.waspas.steps.${k}`))
   return (
     <div className="flex flex-col gap-2">
       <WaspasLambda
@@ -49,8 +53,11 @@ export function Idea({ example, problem }: IdeaPictureProps) {
           showTable: t('methods.page.idea.showTable'),
           alternative: t('methods.page.idea.alternative'),
         }}
+        step={steps.step}
+        explain={steps.explain}
         className="max-w-[880px]"
       />
+      <IdeaSteps control={steps} sentences={sentences} labels={stepLabels} />
       <IdeaSource example={example} />
     </div>
   )

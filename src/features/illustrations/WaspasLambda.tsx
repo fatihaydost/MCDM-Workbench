@@ -53,8 +53,15 @@ export type WaspasLambdaProps = {
   /** Number in the active locale with the given decimals. */
   format?: ((value: number, decimals: number) => string) | undefined
   labels?: Partial<WaspasLambdaLabels>
+  /** Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. WASPAS_IDEA_STEPS - 1 that step, the last being the full picture. */
+  step?: number | null | undefined
+  /** Move at the explain pace (--dur-explain), for a step change and the frame the stepping ends. */
+  explain?: boolean | undefined
   className?: string | undefined
 }
+
+/** The steps of the WASPAS idea: 0 the linear Q(λ) sweep from WPM (λ = 0) to WSM (λ = 1), 1 the crossing marks where two alternatives swap ranks, 2 the vertical cursor at the chosen λ. */
+export const WASPAS_IDEA_STEPS = 3
 
 const defaultFormat = (v: number, d: number) => v.toFixed(d)
 const HIT = 6
@@ -70,13 +77,27 @@ type Active = { i: number; k: number }
  * cursor jumps, the lines stay (they do not depend on λ); a weight change moves the lines (object constancy).
  * `method="cocoso"` draws CoCoSo's k the same way: λ moves only k_c, so k bends a little between grid points.
  */
-export function WaspasLambda({ method = 'waspas', problem, weights, lambda, format = defaultFormat, labels, className }: WaspasLambdaProps) {
+export function WaspasLambda({
+  method = 'waspas',
+  problem,
+  weights,
+  lambda,
+  format = defaultFormat,
+  labels,
+  step,
+  explain = false,
+  className,
+}: WaspasLambdaProps) {
   const l = { ...WASPAS_LAMBDA_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const animate = useAnimateValues(width)
   const [active, setActive] = useState<Active | null>(null)
   const [focusKey, setFocusKey] = useState<Active>({ i: 0, k: 5 })
+  const stepping = step !== null && step !== undefined
+  const stage = stepping ? Math.min(Math.max(step, 0), WASPAS_IDEA_STEPS - 1) : WASPAS_IDEA_STEPS - 1
+  const off = (from: number) => (stage >= from ? undefined : '')
+  const shownActive = stepping ? null : active
   const names = problem.alternatives
   const res = useMemo(() => {
     try {
@@ -118,6 +139,7 @@ export function WaspasLambda({ method = 'waspas', problem, weights, lambda, form
   const byRank = (k: number) => names.map((_, i) => i).sort((a, b) => ranksAt[k]![a]! - ranksAt[k]![b]! || a - b)
   const focus = { i: Math.min(focusKey.i, m - 1), k: focusKey.k }
   const move = (e: KeyboardEvent<SVGGElement>) => {
+    if (stepping) return
     const next = { ...focus }
     const order = byRank(focus.k)
     const pos = order.indexOf(focus.i)
@@ -153,7 +175,7 @@ export function WaspasLambda({ method = 'waspas', problem, weights, lambda, form
       className={className}
     >
       <svg
-        className={animate ? `${s.svg} ${r.animate}` : s.svg}
+        className={[s.svg, animate && r.animate, explain && s.explain].filter(Boolean).join(' ')}
         width={layout.width}
         height={height}
         viewBox={`0 0 ${layout.width} ${height}`}
@@ -185,22 +207,54 @@ export function WaspasLambda({ method = 'waspas', problem, weights, lambda, form
               key={i}
               className={`${r.sweepLine} ${s.lambdaLine}`}
               data-highlight={leaders.has(i) || undefined}
-              data-on={active?.i === i || undefined}
+              data-on={shownActive?.i === i || undefined}
               data-testid={`${method}-line`}
               d={layout.paths[i]}
               style={{ d: `path("${layout.paths[i]}")` }}
             />
           ))}
           {swaps.map((p, k) => (
-            <circle key={k} className={r.switchMark} data-testid={`${method}-swap`} cx={x(p.x)} cy={y(p.y)} r={3.5} />
+            <circle
+              key={k}
+              className={`${r.switchMark} ${s.stageItem}`}
+              data-off={off(1)}
+              data-testid={`${method}-swap`}
+              cx={x(p.x)}
+              cy={y(p.y)}
+              r={3.5}
+            />
           ))}
           {/* The current λ: a state, so it jumps (no transition). */}
-          <line className={r.cursor} data-testid={`${method}-cursor`} data-lambda={lambda} x1={cx} x2={cx} y1={top - 4} y2={bottom} />
-          <text className={r.tick} x={Math.min(Math.max(cx, left + 30), right - 30)} y={top - 12} textAnchor="middle" dominantBaseline="central">
+          <line
+            className={`${r.cursor} ${s.stageItem}`}
+            data-off={off(2)}
+            data-testid={`${method}-cursor`}
+            data-lambda={lambda}
+            x1={cx}
+            x2={cx}
+            y1={top - 4}
+            y2={bottom}
+          />
+          <text
+            className={`${r.tick} ${s.stageItem}`}
+            data-off={off(2)}
+            x={Math.min(Math.max(cx, left + 30), right - 30)}
+            y={top - 12}
+            textAnchor="middle"
+            dominantBaseline="central"
+          >
             {l.current}
           </text>
           {res.scores.map((q, i) => (
-            <circle key={i} className={r.cursorDot} data-highlight={leaders.has(i) || undefined} cx={cx} cy={y(q)} r={3.5} />
+            <circle
+              key={i}
+              className={`${r.cursorDot} ${s.stageItem}`}
+              data-off={off(2)}
+              data-highlight={leaders.has(i) || undefined}
+              cx={cx}
+              cy={y(q)}
+              r={3.5}
+            />
           ))}
           {layout.ends.map((e) => (
             <g key={e.index} className={r.endLabel} style={{ transform: `translate(0px, ${e.y}px)` }} data-highlight={leaders.has(e.index) || undefined}>
@@ -211,19 +265,19 @@ export function WaspasLambda({ method = 'waspas', problem, weights, lambda, form
             </g>
           ))}
         </g>
-        <g onKeyDown={move} onMouseLeave={() => setActive(null)}>
+        <g onKeyDown={move} onMouseLeave={() => setActive(null)} style={stepping ? { pointerEvents: 'none' } : undefined}>
           {sweep.map((row, i) =>
             row.map((q, k) => (
               <circle
                 key={`${i}-${k}`}
                 className={s.lambdaHit}
-                data-on={(active?.i === i && active.k === k) || undefined}
+                data-on={(shownActive?.i === i && shownActive.k === k) || undefined}
                 data-i={i}
                 data-k={k}
                 cx={x(WASPAS_LAMBDA_GRID[k]!)}
                 cy={y(q)}
                 r={HIT}
-                tabIndex={focus.i === i && focus.k === k ? 0 : -1}
+                tabIndex={focus.i === i && focus.k === k && !stepping ? 0 : -1}
                 role="img"
                 aria-label={l.point(names[i]!, grid(k), format(q, 4), ranksAt[k]![i]!)}
                 onMouseEnter={() => setActive({ i, k })}
@@ -239,9 +293,9 @@ export function WaspasLambda({ method = 'waspas', problem, weights, lambda, form
       </svg>
       {/* The focused point's own name says the same to a screen reader, so the readout is for the eyes only. */}
       <p className={s.readout}>
-        {active ? (
+        {shownActive ? (
           <span className={s.readoutC} aria-hidden>
-            {l.readout(grid(active.k), order(active.k))}
+            {l.readout(grid(shownActive.k), order(shownActive.k))}
           </span>
         ) : (
           <span>{swaps.length > 0 ? (l.caption ?? ' ') : l.noSwaps}</span>
