@@ -15,5 +15,5 @@ export type SkeletonProps = {
  */
 export function Skeleton({ width = '100%', height = 16, className }: SkeletonProps) {
   const style: CSSProperties = { width, height }
-  return <span aria-hidden className={cn('block rounded-control bg-surface-2', className)} style={style} />
+  return <span aria-hidden className={cn('block max-w-full rounded-control bg-surface-2', className)} style={style} />
 }

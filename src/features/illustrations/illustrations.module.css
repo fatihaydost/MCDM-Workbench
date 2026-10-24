@@ -1063,6 +1063,15 @@
   text-align: center;
 }
 
+.rankReason[data-compact] {
+  margin: 0 auto;
+  max-height: 100%;
+  padding-top: 4px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  text-align: left;
+}
+
 /* WASPAS λ chart (WaspasLambda) ----------------------------------------------------------------- */
 
 /* The hovered or focused alternative's line steps forward. */
@@ -1247,7 +1256,7 @@
 /* AHP pairwise matrix + weight bars ------------------------------------------------------------ */
 
 .ahpCell {
-  fill: var(--bg-subtle);
+  fill: var(--surface-2);
   stroke: var(--line);
   stroke-width: 1;
   shape-rendering: crispEdges;
@@ -1263,7 +1272,7 @@
 }
 
 .ahpCell[data-flagged] {
-  fill: var(--accent-subtle);
+  fill: var(--accent-bg);
   stroke: var(--accent);
   stroke-width: 1.5;
   stroke-dasharray: none;

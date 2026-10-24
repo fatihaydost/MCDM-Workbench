@@ -261,7 +261,10 @@ export default function WorkbenchPage() {
       ) : (
         <StageStatus state="done">{`${problem.alternatives.length} × ${problem.criteria.length}`}</StageStatus>
       )
-    const weightsBroken = weights.value === null && weights.issues.some((x) => x.code.includes('weight'))
+    const weightsBroken =
+      weights.value === null &&
+      dataErrors === 0 &&
+      weights.issues.some((x) => x.code !== 'anchors-missing' && x.code !== 'judgements-incomplete')
     stageMeta.weights = weights.value ? (
       <StageStatus state="done">{weightMethodFullLabel(weightMethod, weightParams, t)}</StageStatus>
     ) : weightsBroken ? (
@@ -270,7 +273,8 @@ export default function WorkbenchPage() {
       <StageStatus state="pending">{weightMethodFullLabel(weightMethod, weightParams, t)}</StageStatus>
     )
     const rankingLabel = rankingMethodFullLabel(rankingMethod, rankingParams, t)
-    stageMeta.ranking = <StageStatus state={ranking.value ? 'done' : 'pending'}>{rankingLabel}</StageStatus>
+    const rankingBroken = ranking.value === null && weights.value !== null && ranking.issues.length > 0
+    stageMeta.ranking = <StageStatus state={ranking.value ? 'done' : rankingBroken ? 'attention' : 'pending'}>{rankingLabel}</StageStatus>
     if (ranking.value) {
       // A method's own answer can be a set (VIKOR's compromise set): name it (at most three, then a count).
       const names = problem.alternatives.map((_, i) => alternativeName(problem, i, t))

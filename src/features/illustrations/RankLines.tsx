@@ -76,9 +76,7 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
 
   const n = names.length
   const W = Math.max(width, 280)
-  const height = HEAD + n * ROW + 4
   const ranked = columns.map((c, j) => (c.ranking ? j : -1)).filter((j) => j >= 0)
-  const yOf = (rank: number) => HEAD + (rank - 1) * ROW + ROW / 2
   const colour = (i: number) => (i < SAW_CATEGORY_COLOURS ? String(i + 1) : 'other')
   const on = (i: number) => selected !== null && (selected[0] === i || selected[1] === i)
   // The selected pair is coloured by slot, not by alternative (two category colours can be near twins): a and b.
@@ -104,10 +102,16 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
   const step = slots > 1 ? (x1 - x0) / (slots - 1) : 0
   const xOf = (slot: number) => x0 + slot * step
   const bordaX = xOf(columns.length)
-  // Heads wider than a column step (six methods at 390 px) alternate between two lines, so neighbours never touch.
+  // Heads wider than a column step stagger across two or three lines so neighbours never touch.
   const heads = [...columns.map((c) => c.label), ...(borda ? [l.borda] : [])]
-  const crowded = maxOf(heads.map((h) => estimateTextWidth(h, HEAD_FONT))) > step - 4
-  const headY = (slot: number) => (crowded ? (slot % 2 === 0 ? 6 : HEAD - 8) : HEAD / 2 - 2)
+  const maxHeadW = maxOf(heads.map((h) => estimateTextWidth(h, HEAD_FONT)))
+  const headRows = maxHeadW <= step - 4 ? 1 : maxHeadW <= 2 * step - 6 ? 2 : 3
+  const headH = headRows === 1 ? HEAD : headRows === 2 ? 36 : 48
+  const height = headH + n * ROW + 4
+  const yOf = (rank: number) => headH + (rank - 1) * ROW + ROW / 2
+  const headY = (slot: number) => (headRows === 1 ? headH / 2 - 2 : headRows === 2 ? (slot % 2 === 0 ? 8 : 22) : 8 + (slot % 3) * 13)
+  const compactReason = step < 44
+  const reasonW = compactReason ? Math.max(step - 2, 18) : Math.max(step - 4, 40)
 
   const crossings: Crossing[] = []
   for (let c = 0; c + 1 < ranked.length; c++) {
@@ -179,9 +183,9 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
       >
         <g className={s.rankPlot} data-dimmed={selected ? '' : undefined}>
           {columns.map((c, j) => (
-            <line key={j} className={s.rankAxis} x1={xOf(j)} x2={xOf(j)} y1={HEAD - 4} y2={height - 4} aria-hidden />
+            <line key={j} className={s.rankAxis} x1={xOf(j)} x2={xOf(j)} y1={headH - 4} y2={height - 4} aria-hidden />
           ))}
-          {borda && <line className={s.rankAxis} x1={bordaX} x2={bordaX} y1={HEAD - 4} y2={height - 4} aria-hidden />}
+          {borda && <line className={s.rankAxis} x1={bordaX} x2={bordaX} y1={headH - 4} y2={height - 4} aria-hidden />}
           <g aria-hidden>
             {lineOrder.map((i) => {
               const pts = ranked.map((j) => `${xOf(j)},${yOf(columns[j]!.ranking![i]!)}`).join(' ')
@@ -224,8 +228,10 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
                     />
                   ))
                 : c.reason && (
-                    <foreignObject x={xOf(j) - step / 2 + 2} y={HEAD} width={Math.max(step - 4, 40)} height={height - HEAD}>
-                      <p className={s.rankReason}>{c.reason}</p>
+                    <foreignObject x={xOf(j) - reasonW / 2} y={headH} width={reasonW} height={height - headH}>
+                      <p className={s.rankReason} data-compact={compactReason || undefined}>
+                        {c.reason}
+                      </p>
                     </foreignObject>
                   )}
             </g>
