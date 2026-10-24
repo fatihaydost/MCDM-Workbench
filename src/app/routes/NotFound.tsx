@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
-import { buttonClasses } from '../../ui'
+import { buttonClasses } from '../../ui/Button'
 import { usePageMeta } from '../landing/usePageMeta'
 
 /** Any unknown path. */

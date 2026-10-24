@@ -8,9 +8,13 @@ import { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 import { methodContent } from '../content/methods'
 import type { MethodId } from '../content/types'
-import { initI18n, type Lang } from '../i18n'
+import { initI18n, registerLanguages, type Lang } from '../i18n'
 import i18n from '../i18n'
+import en from '../i18n/en.json'
+import tr from '../i18n/tr.json'
 import { App, preloadRoute, ROUTER_BASE } from './App'
+
+registerLanguages({ en, tr })
 
 /** A static route: its path (without the base), its title and description, and whether its body is prerendered. */
 export type RouteMeta = { path: string; title: string; description: string; prerender: boolean }

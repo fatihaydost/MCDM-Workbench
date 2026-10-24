@@ -1,7 +1,6 @@
 import { lazy, Suspense, useLayoutEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Route, Router, Switch, useLocation } from 'wouter'
-import { TooltipProvider } from '../ui'
 import { NotFound } from './routes/NotFound'
 import { Workbench } from './routes/Workbench'
 import { isMethodId } from '../content/methods/catalog'
@@ -92,42 +91,40 @@ export function App({ ssrPath }: { ssrPath?: string | undefined } = {}) {
   }, [])
 
   return (
-    <TooltipProvider>
-      <Router base={ROUTER_BASE} {...(ssrPath !== undefined && { ssrPath })}>
-        <ScrollToTopOnNavigate />
-        <div className="flex min-h-dvh flex-col">
-          <TopBar />
-          <Switch>
-            <Route path="/">
+    <Router base={ROUTER_BASE} {...(ssrPath !== undefined && { ssrPath })}>
+      <ScrollToTopOnNavigate />
+      <div className="flex min-h-dvh flex-col">
+        <TopBar />
+        <Switch>
+          <Route path="/">
+            <Suspense fallback={<PageFallback />}>
+              <Landing />
+            </Suspense>
+          </Route>
+          <Route path="/app" component={Workbench} />
+          <Route path="/methods">
+            <Suspense fallback={<PageFallback />}>
+              <MethodsCatalog />
+            </Suspense>
+          </Route>
+          <Route path="/methods/:id">
+            {(params) => (
               <Suspense fallback={<PageFallback />}>
-                <Landing />
+                <MethodPage id={params.id} />
               </Suspense>
-            </Route>
-            <Route path="/app" component={Workbench} />
-            <Route path="/methods">
-              <Suspense fallback={<PageFallback />}>
-                <MethodsCatalog />
-              </Suspense>
-            </Route>
-            <Route path="/methods/:id">
-              {(params) => (
-                <Suspense fallback={<PageFallback />}>
-                  <MethodPage id={params.id} />
-                </Suspense>
-              )}
-            </Route>
-            {DevIllustrations && <Route path="/dev/illustrations"><Suspense fallback={null}><DevIllustrations /></Suspense></Route>}
-            {DevUi && (
-              <Route path="/dev/ui">
-                <Suspense fallback={null}>
-                  <DevUi />
-                </Suspense>
-              </Route>
             )}
-            <Route component={NotFound} />
-          </Switch>
-        </div>
-      </Router>
-    </TooltipProvider>
+          </Route>
+          {DevIllustrations && <Route path="/dev/illustrations"><Suspense fallback={null}><DevIllustrations /></Suspense></Route>}
+          {DevUi && (
+            <Route path="/dev/ui">
+              <Suspense fallback={null}>
+                <DevUi />
+              </Suspense>
+            </Route>
+          )}
+          <Route component={NotFound} />
+        </Switch>
+      </div>
+    </Router>
   )
 }

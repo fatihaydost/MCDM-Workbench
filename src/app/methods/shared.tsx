@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import type { MethodStatus, Origin, Source } from '../../content/types'
 import type { Lang } from '../../i18n'
-import { cn } from '../../ui'
+import { cn } from '../../ui/cn'
 import { textLink } from '../landing/usePageMeta'
 
 /** Status as text in a hairline box: "Available" reads stronger than "In research", never colour alone. */

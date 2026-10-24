@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Skeleton } from '../../ui'
+import { Skeleton } from '../../ui/Skeleton'
 
 // The workbench (grid, charts, IO, calculation) is its own chunk; the landing page does not load it.
 const WorkbenchPage = lazy(() => import('../workbench/WorkbenchPage'))

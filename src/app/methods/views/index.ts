@@ -82,3 +82,8 @@ export const viewOf = (id: string): MethodView | undefined =>
 export function preloadStagePictures(): Promise<unknown> {
   return Promise.allSettled(ids.map((id) => methodViews[id].stage?.preload()))
 }
+
+/** Loads the stage pictures of the given methods; settles when all have loaded or failed. */
+export function preloadActiveStagePictures(activeIds: readonly ViewId[]): Promise<unknown> {
+  return Promise.allSettled(activeIds.map((id) => methodViews[id]?.stage?.preload()))
+}
