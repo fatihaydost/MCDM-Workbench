@@ -1,17 +1,15 @@
 # Build plan
 
-Status as of 2026-09-30. Read DESIGN.md first, then FOUNDATION.md, then this file.
+Status as of 2026-10-24. Read DESIGN.md first, then FOUNDATION.md, then this file.
 
 ## Where v1 stands
-MCDM Workbench v1 is built and reviewed, not yet published. The local commits on `main` are ahead of `origin/main`.
+MCDM Workbench has all 26 catalogue methods implemented, verified against published reference examples, and reviewed.
 
-- **Methods that compute:** CRITIC, equal weights, manual weights, TOPSIS (`src/core`). 26 methods have draft
-  research cards (`docs/research/`) and bilingual content (`src/content`); 23 are marked "in research".
-- **Site:** landing (`/`), workbench (`/app`), catalogue and method-choice guide (`/methods`), method pages
-  (`/methods/:id`), TR/EN, light/dark, every route prerendered with its own `index.html`, `sitemap.xml`.
-- **Quality:** 714 unit tests, 24 e2e (`pnpm e2e`); two independent reviews (round 1 REVISE with 7 blockers,
-  round 2 APPROVE: 88 screens with no axe, overflow or console errors); a polish round after it.
-  Lighthouse mobile: landing 93, method page 90, catalogue 91, workbench 82.
+- **Methods that compute (26/26):**
+  - **Weighting (11 core + manual):** CRITIC, Entropy, SD, MEREC, LOPCOW, CILOS, Equal weights, BWM, AHP (Phase 1 & 2: eigenvector, geometric mean, LLSM incomplete completion), ROC (ROC/RS/RR), SWARA (`src/core/methods/`).
+  - **Ranking (15):** TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I, ELECTRE III (`src/core/methods/`).
+- **Site:** landing (`/`), workbench (`/app` with Data, Weights, Ranking, Results, Robustness, and Compare stages), catalogue and method-choice guide (`/methods`), 26 method pages (`/methods/:id`), TR/EN, light/dark, every route prerendered with its own `index.html`, `sitemap.xml`.
+- **Quality:** 1,732 unit tests across 57 test files (`pnpm test`) and Playwright e2e tests (`pnpm e2e`); independent DSS and mathematical audits completed.
 - **Brand:** MCDM Workbench mark, a matrix in brackets with the decision inside (`docs/brand/`, three drawings:
   16 px cut, 24 px cut, master), favicon and web icons, top bar and hero logo, sharing image. MIT licence.
 - **Ship prep:** English README with screenshots, `.github/workflows/pages.yml` (triggers on `main`), `.nvmrc`.

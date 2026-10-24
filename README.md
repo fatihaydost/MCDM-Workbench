@@ -5,7 +5,7 @@
   </picture>
 </h1>
 
-A browser tool for multi-criteria decision analysis: weight criteria with CRITIC, Entropy, SD, MEREC, LOPCOW, CILOS, ROC, AHP or BWM (from your own comparisons), rank alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS or PROMETHEE II and read every intermediate step, in English or Turkish.
+A browser tool for multi-criteria decision analysis: weight criteria with CRITIC, Entropy, SD, MEREC, LOPCOW, CILOS, ROC, SWARA, AHP or BWM (from your own comparisons), rank alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I or ELECTRE III and read every intermediate step, in English or Turkish.
 
 **Live demo:** https://fatihaydost.github.io/MCDM-Workbench/ (published once ten methods compute)
 
@@ -33,6 +33,7 @@ The test suite recomputes published examples and compares every printed digit:
 | LOPCOW | Ecer and Pamucar (2022), Omega 112:102690; Keleş (2023), ÖHÜ İİBF Dergisi 16(3):727, Tables 6-8 (10 logistics firms, 8 criteria) | normalized matrix, RMS, sample SD, PV and weights; RMS >= σ identity and m = 2 collapse | ±0.0005 |
 | CILOS | Zavadskas and Podvezko (2016), IJITDM 15(2):267; Zavadskas et al. (2017), Sustainability 9(5):702, Tables 4 and 10 (Social block) and Table 8 (Economic block); Pala (2021), Bingöl Univ. J. Econ. Admin. Sci. 5(2):277 | sum-normalized matrix, square matrix A, relative impact-loss matrix P, system matrix F and weights | ±0.00005 |
 | ROC | Barron and Barrett (1996), Management Science 42(11):1515; Stillwell, Seaver and Edwards (1981), OBHP 28(1):62; Roszkowska (2013), Optimum. Studia Ekonomiczne 5(65):14, Table 4 and Tables 5-6 | Rank Order Centroid (ROC), Rank Sum (RS) and Rank Reciprocal (RR) weights and tie-averaged rank weights | ±0.00006 |
+| SWARA | Keršulienė, Zavadskas and Turskis (2010), Journal of Business Economics and Management 11(2):243, Table 1 (6 dispute-resolution criteria); Adalı and Işık (2017), IREM 5(4):56, Table 5 | comparative importance ratios s_j, step coefficients k_j = 1 + s_j, recalculated weights q_j and normalized weights w_j | ±0.005 |
 | BWM | Rezaei (2016), Omega 64:126, Examples 1-3 (Example 3 from Liang et al. (2020), Table 1); Ratandhara and Kumar, arXiv 2506.17666, Examples 1-4 (one per closed-form branch); Demir and Bircan (2020), Tables 5-7; Arsu and Uğuz Arsu (2021), Tables 4-5 | linear-model weights, ξ, input-based CR and the criterion that fits worst | ±0.00006 |
 | AHP | Saaty (2008), IJSSci 1(1):83, Tables 2, 7 and 8 (job choice, drink consumption corrected for a printed reciprocal typo, flexibility); Doğuç (2022), Beykent Univ. J. Sci. Eng. 15(1):19, Table 2 (recruitment); Bozóki, Fülöp and Rónyai (2010), EJOR 206(2):355, Section 6 (incomplete 8×8 matrix, LLSM completion) | principal-eigenvector and geometric-mean weights, λ_max, CI, CR, worst-fitting pair and incomplete-graph LLSM weights | ±0.0005 |
 | TOPSIS | Opricovic and Tzeng (2004), EJOR 156(2):445, Table 3, two unit variants | D+, D−, closeness and ranks | ±0.0005 |
@@ -48,12 +49,14 @@ The test suite recomputes published examples and compares every printed digit:
 | ARAS | Zavadskas and Turskis (2010), Technological and Economic Development of Economy 16(2):159, Tables 1-4 (14 rooms, 6 criteria; Table 2 Room 8 illumination typo 390 vs 400 lx recorded); Bakır and Atalık (2018), Business and Economics Research Journal 9(1):179, Tables 3-6 (11 airlines, 8 criteria, Entropy weights) | optimal row, normalized and weighted matrices, S0, Si, utility degree Ki and ranks | ±0.0001 |
 | CODAS | Keshavarz Ghorabaee et al. (2016), Economic Computation and Economic Cybernetics Studies and Research 50(3):25, Examples 1-2 (7 robots, 5 criteria and 14 rooms, 6 criteria; Section 4 sensitivity script < τ inversion recorded); Badi et al. (2018), DMAME 1(1):1, Tables 2-5 (6 steelmaking suppliers, AHP weights); Trung (2022), EUREKA: Physics and Engineering (5):112, Tables 12 and 14-16 | normalized and weighted matrices, negative-ideal point, Euclidean Ei, Taxicab Ti, relative assessment matrix and Hi | ±0.0005 |
 | PROMETHEE II | Brans, Vincke and Mareschal (1986), EJOR 24(2):228, Tables 2-4 (6 hydroelectric power plants, 6 criteria, all 6 preference function types); Goswami (2020), Foundations of Management 12(1):93, Tables 4, 7, 13-18 (6 laptops, 7 criteria); Abdullah, Chan and Afshari (2019), IEEE Access 7:43472, Tables 5 and 9-12 | aggregated preference matrix Π, leaving flow φ+, entering flow φ−, net flow φ and PROMETHEE I incomparabilities | ±0.00001 |
+| ELECTRE I | Roy (1968), RIRO 2(V1):57; Wang and Triantaphyllou (2008), Omega 36(1):45, Section 3.1 (Galway wastewater treatment plant, 5 sites, 7 criteria); Soner and Önüt (2006), J. Fac. Eng. Arch. Gazi Univ. 21(3):579 | concordance C, discordance D, outranking graph S, SCC-condensed kernel K = {A2, A3, A5} and net concordance / discordance | ±0.0005 |
+| ELECTRE III | Roy (1978), Cahiers du CERO 20(1):3; Wang and Triantaphyllou (2008), Omega 36(1):45, Section 3.2, Tables 2-3 (11 waste incineration strategies, 11 criteria, 110 off-diagonal credibility cells) | pseudo-criterion concordance C, credibility σ(a, b), descending and ascending distillation pre-orders and incomparabilities | ±0.005 |
 
 CRITIC is also checked against the hand-solved spreadsheet from the original coursework (`legacy/CRITIC(2).xlsx`) and the full CRITIC + TOPSIS chain against the legacy Python code, both to 10⁻¹². Fixtures are in [`tests/fixtures/`](tests/fixtures).
 
 ## Methods
 
-23 methods compute today (CRITIC, Entropy, SD, MEREC, LOPCOW, CILOS, ROC, BWM, AHP, equal weights, TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II) and 3 more are researched and documented, each with its own page: [methods catalogue](https://fatihaydost.github.io/MCDM-Workbench/methods).
+All 26 methods compute today (CRITIC, Entropy, SD, MEREC, LOPCOW, CILOS, equal weights, BWM, AHP, ROC, SWARA; TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I, ELECTRE III), each with its own page and interactive illustration: [methods catalogue](https://fatihaydost.github.io/MCDM-Workbench/methods).
 
 ![TOPSIS method page: an interactive distance diagram, when to use it and the algorithm](docs/screenshots/method-topsis.png)
 
