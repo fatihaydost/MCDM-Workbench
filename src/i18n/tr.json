@@ -1390,7 +1390,22 @@
         "lambdaMax": "Tutarlılık",
         "weights": "Ağırlıklar"
       },
+      "bwm": {
+        "bestToOthers": "Karşılaştırma vektörleri",
+        "consistencyLocal": "Tutarlılık",
+        "weights": "Ağırlıklar"
+      },
+      "saw": {
+        "normalized": "Normalize",
+        "weighted": "Ağırlıklı",
+        "scores": "Puanlar"
+      },
       "ahp-ranking": {
+        "local": "Yerel p",
+        "weighted": "Ağırlıklı v",
+        "scores": "Öncelik P"
+      },
+      "ahpRanking": {
         "local": "Yerel p",
         "weighted": "Ağırlıklı v",
         "scores": "Öncelik P"
@@ -1452,7 +1467,7 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri 11 nesnel ve öznel yöntemle (CRITIC, Entropi, SD, MEREC, LOPCOW, CILOS, BWM, AHP, ROC, SWARA, Eşit) ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri 15 yöntemle (TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I, ELECTRE III) sıralayın, sağlamlığı sınayın ve her adımı görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri 11 nesnel ve öznel yöntemle (CRITIC, Entropi, SD, MEREC, LOPCOW, CILOS, BWM, AHP, ROC, SWARA, Eşit) ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri 16 yöntemle (TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I, ELECTRE III, AHP) sıralayın, sağlamlığı sınayın ve her adımı görün."
     },
     "pairwise": {
       "question": "Hangisi daha önemli?",
@@ -2229,6 +2244,7 @@
     },
     "entropy": {
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden Entropi ağırlığı 0.",
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, yine de Entropi ona bir ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
       "zeros-in-column": "{{criterion}} sıfır içeriyor; sıfırlar ağırlığını şişirebilir.",
       "two-alternatives-minmax": "2 alternatifle min-maks, sabit olmayan her kritere aynı ağırlığı verir.",
       "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; yayılımın gerçek olup olmadığına bakın.",
@@ -2240,6 +2256,7 @@
     },
     "vikor": {
       "constant-column": "{{criterion}} kriterinin bütün değerleri aynı; S'ye ve R'ye bir şey katmıyor.",
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam uzaklık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
       "equal-group-utility": "Bütün alternatiflerin S değeri aynı; Q yalnız R'den geliyor ve en fazla 1 − v olabiliyor; bu, C1'i sağlamayı zorlaştırabilir.",
       "equal-regret": "Bütün alternatiflerin R değeri aynı; Q yalnız S'den geliyor ve en fazla v olabiliyor; bu, C1'i sağlamayı zorlaştırabilir.",
       "no-spread": "Bütün alternatiflerin S ve R değerleri aynı; hepsi Q = 0 alıyor.",
@@ -2267,6 +2284,7 @@
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden LOPCOW ağırlığı 0.",
       "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
       "two-alternatives": "2 alternatifle her değişken sütunda karesel ortalama örneklem standart sapmasına eşittir (PV = 0), bu yüzden eşit ağırlık kullanıldı.",
+      "zero-pv-column": "{{criterion}} kriterinde karesel ortalama örneklem standart sapmasına eşittir (PV = 0), bu yüzden LOPCOW ağırlığı 0.",
       "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı."
     },
     "cilos": {
@@ -2280,7 +2298,8 @@
       "no-cost-criteria": "Ağırlığı 0'dan büyük maliyet kriteri yok; bu yüzden Q = S+ ve COPRAS, SAW'ın toplam seçeneğiyle aynı sonucu veriyor."
     },
     "cocoso": {
-      "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin."
+      "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
+      "no-spread": "Etkin kriterlerin tamamı sabit, bu yüzden bütün alternatifler 1. sırayı paylaşıyor."
     },
     "mabac": {
       "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin."
@@ -2293,6 +2312,17 @@
       "inconsistent": "Tutarlılık oranı CR 0,10 veya üzerinde; ağırlıklar yine de hesaplanır, ancak işaretlenen çifti kontrol edin.",
       "inconsistent-criterion": "{{criterion}} kriterinde tutarlılık oranı CR 0,10 veya üzerinde; öncelikler yine de hesaplanır, ancak işaretlenen çifti kontrol edin.",
       "many-criteria": "8 veya daha fazla kriterde AHP en az 28 karşılaştırma ister ve tutarlılığı korumak zorlaşır; daha az soru için BWM'yi düşünebilirsiniz."
+    },
+    "ahp-ranking": {
+      "pairwise-ignored-above-cap": "7'den fazla alternatif olduğunda ikili alternatif karşılaştırmaları yok sayılır ve yerel öncelikler karar matrisinden hesaplanır."
+    },
+    "promethee-ii": {
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama tercih fonksiyonları onu 0 ile 1 arasına ölçekliyor. Farkın gerçek olup olmadığını kontrol edin."
+    },
+    "electre-i": {
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama açıklık uyumsuzluğu onu 0 ile 1 arasına ölçekliyor. Farkın gerçek olup olmadığını kontrol edin.",
+      "cycle-detected": "Üstünlük matrisi S içinde karşılıklı üstünlük döngüleri var; çekirdek K bulunmadan önce her döngü tek bir eşdeğerlik sınıfına daraltıldı.",
+      "non-kernel-leader": "En yüksek net skora sahip alternatif üstünlük çekirdeği K dışında yer alıyor; çekirdek sütununu da kontrol edin."
     },
     "moora": {
       "zero-column": "{{criterion}} kriterinin bütün değerleri 0, bu yüzden sıralamayı etkilemiyor."

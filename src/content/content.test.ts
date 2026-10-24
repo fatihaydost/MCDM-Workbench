@@ -17,8 +17,10 @@ import {
 } from './guide'
 import * as guide from './guide'
 import { allMethods, isMethodId, methodContent } from './methods'
-import { STEP_KEYS, stepContent, stepFlow } from './steps'
+import { modules, STEP_KEYS, stepContent, stepFlow, type MethodSteps } from './steps'
 import { localizeMethod, type LocalizedText, type MethodContent } from './types'
+import enJson from '../i18n/en.json'
+import trJson from '../i18n/tr.json'
 
 const here = dirname(fileURLToPath(import.meta.url))
 
@@ -224,8 +226,25 @@ describe('step content', () => {
       }
     }
     expect(stepFlow('topsis', ['topsis.normalized'])?.map((n) => n.key)).toEqual(['topsis.normalized'])
-    expect(stepFlow('saw', ['saw.scores'])).toBeNull()
+    expect(stepFlow('saw', ['saw.scores'])?.map((n) => n.key)).toEqual(['saw.scores'])
+    expect(stepFlow('equal', ['equal.weights'])).toBeNull()
     expect(stepFlow('constructor', [])).toBeNull()
+  })
+
+  it('has EN and TR translations for every flow node in modules', () => {
+    const flowEn = enJson.workbench.flow as Record<string, unknown>
+    const flowTr = trJson.workbench.flow as Record<string, unknown>
+    for (const mod of new Set(Object.values(modules) as readonly MethodSteps[])) {
+      for (const node of mod.flow ?? []) {
+        const [methodKey, stepKey] = node.key.split('.')
+        const enGroup = flowEn[methodKey!] as Record<string, unknown> | undefined
+        const trGroup = flowTr[methodKey!] as Record<string, unknown> | undefined
+        expect(typeof enGroup?.[stepKey!], `en: workbench.flow.${node.key}`).toBe('string')
+        expect(((enGroup?.[stepKey!] as string) ?? '').trim(), `en: workbench.flow.${node.key}`).not.toBe('')
+        expect(typeof trGroup?.[stepKey!], `tr: workbench.flow.${node.key}`).toBe('string')
+        expect(((trGroup?.[stepKey!] as string) ?? '').trim(), `tr: workbench.flow.${node.key}`).not.toBe('')
+      }
+    }
   })
 
   it('has both languages for every key', () => {

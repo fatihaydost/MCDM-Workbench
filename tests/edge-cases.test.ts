@@ -356,14 +356,10 @@ describe('3. Constant, near-constant, and tied data states', () => {
       expect(codas.compute(pAllConst, w2, {}).ranking).toEqual([1, 1, 1])
     })
 
-    it('cocoso blocks with all-worst-alternative when all columns are constant', () => {
-      // When all columns are constant, r_ij = 0 for all i, j; so S = 0 for all alternatives
-      expect(() => cocoso.compute(pAllConst, w2, {})).toThrow(ProblemValidationError)
-      try {
-        cocoso.compute(pAllConst, w2, {})
-      } catch (e) {
-        expect((e as ProblemValidationError).issues.map((x) => x.code)).toContain('all-worst-alternative')
-      }
+    it('cocoso ties all alternatives at rank 1 with cocoso.no-spread when all columns are constant', () => {
+      const res = cocoso.compute(pAllConst, w2, {})
+      expect(res.ranking).toEqual([1, 1, 1])
+      expect(res.warnings).toContainEqual({ code: 'cocoso.no-spread' })
     })
   })
 
@@ -806,7 +802,7 @@ describe('3. Constant, near-constant, and tied data states', () => {
         expect(res.weights).toEqual([0, 1])
       })
 
-      it('documents LOPCOW silent fallback to equal weights when single best alternative yields PV = 0', () => {
+      it('emits lopcow.zero-pv-column warnings when single best alternative yields PV = 0', () => {
         // m = 3, n = 2. On each criterion, exactly one alternative is 1 and all others are 0.
         // For normalized column [1, 0, 0]: RMS = 1/sqrt(3) and sampleStd = 1/sqrt(3).
         // Because RMS === sampleStd, PV collapses to 0 on both columns.
@@ -822,8 +818,10 @@ describe('3. Constant, near-constant, and tied data states', () => {
         const pv = step(res.steps, 'lopcow.pv').vector!
         expect(pv).toEqual([0, 0])
         expect(res.weights).toEqual([0.5, 0.5])
-        // Silently defaults to equal weights with zero warnings:
-        expect(res.warnings).toHaveLength(0)
+        expect(res.warnings).toEqual([
+          { code: 'lopcow.zero-pv-column', col: 0 },
+          { code: 'lopcow.zero-pv-column', col: 1 },
+        ])
         expect(res.diagnostics?.allConstant).toBe(0)
       })
 

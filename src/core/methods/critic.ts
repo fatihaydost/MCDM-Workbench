@@ -37,7 +37,7 @@ export const critic: WeightingMethod = {
     // 3. Pearson correlation between normalized columns; undefined (NaN) for a pair with a constant column.
     const rho = zeros(n, n)
     for (let j = 0; j < n; j++) {
-      rho[j]![j] = 1
+      rho[j]![j] = constant[j] ? Number.NaN : 1
       for (let k = j + 1; k < n; k++) {
         const v = constant[j] || constant[k] ? Number.NaN : pearson(column(r, j), column(r, k))
         rho[j]![k] = v

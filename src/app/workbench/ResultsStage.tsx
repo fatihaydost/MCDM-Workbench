@@ -165,9 +165,20 @@ export function ResultsStage() {
       <section aria-labelledby="wb-results-headline" className="flex flex-col gap-5">
         <div className="flex flex-col gap-1">
           <p id="wb-results-headline" className="text-24 font-semibold text-text">
-            {firsts.length > 1
-              ? t('workbench.results.headlineTied', { names: firsts.map((i) => altNames[i]).join(', '), symbol: score.symbol, value: nf.format(result.scores[best]) })
-              : t('workbench.results.headline', { name: altNames[best], symbol: score.symbol, value: nf.format(result.scores[best]) })}
+            {(() => {
+              if (firsts.length > 1) {
+                const leaderScores = firsts.map((i) => result.scores[i]!).filter(Number.isFinite)
+                const minL = Math.min(...leaderScores)
+                const maxL = Math.max(...leaderScores)
+                const val = leaderScores.length > 1 && maxL - minL > 1e-9 ? `${nf.format(minL)} .. ${nf.format(maxL)}` : nf.format(result.scores[best])
+                return t('workbench.results.headlineTied', {
+                  names: firsts.map((i) => altNames[i]).join(', '),
+                  symbol: score.symbol,
+                  value: val,
+                })
+              }
+              return t('workbench.results.headline', { name: altNames[best], symbol: score.symbol, value: nf.format(result.scores[best]) })
+            })()}
           </p>
           {verdict && verdict.failed.length > 0 && (
             <p className="max-w-[70ch] text-16 text-text" data-testid="results-vikor-verdict">

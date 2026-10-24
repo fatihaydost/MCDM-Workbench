@@ -66,6 +66,13 @@ export const cilos: MethodContent = {
       },
     },
     {
+      methodId: 'edas',
+      text: {
+        en: 'CILOS and IDOCRIW weights paired with EDAS, SAW, TOPSIS and COPRAS on the Vilnius neighbourhood dataset: Zavadskas et al. (2017).',
+        tr: 'Vilnius mahalleleri verisinde EDAS, SAW, TOPSIS ve COPRAS ile eşleştirilen CILOS ve IDOCRIW ağırlıkları: Zavadskas vd. (2017).',
+      },
+    },
+    {
       methodId: 'critic',
       text: {
         en: 'Compared with Entropy, IDOCRIW, CRITIC and D-CRITIC on one matrix by Krishnan et al. (2021).',

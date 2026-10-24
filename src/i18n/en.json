@@ -1390,7 +1390,22 @@
         "lambdaMax": "Consistency",
         "weights": "Weights"
       },
+      "bwm": {
+        "bestToOthers": "Comparison vectors",
+        "consistencyLocal": "Consistency",
+        "weights": "Weights"
+      },
+      "saw": {
+        "normalized": "Normalized",
+        "weighted": "Weighted",
+        "scores": "Scores"
+      },
       "ahp-ranking": {
+        "local": "Local p",
+        "weighted": "Weighted v",
+        "scores": "Priority P"
+      },
+      "ahpRanking": {
         "local": "Local p",
         "weighted": "Weighted v",
         "scores": "Priority P"
@@ -1452,7 +1467,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with 11 objective and subjective methods (CRITIC, Entropy, SD, MEREC, LOPCOW, CILOS, BWM, AHP, ROC, SWARA, Equal) or your own weights, rank the alternatives across 15 methods (TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I, ELECTRE III), test robustness and see every step."
+      "description": "Enter or import a decision matrix, weight the criteria with 11 objective and subjective methods (CRITIC, Entropy, SD, MEREC, LOPCOW, CILOS, BWM, AHP, ROC, SWARA, Equal) or your own weights, rank the alternatives across 16 methods (TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I, ELECTRE III, AHP), test robustness and see every step."
     },
     "pairwise": {
       "question": "Which matters more?",
@@ -2229,6 +2244,7 @@
     },
     "entropy": {
       "constant-column": "{{criterion}} has the same value for every alternative, so its Entropy weight is 0.",
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet Entropy gives it a weight. Check whether the difference is real.",
       "zeros-in-column": "{{criterion}} contains zeros, which can inflate its weight.",
       "two-alternatives-minmax": "With 2 alternatives, min-max gives every criterion that is not constant the same weight.",
       "dominant-weight": "{{criterion}} takes more than half of the weight, so check whether its spread is real.",
@@ -2240,6 +2256,7 @@
     },
     "vikor": {
       "constant-column": "Every value of {{criterion}} is the same, so it adds nothing to S or R.",
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full distance. Check whether the difference is real.",
       "equal-group-utility": "Every alternative has the same S, so Q comes from R alone and reaches at most 1 − v, which can make C1 harder to meet.",
       "equal-regret": "Every alternative has the same R, so Q comes from S alone and reaches at most v, which can make C1 harder to meet.",
       "no-spread": "Every alternative has the same S and the same R, so all get Q = 0.",
@@ -2267,6 +2284,7 @@
       "constant-column": "{{criterion}} has the same value for every alternative, so its LOPCOW weight is 0.",
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",
       "two-alternatives": "With 2 alternatives, every varying column has RMS equal to its sample standard deviation (PV = 0), so equal weights are used instead.",
+      "zero-pv-column": "{{criterion}} has RMS equal to its sample standard deviation (PV = 0), so its LOPCOW weight is 0.",
       "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead."
     },
     "cilos": {
@@ -2280,7 +2298,8 @@
       "no-cost-criteria": "There is no cost criterion with a weight above 0, so Q = S+ and COPRAS gives the same result as SAW with the sum option."
     },
     "cocoso": {
-      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real."
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",
+      "no-spread": "Every active criterion is constant, so all alternatives tie at rank 1."
     },
     "mabac": {
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real."
@@ -2293,6 +2312,17 @@
       "inconsistent": "The consistency ratio CR is at or above 0.10; check the highlighted pair, though the weights are still computed.",
       "inconsistent-criterion": "On {{criterion}}, the consistency ratio CR is at or above 0.10; check the highlighted pair, though the priorities are still computed.",
       "many-criteria": "With 8 or more criteria AHP asks at least 28 comparisons and consistency is harder to keep; consider BWM for fewer questions."
+    },
+    "ahp-ranking": {
+      "pairwise-ignored-above-cap": "With more than 7 alternatives, pairwise alternative comparisons are ignored and local priorities come from the decision matrix."
+    },
+    "promethee-ii": {
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet preference functions rescale it to 0 to 1. Check whether the difference is real."
+    },
+    "electre-i": {
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet range discordance rescales it to 0 to 1. Check whether the difference is real.",
+      "cycle-detected": "Mutual outranking cycles exist in S; each cycle is condensed into an equivalence class before finding the kernel K.",
+      "non-kernel-leader": "The alternative with the highest net score is outside the outranking kernel K; check the kernel column as well."
     },
     "moora": {
       "zero-column": "Every value of {{criterion}} is 0, so it does not affect the ranking."

@@ -40,6 +40,8 @@ export type ExampleDataset = {
   weights?: number[]
   /** The paper weighs every criterion equally: the example opens with Equal weights (not a reference for them). */
   equalWeights?: true
+  /** Method-specific parameters from the paper (e.g. SWARA step-down ratios or ELECTRE III thresholds). */
+  methodParams?: Record<string, Record<string, unknown>>
   /** Published outputs, as printed (rounded as in the paper). */
   published: { label: string; values: number[] | number[][]; decimals: number }[]
 }
@@ -1048,6 +1050,9 @@ export const examples: readonly ExampleDataset[] = [
       [6, 5, 3, 7, 8, 8],
       [3, 9, 9, 2, 9, 9],
     ],
+    methodParams: {
+      swara: { s: [0, 0.15, 0.04, 0.29, 0.02, 0.04] },
+    },
     published: [{ label: 'swara.weights', values: [0.22, 0.19, 0.18, 0.14, 0.14, 0.13], decimals: 2 }],
   },
   {
@@ -1146,6 +1151,14 @@ export const examples: readonly ExampleDataset[] = [
       [12074, 897, 10.61, 169, 1.65, 378, 162, 0, 1, 7, 6],
     ],
     weights: [0.16, 0.033, 0.033, 0.097, 0.097, 0.16, 0.097, 0.16, 0.033, 0.033, 0.097],
+    methodParams: {
+      'electre-iii': {
+        mode: ['abs', 'rel', 'rel', 'abs', 'rel', 'rel', 'rel', 'abs', 'abs', 'abs', 'abs'],
+        q: [1000, 0.1, 0.1, 5, 0.1, 0.1, 0.1, 2, 0.2, 0, 0],
+        p: [2000, 0.2, 0.2, 10, 0.2, 0.2, 0.2, 4, 0.4, 1, 1],
+        v: [null, null, null, null, null, null, null, null, null, null, null],
+      },
+    },
     published: [
       { label: 'electre-iii.descending', values: [9, 10, 5, 2, 5, 11, 3, 5, 1, 4, 5], decimals: 0 },
       { label: 'electre-iii.ascending', values: [1, 6, 8, 4, 6, 11, 1, 10, 3, 5, 8], decimals: 0 },

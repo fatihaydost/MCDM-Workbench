@@ -56,14 +56,21 @@ export const roc: WeightingMethod<RocParams> = {
     const formula: RocFormula = params.formula === 'rs' || params.formula === 'rr' ? params.formula : 'roc'
     const strict = strictRankWeights(n, formula)
 
-    const hasCustomRanks =
-      Array.isArray(params.ranks) &&
-      params.ranks.length === n &&
-      params.ranks.every((r) => typeof r === 'number' && Number.isFinite(r))
-
-    const rawRanks: readonly number[] = hasCustomRanks
-      ? params.ranks!
-      : Array.from({ length: n }, (_, j) => j + 1)
+    let rawRanks: readonly number[]
+    if (params.ranks !== undefined) {
+      if (
+        !Array.isArray(params.ranks) ||
+        params.ranks.length !== n ||
+        !params.ranks.every((r) => typeof r === 'number' && Number.isFinite(r))
+      ) {
+        throw new RangeError(
+          `roc: expected ranks to be an array of ${n} finite numbers, got ${Array.isArray(params.ranks) ? `length ${params.ranks.length}` : typeof params.ranks}`,
+        )
+      }
+      rawRanks = params.ranks
+    } else {
+      rawRanks = Array.from({ length: n }, (_, j) => j + 1)
+    }
 
     // Sort criterion indices by input rank ascending; tied criteria share the average of their occupied positions.
     const order = Array.from({ length: n }, (_, j) => j).sort((a, b) => rawRanks[a]! - rawRanks[b]!)

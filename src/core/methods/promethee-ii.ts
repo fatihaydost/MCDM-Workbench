@@ -1,6 +1,6 @@
-import { zeros } from '../math'
+import { column, isNearConstant, zeros } from '../math'
 import { rankScores, TIE_TOLERANCE } from '../rank'
-import type { Problem, RankingMethod, RankingResult, Step } from '../types'
+import type { MethodWarning, Problem, RankingMethod, RankingResult, Step } from '../types'
 import { assertValid, validateProblem, validateWeights } from '../validate'
 
 /** Workbench preference function families selectable for all criteria. */
@@ -155,10 +155,16 @@ export const prometheeII: RankingMethod<PrometheeParams> = {
 
     const { matrix, criteria } = problem
     const pi = zeros(m, m)
+    const warnings: MethodWarning[] = []
 
     for (let j = 0; j < n; j++) {
       const wj = weights[j]!
       if (wj === 0) continue
+
+      const col = column(matrix, j)
+      if (isNearConstant(col)) {
+        warnings.push({ code: 'promethee-ii.near-constant-column', col: j })
+      }
 
       let min = Infinity
       let max = -Infinity
@@ -222,7 +228,7 @@ export const prometheeII: RankingMethod<PrometheeParams> = {
       ranking: rankScores(netFlow, 'desc'),
       steps,
       diagnostics: { incomparablePairs },
-      warnings: [],
+      warnings,
     }
   },
 }

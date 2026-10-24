@@ -11,7 +11,7 @@ import { reweight } from './reweight'
 import type { RankerFor } from './run'
 import { ProblemValidationError } from './validate'
 import type { ValidationIssue } from './validate'
-import type { MethodParams, Problem, WeightingMethod } from './types'
+import type { MethodParams, MethodParamValue, Problem, WeightingMethod } from './types'
 
 // ---------- shared helpers ----------
 
@@ -234,27 +234,6 @@ export function sweepWeight(
     }
   }
 
-  // Pieces between merged switch points; ranking at each piece's midpoint; merge equal neighbours.
-  breaks.sort((x, y) => x - y)
-  const cuts: number[] = [lo]
-  for (const p of breaks) {
-    if (p <= lo || p >= hi) continue
-    if (p - cuts[cuts.length - 1]! <= MERGE_TOL) continue
-    cuts.push(p)
-  }
-  if (cuts.length > 1 && hi - cuts[cuts.length - 1]! <= MERGE_TOL) cuts.pop()
-  cuts.push(hi)
-
-  const rankingIntervals: StableInterval[] = []
-  for (let j = 0; j + 1 < cuts.length; j++) {
-    const from = cuts[j]!
-    const to = cuts[j + 1]!
-    const ranking = evalAt((from + to) / 2).ranking
-    const last = rankingIntervals[rankingIntervals.length - 1]
-    if (last && rankKey(last.ranking) === rankKey(ranking)) last.to = to
-    else rankingIntervals.push({ from, to, ranking, top: topSet(ranking) })
-  }
-
   // At w_k = 0 or 1 some weights are exactly 0, so alternatives equal on the remaining criteria tie there. Next to
   // that point their scores differ by less than the tie tolerance of rankScores (1e-12, relative), so the tie
   // stretches a hair into the sweep (about 2e-6 on Krishnan 2021, k = 2). An end piece that narrow whose ranking only
@@ -267,6 +246,45 @@ export function sweepWeight(
       }
     }
     return true
+  }
+
+  // Pieces between merged switch points; ranking at each piece's midpoint; merge equal neighbours.
+  // A genuine jump discontinuity right at lo or hi (e.g. CoCoSo w_k = 0 -> w_k > 0 where 0^0 = 1 vs 0^w_k = 0)
+  // keeps its boundary cut instead of being swallowed by MERGE_TOL.
+  breaks.sort((x, y) => x - y)
+  const cuts: number[] = [lo]
+  for (const p of breaks) {
+    if (p <= lo || p >= hi) continue
+    if (p - cuts[cuts.length - 1]! <= MERGE_TOL) {
+      if (cuts.length === 1 && !onlyMerges(grid[0]!.ranking, evalAt(Math.min(hi, lo + MERGE_TOL)).ranking)) {
+        cuts.push(p)
+      }
+      continue
+    }
+    cuts.push(p)
+  }
+  if (
+    cuts.length > 1 &&
+    hi - cuts[cuts.length - 1]! <= MERGE_TOL &&
+    onlyMerges(grid[last]!.ranking, evalAt(Math.max(lo, hi - MERGE_TOL)).ranking)
+  ) {
+    cuts.pop()
+  }
+  cuts.push(hi)
+
+  const rankingIntervals: StableInterval[] = []
+  for (let j = 0; j + 1 < cuts.length; j++) {
+    const from = cuts[j]!
+    const to = cuts[j + 1]!
+    const ranking =
+      from === lo && to - from <= MERGE_TOL
+        ? grid[0]!.ranking
+        : to === hi && to - from <= MERGE_TOL
+          ? grid[last]!.ranking
+          : evalAt((from + to) / 2).ranking
+    const prev = rankingIntervals[rankingIntervals.length - 1]
+    if (prev && rankKey(prev.ranking) === rankKey(ranking)) prev.to = to
+    else rankingIntervals.push({ from, to, ranking, top: topSet(ranking) })
   }
   if (rankingIntervals.length > 1) {
     const first = rankingIntervals[0]!
@@ -350,9 +368,10 @@ export function perturbWeights(
   const baseTop = topSet(baseRanking)
   const rows: PerturbationRow[] = []
   for (let k = 0; k < weights.length; k++) {
+    const wk = weights[k]!
     let others = 0
     for (let j = 0; j < weights.length; j++) if (j !== k) others += weights[j]!
-    if (others <= ALL_ON_ONE) continue
+    if (wk <= ALL_ON_ONE || others <= ALL_ON_ONE) continue
     for (const delta of ds) {
       const w = reweight(weights, k, weights[k]! * (1 + delta))
       const ranking = tryRank(rank, w)
@@ -592,9 +611,42 @@ export function removeCriteria(
 ): RemovalRow[] {
   const n = problem.criteria.length
   if (n <= 2) return []
-  const baseRanking = rankFor(problem)([...weights]).ranking
+  let baseRanking: number[]
+  try {
+    baseRanking = rankFor(problem)([...weights]).ranking
+  } catch (err) {
+    if (err instanceof ProblemValidationError) return []
+    throw err
+  }
   const baseTop = topSet(baseRanking)
   const rows: RemovalRow[] = []
+
+  const reduceWeightingParams = (params: MethodParams | undefined, j: number): MethodParams => {
+    if (!params) return {}
+    const next: Record<string, MethodParamValue> = { ...params }
+    const rawOrder = (params as Record<string, unknown>).order
+    const rawS = (params as Record<string, unknown>).s
+    const rawRanks = (params as Record<string, unknown>).ranks
+    if (Array.isArray(rawOrder) && rawOrder.length === n) {
+      const pos = rawOrder.indexOf(j)
+      next.order = rawOrder
+        .filter((c) => c !== j)
+        .map((c) => (typeof c === 'number' && c > j ? c - 1 : c)) as unknown as MethodParamValue
+      if (Array.isArray(rawS) && rawS.length === n && pos >= 0) {
+        const reducedS = rawS.filter((_, idx) => idx !== pos)
+        if (reducedS.length > 0) reducedS[0] = 0
+        next.s = reducedS as unknown as MethodParamValue
+      }
+    } else if (Array.isArray(rawS) && rawS.length === n) {
+      const reducedS = rawS.filter((_, c) => c !== j)
+      if (reducedS.length > 0) reducedS[0] = 0
+      next.s = reducedS as unknown as MethodParamValue
+    }
+    if (Array.isArray(rawRanks) && rawRanks.length === n) {
+      next.ranks = rawRanks.filter((_, c) => c !== j) as unknown as MethodParamValue
+    }
+    return next
+  }
 
   // A removal the method cannot rank (CoCoSo: an alternative then worst on every remaining criterion) is a blocked row.
   const row = (j: number, mode: RemovalRow['mode'], reduced: Problem, w: number[]): RemovalRow => {
@@ -630,7 +682,8 @@ export function removeCriteria(
     rows.push(row(j, 'renormalize', reduced, renorm))
     if (weighting) {
       try {
-        rows.push(row(j, 'recompute', reduced, weighting.compute(reduced, opts?.weightingParams ?? {}).weights))
+        const reducedParams = reduceWeightingParams(opts?.weightingParams, j)
+        rows.push(row(j, 'recompute', reduced, weighting.compute(reduced, reducedParams).weights))
       } catch (err) {
         if (!(err instanceof ProblemValidationError)) throw err
         rows.push({ j, mode: 'recompute', weights: new Array<number>(n).fill(0), ...blockedRow(err) })

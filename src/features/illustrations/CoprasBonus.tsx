@@ -215,7 +215,9 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
                     onBlur={() => setActive(null)}
                   />
                 ))}
-                <rect className={`${s.sawGap} ${s.stageItem}`} data-off={off(1)} x={-1} y={barY} width={2} height={BAR} style={{ transform: `translate(${segs[1]!.x}px, 0px)` }} aria-hidden />
+                {segs[0]!.width > 0 && segs[1]!.width > 0 && (
+                  <rect className={`${s.sawGap} ${s.stageItem}`} data-off={off(1)} x={-1} y={barY} width={2} height={BAR} style={{ transform: `translate(${segs[1]!.x}px, 0px)` }} aria-hidden />
+                )}
                 {/* The cost share that sets the bonus: at the bar end for step 1 only, where Q takes its place. */}
                 <text
                   className={`${s.sawValue} ${s.stageItem}`}

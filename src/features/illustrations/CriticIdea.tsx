@@ -86,7 +86,8 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
   if (!parts) return null
 
   const n = problem.criteria.length
-  const hi = highlight ?? argMax(parts.weights)
+  const hasSpread = parts.weights.length > 1 && Math.max(...parts.weights) - Math.min(...parts.weights) > 1e-12
+  const hi = highlight ?? (hasSpread ? argMax(parts.weights) : -1)
   const weightTexts = parts.weights.map((w) => format(w))
   const informationTexts = parts.information.map((c) => format(c))
   const stepping = step !== null && step !== undefined

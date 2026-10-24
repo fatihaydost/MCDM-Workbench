@@ -23,7 +23,7 @@ export const sd: WeightingMethod = {
     constant.forEach((c, j) => c && warnings.push({ code: 'sd.constant-column', col: j }))
     nearConstant.forEach((near, j) => near && warnings.push({ code: 'sd.near-constant-column', col: j }))
     // Every varying column becomes {0, 1} with the same σ: equal weights over them.
-    if (m === 2) warnings.push({ code: 'sd.two-alternatives' })
+    if (m === 2 && constant.filter((c) => !c).length >= 2) warnings.push({ code: 'sd.two-alternatives' })
 
     // 2. Contrast: sample standard deviation per column.
     const sigma = Array.from({ length: n }, (_, j) => sampleStd(column(r, j)))

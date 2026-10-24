@@ -313,15 +313,65 @@ export function matchAlternatives(
   return out
 }
 
+const altPairMemory = new WeakMap<
+  Criterion,
+  { active: boolean; pairs: Map<string, Map<string, Ratio | null>> }
+>()
+
+function memorizeAlternativeJudgements(problem: DraftProblem, j: AlternativeJudgements | undefined): void {
+  if (!j) return
+  problem.criteria.forEach((c, col) => {
+    const mat = j[col]
+    if (!mat) {
+      const existing = altPairMemory.get(c)
+      if (existing) existing.active = false
+      return
+    }
+    const existing = altPairMemory.get(c) ?? { active: true, pairs: new Map<string, Map<string, Ratio | null>>() }
+    existing.active = true
+    problem.alternatives.forEach((altA, a) => {
+      let rowMap = existing.pairs.get(altA)
+      if (!rowMap) {
+        rowMap = new Map<string, Ratio | null>()
+        existing.pairs.set(altA, rowMap)
+      }
+      problem.alternatives.forEach((altB, b) => {
+        if (a !== b) rowMap!.set(altB, mat[a]?.[b] ?? null)
+      })
+    })
+    altPairMemory.set(c, existing)
+  })
+}
+
 function carryAlternativeJudgements(
   oldProblem: DraftProblem,
   old: AlternativeJudgements | undefined,
   nextProblem: DraftProblem,
   byPosition: boolean,
 ): AlternativeJudgements {
-  const critMap = matchCriteria(oldProblem.criteria, nextProblem.criteria, byPosition)
+  memorizeAlternativeJudgements(oldProblem, old)
+  const critMap = matchCriteria(oldProblem.criteria, nextProblem.criteria, byPosition, (c) => altPairMemory.has(c))
   const altMap = matchAlternatives(oldProblem.alternatives, nextProblem.alternatives, byPosition)
-  return remapAlternativeJudgements(old, critMap, altMap, nextProblem.alternatives.length)
+  let res = remapAlternativeJudgements(old, critMap, altMap, nextProblem.alternatives.length)
+  const m = nextProblem.alternatives.length
+  const n = nextProblem.criteria.length
+  nextProblem.criteria.forEach((c, col) => {
+    const mem = altPairMemory.get(c)
+    if (!mem || !mem.active) return
+    if (critMap[col] === undefined && res[col] === null) {
+      res = setAlternativeSource(res, m, n, col, 'pairwise')
+    }
+    if (res[col] === null) return
+    nextProblem.alternatives.forEach((altA, a) => {
+      nextProblem.alternatives.forEach((altB, b) => {
+        if (a >= b) return
+        if (critMap[col] !== undefined && altMap[a] !== undefined && altMap[b] !== undefined) return
+        const v = mem.pairs.get(altA)?.get(altB)
+        if (v != null) res = setAlternativePair(res, m, n, col, a, b, v)
+      })
+    })
+  })
+  return res
 }
 
 /**
@@ -401,7 +451,15 @@ export const useWorkbench = create<WorkbenchState>()(
           const manualWeights = carryWeights(s.problem.criteria, s.manualWeights, problem.criteria, false)
           const judgements = carryJudgements(s.problem.criteria, s.judgements, problem.criteria, false)
           const alternativeJudgements = carryAlternativeJudgements(s.problem, s.alternativeJudgements, problem, false)
-          return { problem, exampleId: null, importedFrom: fileName, manualWeights, judgements, alternativeJudgements }
+          return {
+            problem,
+            exampleId: null,
+            importedFrom: fileName,
+            methodParams: {},
+            manualWeights,
+            judgements,
+            alternativeJudgements,
+          }
         }),
 
       loadExample: (id, lang, method) => {
@@ -421,10 +479,14 @@ export const useWorkbench = create<WorkbenchState>()(
         remember(get(), true)
         memorize(get().problem.criteria, get().manualWeights)
         memorizeJudgements(get().problem.criteria, judgementsOf(get()))
-        set((s) => ({
-          ...((reference || ranking) && {
-            methodParams: { ...s.methodParams, ...(reference && { [reference]: {} }), ...(ranking && { [ranking]: {} }) },
-          }),
+        memorizeAlternativeJudgements(get().problem, altJudgementsOf(get()))
+        const nextMethodParams: MethodParamsState = {
+          ...(reference && { [reference]: {} }),
+          ...(ranking && { [ranking]: {} }),
+          ...(ex.methodParams ? (structuredClone(ex.methodParams) as MethodParamsState) : {}),
+        }
+        set({
+          methodParams: nextMethodParams,
           ...(ranking && { rankingMethod: ranking }),
           problem: {
             alternatives: [...alternativeNames(ex, lang)],
@@ -437,7 +499,7 @@ export const useWorkbench = create<WorkbenchState>()(
           manualWeights: ex.weights ? [...ex.weights] : new Array<number | null>(ex.criteria.length).fill(null),
           judgements: emptyJudgements(ex.criteria.length),
           alternativeJudgements: emptyAlternativeJudgements(ex.criteria.length),
-        }))
+        })
       },
 
       localizeExample: (lang) => {
@@ -463,6 +525,7 @@ export const useWorkbench = create<WorkbenchState>()(
         remember(get(), true)
         memorize(get().problem.criteria, get().manualWeights)
         memorizeJudgements(get().problem.criteria, judgementsOf(get()))
+        memorizeAlternativeJudgements(get().problem, altJudgementsOf(get()))
         set({
           problem: {
             alternatives: Array.from({ length: m }, (_, i) => names?.alternative(i) ?? `A${i + 1}`),
@@ -471,6 +534,7 @@ export const useWorkbench = create<WorkbenchState>()(
           },
           exampleId: null,
           importedFrom: null,
+          methodParams: {},
           manualWeights: new Array<number | null>(n).fill(null),
           judgements: emptyJudgements(n),
           alternativeJudgements: emptyAlternativeJudgements(n),
@@ -517,21 +581,24 @@ export const useWorkbench = create<WorkbenchState>()(
         })),
 
       removeAlternative: (row) =>
-        set((s) => ({
-          exampleId: null,
-          importedFrom: null,
-          problem: {
-            ...s.problem,
-            alternatives: s.problem.alternatives.filter((_, i) => i !== row),
-            matrix: s.problem.matrix.filter((_, i) => i !== row),
-          },
-          alternativeJudgements: remapAlternativeJudgements(
-            s.alternativeJudgements,
-            [...s.problem.criteria.keys()],
-            [...s.problem.alternatives.keys()].filter((i) => i !== row),
-            Math.max(0, s.problem.alternatives.length - 1),
-          ),
-        })),
+        set((s) => {
+          memorizeAlternativeJudgements(s.problem, s.alternativeJudgements)
+          return {
+            exampleId: null,
+            importedFrom: null,
+            problem: {
+              ...s.problem,
+              alternatives: s.problem.alternatives.filter((_, i) => i !== row),
+              matrix: s.problem.matrix.filter((_, i) => i !== row),
+            },
+            alternativeJudgements: remapAlternativeJudgements(
+              s.alternativeJudgements,
+              [...s.problem.criteria.keys()],
+              [...s.problem.alternatives.keys()].filter((i) => i !== row),
+              Math.max(0, s.problem.alternatives.length - 1),
+            ),
+          }
+        }),
 
       addCriterion: (criterion) =>
         set((s) => ({
@@ -553,26 +620,31 @@ export const useWorkbench = create<WorkbenchState>()(
         })),
 
       removeCriterion: (col) =>
-        set((s) => ({
-          exampleId: null,
-          importedFrom: null,
-          problem: {
-            ...s.problem,
-            criteria: s.problem.criteria.filter((_, j) => j !== col),
-            matrix: s.problem.matrix.map((r) => r.filter((_, j) => j !== col)),
-          },
-          manualWeights: fitWeights(s.manualWeights, s.problem.criteria.length).filter((_, j) => j !== col),
-          judgements: remapJudgements(
-            judgementsOf(s),
-            [...s.problem.criteria.keys()].filter((j) => j !== col),
-          ),
-          alternativeJudgements: remapAlternativeJudgements(
-            s.alternativeJudgements,
-            [...s.problem.criteria.keys()].filter((j) => j !== col),
-            [...s.problem.alternatives.keys()],
-            s.problem.alternatives.length,
-          ),
-        })),
+        set((s) => {
+          memorize(s.problem.criteria, s.manualWeights)
+          memorizeJudgements(s.problem.criteria, judgementsOf(s))
+          memorizeAlternativeJudgements(s.problem, s.alternativeJudgements)
+          return {
+            exampleId: null,
+            importedFrom: null,
+            problem: {
+              ...s.problem,
+              criteria: s.problem.criteria.filter((_, j) => j !== col),
+              matrix: s.problem.matrix.map((r) => r.filter((_, j) => j !== col)),
+            },
+            manualWeights: fitWeights(s.manualWeights, s.problem.criteria.length).filter((_, j) => j !== col),
+            judgements: remapJudgements(
+              judgementsOf(s),
+              [...s.problem.criteria.keys()].filter((j) => j !== col),
+            ),
+            alternativeJudgements: remapAlternativeJudgements(
+              s.alternativeJudgements,
+              [...s.problem.criteria.keys()].filter((j) => j !== col),
+              [...s.problem.alternatives.keys()],
+              s.problem.alternatives.length,
+            ),
+          }
+        }),
 
       setWeightMethod: (weightMethod) => set({ weightMethod }),
 
@@ -624,6 +696,7 @@ export const useWorkbench = create<WorkbenchState>()(
         remember(get(), true)
         memorize(get().problem.criteria, get().manualWeights)
         memorizeJudgements(get().problem.criteria, judgementsOf(get()))
+        memorizeAlternativeJudgements(get().problem, altJudgementsOf(get()))
         set(initialWorkbench())
       },
     }),
@@ -713,16 +786,15 @@ export function computeWeights(
 
   if (data.weightMethod === 'manual') {
     const weights = fitWeights(data.manualWeights, n).map((w) => (w === null ? Number.NaN : w))
-    const wIssues = validateWeights(weights, n)
+    const wIssues = [...issues, ...validateWeights(weights, n)]
     if (hasErrors(wIssues)) return { value: null, issues: wIssues }
     return { value: { weights, steps: [{ key: 'manual.weights', vector: weights, axes: 'criteria' }] }, issues: wIssues }
   }
 
   if (data.weightMethod === 'equal') {
-    // Equal weights only need the number of criteria; the matrix is not read.
-    if (n < 1) return { value: null, issues: issues.filter((x) => x.code === 'too-few-criteria') }
+    if (hasErrors(issues)) return { value: null, issues }
     const weights = new Array<number>(n).fill(1 / n)
-    return { value: { weights, steps: [{ key: 'equal.weights', vector: weights, axes: 'criteria' }] }, issues: [] }
+    return { value: { weights, steps: [{ key: 'equal.weights', vector: weights, axes: 'criteria' }] }, issues }
   }
 
   const method = getWeightingMethod(data.weightMethod)

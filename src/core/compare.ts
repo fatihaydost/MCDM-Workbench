@@ -44,18 +44,35 @@ export type Echo = { methodId: string; of: string }
  * so it echoes SAW when SAW ran with that option.
  * AHP with all criteria from the decision matrix uses SAW 'sum' local priorities, so it echoes SAW when SAW ran with
  * 'sum' and no criterion has active pairwise alternative comparisons (m <= 7).
+ * WASPAS with lambda = 1 is purely the WSM component (SAW 'linearMax'), so it echoes SAW ('linearMax') or MARCOS.
+ * PROMETHEE II with a linear ('v-shape') preference function over the full criterion range (p_j = max - min) is an
+ * affine transform of MABAC (Mareschal 2015), so it echoes MABAC when no per-criterion function overrides it.
  */
 function findEchoes(runs: readonly RankingRun[], ranked: ReadonlySet<string>, m: number): Echo[] {
   const echoes: Echo[] = []
-  if (ranked.has('marcos') && ranked.has('saw')) {
-    const linear = runs.some((r) => r.methodId === 'saw' && (r.params.normalization ?? 'linearMax') === 'linearMax')
-    if (linear) echoes.push({ methodId: 'marcos', of: 'saw' })
+  const sawLinear =
+    ranked.has('saw') && runs.some((r) => r.methodId === 'saw' && (r.params.normalization ?? 'linearMax') === 'linearMax')
+  if (ranked.has('marcos') && sawLinear) {
+    echoes.push({ methodId: 'marcos', of: 'saw' })
   }
   if (ranked.has('ahp-ranking') && ranked.has('saw')) {
     const sawSum = runs.some((r) => r.methodId === 'saw' && r.params.normalization === 'sum')
     const ahpRun = runs.find((r) => r.methodId === 'ahp-ranking')
     const hasPairwise = m <= AHP_MAX_PAIRWISE_ALTERNATIVES && Boolean(ahpRun?.judgements?.some((mat) => mat != null))
     if (sawSum && !hasPairwise) echoes.push({ methodId: 'ahp-ranking', of: 'saw' })
+  }
+  if (ranked.has('waspas')) {
+    const waspasRun = runs.find((r) => r.methodId === 'waspas')
+    if (waspasRun?.params.lambda === 1) {
+      if (sawLinear) echoes.push({ methodId: 'waspas', of: 'saw' })
+      else if (ranked.has('marcos')) echoes.push({ methodId: 'waspas', of: 'marcos' })
+    }
+  }
+  if (ranked.has('promethee-ii') && ranked.has('mabac')) {
+    const promRun = runs.find((r) => r.methodId === 'promethee-ii')
+    if ((promRun?.params.preferenceFunction ?? 'v-shape') === 'v-shape' && !promRun?.params.criteriaFunctions) {
+      echoes.push({ methodId: 'promethee-ii', of: 'mabac' })
+    }
   }
   return echoes
 }
@@ -168,7 +185,13 @@ export function pairFacts(problem: Problem, weights: number[], c: Comparison, i:
   const kFirst = br && br[k]! !== br[i]! ? br[k]! < br[i]! : k < i // Borda order, else lower index
   const [a, b] = kFirst ? [k, i] : [i, k]
   const rows = problem.matrix
-  const decisive = problem.criteria
+  const methods = c.runs.flatMap((r) => {
+    if (!r.result || c.echoes.some((e) => e.methodId === r.methodId)) return []
+    const { ranking } = r.result
+    const higher = ranking[a]! === ranking[b]! ? 'tie' : ranking[a]! < ranking[b]! ? 'a' : 'b'
+    return [{ methodId: r.methodId, higher } as const]
+  })
+  const allDecisive = problem.criteria
     .map((crit, col) => {
       const column = rows.map((r) => r[col]!)
       const range = isConstant(column) ? 0 : maxOf(column) - minOf(column)
@@ -179,14 +202,13 @@ export function pairFacts(problem: Problem, weights: number[], c: Comparison, i:
     })
     .filter((x) => x.value > 0)
     .sort((x, y) => y.value - x.value)
-    .slice(0, 3)
-    .map(({ col, better }) => ({ col, better }))
-  const methods = c.runs.flatMap((r) => {
-    if (!r.result || c.echoes.some((e) => e.methodId === r.methodId)) return []
-    const { ranking } = r.result
-    const higher = ranking[a]! === ranking[b]! ? 'tie' : ranking[a]! < ranking[b]! ? 'a' : 'b'
-    return [{ methodId: r.methodId, higher } as const]
-  })
+  const top = allDecisive.slice(0, 3)
+  const split = methods.some((m) => m.higher === 'a') && methods.some((m) => m.higher === 'b')
+  if (split && top.length === 3 && top.every((x) => x.better === top[0]!.better)) {
+    const other = allDecisive.find((x) => x.better !== top[0]!.better)
+    if (other) top[2] = other
+  }
+  const decisive = top.map(({ col, better }) => ({ col, better }))
   const d = c.runs.find((r) => r.methodId === 'vikor')?.result?.steps.find((s) => s.key === 'vikor.weightedDistance')
   return {
     a,

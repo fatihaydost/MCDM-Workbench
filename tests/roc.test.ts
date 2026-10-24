@@ -167,4 +167,11 @@ describe('ROC: custom ranks, ties and pyDecision cross-validation', () => {
       roc.compute(makeProblem([[1, Number.NaN], [2, 3]], ['benefit', 'benefit']), {}),
     ).toThrow(ProblemValidationError)
   })
+
+  it('throws RangeError when params.ranks is not an array of length n with finite numbers', () => {
+    expect(() => roc.compute(p4, { ranks: [1, 2, 3] })).toThrow(RangeError)
+    expect(() => roc.compute(p4, { ranks: [1, 2, 3, 4, 5] })).toThrow(RangeError)
+    expect(() => roc.compute(p4, { ranks: [1, 2, Number.NaN, 4] })).toThrow(RangeError)
+    expect(() => roc.compute(p4, { ranks: 'invalid' as unknown as number[] })).toThrow(RangeError)
+  })
 })

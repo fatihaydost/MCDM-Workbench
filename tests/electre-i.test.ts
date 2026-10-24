@@ -81,6 +81,7 @@ describe('ELECTRE I — Wang & Triantaphyllou (2008) Galway wastewater plant', (
       // Mutual outranking cycle between A2 (index 1) and A3 (index 2).
       expect(S[1]![2]).toBe(1)
       expect(S[2]![1]).toBe(1)
+      expect(res.warnings).toContainEqual({ code: 'electre-i.cycle-detected' })
 
       const K = electreIKernel(S)
       expect(K).toEqual([1, 2, 4])
@@ -210,6 +211,45 @@ describe('ELECTRE I — graph kernel, edge cases & parameter validation', () => 
     const resFlat = electreI.compute(flat, [0.5, 0.5], {})
     expect(resFlat.scores).toEqual([0, 0])
     expect(resFlat.ranking).toEqual([1, 1])
+  })
+
+  it('emits near-constant-column and non-kernel-leader warnings when applicable', () => {
+    const nearConst: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'benefit' },
+      ],
+      matrix: [
+        [10, 1],
+        [20, 1 + 1e-10],
+        [30, 1],
+      ],
+    }
+    const resNear = electreI.compute(nearConst, [0.5, 0.5], {})
+    expect(resNear.warnings).toContainEqual({ code: 'electre-i.near-constant-column', col: 1 })
+
+    // Non-kernel leader: A2 (index 1) has the highest net outranking score Φ,
+    // but is outranked by A1 (index 0) and is therefore excluded from the kernel K = {0}.
+    const nonKernelLeaderProb: Problem = {
+      alternatives: ['A1', 'A2', 'A3', 'A4'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'benefit' },
+        { name: 'C3', type: 'benefit' },
+      ],
+      matrix: [
+        [100, 100, 0], // A1: beats A2 on C1, C2 (w=0.7) with small loss on C3 (30/100 = 0.3 <= dHat=0.35) -> S(A1, A2) = 1
+        [90, 90, 30],  // A2: beats A3, A4 on all criteria -> highest net score, but outranked by A1 so kernel[1] = 0
+        [0, 0, 20],
+        [0, 0, 10],
+      ],
+    }
+    const resLeader = electreI.compute(nonKernelLeaderProb, [0.35, 0.35, 0.3], { cHat: 0.7, dHat: 0.35 })
+    const kernelVec = resLeader.steps.find((s) => s.key === 'electre-i.kernel')!.vector!
+    expect(resLeader.ranking[1]).toBe(1)
+    expect(kernelVec[1]).toBe(0)
+    expect(resLeader.warnings).toContainEqual({ code: 'electre-i.non-kernel-leader', row: 1 })
   })
 
   it('rejects out-of-range cHat, dHat, or invalid discordanceScale', () => {

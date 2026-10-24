@@ -44,9 +44,10 @@ describe('whySentences', () => {
     const f = pairFacts(p, ex.weights!, c, 0, 6)
     expect(whySentences(f, await ctx('en', p))).toEqual([
       'A1 is mainly ahead on C1 and C6 but behind on C5.',
-      'TOPSIS, SAW, EDAS, WASPAS, COPRAS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I and AHP rank A1 above A7.',
+      'TOPSIS, SAW, EDAS, WASPAS, COPRAS, CoCoSo, MABAC, MOORA, ARAS, CODAS, ELECTRE I and AHP rank A1 above A7.',
       'VIKOR ranks A7 above A1.',
       'ELECTRE III ranks A1 and A7 equal.',
+      'VIKOR weighs the total against the single largest regret, so one big weakness weighs heavily.',
       "VIKOR's largest regret for both A1 and A7 is on C3, and A1's is larger.",
     ])
   })
@@ -55,25 +56,35 @@ describe('whySentences', () => {
     const f = pairFacts(p, ex.weights!, c, 0, 6)
     expect(whySentences(f, await ctx('tr', p))).toEqual([
       'A1, özellikle C1 ve C6 kriterlerinde önde ama C5 kriterinde geride.',
-      'TOPSIS, SAW, EDAS, WASPAS, COPRAS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I ve AHP için A1 alternatifi A7 alternatifinden önde.',
+      'TOPSIS, SAW, EDAS, WASPAS, COPRAS, CoCoSo, MABAC, MOORA, ARAS, CODAS, ELECTRE I ve AHP için A1 alternatifi A7 alternatifinden önde.',
       'VIKOR için A7 alternatifi A1 alternatifinden önde.',
       'ELECTRE III için A1 ve A7 eşit sırada.',
+      'VIKOR toplamı tek bir en büyük pişmanlıkla tartar, bu yüzden tek büyük zayıflık ağır basar.',
       "VIKOR'un en büyük pişmanlığı hem A1 hem A7 için C3 kriterinde, daha büyüğü A1 için.",
     ])
   })
 
-  it('names both columns when VIKOR regrets differ, and says when they are equal', async () => {
+  it('names both columns when VIKOR regrets differ, says when they are equal, and omits regret when it contradicts VIKOR', async () => {
     const f = pairFacts(p, ex.weights!, c, 0, 6)
-    const regret = (vikorRegret: PairFacts['vikorRegret'], lang: 'en' | 'tr') =>
-      ctxAndRun(lang, { ...f, vikorRegret })
+    const flipSides: PairFacts = {
+      ...f,
+      methods: f.methods.map((m) =>
+        m.higher === 'a' ? { ...m, higher: 'b' as const } : m.higher === 'b' ? { ...m, higher: 'a' as const } : m,
+      ),
+    }
     const ctxAndRun = async (lang: 'en' | 'tr', x: PairFacts) => whySentences(x, await ctx(lang, p)).at(-1)
-    expect(await regret({ a: 2, b: 0, ra: 0.03, rb: 0.04 }, 'en')).toBe(
+    expect(await ctxAndRun('en', { ...flipSides, vikorRegret: { a: 2, b: 0, ra: 0.03, rb: 0.04 } })).toBe(
       "VIKOR's largest regret for A1 is on C3, for A7 on C1, and A7's is larger.",
     )
-    expect(await regret({ a: 2, b: 0, ra: 0.03, rb: 0.04 }, 'tr')).toBe(
+    expect(await ctxAndRun('tr', { ...flipSides, vikorRegret: { a: 2, b: 0, ra: 0.03, rb: 0.04 } })).toBe(
       "VIKOR'un en büyük pişmanlığı A1 için C3, A7 için C1 kriterinde, daha büyüğü A7 için.",
     )
-    expect(await regret({ a: 2, b: 1, ra: 0.03, rb: 0.03 }, 'en')).toBe("VIKOR's largest regrets for A1 and A7 are equal.")
+    expect(await ctxAndRun('en', { ...f, vikorRegret: { a: 2, b: 1, ra: 0.03, rb: 0.03 } })).toBe(
+      "VIKOR's largest regrets for A1 and A7 are equal.",
+    )
+    // When VIKOR ranks A7 (b) above A1 (a) via S despite A7 having larger R, omit the misleading regret sentence.
+    const contradicted = whySentences({ ...f, vikorRegret: { a: 2, b: 0, ra: 0.03, rb: 0.04 } }, await ctx('en', p))
+    expect(contradicted.some((s) => s.includes('largest regret for'))).toBe(false)
   })
 
   it('a 2-2 split explains both sides within five sentences', async () => {
@@ -91,13 +102,29 @@ describe('whySentences', () => {
     expect(s.filter((x) => /^(TOPSIS|VIKOR) (measures|weighs)/.test(x))).toHaveLength(2)
   })
 
+  it('includes the tied method character sentence when one side has 0 methods and another method ties', async () => {
+    const f: PairFacts = {
+      ...pairFacts(p, ex.weights!, c, 0, 6),
+      unanimous: false,
+      vikorRegret: null,
+      methods: [
+        { methodId: 'topsis', higher: 'a' },
+        { methodId: 'saw', higher: 'a' },
+        { methodId: 'electre-iii', higher: 'tie' },
+      ],
+    }
+    const s = whySentences(f, await ctx('en', p))
+    expect(s).toContain('ELECTRE III ranks A1 and A7 equal.')
+    expect(s.some((x) => x.startsWith('ELECTRE III builds a fuzzy outranking credibility matrix'))).toBe(true)
+  })
+
   it('unanimous pair: one sentence plus the pointer to the crossings', async () => {
     const f = pairFacts(p, ex.weights!, c, 0, 1)
     expect(f.unanimous).toBe(true)
     const s = whySentences(f, await ctx('en', p))
-    expect(s[0]).toBe('All 15 methods put A1 above A2.')
-    expect(whySentences(f, await ctx('tr', p))[0]).toBe('15 yöntemin hepsi A1 alternatifini A2 alternatifinin üstüne koyuyor.')
-    expect(s).toEqual(['All 15 methods put A1 above A2.', 'Select a crossing in the chart to see another pair.'])
+    expect(s[0]).toBe('All 14 methods put A1 above A2.')
+    expect(whySentences(f, await ctx('tr', p))[0]).toBe('14 yöntemin hepsi A1 alternatifini A2 alternatifinin üstüne koyuyor.')
+    expect(s).toEqual(['All 14 methods put A1 above A2.', 'Select a crossing in the chart to see another pair.'])
   })
 
   it('identical rankings: exactly one sentence', async () => {
@@ -107,7 +134,7 @@ describe('whySentences', () => {
     expect(identicalRankings(cq)).toBe(true)
     const [i, k] = defaultPair(cq)!
     expect(whySentences(pairFacts(q, ex.weights!, cq, i, k), await ctx('en', q, true))).toEqual([
-      'All 14 methods give the same ranking.',
+      'All 13 methods give the same ranking.',
     ])
   })
 

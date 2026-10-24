@@ -1,4 +1,4 @@
-import { column, isConstant, maxOf, minOf, sum, zeros } from '../math'
+import { column, isConstant, maxOf, minOf, sum, vectorNormalize } from '../math'
 import { rankScores } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, validateProblem, validateWeights } from '../validate'
@@ -14,19 +14,10 @@ export const topsis: RankingMethod = {
     const n = problem.criteria.length
     assertValid([...validateProblem(problem), ...validateWeights(weights, n)])
     const { matrix, criteria } = problem
-    const m = matrix.length
-    const warnings: MethodWarning[] = []
 
     // 1. Vector normalization r_ij = x_ij / sqrt(Σ_i x_ij²); an all-zero column stays 0.
-    const norms = Array.from({ length: n }, (_, j) => Math.sqrt(sum(column(matrix, j).map((x) => x * x))))
-    const r = zeros(m, n)
-    norms.forEach((norm, j) => {
-      if (norm === 0) {
-        warnings.push({ code: 'topsis.zero-column', col: j })
-        return
-      }
-      for (let i = 0; i < m; i++) r[i]![j] = matrix[i]![j]! / norm
-    })
+    const { normalized: r, zeroCols } = vectorNormalize(matrix)
+    const warnings: MethodWarning[] = zeroCols.map((col) => ({ code: 'topsis.zero-column', col }))
 
     // 2. Weighted normalized matrix v_ij = w_j r_ij.
     const v = r.map((row) => row.map((x, j) => x * weights[j]!))

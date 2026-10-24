@@ -2,7 +2,7 @@ import { CaretDown, Check, Copy, Info } from '@phosphor-icons/react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isStepKey, stepContent, stepFlow } from '../../content/steps'
-import type { Step } from '../../core'
+import type { Criterion, Step } from '../../core'
 import { StepFlow } from '../../features/illustrations/StepFlow'
 import { escapeLatex, stepToTable, tableToLatex, tableToTsv, type StepTable } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
@@ -63,10 +63,21 @@ export default function WorkedCalculation({ groups, problem, headingLevel = 'h3'
   }, [groups])
 
   const jump = (key: string) => {
-    const i = keys.indexOf(key)
+    let resolved = key
+    if (!keys.includes(resolved)) {
+      for (const g of groups) {
+        const node = flowFor(g.steps)?.find((n) => n.key === key)
+        const firstKey = node?.stepKeys?.find((k) => keys.includes(k))
+        if (firstKey) {
+          resolved = firstKey
+          break
+        }
+      }
+    }
+    const i = keys.indexOf(resolved)
     if (i < 0) return
     setCurrent(i)
-    const target = document.getElementById(stepDomId(key))
+    const target = document.getElementById(stepDomId(resolved))
     target?.scrollIntoView({ block: 'start' })
     target?.focus({ preventScroll: true })
   }
@@ -139,6 +150,7 @@ export default function WorkedCalculation({ groups, problem, headingLevel = 'h3'
                     current={index === current}
                     onCurrent={() => setCurrent(index)}
                     labels={labels}
+                    criteria={problem.criteria}
                     heading={headingLevel}
                     name={stepName(step.key, t)}
                     digits={digits}
@@ -163,13 +175,14 @@ type StepBlockProps = {
   current: boolean
   onCurrent: () => void
   labels: ReturnType<typeof stepAxisLabels>
+  criteria: readonly Criterion[]
   heading: 'h3' | 'h4'
   name: string
   digits: 2 | 4
   highlightCols: boolean
 }
 
-function StepBlock({ step, number, index, domId, current, onCurrent, labels, heading: H, name, digits, highlightCols }: StepBlockProps) {
+function StepBlock({ step, number, index, domId, current, onCurrent, labels, criteria, heading: H, name, digits, highlightCols }: StepBlockProps) {
   const { t, i18n } = useTranslation()
   const nf = useNumberFormat(digits)
   const lang = nf.lang
@@ -284,6 +297,8 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, hea
         {/* A value the step leaves undefined (a constant column's correlation) says so instead of a blank cell. */}
         <StepTableView
           table={table}
+          stepKey={step.key}
+          criteria={criteria}
           format={(v) => (Number.isFinite(v) ? nf.format(v) : t('workbench.calc.undefined'))}
           label={t('workbench.calc.tableLabel', { n: number, name })}
           signed={content?.signed}
@@ -301,18 +316,69 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, hea
 
 type Hover = { r: number; c: number } | null
 
+const NO_PEAK_STEPS = new Set<string>([
+  'critic.correlation',
+  'electre-i.concordance',
+  'electre-i.discordance',
+  'electre-i.outranking',
+  'electre-iii.concordance',
+  'electre-iii.credibility',
+  'promethee-ii.preferenceMatrix',
+  'codas.relativeAssessment',
+  'vikor.best',
+  'vikor.worst',
+  'topsis.idealBest',
+  'topsis.idealWorst',
+  'cilos.squareMatrix',
+  'cilos.lossMatrix',
+  'cilos.systemMatrix',
+])
+
+const MIN_PEAK_STEPS = new Set<string>([
+  'vikor.weightedDistance',
+  'vikor.groupUtility',
+  'vikor.individualRegret',
+  'vikor.q',
+  'topsis.distanceBest',
+  'merec.normalized',
+  'edas.nda',
+  'edas.weightedNda',
+  'edas.sn',
+  'copras.sMinus',
+  'moora.costSum',
+  'promethee-ii.negativeFlow',
+  'electre-i.netDiscordance',
+  'electre-iii.descending',
+  'electre-iii.ascending',
+  'electre-iii.meanRank',
+])
+
+const UNORIENTED_MATRIX_STEPS = new Set<string>([
+  'topsis.normalized',
+  'topsis.weighted',
+  'moora.normalized',
+  'moora.weighted',
+  'copras.normalizedSum',
+  'copras.weighted',
+  'electre-i.oriented',
+])
+
 /**
  * Labelled matrix, vector or scalar in Plex Mono with fixed decimals. Hovering a cell tints its
  * row and column labels. Wide or tall tables scroll inside their own box, never the page.
  */
 function StepTableView({
   table,
+  stepKey,
+  criteria,
   format,
   label,
   signed,
   highlightCols = false,
 }: {
   table: StepTable
+  stepKey?: string | undefined
+  criteria?: readonly Criterion[] | undefined
   format: (v: number) => string
   label: string
   signed?: true | undefined
@@ -323,14 +389,20 @@ function StepTableView({
   const colPeaks = useMemo(() => {
     if (!highlightCols || table.values.length < 2) return null
     const cols = table.values[0]?.length ?? 0
+    if (stepKey !== undefined && NO_PEAK_STEPS.has(stepKey)) return Array.from({ length: cols }, () => NaN)
+    const lowerIsBetterStep = stepKey !== undefined && MIN_PEAK_STEPS.has(stepKey)
+    const unorientedMatrix = stepKey !== undefined && UNORIENTED_MATRIX_STEPS.has(stepKey)
     return Array.from({ length: cols }, (_, c) => {
       const colVals = table.values.map((r) => r[c]!).filter(Number.isFinite)
       if (colVals.length < 2) return null
       const min = Math.min(...colVals)
       const max = Math.max(...colVals)
-      return max - min > 1e-12 ? max : null
+      if (max - min <= 1e-12) return null
+      if (lowerIsBetterStep) return min
+      if (unorientedMatrix && stepKey !== 'electre-i.oriented' && criteria?.[c]?.type === 'cost') return min
+      return max
     })
-  }, [highlightCols, table.values])
+  }, [highlightCols, table.values, stepKey, criteria])
 
   if (table.kind === 'scalar') {
     return (

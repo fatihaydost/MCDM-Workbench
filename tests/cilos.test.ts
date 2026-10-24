@@ -152,21 +152,29 @@ describe('CILOS: mathematical properties and edge cases', () => {
     assertAllFinite(res.steps, res.weights)
   })
 
-  it('breaks ties for a criterion maximum by picking the first matching alternative', () => {
-    const res = run(
-      [
-        [10, 4, 2],
-        [10, 8, 5],
-        [6, 5, 9],
-      ],
-      ['benefit', 'benefit', 'benefit'],
+  it('averages tied winning rows for a criterion maximum so row permutations leave CILOS weights invariant', () => {
+    const m1 = [
+      [10, 4, 2],
+      [10, 8, 5],
+      [6, 5, 9],
+    ]
+    const m2 = [
+      [10, 8, 5],
+      [10, 4, 2],
+      [6, 5, 9],
+    ]
+    const res1 = run(m1, ['benefit', 'benefit', 'benefit'])
+    const res2 = run(m2, ['benefit', 'benefit', 'benefit'])
+    const Xbar = step(res1.steps, 'cilos.normalized').matrix!
+    const A = step(res1.steps, 'cilos.squareMatrix').matrix!
+    // Criterion 0 ties at rows 0 and 1 (both 10); row 0 of A is the average of rows 0 and 1 of Xbar.
+    expectClose(
+      A[0]!,
+      Xbar[0]!.map((v, j) => (v + Xbar[1]![j]!) / 2),
+      1e-15,
     )
-    const Xbar = step(res.steps, 'cilos.normalized').matrix!
-    const A = step(res.steps, 'cilos.squareMatrix').matrix!
-    // Criterion 0 ties at rows 0 and 1 (both 10); row 0 of A must copy row 0 of Xbar, not row 1.
-    expectClose(A[0]!, Xbar[0]!, 1e-15)
-    expect(A[0]![1]).not.toBeCloseTo(Xbar[1]![1]!, 5)
-    assertAllFinite(res.steps, res.weights)
+    expectClose(res1.weights, res2.weights, 1e-15)
+    assertAllFinite(res1.steps, res1.weights)
   })
 
   it('rejects zero and negative cells with ProblemValidationError (non-positive-value)', () => {

@@ -1,4 +1,4 @@
-import { column, isConstant, maxOf, minOf, sum, zeros } from '../math'
+import { column, isConstant, isNearConstant, maxOf, minOf, sum, zeros } from '../math'
 import { rankScores, tied } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, validateProblem, validateWeights } from '../validate'
@@ -67,8 +67,11 @@ export function vikorCompromise(S: readonly number[], R: readonly number[], Q: r
   const dq = 1 / (m - 1)
   const advantage = Q[second]! - Q[first]!
   const c1 = advantage >= dq - DQ_TOLERANCE
-  const bestByS = rankScores([...S], 'asc')[first] === 1
-  const bestByR = rankScores([...R], 'asc')[first] === 1
+  const rankS = rankScores([...S], 'asc')
+  const rankR = rankScores([...R], 'asc')
+  const tiedFirst = order.filter((i) => tied(Q[i]!, Q[first]!))
+  const bestByS = tiedFirst.some((i) => rankS[i] === 1)
+  const bestByR = tiedFirst.some((i) => rankR[i] === 1)
   const c2 = bestByS || bestByR
   const set = c1 ? (c2 ? [first] : [first, second]) : order.filter((i) => Q[i]! - Q[first]! < dq - DQ_TOLERANCE)
   return { order, first, second, dq, advantage, c1, c2, bestByS, bestByR, tieAtTop: qRank[second] === qRank[first], set }
@@ -111,11 +114,14 @@ export const vikor: RankingMethod<VikorParams> = {
     // 2. Weighted normalized distance to the best; a constant column cannot tell anyone apart: 0, never divided.
     const d = zeros(m, n)
     for (let j = 0; j < n; j++) {
+      const col = column(matrix, j)
       const span = best[j]! - worst[j]!
       // Constant up to rounding (as in validateProblem): a spread of one ulp is not stretched to the full [0, 1].
-      if (isConstant(column(matrix, j))) {
+      if (isConstant(col)) {
         warnings.push({ code: 'vikor.constant-column', col: j })
         continue
+      } else if (isNearConstant(col)) {
+        warnings.push({ code: 'vikor.near-constant-column', col: j })
       }
       for (let i = 0; i < m; i++) d[i]![j] = (weights[j]! * (best[j]! - matrix[i]![j]!)) / span
     }
@@ -129,8 +135,8 @@ export const vikor: RankingMethod<VikorParams> = {
     const sFlat = vikorFlat(S)
     const rFlat = vikorFlat(R)
     if (sFlat && rFlat) warnings.push({ code: 'vikor.no-spread' })
-    else if (sFlat) warnings.push({ code: 'vikor.equal-group-utility' })
-    else if (rFlat) warnings.push({ code: 'vikor.equal-regret' })
+    if (sFlat && !rFlat && v > 0) warnings.push({ code: 'vikor.equal-group-utility' })
+    if (rFlat && !sFlat && v < 1) warnings.push({ code: 'vikor.equal-regret' })
     const sTerm = vikorTerm(S)
     const rTerm = vikorTerm(R)
     const Q = S.map((_, i) => v * sTerm[i]! + (1 - v) * rTerm[i]!)

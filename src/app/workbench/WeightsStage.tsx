@@ -220,9 +220,12 @@ function DirectionLabel({ type }: { type: 'benefit' | 'cost' }) {
   )
 }
 
-/** Index of the largest weight (the first one on ties), drawn in the accent as on the landing page. */
-export const argmax = (values: readonly number[]): number =>
-  values.reduce((best, v, j) => (v > (values[best] ?? -Infinity) ? j : best), 0)
+/** Index of the largest weight (the first one on ties), drawn in the accent as on the landing page; -1 when all weights are equal. */
+export const argmax = (values: readonly number[]): number => {
+  const finite = values.filter(Number.isFinite)
+  if (finite.length < 2 || Math.max(...finite) - Math.min(...finite) <= 1e-12) return -1
+  return values.reduce((best, v, j) => (v > (values[best] ?? -Infinity) ? j : best), 0)
+}
 
 export function WeightsChart({ names, weights, format, className }: { names: string[]; weights: number[]; format: (v: number) => string; className?: string }) {
   const { t } = useTranslation()

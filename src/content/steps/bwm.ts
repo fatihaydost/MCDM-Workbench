@@ -13,11 +13,15 @@ export const bwm = {
       en: 'Best over others: how much more important the best criterion is than each, 1-9.',
       tr: 'En iyinin diğerlerine üstünlüğü: en iyi kriter her birinden kaç kat önemli, 1-9.',
       tex: String.raw`a_B = (a_{B1}, \dots, a_{Bn}), \qquad a_{BB} = 1`,
+      symbol: 'a_B',
+      texSymbol: '$a_B$',
     },
     'bwm.othersToWorst': {
       en: 'Others over worst: how much more important each criterion is than the worst, 1-9.',
       tr: 'Diğerlerinin en kötüye üstünlüğü: her kriter en kötüden kaç kat önemli, 1-9.',
       tex: String.raw`a_W = (a_{1W}, \dots, a_{nW}), \qquad a_{WW} = 1`,
+      symbol: 'a_W',
+      texSymbol: '$a_W$',
     },
     'bwm.consistencyLocal': {
       en: 'Consistency per criterion: how far a_Bj times a_jW is from a_BW.',

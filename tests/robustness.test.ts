@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { critic, entropy, equal, merec, rankScores, saw, topsis, type MethodParams, type Problem, type RankingMethod } from '../src/core'
+import { critic, entropy, equal, merec, rankScores, roc, saw, swara, topsis, type MethodParams, type Problem, type RankingMethod } from '../src/core'
 import {
   createRng,
   DEFAULT_DELTAS,
@@ -15,6 +15,8 @@ import {
   wsCoefficient,
   type Sweep,
 } from '../src/core/robustness'
+import { recomputable, switchMarks } from '../src/app/workbench/robustness/helpers'
+import { layoutSweep } from '../src/features/charts/sweep'
 import { examples } from '../src/data/examples'
 import { expectClose, makeProblem, rankerOf } from './helpers'
 
@@ -289,13 +291,13 @@ describe('perturbWeights', () => {
 
 // ---------- agreement coefficients ----------
 
-describe('perturbWeights: all the weight on one criterion (combinations.md §C.1, w_k = 1 -> skip)', () => {
-  it('skips that criterion instead of inventing an equal split, so no row repeats the base vector', () => {
+describe('perturbWeights: all the weight on one criterion or zero weight (combinations.md §C.1 -> skip)', () => {
+  it('skips w_k = 1 and w_k = 0 instead of inventing splits or repeating the base vector', () => {
     const p = makeProblem([[10, 1, 1], [9, 9, 9], [8, 5, 9]], ['benefit', 'benefit', 'benefit'])
-    const rows = perturbWeights(p, [1, 0, 0], rankerOf(topsis))
-    expect(rows.some((r) => r.k === 0)).toBe(false)
-    // The zero-weight criteria keep their rows (they equal the base and the stage marks them n/a).
-    expect(rows.every((r) => r.weights[0] === 1)).toBe(true)
+    expect(perturbWeights(p, [1, 0, 0], rankerOf(topsis))).toEqual([])
+    const partial = perturbWeights(p, [0.6, 0.4, 0], rankerOf(topsis))
+    expect(partial.some((r) => r.k === 2)).toBe(false)
+    expect(new Set(partial.map((r) => r.k))).toEqual(new Set([0, 1]))
   })
 })
 
@@ -718,5 +720,72 @@ describe('monteCarlo progress', () => {
     expect(seen.every((p) => p.total === 500)).toBe(true)
     // Every row of a snapshot is a distribution over the draws ranked so far.
     for (const p of seen) for (const row of p.acceptability) expect(row.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 9)
+  })
+})
+
+describe('robustness helpers and chart layout', () => {
+  it('recomputable disables recompute for equal, roc, swara and judgement-based methods', () => {
+    expect(recomputable('equal')).toBeUndefined()
+    expect(recomputable('roc')).toBeUndefined()
+    expect(recomputable('swara')).toBeUndefined()
+    expect(recomputable('ahp')).toBeUndefined()
+    expect(recomputable('bwm')).toBeUndefined()
+    expect(recomputable('critic')?.id).toBe('critic')
+    expect(recomputable('entropy')?.id).toBe('entropy')
+    expect(recomputable('cilos')?.id).toBe('cilos')
+  })
+
+  it('switchMarks detects rank changes across a tie interval as well as direct swaps', () => {
+    const intervals = [
+      { from: 0, to: 0.4, ranking: [2, 1, 3], top: [1] },
+      { from: 0.4, to: 0.6, ranking: [1, 1, 3], top: [0, 1] },
+      { from: 0.6, to: 1, ranking: [1, 2, 3], top: [0] },
+    ]
+    const marks = switchMarks(intervals, (wk) => [wk, 1 - wk, 0.2])
+    expect(marks).toEqual([
+      { x: 0.4, y: 0.5 },
+      { x: 0.6, y: 0.5 },
+    ])
+  })
+
+  it('removeCriteria returns [] when base ranking fails validation, and slices array weightingParams', () => {
+    const p = makeProblem([[0, 2, 3], [2, 1, 4], [1, 3, 2]], ['benefit', 'benefit', 'benefit'])
+    expect(removeCriteria(p, [0.4, 0.3, 0.3], (q) => (w) => saw.compute(q, w, {}))).toEqual([])
+
+    const p3 = makeProblem([[10, 2, 3], [2, 8, 4], [5, 3, 9]], ['benefit', 'benefit', 'benefit'])
+    const swaraParams = { s: [0, 0.25, 0.2], order: [1, 0, 2] }
+    const baseW = swara.compute(p3, swaraParams).weights
+    const rows = removeCriteria(p3, baseW, rankerOf(topsis), swara, {
+      weightingParams: swaraParams as unknown as MethodParams,
+    }).filter((r) => r.mode === 'recompute')
+    expect(rows).toHaveLength(3)
+    for (const r of rows) {
+      expect(Math.abs(sum(r.weights) - 1)).toBeLessThan(1e-12)
+      expect(r.weights[r.j]).toBe(0)
+    }
+
+    const rocParams = { ranks: [2, 1, 3] }
+    const rocW = roc.compute(p3, rocParams).weights
+    const rocRows = removeCriteria(p3, rocW, rankerOf(topsis), roc, {
+      weightingParams: rocParams as unknown as MethodParams,
+    }).filter((r) => r.mode === 'recompute')
+    expect(rocRows).toHaveLength(3)
+    expectClose(rocRows[0]!.weights, [0, 0.75, 0.25], 1e-12)
+  })
+
+  it('layoutSweep keeps x domain at [0, 1] and clamps extreme endpoint spikes in y', () => {
+    const layout = layoutSweep({
+      width: 600,
+      xs: [0, 0.1, 0.5, 0.9],
+      series: [
+        [100, 0.6, 0.5, 0.4],
+        [0.2, 0.3, 0.4, 0.5],
+      ],
+      labels: ['A1', 'A2'],
+    })
+    expect(layout.x.domain).toEqual([0, 1])
+    expect(layout.y.domain[1]).toBeLessThan(2)
+    expect(layout.y(100)).toBeGreaterThanOrEqual(layout.top)
+    expect(layout.y(100)).toBeLessThanOrEqual(layout.bottom)
   })
 })

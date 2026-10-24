@@ -42,6 +42,7 @@ export const electreIII: MethodView<'ranking'> = {
     { step: 'electre-iii.ascending', label: 'workbench.ranking.columns.ascendingRank', decimals: 0 },
   ],
   stage: preloadable(() => pictures().then((m) => ({ default: m.Stage }))),
+  pictureShowsScores: true,
   ledger: {
     example: 'wang-2008-waste-incineration',
     fixture: 'electre-iii-wang2008.json#expected.tolerance',

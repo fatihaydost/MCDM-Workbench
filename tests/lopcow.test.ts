@@ -130,7 +130,7 @@ describe('LOPCOW: properties and edge cases', () => {
     expect(res.warnings).toContainEqual({ code: 'lopcow.near-constant-column', col: 0 })
   })
 
-  it('with 2 alternatives, RMS = sigma = 1/sqrt(2) on every varying column, so PV = 0 and weights fall back to 1/n with a warning', () => {
+  it('with 2 alternatives, RMS = sigma = 1/sqrt(2) on every varying column, so PV = 0 and varying columns share weight equally while constant columns keep 0', () => {
     const res = run(
       [
         [10, 5, 100],
@@ -139,17 +139,28 @@ describe('LOPCOW: properties and edge cases', () => {
       ['benefit', 'benefit', 'cost'],
     )
     expectClose(step(res.steps, 'lopcow.pv').vector!, [0, 0, 0], 1e-15)
-    expectClose(res.weights, [1 / 3, 1 / 3, 1 / 3], 1e-15)
+    expectClose(res.weights, [0.5, 0, 0.5], 1e-15)
     expect(res.warnings).toContainEqual({ code: 'lopcow.two-alternatives' })
     expect(res.warnings).toContainEqual({ code: 'lopcow.constant-column', col: 1 })
+
+    const oneVarying = run(
+      [
+        [10, 5],
+        [20, 5],
+      ],
+      ['benefit', 'benefit'],
+    )
+    expect(oneVarying.weights).toEqual([1, 0])
+    expect(oneVarying.warnings?.map((w) => w.code)).not.toContain('lopcow.two-alternatives')
   })
 
-  it('gives PV = 0 and weight = 0 to a single-best-alternative column [1, 0, ..., 0] where RMS = sigma = 1/sqrt(m)', () => {
+  it('gives PV = 0, weight = 0, and lopcow.zero-pv-column warning to a single-best-alternative column [1, 0, ..., 0] where RMS = sigma = 1/sqrt(m)', () => {
     for (const m of [3, 5, 7]) {
       const rows = Array.from({ length: m }, (_, i) => [i === 0 ? 10 : 0, i + 1])
       const res = run(rows, ['benefit', 'benefit'])
       expect(step(res.steps, 'lopcow.pv').vector![0]).toBe(0)
       expect(res.weights).toEqual([0, 1])
+      expect(res.warnings).toContainEqual({ code: 'lopcow.zero-pv-column', col: 0 })
     }
   })
 

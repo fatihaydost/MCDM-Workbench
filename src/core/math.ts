@@ -25,13 +25,19 @@ export function minOf(xs: readonly number[]): number {
 export const CONSTANT_TOLERANCE = 1e-12
 
 /**
- * Whether every value is the same up to rounding: max - min <= 1e-12 * max(|max|, |min|). Relative, with no floor, so
- * the test does not depend on the unit the column is entered in; an all-zero column is constant.
+ * Whether every value is the same up to rounding: max - min <= 1e-12 * max(|max|, |min|), with a zero-crossing /
+ * zero-endpoint floor so residuals around 0 (e.g. [-1e-15, 1e-15, 0] or [0, 1e-100, 0]) also count as constant.
  */
 export function isConstant(xs: readonly number[]): boolean {
   const hi = maxOf(xs)
   const lo = minOf(xs)
-  return hi - lo <= CONSTANT_TOLERANCE * Math.max(Math.abs(hi), Math.abs(lo))
+  const span = hi - lo
+  const scale = Math.max(Math.abs(hi), Math.abs(lo))
+  return (
+    span <= CONSTANT_TOLERANCE * scale ||
+    span <= Number.EPSILON ||
+    (lo <= 0 && hi >= 0 && span <= CONSTANT_TOLERANCE)
+  )
 }
 
 /**
@@ -40,11 +46,17 @@ export function isConstant(xs: readonly number[]): boolean {
  */
 export const NEAR_CONSTANT_TOLERANCE = 1e-9
 
-/** Not constant (isConstant), but max - min <= 1e-9 * max(|max|, |min|). */
+/** Not constant (isConstant), but max - min <= 1e-9 * max(|max|, |min|) (or <= 1e-9 across zero). */
 export function isNearConstant(xs: readonly number[]): boolean {
+  if (isConstant(xs)) return false
   const hi = maxOf(xs)
   const lo = minOf(xs)
-  return !isConstant(xs) && hi - lo <= NEAR_CONSTANT_TOLERANCE * Math.max(Math.abs(hi), Math.abs(lo))
+  const span = hi - lo
+  const scale = Math.max(Math.abs(hi), Math.abs(lo))
+  return (
+    span <= NEAR_CONSTANT_TOLERANCE * scale ||
+    (lo <= 0 && hi >= 0 && span <= NEAR_CONSTANT_TOLERANCE)
+  )
 }
 
 /**

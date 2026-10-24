@@ -123,8 +123,18 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
   const sum = (row: readonly number[]) => row.reduce((a, b) => a + b, 0)
   const isCost = problem.criteria.map((c) => c.type === 'cost')
   // Step 0 draws the unweighted normalized ratios x*_ij on a scale of their own; step 1+ draws weighted v_ij.
-  const normBenefit = normalized.map((row) => row.map((v, j) => (isCost[j] ? 0 : Math.max(0, v))))
-  const normCost = normalized.map((row) => row.map((v, j) => (isCost[j] ? Math.max(0, v) : 0)))
+  const normBenefit = normalized.map((row) =>
+    row.map((v, j) => {
+      const sVal = isCost[j] ? -v : v
+      return sVal > 0 ? sVal : 0
+    }),
+  )
+  const normCost = normalized.map((row) =>
+    row.map((v, j) => {
+      const sVal = isCost[j] ? -v : v
+      return sVal < 0 ? -sVal : 0
+    }),
+  )
   const drawAbove = stage === 0 ? normBenefit : benefit
   const drawBelow = stage === 0 ? normCost : cost
   const drawSp = stage === 0 ? drawAbove.map(sum) : sPlus
@@ -142,8 +152,8 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
   const plotLeft = labelWidth
   const plotRight = Math.max(plotLeft + 1, W - valueWidth)
   // One scale for both sides: the zero line sits where the longest S- ends, so S+ and S- keep their true proportions.
-  const maxSn = maxOf(drawSn)
-  const maxSp = maxOf(drawSp)
+  const maxSn = Math.max(0, maxOf(drawSn))
+  const maxSp = Math.max(0, maxOf(drawSp))
   const span = maxSn + maxSp > 0 ? maxSn + maxSp : 1
   const pxPerUnit = (plotRight - plotLeft) / span
   const center = plotLeft + (maxSn + maxSp > 0 ? maxSn : span / 2) * pxPerUnit
@@ -161,7 +171,10 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
   const belowX = Math.max(center - 6, estimateTextWidth(belowText, HEAD_FONT))
   const aboveX = Math.min(center + 6, W - estimateTextWidth(aboveText, HEAD_FONT))
 
-  const signed = (i: number, j: number) => (benefit[i]![j]! > 0 ? benefit[i]![j]! : -cost[i]![j]!)
+  const signed = (i: number, j: number) => {
+    const v = isCost[j] ? -parts.weighted[i]![j]! : parts.weighted[i]![j]!
+    return v === 0 ? 0 : v
+  }
   const table: ChartTable = {
     corner: l.alternative,
     columns: [...critNames, l.sPlus, l.sMinus, l.score],

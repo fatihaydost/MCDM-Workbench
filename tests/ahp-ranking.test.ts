@@ -202,6 +202,27 @@ describe('AHP ranking — validation, m <= 7 cap, and per-criterion inconsistenc
     const res = ahpRanking.compute(p, [0.5, 0.5], {}, incomplete)
     const sawRes = saw.compute(p, [0.5, 0.5], { normalization: 'sum' })
     res.scores.forEach((s, i) => expect(s).toBeCloseTo(sawRes.scores[i]!, 12))
+    expect(res.warnings).toContainEqual({ code: 'ahp-ranking.pairwise-ignored-above-cap' })
+  })
+
+  it('allows zero or negative table cells on pairwise criteria while blocking non-positive cells on table criteria', () => {
+    const p: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'PairwiseCrit', type: 'benefit' },
+        { name: 'TableCrit', type: 'benefit' },
+      ],
+      matrix: [
+        [0, 10],
+        [-5, 20],
+        [0, 30],
+      ],
+    }
+    const pairs = judgementsFromUpper(3, [2, 4, 2]).pairs
+    const res = ahpRanking.compute(p, [0.5, 0.5], {}, [pairs, null])
+    expect(sum(res.scores)).toBeCloseTo(1, 12)
+
+    expect(() => ahpRanking.compute(p, [0.5, 0.5], {}, [null, null])).toThrowError(ProblemValidationError)
   })
 
   it('emits ahp.inconsistent warning with col and extra metadata when a criterion matrix has CR >= 0.10', () => {

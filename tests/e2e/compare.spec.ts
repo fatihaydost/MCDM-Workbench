@@ -31,10 +31,11 @@ test('compare: one column per ranking method, VIKOR\'s A7 first, Borda at the en
   await expect(page.locator('[data-testid="borda-rank"][data-name="A1"]')).toHaveText('1')
   const summary = page.getByTestId('compare-summary')
   await expect(summary).toContainText(`Agreement (Kendall's W): ${core.kendallW!.toFixed(2)}`)
-  // MARCOS echoes SAW (Linear): a badge, and it is counted once.
+  // MARCOS echoes SAW (Linear) and PROMETHEE II (V-shape) echoes MABAC: badges, each pair counted once.
   await expect(page.getByTestId('marcos-badge')).toHaveText('MARCOS: same order as SAW (Linear), counted once')
-  expect(core.firstPlace!.of).toBe(N - 1)
-  await expect(summary).toContainText(`A1 is first in ${core.firstPlace!.methods} of ${N - 1} methods`)
+  await expect(page.getByTestId('promethee-ii-badge')).toHaveText('PROMETHEE II: same order as MABAC, counted once')
+  expect(core.firstPlace!.of).toBe(N - 2)
+  await expect(summary).toContainText(`A1 is first in ${core.firstPlace!.methods} of ${N - 2} methods`)
   await expect(summary).not.toContainText('methods ranked')
 
   // The top two (A1, A7) are selected at first; clicking another crossing selects that pair, arrows move focus.

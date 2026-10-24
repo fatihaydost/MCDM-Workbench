@@ -1,4 +1,5 @@
-import { column, isConstant, isNearConstant, minOf, sum, zeros } from '../math'
+import { column, isConstant, isNearConstant, maxOf, mean, minOf, sum, zeros } from '../math'
+import { tied } from '../rank'
 import type { MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
 import { assertValid, validateProblem, type ValidationIssue } from '../validate'
 
@@ -121,17 +122,24 @@ export const cilos: WeightingMethod = {
       for (let i = 0; i < m; i++) normalized[i]![j] = oriented[i]! / total
     }
 
-    // 3. Square matrix A (n × n): row i is row k_i of X̄ where k_i = argmax_r x̄_ri (first occurrence on ties).
-    const winners = new Array<number>(n).fill(0)
+    // 3. Square matrix A (n × n): row i is the mean of winning rows r in argmax_r x̄_ri (exact row when unique, permutation-invariant on ties).
+    const winnerKeys = new Array<string>(n).fill('0')
+    const squareMatrix = zeros(n, n)
     for (let i = 0; i < n; i++) {
-      if (constant[i]) continue
-      let best = 0
-      for (let r = 1; r < m; r++) {
-        if (normalized[r]![i]! > normalized[best]![i]!) best = r
+      if (constant[i]) {
+        for (let j = 0; j < n; j++) squareMatrix[i]![j] = mean(normalized.map((row) => row[j]!))
+        continue
       }
-      winners[i] = best
+      const maxVal = maxOf(normalized.map((row) => row[i]!))
+      const winRows: number[] = []
+      for (let r = 0; r < m; r++) {
+        if (tied(normalized[r]![i]!, maxVal)) winRows.push(r)
+      }
+      winnerKeys[i] = winRows.join(',')
+      for (let j = 0; j < n; j++) {
+        squareMatrix[i]![j] = mean(winRows.map((r) => normalized[r]![j]!))
+      }
     }
-    const squareMatrix = Array.from({ length: n }, (_, i) => [...normalized[winners[i]!]!])
 
     // 4. Relative impact-loss matrix P (n × n): p_ij = (a_jj - a_ij) / a_jj on active criteria; 0 on constant rows/cols.
     const lossMatrix = zeros(n, n)
@@ -157,7 +165,7 @@ export const cilos: WeightingMethod = {
     // 6. Solve F q = 0, Σ_j q_j = 1 on the active (non-constant) criteria.
     const active = Array.from({ length: n }, (_, j) => j).filter((j) => !constant[j])
     const allConstant = active.length === 0
-    const activeWinners = active.map((j) => winners[j]!)
+    const activeWinners = active.map((j) => winnerKeys[j]!)
     const sharedOptimum = active.length >= 2 && new Set(activeWinners).size < active.length
     if (sharedOptimum) warnings.push({ code: 'cilos.shared-optimum' })
 

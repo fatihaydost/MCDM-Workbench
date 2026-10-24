@@ -52,13 +52,31 @@ export default function CompareStage() {
     const issues = comparison
       ? [...new Map(comparison.runs.flatMap((r) => r.issues).map((x) => [`${x.code}:${x.row}:${x.col}`, x])).values()]
       : weights.issues
-    // SAW and MARCOS are the only ones that ranked and they order alike: one ranking, not a blocked comparison.
-    const onlyEcho = !!comparison && comparison.echoes.length > 0 && comparison.ranked.length - comparison.echoes.length === 1
+    // Only one independent ranking and its echoes ranked: one ranking, not a blocked comparison.
+    const firstEcho = comparison?.echoes[0]
+    const onlyEcho = !!comparison && !!firstEcho && comparison.ranked.length - comparison.echoes.length === 1
+    const echoSummary = firstEcho
+      ? tc('echo', {
+          method: tr(t, `workbench.rankingMethod.${firstEcho.methodId}`),
+          of:
+            firstEcho.of === 'saw'
+              ? tc(firstEcho.methodId === 'ahp-ranking' ? 'sawSum' : 'sawLinear')
+              : tr(t, `workbench.rankingMethod.${firstEcho.of}`),
+        })
+      : ''
     return (
       <div className="flex flex-col gap-4">
         <EmptyState
           title={t('workbench.empty.compare.title')}
-          description={comparison ? (onlyEcho ? tc('onlyOneRanking') : tc('blocked')) : tc('weightsBlocked')}
+          description={
+            comparison
+              ? onlyEcho
+                ? firstEcho.methodId === 'marcos' && firstEcho.of === 'saw'
+                  ? tc('onlyOneRanking')
+                  : echoSummary
+                : tc('blocked')
+              : tc('weightsBlocked')
+          }
           className="pb-2"
         />
         <BlockedByIssues issues={issues} problem={draft} />
@@ -124,7 +142,10 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
           >
             {tc('echo', {
               method: tr(t, `workbench.rankingMethod.${e.methodId}`),
-              of: tc(e.methodId === 'ahp-ranking' ? 'sawSum' : 'sawLinear'),
+              of:
+                e.of === 'saw'
+                  ? tc(e.methodId === 'ahp-ranking' ? 'sawSum' : 'sawLinear')
+                  : tr(t, `workbench.rankingMethod.${e.of}`),
             })}
           </span>
         ))}

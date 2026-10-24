@@ -77,12 +77,15 @@ describe('SD: properties', () => {
     expect(codes(res)).toContain('sd.all-constant-equal-weights')
     expect(res.diagnostics?.allConstant).toBe(1)
   })
-  it('m = 2: equal weights over the non-constant columns and a warning', () => {
+  it('m = 2: equal weights over the non-constant columns and a warning when at least 2 vary', () => {
     const two = [dm1[0]!, [dm1[1]![0]!, dm1[1]![1]!, dm1[0]![2]!, dm1[1]![3]!, dm1[1]![4]!]]
     const res = sd.compute(makeProblem(two, mukTypes), {})
     expectClose(res.weights, [0.25, 0.25, 0, 0.25, 0.25], 1e-15)
     expect(codes(res)).toContain('sd.two-alternatives')
     expectClose(sd.compute(makeProblem(dm1.slice(0, 2), mukTypes), {}).weights, [0.2, 0.2, 0.2, 0.2, 0.2], 1e-15)
+    const oneVarying = sd.compute(makeProblem([[10, 5], [20, 5]], ['benefit', 'benefit']), {})
+    expect(oneVarying.weights).toEqual([1, 0])
+    expect(codes(oneVarying)).not.toContain('sd.two-alternatives')
   })
   it('weights sum to 1', () => expect(Math.abs(sumOf(base) - 1)).toBeLessThan(1e-15))
   it('invalid input throws ProblemValidationError', () => {

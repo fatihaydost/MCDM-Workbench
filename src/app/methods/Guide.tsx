@@ -24,16 +24,20 @@ type Answer = { node: GuideNode; option: GuideOption }
 
 /**
  * A risk applies when the path recommends at least two of its methods (a weighting and a ranking
- * method, or two rankers), or its only method.
+ * method, or two rankers across separate steps), or its only method (or any ratio-based method for ratio-shifted).
  */
-function risksFor(picked: Set<MethodId>): RiskyCombination[] {
+export function risksFor(picked: Set<MethodId>, rankingStages = 1): RiskyCombination[] {
   return riskyCombinations.filter((r) => {
-    if (r.id !== 'ratio-shifted') {
-      const wIds = r.methodIds.filter((id) => methodMeta[id].family.startsWith('weighting'))
-      const rIds = r.methodIds.filter((id) => !methodMeta[id].family.startsWith('weighting'))
-      if (wIds.length > 0 && rIds.length > 0) {
-        return wIds.some((id) => picked.has(id)) && rIds.some((id) => picked.has(id))
-      }
+    if (r.id === 'chaining-rankers') {
+      return rankingStages >= 2 && r.methodIds.filter((id) => picked.has(id)).length >= 2
+    }
+    if (r.id === 'ratio-shifted') {
+      return r.methodIds.some((id) => picked.has(id))
+    }
+    const wIds = r.methodIds.filter((id) => methodMeta[id].family.startsWith('weighting'))
+    const rIds = r.methodIds.filter((id) => !methodMeta[id].family.startsWith('weighting'))
+    if (wIds.length > 0 && rIds.length > 0) {
+      return wIds.some((id) => picked.has(id)) && rIds.some((id) => picked.has(id))
     }
     const hits = r.methodIds.filter((id) => picked.has(id)).length
     return r.methodIds.length === 1 ? hits === 1 : hits >= 2
@@ -61,7 +65,8 @@ export function Guide() {
   )
   const risks = useMemo(() => {
     const picked = new Set<MethodId>(recommendations.flatMap((r) => r.rec.methodIds))
-    return risksFor(picked)
+    const rankingStages = recommendations.filter((r) => r.stage === 'ranking').length
+    return risksFor(picked, rankingStages)
   }, [recommendations])
 
   const answer = (node: GuideNode, option: GuideOption) => {

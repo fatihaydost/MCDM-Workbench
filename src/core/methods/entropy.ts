@@ -1,4 +1,4 @@
-import { column, isConstant, minMaxNormalize, sum, zeros } from '../math'
+import { column, isConstant, isNearConstant, minMaxNormalize, sum, zeros } from '../math'
 import type { MethodWarning, Problem, Step, WeightingMethod, WeightingResult } from '../types'
 import { assertValid, validateProblem, type ValidationIssue } from '../validate'
 
@@ -50,7 +50,9 @@ export const entropy: WeightingMethod<EntropyParams> = {
     const constant = Array.from({ length: n }, (_, j) => isConstant(column(matrix, j)))
 
     // 1. (minmax only) r in [0, 1], 1 = best; a constant column (max = min) stays 0 and is never divided.
-    const r = variant === 'minmax' ? minMaxNormalize(problem).r : undefined
+    const isMinMax = variant === 'minmax'
+    const norm = isMinMax ? minMaxNormalize(problem) : null
+    const r = norm ? norm.r : undefined
     const base = r ?? matrix
 
     // 2-4. Proportions, entropy and diversification per column.
@@ -64,6 +66,10 @@ export const entropy: WeightingMethod<EntropyParams> = {
         warnings.push({ code: 'entropy.constant-column', col: j })
         continue
       }
+      const rawCol = column(matrix, j)
+      if (isMinMax ? norm!.nearConstant[j] : isNearConstant(rawCol)) {
+        warnings.push({ code: 'entropy.near-constant-column', col: j })
+      }
       // Not constant, so the column total is above 0: (sum) values are >= 0 and not all equal, (minmax) the best is 1.
       const total = sum(column(base, j))
       let h = 0
@@ -74,7 +80,7 @@ export const entropy: WeightingMethod<EntropyParams> = {
       }
       e[j] = -k * h
       d[j] = Math.max(0, 1 - e[j]!)
-      if (variant === 'sum' && column(matrix, j).some((v) => v === 0)) warnings.push({ code: 'entropy.zeros-in-column', col: j })
+      if (variant === 'sum' && rawCol.some((v) => v === 0)) warnings.push({ code: 'entropy.zeros-in-column', col: j })
     }
 
     // 5. Weights; with no diversification at all there is nothing to weigh: equal weights across varying columns (or all if all constant).

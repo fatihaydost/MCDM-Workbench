@@ -1,7 +1,14 @@
 import type { MethodSteps } from './types'
 
+const sawFlow = [
+  { key: 'saw.normalized', symbol: 'R', stepKeys: ['saw.normalizedLinearMax', 'saw.normalizedSum'] },
+  { key: 'saw.weighted', symbol: 'V', stepKeys: ['saw.weighted'] },
+  { key: 'saw.scores', symbol: 'S', stepKeys: ['saw.scores'] },
+]
+
 /** SAW: the steps src/core/methods/saw.ts emits, with the formulas the code follows. */
 export const saw = {
+  flow: sawFlow,
   steps: {
     'saw.normalizedLinearMax': {
       en: 'Linear max normalized matrix: the best value of each column becomes 1.',

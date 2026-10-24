@@ -1,4 +1,4 @@
-import { ahp } from './ahp'
+import { ahp, ahpRankingSteps } from './ahp'
 import { aras } from './aras'
 import { bwm } from './bwm'
 import { cilos } from './cilos'
@@ -28,12 +28,13 @@ import { vikor } from './vikor'
 import { waspas } from './waspas'
 
 export type { FlowNode, MethodSteps, StepContent } from './types'
+export { ahpRankingSteps } from './ahp'
 
 /**
  * Every method's step module (`src/content/steps/<id>.ts`), by method id. Import this index only from
  * lazy code (WorkedCalculation): the TeX must stay out of the main chunk.
  */
-const modules = {
+export const modules = {
   critic,
   entropy,
   sd,
@@ -44,6 +45,8 @@ const modules = {
   manual,
   bwm,
   ahp,
+  ahpRanking: ahpRankingSteps,
+  'ahp-ranking': ahpRankingSteps,
   roc,
   swara,
   topsis,
@@ -78,6 +81,9 @@ export const isStepKey = (key: string): key is StepKey => Object.hasOwn(stepCont
  */
 export function stepFlow(methodId: string, stepKeys: readonly string[]): FlowNode[] | null {
   const flow = Object.hasOwn(modules, methodId) ? (modules as Record<string, MethodSteps>)[methodId]!.flow : undefined
-  const nodes = flow?.filter((n) => n.stepKeys.some((k) => stepKeys.includes(k))) ?? []
+  const nodes =
+    flow
+      ?.map((n) => ({ ...n, stepKeys: n.stepKeys.filter((k) => stepKeys.includes(k)) }))
+      .filter((n) => n.stepKeys.length > 0) ?? []
   return nodes.length > 0 ? nodes : null
 }

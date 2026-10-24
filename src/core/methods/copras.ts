@@ -38,12 +38,16 @@ export const copras: RankingMethod = {
 
     // 3. Relative significance (Eq. 5, simplified): the cost weight W_C handed out by the reciprocal of each S-.
     const wCost = sum(weights.filter((_, j) => isCost[j]))
-    let scores = sPlus
-    if (wCost > 0) {
-      const inv = sMinus.map((x) => 1 / x)
+    const sMax = Math.max(...sMinus)
+    let scores: number[]
+    if (wCost > 0 && sMax > 0 && sMinus.every((s) => s > 0)) {
+      const inv = sMinus.map((s) => sMax / s)
       const invTotal = sum(inv)
-      scores = sPlus.map((x, i) => x + (wCost * inv[i]!) / invTotal)
-    } else warnings.push({ code: 'copras.no-cost-criteria' })
+      scores = sPlus.map((sp, i) => sp + (wCost * inv[i]!) / invTotal)
+    } else {
+      scores = [...sPlus]
+      warnings.push({ code: 'copras.no-cost-criteria' })
+    }
 
     // 4. Utility degree (Eq. 6), the best alternative 100.
     const best = maxOf(scores)

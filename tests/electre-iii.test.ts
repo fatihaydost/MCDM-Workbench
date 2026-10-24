@@ -188,6 +188,29 @@ describe('ELECTRE III — Discordance and Veto unit verification', () => {
     expect(conc[0]![1]).toBeCloseTo(vCase.expectedC01, 12)
     expect(cred[0]![1]).toBe(vCase.expectedSigma01FullVeto)
   })
+
+  it('handles crisp veto threshold (p_j = v_j) where Δ_j = p_j = v_j triggers full veto (d_j = 1)', () => {
+    const crispProblem: Problem = {
+      alternatives: ['A1', 'A2'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'benefit' },
+      ],
+      matrix: [
+        [100, 10], // On C2, Δ_2(A1, A2) = 20 - 10 = 10 = p_2 = v_2
+        [90, 20],
+      ],
+    }
+    const res = electreIII.compute(crispProblem, [0.8, 0.2], {
+      q: [0, 0],
+      p: [5, 10],
+      v: [null, 10],
+    })
+    const conc = res.steps.find((s) => s.key === 'electre-iii.concordance')!.matrix!
+    const cred = res.steps.find((s) => s.key === 'electre-iii.credibility')!.matrix!
+    expect(conc[0]![1]).toBeCloseTo(0.8, 12)
+    expect(cred[0]![1]).toBe(0)
+  })
 })
 
 describe('ELECTRE III — Threshold presets and parameter validation', () => {

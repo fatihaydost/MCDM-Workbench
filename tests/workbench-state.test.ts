@@ -9,7 +9,12 @@ import {
   WORKBENCH_STORAGE_KEY,
   type DraftProblem,
 } from '../src/state/workbench'
-import { deleteCriterion, insertCriterion, setType, writeCell } from '../src/features/grid/model'
+import { deleteAlternative, deleteCriterion, insertCriterion, setType, writeCell } from '../src/features/grid/model'
+import { decisionTree } from '../src/content/guide'
+import { risksFor } from '../src/app/methods/Guide'
+import { cilos } from '../src/content/methods/cilos'
+import { codas } from '../src/content/methods/codas'
+import { roc } from '../src/content/methods/roc'
 import { expectClose } from './helpers'
 import critic2021 from './fixtures/critic-krishnan2021.json'
 import edasKG from './fixtures/edas-keshavarz2015.json'
@@ -861,5 +866,103 @@ describe('AHP through the store', () => {
     const g = computeWeights(st())
     expect(g.value).not.toBeNull()
     expectClose(g.value!.weights, [0.0351085, 0.1185434, 0.2714848, 0.0721176, 0.5027456], 1e-6)
+  })
+})
+
+describe('examples with methodParams, lifecycle resets, alternativeJudgements undo, and guide coverage', () => {
+  it('kersuliene-2010-dispute (SWARA) and wang-2008-waste-incineration (ELECTRE III) reproduce published outputs via loadExample', () => {
+    const st = () => useWorkbench.getState()
+    st().loadExample('kersuliene-2010-dispute', 'en')
+    const wSwara = computeWeights(st())
+    expect(wSwara.value).not.toBeNull()
+    expectClose(wSwara.value!.weights, swaraK.published.weights, 0.01)
+
+    st().loadExample('wang-2008-waste-incineration', 'en')
+    const rElectre3 = computeRanking(st())
+    expect(rElectre3.value).not.toBeNull()
+    const descStep = rElectre3.value!.steps.find((s) => s.key === 'electre-iii.descending')!
+    const ascStep = rElectre3.value!.steps.find((s) => s.key === 'electre-iii.ascending')!
+    expect(descStep.vector).toEqual(electreIIIW.expected.descendingRanks)
+    expect(ascStep.vector).toEqual(electreIIIW.expected.ascendingRanks)
+  })
+
+  it('loadExample, startBlank and importProblem clear stale methodParams', () => {
+    const st = () => useWorkbench.getState()
+    st().loadExample('kersuliene-2010-dispute', 'en')
+    expect(st().methodParams?.swara).toBeDefined()
+    st().setMethodParam('vikor', 'v', 0.9)
+
+    st().loadExample('krishnan-2021-smartphones', 'en')
+    expect(st().methodParams?.swara).toBeUndefined()
+    expect(st().methodParams?.vikor).toBeUndefined()
+    expect(st().methodParams).toEqual({ critic: {} })
+
+    st().setMethodParam('topsis', 'normalization', 'minmax')
+    st().startBlank(3, 3)
+    expect(st().methodParams).toEqual({})
+
+    st().setMethodParam('saw', 'normalization', 'sum')
+    st().importProblem(draftOf('podvezko-2011-baltic'), 'baltic.csv')
+    expect(st().methodParams).toEqual({})
+  })
+
+  it('computeWeights blocks on an invalid matrix cell even in manual and equal modes', () => {
+    const p = draftOf('opricovic-tzeng-2004-f')
+    const matrix = p.matrix.map((r) => [...r]) as (number | null)[][]
+    matrix[0]![0] = null
+    const draft = { ...p, matrix }
+
+    const wManual = computeWeights({ problem: draft, weightMethod: 'manual', manualWeights: [0.5, 0.5] })
+    expect(wManual.value).toBeNull()
+    expect(wManual.issues).toContainEqual({ code: 'invalid-cell', severity: 'error', row: 0, col: 0 })
+
+    const wEqual = computeWeights({ problem: draft, weightMethod: 'equal', manualWeights: [] })
+    expect(wEqual.value).toBeNull()
+    expect(wEqual.issues).toContainEqual({ code: 'invalid-cell', severity: 'error', row: 0, col: 0 })
+  })
+
+  it('restores alternativeJudgements after deleting a criterion or alternative and undoing via setProblem', () => {
+    const st = () => useWorkbench.getState()
+    st().loadExample('opricovic-tzeng-2004-f', 'en')
+    st().setAlternativeJudgement(0, 0, 1, 3)
+    st().setAlternativeJudgement(0, 1, 2, 5)
+    st().setAlternativeJudgement(1, 0, 2, 7)
+    const before = st().problem
+    const beforeJudgements = st().alternativeJudgements
+
+    // Delete criterion 0 and undo
+    st().setProblem(deleteCriterion(before, 0))
+    expect(st().alternativeJudgements).toHaveLength(1)
+    st().setProblem(before)
+    expect(st().alternativeJudgements).toEqual(beforeJudgements)
+
+    // Delete alternative 1 and undo
+    st().setProblem(deleteAlternative(before, 1))
+    expect(st().alternativeJudgements?.[0]).toHaveLength(before.alternatives.length - 1)
+    st().setProblem(before)
+    expect(st().alternativeJudgements).toEqual(beforeJudgements)
+  })
+
+  it('guide decision tree recommends all methods and risksFor flags risky combinations', () => {
+    const recommended = new Set<string>(
+      decisionTree.nodes.flatMap((q) => q.options.flatMap((o) => o.recommend?.methodIds ?? [])),
+    )
+    for (const id of ['cilos', 'moora', 'codas', 'marcos', 'ahp']) {
+      expect(recommended.has(id)).toBe(true)
+    }
+
+    // Single ranking stage with multiple recommended rankers does not trigger chaining-rankers
+    expect(risksFor(new Set(['topsis', 'vikor']), 1).some((r) => r.id === 'chaining-rankers')).toBe(false)
+    // Two ranking stages trigger chaining-rankers
+    expect(risksFor(new Set(['topsis', 'vikor']), 2).some((r) => r.id === 'chaining-rankers')).toBe(true)
+    // Ratio-based method triggers ratio-shifted
+    expect(risksFor(new Set(['saw'])).some((r) => r.id === 'ratio-shifted')).toBe(true)
+    expect(risksFor(new Set(['merec'])).some((r) => r.id === 'ratio-shifted')).toBe(true)
+    // Dispersion weighting + outranking triggers dispersion-in-outranking
+    expect(risksFor(new Set(['sd', 'electre-iii'])).some((r) => r.id === 'dispersion-in-outranking')).toBe(true)
+
+    expect(cilos.combinedWith.some((c) => c.methodId !== undefined)).toBe(true)
+    expect(codas.combinedWith.some((c) => c.methodId !== undefined)).toBe(true)
+    expect(roc.combinedWith.some((c) => c.methodId !== undefined)).toBe(true)
   })
 })

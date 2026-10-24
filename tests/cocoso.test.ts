@@ -164,13 +164,14 @@ describe('CoCoSo: edge cases', () => {
     expect(thrown(() => cocoso.compute(p, [0.5, 0.5, 0], {}))).toEqual([['all-worst-alternative', 0]])
     expect(thrown(() => cocoso.compute(p, [0.4, 0.4, 0.2], {}))).toEqual([])
   })
-  it('all alternatives equal: every one is the worst everywhere', () => {
+  it('all active criteria constant: returns tied rank 1 with finite scores instead of throwing all-worst-alternative', () => {
     const p = makeProblem([[2, 2, 2], [2, 2, 2], [2, 2, 2]], types)
-    expect(thrown(() => cocoso.compute(p, [0.3, 0.3, 0.4], {}))).toEqual([
-      ['all-worst-alternative', 0],
-      ['all-worst-alternative', 1],
-      ['all-worst-alternative', 2],
-    ])
+    const res = cocoso.compute(p, [0.3, 0.3, 0.4], {})
+    expect(res.ranking).toEqual([1, 1, 1])
+    expect(res.scores.every(Number.isFinite)).toBe(true)
+    expectClose(vec(res.steps, 'cocoso.ka'), [1 / 3, 1 / 3, 1 / 3], 1e-15)
+    expect(vec(res.steps, 'cocoso.kb')).toEqual([2, 2, 2])
+    expect(vec(res.steps, 'cocoso.kc')).toEqual([1, 1, 1])
   })
   it('zeros and negative values compute; a single alternative is too few', () => {
     const p = makeProblem([[-1, 0, 2], [0, -3, 4], [4, 2, 0]], types)

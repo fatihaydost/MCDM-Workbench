@@ -237,7 +237,7 @@ export function SawContributions({ problem, weights, params, parts: partsProp, f
                   )
                 })}
                 {/* A 2 px gap in the page colour between neighbours, so touching segments never merge. */}
-                {segs.slice(1).map((g) => (
+                {segs.filter((g) => g.width > 0).slice(1).map((g) => (
                   <rect
                     key={`gap-${g.col}`}
                     className={s.sawGap}

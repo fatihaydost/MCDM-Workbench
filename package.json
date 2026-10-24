@@ -2,7 +2,7 @@
   "name": "mcdm-workbench",
   "private": true,
   "version": "0.1.0",
-  "description": "Multi-criteria decision analysis (MCDM / MCDA) workbench in the browser: 11 weighting methods (CRITIC, Entropy, SD, MEREC, LOPCOW, CILOS, Equal, BWM, AHP, ROC, SWARA) and 15 ranking methods (TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I, ELECTRE III), sensitivity and Monte Carlo robustness, multi-method comparison, and step-by-step calculations in English and Turkish.",
+  "description": "Multi-criteria decision analysis (MCDM / MCDA) workbench in the browser: 11 weighting methods (CRITIC, Entropy, SD, MEREC, LOPCOW, CILOS, Equal, BWM, AHP, ROC, SWARA) and 16 ranking methods (TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I, ELECTRE III, AHP), sensitivity and Monte Carlo robustness, multi-method comparison, and step-by-step calculations in English and Turkish.",
   "homepage": "https://fatihaydost.github.io/MCDM-Workbench/",
   "license": "MIT",
   "engines": {

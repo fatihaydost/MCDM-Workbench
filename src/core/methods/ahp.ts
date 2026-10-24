@@ -1,4 +1,4 @@
-import { nearestScale, toScale } from '../judgements'
+import { nearestScale, SCALE, toScale } from '../judgements'
 import { sum, zeros } from '../math'
 import { rankScores } from '../rank'
 import type {
@@ -18,11 +18,9 @@ import {
   hasErrors,
   ProblemValidationError,
   validateProblem,
-  validateRequirements,
   validateWeights,
   type ValidationIssue,
 } from '../validate'
-import { sawSumNormalize } from './saw'
 
 export type AhpAggregation = 'eigenvector' | 'geometric'
 
@@ -240,6 +238,9 @@ export function ahpIncompleteLlsm(n: number, pairs: readonly (readonly (Ratio | 
 export function ahpWorstPair(A: readonly (readonly number[])[], weights: readonly number[]): AhpWorstPair | null {
   const n = A.length
   if (n < 3) return null
+  const baseLambda = rayleighLambdaMax(A, weights)
+  const ri = riFor(n)
+  const baseCr = ri > 0 ? Math.max(0, (baseLambda - n) / (n - 1)) / ri : 0
   let best: AhpWorstPair | null = null
   for (let i = 0; i < n; i++)
     for (let k = i + 1; k < n; k++) {
@@ -247,15 +248,48 @@ export function ahpWorstPair(A: readonly (readonly number[])[], weights: readonl
       const ratio = weights[i]! / weights[k]!
       const eps = Math.max(actual / ratio, ratio / actual)
       if (eps <= 1 + 1e-9) continue
-      const suggested = nearestScale(ratio)
+      let suggested = nearestScale(ratio)
+      if (Math.abs(suggested - actual) <= 1e-9) {
+        let logIndirect = 0
+        for (let j = 0; j < n; j++) {
+          if (j !== i && j !== k) logIndirect += Math.log(A[i]![j]! * A[j]![k]!)
+        }
+        const indirectRatio = Math.exp(logIndirect / (n - 2))
+        const indirectSuggested = nearestScale(indirectRatio)
+        if (Math.abs(indirectSuggested - actual) > 1e-9) {
+          suggested = indirectSuggested
+        } else {
+          let bestLambda = baseLambda - 1e-12
+          for (const s of SCALE) {
+            if (Math.abs(s - actual) <= 1e-9) continue
+            const trial = A.map((row, r) =>
+              row.map((v, c) => (r === i && c === k ? s : r === k && c === i ? 1 / s : v)),
+            )
+            const { lambdaMax } = ahpEigenvector(trial)
+            if (lambdaMax < bestLambda) {
+              bestLambda = lambdaMax
+              suggested = s
+            }
+          }
+        }
+      }
       const cand: AhpWorstPair = { i, k, epsilon: eps, actual, suggested }
-      if (
-        !best ||
-        eps > best.epsilon + 1e-12 ||
-        (Math.abs(eps - best.epsilon) <= 1e-12 &&
-          Math.abs(best.suggested - best.actual) <= 1e-9 &&
-          Math.abs(suggested - actual) > 1e-9)
-      ) {
+      if (!best) {
+        best = cand
+        continue
+      }
+      const bestActionable = Math.abs(best.suggested - best.actual) > 1e-9
+      const candActionable = Math.abs(cand.suggested - cand.actual) > 1e-9
+      if (baseCr >= AHP_CR_THRESHOLD || Math.abs(eps - best.epsilon) <= 1e-7) {
+        if (candActionable && !bestActionable) {
+          best = cand
+          continue
+        }
+        if (!candActionable && bestActionable) {
+          continue
+        }
+      }
+      if (eps > best.epsilon + 1e-9) {
         best = cand
       }
     }
@@ -439,7 +473,6 @@ export function validateAlternativeJudgements(
 export const ahpRanking: RankingMethod<AhpParams> = {
   id: 'ahp-ranking',
   kind: 'ranking',
-  requires: { positiveValues: true },
   params: ahp.params!,
   compute(
     problem: Problem,
@@ -454,13 +487,25 @@ export const ahpRanking: RankingMethod<AhpParams> = {
     const m = problem.alternatives.length
     const n = problem.criteria.length
     const issues = validateProblem(problem)
-    const cells = hasErrors(issues) ? [] : validateRequirements(problem, ahpRanking)
+    const cells: ValidationIssue[] = []
+    if (!hasErrors(issues)) {
+      problem.matrix.forEach((row, i) =>
+        row.forEach((v, j) => {
+          const isPairwise = m <= AHP_MAX_PAIRWISE_ALTERNATIVES && judgements?.[j] != null
+          if (!isPairwise && typeof v === 'number' && Number.isFinite(v) && v <= 0) {
+            cells.push({ code: 'non-positive-value', severity: 'error', row: i, col: j, value: v })
+          }
+        }),
+      )
+    }
     const jIssues = hasErrors(issues) ? [] : validateAlternativeJudgements(m, n, judgements)
     assertValid([...issues, ...cells, ...validateWeights(weights, n), ...jIssues])
 
-    const matrixLocals = sawSumNormalize(problem)
     const local = zeros(m, n)
     const warnings: MethodWarning[] = []
+    if (m > AHP_MAX_PAIRWISE_ALTERNATIVES && judgements?.some((mat) => mat != null)) {
+      warnings.push({ code: 'ahp-ranking.pairwise-ignored-above-cap' })
+    }
 
     for (let j = 0; j < n; j++) {
       const rawMat = m <= AHP_MAX_PAIRWISE_ALTERNATIVES ? judgements?.[j] : null
@@ -497,7 +542,10 @@ export const ahpRanking: RankingMethod<AhpParams> = {
           })
         }
       } else {
-        for (let i = 0; i < m; i++) local[i]![j] = matrixLocals[i]![j]!
+        const col = problem.matrix.map((row) => row[j]!)
+        const base = problem.criteria[j]!.type === 'cost' ? col.map((x) => 1 / x) : col
+        const total = sum(base)
+        for (let i = 0; i < m; i++) local[i]![j] = base[i]! / total
       }
     }
 

@@ -58,11 +58,26 @@ export function whySentences(f: PairFacts, ctx: WhyContext): string[] {
   const na = side('a').length
   const nb = side('b').length
   // Methods whose character is explained: the minority side; on a 2-2 split one per side (VIKOR first), so both
-  // sides get a sentence within the limit.
+  // sides get a sentence within the limit; when only one strict side exists alongside ties, explain the tied methods.
   const rep = (ids: string[]) => [ids.includes('vikor') ? 'vikor' : ids[0]!]
-  const shown = na === nb ? [...(na ? rep(side('a')) : []), ...(nb ? rep(side('b')) : [])] : na < nb ? side('a') : side('b')
+  const shown =
+    na === 0 || nb === 0
+      ? tied
+      : na === nb
+        ? [...rep(side('a')), ...rep(side('b'))]
+        : na < nb
+          ? side('a')
+          : side('b')
   const head = [...criteria, ...groups, ...ties]
-  const v = shown.includes('vikor') ? f.vikorRegret : null
+  const vikorSide = f.methods.find((m) => m.methodId === 'vikor')?.higher
+  const v =
+    shown.includes('vikor') &&
+    f.vikorRegret &&
+    ((vikorSide === 'a' && f.vikorRegret.ra < f.vikorRegret.rb - 1e-12) ||
+      (vikorSide === 'b' && f.vikorRegret.rb < f.vikorRegret.ra - 1e-12) ||
+      Math.abs(f.vikorRegret.ra - f.vikorRegret.rb) < 1e-12)
+      ? f.vikorRegret
+      : null
   const regret = !v ? [] : Math.abs(v.ra - v.rb) < 1e-12
     ? [t('why.vikorRegretEqual', { a, b })]
     : [
@@ -70,12 +85,14 @@ export function whySentences(f: PairFacts, ctx: WhyContext): string[] {
           ? t('why.vikorRegretSame', { a, b, c: ctx.criteria[v.a]!, larger: v.ra > v.rb ? a : b })
           : t('why.vikorRegret', { a, b, ca: ctx.criteria[v.a]!, cb: ctx.criteria[v.b]!, larger: v.ra > v.rb ? a : b }),
       ]
-  // Prioritize VIKOR in character sentences and reserve space for its regret explanation on asymmetric splits.
+  // Prioritize VIKOR in character sentences and reserve space for its regret explanation on asymmetric splits;
+  // when a tie sentence is present, keep room for at least one character sentence.
   const prioritized = shown.includes('vikor') ? ['vikor', ...shown.filter((x) => x !== 'vikor')] : shown
+  const limit = MAX_SENTENCES + ties.length
   const reserve = na !== nb ? regret.length : 0
   const characters = prioritized
     .filter(isRankingId)
     .map((id) => t(`why.character.${id}`))
-    .slice(0, Math.max(0, MAX_SENTENCES - head.length - reserve))
-  return [...head, ...characters, ...regret].slice(0, MAX_SENTENCES)
+    .slice(0, Math.max(0, limit - head.length - reserve))
+  return [...head, ...characters, ...regret].slice(0, limit)
 }

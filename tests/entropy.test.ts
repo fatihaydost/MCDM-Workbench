@@ -238,4 +238,33 @@ describe('Entropy: validation and edge cases', () => {
     const p: Problem = makeProblem([[1, 2], [2, 3]], ['benefit', 'cost'])
     expect(() => entropy.compute(p, { normalization: 'zscore' as never })).toThrow(RangeError)
   })
+
+  it('emits entropy.near-constant-column in both minmax and sum modes when a column varies within 1e-9', () => {
+    const p = makeProblem(
+      [
+        [100, 10],
+        [100 + 1e-8, 20],
+        [100 + 2e-8, 30],
+      ],
+      ['benefit', 'benefit'],
+    )
+    const resMinmax = entropy.compute(p, { normalization: 'minmax' })
+    expect(resMinmax.warnings).toContainEqual({ code: 'entropy.near-constant-column', col: 0 })
+    const resSum = entropy.compute(p, { normalization: 'sum' })
+    expect(resSum.warnings).toContainEqual({ code: 'entropy.near-constant-column', col: 0 })
+  })
+
+  it('preserves diversification ratio on homogeneous non-constant data above ENTROPY_NO_INFORMATION', () => {
+    const p = makeProblem(
+      [
+        [1e5, 1e5],
+        [1e5 + 0.5, 1e5 + 1],
+        [1e5 + 1, 1e5 + 2],
+      ],
+      ['benefit', 'benefit'],
+    )
+    const res = entropy.compute(p, { normalization: 'sum' })
+    expect(codes(res)).not.toContain('entropy.all-constant-equal-weights')
+    expectClose(res.weights, [0.2, 0.8], 1e-3)
+  })
 })

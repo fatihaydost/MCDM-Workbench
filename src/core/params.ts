@@ -6,9 +6,12 @@ export function isValidParam(d: ParamDescriptor, value: unknown): value is Metho
   return typeof value === 'number' && Number.isFinite(value) && value >= d.min && value <= d.max
 }
 
+const PASSTHROUGH_ARRAY_KEYS = ['s', 'order', 'ranks', 'q', 'p', 'v', 'mode', 'criteriaFunctions'] as const
+
 /**
  * The options a method is run with: every declared key, from `raw` when valid, else the default. Unknown keys
  * and invalid values (an old or hand-edited saved state) are dropped, so a method never sees them.
+ * Per-criterion array parameters (`s`, `order`, `ranks`, `q`, `p`, `v`, `mode`, `criteriaFunctions`) are preserved.
  */
 export function resolveParams(
   descriptors: readonly ParamDescriptor[] | undefined,
@@ -18,6 +21,21 @@ export function resolveParams(
   for (const d of descriptors ?? []) {
     const v = raw?.[d.key]
     out[d.key] = isValidParam(d, v) ? v : d.default
+  }
+  if (raw) {
+    for (const key of PASSTHROUGH_ARRAY_KEYS) {
+      const val = raw[key]
+      if (Array.isArray(val)) out[key] = val as unknown as MethodParamValue
+    }
+    if (Array.isArray(raw.mode)) {
+      const modes = raw.mode
+      for (const k of ['q', 'p'] as const) {
+        const arr = raw[k]
+        if (Array.isArray(arr) && arr.length === modes.length && arr.every((x) => typeof x === 'number')) {
+          out[k] = arr.map((x, j) => (modes[j] === 'rel' ? { rel: x as number } : { abs: x as number })) as unknown as MethodParamValue
+        }
+      }
+    }
   }
   return out
 }

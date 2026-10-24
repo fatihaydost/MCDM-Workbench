@@ -41,7 +41,16 @@ export function switchMarks(intervals: readonly StableInterval[], scoresAt: (wk:
   for (let k = 0; k + 1 < intervals.length; k++) {
     const a = intervals[k]!
     const b = intervals[k + 1]!
-    const changed = a.ranking.map((r, i) => (r !== b.ranking[i] ? i : -1)).filter((i) => i >= 0)
+    const involved = new Set<number>()
+    for (let p = 0; p < a.ranking.length; p++) {
+      for (let q = p + 1; q < a.ranking.length; q++) {
+        if (Math.sign(a.ranking[p]! - a.ranking[q]!) !== Math.sign(b.ranking[p]! - b.ranking[q]!)) {
+          involved.add(p)
+          involved.add(q)
+        }
+      }
+    }
+    const changed = [...involved]
     if (changed.length < 2) continue
     const s = scoresAt(a.to)
     const sorted = changed.slice().sort((p, q) => s[p]! - s[q]!)
@@ -154,6 +163,7 @@ export function formatDelta(delta: number, lang: Lang): string {
  * the user's answers are not recomputed (no answers exist for the reduced set), so their weights are renormalized.
  */
 export function recomputable(weightMethod: WeightMethodId): WeightingMethod | undefined {
-  const method = weightMethod === 'equal' ? undefined : getWeightingMethod(weightMethod)
+  if (weightMethod === 'equal' || weightMethod === 'roc' || weightMethod === 'swara') return undefined
+  const method = getWeightingMethod(weightMethod)
   return method?.reads === 'judgements' ? undefined : method
 }

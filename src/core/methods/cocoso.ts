@@ -32,12 +32,17 @@ export const cocoso: RankingMethod<CocosoParams> = {
     const warnings: MethodWarning[] = []
     nearConstant.forEach((near, j) => near && warnings.push({ code: 'cocoso.near-constant-column', col: j }))
 
+    const m = problem.matrix.length
     const s = r.map((row) => row.reduce((a, x, j) => a + x * weights[j]!, 0))
     const p = r.map((row) => row.reduce((a, x, j) => a + (weights[j]! > 0 ? x ** weights[j]! : 0), 0))
+    const allZero = s.every((v) => v === 0) && p.every((v) => v === 0)
+    if (allZero) warnings.push({ code: 'cocoso.no-spread' })
     // S = 0 or P = 0 when every weighted r is 0 (or underflows to 0).
-    const own: ValidationIssue[] = s.flatMap((x, i) =>
-      x <= 0 || p[i]! <= 0 ? [{ code: 'all-worst-alternative' as const, severity: 'error' as const, row: i }] : [],
-    )
+    const own: ValidationIssue[] = allZero
+      ? []
+      : s.flatMap((x, i) =>
+          x <= 0 || p[i]! <= 0 ? [{ code: 'all-worst-alternative' as const, severity: 'error' as const, row: i }] : [],
+        )
     assertValid([...issues, ...own])
 
     const minS = minOf(s)
@@ -45,18 +50,20 @@ export const cocoso: RankingMethod<CocosoParams> = {
     const maxS = maxOf(s)
     const maxP = maxOf(p)
     const total = sum(s.map((x, i) => x + p[i]!))
-    const ka = s.map((x, i) => (x + p[i]!) / total)
-    const kb = s.map((x, i) => x / minS + p[i]! / minP)
-    const kcAt = (l: number) => s.map((x, i) => (l * x + (1 - l) * p[i]!) / (l * maxS + (1 - l) * maxP))
+    const ka = allZero ? new Array<number>(m).fill(1 / m) : s.map((x, i) => (x + p[i]!) / total)
+    const kb = allZero ? new Array<number>(m).fill(2) : s.map((x, i) => x / minS + p[i]! / minP)
+    const kcAt = (l: number) =>
+      allZero ? new Array<number>(m).fill(1) : s.map((x, i) => (l * x + (1 - l) * p[i]!) / (l * maxS + (1 - l) * maxP))
     const final = (kc: number[]) => kc.map((c, i) => Math.cbrt(ka[i]! * kb[i]! * c) + (ka[i]! + kb[i]! + c) / 3)
     const kc = kcAt(lambda)
     const scores = final(kc)
+    const ranking = allZero ? new Array<number>(m).fill(1) : rankScores(scores, 'desc')
     const sweep = WASPAS_LAMBDA_GRID.map((l) => final(kcAt(l)))
 
     return {
       scores,
       order: 'desc',
-      ranking: rankScores(scores, 'desc'),
+      ranking,
       steps: [
         { key: 'cocoso.normalized', matrix: r, axes: ['alternatives', 'criteria'] },
         { key: 'cocoso.s', vector: s, axes: 'alternatives' },

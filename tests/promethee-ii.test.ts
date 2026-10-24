@@ -244,6 +244,25 @@ describe('PROMETHEE II — Mareschal (2015) algebraic identities & invariants', 
     expect(Math.abs(res.scores.reduce((a, b) => a + b, 0))).toBeLessThan(1e-12)
   })
 
+  it('emits near-constant-column warning for active near-constant criteria', () => {
+    const nearConstProblem: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'benefit' },
+      ],
+      matrix: [
+        [10, 1],
+        [20, 1 + 1e-10],
+        [30, 1],
+      ],
+    }
+    const res = prometheeII.compute(nearConstProblem, [0.5, 0.5], {})
+    expect(res.warnings).toEqual([{ code: 'promethee-ii.near-constant-column', col: 1 }])
+    const resZeroWeight = prometheeII.compute(nearConstProblem, [1, 0], {})
+    expect(resZeroWeight.warnings).toEqual([])
+  })
+
   it('rejects invalid preferenceFunction or mismatched criteriaFunctions length', () => {
     expect(() =>
       prometheeII.compute(p, ex.weights!, { preferenceFunction: 'invalid' as never }),

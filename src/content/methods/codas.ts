@@ -51,9 +51,10 @@ export const codas: MethodContent = {
   ],
   combinedWith: [
     {
+      methodId: 'ahp',
       text: {
-        en: 'Expert weights, then CODAS: Badi, Abdulshahed & Shetwan (2018), the example used here; the origin uses weights from Chakraborty & Zavadskas (2014) and Zavadskas & Turskis (2010).',
-        tr: 'Uzman ağırlıkları, ardından CODAS: Badi, Abdulshahed ve Shetwan (2018), buradaki örnek; özgün makale Chakraborty ve Zavadskas (2014) ile Zavadskas ve Turskis (2010) ağırlıklarını kullanır.',
+        en: 'Expert or AHP weights, then CODAS: Badi, Abdulshahed & Shetwan (2018), the example used here; the origin uses weights from Chakraborty & Zavadskas (2014) and Zavadskas & Turskis (2010).',
+        tr: 'Uzman ya da AHP ağırlıkları, ardından CODAS: Badi, Abdulshahed ve Shetwan (2018), buradaki örnek; özgün makale Chakraborty ve Zavadskas (2014) ile Zavadskas ve Turskis (2010) ağırlıklarını kullanır.',
       },
     },
     {

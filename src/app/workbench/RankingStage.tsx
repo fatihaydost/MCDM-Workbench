@@ -65,7 +65,7 @@ export function RankingTable({
   // Results (compact): a small bar before each score, the same raw scale as the score chart on Ranking.
   // A lower-is-better score (VIKOR's Q) has its best row on the shortest bar, so it gets none.
   const finite = result.scores.filter(Number.isFinite)
-  const lowerBetter = finite.length > 1 && Math.min(...finite) < Math.max(...finite) && result.scores[bestIndex(result)] === Math.min(...finite)
+  const lowerBetter = result.order === 'asc'
   const topScore = lowerBetter ? 0 : Math.max(...finite.map((v) => Math.max(v, 0)), 0)
   const narrowHidden = !compact && view.columnsFromSm === true
   const extraClass = narrowHidden ? 'max-sm:hidden' : undefined
@@ -272,17 +272,25 @@ export function RankingStage() {
         <>
           <MethodWarnings warnings={result.warnings} problem={problem} />
           <p className="text-20 font-semibold text-text" data-testid="best-sentence">
-            {leaders(result).length > 1
-              ? t('workbench.ranking.bestTied', {
-                  names: leaders(result).map((i) => alternativeName(problem, i, t)).join(', '),
+            {(() => {
+              const firsts = leaders(result)
+              if (firsts.length > 1) {
+                const leaderScores = firsts.map((i) => result.scores[i]!).filter(Number.isFinite)
+                const minL = Math.min(...leaderScores)
+                const maxL = Math.max(...leaderScores)
+                const val = leaderScores.length > 1 && maxL - minL > 1e-9 ? `${nf.format(minL)} .. ${nf.format(maxL)}` : nf.format(result.scores[best])
+                return t('workbench.ranking.bestTied', {
+                  names: firsts.map((i) => alternativeName(problem, i, t)).join(', '),
                   symbol: scoreWords(rankingMethod, t).symbol,
-                  value: nf.format(result.scores[best]),
+                  value: val,
                 })
-              : t('workbench.ranking.best', {
-                  name: alternativeName(problem, best, t),
-                  symbol: scoreWords(rankingMethod, t).symbol,
-                  value: nf.format(result.scores[best]),
-                })}
+              }
+              return t('workbench.ranking.best', {
+                name: alternativeName(problem, best, t),
+                symbol: scoreWords(rankingMethod, t).symbol,
+                value: nf.format(result.scores[best]),
+              })
+            })()}
           </p>
           <div className={cn('grid grid-cols-1 items-start gap-8', !pictureShowsScores && 'xl:grid-cols-2')}>
             {!pictureShowsScores && <ScoreChart problem={problem} result={result} method={rankingMethod} className="min-w-0" />}

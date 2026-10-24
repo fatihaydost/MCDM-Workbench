@@ -24,10 +24,11 @@ export const lopcow: WeightingMethod = {
 
     // 1. Min-max normalization; a constant column stays all zeros (sigma 0 -> PV 0 -> weight 0).
     const { r, constant, nearConstant } = minMaxNormalize(problem)
+    const varying = constant.filter((c) => !c).length
     constant.forEach((c, j) => c && warnings.push({ code: 'lopcow.constant-column', col: j }))
     nearConstant.forEach((near, j) => near && warnings.push({ code: 'lopcow.near-constant-column', col: j }))
     // With two alternatives, every varying column is {0, 1}: RMS = sigma = 1/sqrt(2), so PV = 0 -> equal weights.
-    if (m === 2) warnings.push({ code: 'lopcow.two-alternatives' })
+    if (m === 2 && varying >= 2) warnings.push({ code: 'lopcow.two-alternatives' })
 
     // 2. Root-mean-square, sample standard deviation (m - 1), and logarithmic percentage value per column.
     const rms = new Array<number>(n)
@@ -41,13 +42,18 @@ export const lopcow: WeightingMethod = {
       rms[j] = q
       stdDev[j] = sd
       pv[j] = constant[j] || sd === 0 || tied(q, sd) ? 0 : Math.abs(Math.log(q / sd) * 100)
+      if (!constant[j] && m > 2 && pv[j] === 0) warnings.push({ code: 'lopcow.zero-pv-column', col: j })
     }
 
-    // 3. Weights; when all columns are constant or every PV is 0 (e.g. m = 2), fall back to equal weights 1/n.
+    // 3. Weights; when all columns are constant fall back to 1/n, when every PV is 0 share equally among varying columns.
     const total = sum(pv)
     const allConstant = constant.every(Boolean)
     if (allConstant) warnings.push({ code: 'lopcow.all-constant-equal-weights' })
-    const weights = allConstant || total === 0 ? new Array<number>(n).fill(1 / n) : pv.map((v) => v / total)
+    const weights = allConstant
+      ? new Array<number>(n).fill(1 / n)
+      : total === 0
+        ? constant.map((c) => (c ? 0 : 1 / varying))
+        : pv.map((v) => v / total)
 
     return {
       weights,

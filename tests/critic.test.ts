@@ -44,9 +44,10 @@ describe('CRITIC: edge cases', () => {
     expect(res.diagnostics?.constantColumns).toBe(1)
     // Its correlations are undefined (shown as n/a) and its own conflict is 0, so each row adds up as displayed.
     const rho = step(res.steps, 'critic.correlation').matrix!
+    expect(rho[0]![0]).toBe(1)
     expect(rho[0]![1]).toBeNaN()
     expect(rho[1]![2]).toBeNaN()
-    expect(rho[1]![1]).toBe(1)
+    expect(rho[1]![1]).toBeNaN()
     const conflict = step(res.steps, 'critic.conflict').vector!
     expect(conflict[1]).toBe(0)
     expect(conflict[0]).toBeCloseTo(1 - rho[0]![2]!, 15)
@@ -117,5 +118,51 @@ describe('CRITIC: edge cases', () => {
 
   it('empty cell (NaN) is rejected, not read as 0', () => {
     expect(() => critic.compute(makeProblem([[1, 2], [NaN, 3], [4, 5]], ['benefit', 'cost']), {})).toThrow(ProblemValidationError)
+  })
+
+  it('zero-crossing and zero-endpoint residuals within tolerance count as constant or near-constant', () => {
+    const zeroCrossConst = critic.compute(
+      makeProblem(
+        [
+          [1, -1e-15],
+          [2, 1e-15],
+          [3, 0],
+          [4, 0],
+        ],
+        ['benefit', 'benefit'],
+      ),
+      {},
+    )
+    expect(zeroCrossConst.weights).toEqual([1, 0])
+    expect(zeroCrossConst.warnings).toContainEqual({ code: 'critic.constant-column', col: 1 })
+
+    const zeroEndConst = critic.compute(
+      makeProblem(
+        [
+          [1, 0],
+          [2, 1e-100],
+          [3, 0],
+          [4, 0],
+        ],
+        ['benefit', 'benefit'],
+      ),
+      {},
+    )
+    expect(zeroEndConst.weights).toEqual([1, 0])
+    expect(zeroEndConst.warnings).toContainEqual({ code: 'critic.constant-column', col: 1 })
+
+    const zeroCrossNear = critic.compute(
+      makeProblem(
+        [
+          [1, -1e-10],
+          [2, 1e-10],
+          [3, 0],
+          [4, 0],
+        ],
+        ['benefit', 'benefit'],
+      ),
+      {},
+    )
+    expect(zeroCrossNear.warnings).toContainEqual({ code: 'critic.near-constant-column', col: 1 })
   })
 })

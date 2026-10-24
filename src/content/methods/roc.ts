@@ -49,9 +49,10 @@ export const roc: MethodContent = {
       },
     },
     {
+      methodId: 'ahp',
       text: {
-        en: 'Rank weights as surrogate weights in decision-quality simulations: Barron & Barrett (1996).',
-        tr: 'Karar kalitesi benzetimlerinde vekil ağırlık olarak sıra ağırlıkları: Barron ve Barrett (1996).',
+        en: 'Rank weights as surrogate weights in decision-quality simulations and compared against AHP pairwise weights: Barron & Barrett (1996); Roszkowska (2013).',
+        tr: 'Karar kalitesi benzetimlerinde vekil ağırlık olarak sıra ağırlıkları ve AHP ikili ağırlıklarıyla karşılaştırma: Barron ve Barrett (1996); Roszkowska (2013).',
       },
     },
   ],

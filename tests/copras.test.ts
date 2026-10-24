@@ -218,6 +218,12 @@ describe('COPRAS properties', () => {
     const res = copras.compute(makeProblem([[2, 3], [2, 3], [1, 4]], ['benefit', 'cost']), [0.5, 0.5], {})
     expect(res.ranking).toEqual([1, 1, 3])
   })
+  it('handles a tiny positive cost weight (1e-310) without 1 / sMinus overflow to NaN', () => {
+    const p = makeProblem([[10, 20], [30, 10], [20, 40]], ['benefit', 'cost'])
+    const res = copras.compute(p, [1, 1e-310], {})
+    expect(res.scores.every(Number.isFinite)).toBe(true)
+    expect(res.ranking).toEqual([3, 1, 2])
+  })
 })
 
 describe('COPRAS validation', () => {

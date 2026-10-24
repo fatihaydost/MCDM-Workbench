@@ -108,6 +108,20 @@ export type WorkbookInput = {
 /** Display format of computed numbers; the cells keep full precision. */
 export const COMPUTED_NUMBER_FORMAT = '0.0000'
 
+/** Display format of integer / rank / binary steps. */
+export const INTEGER_NUMBER_FORMAT = '0'
+
+/** Step keys whose values are integers, ranks or binary 0/1 flags rather than continuous decimals. */
+export const INTEGER_STEP_KEYS = new Set<string>([
+  'electre-iii.descending',
+  'electre-iii.ascending',
+  'roc.ranks',
+  'electre-i.kernel',
+  'electre-i.outranking',
+  'bwm.bestToOthers',
+  'bwm.othersToWorst',
+])
+
 const sameValues = (a: readonly number[], b: readonly number[]): boolean =>
   a.length === b.length && a.every((x, i) => x === b[i])
 
@@ -128,14 +142,20 @@ const finite = (x: number | null | undefined): number | null =>
  * "0.0000" like its neighbours (fixed decimals per column); raw input keeps none. `countColumns`:
  * columns that hold counts such as the rank, which stay as they are.
  */
-function toSheet(X: SheetJS, rows: Cell[][], numFmt?: string, countColumns: readonly number[] = []): XLSX.WorkSheet {
+function toSheet(
+  X: SheetJS,
+  rows: Cell[][],
+  numFmt?: string,
+  countColumns: readonly number[] = [],
+  intCell?: (r: number, c: number) => boolean,
+): XLSX.WorkSheet {
   const ws = X.utils.aoa_to_sheet(rows)
   if (numFmt) {
     rows.forEach((row, r) =>
       row.forEach((c, j) => {
         if (typeof c !== 'number' || countColumns.includes(j)) return
         const cell = ws[X.utils.encode_cell({ r, c: j })] as XLSX.CellObject | undefined
-        if (cell && cell.t === 'n') cell.z = numFmt
+        if (cell && cell.t === 'n') cell.z = intCell?.(r, j) ? INTEGER_NUMBER_FORMAT : numFmt
       }),
     )
   }
@@ -166,8 +186,13 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
   const axisLabels: StepLabels = { alternatives: problem.alternatives, criteria: problem.criteria.map((c) => c.name), ...(L.lambda ? { lambda: L.lambda } : {}) }
   const wb = X.utils.book_new()
   const taken = new Set<string>()
-  const add = (rows: Cell[][], name: string, numFmt?: string, countColumns?: readonly number[]) =>
-    X.utils.book_append_sheet(wb, toSheet(X, rows, numFmt, countColumns), sheetName(name, taken))
+  const add = (
+    rows: Cell[][],
+    name: string,
+    numFmt?: string,
+    countColumns?: readonly number[],
+    intCell?: (r: number, c: number) => boolean,
+  ) => X.utils.book_append_sheet(wb, toSheet(X, rows, numFmt, countColumns, intCell), sheetName(name, taken))
 
   // Data
   add(problemToGrid(problem, { corner: L.alternative, typeLabel: L.type, typeWords: L.typeWords }), L.sheets.data)
@@ -175,48 +200,62 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
   // Weights
   if (input.weighting) {
     const { method, result } = input.weighting
-    const tables = (result.steps ?? []).map((s) => stepToTable(s, axisLabels, { valueLabel: L.step(s.key) }))
-    const columns = tables.filter(
-      (t) => t.kind === 'vector' && t.colAxis === 'criteria' && !sameValues(t.values[0]!, result.weights),
+    const entries = (result.steps ?? []).map((s) => ({
+      key: s.key,
+      table: stepToTable(s, axisLabels, { valueLabel: L.step(s.key) }),
+    }))
+    const columns = entries.filter(
+      ({ table: t }) => t.kind === 'vector' && t.colAxis === 'criteria' && !sameValues(t.values[0]!, result.weights),
     )
-    const scalars = tables.filter((t) => t.kind === 'scalar')
+    const scalars = entries.filter(({ table: t }) => t.kind === 'scalar')
+    const intCols = new Set(columns.flatMap((col, idx) => (INTEGER_STEP_KEYS.has(col.key) ? [2 + idx] : [])))
+    const nCrit = problem.criteria.length
     const rows: Cell[][] = [
       [L.method, method],
       [],
-      [L.criterion, L.type, ...columns.map((t) => t.rowLabels[0]!), L.weight],
+      [L.criterion, L.type, ...columns.map(({ table: t }) => t.rowLabels[0]!), L.weight],
       ...problem.criteria.map((c, j): Cell[] => [
         c.name,
         L.typeWords[c.type],
-        ...columns.map((t) => finite(t.values[0]![j])),
+        ...columns.map(({ table: t }) => finite(t.values[0]![j])),
         finite(result.weights[j]),
       ]),
     ]
-    if (scalars.length > 0) rows.push([], ...scalars.map((t): Cell[] => [t.rowLabels[0]!, finite(t.values[0]![0])]))
-    add(rows, L.sheets.weights, COMPUTED_NUMBER_FORMAT)
+    if (scalars.length > 0) rows.push([], ...scalars.map(({ table: t }): Cell[] => [t.rowLabels[0]!, finite(t.values[0]![0])]))
+    add(rows, L.sheets.weights, COMPUTED_NUMBER_FORMAT, [], (r, c) => r >= 3 && r < 3 + nCrit && intCols.has(c))
   }
 
   // Ranking
   if (input.ranking) {
     const { method, result } = input.ranking
-    const tables = (result.steps ?? []).map((s) => stepToTable(s, axisLabels, { valueLabel: L.step(s.key) }))
-    const columns = tables.filter(
-      (t) => t.kind === 'vector' && t.rowAxis === 'alternatives' && !sameValues(t.values.map((r) => r[0]!), result.scores),
+    const entries = (result.steps ?? []).map((s) => ({
+      key: s.key,
+      table: stepToTable(s, axisLabels, { valueLabel: L.step(s.key) }),
+    }))
+    const columns = entries.filter(
+      ({ table: t }) => t.kind === 'vector' && t.rowAxis === 'alternatives' && !sameValues(t.values.map((r) => r[0]!), result.scores),
     )
+    const scalars = entries.filter(({ table: t }) => t.kind === 'scalar')
+    const intCols = new Set(columns.flatMap((col, idx) => (INTEGER_STEP_KEYS.has(col.key) ? [1 + idx] : [])))
+    const nAlt = problem.alternatives.length
+    const rows: Cell[][] = [
+      [L.method, method],
+      [],
+      [L.alternative, ...columns.map(({ table: t }) => t.colLabels![0]!), L.score, L.rank],
+      ...problem.alternatives.map((a, i): Cell[] => [
+        a,
+        ...columns.map(({ table: t }) => finite(t.values[i]![0])),
+        finite(result.scores[i]),
+        finite(result.ranking[i]),
+      ]),
+    ]
+    if (scalars.length > 0) rows.push([], ...scalars.map(({ table: t }): Cell[] => [t.rowLabels[0]!, finite(t.values[0]![0])]))
     add(
-      [
-        [L.method, method],
-        [],
-        [L.alternative, ...columns.map((t) => t.colLabels![0]!), L.score, L.rank],
-        ...problem.alternatives.map((a, i): Cell[] => [
-          a,
-          ...columns.map((t) => finite(t.values[i]![0])),
-          finite(result.scores[i]),
-          finite(result.ranking[i]),
-        ]),
-      ],
+      rows,
       L.sheets.ranking,
       COMPUTED_NUMBER_FORMAT,
       [columns.length + 2], // the rank
+      (r, c) => r >= 3 && r < 3 + nAlt && intCols.has(c),
     )
   }
 
@@ -228,22 +267,33 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
   ]
   if (steps.length > 0) {
     const rows: Cell[][] = []
+    const intRows = new Set<number>()
     for (const { step: s, method } of steps) {
       const table = stepToTable(s, axisLabels, { valueLabel: L.step(s.key) })
       rows.push([method ? `${method}: ${L.step(s.key)}` : L.step(s.key)])
       const cells = tableToCells(table, '')
+      const blockRows = table.kind === 'scalar' ? cells.map((r) => ['', ...r.slice(1)]) : cells
+      if (INTEGER_STEP_KEYS.has(s.key)) {
+        for (let k = 0; k < blockRows.length; k++) intRows.add(rows.length + k)
+      }
       // A scalar block already has its title as the row label; keep only the value under the title.
-      rows.push(...(table.kind === 'scalar' ? cells.map((r) => ['', ...r.slice(1)]) : cells), [])
+      rows.push(...blockRows, [])
     }
-    add(rows, L.sheets.calculation, COMPUTED_NUMBER_FORMAT)
+    add(rows, L.sheets.calculation, COMPUTED_NUMBER_FORMAT, [], (r) => intRows.has(r))
   }
 
   // Judgements: criterion pairwise matrix (AHP / BWM) and/or per-criterion alternative pairwise matrices (AHP ranking).
   const jRows: Cell[][] = []
   if (input.judgements && input.judgements.pairs.length === problem.criteria.length) {
     const critNames = problem.criteria.map((c) => c.name)
+    jRows.push([input.weighting?.method ? `${input.weighting.method}: ${L.criterion}` : L.criterion])
+    if (input.judgements.best !== null && input.judgements.best !== undefined && critNames[input.judgements.best] !== undefined) {
+      jRows.push(['Best', critNames[input.judgements.best]!])
+    }
+    if (input.judgements.worst !== null && input.judgements.worst !== undefined && critNames[input.judgements.worst] !== undefined) {
+      jRows.push(['Worst', critNames[input.judgements.worst]!])
+    }
     jRows.push(
-      [input.weighting?.method ? `${input.weighting.method}: ${L.criterion}` : L.criterion],
       [L.criterion, ...critNames],
       ...critNames.map((name, i): Cell[] => [
         name,

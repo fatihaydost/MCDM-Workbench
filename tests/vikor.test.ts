@@ -191,18 +191,27 @@ describe('VIKOR: v, guards and edge cases', () => {
     const base = vikor.compute(makeProblem([[1, 2], [3, 1], [2, 4]], ['benefit', 'cost']), [0.5, 0.5], {})
     expectClose(res.scores, base.scores, 1e-15)
   })
-  it('every S equal: the S term is 0, Q comes from R alone, with a notice', () => {
+  it('a near-constant column emits vikor.near-constant-column with its column index', () => {
+    const p = makeProblem([[1, 2, 1], [3, 1, 1 + 1e-10], [2, 4, 1]], ['benefit', 'cost', 'benefit'])
+    const res = vikor.compute(p, [0.25, 0.25, 0.5], {})
+    expect(res.warnings).toContainEqual({ code: 'vikor.near-constant-column', col: 2 })
+  })
+  it('every S equal: the S term is 0, Q comes from R alone, with a notice when v > 0 (and no notice at v = 0)', () => {
     // d = [0, .5], [.5, 0], [.25, .25]: S = .5 for all, R = .5, .5, .25.
-    const res = vikor.compute(makeProblem([[1, 0], [0, 1], [0.5, 0.5]], ['benefit', 'benefit']), w, {})
+    const prob = makeProblem([[1, 0], [0, 1], [0.5, 0.5]], ['benefit', 'benefit'])
+    const res = vikor.compute(prob, w, {})
     expect(new Set(vec(res, 'vikor.groupUtility')).size).toBe(1)
     expect(res.scores).toEqual([0.5, 0.5, 0])
     expect(res.warnings).toEqual([{ code: 'vikor.equal-group-utility' }])
+    expect(vikor.compute(prob, w, { v: 0 }).warnings).toEqual([])
   })
-  it('every R equal: the R term is 0, Q comes from S alone, with a notice', () => {
+  it('every R equal: the R term is 0, Q comes from S alone, with a notice when v < 1 (and no equal-regret notice at v = 1)', () => {
     // d = [.5, 0], [.5, .5], [0, .5]: R = .5 for all, S = .5, 1, .5.
-    const res = vikor.compute(makeProblem([[0, 1], [0, 0], [1, 0]], ['benefit', 'benefit']), w, {})
+    const prob = makeProblem([[0, 1], [0, 0], [1, 0]], ['benefit', 'benefit'])
+    const res = vikor.compute(prob, w, {})
     expect(res.scores).toEqual([0, 0.5, 0])
     expect(res.warnings).toContainEqual({ code: 'vikor.equal-regret' })
+    expect(vikor.compute(prob, w, { v: 1 }).warnings).not.toContainEqual({ code: 'vikor.equal-regret' })
     // A1 and A3 tie for first: reported, both in the compromise set, A1 first by input order.
     expect(res.warnings).toContainEqual({ code: 'vikor.tie-for-first' })
     const c = compromiseOf(res)
@@ -237,12 +246,17 @@ describe('VIKOR: v, guards and edge cases', () => {
     expect(res.ranking).toEqual([1, 1])
     expect(res.warnings).toEqual([{ code: 'vikor.no-spread' }])
   })
-  it('a tie for first is ordered by input index whatever the input order', () => {
+  it('a tie for first is ordered by input index whatever the input order, and C2 / bestByS / bestByR are permutation-invariant across tied leaders', () => {
     const m = [[3, 1], [1, 3], [1, 1]]
     const a = compromiseOf(vikor.compute(makeProblem(m, ['benefit', 'benefit']), w, {}))
     const b = compromiseOf(vikor.compute(makeProblem([m[1]!, m[0]!, m[2]!], ['benefit', 'benefit']), w, {}))
     expect([a.first, a.second]).toEqual([0, 1])
     expect([b.first, b.second]).toEqual([0, 1])
+    // Only one of the two tied Q-leaders leads S, and the other leads R: both row orders agree on bestByS, bestByR, c2.
+    const cOrder1 = vikorCompromise([0.5, 0.1, 0.9], [0.1, 0.5, 0.9], [0, 0, 1])
+    const cOrder2 = vikorCompromise([0.1, 0.5, 0.9], [0.5, 0.1, 0.9], [0, 0, 1])
+    expect([cOrder1.bestByS, cOrder1.bestByR, cOrder1.c2]).toEqual([true, true, true])
+    expect([cOrder2.bestByS, cOrder2.bestByR, cOrder2.c2]).toEqual([true, true, true])
   })
   it('a cost criterion prefers the smaller value; flipping its type reverses its column', () => {
     const p = makeProblem([[10, 1], [20, 1.5]], ['cost', 'benefit'])

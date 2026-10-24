@@ -163,7 +163,7 @@ export function distancePoints(proj: Pick<TopsisProjection, 'dPlus' | 'dMinus'>)
 }
 
 /** Closeness of a point of the distance plane: C = D- / (D+ + D-) = y / (x + y). */
-export const closenessAt = (p: Point): number => (p.x + p.y > 0 ? p.y / (p.x + p.y) : 0)
+export const closenessAt = (p: Point): number => (p.x + p.y > 0 ? p.y / (p.x + p.y) : 0.5)
 
 /**
  * Where the ray of constant closeness C leaves the box [0, xMax] x [0, yMax]. Every point on
@@ -943,8 +943,18 @@ export function mooraParts(problem: Problem, weights: readonly number[]): MooraP
   const normalized = stepMatrix(result.steps, 'moora.normalized')
   const weighted = stepMatrix(result.steps, 'moora.weighted')
   const isCost = problem.criteria.map((c) => c.type === 'cost')
-  const benefit = weighted.map((row) => row.map((v, j) => (isCost[j] ? 0 : Math.max(0, v))))
-  const cost = weighted.map((row) => row.map((v, j) => (isCost[j] ? Math.max(0, v) : 0)))
+  const benefit = weighted.map((row) =>
+    row.map((v, j) => {
+      const signed = isCost[j] ? -v : v
+      return signed > 0 ? signed : 0
+    }),
+  )
+  const cost = weighted.map((row) =>
+    row.map((v, j) => {
+      const signed = isCost[j] ? -v : v
+      return signed < 0 ? -signed : 0
+    }),
+  )
   const order = result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b)
   return {
     result,

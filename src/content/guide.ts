@@ -666,7 +666,7 @@ export const riskyCombinations: readonly RiskyCombination[] = [
       en: 'With objective weights, always show an equal-weights run and the Monte Carlo panel next to the main result, and warn when one criterion takes more than half of the weight.',
       tr: 'Nesnel ağırlık kullanıldığında ana sonucun yanında her zaman eşit ağırlıklı bir çalıştırma ve Monte Carlo paneli gösterilir; bir kriter ağırlığın yarısından fazlasını alırsa uyarı çıkar.',
     },
-    methodIds: ['entropy', 'sd', 'critic', 'topsis', 'vikor'],
+    methodIds: ['entropy', 'sd', 'critic', 'lopcow', 'merec', 'cilos', 'topsis', 'vikor', 'mabac', 'cocoso'],
     sources: [
       { label: 'Choo, Schoner & Wedley (1999), Computers & Industrial Engineering 37, 527-541', doi: '10.1016/S0360-8352(00)00019-X' },
       { label: 'Mukhametzyanov (2021), DMAME 4(2), 76-105', doi: '10.31181/dmame210402076i' },
@@ -732,18 +732,18 @@ export const riskyCombinations: readonly RiskyCombination[] = [
       tr: "ELECTRE'de ağırlıklar ödünleşim katsayısı değil, ölçeklerden bağımsız oy gücüdür (Figueira, Mousseau ve Roy 2005). Normalize matris üzerinde hesaplanan Entropi ya da CRITIC ağırlıklarını ham birimdeki eşiklerle birlikte kullanmak iki farklı anlamı karıştırır. Kullanabilirsiniz, ama bunu belirtin.",
     },
     basis: 'sourced',
-    methodIds: ['electre-i', 'electre-iii', 'promethee-ii', 'entropy', 'critic'],
+    methodIds: ['electre-i', 'electre-iii', 'promethee-ii', 'entropy', 'critic', 'sd', 'lopcow', 'merec', 'cilos'],
     sources: [{ label: 'Figueira, Mousseau & Roy (2005), ELECTRE methods', doi: '10.1007/0-387-23081-5_4' }],
   },
   {
     id: 'ratio-shifted',
     title: { en: 'Ratio-based methods on shifted data', tr: 'Kaydırılmış veride orana dayalı yöntemler' },
     text: {
-      en: 'WPM, WASPAS, COPRAS, ARAS, MARCOS and MEREC need positive data. Our analysis: silently shifting the data (x - min + 1) changes their rankings, so the site blocks them or requires an explicit, displayed shift.',
-      tr: 'WPM, WASPAS, COPRAS, ARAS, MARCOS ve MEREC pozitif veri ister. Bizim yorumumuz: veriyi sessizce kaydırmak (x - min + 1) bu yöntemlerin sıralamasını değiştirir; bu yüzden site bunları engeller ya da açıkça gösterilen bir kaydırma ister.',
+      en: 'SAW, WPM, WASPAS, COPRAS, ARAS, MARCOS, CODAS, MEREC and CILOS need positive data. Our analysis: silently shifting the data (x - min + 1) changes their rankings, so the site blocks them or requires an explicit, displayed shift.',
+      tr: 'SAW, WPM, WASPAS, COPRAS, ARAS, MARCOS, CODAS, MEREC ve CILOS pozitif veri ister. Bizim yorumumuz: veriyi sessizce kaydırmak (x - min + 1) bu yöntemlerin sıralamasını değiştirir; bu yüzden site bunları engeller ya da açıkça gösterilen bir kaydırma ister.',
     },
     basis: 'analysis',
-    methodIds: ['waspas', 'copras', 'aras', 'marcos', 'merec'],
+    methodIds: ['saw', 'waspas', 'copras', 'aras', 'marcos', 'codas', 'merec', 'cilos'],
     sources: [],
   },
   {
@@ -1067,10 +1067,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'positive',
           label: { en: 'No, every value is positive', tr: 'Hayır, her değer pozitif' },
           recommend: {
-            methodIds: ['entropy', 'merec'],
+            methodIds: ['entropy', 'merec', 'cilos'],
             reason: {
-              en: 'Entropy weights by dispersion and turns erratic on very homogeneous data; MEREC weights by how much removing a criterion changes the scores and is sensitive to single outliers.',
-              tr: 'Entropi yayılıma göre ağırlık verir ve çok homojen veride oynaklaşır; MEREC bir kriteri çıkarmanın puanları ne kadar değiştirdiğine bakar ve tek tek uç değerlere duyarlıdır.',
+              en: 'Entropy weights by dispersion and turns erratic on very homogeneous data; MEREC weights by how much removing a criterion changes the scores; CILOS weights by how little a criterion loses when another criterion\'s winner is chosen.',
+              tr: 'Entropi yayılıma göre ağırlık verir ve çok homojen veride oynaklaşır; MEREC bir kriteri çıkarmanın puanları ne kadar değiştirdiğine bakar; CILOS ise başka bir kriterin birincisi seçildiğinde uğranan kaybın azlığına göre ağırlık verir.',
             },
           },
           next: RANKING_START,
@@ -1199,10 +1199,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'rank-zeros',
           label: { en: 'Zeros, but no negatives', tr: 'Sıfırlar var, negatif yok' },
           recommend: {
-            methodIds: ['topsis', 'vikor', 'mabac'],
+            methodIds: ['topsis', 'vikor', 'mabac', 'moora'],
             reason: {
-              en: 'These accept zeros (TOPSIS as long as no column is all zero), while ratio-based methods (WASPAS, COPRAS, ARAS, MARCOS) are excluded.',
-              tr: 'Bunlar sıfırı kabul eder (TOPSIS, tamamı sıfır olan sütun olmadıkça); orana dayalı yöntemler (WASPAS, COPRAS, ARAS, MARCOS) dışarıda kalır.',
+              en: 'These accept zeros (TOPSIS and MOORA as long as no column is all zero), while ratio-based methods (WASPAS, COPRAS, ARAS, MARCOS) are excluded.',
+              tr: 'Bunlar sıfırı kabul eder (TOPSIS ve MOORA, tamamı sıfır olan sütun olmadıkça); orana dayalı yöntemler (WASPAS, COPRAS, ARAS, MARCOS) dışarıda kalır.',
             },
           },
         },
@@ -1221,10 +1221,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'closeness',
           label: { en: 'Closeness to an ideal option, from 0 to 1', tr: 'İdeal seçeneğe yakınlık, 0 ile 1 arası' },
           recommend: {
-            methodIds: ['topsis'],
+            methodIds: ['topsis', 'moora'],
             reason: {
-              en: 'TOPSIS gives one 0-1 closeness score per alternative and is the most common partner of AHP and Entropy.',
-              tr: 'TOPSIS her alternatif için 0-1 arası tek bir yakınlık skoru verir ve AHP ile Entropinin en yaygın ortağıdır.',
+              en: 'TOPSIS gives one 0-1 closeness score per alternative and is the most common partner of AHP and Entropy; MOORA uses the same vector normalization and subtracts weighted cost ratios from benefit ratios directly.',
+              tr: 'TOPSIS her alternatif için 0-1 arası tek bir yakınlık skoru verir ve AHP ile Entropinin en yaygın ortağıdır; MOORA aynı vektör normalizasyonunu kullanır ve ağırlıklı maliyet oranlarını fayda oranlarından doğrudan çıkarır.',
             },
           },
         },
@@ -1243,10 +1243,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'weighted-sum',
           label: { en: 'A weighted sum where every point can be traced', tr: 'Her puanı izlenebilen bir ağırlıklı toplam' },
           recommend: {
-            methodIds: ['saw', 'waspas'],
+            methodIds: ['saw', 'waspas', 'ahp'],
             reason: {
-              en: 'SAW is the most transparent method, and WASPAS blends it with the weighted product, which punishes very weak values harder.',
-              tr: 'SAW en şeffaf yöntemdir; WASPAS onu çok zayıf değerleri daha sert cezalandıran ağırlıklı çarpımla harmanlar.',
+              en: 'SAW is the most transparent method, WASPAS blends it with the weighted product, and AHP synthesizes local priorities from the decision matrix or pairwise alternative comparisons.',
+              tr: 'SAW en şeffaf yöntemdir, WASPAS onu ağırlıklı çarpımla harmanlar, AHP ise karar matrisinden ya da ikili alternatif karşılaştırmalarından yerel öncelikleri birleştirir.',
             },
           },
         },
@@ -1254,10 +1254,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'average',
           label: { en: 'Better or worse than the average alternative', tr: 'Ortalama alternatiften iyi ya da kötü olmak' },
           recommend: {
-            methodIds: ['edas'],
+            methodIds: ['edas', 'codas'],
             reason: {
-              en: 'EDAS measures positive and negative distance from the average solution and is less sensitive to one extreme alternative.',
-              tr: 'EDAS ortalama çözümden pozitif ve negatif uzaklığı ölçer ve tek bir uç alternatife daha az duyarlıdır.',
+              en: 'EDAS measures positive and negative distance from the average solution; CODAS compares alternatives by their Euclidean and Taxicab distances from the negative-ideal point.',
+              tr: 'EDAS ortalama çözümden pozitif ve negatif uzaklığı ölçer; CODAS ise alternatifleri negatif ideal noktadan Öklid ve Taxicab uzaklıklarıyla karşılaştırır.',
             },
           },
         },
@@ -1265,10 +1265,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'percent-target',
           label: { en: 'A percentage of a target or of the best', tr: 'Bir hedefin ya da en iyinin yüzdesi' },
           recommend: {
-            methodIds: ['aras', 'copras'],
+            methodIds: ['aras', 'copras', 'marcos'],
             reason: {
-              en: 'ARAS reports each alternative as a percentage of an optimal alternative you can define; COPRAS as a percentage of the best, with benefits and costs summed separately.',
-              tr: 'ARAS her alternatifi tanımlayabileceğiniz optimal bir alternatifin yüzdesi olarak verir; COPRAS ise fayda ve maliyetleri ayrı toplayarak en iyinin yüzdesi olarak.',
+              en: 'ARAS reports each alternative as a percentage of an optimal alternative; COPRAS as a percentage of the best with benefits and costs summed separately; MARCOS measures utility relative to both the ideal and anti-ideal rows.',
+              tr: 'ARAS her alternatifi optimal bir alternatifin yüzdesi olarak verir; COPRAS fayda ve maliyetleri ayrı toplayarak en iyinin yüzdesi olarak sunar; MARCOS ise hem ideal hem anti-ideal satıra göre faydayı ölçer.',
             },
           },
         },

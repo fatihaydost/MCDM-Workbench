@@ -61,8 +61,9 @@ function partialConcordance(delta: number, q: number, p: number): number {
 }
 
 function partialDiscordance(delta: number, p: number, v: number | null): number {
-  if (v === null || delta <= p + TIE_TOLERANCE) return 0
+  if (v === null) return 0
   if (delta >= v - TIE_TOLERANCE) return 1
+  if (delta <= p + TIE_TOLERANCE) return 0
   return (delta - p) / (v - p)
 }
 

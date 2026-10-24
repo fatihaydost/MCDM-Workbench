@@ -91,14 +91,21 @@ export function layoutSweep({ width, labelled, plotHeight = 240, xs, series, ext
 
   const all = [...series.flat(), ...extra]
   const e = extent(all) ?? [0, 1]
-  const pad = Math.max((e[1] - e[0]) * 0.06, 0.01)
+  // Clamp extreme endpoint spikes (e.g. CoCoSo k_ib exploding near w_k -> 1 or 0) when they exceed 10x the interior span.
+  const interior = series.flatMap((line) => line.filter((_, p) => (xs[p] ?? 0) >= 0.05 && (xs[p] ?? 0) <= 0.9))
+  const ie = extent(interior)
+  const intSpan = ie ? ie[1] - ie[0] : 0
+  const rawLo = ie && intSpan > 0 && ie[0] - e[0] > 10 * intSpan ? ie[0] - 2 * intSpan : e[0]
+  const rawHi = ie && intSpan > 0 && e[1] - ie[1] > 10 * intSpan ? ie[1] + 2 * intSpan : e[1]
+  const pad = Math.max((rawHi - rawLo) * 0.06, 0.01)
   // Scores in [0, 1] (closeness, SAW, VIKOR Q, COPRAS Q, which add up to 1) keep the axis inside [0, 1]; a method whose
   // scores leave it (a score below 0 or above 1) gets the axis its data need, so no line is cut off.
-  const lo = e[0] >= 0 ? Math.max(0, e[0] - pad) : e[0] - pad
-  const hi = e[1] <= 1 ? Math.min(1, e[1] + pad) : e[1] + pad
+  const lo = rawLo >= 0 ? Math.max(0, rawLo - pad) : rawLo - pad
+  const hi = rawHi <= 1 ? Math.min(1, rawHi + pad) : rawHi + pad
   const yDomain: Domain = niceDomain(lo, hi, 4)
-  const x = scaleLinear([xs[0] ?? 0, xs[xs.length - 1] ?? 1], [left, right])
-  const y = scaleLinear(yDomain, [bottom, top])
+  const x = scaleLinear([0, 1], [left, right])
+  const rawY = scaleLinear(yDomain, [bottom, top])
+  const y: LinearScale = Object.assign((v: number) => Math.min(bottom, Math.max(top, rawY(v))), rawY)
 
   const paths = series.map((s) => linePath(xs.map((w, p) => [x(w), y(s[p] ?? Number.NaN)] as const).filter(([, py]) => Number.isFinite(py))))
   const lastY = named.map((i) => y(series[i]?.[series[i]!.length - 1] ?? 0))

@@ -210,4 +210,12 @@ describe('AHP — edge cases, warnings and steps', () => {
     expect(ev.lambdaMax).toBeCloseTo(4, 12)
     expect(gm.lambdaMax).toBeCloseTo(4, 12)
   })
+
+  it('ahpWorstPair avoids suggested === actual lock-up on inconsistent triads like [9, 9, 9]', () => {
+    const j = judgementsFromUpper(3, [9, 9, 9])
+    const p = ahpProgress(prob(3), j)
+    expect(p.inconsistent).toBe(true)
+    expect(p.worstPair).not.toBeNull()
+    expect(p.worstPair!.suggested).not.toBeCloseTo(p.worstPair!.actual, 6)
+  })
 })

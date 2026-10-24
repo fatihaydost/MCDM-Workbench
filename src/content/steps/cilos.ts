@@ -12,7 +12,7 @@ export const cilos = {
     'cilos.normalized': {
       en: 'Invert cost criteria by the column minimum, then divide each column by its sum.',
       tr: 'Maliyet kriterlerini sütun minimumuyla ters çevirin, ardından her sütunu toplamına bölün.',
-      tex: '\\tilde{x}_{ij} = \\begin{cases} x_{ij}, & j \\in B \\\\ \\dfrac{\\min_r x_{rj}}{x_{ij}}, & j \\in C \\end{cases}, \\qquad \\bar{x}_{ij} = \\frac{\\tilde{x}_{ij}}{\\sum_{r=1}^{m} \\tilde{x}_{rj}}',
+      tex: '\\tilde{x}_{ij} = \\begin{cases} x_{ij}, & j \\in J^{+} \\\\ \\dfrac{\\min_r x_{rj}}{x_{ij}}, & j \\in J^{-} \\end{cases}, \\qquad \\bar{x}_{ij} = \\frac{\\tilde{x}_{ij}}{\\sum_{r=1}^{m} \\tilde{x}_{rj}}',
       edgeCase: {
         en: 'A constant column gets 1/m in every row and receives weight 0.',
         tr: 'Sabit bir sütun her satırda 1/m alır ve ağırlığı 0 olur.',
@@ -45,6 +45,8 @@ export const cilos = {
         en: 'If all varying criteria share one winner, they share the weight equally.',
         tr: 'Değişen tüm kriterler aynı kazananı paylaşırsa ağırlığı eşit paylaşırlar.',
       },
+      symbol: 'w',
+      texSymbol: '$w_j$',
     },
   },
 } satisfies MethodSteps

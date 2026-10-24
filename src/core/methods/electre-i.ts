@@ -1,6 +1,6 @@
-import { sum, zeros } from '../math'
+import { column, isConstant, isNearConstant, sum, zeros } from '../math'
 import { rankScores } from '../rank'
-import type { Problem, RankingMethod, RankingResult, Step } from '../types'
+import type { MethodWarning, Problem, RankingMethod, RankingResult, Step } from '../types'
 import { assertValid, validateProblem, validateWeights } from '../validate'
 
 /** How pairwise discordance differences are scaled across criteria. */
@@ -25,17 +25,9 @@ export type ElectreIParams = {
 const VALID_SCALES: readonly ElectreIDiscordanceScale[] = ['global', 'range']
 const BOUNDARY_EPS = 1e-12
 
-/**
- * Computes the ELECTRE I choice kernel K (0-based alternative indices in ascending order) from an m x m binary
- * outranking matrix S.
- *
- * Condenses strongly connected components (cycles of mutual outranking) of S into single equivalence classes so the
- * reduced graph is a DAG, then iteratively places all active classes with no incoming arc into K and removes them
- * together with every class they directly outrank (Roy 1968; Figueira, Mousseau & Roy 2005).
- */
-export function electreIKernel(S: readonly (readonly number[])[]): number[] {
+function computeKernelWithCycles(S: readonly (readonly number[])[]): { kernel: number[]; hasCycle: boolean } {
   const m = S.length
-  if (m === 0) return []
+  if (m === 0) return { kernel: [], hasCycle: false }
 
   // 1. Reachability matrix via BFS from each alternative to identify strongly connected components (SCCs).
   const reach: boolean[][] = Array.from({ length: m }, () => new Array<boolean>(m).fill(false))
@@ -71,6 +63,8 @@ export function electreIKernel(S: readonly (readonly number[])[]): number[] {
     }
     classes.push(members)
   }
+
+  const hasCycle = classes.some((c) => c.length > 1)
 
   // 3. Direct outranking arcs between distinct SCC classes (condensed DAG).
   const k = classes.length
@@ -124,7 +118,19 @@ export function electreIKernel(S: readonly (readonly number[])[]): number[] {
   for (let c = 0; c < k; c++) {
     if (inKernelClass[c]) kernel.push(...classes[c]!)
   }
-  return kernel.sort((a, b) => a - b)
+  return { kernel: kernel.sort((a, b) => a - b), hasCycle }
+}
+
+/**
+ * Computes the ELECTRE I choice kernel K (0-based alternative indices in ascending order) from an m x m binary
+ * outranking matrix S.
+ *
+ * Condenses strongly connected components (cycles of mutual outranking) of S into single equivalence classes so the
+ * reduced graph is a DAG, then iteratively places all active classes with no incoming arc into K and removes them
+ * together with every class they directly outrank (Roy 1968; Figueira, Mousseau & Roy 2005).
+ */
+export function electreIKernel(S: readonly (readonly number[])[]): number[] {
+  return computeKernelWithCycles(S).kernel
 }
 
 /**
@@ -191,12 +197,15 @@ export const electreI: RankingMethod<ElectreIParams> = {
 
     const { matrix, criteria } = problem
     const wTotal = sum(weights)
+    const warnings: MethodWarning[] = []
 
     // 1. Orient all criteria so larger is better: +x_ij for benefit, -x_ij for cost.
     const oriented = zeros(m, n)
     const ranges = new Array<number>(n).fill(0)
+    const constCols = new Array<boolean>(n).fill(false)
     let delta = 0
     for (let j = 0; j < n; j++) {
+      const col = column(matrix, j)
       const sign = criteria[j]!.type === 'benefit' ? 1 : -1
       let lo = Infinity
       let hi = -Infinity
@@ -205,6 +214,14 @@ export const electreI: RankingMethod<ElectreIParams> = {
         oriented[i]![j] = g
         if (g < lo) lo = g
         if (g > hi) hi = g
+      }
+      if (isConstant(col)) {
+        constCols[j] = true
+        ranges[j] = 0
+        continue
+      }
+      if (isNearConstant(col)) {
+        warnings.push({ code: 'electre-i.near-constant-column', col: j })
       }
       const r = hi - lo
       ranges[j] = r
@@ -222,6 +239,10 @@ export const electreI: RankingMethod<ElectreIParams> = {
         let wSum = 0
         let maxDiff = 0
         for (let j = 0; j < n; j++) {
+          if (constCols[j]) {
+            wSum += weights[j]!
+            continue
+          }
           const ga = oriented[a]![j]!
           const gb = oriented[b]![j]!
           if (ga >= gb - BOUNDARY_EPS) {
@@ -259,7 +280,10 @@ export const electreI: RankingMethod<ElectreIParams> = {
     }
 
     // 5. Kernel membership vector after SCC cycle condensation.
-    const kernelIndices = electreIKernel(outranking)
+    const { kernel: kernelIndices, hasCycle } = computeKernelWithCycles(outranking)
+    if (hasCycle) {
+      warnings.push({ code: 'electre-i.cycle-detected' })
+    }
     const kernelSet = new Set(kernelIndices)
     const kernel = Array.from({ length: m }, (_, i) => (kernelSet.has(i) ? 1 : 0))
 
@@ -281,6 +305,15 @@ export const electreI: RankingMethod<ElectreIParams> = {
       netScore[a] = (cSum - dSum) / denom + 0
     }
 
+    const ranking = rankScores(netScore, 'desc')
+    if (kernel.some((k) => k === 1)) {
+      for (let i = 0; i < m; i++) {
+        if (ranking[i] === 1 && kernel[i] === 0) {
+          warnings.push({ code: 'electre-i.non-kernel-leader', row: i })
+        }
+      }
+    }
+
     const steps: Step[] = [
       { key: 'electre-i.oriented', matrix: oriented, axes: ['alternatives', 'criteria'] },
       { key: 'electre-i.concordance', matrix: concordance, axes: ['alternatives', 'alternatives'] },
@@ -295,7 +328,7 @@ export const electreI: RankingMethod<ElectreIParams> = {
     return {
       scores: netScore,
       order: 'desc',
-      ranking: rankScores(netScore, 'desc'),
+      ranking,
       steps,
       diagnostics: {
         cHat,
@@ -304,7 +337,7 @@ export const electreI: RankingMethod<ElectreIParams> = {
         kernelSize: kernelIndices.length,
         outrankingEdges,
       },
-      warnings: [],
+      warnings,
     }
   },
 }

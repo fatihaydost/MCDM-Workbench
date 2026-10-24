@@ -1,5 +1,43 @@
 import type { MethodSteps } from './types'
 
+export type StepModule = MethodSteps
+
+const ahpRankingFlow = [
+  { key: 'ahpRanking.local', symbol: 'P', stepKeys: ['ahpRanking.local'] },
+  { key: 'ahpRanking.weighted', symbol: 'wP', stepKeys: ['ahpRanking.weighted'] },
+  { key: 'ahpRanking.scores', symbol: 'S', stepKeys: ['ahpRanking.scores'] },
+]
+
+/** AHP ranking: the steps src/core/methods/ahp.ts (ahpRanking) emits, with the formulas the code follows. */
+export const ahpRankingSteps = {
+  flow: ahpRankingFlow,
+  steps: {
+    'ahpRanking.local': {
+      en: 'Local priorities per criterion: from pairwise alternative comparisons or sum-normalized table values.',
+      tr: 'Kriter başına yerel öncelikler: ikili alternatif karşılaştırmalarından veya toplam normalize tablo değerlerinden.',
+      tex: String.raw`A_j\, p_j = \lambda_{\max}\, p_j \quad \vee \quad p_{ij} = r_{ij}, \qquad \sum_{i=1}^{m} p_{ij} = 1`,
+      symbol: 'p',
+      texSymbol: '$p_{ij}$',
+    },
+    'ahpRanking.weighted': {
+      en: 'Weighted priorities: each local priority multiplied by its criterion weight.',
+      tr: 'Ağırlıklı öncelikler: her yerel öncelik kendi kriter ağırlığıyla çarpılır.',
+      tex: String.raw`v_{ij} = w_j \cdot p_{ij}`,
+      symbol: 'v',
+      texSymbol: '$v_{ij}$',
+    },
+    'ahpRanking.scores': {
+      en: 'Global priorities S: the row sum of weighted priorities; higher ranks better.',
+      tr: 'Genel öncelikler S: ağırlıklı önceliklerin satır toplamı; yüksek olan önde sıralanır.',
+      tex: String.raw`S_i = \sum_{j=1}^{n} w_j\, p_{ij}`,
+      symbol: 'S',
+      texSymbol: '$S_i$',
+    },
+  },
+} satisfies StepModule
+
+export const ahpRanking = ahpRankingSteps
+
 /** AHP: the steps src/core/methods/ahp.ts emits, with the formulas the code follows. */
 export const ahp = {
   flow: [
@@ -49,26 +87,6 @@ export const ahp = {
       symbol: 'w',
       texSymbol: '$w_j$',
     },
-    'ahpRanking.local': {
-      en: 'Local priorities per criterion: from pairwise alternative comparisons or sum-normalized table values.',
-      tr: 'Kriter başına yerel öncelikler: ikili alternatif karşılaştırmalarından veya toplam normalize tablo değerlerinden.',
-      tex: String.raw`A_j\, p_j = \lambda_{\max}\, p_j \quad \vee \quad p_{ij} = r_{ij}, \qquad \sum_{i=1}^{m} p_{ij} = 1`,
-      symbol: 'p',
-      texSymbol: '$p_{ij}$',
-    },
-    'ahpRanking.weighted': {
-      en: 'Weighted priorities: each local priority multiplied by its criterion weight.',
-      tr: 'Ağırlıklı öncelikler: her yerel öncelik kendi kriter ağırlığıyla çarpılır.',
-      tex: String.raw`v_{ij} = w_j \cdot p_{ij}`,
-      symbol: 'v',
-      texSymbol: '$v_{ij}$',
-    },
-    'ahpRanking.scores': {
-      en: 'Global priorities S: the row sum of weighted priorities; higher ranks better.',
-      tr: 'Genel öncelikler S: ağırlıklı önceliklerin satır toplamı; yüksek olan önde sıralanır.',
-      tex: String.raw`S_i = \sum_{j=1}^{n} w_j\, p_{ij}`,
-      symbol: 'S',
-      texSymbol: '$S_i$',
-    },
+    ...ahpRankingSteps.steps,
   },
 } satisfies MethodSteps

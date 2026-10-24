@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import type { ParamDescriptor } from '../../core'
 import { useNumberFormat } from '../../i18n'
 import { snapWeight } from '../ranking/order'
-import { WeightRange } from '../ranking/WeightRange'
+import s from '../ranking/ranking.module.css'
+import { THUMB, WeightRange } from '../ranking/WeightRange'
 import { useMethodParams, useWorkbench } from '../../state/workbench'
 import { NumberInput, SegmentedControl } from '../../ui'
 import { paramLabel, paramOptionLabel, tr } from './shared'
@@ -35,7 +36,7 @@ function MethodParam({ methodId, d }: { methodId: string; d: ParamDescriptor }) 
   const label = paramLabel(methodId, d, t)
   const value = params[d.key]
 
-  if (d.kind === 'number' && d.min === 0 && d.max === 1) {
+  if (d.kind === 'number' && d.min !== undefined && d.max !== undefined) {
     return <UnitSlider methodId={methodId} d={d} label={label} value={typeof value === 'number' ? value : d.default} onChange={(v) => setMethodParam(methodId, d.key, v)} />
   }
 
@@ -78,6 +79,12 @@ function MethodParam({ methodId, d }: { methodId: string; d: ParamDescriptor }) 
   )
 }
 
+function snapRange(v: number, min: number, max: number, step = 0.01): number {
+  if (!Number.isFinite(v)) return min
+  const k = Math.round(1 / step)
+  return Math.min(max, Math.max(min, Math.round(v * k) / k))
+}
+
 function UnitSlider({
   methodId,
   d,
@@ -95,13 +102,15 @@ function UnitSlider({
   const { format } = useNumberFormat(2)
   const id = useId()
   const ends = `workbench.params.${methodId}.${d.key}Ends`
+  const isUnit = d.min === 0 && d.max === 1
   // An off-grid saved value (older state, a hand-edited one) is shown on the grid and written back, so the readout, the
   // ranking and the pictures all use the same value.
-  const snapped = snapWeight(value, d.step)
+  const snapped = isUnit ? snapWeight(value, d.step) : snapRange(value, d.min, d.max, d.step)
   useEffect(() => {
     if (snapped !== value) onChange(snapped)
   }, [snapped, value, onChange])
-  const text = format(snapped, 2)
+  const decimals = d.step >= 1 ? 0 : d.step >= 0.1 ? 1 : d.step >= 0.01 ? 2 : 3
+  const text = format(snapped, isUnit ? 2 : Math.max(2, decimals))
   return (
     <div className="flex w-full max-w-[360px] flex-col gap-1" data-testid={`param-${methodId}-${d.key}`}>
       <div className="flex items-baseline justify-between gap-4">
@@ -112,7 +121,42 @@ function UnitSlider({
           {text}
         </output>
       </div>
-      <WeightRange id={id} value={snapped} base={d.default} valueText={text} step={d.step} onChange={(v) => onChange(snapWeight(v, d.step))} />
+      {isUnit ? (
+        <WeightRange id={id} value={snapped} base={d.default} valueText={text} step={d.step} onChange={(v) => onChange(snapWeight(v, d.step))} />
+      ) : (
+        <div className="flex items-center gap-3">
+          <div className={`${s.slider} flex-1`}>
+            <input
+              id={id}
+              type="range"
+              className={s.range}
+              min={d.min}
+              max={d.max}
+              step={d.step}
+              value={snapped}
+              aria-valuetext={text}
+              onChange={(e) => onChange(snapRange(Number(e.target.value), d.min, d.max, d.step))}
+            />
+            {d.max > d.min && (
+              <span
+                aria-hidden
+                className={s.baseTick}
+                style={{ left: `calc(${THUMB / 2}px + ${(d.default - d.min) / (d.max - d.min)} * (100% - ${THUMB}px))` }}
+              />
+            )}
+          </div>
+          <NumberInput
+            aria-label={label}
+            value={snapped}
+            decimals={Math.max(2, decimals)}
+            controlSize="sm"
+            className="w-24"
+            onValueChange={(v) => {
+              if (v !== null && v >= d.min && v <= d.max) onChange(v)
+            }}
+          />
+        </div>
+      )}
       {i18n.exists(`${ends}.min`) && (
         <div className="flex justify-between gap-4 text-12 text-text-3">
           <span>{tr(t, `${ends}.min`)}</span>
