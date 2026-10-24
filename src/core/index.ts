@@ -15,6 +15,14 @@ export { lopcow } from './methods/lopcow'
 export { marcos } from './methods/marcos'
 export { merec, MEREC_DOMINANT_WEIGHT } from './methods/merec'
 export { moora } from './methods/moora'
+export {
+  prometheeII,
+  prometheeIncomparablePairs,
+  type PrometheeCriterionFunction,
+  type PrometheeCriterionType,
+  type PrometheeParams,
+  type PrometheePreferenceFunction,
+} from './methods/promethee-ii'
 export { sd } from './methods/sd'
 export { saw, type SawNormalization, type SawParams } from './methods/saw'
 export { topsis } from './methods/topsis'

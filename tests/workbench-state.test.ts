@@ -31,6 +31,7 @@ import mabacPC from './fixtures/mabac-pamucar-cirovic2015-forklifts.json'
 import mooraBZ from './fixtures/moora-brauers-zavadskas2010.json'
 import arasBA from './fixtures/aras-bakir-atalik2018.json'
 import codasG from './fixtures/codas-ghorabaee2016.json'
+import prometheeB from './fixtures/promethee-ii-brans1986.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -214,6 +215,19 @@ describe('examples match the published fixtures', () => {
       { label: 'codas.euclidean', values: codasG.badi2018.published.E, decimals: 4 },
       { label: 'codas.taxicab', values: codasG.badi2018.published.T, decimals: 4 },
       { label: 'codas.score', values: codasG.badi2018.published.H, decimals: 4 },
+    ])
+  })
+  it('Goswami 2020 (PROMETHEE II, laptop selection)', () => {
+    const ex = getExample('goswami-2020-laptops')!
+    expect(ex.referenceFor).toEqual(['promethee-ii'])
+    expect(ex.matrix).toEqual(prometheeB.goswami2020.matrix)
+    expect(ex.alternatives).toEqual(prometheeB.goswami2020.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(prometheeB.goswami2020.criteria.map((c) => c.type))
+    expect(ex.weights).toEqual(prometheeB.goswami2020.weights)
+    expect(ex.published).toEqual([
+      { label: 'promethee-ii.positiveFlow', values: prometheeB.goswami2020.positiveFlow, decimals: 5 },
+      { label: 'promethee-ii.negativeFlow', values: prometheeB.goswami2020.negativeFlow, decimals: 5 },
+      { label: 'promethee-ii.netFlow', values: prometheeB.goswami2020.netFlow, decimals: 5 },
     ])
   })
   it('every example has a DOI and a table reference', () => {
@@ -555,6 +569,20 @@ describe('store actions', () => {
     const r = computeRanking(s)
     expectClose(r.value!.scores, codasG.badi2018.published.H, codasG.badi2018.published.tolerance)
     expect(r.value!.ranking).toEqual(codasG.badi2018.published.ranking)
+  })
+
+  it('PROMETHEE II through the store: the laptops open with PROMETHEE II and the paper weights, preferenceFunction from the option state', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.setMethodParam('promethee-ii', 'preferenceFunction', 'usual')
+    st.loadExample('goswami-2020-laptops', 'en')
+    const s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('promethee-ii')
+    expect(s.weightMethod).toBe('manual')
+    expect(s.methodParams?.['promethee-ii']).toEqual({})
+    const r = computeRanking(s)
+    expectClose(r.value!.scores, prometheeB.goswami2020.netFlow, prometheeB.goswami2020.tolerance)
+    expect(r.value!.ranking).toEqual(prometheeB.goswami2020.ranking)
   })
 
   it('EDAS through the store: the 47 items open with EDAS and equal weights, the ten alternatives through the method page link', () => {

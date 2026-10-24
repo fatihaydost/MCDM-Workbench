@@ -1,0 +1,149 @@
+{
+  "brans1986": {
+    "source": "Brans, J.-P., Vincke, Ph. & Mareschal, B. (1986). How to select and how to rank projects: The PROMETHEE method. European Journal of Operational Research, 24(2), 228-238; Mareschal, B. (2019), Exercises with Visual PROMETHEE, Table 1.",
+    "doi": "10.1016/0377-2217(86)90044-5",
+    "alternatives": ["a1 Italy", "a2 Belgium", "a3 Germany", "a4 Sweden", "a5 Austria", "a6 France"],
+    "criteria": [
+      { "name": "f1 manpower", "type": "cost" },
+      { "name": "f2 power", "type": "benefit" },
+      { "name": "f3 construction cost", "type": "cost" },
+      { "name": "f4 maintenance cost", "type": "cost" },
+      { "name": "f5 villages to evacuate", "type": "cost" },
+      { "name": "f6 safety", "type": "benefit" }
+    ],
+    "matrix": [
+      [80, 90, 600, 5.4, 8, 5],
+      [65, 58, 200, 9.7, 1, 1],
+      [83, 60, 400, 7.2, 4, 7],
+      [40, 80, 1000, 7.5, 7, 10],
+      [52, 72, 600, 2.0, 3, 8],
+      [94, 96, 700, 3.6, 5, 6]
+    ],
+    "weights": [1, 1, 1, 1, 1, 1],
+    "criteriaFunctions": [
+      { "type": "u-shape", "q": 10 },
+      { "type": "v-shape", "p": 30 },
+      { "type": "linear", "q": 50, "p": 500 },
+      { "type": "level", "q": 1, "p": 6 },
+      { "type": "usual" },
+      { "type": "gaussian", "s": 5 }
+    ],
+    "publishedPi3dp": [
+      [0.000, 0.296, 0.250, 0.268, 0.100, 0.185],
+      [0.462, 0.000, 0.389, 0.333, 0.296, 0.500],
+      [0.236, 0.180, 0.000, 0.333, 0.056, 0.429],
+      [0.399, 0.505, 0.305, 0.000, 0.223, 0.212],
+      [0.444, 0.515, 0.487, 0.380, 0.000, 0.448],
+      [0.286, 0.399, 0.250, 0.432, 0.133, 0.000]
+    ],
+    "publishedSumNetFlow": [-0.728, 0.085, -0.447, -0.102, 1.466, -0.274],
+    "positiveFlow": [0.2199, 0.3963, 0.2466, 0.3293, 0.4547, 0.3001],
+    "negativeFlow": [0.3655, 0.3791, 0.3362, 0.3493, 0.1618, 0.3549],
+    "netFlow": [-0.1457, 0.0172, -0.0895, -0.0200, 0.2929, -0.0549],
+    "ranking": [6, 2, 5, 3, 1, 4],
+    "incomparablePairs": [[0, 1], [1, 2], [1, 3], [1, 5], [2, 3], [2, 5]],
+    "sensitivity": {
+      "w2_50": {
+        "weights": [10, 50, 10, 10, 10, 10],
+        "netFlow": [0.1313, -0.2510, -0.2937, 0.0520, 0.1117, 0.2497],
+        "ranking": [2, 5, 6, 4, 3, 1]
+      },
+      "w5_55": {
+        "weights": [9, 9, 9, 9, 55, 9],
+        "netFlow": [-0.5387, 0.4693, 0.0437, -0.2868, 0.4342, -0.1216],
+        "ranking": [6, 1, 3, 5, 2, 4]
+      },
+      "allUsual": {
+        "positiveFlow": [0.4000, 0.4333, 0.4667, 0.5000, 0.7000, 0.4667],
+        "negativeFlow": [0.5667, 0.5667, 0.5333, 0.5000, 0.2667, 0.5333],
+        "netFlow": [-0.1667, -0.1333, -0.0667, 0.0000, 0.4333, -0.0667],
+        "ranking": [6, 5, 3, 2, 1, 3]
+      }
+    }
+  },
+  "goswami2020": {
+    "source": "Goswami, S. S. (2020). Outranking Methods: Promethee I and Promethee II. Foundations of Management, 12(1), 93-110, Tables 4, 7, 13, 15, 16, 17, 18.",
+    "doi": "10.2478/fman-2020-0008",
+    "alternatives": ["Model 1", "Model 2", "Model 3", "Model 4", "Model 5", "Model 6"],
+    "criteria": [
+      { "name": "Processor", "type": "benefit" },
+      { "name": "Hard disk capacity", "type": "benefit" },
+      { "name": "Operating system", "type": "benefit" },
+      { "name": "RAM", "type": "benefit" },
+      { "name": "Screen size", "type": "benefit" },
+      { "name": "Brand", "type": "benefit" },
+      { "name": "Color", "type": "benefit" }
+    ],
+    "matrix": [
+      [3, 5, 3, 5, 3, 9, 3],
+      [5, 7, 5, 5, 7, 3, 3],
+      [5, 9, 9, 7, 7, 7, 5],
+      [7, 9, 9, 9, 9, 2, 9],
+      [5, 7, 9, 7, 7, 9, 9],
+      [3, 5, 5, 5, 7, 5, 3]
+    ],
+    "weights": [0.37657, 0.09395, 0.04529, 0.21594, 0.16932, 0.07647, 0.02246],
+    "publishedPi": [
+      [0.00000, 0.06554, 0.02185, 0.07647, 0.00000, 0.04370],
+      [0.36323, 0.00000, 0.00000, 0.01092, 0.00000, 0.23526],
+      [0.55586, 0.23632, 0.00000, 0.05462, 0.04697, 0.44973],
+      [0.92353, 0.56030, 0.36767, 0.00000, 0.39967, 0.79555],
+      [0.52386, 0.22617, 0.03683, 0.07647, 0.00000, 0.43958],
+      [0.12798, 0.02185, 0.00000, 0.03277, 0.00000, 0.00000]
+    ],
+    "positiveFlow": [0.04151, 0.12188, 0.26870, 0.60934, 0.26058, 0.03652],
+    "negativeFlow": [0.49889, 0.22204, 0.08527, 0.05025, 0.08933, 0.39276],
+    "netFlow": [-0.45738, -0.10015, 0.18343, 0.55909, 0.17125, -0.35624],
+    "ranking": [6, 4, 2, 1, 3, 5],
+    "incomparablePairs": [[0, 5]],
+    "tolerance": 0.00002
+  },
+  "abdullah2019": {
+    "source": "Abdullah, L., Chan, W. & Afshari, A. (2019). Application of PROMETHEE method for green supplier selection: a comparative result based on preference functions. Journal of Industrial Engineering International, 15(2), 271-285, Tables 5-17.",
+    "doi": "10.1007/s40092-018-0289-z",
+    "alternatives": ["A1", "A2", "A3", "A4"],
+    "criteria": [
+      { "name": "C1 Cost", "type": "benefit" },
+      { "name": "C2 Quality", "type": "benefit" },
+      { "name": "C3 Services", "type": "benefit" },
+      { "name": "C4 Delivery", "type": "benefit" },
+      { "name": "C5 Technology", "type": "benefit" },
+      { "name": "C6 Environmental management", "type": "benefit" },
+      { "name": "C7 Green packaging", "type": "benefit" }
+    ],
+    "matrix": [
+      [0.80, 0.60, 0.85, 0.70, 0.80, 0.65, 0.60],
+      [0.40, 0.40, 0.75, 0.50, 0.50, 0.50, 0.50],
+      [0.50, 0.40, 0.60, 0.55, 0.60, 0.55, 0.70],
+      [0.50, 0.45, 0.65, 0.60, 0.65, 0.50, 0.55]
+    ],
+    "weights": [0.1859, 0.1870, 0.1262, 0.1669, 0.1085, 0.1080, 0.1176],
+    "case1Usual": {
+      "positiveFlow": [0.9609, 0.084133, 0.343367, 0.4515],
+      "negativeFlow": [0.0392, 0.817633, 0.532433, 0.450633],
+      "netFlow": [0.9217, -0.7335, -0.189067, 0.000867],
+      "ranking": [1, 4, 3, 2]
+    },
+    "case2LinearLevel": {
+      "criteriaFunctions": [
+        { "type": "v-shape", "p": 0.10 },
+        { "type": "level", "q": 0.05, "p": 0.10 },
+        { "type": "level", "q": 0.05, "p": 0.10 },
+        { "type": "level", "q": 0.05, "p": 0.10 },
+        { "type": "level", "q": 0.05, "p": 0.10 },
+        { "type": "level", "q": 0.05, "p": 0.10 },
+        { "type": "level", "q": 0.05, "p": 0.10 }
+      ],
+      "publishedPi": [
+        [0.00000, 0.87820, 0.82850, 0.79905],
+        [0.00000, 0.00000, 0.12620, 0.06310],
+        [0.05880, 0.35775, 0.00000, 0.11760],
+        [0.00000, 0.37785, 0.00000, 0.00000]
+      ],
+      "positiveFlow": [0.835167, 0.063094, 0.178032, 0.125937],
+      "negativeFlow": [0.019598, 0.537880, 0.318202, 0.326551],
+      "netFlow": [0.815569, -0.474786, -0.140170, -0.200614],
+      "ranking": [1, 4, 2, 3]
+    }
+  }
+}

@@ -96,14 +96,59 @@
 - Our TypeScript choices: explicit min/max; validate thresholds; compute π once and derive φ⁺, φ⁻, φ, φ_j and PROMETHEE I relations from it; expose φ_j for the "why" panel; tie tolerance 1e-12 on φ; n ≥ 2 required; warn on constant columns and on thresholds larger than the column range (function degenerates).
 - Performance: π is n × n; for n > 500 compute flows by streaming rows rather than storing π.
 
+---
+
+## Re-verification (2026-04-20)
+
+Script: [`../scripts/promethee_ii.py`](../scripts/promethee_ii.py) · Output: [`../scripts/promethee_ii.out`](../scripts/promethee_ii.out) · Tests: [`tests/promethee-ii.test.ts`](../../../tests/promethee-ii.test.ts) · Fixture: [`tests/fixtures/promethee-ii-brans1986.json`](../../../tests/fixtures/promethee-ii-brans1986.json)
+
+### Primary sources & open-source implementations inspected
+1. **Brans & Mareschal (2005)**, *PROMETHEE Methods*, Chapter 5 in Figueira, Greco & Ehrgott (eds.), *Multiple Criteria Decision Analysis: State of the Art Surveys*, Springer, pp. 163–195, DOI [10.1007/0-387-23081-5_5](https://doi.org/10.1007/0-387-23081-5_5) — inspected full text (Eqs. 5.3–5.21, Table 5.3 generalized criterion types I–VI).
+2. **Mareschal (2019)**, *Exercises with Visual PROMETHEE*, Université Libre de Bruxelles — inspected full PDF (Table 1 power plant 6×6 input, Figures 1–4, Exercises 1–6; Table 2 Hypermarkets 12×5; Table 3 Marketing 6×5).
+3. **Mareschal (2015)**, *Note on the PROMETHEE net flow computation*, Université Libre de Bruxelles — inspected full PDF (Eqs. 1–16: proves V-shape with $p_j \ge R_j$ reduces to an affine weighted sum $\phi(a) = \frac{m}{m-1}\sum_j \frac{w_j}{p_j}(x_{aj} - \bar{x}_j)$, and Usual Type I reduces to weighted Borda midrank score $\phi_j(a) = \frac{m+1}{m-1} - \frac{2}{m-1} R_j(a)$).
+4. **Goswami (2020)**, *Outranking Methods: Promethee I and Promethee II*, *Foundations of Management* 12(1):93–110, DOI [10.2478/fman-2020-0008](https://doi.org/10.2478/fman-2020-0008) — inspected full PDF (6 laptop models × 7 criteria, Tables 3–18).
+5. **Abdullah, Chan & Afshari (2019)**, *Application of PROMETHEE method for green supplier selection: a comparative result based on preference functions*, *Journal of Industrial Engineering International* 15(2):271–285, DOI [10.1007/s40092-018-0289-z](https://doi.org/10.1007/s40092-018-0289-z) — inspected full PDF (4 green suppliers × 7 criteria, Tables 3–17).
+6. **Open-source Python libraries audited (`pymcdm` 1.4.0, `pyrepo-mcda` 0.1.15, `pyDecision` 5.1.8):**
+   - `pymcdm` (`pymcdm/methods/promethee_ii.py`, `partial/promethee_i.py`): (a) stores `self.pfs` as a single-use generator expression when `p` or `q` is passed, so calling the same `PROMETHEE_II` instance a second time exhausts `self.pfs`, produces `pi_table = 0`, and crashes with `AxisError: axis 1 is out of bounds for array of dimension 0`; (b) omits Type VI (Gaussian) completely.
+   - `pyrepo-mcda` (`pyrepo_mcda/mcda_methods/promethee.py`, `promethee_preference_functions.py`): couples the Gaussian parameter as `s = (p + q) / 2` in `preference_gaussian_function(d, p, q)` instead of accepting an independent $s_j$, and defaults `p = 2 * std`, `q = 0.5 * std` when omitted.
+   - `pyDecision` (`pyDecision/algorithm/p_ii.py`): matches all 6 Brans & Vincke types to $1.11 \times 10^{-16}$, but has no `criterion_type` parameter (treats all columns as benefit unless negated by the caller) and does not validate $q < p$.
+
+### Algebraic identity for default `'v-shape'` ($p_j = R_j = \max_i x_{ij} - \min_i x_{ij}$)
+When every criterion uses Type III (`'v-shape'`) with $q_j = 0$ and $p_j = R_j = \max_i x_{ij} - \min_i x_{ij}$ (our workbench default when `preferenceFunction: 'v-shape'`), for any pair $(a, b)$ on criterion $j$ with $R_j > 0$:
+$$P_j(a, b) - P_j(b, a) = \frac{\sigma_j(x_{aj} - x_{bj})}{R_j} = r_{aj} - r_{bj}$$
+where $r_{aj} \in [0, 1]$ is the min–max normalized entry ($\frac{x_{aj} - \min_i x_{ij}}{R_j}$ for benefit, $\frac{\max_i x_{ij} - x_{aj}}{R_j}$ for cost). Averaging over $b \ne a$ yields the single-criterion net flow $\phi_j(a) = \frac{m}{m-1}(r_{aj} - \bar{r}_j)$ and the aggregated net flow:
+$$\phi(a) = \frac{m}{m-1}\left(\sum_{j=1}^n w_j r_{aj} - \sum_{j=1}^n w_j \bar{r}_j\right)$$
+Because $\frac{m}{m-1} > 0$ and $\sum_j w_j \bar{r}_j$ is constant across alternatives, **PROMETHEE II with default `'v-shape'` ($p_j = R_j$) is an exact positive affine transformation of the min–max weighted sum, and therefore always produces the exact same complete ranking as MABAC** (verified to $3.33 \times 10^{-16}$ across 1,000 random problems in `promethee_ii.py`). Unlike MABAC, however, PROMETHEE II decomposes $\phi(a)$ into separate leaving ($\phi^+$) and entering ($\phi^-$) flows that expose PROMETHEE I incomparabilities, and switching `preferenceFunction` to `'usual'`, `'level'`, or `'gaussian'` (or supplying per-criterion thresholds in `criteriaFunctions`) departs from the linear min–max order.
+
+### Verified fixtures
+
+1. **F1 — Brans, Vincke & Mareschal (1986) / Mareschal (2019), 6 hydroelectric projects × 6 criteria (all 6 types I–VI):**
+   - Equal weights $w_j = 1/6$: $\phi^+ = [0.2199, 0.3963, 0.2466, 0.3293, 0.4547, 0.3001]$, $\phi^- = [0.3655, 0.3791, 0.3362, 0.3493, 0.1618, 0.3549]$, $\phi = [-0.1457, +0.0172, -0.0895, -0.0200, +0.2929, -0.0549]$, ranking $a_5 \succ a_2 \succ a_4 \succ a_6 \succ a_3 \succ a_1$ (`[6, 2, 5, 3, 1, 4]`). Matches published 3-d.p. $\pi$ matrix to $9.64 \times 10^{-4}$, scaled flows to $4.9 \times 10^{-5}$, and `pyDecision` 5.1.8 to $1.11 \times 10^{-16}$.
+   - PROMETHEE I partial order: 6 incomparable pairs $(a_1, a_2), (a_2, a_3), (a_2, a_4), (a_2, a_6), (a_3, a_4), (a_3, a_6)$, matching Figure 1 in Mareschal (2019).
+   - Weight sensitivity (Mareschal 2019, Exercises 1 & 2): $w = [10, 50, 10, 10, 10, 10] \implies a_6$ (France) ranks 1st ($\phi(a_6) = +0.2497$); $w = [9, 9, 9, 9, 55, 9] \implies a_2$ (Belgium) ranks 1st ($\phi(a_2) = +0.4693$).
+   - All-Usual (Mareschal 2019, Exercise 4): $\phi = [-0.1667, -0.1333, -0.0667, 0.0000, +0.4333, -0.0667]$, ranking `[6, 5, 3, 2, 1, 4]` ($a_3$ and $a_6$ tie at $-1/15$).
+
+2. **F2 — Goswami (2020), 6 laptop models × 7 criteria (Type III V-shape with $p_j = R_j$; workbench example `goswami-2020-laptops`):**
+   - Table 7 matrix (`[[3,5,3,5,3,9,3], [5,7,5,5,7,3,3], [5,9,9,7,7,7,5], [7,9,9,9,9,2,9], [5,7,9,7,7,9,9], [3,5,5,5,7,5,3]]`, all benefit) and Table 4 AHP weights (`[0.37657, 0.09395, 0.04529, 0.21594, 0.16932, 0.07647, 0.02246]`, where $w_7$'s exact row average is $0.0224591$, printed as $0.02247$ in Table 4 so the printed column sums to $1.00001$).
+   - Because Goswami (2020) min–max normalizes each column $R_{ij} \in [0, 1]$ (Eq. 4) and applies $P_j(a, b) = \max(0, R_{aj} - R_{bj})$ (Eqs. 7–8), his formulation is algebraically identical to our default `'v-shape'` with $p_j = \max_i x_{ij} - \min_i x_{ij}$ on the raw matrix.
+   - Reproduces Table 13 ($\pi$), Table 15 ($\phi^+ = [0.04151, 0.12188, 0.26870, 0.60934, 0.26058, 0.03652]$, $\phi^- = [0.49889, 0.22204, 0.08527, 0.05025, 0.08933, 0.39276]$), Table 16 ($\phi = [-0.45738, -0.10015, +0.18343, +0.55909, +0.17125, -0.35624]$), Table 17 (unique PROMETHEE I incomparability $\text{Model 1 } R \text{ Model 6}$), and Table 18 (ranking $\text{Model 4} \succ \text{Model 3} \succ \text{Model 5} \succ \text{Model 2} \succ \text{Model 6} \succ \text{Model 1}$, `[6, 4, 2, 1, 3, 5]`) with max absolute difference $\le 8 \times 10^{-6}$.
+
+3. **F3 — Abdullah, Chan & Afshari (2019), 4 green suppliers × 7 criteria (Usual Type I & mixed V-shape/Level):**
+   - Case 1 (Usual Type I, Tables 8–11): $\phi^+ = [0.9608, 0.0841, 0.3433, 0.4515]$, $\phi^- = [0.0392, 0.8176, 0.5324, 0.4506]$, $\phi = [+0.9216, -0.7334, -0.1890, +0.0009]$, ranking $A_1 \succ A_4 \succ A_3 \succ A_2$ (`[1, 4, 3, 2]`), matching Tables 10–11 within $1.1 \times 10^{-4}$ (paper's Table 5 weights sum to $1.0001$).
+   - Case 2 (V-shape $p = 0.10$ on $C_1$ + Level $q = 0.05, p = 0.10$ on $C_2\text{–}C_7$, Tables 12–16): reproduces Table 13 and Table 14 ($\pi$) to $8.8 \times 10^{-5}$ and ranking $A_1 \succ A_3 \succ A_4 \succ A_2$ (`[1, 4, 2, 3]`). Documents two paper errata: (i) Eq. (8) prints $q + p$ as the upper Level cutoff, but Table 13 uses standard $p = 0.10$ ($d = 0.15 \mapsto 1$); (ii) Table 15 misprints $\phi^+(A_1) = (0.8782 + 0.8285 + 0.79905)/3 = 0.83525$ with a shifted decimal point as $0.0835$.
+
 ## Sources
 - Brans, Vincke & Mareschal (1986), EJOR 24(2), 228–238, DOI 10.1016/0377-2217(86)90044-5.
 - Brans & Vincke (1985), Management Science 31(6), 647–656, DOI 10.1287/mnsc.31.6.647.
 - Brans & Mareschal (2005), PROMETHEE methods, in Figueira, Greco & Ehrgott (eds.) *Multiple Criteria Decision Analysis: State of the Art Surveys*, Springer, 163–186, DOI [10.1007/0-387-23081-5_5](https://doi.org/10.1007/0-387-23081-5_5) (preprint read: https://www.cin.ufpe.br/~if703/aulas/promethee.pdf).
 - Mareschal, B. (2015). Note on the PROMETHEE net flow computation (V-shape ⇒ weighted sum; usual ⇒ Borda). https://bertrand.mareschal.web.ulb.be/PG2024/assets/promethee_net_flow.pdf
 - Mareschal, B. (2019). Exercises with Visual PROMETHEE. https://bertrand.mareschal.web.ulb.be/PG2024/assets/exercises-vp-2019.pdf
+- Goswami, S. S. (2020). Outranking Methods: Promethee I and Promethee II. *Foundations of Management* 12(1), 93–110, DOI [10.2478/fman-2020-0008](https://doi.org/10.2478/fman-2020-0008).
+- Abdullah, L., Chan, W. & Afshari, A. (2019). Application of PROMETHEE method for green supplier selection: a comparative result based on preference functions. *Journal of Industrial Engineering International* 15(2), 271–285, DOI [10.1007/s40092-018-0289-z](https://doi.org/10.1007/s40092-018-0289-z).
 - Behzadian et al. (2010), EJOR 200(1), 198–215, DOI 10.1016/j.ejor.2009.01.021.
 - Çebi, Onar, Öztayşi & Kahraman (2022). Integration of AHP with other MCDM methods: a literature review. ISAHP 2022. https://isahp.org/uploads/36_001.pdf
 - De Keyser & Peeters (1996); Mareschal, De Smet & Nemery (2008); Verly & De Smet (2013) — rank reversal, DOIs above.
 - Dağdeviren (2008); Tuzkaya et al. (2010); Sałabun et al. (2020) — DOIs above.
-- pyDecision 5.1.1, `pyDecision/algorithm/p_ii.py` (Pereira, V.), https://github.com/Valdecy/pyDecision
+- pyDecision 5.1.8, `pyDecision/algorithm/p_ii.py` (Pereira, V.), https://github.com/Valdecy/pyDecision
+- pymcdm 1.4.0, `pymcdm/methods/promethee_ii.py` (Kizielewicz, B., Shekhovtsov, A. & Sałabun, W.)
+- pyrepo-mcda 0.1.15, `pyrepo_mcda/mcda_methods/promethee.py` (Bączkiewicz, A.)
