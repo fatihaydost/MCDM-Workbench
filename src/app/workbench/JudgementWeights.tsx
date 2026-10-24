@@ -86,10 +86,21 @@ export function JudgementWeights({ problem, method, result }: Props) {
   const bwmSuggestion = isAhp ? null : (bwmProg?.suggestion ?? null)
 
   const isFlagged = (q: Question) => {
-    if (isAhp) return worstPair !== null && q.a === worstPair.i && q.b === worstPair.k
+    const ans = judgements.pairs[q.a]?.[q.b] ?? null
+    if (isAhp) {
+      return (
+        worstPair !== null &&
+        q.a === worstPair.i &&
+        q.b === worstPair.k &&
+        withinCap(worstPair.suggested, qMode(q)) !== null &&
+        Math.abs(worstPair.suggested - (ans ?? 0)) > 1e-9
+      )
+    }
     return (
       bwmFlagged !== null &&
       bwmSuggestion !== null &&
+      withinCap(bwmSuggestion.value, qMode(q)) !== null &&
+      Math.abs(bwmSuggestion.value - (ans ?? 0)) > 1e-9 &&
       (bwmSuggestion.side === 'bestToOthers' ? q.a === best && q.b === bwmFlagged : q.a === bwmFlagged && q.b === worst)
     )
   }

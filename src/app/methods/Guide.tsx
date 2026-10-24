@@ -27,6 +27,13 @@ type Answer = { node: GuideNode; option: GuideOption }
  */
 function risksFor(picked: Set<MethodId>): RiskyCombination[] {
   return riskyCombinations.filter((r) => {
+    if (r.id !== 'ratio-shifted') {
+      const wIds = r.methodIds.filter((id) => methodMeta[id].family.startsWith('weighting'))
+      const rIds = r.methodIds.filter((id) => !methodMeta[id].family.startsWith('weighting'))
+      if (wIds.length > 0 && rIds.length > 0) {
+        return wIds.some((id) => picked.has(id)) && rIds.some((id) => picked.has(id))
+      }
+    }
     const hits = r.methodIds.filter((id) => picked.has(id)).length
     return r.methodIds.length === 1 ? hits === 1 : hits >= 2
   })

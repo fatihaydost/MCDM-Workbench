@@ -1,9 +1,9 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { build, type Plugin, type Rollup } from 'vite'
+import { build, searchForWorkspaceRoot, type Plugin, type Rollup } from 'vite'
 import { defineConfig } from 'vitest/config'
 
 type RouteMeta = { path: string; title: string; description: string; prerender: boolean }
@@ -254,6 +254,11 @@ export default defineConfig(({ command, isPreview }) => ({
   // GitHub Pages project site for the build and `vite preview`, root in dev.
   base: command === 'build' || isPreview ? '/MCDM-Workbench/' : '/',
   plugins: [react(), tailwindcss(), criticalPreloads(), spaFallback(), pagesPreview()],
+  server: {
+    fs: {
+      allow: [searchForWorkspaceRoot(process.cwd()), realpathSync(resolve(process.cwd(), 'node_modules'))],
+    },
+  },
   test: {
     include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
     environment: 'node',
