@@ -135,6 +135,9 @@
       "lopcow": {
         "claim": "Weights match {{citation}} to {{decimals}} decimals across all three criteria sets with the sample standard deviation."
       },
+      "cilos": {
+        "claim": "Weights match {{citation}} to {{decimals}} decimals across both the Social (Table 10) and Economic (Table 8) criteria blocks once the mislabeled row order is restored."
+      },
       "ahp": {
         "claim": "Eigenvector weights and consistency ratios match {{citation}} to {{decimals}} decimals."
       },
@@ -226,6 +229,7 @@
       "sd": "SD",
       "merec": "MEREC",
       "lopcow": "LOPCOW",
+      "cilos": "CILOS",
       "bwm": "BWM",
       "ahp": "AHP"
     },
@@ -421,6 +425,7 @@
         "sd": "Objective weights from how widely each criterion's values spread over the alternatives.",
         "merec": "Objective weights from how much the alternatives' overall performance drops when each criterion is removed. Every value must be above 0.",
         "lopcow": "Objective weights from the log ratio of each criterion's root-mean-square to its sample standard deviation after min-max scaling.",
+        "cilos": "Objective weights from the impact loss other criteria suffer when each criterion's best alternative is chosen, solved by F w = 0. Every value must be above 0.",
         "bwm": "Pick the most and least important criterion, then compare every other with these two (1‑9); 2n - 3 answers give the weights.",
         "ahp": "Compare the criteria two at a time on the 1‑9 scale; all n(n - 1) / 2 answers give the weights and the consistency ratio CR."
       },
@@ -700,6 +705,13 @@
         "pv": "Percentage value PV",
         "weights": "Weights w"
       },
+      "cilos": {
+        "normalized": "Normalized matrix x̄ (sum)",
+        "squareMatrix": "Winner matrix A",
+        "lossMatrix": "Relative loss matrix P",
+        "systemMatrix": "Loss system matrix F",
+        "weights": "Weights w"
+      },
       "waspas": {
         "normalized": "Normalized matrix x̄",
         "wsm": "Weighted sum Q1",
@@ -908,6 +920,12 @@
         "pv": "Percentage value PV",
         "weight": "Weight"
       },
+      "cilos": {
+        "title": "Smaller loss under other winners, more weight",
+        "loss": "Losses p_ij, sum |f_jj|",
+        "totalLoss": "Total loss |f_jj|",
+        "weight": "Weight"
+      },
       "waspas": {
         "title": "Score Q as λ moves",
         "axis": "λ: share of the weighted sum",
@@ -1050,6 +1068,13 @@
         "pv": "PV",
         "weights": "Weights"
       },
+      "cilos": {
+        "normalized": "Shares",
+        "squareMatrix": "Winners A",
+        "lossMatrix": "Losses P",
+        "systemMatrix": "System F",
+        "weights": "Weights"
+      },
       "waspas": {
         "normalized": "Normalize",
         "wsm": "Sum and product",
@@ -1185,6 +1210,7 @@
       "sd": "SD",
       "merec": "MEREC",
       "lopcow": "LOPCOW",
+      "cilos": "CILOS",
       "waspas": "WASPAS",
       "copras": "COPRAS",
       "marcos": "MARCOS",
@@ -1253,6 +1279,7 @@
         "sd": "Weights from how widely the data spread.",
         "merec": "Weights from what removing a criterion changes.",
         "lopcow": "Weights from the log ratio of root-mean-square to spread.",
+        "cilos": "Weights from the relative impact loss when each criterion's best alternative is chosen.",
         "waspas": "Blends a weighted sum with a weighted product.",
         "copras": "Adds benefit shares and a bonus for a small cost share.",
         "marcos": "Measures against an imaginary ideal and anti-ideal.",
@@ -1430,6 +1457,20 @@
             "s2": "Spread σ: the sample standard deviation (divisor m - 1), drawn from 0 below RMS on the same scale.",
             "s3": "Percentage value PV = |ln(RMS / σ) × 100|: the log gap between the two rulers.",
             "s4": "Weight w = PV / ΣPV: the share of the total percentage value, so the weights add up to 1."
+          }
+        },
+        "cilos": {
+          "title": "Smaller loss under other winners, more weight",
+          "loss": "Losses p_ij, sum |f_jj|",
+          "totalLoss": "Total loss |f_jj|",
+          "weight": "Weight",
+          "caption": "Each segment is the relative loss p_ij on a criterion when another criterion's best elderate is picked; their sum is |f_jj|, and F w = 0 gives the weights.",
+          "weightHead": "Weight w (F w = 0)",
+          "steps": {
+            "s1": "Each row is a criterion, and each criterion has a winning elderate with the largest normalized share.",
+            "s2": "Losses p_ij: the relative share a criterion loses when another criterion's winning elderate is chosen instead of its own.",
+            "s3": "The losses in a column add up to |f_jj|, the diagonal magnitude of the system matrix F.",
+            "s4": "Weight w solves F w = 0 with Σw = 1: a criterion that loses less under other winners gets a larger weight."
           }
         },
         "waspas": {
@@ -1627,6 +1668,13 @@
       "pv": "Percentage value PV: the absolute natural logarithm of RMS over σ, multiplied by 100.",
       "weights": "LOPCOW weights: each criterion's share of the total percentage value."
     },
+    "cilos": {
+      "normalized": "Sum normalization: cost criteria are inverted with min x / x first, then each value is divided by its column total so the shares add up to 1.",
+      "squareMatrix": "Square matrix A: row i copies the normalized row of the alternative that reaches the maximum on criterion i.",
+      "lossMatrix": "Relative impact-loss matrix P: how much criterion j loses relative to its maximum a_jj when criterion i's winning alternative is chosen.",
+      "systemMatrix": "Loss system matrix F: P with each diagonal entry set to the negative sum of its column, so every column of F adds up to 0.",
+      "weights": "CILOS weights: the unique vector w with sum 1 that solves the homogeneous linear system F w = 0."
+    },
     "waspas": {
       "normalized": "Linear max normalization: each value divided by the column maximum, or for a cost criterion the column minimum divided by the value, so the best value is 1.",
       "wsm": "Weighted sum Q1: each normalized value times its criterion weight, added up.",
@@ -1784,6 +1832,13 @@
       "constant-column": "{{criterion}} has the same value for every alternative, so its LOPCOW weight is 0.",
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",
       "two-alternatives": "With 2 alternatives, every varying column has RMS equal to its sample standard deviation (PV = 0), so equal weights are used instead.",
+      "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead."
+    },
+    "cilos": {
+      "constant-column": "{{criterion}} has the same value for every alternative, so its CILOS weight is 0.",
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet CILOS normalizes its tiny losses against the rest of the system. Check whether the difference is real.",
+      "shared-optimum": "Two or more criteria reach their best value on the same alternative, so the corresponding rows of A coincide and the relative loss between them is 0.",
+      "zero-loss-equal-weights": "One alternative is simultaneously the best on every varying criterion (or the loss system is degenerate), so all relative losses vanish (P = 0, F = 0) and active criteria share the weight equally.",
       "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead."
     },
     "copras": {

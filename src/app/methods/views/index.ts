@@ -2,6 +2,7 @@ import type { RankingMethodId, WeightMethodId } from '../../../state/workbench'
 import { ahp } from './ahp'
 import { aras } from './aras'
 import { bwm } from './bwm'
+import { cilos } from './cilos'
 import { cocoso } from './cocoso'
 import { codas } from './codas'
 import { copras } from './copras'
@@ -40,6 +41,7 @@ export const methodViews: Readonly<Views> = {
   sd,
   merec,
   lopcow,
+  cilos,
   equal,
   manual,
   bwm,

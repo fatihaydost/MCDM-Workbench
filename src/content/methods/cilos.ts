@@ -6,7 +6,7 @@ export const cilos: MethodContent = {
   name: { en: 'CILOS', tr: 'CILOS' },
   fullName: { en: 'Criterion Impact LOSs', tr: 'Kriter etki kaybı' },
   family: 'weighting-objective',
-  status: 'research',
+  status: 'available',
   year: 2016,
   origin: {
     authors: 'Zavadskas, E.K.; Podvezko, V.',
@@ -82,15 +82,16 @@ export const cilos: MethodContent = {
   reference: {
     source: 'Zavadskas, E.K.; Cavallaro, F.; Podvezko, V.; Ubarte, I.; Kaklauskas, A. (2017). MCDM Assessment of a Healthy and Safe Built Environment According to Sustainable Development Principles: A Practical Neighborhood Approach in Vilnius. Sustainability 9(5), 702',
     doi: '10.3390/su9050702',
-    match: 'partial',
+    match: 'match',
     note: {
-      en: 'Published example (Table 4 (input, social block), Table 10 (CILOS)); this method is not computed here yet, only recomputed during research. Twenty-one Vilnius neighbourhoods, five social criteria. All published CILOS values are reproduced to 4 decimals, but the paper attaches them to the wrong criteria: in Table 10 the first two rows are swapped (the same happens in Tables 8 and 12). Matched after undoing the swap.',
-      tr: "Yayımlanmış örnek (Tablo 4 (girdi, sosyal blok), Tablo 10 (CILOS)); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Yirmi bir Vilnius mahallesi, beş sosyal kriter. Yayımlanan tüm CILOS değerleri 4 basamakta elde ediliyor, ama makale onları yanlış kriterlere bağlamış: Tablo 10'da ilk iki satır yer değiştirmiş (Tablo 8 ve 12'de de benzeri var). Yer değişimi geri alınınca örtüşüyor.",
+      en: 'Published example (Table 4, social and economic blocks; Tables 10 and 8, CILOS): twenty-one Vilnius neighbourhoods, five criteria per block. All published CILOS values are reproduced to 4 decimals, but the paper attaches them to the wrong criteria: in Table 10 the first two rows are swapped (and in Table 8 the rows follow [2, 4, 0, 1, 3]). Matched after undoing the swap.',
+      tr: "Yayımlanmış örnek (Tablo 4, sosyal ve ekonomik bloklar; Tablo 10 ve 8, CILOS): yirmi bir Vilnius mahallesi, blok başına beş kriter. Yayımlanan tüm CILOS değerleri 4 basamakta elde ediliyor, ama makale onları yanlış kriterlere bağlamış: Tablo 10'da ilk iki satır yer değiştirmiş (Tablo 8'de de satırlar [2, 4, 0, 1, 3] sırasını izliyor). Yer değişimi geri alınınca örtüşüyor.",
     },
   },
   sources: [
     { label: 'Zavadskas & Podvezko (2016), International Journal of Information Technology & Decision Making 15(2), 267-283', doi: '10.1142/S0219622016500036' },
     { label: 'Zavadskas, Cavallaro, Podvezko, Ubarte & Kaklauskas (2017), Sustainability 9(5), 702', doi: '10.3390/su9050702' },
+    { label: 'Pala (2021), Kafkas Üniversitesi İİBF Dergisi 12(23), 263-294', doi: '10.36543/kauiibfd.2021.013' },
     { label: 'Krishnan, Kasim, Hamid & Ghazali (2021), Symmetry 13(6), 973', doi: '10.3390/sym13060973' },
     { label: 'Mirkin (1974), Problema gruppovogo vybora, Nauka, Moscow' },
     { label: 'Podvezko, Zavadskas & Podviezko (2020), Economic Computation and Economic Cybernetics Studies and Research 54(2)', doi: '10.24818/18423264/54.2.20.04' },
@@ -114,8 +115,8 @@ export const cilos: MethodContent = {
     ],
     pitfalls: [
       'A constant column makes the system rank-deficient; it is dropped (weight 0) with a warning and the rest is solved.',
-      'Ties for the column maximum change the matrix A; the first occurrence is taken and flagged.',
-      'Ill-conditioned systems can give negative weights; that is not part of the method, so an error is shown instead of clipping.',
+      'Ties for the column maximum change the matrix A; the first occurrence is taken.',
+      'If one alternative is best on every varying criterion, all losses in P are 0 (F = 0), so the varying criteria share the weight equally with a warning.',
     ],
   },
   tr: {
@@ -137,8 +138,8 @@ export const cilos: MethodContent = {
     ],
     pitfalls: [
       'Sabit sütun sistemin rankını düşürür; o sütun çıkarılır (ağırlık 0), uyarı verilir ve kalanlar çözülür.',
-      'Sütun maksimumunda eşitlik A matrisini değiştirir; ilk bulunan alınır ve bu belirtilir.',
-      'Kötü koşullu sistemler negatif ağırlık üretebilir; bu yöntemin parçası değildir, bu yüzden kırpmak yerine hata gösterilir.',
+      'Sütun maksimumunda eşitlik A matrisini değiştirir; ilk bulunan alınır.',
+      'Tek bir alternatif değişen her kriterde en iyiyse P içindeki tüm kayıplar 0 olur (F = 0); değişen kriterler uyarı verilerek ağırlığı eşit paylaşır.',
     ],
   },
 }

@@ -21,6 +21,7 @@ import podvezko from './fixtures/saw-podvezko2011.json'
 import diak from './fixtures/sd-diakoulaki1995.json'
 import merecK from './fixtures/merec-keshavarz2021-illustrative.json'
 import lopcowK from './fixtures/lopcow-keles2023.json'
+import cilosZ from './fixtures/cilos-zavadskas2017.json'
 import vikorKG from './fixtures/vikor-keshavarz2015.json'
 import vikorOT from './fixtures/vikor-opricovic-tzeng2004.json'
 import waspasA from './fixtures/waspas-adali2017.json'
@@ -79,6 +80,14 @@ describe('examples match the published fixtures', () => {
     expect(ex.alternatives).toEqual(lopcowK.alternatives)
     expect(ex.criteria.map((c) => c.type)).toEqual(lopcowK.types)
     expect(ex.published).toEqual([{ label: 'lopcow.weights', values: lopcowK.published.weights, decimals: 3 }])
+  })
+  it('Zavadskas et al. 2017 (CILOS, Social block, Table 10)', () => {
+    const ex = getExample('zavadskas-2017-vilnius-social')!
+    expect(ex.referenceFor).toEqual(['cilos'])
+    expect(ex.matrix).toEqual(cilosZ.matrix)
+    expect(ex.alternatives).toEqual(cilosZ.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(cilosZ.types)
+    expect(ex.published).toEqual([{ label: 'cilos.weights', values: cilosZ.expected.weights, decimals: 4 }])
   })
   for (const [id, fx] of [['opricovic-tzeng-2004-f', f], ['opricovic-tzeng-2004-phi', phi]] as const) {
     it(id, () => {
@@ -272,6 +281,11 @@ describe('derived results', () => {
   it('LOPCOW weights reproduce Keleş 2023 Table 6 through the store', () => {
     const w = computeWeights({ problem: draftOf('keles-2023-cities'), weightMethod: 'lopcow', manualWeights: [] })
     expectClose(w.value!.weights, lopcowK.published.weights, lopcowK.expected.tolerance_vs_published)
+  })
+
+  it('CILOS weights reproduce Zavadskas et al. 2017 Table 10 through the store', () => {
+    const w = computeWeights({ problem: draftOf('zavadskas-2017-vilnius-social'), weightMethod: 'cilos', manualWeights: [] })
+    expectClose(w.value!.weights, cilosZ.expected.weights, cilosZ.expected.tolerance)
   })
 
   it('MEREC blocks a zero cell with non-positive-value at that cell', () => {

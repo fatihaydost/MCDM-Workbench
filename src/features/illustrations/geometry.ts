@@ -3,6 +3,7 @@
  * picture can never disagree with the worked calculation. No DOM.
  */
 import { aras, type ArasParams } from '../../core/methods/aras'
+import { cilos } from '../../core/methods/cilos'
 import { copras } from '../../core/methods/copras'
 import { critic } from '../../core/methods/critic'
 import { edas } from '../../core/methods/edas'
@@ -332,6 +333,54 @@ export function lopcowParts(problem: Problem): LopcowParts | null {
     rms: stepVector(result.steps, 'lopcow.rms'),
     stdDev: stepVector(result.steps, 'lopcow.stdDev'),
     pv: stepVector(result.steps, 'lopcow.pv'),
+    weights: result.weights,
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// CILOS parts
+// ---------------------------------------------------------------------------------------------
+
+export type CilosParts = {
+  result: WeightingResult
+  /** Oriented and sum-normalized matrix x̄_ij. */
+  normalized: number[][]
+  /** Square winner matrix A (n × n). */
+  squareMatrix: number[][]
+  /** Relative impact-loss matrix P (n × n). */
+  lossMatrix: number[][]
+  /** System matrix F (n × n). */
+  systemMatrix: number[][]
+  /** losses[j][i] = p_ij: relative loss on criterion j when criterion i's winner is picked. */
+  losses: number[][]
+  /** Total column loss Σ_{i ≠ j} p_ij = -f_jj on each criterion j. */
+  totalLoss: number[]
+  weights: number[]
+}
+
+/** CILOS through the core, with the per-criterion losses and system solution the illustration draws. Null when it cannot run. */
+export function cilosParts(problem: Problem): CilosParts | null {
+  let result: WeightingResult
+  try {
+    result = cilos.compute(problem, {})
+  } catch {
+    return null
+  }
+  const normalized = stepMatrix(result.steps, 'cilos.normalized')
+  const squareMatrix = stepMatrix(result.steps, 'cilos.squareMatrix')
+  const lossMatrix = stepMatrix(result.steps, 'cilos.lossMatrix')
+  const systemMatrix = stepMatrix(result.steps, 'cilos.systemMatrix')
+  const n = problem.criteria.length
+  const losses = Array.from({ length: n }, (_, j) => Array.from({ length: n }, (_, i) => lossMatrix[i]![j]!))
+  const totalLoss = Array.from({ length: n }, (_, j) => Math.max(0, -systemMatrix[j]![j]!))
+  return {
+    result,
+    normalized,
+    squareMatrix,
+    lossMatrix,
+    systemMatrix,
+    losses,
+    totalLoss,
     weights: result.weights,
   }
 }

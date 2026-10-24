@@ -20,6 +20,7 @@ import {
   defaultAxes,
   sdParts,
   lopcowParts,
+  cilosParts,
   merecParts,
   entropyParts,
   distancePoints,
@@ -343,6 +344,21 @@ describe('lopcowParts', () => {
   })
   it('is null when LOPCOW cannot run', () => {
     expect(lopcowParts({ ...problem, matrix: [[1, 2, 3, 4, 5, 6]] })).toBeNull()
+  })
+})
+
+describe('cilosParts', () => {
+  const ex = getExample('zavadskas-2017-vilnius-social')!
+  const problem: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+
+  it('stacks per-criterion relative losses p_ij that add up to |f_jj|, with the core weights', () => {
+    const parts = cilosParts(problem)!
+    expect(parts.weights).toEqual(parts.result.weights)
+    parts.losses.forEach((col, j) => expect(col.reduce((a, b) => a + b, 0)).toBeCloseTo(parts.totalLoss[j]!, 12))
+    expect(parts.weights.map((w) => Number(w.toFixed(4)))).toEqual(ex.published[0]!.values)
+  })
+  it('is null when CILOS cannot run (a zero cell)', () => {
+    expect(cilosParts({ ...problem, matrix: problem.matrix.map((r, i) => (i === 0 ? [0, ...r.slice(1)] : r)) })).toBeNull()
   })
 })
 

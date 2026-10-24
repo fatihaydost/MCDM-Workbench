@@ -135,6 +135,9 @@
       "lopcow": {
         "claim": "Ağırlıklar örneklem standart sapmasıyla üç kriter kümesinde de {{citation}} ile {{decimals}} basamağa kadar aynı."
       },
+      "cilos": {
+        "claim": "Ağırlıklar, yanlış etiketli satır sırası düzeltilince Sosyal (Tablo 10) ve Ekonomik (Tablo 8) kriter bloklarının ikisinde de {{citation}} ile {{decimals}} basamağa kadar aynı."
+      },
       "ahp": {
         "claim": "Özvektör ağırlıkları ve tutarlılık oranları {{citation}} ile {{decimals}} basamağa kadar aynı."
       },
@@ -226,6 +229,7 @@
       "sd": "SD",
       "merec": "MEREC",
       "lopcow": "LOPCOW",
+      "cilos": "CILOS",
       "bwm": "BWM",
       "ahp": "AHP"
     },
@@ -421,6 +425,7 @@
         "sd": "Her kriterin değerlerinin alternatifler arasında ne kadar yayıldığına bakan nesnel ağırlıklar.",
         "merec": "Ağırlığı, kriteri çıkarmanın neyi değiştirdiğinden bulur. Her değer 0'dan büyük olmalı.",
         "lopcow": "Min-maks ölçeklemesinden sonra her kriterin karesel ortalamasının örneklem standart sapmasına logaritmik oranından bulunan nesnel ağırlıklar.",
+        "cilos": "Her kriterin en iyi alternatifi seçildiğinde diğer kriterlerin uğradığı etki kaybından F w = 0 doğrusal sistemiyle bulunan nesnel ağırlıklar. Her değer 0'dan büyük olmalı.",
         "bwm": "En önemli ve en önemsiz kriteri seçin, diğer her kriteri bu ikisiyle karşılaştırın (1‑9); 2n - 3 yanıt ağırlıkları verir.",
         "ahp": "Kriterleri 1‑9 ölçeğinde ikişer ikişer karşılaştırın; tüm n(n - 1) / 2 yanıt ağırlıkları ve tutarlılık oranı CR'yi verir."
       },
@@ -700,6 +705,13 @@
         "pv": "Yüzde değer PV",
         "weights": "Ağırlıklar w"
       },
+      "cilos": {
+        "normalized": "Normalize matris x̄ (toplam)",
+        "squareMatrix": "Kazananlar matrisi A",
+        "lossMatrix": "Göreli kayıp matrisi P",
+        "systemMatrix": "Kayıp sistem matrisi F",
+        "weights": "Ağırlıklar w"
+      },
       "waspas": {
         "normalized": "Normalize matris x̄",
         "wsm": "Ağırlıklı toplam Q1",
@@ -908,6 +920,12 @@
         "pv": "Yüzde değer PV",
         "weight": "Ağırlık"
       },
+      "cilos": {
+        "title": "Diğer kazananlar altında küçük kayıp, büyük ağırlık",
+        "loss": "Kayıplar p_ij, toplam |f_jj|",
+        "totalLoss": "Toplam kayıp |f_jj|",
+        "weight": "Ağırlık"
+      },
       "waspas": {
         "title": "λ değiştikçe skor Q",
         "axis": "λ: ağırlıklı toplamın payı",
@@ -1050,6 +1068,13 @@
         "pv": "PV",
         "weights": "Ağırlıklar"
       },
+      "cilos": {
+        "normalized": "Paylar",
+        "squareMatrix": "Kazananlar A",
+        "lossMatrix": "Kayıplar P",
+        "systemMatrix": "Sistem F",
+        "weights": "Ağırlıklar"
+      },
       "waspas": {
         "normalized": "Normalizasyon",
         "wsm": "Toplam ve çarpım",
@@ -1185,6 +1210,7 @@
       "sd": "SD",
       "merec": "MEREC",
       "lopcow": "LOPCOW",
+      "cilos": "CILOS",
       "waspas": "WASPAS",
       "copras": "COPRAS",
       "marcos": "MARCOS",
@@ -1253,6 +1279,7 @@
         "sd": "Ağırlığı verinin ne kadar geniş yayıldığından bulur.",
         "merec": "Kriteri çıkarmanın neyi değiştirdiğinden ağırlık.",
         "lopcow": "Karesel ortalamanın yayılıma logaritmik oranından ağırlık.",
+        "cilos": "Her kriterin en iyi alternatifi seçildiğindeki göreli etki kaybından ağırlık.",
         "waspas": "Ağırlıklı toplamı ağırlıklı çarpımla karıştırır.",
         "copras": "Fayda paylarını toplar, küçük maliyet payını ödüllendirir.",
         "marcos": "Hayali bir ideal ve anti-ideale göre ölçer.",
@@ -1430,6 +1457,20 @@
             "s2": "Yayılım σ: örneklem standart sapması (payda m - 1), aynı ölçekte RMS'nin altında 0'dan çizilir.",
             "s3": "Yüzde değer PV = |ln(RMS / σ) × 100|: iki cetvel arasındaki logaritmik fark.",
             "s4": "Ağırlık w = PV / ΣPV: toplam yüzde değer içindeki pay, ağırlıkların toplamı 1 olur."
+          }
+        },
+        "cilos": {
+          "title": "Diğer kazananlar altında küçük kayıp, büyük ağırlık",
+          "loss": "Kayıplar p_ij, toplam |f_jj|",
+          "totalLoss": "Toplam kayıp |f_jj|",
+          "weight": "Ağırlık",
+          "caption": "Her parça, başka bir kriterin en iyi mahallesi seçildiğinde bu kriterin uğradığı göreli kayıp p_ij değeridir; toplamları |f_jj| olur ve F w = 0 ağırlıkları verir.",
+          "weightHead": "Ağırlık w (F w = 0)",
+          "steps": {
+            "s1": "Her satır bir kriterdir ve her kriterin en yüksek normalize paya sahip kazanan bir mahallesi vardır.",
+            "s2": "Kayıplar p_ij: kendi kazananı yerine başka bir kriterin kazanan mahallesi seçildiğinde kriterin kaybettiği göreli pay.",
+            "s3": "Bir sütundaki kayıpların toplamı, F sistem matrisinin köşegen büyüklüğü olan |f_jj| değerini verir.",
+            "s4": "Ağırlık w, Σw = 1 koşuluyla F w = 0 sistemini çözer: diğer kazananlar altında az kaybeden kriter daha büyük ağırlık alır."
           }
         },
         "waspas": {
@@ -1627,6 +1668,13 @@
       "pv": "Yüzde değer PV: karesel ortalamanın standart sapmaya oranının mutlak doğal logaritmasının 100 katı.",
       "weights": "LOPCOW ağırlıkları: her kriterin toplam yüzde değer içindeki payı."
     },
+    "cilos": {
+      "normalized": "Toplam normalizasyonu: maliyet kriterleri önce min x / x ile ters çevrilir, ardından her değer sütun toplamına bölünür; payların toplamı 1 olur.",
+      "squareMatrix": "Kare matris A: i satırı, i kriterinde en yüksek değere ulaşan alternatifin normalize satırını kopyalar.",
+      "lossMatrix": "Göreli etki kaybı matrisi P: i kriterinin kazanan alternatifi seçildiğinde j kriterinin kendi maksimumu a_jj değerine göre ne kadar kaybettiği.",
+      "systemMatrix": "Kayıp sistem matrisi F: P matrisinin köşegenine ilgili sütun toplamının negatifi yazılır; böylece F'nin her sütununun toplamı 0 olur.",
+      "weights": "CILOS ağırlıkları: toplamı 1 koşuluyla F w = 0 homojen doğrusal sistemini çözen tekil w vektörü."
+    },
     "waspas": {
       "normalized": "Doğrusal maks normalizasyonu: her değer sütun maksimumuna bölünür, maliyet kriterinde sütun minimumu değere bölünür; böylece en iyi değer 1 olur.",
       "wsm": "Ağırlıklı toplam Q1: her normalize değer kriter ağırlığıyla çarpılıp toplanır.",
@@ -1784,6 +1832,13 @@
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden LOPCOW ağırlığı 0.",
       "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
       "two-alternatives": "2 alternatifle her değişken sütunda karesel ortalama örneklem standart sapmasına eşittir (PV = 0), bu yüzden eşit ağırlık kullanıldı.",
+      "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı."
+    },
+    "cilos": {
+      "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden CILOS ağırlığı 0.",
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, yine de CILOS bu küçük kayıpları sistemin geri kalanıyla oranlıyor. Farkın gerçek olup olmadığını kontrol edin.",
+      "shared-optimum": "İki ya da daha fazla kriter en iyi değerine aynı alternatifte ulaşıyor; A matrisinin ilgili satırları çakışır ve aralarındaki göreli kayıp 0 olur.",
+      "zero-loss-equal-weights": "Tek bir alternatif değişen her kriterde aynı anda en iyidir (ya da kayıp sistemi dejeneredir); tüm göreli kayıplar sıfırlanır (P = 0, F = 0) ve etkin kriterler ağırlığı eşit paylaşır.",
       "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı."
     },
     "copras": {
