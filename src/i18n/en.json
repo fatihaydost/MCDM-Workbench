@@ -254,6 +254,7 @@
       "label": "Ranking method",
       "topsis": "TOPSIS",
       "saw": "SAW",
+      "ahp-ranking": "AHP",
       "vikor": "VIKOR",
       "edas": "EDAS",
       "waspas": "WASPAS",
@@ -332,6 +333,21 @@
         "aggregationHints": {
           "eigenvector": "Saaty's right principal eigenvector (A w = λmax w); matches the original AHP literature.",
           "geometric": "Normalized row geometric means; equals the eigenvector for 3 criteria and solves in closed form."
+        },
+        "aggregationVariant": {
+          "eigenvector": "eigenvector",
+          "geometric": "geometric mean"
+        }
+      },
+      "ahp-ranking": {
+        "aggregation": "Priority vector",
+        "aggregationOptions": {
+          "eigenvector": "Principal eigenvector",
+          "geometric": "Geometric mean (LLSM)"
+        },
+        "aggregationHints": {
+          "eigenvector": "Saaty's right principal eigenvector (A p = λmax p) for pairwise criteria; matches the original AHP literature.",
+          "geometric": "Normalized row geometric means for pairwise criteria; equals the eigenvector for 3 alternatives and solves in closed form."
         },
         "aggregationVariant": {
           "eigenvector": "eigenvector",
@@ -594,6 +610,7 @@
       "methodHint": {
         "topsis": "Ranks the alternatives by their distance from an ideal and a negative-ideal solution.",
         "saw": "Weights the rescaled values of each criterion and adds them up.",
+        "ahp-ranking": "Synthesizes global priority P from criterion weights and local alternative priorities (table shares or 1‑9 pairwise comparisons).",
         "vikor": "Looks for a compromise between the best total (S) and the smallest worst regret (R); a lower Q is better.",
         "edas": "Scores each alternative by how far it lies above and below the average of all alternatives; a higher AS is better.",
         "waspas": "Blends a weighted sum with a weighted product, which punishes a very weak value harder; a higher Q is better.",
@@ -646,6 +663,11 @@
           "name": "Score S",
           "title": "Weighted sum S",
           "symbol": "S"
+        },
+        "ahp-ranking": {
+          "name": "Priority P",
+          "title": "Global priority P",
+          "symbol": "P"
         },
         "vikor": {
           "name": "Compromise Q",
@@ -722,6 +744,21 @@
         "distance": "Distance & compromise",
         "additive": "Additive & ratio",
         "outranking": "Pairwise outranking"
+      },
+      "ahp": {
+        "sourcesTitle": "Local priorities by criterion",
+        "sourcesHint": "Use the decision matrix values (shares of the column total, with 1 / x for cost) or compare the alternatives two at a time on the 1‑9 scale for qualitative criteria.",
+        "sourceFor": "Local priority source for {{criterion}}",
+        "sourceTable": "From the table",
+        "sourcePairwise": "Pairwise",
+        "question": "On {{criterion}}, which is preferred?",
+        "sides": "Which is preferred",
+        "equal": "Equally preferred",
+        "allEqual": "All equally preferred",
+        "localPriorities": "Local priorities p",
+        "otherWeightsNotice": "Full AHP normally pairs with AHP criterion weights.",
+        "switchToAhpWeights": "Use AHP weights",
+        "capNotice": "Pairwise alternative comparisons are active up to {{max}} alternatives; table values are used here."
       }
     },
     "results": {
@@ -746,6 +783,7 @@
         "weights": "Weights",
         "ranking": "Ranking",
         "calculation": "Calculation",
+        "judgements": "Judgements",
         "type": "Type",
         "method": "Method",
         "weight": "Weight",
@@ -936,6 +974,11 @@
         "consistencyRatio": "Consistency ratio CR",
         "weights": "Weights w"
       },
+      "ahpRanking": {
+        "local": "Local priorities p",
+        "weighted": "Weighted priorities v = w p",
+        "scores": "Global priority P"
+      },
       "moora": {
         "normalized": "Vector-normalized x*",
         "weighted": "Weighted ratios v",
@@ -997,10 +1040,12 @@
     "issues": {
       "dataTitle": "The decision matrix has problems",
       "weightsTitle": "The weights have problems",
+      "rankingTitle": "The ranking has problems",
       "more_one": "and {{count}} more",
       "more_other": "and {{count}} more",
       "goToData": "Go to Data",
-      "goToWeights": "Go to Weights"
+      "goToWeights": "Go to Weights",
+      "goToRanking": "Go to Ranking"
     },
     "chart": {
       "showTable": "Show as table"
@@ -1339,6 +1384,11 @@
         "pairwiseMatrix": "Matrix A",
         "lambdaMax": "Consistency",
         "weights": "Weights"
+      },
+      "ahp-ranking": {
+        "local": "Local p",
+        "weighted": "Weighted v",
+        "scores": "Priority P"
       },
       "moora": {
         "normalized": "Normalize",
@@ -2053,6 +2103,11 @@
       "consistencyRatio": "Consistency ratio CR = CI / RI_n: compares CI against Saaty's random index; up to 0.10 is the usual limit.",
       "weights": "AHP weights: the normalized priority vector from the principal eigenvector or the row geometric mean."
     },
+    "ahpRanking": {
+      "local": "Local priorities p: column shares from the table (1 / x for cost) or the priority vector of the criterion's pairwise comparison matrix.",
+      "weighted": "Weighted local priorities v = w p: each alternative's local priority multiplied by the criterion weight.",
+      "scores": "Global priority P: the sum of an alternative's weighted local priorities across all criteria, summing to 1."
+    },
     "moora": {
       "normalized": "Vector normalization: each value divided by the Euclidean length of its column.",
       "weighted": "Weighted normalized matrix v: each normalized ratio multiplied by its criterion weight.",
@@ -2134,6 +2189,7 @@
       "non-positive-average": "The average of {{criterion}} is {{value}}. EDAS divides by each criterion's average, so it must be above 0.",
       "all-worst-alternative": "{{alternative}} is the worst on every weighted criterion, so its S and P are 0 and CoCoSo would divide by 0. Remove it or choose another method.",
       "judgements-incomplete": "{{value}} of the questions answered; answer the rest to get the weights.",
+      "alt-judgements-incomplete": "On {{criterion}}, {{value}} of {{total}} alternative comparisons are answered; answer the rest to compute the ranking.",
       "anchors-missing": "Choose the best and the worst criterion first."
     }
   },
@@ -2209,6 +2265,7 @@
     },
     "ahp": {
       "inconsistent": "The consistency ratio CR is at or above 0.10; check the highlighted pair, though the weights are still computed.",
+      "inconsistent-criterion": "On {{criterion}}, the consistency ratio CR is at or above 0.10; check the highlighted pair, though the priorities are still computed.",
       "many-criteria": "With 8 or more criteria AHP asks at least 28 comparisons and consistency is harder to keep; consider BWM for fewer questions."
     },
     "moora": {

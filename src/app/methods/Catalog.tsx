@@ -25,7 +25,7 @@ function exampleProblem(id: string): Problem {
  */
 const AVAILABLE = {
   weighting: WEIGHTING_VIEW_IDS.filter((id): id is WeightingId => methodViews[id].thumb !== undefined),
-  ranking: RANKING_VIEW_IDS.filter((id) => methodViews[id].thumb !== undefined),
+  ranking: RANKING_VIEW_IDS.filter((id): id is Exclude<(typeof RANKING_VIEW_IDS)[number], 'ahp-ranking'> => methodViews[id].thumb !== undefined),
 }
 
 /** The pictures on the available methods' cards, computed from the published examples (each view's `thumb`). */

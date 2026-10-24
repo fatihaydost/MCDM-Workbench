@@ -254,6 +254,7 @@
       "label": "Sıralama yöntemi",
       "topsis": "TOPSIS",
       "saw": "SAW",
+      "ahp-ranking": "AHP",
       "vikor": "VIKOR",
       "edas": "EDAS",
       "waspas": "WASPAS",
@@ -332,6 +333,21 @@
         "aggregationHints": {
           "eigenvector": "Saaty'nin sağ temel özvektörü (A w = λmaks w); özgün AHP literatürüyle örtüşür.",
           "geometric": "Normalize satır geometrik ortalamaları; 3 kriterde özvektörle aynıdır ve kapalı biçimde çözülür."
+        },
+        "aggregationVariant": {
+          "eigenvector": "özvektör",
+          "geometric": "geometrik ortalama"
+        }
+      },
+      "ahp-ranking": {
+        "aggregation": "Öncelik vektörü",
+        "aggregationOptions": {
+          "eigenvector": "Temel özvektör",
+          "geometric": "Geometrik ortalama (LLSM)"
+        },
+        "aggregationHints": {
+          "eigenvector": "İkili karşılaştırma kriterlerinde Saaty'nin sağ temel özvektörü (A p = λmaks p); özgün AHP literatürüyle örtüşür.",
+          "geometric": "İkili karşılaştırma kriterlerinde normalize satır geometrik ortalamaları; 3 alternatifte özvektörle aynıdır ve kapalı biçimde çözülür."
         },
         "aggregationVariant": {
           "eigenvector": "özvektör",
@@ -594,6 +610,7 @@
       "methodHint": {
         "topsis": "Alternatifleri ideal ve negatif ideal çözüme olan uzaklıklarına göre sıralar.",
         "saw": "Kriterlerin ölçeklenmiş değerlerini ağırlıklandırıp toplar.",
+        "ahp-ranking": "Kriter ağırlıkları ile yerel alternatif önceliklerini (tablo payları ya da 1‑9 ikili karşılaştırmalar) birleştirerek genel öncelik P skorunu hesaplar.",
         "vikor": "En iyi toplam (S) ile en küçük en büyük pişmanlık (R) arasında uzlaşı arar; Q küçüldükçe sıra yükselir.",
         "edas": "Her alternatifi, bütün alternatiflerin ortalamasının ne kadar üstünde ya da altında olduğuna göre puanlar; AS büyüdükçe sıra yükselir.",
         "waspas": "Ağırlıklı toplamı, çok zayıf bir değeri daha sert cezalandıran ağırlıklı çarpımla karıştırır; Q büyüdükçe sıra yükselir.",
@@ -646,6 +663,11 @@
           "name": "Skor S",
           "title": "Ağırlıklı toplam S",
           "symbol": "S"
+        },
+        "ahp-ranking": {
+          "name": "Öncelik P",
+          "title": "Genel öncelik P",
+          "symbol": "P"
         },
         "vikor": {
           "name": "Uzlaşı Q",
@@ -722,6 +744,21 @@
         "distance": "Uzaklık ve uzlaşı",
         "additive": "Toplamsal ve oran",
         "outranking": "İkili üstünlük"
+      },
+      "ahp": {
+        "sourcesTitle": "Kriter bazında yerel öncelikler",
+        "sourcesHint": "Karar matrisindeki değerleri (maliyette 1 / x ile sütun toplamındaki paylar) kullanın ya da nitel kriterlerde alternatifleri 1‑9 ölçeğinde ikişer ikişer karşılaştırın.",
+        "sourceFor": "{{criterion}} için yerel öncelik kaynağı",
+        "sourceTable": "Tablodan",
+        "sourcePairwise": "İkili karşılaştırma",
+        "question": "{{criterion}} kriterinde hangisi tercih edilir?",
+        "sides": "Hangisi tercih edilir",
+        "equal": "Eşit tercih edilir",
+        "allEqual": "Tümü eşit tercih edilir",
+        "localPriorities": "Yerel öncelikler p",
+        "otherWeightsNotice": "Tam AHP çoğunlukla AHP kriter ağırlıklarıyla birlikte kullanılır.",
+        "switchToAhpWeights": "AHP ağırlıklarını kullanın",
+        "capNotice": "Alternatiflerin ikili karşılaştırması en çok {{max}} alternatifte etkindir; burada tablo değerleri kullanılır."
       }
     },
     "results": {
@@ -746,6 +783,7 @@
         "weights": "Ağırlıklar",
         "ranking": "Sıralama",
         "calculation": "Hesap",
+        "judgements": "Yargılar",
         "type": "Yön",
         "method": "Yöntem",
         "weight": "Ağırlık",
@@ -936,6 +974,11 @@
         "consistencyRatio": "Tutarlılık oranı CR",
         "weights": "Ağırlıklar w"
       },
+      "ahpRanking": {
+        "local": "Yerel öncelikler p",
+        "weighted": "Ağırlıklı öncelikler v = w p",
+        "scores": "Genel öncelik P"
+      },
       "moora": {
         "normalized": "Vektör normalize x*",
         "weighted": "Ağırlıklı oranlar v",
@@ -997,10 +1040,12 @@
     "issues": {
       "dataTitle": "Karar matrisinde sorunlar var",
       "weightsTitle": "Ağırlıklarda sorunlar var",
+      "rankingTitle": "Sıralamada sorunlar var",
       "more_one": "ve {{count}} sorun daha",
       "more_other": "ve {{count}} sorun daha",
       "goToData": "Veri aşamasına git",
-      "goToWeights": "Ağırlıklar aşamasına git"
+      "goToWeights": "Ağırlıklar aşamasına git",
+      "goToRanking": "Sıralama aşamasına git"
     },
     "chart": {
       "showTable": "Tablo olarak göster"
@@ -1339,6 +1384,11 @@
         "pairwiseMatrix": "Matris A",
         "lambdaMax": "Tutarlılık",
         "weights": "Ağırlıklar"
+      },
+      "ahp-ranking": {
+        "local": "Yerel p",
+        "weighted": "Ağırlıklı v",
+        "scores": "Öncelik P"
       },
       "moora": {
         "normalized": "Normalize",
@@ -2053,6 +2103,11 @@
       "consistencyRatio": "Tutarlılık oranı CR = CI / RI_n: CI değerini Saaty'nin rastgele indeksiyle karşılaştırır; 0,10'a kadar olağan sınırdır.",
       "weights": "AHP ağırlıkları: temel özvektör ya da satır geometrik ortalamasından elde edilen normalize öncelik vektörü."
     },
+    "ahpRanking": {
+      "local": "Yerel öncelikler p: tablodaki sütun payları (maliyette 1 / x) ya da kriterin ikili karşılaştırma matrisinin öncelik vektörü.",
+      "weighted": "Ağırlıklı yerel öncelikler v = w p: her alternatifin yerel önceliğinin kriter ağırlığıyla çarpımı.",
+      "scores": "Genel öncelik P: bir alternatifin tüm kriterlerdeki ağırlıklı yerel önceliklerinin toplamı; toplamları 1 eder."
+    },
     "moora": {
       "normalized": "Vektör normalizasyonu: her değer kendi sütununun Öklid uzunluğuna bölünür.",
       "weighted": "Ağırlıklı normalize matris v: her normalize oran kendi kriter ağırlığıyla çarpılır.",
@@ -2134,6 +2189,7 @@
       "non-positive-average": "{{criterion}} kriterinin ortalaması {{value}}. EDAS her kriterin ortalamasına böler, bu yüzden ortalama 0'dan büyük olmalı.",
       "all-worst-alternative": "{{alternative}}, ağırlığı olan her kriterde en kötü; S ve P değeri 0 olur ve CoCoSo 0'a bölerdi. Bu alternatifi çıkarın ya da başka bir yöntem seçin.",
       "judgements-incomplete": "Soruların {{value}} tanesi yanıtlandı; ağırlıkları görmek için kalanları yanıtlayın.",
+      "alt-judgements-incomplete": "{{criterion}} kriterinde {{total}} alternatif karşılaştırmasının {{value}} tanesi yanıtlandı; sıralamayı hesaplamak için kalanları yanıtlayın.",
       "anchors-missing": "Önce en iyi ve en kötü kriteri seçin."
     }
   },
@@ -2209,6 +2265,7 @@
     },
     "ahp": {
       "inconsistent": "Tutarlılık oranı CR 0,10 veya üzerinde; ağırlıklar yine de hesaplanır, ancak işaretlenen çifti kontrol edin.",
+      "inconsistent-criterion": "{{criterion}} kriterinde tutarlılık oranı CR 0,10 veya üzerinde; öncelikler yine de hesaplanır, ancak işaretlenen çifti kontrol edin.",
       "many-criteria": "8 veya daha fazla kriterde AHP en az 28 karşılaştırma ister ve tutarlılığı korumak zorlaşır; daha az soru için BWM'yi düşünebilirsiniz."
     },
     "moora": {

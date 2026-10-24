@@ -601,7 +601,7 @@ export function removeCriteria(
     const full = [...w.slice(0, j), 0, ...w.slice(j)]
     let ranking: number[] | ProblemValidationError
     try {
-      ranking = tryRank(rankFor(reduced), w)
+      ranking = tryRank(rankFor(reduced, j), w)
     } catch (err) {
       if (!(err instanceof ProblemValidationError)) throw err
       ranking = err

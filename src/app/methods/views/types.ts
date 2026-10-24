@@ -1,5 +1,6 @@
 import type { TFunction } from 'i18next'
-import type { Judgements, MethodParams, Problem, RankingResult } from '../../../core'
+import type { MethodId } from '../../../content/types'
+import type { AlternativeJudgements, Judgements, MethodParams, Problem, RankingResult } from '../../../core'
 import type { ExampleDataset } from '../../../data/examples'
 import type { JudgementExample } from '../../../data/judgementExamples'
 import type * as Geometry from '../../../features/illustrations/geometry'
@@ -7,7 +8,14 @@ import type { MethodThumbProps } from '../../../features/illustrations/MethodThu
 import type { Preloadable } from '../../preloadable'
 
 /** A method's picture on the Weights or Ranking stage, drawn on the current problem (the store's, as the core reads it). */
-export type StagePictureProps = { problem: Problem; weights: readonly number[]; params: MethodParams; judgements?: Judgements; className?: string }
+export type StagePictureProps = {
+  problem: Problem
+  weights: readonly number[]
+  params: MethodParams
+  judgements?: Judgements
+  alternativeJudgements?: AlternativeJudgements
+  className?: string
+}
 
 /** A method's picture at the top of its method page, drawn on its published example. */
 export type IdeaPictureProps = { example: ExampleDataset; problem: Problem }
@@ -40,6 +48,8 @@ export type Verdict = {
  */
 export type MethodView<K extends 'weighting' | 'ranking' = 'weighting' | 'ranking'> = {
   kind: K
+  /** Shared method card/page id when one method spans both weighting and ranking (`ahp-ranking` -> `'ahp'`). */
+  page?: MethodId | undefined
   /** The picture on the method page and the published example it is drawn on. */
   idea?: { example: string; Picture: Preloadable<IdeaPictureProps> }
   /** The same for a method that reads judgements, not a matrix (BWM): drawn on a published judgement example. */

@@ -105,13 +105,17 @@ describe('method content', () => {
 
   it('marks exactly the methods in the core registry as available', () => {
     const available = allMethods.filter((m) => m.status === 'available').map((m) => m.id).sort()
-    const registry = listMethods().map((m) => m.id).sort()
+    const registry = [...new Set(listMethods().map((m) => (m.id === 'ahp-ranking' ? 'ahp' : m.id)))].sort()
     expect(available).toEqual(registry)
     expect(available).toEqual(['ahp', 'aras', 'bwm', 'cilos', 'cocoso', 'codas', 'copras', 'critic', 'edas', 'electre-i', 'electre-iii', 'entropy', 'equal', 'lopcow', 'mabac', 'marcos', 'merec', 'moora', 'promethee-ii', 'roc', 'saw', 'sd', 'swara', 'topsis', 'vikor', 'waspas'])
   })
 
   it('gives each registry method the matching kind of family', () => {
     for (const core of listMethods()) {
+      if (core.id === 'ahp-ranking') {
+        expect(methodContent.ahp).toBeDefined()
+        continue
+      }
       const m = methodContent[core.id as keyof typeof methodContent]
       expect(m, core.id).toBeDefined()
       expect(m.family.startsWith(core.kind), core.id).toBe(true)

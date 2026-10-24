@@ -1,4 +1,4 @@
-import type { Judgements, Ratio } from './types'
+import type { AlternativeJudgements, Judgements, Ratio } from './types'
 
 /** Saaty's 17 values, ascending: 1/9 … 1/2, 1, 2 … 9. */
 export const SCALE: readonly Ratio[] = [
@@ -106,4 +106,101 @@ export function judgementsFromUpper(n: number, upper: readonly (number | null | 
       if (v !== null) j = setPair(j, i, k, v)
     }
   return j
+}
+
+const emptyPairsMatrix = (m: number): (Ratio | null)[][] =>
+  Array.from({ length: m }, (_, i) => Array.from({ length: m }, (_, k) => (i === k ? 1 : null)))
+
+export function emptyAlternativeJudgements(n: number): AlternativeJudgements {
+  return new Array<null>(n).fill(null)
+}
+
+/** Trust boundary: refit untyped input to a valid length-n AlternativeJudgements with m × m matrices. */
+export function sanitizeAlternativeJudgements(raw: unknown, m: number, n: number): AlternativeJudgements {
+  const arr = Array.isArray(raw) ? raw : []
+  return Array.from({ length: n }, (_, j) => {
+    const mat = arr[j]
+    if (!Array.isArray(mat)) return null
+    const out = emptyPairsMatrix(m)
+    for (let i = 0; i < m; i++)
+      for (let k = i + 1; k < m; k++) {
+        const row = mat[i]
+        const v = toScale(Array.isArray(row) ? row[k] : undefined)
+        if (v !== null) {
+          out[i]![k] = v
+          out[k]![i] = reciprocal(v)
+        }
+      }
+    return out
+  })
+}
+
+/** Remap alternative judgements across both criteria (`critMap`) and alternatives (`altMap` of length `nextM`). */
+export function remapAlternativeJudgements(
+  old: AlternativeJudgements | undefined,
+  critMap: readonly (number | undefined)[],
+  altMap: readonly (number | undefined)[],
+  nextM: number,
+): AlternativeJudgements {
+  const maps = altMap.slice(0, nextM)
+  while (maps.length < nextM) maps.push(undefined)
+  return critMap.map((oldJ) => {
+    if (oldJ === undefined) return null
+    const oldMat = old?.[oldJ]
+    if (!oldMat) return null
+    const out = emptyPairsMatrix(nextM)
+    for (let a = 0; a < nextM; a++) {
+      const oa = maps[a]
+      if (oa === undefined) continue
+      for (let b = a + 1; b < nextM; b++) {
+        const ob = maps[b]
+        if (ob === undefined) continue
+        const v = toScale(oldMat[oa]?.[ob])
+        if (v !== null) {
+          out[a]![b] = v
+          out[b]![a] = reciprocal(v)
+        }
+      }
+    }
+    return out
+  })
+}
+
+/** Sets criterion `col` to `'table'` / `'matrix'` (`null`) or `'pairwise'` (preserving an existing m × m matrix if present). */
+export function setAlternativeSource(
+  current: AlternativeJudgements | undefined,
+  m: number,
+  n: number,
+  col: number,
+  source: 'table' | 'matrix' | 'pairwise',
+): AlternativeJudgements {
+  const base = sanitizeAlternativeJudgements(current, m, n)
+  return base.map((mat, j) => {
+    if (j !== col) return mat
+    if (source !== 'pairwise') return null
+    return mat && mat.length === m ? mat.map((row) => row.slice()) : emptyPairsMatrix(m)
+  })
+}
+
+/** Writes [i][k] = value and [k][i] = 1 / value on criterion `col`'s m × m matrix. */
+export function setAlternativePair(
+  current: AlternativeJudgements | undefined,
+  m: number,
+  n: number,
+  col: number,
+  i: number,
+  k: number,
+  value: Ratio | null,
+): AlternativeJudgements {
+  const base = sanitizeAlternativeJudgements(current, m, n)
+  return base.map((mat, j) => {
+    if (j !== col) return mat
+    const next = mat && mat.length === m ? mat.map((row) => row.slice()) : emptyPairsMatrix(m)
+    if (i >= 0 && i < m && k >= 0 && k < m && i !== k) {
+      const v = value === null ? null : (toScale(value) ?? value)
+      next[i]![k] = v
+      next[k]![i] = v === null ? null : reciprocal(v)
+    }
+    return next
+  })
 }

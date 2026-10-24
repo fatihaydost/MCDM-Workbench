@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { getExample } from '../../data/examples'
 import { useLang } from '../../i18n'
 import { compareRankings, getRankingMethod, rankingMethods } from '../../core'
-import { isEmptyProblem, paramsFor, STAGES, toProblem, useMethodParams, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
+import { isEmptyProblem, runFor, STAGES, toProblem, useMethodParams, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
 import { Skeleton } from '../../ui'
 import { usePageMeta } from '../landing/usePageMeta'
 import { methodViews, preloadStagePictures } from '../methods/views'
@@ -226,19 +226,24 @@ export default function WorkbenchPage() {
 
   // How often first place survives the ±5/10/20 % nudges of each weight, once the robustness chunk has loaded.
   const rankingParams = useMethodParams(rankingMethod)
+  const methodParams = useWorkbench((s) => s.methodParams)
+  const alternativeJudgements = useWorkbench((s) => s.alternativeJudgements)
   const robustness = useMemo(() => {
     if (!robustnessSummary || !getRankingMethod(rankingMethod) || !weights.value || !ranking.value) return null
     // The rail line is outside the stage's error boundary: a failure here hides the line, never the page.
     try {
-      return robustnessSummary(toProblem(problem), weights.value.weights, { methodId: rankingMethod, params: rankingParams })
+      return robustnessSummary(
+        toProblem(problem),
+        weights.value.weights,
+        runFor({ methodParams, alternativeJudgements }, rankingMethod),
+      )
     } catch (err) {
       console.error(err)
       return null
     }
-  }, [robustnessSummary, rankingMethod, rankingParams, problem, weights.value, ranking.value])
+  }, [robustnessSummary, rankingMethod, methodParams, alternativeJudgements, problem, weights.value, ranking.value])
 
   // The rail line: the alternative most methods put first, from every ranking method on the same weights.
-  const methodParams = useWorkbench((s) => s.methodParams)
   const weightValues = weights.value?.weights
   const comparison = useMemo(
     () =>
@@ -246,10 +251,10 @@ export default function WorkbenchPage() {
         ? compareRankings(
             toProblem(problem),
             weightValues,
-            rankingMethods.map((m) => ({ methodId: m.id, params: paramsFor({ methodParams }, m.id) })),
+            rankingMethods.map((m) => runFor({ methodParams, alternativeJudgements }, m.id)),
           )
         : null,
-    [problem, weightValues, methodParams],
+    [problem, weightValues, methodParams, alternativeJudgements],
   )
 
   const stageMeta: Partial<Record<Stage, ReactNode>> = {}

@@ -6,25 +6,58 @@
  * once, so it never adds a second agreeing vote.
  */
 import { isConstant, maxOf, minOf } from './math'
+import { AHP_MAX_PAIRWISE_ALTERNATIVES } from './methods/ahp'
 import { rankScores } from './rank'
+import type { RankingId } from './registry'
 import { midRanks } from './robustness'
 import { prepareRanking, type RankingRun } from './run'
 import type { Problem, RankingResult } from './types'
 import type { ValidationIssue } from './validate'
 
+/** Registry order, with AHP and MARCOS right after SAW so their echo lines sit adjacent. */
+export const COMPARE_ORDER: readonly RankingId[] = [
+  'topsis',
+  'saw',
+  'ahp-ranking',
+  'marcos',
+  'vikor',
+  'edas',
+  'waspas',
+  'copras',
+  'cocoso',
+  'mabac',
+  'moora',
+  'aras',
+  'codas',
+  'promethee-ii',
+  'electre-i',
+  'electre-iii',
+]
+
 export type MethodRun = { methodId: string; result: RankingResult | null; issues: ValidationIssue[] }
 
-/** A ranked method that always orders like another ranked run, and that run (MARCOS = c x SAW 'linearMax'). */
+/** A ranked method that always orders like another ranked run, and that run (MARCOS = c x SAW 'linearMax', AHP = SAW 'sum'). */
 export type Echo = { methodId: string; of: string }
 
 /**
  * MARCOS with data-derived ideal rows is SAW 'linearMax' times one constant (docs/research/methods/marcos.md, step 7),
- * so it echoes SAW when SAW ran with that option. SAW 'sum' can order differently: no echo then.
+ * so it echoes SAW when SAW ran with that option.
+ * AHP with all criteria from the decision matrix uses SAW 'sum' local priorities, so it echoes SAW when SAW ran with
+ * 'sum' and no criterion has active pairwise alternative comparisons (m <= 7).
  */
-function findEchoes(runs: readonly RankingRun[], ranked: ReadonlySet<string>): Echo[] {
-  const sawRun = runs.find((r) => r.methodId === 'saw')
-  const linear = (sawRun?.params.normalization ?? 'linearMax') === 'linearMax'
-  return ranked.has('marcos') && ranked.has('saw') && linear ? [{ methodId: 'marcos', of: 'saw' }] : []
+function findEchoes(runs: readonly RankingRun[], ranked: ReadonlySet<string>, m: number): Echo[] {
+  const echoes: Echo[] = []
+  if (ranked.has('marcos') && ranked.has('saw')) {
+    const linear = runs.some((r) => r.methodId === 'saw' && (r.params.normalization ?? 'linearMax') === 'linearMax')
+    if (linear) echoes.push({ methodId: 'marcos', of: 'saw' })
+  }
+  if (ranked.has('ahp-ranking') && ranked.has('saw')) {
+    const sawSum = runs.some((r) => r.methodId === 'saw' && r.params.normalization === 'sum')
+    const ahpRun = runs.find((r) => r.methodId === 'ahp-ranking')
+    const hasPairwise = m <= AHP_MAX_PAIRWISE_ALTERNATIVES && Boolean(ahpRun?.judgements?.some((mat) => mat != null))
+    if (sawSum && !hasPairwise) echoes.push({ methodId: 'ahp-ranking', of: 'saw' })
+  }
+  return echoes
 }
 
 export type Comparison = {
@@ -79,7 +112,7 @@ export function compareRankings(problem: Problem, weights: number[], runs: Ranki
     return { methodId: run.methodId, result: res.value, issues: res.issues }
   })
   const done = results.filter((r): r is MethodRun & { result: RankingResult } => r.result !== null)
-  const echoes = findEchoes(runs, new Set(done.map((r) => r.methodId)))
+  const echoes = findEchoes(runs, new Set(done.map((r) => r.methodId)), problem.alternatives.length)
   const counted = done.filter((r) => !echoes.some((e) => e.methodId === r.methodId))
   const rankings = counted.map((r) => r.result.ranking)
   const comparable = counted.length >= 2

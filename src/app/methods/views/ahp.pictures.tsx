@@ -1,10 +1,13 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AHP_CR_THRESHOLD, ahpProgress, type AhpParams } from '../../../core'
 import { AHP_IDEA_STEPS, AhpMatrix, type AhpMatrixLabels } from '../../../features/illustrations/AhpMatrix'
+import { ahpRankingParts } from '../../../features/illustrations/geometry'
 import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
+import { SawContributions } from '../../../features/illustrations/SawContributions'
 import { useNumberFormat } from '../../../i18n'
-import { DECIMALS } from '../../workbench/shared'
+import { cn } from '../../../ui'
+import { DECIMALS, scoreWords } from '../../workbench/shared'
 import { IdeaSource, useStepLabels } from './parts'
 import type { JudgementIdeaProps, StagePictureProps } from './types'
 
@@ -76,5 +79,35 @@ export function Idea({ example, criteria }: JudgementIdeaProps) {
       <IdeaSteps control={steps} sentences={sentences} labels={stepLabels} />
       <IdeaSource example={example} />
     </div>
+  )
+}
+
+/** Ranking stage: each alternative's global priority P_i as a stack of its weighted local priorities w_j p_ij. */
+export function RankingStage({ problem, weights, params, alternativeJudgements, className }: StagePictureProps) {
+  const { t } = useTranslation()
+  const nf = useNumberFormat(DECIMALS.score)
+  const format = useCallback((v: number) => nf.format(v), [nf])
+  const parts = useMemo(
+    () => ahpRankingParts(problem, weights, (params as AhpParams | undefined) ?? {}, alternativeJudgements),
+    [problem, weights, params, alternativeJudgements],
+  )
+  return (
+    <SawContributions
+      problem={problem}
+      weights={weights}
+      parts={parts}
+      format={format}
+      labels={{
+        title: t('workbench.visual.saw.title'),
+        showTable: t('workbench.chart.showTable'),
+        alternative: t('workbench.alternative'),
+        score: scoreWords('ahp-ranking', t).name,
+        legend: t('workbench.visual.saw.legend'),
+        others: t('workbench.visual.saw.others'),
+        segment: (alternative, criterion, value, score) => t('workbench.visual.saw.segment', { alternative, criterion, value, score }),
+        readout: (alternative, criterion, value, score) => t('workbench.visual.saw.readout', { alternative, criterion, value, score }),
+      }}
+      className={cn('max-w-[760px]', className)}
+    />
   )
 }
