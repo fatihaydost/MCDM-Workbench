@@ -1,9 +1,10 @@
 # Typecheck, test and build, then publish dist/ to GitHub Pages.
-# Manual only for now (workflow_dispatch); re-add `push: branches: [main]` to deploy on every push.
 # One-time setup: repository Settings -> Pages -> Source: GitHub Actions.
 name: Pages
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
