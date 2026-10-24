@@ -728,6 +728,47 @@ export const examples: readonly ExampleDataset[] = [
     // Table 12 as printed.
     published: [{ label: 'mabac.scores', values: [0.0826, 0.2183, -0.0488, 0.0246, -0.0704, 0.0465, 0.0464], decimals: 4 }],
   },
+  {
+    id: 'brauers-zavadskas-2010-projects',
+    name: { en: 'Transition projects (Brauers and Zavadskas 2010)', tr: 'Geçiş ekonomisi projeleri (Brauers ve Zavadskas 2010)' },
+    summary: {
+      en: 'Three transition-economy projects on nine objectives, Payback period and Risk the two costs, with equal weights: the worked MOORA example of Brauers and Zavadskas (2010, Appendix C).',
+      tr: 'Geçiş ekonomisi için üç proje, Geri ödeme süresi ve Riskin iki maliyet olduğu dokuz amaç, eşit ağırlıkla: Brauers ve Zavadskas (2010, Ek C) çözümlü MOORA örneği.',
+    },
+    referenceFor: ['moora'],
+    citation: {
+      authors: 'Brauers, W.K.M.; Zavadskas, E.K.',
+      year: 2010,
+      title: 'Project management by MULTIMOORA as an instrument for transition economies',
+      venue: 'Technological and Economic Development of Economy 16(1), 5-24',
+      doi: '10.3846/tede.2010.01',
+      tables: { en: 'Appendix C, Table 2 (2a input, 2b-2c output)', tr: 'Ek C, Tablo 2 (2a girdi, 2b-2c çıktı)' },
+    },
+    alternatives: ['Project A', 'Project B', 'Project C'],
+    localAlternatives: { tr: ['Proje A', 'Proje B', 'Proje C'] },
+    criteria: [
+      { name: { en: 'NPV', tr: 'Net bugünkü değer (NPV)' }, type: 'benefit' },
+      { name: { en: 'IRR (%)', tr: 'İç verim oranı (%)' }, type: 'benefit' },
+      { name: { en: 'Payback period (yr)', tr: 'Geri ödeme süresi (yıl)' }, type: 'cost' },
+      { name: { en: 'Government income', tr: 'Kamu geliri' }, type: 'benefit' },
+      { name: { en: 'Employment', tr: 'İstihdam' }, type: 'benefit' },
+      { name: { en: 'Value added', tr: 'Katma değer' }, type: 'benefit' },
+      { name: { en: 'Risk', tr: 'Risk' }, type: 'cost' },
+      { name: { en: 'Balance of payments', tr: 'Ödemeler dengesi' }, type: 'benefit' },
+      { name: { en: 'Investment', tr: 'Yatırım' }, type: 'benefit' },
+    ],
+    matrix: [
+      [1, 14, 9, 200, 600, 20, 20, 3.5, 2.5],
+      [1.6, 16, 7, 150, 800, 13.5, 25, 4, 1.5],
+      [2, 17, 5, 80, 1200, 10, 30, 3.8, 1.25],
+    ],
+    equalWeights: true,
+    // Appendix C Table 2c prints unweighted y* = [2.93480, 2.723, 2.698]; under equal weights w_j = 1/9, y = y* / 9.
+    published: [
+      { label: 'moora.score', values: [0.3261, 0.3026, 0.2998], decimals: 4 },
+      { label: 'moora.unweighted', values: [2.9348, 2.723, 2.698], decimals: 4 },
+    ],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

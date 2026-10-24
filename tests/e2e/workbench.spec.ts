@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { cocoso, copras, critic, edas, entropy, mabac, marcos, merec, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
+import { cocoso, copras, critic, edas, entropy, mabac, marcos, merec, moora, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -816,15 +816,34 @@ test('MABAC: the method page opens the forklifts with MABAC; S matches the paper
   await expect(page.getByTestId('mabac-row')).toHaveCount(7)
 })
 
-test('the ranking control is three full rows of three at 375 px', async ({ page }) => {
+test('MOORA: the method page opens the transition projects with MOORA and equal weights; y matches the paper', async ({ page }) => {
+  const ex = getExample('brauers-zavadskas-2010-projects')!
+  const p = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const w = new Array<number>(ex.criteria.length).fill(1 / ex.criteria.length)
+  const res = moora.compute(p, w, {})
+
+  await page.goto('/methods/moora')
+  await expect(page.getByTestId('moora-idea')).toBeVisible()
+  await expect(page.getByTestId('moora-row')).toHaveCount(3)
+  await page.getByRole('link', { name: /Open in workbench/ }).first().click()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(stageHeading(page, 'Ranking')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'MOORA' })).toHaveAttribute('aria-checked', 'true')
+  const published = ex.published.find((x) => x.label === 'moora.score')!.values as number[]
+  res.scores.forEach((v, i) => expect(Math.abs(v - published[i]!)).toBeLessThanOrEqual(1e-4))
+  await expect(page.getByTestId('best-sentence')).toHaveText(`Project A ranks first (y = ${f4(res.scores[0]!)}).`)
+  await expect(page.getByTestId('moora-row')).toHaveCount(3)
+})
+
+test('the ranking control is two full rows of five at 375 px', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await page.goto('/app?example=pamucar-cirovic-2015-forklifts&stage=ranking')
   const radios = page.locator('[aria-label="Ranking method"]').getByRole('radio')
-  await expect(radios).toHaveCount(9)
+  await expect(radios).toHaveCount(10)
   const boxes = await radios.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).map((r) => ({ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) })))
   const rows = [...new Set(boxes.map((b) => b.y))]
-  expect(rows).toHaveLength(3)
-  for (const y of rows) expect(boxes.filter((b) => b.y === y)).toHaveLength(3)
+  expect(rows).toHaveLength(2)
+  for (const y of rows) expect(boxes.filter((b) => b.y === y)).toHaveLength(5)
   const widths = new Set(boxes.map((b) => b.w))
   expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(1)
   for (const b of boxes) expect(b.x + b.w).toBeLessThanOrEqual(375)

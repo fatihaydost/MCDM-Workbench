@@ -137,6 +137,9 @@
       },
       "ahp": {
         "claim": "Eigenvector weights and consistency ratios match {{citation}} to {{decimals}} decimals."
+      },
+      "moora": {
+        "claim": "All nine column norms, every normalized cell and the three ratio-system scores match {{citation}} to {{decimals}} decimals, with the same three ranks."
       }
     },
     "catalogue": {
@@ -230,7 +233,8 @@
       "copras": "COPRAS",
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
-      "mabac": "MABAC"
+      "mabac": "MABAC",
+      "moora": "MOORA"
     },
     "params": {
       "entropy": {
@@ -443,7 +447,8 @@
         "copras": "Adds up each alternative's weighted share of the benefit criteria plus a bonus that grows as its cost share shrinks; a higher Q is better.",
         "marcos": "Measures each weighted total against an imaginary ideal and anti-ideal row; a higher f(K) is better, in the same order as SAW (Linear).",
         "cocoso": "Reads a weighted sum S and a power sum P three ways and combines them; a higher k is better. Zeros and negative values are allowed.",
-        "mabac": "Adds up how far each alternative lies above or below a border, the geometric mean of every criterion; a higher S is better, in the same order as a min-max weighted sum. Zeros and negative values are allowed."
+        "mabac": "Adds up how far each alternative lies above or below a border, the geometric mean of every criterion; a higher S is better, in the same order as a min-max weighted sum. Zeros and negative values are allowed.",
+        "moora": "Divides each value by the Euclidean length of its column, adds the weighted benefit ratios and subtracts the weighted cost ratios; a higher y is better. Zeros and negative values are allowed."
       },
       "columns": {
         "rank": "Rank",
@@ -458,7 +463,9 @@
         "wpm": "Product Q2",
         "utility": "Utility degree N (%)",
         "weightedSum": "Weighted sum S",
-        "powerSum": "Power sum P"
+        "powerSum": "Power sum P",
+        "benefitSum": "Benefit sum S+",
+        "costSum": "Cost sum S-"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -506,6 +513,11 @@
           "name": "Distance to border S",
           "title": "MABAC distance to border S",
           "symbol": "S"
+        },
+        "moora": {
+          "name": "Net score y",
+          "title": "MOORA net assessment y",
+          "symbol": "y"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -714,6 +726,13 @@
         "consistencyIndex": "Consistency index CI",
         "consistencyRatio": "Consistency ratio CR",
         "weights": "Weights w"
+      },
+      "moora": {
+        "normalized": "Vector-normalized x*",
+        "weighted": "Weighted ratios v",
+        "benefitSum": "Benefit sum S+",
+        "costSum": "Cost sum S-",
+        "score": "Net score y"
       }
     },
     "issues": {
@@ -897,6 +916,21 @@
         "fitted": "Fitted w_i / w_k",
         "weight": "Weight",
         "flagged": "Largest gap"
+      },
+      "moora": {
+        "title": "Benefit sum minus cost sum",
+        "benefitHead": "Benefit sum: S+",
+        "costHead": "Cost sum: S-",
+        "zero": "Zero",
+        "legend": "Criteria",
+        "others": "Other criteria",
+        "caption": "Right of the zero line: weighted benefit ratios adding to S+; left: weighted cost ratios adding to S-; y = S+ - S-.",
+        "segmentBenefit": "{{alternative}}, {{criterion}}: +{{value}} benefit ratio (y = {{score}})",
+        "segmentCost": "{{alternative}}, {{criterion}}: -{{value}} cost ratio (y = {{score}})",
+        "segmentZero": "{{alternative}}, {{criterion}}: 0 contribution (y = {{score}})",
+        "readoutBenefit": "{{alternative}}: {{criterion}} adds {{value}} to S+",
+        "readoutCost": "{{alternative}}: {{criterion}} subtracts {{value}} via S-",
+        "readoutZero": "{{alternative}}: {{criterion}} contributes 0"
       }
     },
     "flow": {
@@ -991,6 +1025,12 @@
         "pairwiseMatrix": "Matrix A",
         "lambdaMax": "Consistency",
         "weights": "Weights"
+      },
+      "moora": {
+        "normalized": "Normalize",
+        "weighted": "Weight",
+        "benefitSum": "S+ and S-",
+        "score": "y"
       }
     },
     "pipeline": {
@@ -1077,7 +1117,8 @@
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
       "bwm": "BWM",
-      "ahp": "AHP"
+      "ahp": "AHP",
+      "moora": "MOORA"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1142,7 +1183,8 @@
         "cocoso": "Three readings of a sum and a power sum, combined.",
         "mabac": "Distance above or below a border per criterion.",
         "bwm": "Weights from your answers to a few comparisons.",
-        "ahp": "Weights from comparing every pair of criteria."
+        "ahp": "Weights from comparing every pair of criteria.",
+        "moora": "Benefit ratios minus cost ratios after vector normalization."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1395,6 +1437,15 @@
             "s3": "AHP finds the weights that fit the table best (the principal eigenvector) and draws them as bars.",
             "s4": "Where an answer and its fitted ratio disagree most, the cell is marked; the consistency ratio CR summarizes all disagreements against the 0.10 limit."
           }
+        },
+        "moora": {
+          "title": "Benefit ratios pulling right, cost ratios pulling left",
+          "caption": "Right of the zero line: weighted benefit ratios adding to S+; left: weighted cost ratios adding to S-; y = S+ - S-.",
+          "steps": {
+            "s1": "Normalize: divide each value by its column length, benefit ratios to the right of 0 and cost ratios to the left.",
+            "s2": "Weight: multiply each ratio by its criterion weight; the stacks end at S+ and S-.",
+            "s3": "Subtract: y = S+ - S- is the net score, and the highest y ranks first."
+          }
         }
       }
     }
@@ -1537,6 +1588,13 @@
       "consistencyIndex": "Consistency index CI = (λmax - n) / (n - 1): 0 when the comparisons are perfectly consistent.",
       "consistencyRatio": "Consistency ratio CR = CI / RI_n: compares CI against Saaty's random index; up to 0.10 is the usual limit.",
       "weights": "AHP weights: the normalized priority vector from the principal eigenvector or the row geometric mean."
+    },
+    "moora": {
+      "normalized": "Vector normalization: each value divided by the Euclidean length of its column.",
+      "weighted": "Weighted normalized matrix v: each normalized ratio multiplied by its criterion weight.",
+      "benefitSum": "Benefit sum S+: the weighted ratios of the benefit criteria, added up.",
+      "costSum": "Cost sum S-: the weighted ratios of the cost criteria, added up.",
+      "score": "Net assessment score y = S+ - S-. A higher value ranks higher, and negative values are normal when cost weights dominate."
     }
   },
   "validation": {
@@ -1631,6 +1689,9 @@
     "ahp": {
       "inconsistent": "The consistency ratio CR is at or above 0.10; check the highlighted pair, though the weights are still computed.",
       "many-criteria": "With 8 or more criteria AHP asks at least 28 comparisons and consistency is harder to keep; consider BWM for fewer questions."
+    },
+    "moora": {
+      "zero-column": "Every value of {{criterion}} is 0, so it does not affect the ranking."
     }
   }
 }

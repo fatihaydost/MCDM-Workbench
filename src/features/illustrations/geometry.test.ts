@@ -8,6 +8,7 @@ import {
   argMax,
   coprasParts,
   marcosParts,
+  mooraParts,
   divergingSegments,
   edasParts,
   isoQRegion,
@@ -475,5 +476,21 @@ describe('lineCrossings', () => {
   it('a 0 at an end is not a crossing', () => {
     expect(lineCrossings(xs, [1, 2, 3, 4], [1, 1, 1, 1])).toEqual([])
     expect(lineCrossings(xs, [1, 2, 3, 0], [0, 0, 0, 0])).toEqual([])
+  })
+})
+
+describe('MOORA parts', () => {
+  const ex = getExample('brauers-zavadskas-2010-projects')!
+  const p: Problem = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const w = new Array<number>(ex.criteria.length).fill(1 / ex.criteria.length)
+  it('splits weighted ratios into benefit and cost stacks summing to S+ and S-, rows in rank order', () => {
+    const parts = mooraParts(p, w)!
+    expect(parts.order.map((i) => ex.alternatives[i])).toEqual(['Project A', 'Project B', 'Project C'])
+    parts.benefit.forEach((row, i) => expect(row.reduce((a, b) => a + b, 0)).toBeCloseTo(parts.sPlus[i]!, 14))
+    parts.cost.forEach((row, i) => expect(row.reduce((a, b) => a + b, 0)).toBeCloseTo(parts.sMinus[i]!, 14))
+    parts.scores.forEach((y, i) => expect(parts.sPlus[i]! - parts.sMinus[i]!).toBeCloseTo(y, 14))
+  })
+  it('returns null when MOORA cannot run', () => {
+    expect(mooraParts({ ...p, matrix: p.matrix.slice(0, 1), alternatives: ['Project A'] }, w)).toBeNull()
   })
 })

@@ -10,6 +10,7 @@ import { maxOf } from '../../core/math'
 import { entropy, type EntropyParams } from '../../core/methods/entropy'
 import { lopcow } from '../../core/methods/lopcow'
 import { merec } from '../../core/methods/merec'
+import { moora } from '../../core/methods/moora'
 import { sd } from '../../core/methods/sd'
 import { saw, type SawParams } from '../../core/methods/saw'
 import { topsis } from '../../core/methods/topsis'
@@ -795,3 +796,55 @@ export function lineCrossings(xs: readonly number[], a: readonly number[], b: re
   }
   return out
 }
+
+// ---------------------------------------------------------------------------------------------
+// MOORA
+// ---------------------------------------------------------------------------------------------
+
+export type MooraParts = {
+  result: RankingResult
+  /** Vector-normalized matrix x*_ij ('moora.normalized'). */
+  normalized: number[][]
+  /** Weighted normalized matrix v_ij = w_j x*_ij ('moora.weighted'). */
+  weighted: number[][]
+  /** Benefit contributions per alternative and criterion (v_ij for benefit criteria, 0 for cost). */
+  benefit: number[][]
+  /** Cost contributions per alternative and criterion (v_ij for cost criteria, 0 for benefit). */
+  cost: number[][]
+  /** Benefit sum S+_i ('moora.benefitSum'). */
+  sPlus: number[]
+  /** Cost sum S-_i ('moora.costSum'). */
+  sMinus: number[]
+  /** Net assessment score y_i = S+_i - S-_i. */
+  scores: number[]
+  /** Alternatives in rank order (ties keep input order). */
+  order: number[]
+}
+
+/** The core's MOORA result for its diverging benefit-minus-cost picture, or null when MOORA cannot run. */
+export function mooraParts(problem: Problem, weights: readonly number[]): MooraParts | null {
+  let result: RankingResult
+  try {
+    result = moora.compute(problem, [...weights], {})
+  } catch {
+    return null
+  }
+  const normalized = stepMatrix(result.steps, 'moora.normalized')
+  const weighted = stepMatrix(result.steps, 'moora.weighted')
+  const isCost = problem.criteria.map((c) => c.type === 'cost')
+  const benefit = weighted.map((row) => row.map((v, j) => (isCost[j] ? 0 : Math.max(0, v))))
+  const cost = weighted.map((row) => row.map((v, j) => (isCost[j] ? Math.max(0, v) : 0)))
+  const order = result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b)
+  return {
+    result,
+    normalized,
+    weighted,
+    benefit,
+    cost,
+    sPlus: stepVector(result.steps, 'moora.benefitSum'),
+    sMinus: stepVector(result.steps, 'moora.costSum'),
+    scores: result.scores,
+    order,
+  }
+}
+

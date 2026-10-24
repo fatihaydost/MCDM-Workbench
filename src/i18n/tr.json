@@ -137,6 +137,9 @@
       },
       "ahp": {
         "claim": "Özvektör ağırlıkları ve tutarlılık oranları {{citation}} ile {{decimals}} basamağa kadar aynı."
+      },
+      "moora": {
+        "claim": "Dokuz sütun normunun tamamı, her normalize hücre ve üç oran sistemi skoru {{citation}} ile {{decimals}} basamağa kadar aynı, üç sıra da aynı."
       }
     },
     "catalogue": {
@@ -230,7 +233,8 @@
       "copras": "COPRAS",
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
-      "mabac": "MABAC"
+      "mabac": "MABAC",
+      "moora": "MOORA"
     },
     "params": {
       "entropy": {
@@ -443,7 +447,8 @@
         "copras": "Her alternatifin fayda kriterlerindeki ağırlıklı payını toplar, maliyet payı küçüldükçe büyüyen bir puan ekler; Q büyüdükçe sıra yükselir.",
         "marcos": "Her ağırlıklı toplamı hayali bir ideal ve anti-ideal satırla ölçer; f(K) büyüdükçe sıra yükselir, sıra SAW (Doğrusal) ile aynıdır.",
         "cocoso": "Ağırlıklı toplam S ile üs toplamı P'yi üç biçimde okuyup birleştirir; k büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
-        "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir."
+        "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir.",
+        "moora": "Her değeri sütununun Öklid uzunluğuna böler, ağırlıklı fayda oranlarını toplar ve ağırlıklı maliyet oranlarını çıkarır; y büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir."
       },
       "columns": {
         "rank": "Sıra",
@@ -458,7 +463,9 @@
         "wpm": "Çarpım Q2",
         "utility": "Fayda derecesi N (%)",
         "weightedSum": "Ağırlıklı toplam S",
-        "powerSum": "Üs toplamı P"
+        "powerSum": "Üs toplamı P",
+        "benefitSum": "Fayda toplamı S+",
+        "costSum": "Maliyet toplamı S-"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -506,6 +513,11 @@
           "name": "Sınıra uzaklık S",
           "title": "MABAC sınıra uzaklık S",
           "symbol": "S"
+        },
+        "moora": {
+          "name": "Net skor y",
+          "title": "MOORA net değerlendirme y",
+          "symbol": "y"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -714,6 +726,13 @@
         "consistencyIndex": "Tutarlılık indeksi CI",
         "consistencyRatio": "Tutarlılık oranı CR",
         "weights": "Ağırlıklar w"
+      },
+      "moora": {
+        "normalized": "Vektör normalize x*",
+        "weighted": "Ağırlıklı oranlar v",
+        "benefitSum": "Fayda toplamı S+",
+        "costSum": "Maliyet toplamı S-",
+        "score": "Net skor y"
       }
     },
     "issues": {
@@ -897,6 +916,21 @@
         "fitted": "Uydurulan w_i / w_k",
         "weight": "Ağırlık",
         "flagged": "En büyük fark"
+      },
+      "moora": {
+        "title": "Fayda toplamı eksi maliyet toplamı",
+        "benefitHead": "Fayda toplamı: S+",
+        "costHead": "Maliyet toplamı: S-",
+        "zero": "Sıfır",
+        "legend": "Kriterler",
+        "others": "Diğer kriterler",
+        "caption": "Sıfır çizgisinin sağı S+'ya eklenen ağırlıklı fayda oranları, solu S-'ye eklenen ağırlıklı maliyet oranları; y = S+ - S-.",
+        "segmentBenefit": "{{alternative}}, {{criterion}}: +{{value}} fayda oranı (y = {{score}})",
+        "segmentCost": "{{alternative}}, {{criterion}}: -{{value}} maliyet oranı (y = {{score}})",
+        "segmentZero": "{{alternative}}, {{criterion}}: 0 katkı (y = {{score}})",
+        "readoutBenefit": "{{alternative}}: {{criterion}}, S+ değerine {{value}} ekler",
+        "readoutCost": "{{alternative}}: {{criterion}}, S- üzerinden {{value}} düşer",
+        "readoutZero": "{{alternative}}: {{criterion}} katkısı 0"
       }
     },
     "flow": {
@@ -991,6 +1025,12 @@
         "pairwiseMatrix": "Matris A",
         "lambdaMax": "Tutarlılık",
         "weights": "Ağırlıklar"
+      },
+      "moora": {
+        "normalized": "Normalize",
+        "weighted": "Ağırlıklandır",
+        "benefitSum": "S+ ve S-",
+        "score": "y"
       }
     },
     "pipeline": {
@@ -1077,7 +1117,8 @@
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
       "bwm": "BWM",
-      "ahp": "AHP"
+      "ahp": "AHP",
+      "moora": "MOORA"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1142,7 +1183,8 @@
         "cocoso": "Bir toplamın ve bir üs toplamının üç okuması, birleşik.",
         "mabac": "Her kriterde bir sınırın üstüne ya da altına uzaklık.",
         "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar.",
-        "ahp": "Her kriter çiftini karşılaştırarak ağırlık."
+        "ahp": "Her kriter çiftini karşılaştırarak ağırlık.",
+        "moora": "Vektör normalizasyonu sonrası fayda oranları eksi maliyet oranları."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1395,6 +1437,15 @@
             "s3": "AHP tabloya en iyi uyan ağırlıkları (temel özvektör) bulur ve çubuk olarak çizer.",
             "s4": "Bir yanıt ile uydurulan oran en çok nerede ayrışıyorsa hücre işaretlenir; tutarlılık oranı CR tüm ayrışmaları 0,10 sınırına göre özetler."
           }
+        },
+        "moora": {
+          "title": "Fayda oranları sağa, maliyet oranları sola çeker",
+          "caption": "Sıfır çizgisinin sağı S+'ya eklenen ağırlıklı fayda oranları, solu S-'ye eklenen ağırlıklı maliyet oranları; y = S+ - S-.",
+          "steps": {
+            "s1": "Normalizasyon: her değeri sütun uzunluğuna bölün; fayda oranları 0'ın sağına, maliyet oranları soluna yerleşir.",
+            "s2": "Ağırlıklandırma: her oranı kriter ağırlığıyla çarpın; yığınlar S+ ve S- değerlerinde biter.",
+            "s3": "Çıkarma: y = S+ - S- net skordur ve en yüksek y birinci sırada yer alır."
+          }
         }
       }
     }
@@ -1537,6 +1588,13 @@
       "consistencyIndex": "Tutarlılık indeksi CI = (λmaks - n) / (n - 1): karşılaştırmalar tam tutarlı olduğunda 0'dır.",
       "consistencyRatio": "Tutarlılık oranı CR = CI / RI_n: CI değerini Saaty'nin rastgele indeksiyle karşılaştırır; 0,10'a kadar olağan sınırdır.",
       "weights": "AHP ağırlıkları: temel özvektör ya da satır geometrik ortalamasından elde edilen normalize öncelik vektörü."
+    },
+    "moora": {
+      "normalized": "Vektör normalizasyonu: her değer kendi sütununun Öklid uzunluğuna bölünür.",
+      "weighted": "Ağırlıklı normalize matris v: her normalize oran kendi kriter ağırlığıyla çarpılır.",
+      "benefitSum": "Fayda toplamı S+: fayda kriterlerinin ağırlıklı oranları toplanır.",
+      "costSum": "Maliyet toplamı S-: maliyet kriterlerinin ağırlıklı oranları toplanır.",
+      "score": "Net değerlendirme skoru y = S+ - S-. Değer büyüdükçe sıra yükselir; maliyet ağırlıkları baskın olduğunda negatif değerler normaldir."
     }
   },
   "validation": {
@@ -1631,6 +1689,9 @@
     "ahp": {
       "inconsistent": "Tutarlılık oranı CR 0,10 veya üzerinde; ağırlıklar yine de hesaplanır, ancak işaretlenen çifti kontrol edin.",
       "many-criteria": "8 veya daha fazla kriterde AHP en az 28 karşılaştırma ister ve tutarlılığı korumak zorlaşır; daha az soru için BWM'yi düşünebilirsiniz."
+    },
+    "moora": {
+      "zero-column": "{{criterion}} kriterinin bütün değerleri 0, bu yüzden sıralamayı etkilemiyor."
     }
   }
 }

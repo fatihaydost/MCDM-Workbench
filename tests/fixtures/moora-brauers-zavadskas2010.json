@@ -1,0 +1,127 @@
+{
+  "id": "moora-brauers-zavadskas-2010-projects",
+  "source": "Brauers & Zavadskas 2010, Technological and Economic Development of Economy 16(1):5-24, DOI 10.3846/tede.2010.01, Appendix C Table 2 (reprinted in Brauers & Zavadskas 2012, E+M Ekonomie a Management 15(1):28-43, Appendix C Table 5)",
+  "alternatives": ["Project A", "Project B", "Project C"],
+  "criteria": [
+    "NPV",
+    "IRR (%)",
+    "Payback period (yr)",
+    "Government income",
+    "Employment",
+    "Value added",
+    "Risk",
+    "Balance of payments",
+    "Investment"
+  ],
+  "types": ["benefit", "benefit", "cost", "benefit", "benefit", "benefit", "cost", "benefit", "benefit"],
+  "weights": [
+    0.1111111111111111,
+    0.1111111111111111,
+    0.1111111111111111,
+    0.1111111111111111,
+    0.1111111111111111,
+    0.1111111111111111,
+    0.1111111111111111,
+    0.1111111111111111,
+    0.1111111111111111
+  ],
+  "matrix": [
+    [1.0, 14, 9, 200, 600, 20.0, 20, 3.5, 2.5],
+    [1.6, 16, 7, 150, 800, 13.5, 25, 4.0, 1.5],
+    [2.0, 17, 5, 80, 1200, 10.0, 30, 3.8, 1.25]
+  ],
+  "published": {
+    "norms": [2.749545, 27.221, 12.45, 262.4881, 1562.05, 26.12, 43.875, 6.533758, 3.1721444],
+    "normalized": [
+      [0.363696, 0.5143, 0.7229, 0.761939, 0.384, 0.766, 0.4558, 0.536, 0.788],
+      [0.581914, 0.5878, 0.5623, 0.571454, 0.51215, 0.5168, 0.5698, 0.612205, 0.4728662],
+      [0.727393, 0.6245, 0.4016, 0.304776, 0.76822, 0.3828, 0.6838, 0.581595, 0.3940552]
+    ],
+    "y_star_unweighted": [2.93480, 2.723, 2.698],
+    "ranking": [1, 2, 3]
+  },
+  "expected": {
+    "norms": [2.749545, 27.221315, 12.449900, 262.488095, 1562.049935, 26.119916, 43.874822, 6.533758, 3.172144],
+    "normalized": [
+      [0.363696, 0.514303, 0.722897, 0.761939, 0.384111, 0.765699, 0.455842, 0.535679, 0.788110],
+      [0.581914, 0.587775, 0.562254, 0.571454, 0.512148, 0.516847, 0.569803, 0.612205, 0.472866],
+      [0.727393, 0.624511, 0.401610, 0.304776, 0.768221, 0.382850, 0.683763, 0.581595, 0.394055]
+    ],
+    "unweighted": {
+      "benefitSum": [4.113538, 3.855209, 3.783400],
+      "costSum": [1.178740, 1.132056, 1.085373],
+      "y_star": [2.934799, 2.723153, 2.698027]
+    },
+    "equalWeights": {
+      "benefitSum": [0.457060, 0.428357, 0.420378],
+      "costSum": [0.130971, 0.125784, 0.120597],
+      "scores": [0.326089, 0.302573, 0.299781]
+    },
+    "ranking": [1, 2, 3],
+    "tolerance_vs_published_unweighted": 0.0005,
+    "tolerance_exact": 1e-6
+  },
+  "origin2006_table1": {
+    "source": "Brauers & Zavadskas 2006, Control and Cybernetics 35(2):445-469, Table 1 (p. 450, privatization in a welfare economy)",
+    "alternatives": ["Project A", "Project B", "Project C"],
+    "criteria": [
+      "IRR (%)",
+      "Payback period (yr)",
+      "Increase of productivity (%)",
+      "New investment value (10^9 EUR)",
+      "New employment (jobs)",
+      "Value added discounted (10^6 EUR)",
+      "Balance of payments (10^6 EUR)"
+    ],
+    "types": ["benefit", "cost", "benefit", "benefit", "benefit", "benefit", "benefit"],
+    "weights": [
+      0.14285714285714285,
+      0.14285714285714285,
+      0.14285714285714285,
+      0.14285714285714285,
+      0.14285714285714285,
+      0.14285714285714285,
+      0.14285714285714285
+    ],
+    "matrix": [
+      [12, 5, 4, 4.5, 750, 700, 150],
+      [10, 7, 4, 3.0, 800, 600, 200],
+      [10, 8, 1, 2.5, 1000, 900, 225]
+    ],
+    "published_unweighted_y_star": [3.16759, 2.74248, 2.49314],
+    "expected_equal_weights": {
+      "benefitSum": [0.513316, 0.476909, 0.453450],
+      "costSum": [0.060804, 0.085126, 0.097286],
+      "scores": [0.452512, 0.391783, 0.356163],
+      "ranking": [1, 2, 3]
+    }
+  },
+  "origin2006_table5": {
+    "source": "Brauers & Zavadskas 2006, Control and Cybernetics 35(2):445-469, Table 5 (p. 464, privatization in a wellbeing economy)",
+    "alternatives": ["Project A", "Project B", "Project C"],
+    "criteria": [
+      "IRR (%)",
+      "Payback period (yr)",
+      "New investments (10^9 EUR)",
+      "Salary per hour (EUR)",
+      "Shop time (weekly hours)",
+      "New employment (jobs)",
+      "Value added discounted (10^6 EUR)",
+      "Balance of payments (10^6 EUR)"
+    ],
+    "types": ["benefit", "cost", "benefit", "benefit", "cost", "benefit", "benefit", "benefit"],
+    "weights": [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+    "matrix": [
+      [12, 5, 4.5, 30, 50, 750, 700, 150],
+      [10, 7, 3.0, 25, 35, 800, 600, 200],
+      [10, 8, 2.5, 10, 30, 1000, 900, 225]
+    ],
+    "published_unweighted_y_star": [2.4802701, 2.151696, 2.126007],
+    "expected_equal_weights": {
+      "benefitSum": [0.455139, 0.407778, 0.406018],
+      "costSum": [0.145105, 0.138816, 0.140267],
+      "scores": [0.310034, 0.268962, 0.265751],
+      "ranking": [1, 2, 3]
+    }
+  }
+}

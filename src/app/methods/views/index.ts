@@ -12,6 +12,7 @@ import { manual } from './manual'
 import { marcos } from './marcos'
 import { mabac } from './mabac'
 import { merec } from './merec'
+import { moora } from './moora'
 import { saw } from './saw'
 import { sd } from './sd'
 import { topsis } from './topsis'
@@ -50,6 +51,7 @@ export const methodViews: Readonly<Views> = {
   marcos,
   cocoso,
   mabac,
+  moora,
 }
 
 const ids = Object.keys(methodViews) as ViewId[]
