@@ -34,7 +34,7 @@ export const leaders = (result: RankingResult): number[] => rankOrder(result).fi
 const RANKING_FAMILIES: readonly { key: 'distance' | 'additive' | 'outranking'; ids: readonly RankingMethodId[] }[] = [
   { key: 'distance', ids: ['topsis', 'vikor', 'codas', 'mabac'] },
   { key: 'additive', ids: ['saw', 'waspas', 'copras', 'moora', 'aras', 'marcos', 'edas', 'cocoso'] },
-  { key: 'outranking', ids: ['promethee-ii', 'electre-i'] },
+  { key: 'outranking', ids: ['promethee-ii', 'electre-i', 'electre-iii'] },
 ]
 
 /**
@@ -201,14 +201,14 @@ export function RankingStage() {
   return (
     <div className="flex flex-col gap-6 pt-4">
       <div className="flex flex-col gap-2">
-        {/* Thirteen methods do not fit one row: 4-col below sm, 5-col on sm..lg, 7-col on lg+. */}
+        {/* Fifteen methods do not fit one row: 4-col below sm, 5-col on sm..lg (3×5), 8-col on lg+. */}
         <SegmentedControl<RankingMethodId>
           aria-label={t('workbench.rankingMethod.label')}
           value={rankingMethod}
           onValueChange={setRankingMethod}
           options={RANKING_VIEW_IDS.map((m) => ({ value: m, label: t(`workbench.rankingMethod.${m}`) }))}
           size="md"
-          className="self-start max-sm:grid max-sm:grid-cols-4 max-sm:self-stretch max-sm:[&>*]:px-1.5 max-sm:[&>*]:text-13 sm:grid sm:grid-cols-5 lg:grid-cols-7"
+          className="self-start max-sm:grid max-sm:grid-cols-4 max-sm:self-stretch max-sm:[&>*]:px-1.5 max-sm:[&>*]:text-13 sm:grid sm:grid-cols-5 lg:grid-cols-8"
         />
         <div aria-hidden className="flex flex-wrap items-center gap-x-4 gap-y-1 text-12 text-text-3">
           {RANKING_FAMILIES.map((f) => {

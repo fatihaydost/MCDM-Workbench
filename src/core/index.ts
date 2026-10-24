@@ -32,6 +32,15 @@ export {
   type PrometheeParams,
   type PrometheePreferenceFunction,
 } from './methods/promethee-ii'
+export {
+  electreIII,
+  electreIIIDistill,
+  electreIIIIncomparablePairs,
+  type ElectreIIIDistillationResult,
+  type ElectreIIIParams,
+  type ElectreIIIThresholdPreset,
+  type ThresholdSpec,
+} from './methods/electre-iii'
 export { roc, strictRankWeights, type RocFormula, type RocParams } from './methods/roc'
 export { sd } from './methods/sd'
 export { swara, swaraWeights, SWARA_STEP_RATIOS, type SwaraParams, type SwaraStepRatio, type SwaraSteps } from './methods/swara'

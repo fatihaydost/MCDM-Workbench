@@ -161,6 +161,9 @@
       },
       "electre-i": {
         "claim": "Concordance C, discordance D, outranking graph S and kernel {A2, A3, A5} match {{citation}} Section 3.1 to {{decimals}} decimals; Soner and Önüt (2006) net concordance matches too."
+      },
+      "electre-iii": {
+        "claim": "All 121 credibility entries of Table 3 and both distillation chains match {{citation}} within 0.005."
       }
     },
     "catalogue": {
@@ -262,7 +265,8 @@
       "aras": "ARAS",
       "codas": "CODAS",
       "promethee-ii": "PROMETHEE II",
-      "electre-i": "ELECTRE I"
+      "electre-i": "ELECTRE I",
+      "electre-iii": "ELECTRE III"
     },
     "params": {
       "entropy": {
@@ -425,6 +429,24 @@
           "max": "1: no veto"
         },
         "dHatVariant": "d̂ = {{value}}"
+      },
+      "electre-iii": {
+        "thresholdPreset": "Threshold preset",
+        "thresholdPresetOptions": {
+          "standard": "Standard (q = 10%, p = 25% of range, no veto)",
+          "strict": "Strict (q = 5%, p = 15% of range, no veto)",
+          "veto": "With veto (q = 10%, p = 25%, v = 60% of range)"
+        },
+        "thresholdPresetHints": {
+          "standard": "Gaps up to 10% of the column range are indifferent, up to 25% build partial preference, and larger gaps give strict preference without veto.",
+          "strict": "Tighter indifference (5%) and preference (15%) zones on each column range without veto.",
+          "veto": "Adds a veto threshold at 60% of the column range so a large deficit on one criterion cuts credibility σ(a, b) down to 0."
+        },
+        "thresholdPresetVariant": {
+          "standard": "standard",
+          "strict": "strict",
+          "veto": "veto"
+        }
       }
     },
     "example": {
@@ -583,7 +605,8 @@
         "aras": "Prepends an optimal row, adds up each alternative's weighted shares of the m + 1 column totals and divides by the optimal row's total; a higher K is better.",
         "codas": "Scores each alternative by its Euclidean and Taxicab distances from the negative-ideal point, compared across every pair; a higher H is better.",
         "promethee-ii": "Compares every pair of alternatives on each criterion with a preference function and subtracts the entering flow from the leaving flow; a higher φ is better. Zeros and negative values are allowed.",
-        "electre-i": "Tests every pair of alternatives for majority concordance (C ≥ ĉ) and bounded discordance (D ≤ d̂) to find the outranking kernel K, and ranks alternatives by normalized net concordance minus net discordance Φ. Zeros and negative values are allowed."
+        "electre-i": "Tests every pair of alternatives for majority concordance (C ≥ ĉ) and bounded discordance (D ≤ d̂) to find the outranking kernel K, and ranks alternatives by normalized net concordance minus net discordance Φ. Zeros and negative values are allowed.",
+        "electre-iii": "Tests each pair with indifference, preference and veto thresholds to build fuzzy credibility σ(a, b) and distills descending and ascending rankings; a higher net credibility Φ is better. Zeros and negative values are allowed."
       },
       "columns": {
         "rank": "Rank",
@@ -608,7 +631,9 @@
         "negativeFlow": "Entering flow φ⁻",
         "electreIKernel": "Kernel K",
         "electreINetConcordance": "Net concordance Cₐ",
-        "electreINetDiscordance": "Net discordance Dₐ"
+        "electreINetDiscordance": "Net discordance Dₐ",
+        "descendingRank": "Descending rank r↓",
+        "ascendingRank": "Ascending rank r↑"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -680,6 +705,11 @@
         "electre-i": {
           "name": "Net score Φ",
           "title": "ELECTRE I net outranking score Φ",
+          "symbol": "Φ"
+        },
+        "electre-iii": {
+          "name": "Net credibility Φ",
+          "title": "ELECTRE III net credibility Φ",
           "symbol": "Φ"
         }
       },
@@ -955,6 +985,13 @@
         "netConcordance": "Net concordance Cₐ",
         "netDiscordance": "Net discordance Dₐ",
         "netScore": "Net outranking score Φ"
+      },
+      "electre-iii": {
+        "concordance": "Concordance matrix C",
+        "credibility": "Credibility matrix σ",
+        "descending": "Descending rank r↓",
+        "ascending": "Ascending rank r↑",
+        "netCredibility": "Net credibility Φ"
       }
     },
     "issues": {
@@ -1196,6 +1233,11 @@
         "title": "Net concordance Cₐ, net discordance Dₐ, kernel K, and net score Φ",
         "caption": "Left: net concordance Cₐ (top) and opposite net discordance -Dₐ (bottom); [K] marks members of the outranking kernel. Right: normalized net outranking score Φ around zero.",
         "row": "{{alternative}}: Cₐ = {{netC}}, Dₐ = {{netD}}, K = {{kernel}}, Φ = {{score}}"
+      },
+      "electre-iii": {
+        "title": "Descending rank r↓, ascending rank r↑, and net credibility Φ",
+        "caption": "Left: descending rank r↓ (top, lower is better) and ascending rank r↑ (bottom, lower is better). Right: net credibility flow Φ around zero.",
+        "row": "{{alternative}}: r↓ = {{pos}}, r↑ = {{neg}}, Φ = {{score}}"
       }
     },
     "flow": {
@@ -1338,6 +1380,12 @@
         "concordance": "C and D",
         "outranking": "S and K",
         "netScore": "Net Φ"
+      },
+      "electre-iii": {
+        "concordance": "Concordance C",
+        "credibility": "Credibility σ",
+        "descending": "r↓ and r↑",
+        "netCredibility": "Net Φ"
       }
     },
     "pipeline": {
@@ -1432,7 +1480,8 @@
       "roc": "ROC",
       "swara": "SWARA",
       "promethee-ii": "PROMETHEE II",
-      "electre-i": "ELECTRE I"
+      "electre-i": "ELECTRE I",
+      "electre-iii": "ELECTRE III"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1505,7 +1554,8 @@
         "roc": "Weights from the importance rank order of criteria.",
         "swara": "Chains step-down importance ratios between ordered criteria into weights.",
         "promethee-ii": "Pairwise preference functions and leaving minus entering outranking flows.",
-        "electre-i": "Majority concordance and bounded discordance veto to select the outranking kernel."
+        "electre-i": "Majority concordance and bounded discordance veto to select the outranking kernel.",
+        "electre-iii": "Pseudo-criteria with indifference, preference and veto thresholds, fuzzy credibility and distillation."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1844,6 +1894,15 @@
             "s2": "Outranking kernel K: pairs with C ≥ 0.75 and D ≤ 0.50 form the outranking graph; condensing the {A2, A3} cycle leaves the kernel {A2, A3, A5} marked with [K].",
             "s3": "Net outranking score Φ = (Cₐ - Dₐ) / (2(m - 1)): combines high net concordance and low net discordance into a complete ranking."
           }
+        },
+        "electre-iii": {
+          "title": "Descending distillation, ascending distillation, and net credibility",
+          "caption": "Each waste treatment option is compared by fuzzy credibility σ(a, b): descending distillation r↓ selects from the top down, ascending distillation r↑ eliminates from the bottom up, and Φ shows net credibility.",
+          "steps": {
+            "s1": "Descending rank r↓: iterative qualification from the highest credibility cut down, picking the strongest options first.",
+            "s2": "Ascending rank r↑: iterative elimination from the weakest options up; where r↓ and r↑ disagree, the pair is incomparable.",
+            "s3": "Net credibility Φ: leaving minus entering credibility around zero; options are ordered by average distillation rank (r↓ + r↑) / 2, with Φ breaking ties."
+          }
         }
       }
     }
@@ -2043,6 +2102,13 @@
       "netConcordance": "Net concordance Cₐ: outgoing minus incoming concordance across all other alternatives.",
       "netDiscordance": "Net discordance Dₐ: outgoing minus incoming discordance across all other alternatives; lower values are better.",
       "netScore": "Net outranking score Φ = (Cₐ - Dₐ) / (2(m - 1)): normalized net concordance minus net discordance in [-1, 1]."
+    },
+    "electre-iii": {
+      "concordance": "Concordance matrix C: for each ordered pair (a, b), the weighted sum of unicriterion concordance degrees c_j(a, b) from the indifference and preference thresholds.",
+      "credibility": "Credibility matrix σ: concordance C(a, b) attenuated by any criterion whose discordance d_j(a, b) exceeds C(a, b); a veto deficit reduces σ(a, b) to 0.",
+      "descending": "Descending distillation rank r↓: competition rank from top-down qualification on the credibility matrix.",
+      "ascending": "Ascending distillation rank r↑: competition rank from bottom-up elimination on the credibility matrix.",
+      "netCredibility": "Net credibility flow Φ: leaving minus entering credibility average over all other alternatives."
     }
   },
   "validation": {

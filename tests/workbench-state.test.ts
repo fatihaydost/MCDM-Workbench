@@ -34,6 +34,7 @@ import arasBA from './fixtures/aras-bakir-atalik2018.json'
 import codasG from './fixtures/codas-ghorabaee2016.json'
 import electreW from './fixtures/electre-i-wang2008.json'
 import prometheeB from './fixtures/promethee-ii-brans1986.json'
+import electreIIIW from './fixtures/electre-iii-wang2008.json'
 import rosz from './fixtures/roc-roszkowska2013.json'
 import swaraK from './fixtures/swara-kersuliene2010.json'
 
@@ -271,6 +272,18 @@ describe('examples match the published fixtures', () => {
       { label: 'electre-i.kernel', values: electreW.wang2008.kernelVector, decimals: 0 },
       { label: 'electre-i.netConcordance', values: electreW.wang2008.netConcordance, decimals: 3 },
       { label: 'electre-i.netDiscordance', values: electreW.wang2008.netDiscordance, decimals: 2 },
+    ])
+  })
+  it('Wang and Triantaphyllou 2008 (ELECTRE III, waste incineration)', () => {
+    const ex = getExample('wang-2008-waste-incineration')!
+    expect(ex.referenceFor).toEqual(['electre-iii'])
+    expect(ex.matrix).toEqual(electreIIIW.matrix)
+    expect(ex.alternatives).toEqual(electreIIIW.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(electreIIIW.criteria.map((c) => c.type))
+    expect(ex.weights).toEqual(electreIIIW.weights)
+    expect(ex.published).toEqual([
+      { label: 'electre-iii.descending', values: electreIIIW.expected.descendingRanks, decimals: 0 },
+      { label: 'electre-iii.ascending', values: electreIIIW.expected.ascendingRanks, decimals: 0 },
     ])
   })
   it('every example has a DOI and a table reference', () => {

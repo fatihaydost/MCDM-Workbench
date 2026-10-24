@@ -33,7 +33,8 @@
       "aras": "ARAS adds up the weighted column shares with the optimal row in the total, so strengths make up for a weakness fully.",
       "codas": "CODAS measures the Euclidean and Taxicab distances from the worst weighted value across every pair, so one large lead above the worst value boosts Euclidean distance more than several small ones.",
       "promethee-ii": "PROMETHEE II compares alternatives pair by pair through a preference function capped at 1, so how much a difference counts depends on the chosen preference curve.",
-      "electre-i": "ELECTRE I balances majority concordance against the single largest discordance gap across pairs, so a severe deficit on one criterion penalizes an alternative even when it leads on most weights."
+      "electre-i": "ELECTRE I balances majority concordance against the single largest discordance gap across pairs, so a severe deficit on one criterion penalizes an alternative even when it leads on most weights.",
+      "electre-iii": "ELECTRE III builds a fuzzy outranking credibility matrix using indifference, preference and veto thresholds, then distills descending and ascending pre-orders."
     },
     "unanimous": "All {{n}} methods put {{a}} above {{b}}.",
     "crossings": "Select a crossing in the chart to see another pair.",

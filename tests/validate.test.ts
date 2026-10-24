@@ -75,8 +75,8 @@ describe('rankScores', () => {
 
 describe('registry', () => {
   it('lists methods by id and kind', () => {
-    expect(listMethods().map((m) => m.id)).toEqual(['critic', 'entropy', 'sd', 'merec', 'lopcow', 'cilos', 'equal', 'bwm', 'ahp', 'roc', 'swara', 'topsis', 'saw', 'vikor', 'edas', 'waspas', 'copras', 'marcos', 'cocoso', 'mabac', 'moora', 'aras', 'codas', 'promethee-ii', 'electre-i'])
-    expect(listMethods('ranking').map((m) => m.id)).toEqual(['topsis', 'saw', 'vikor', 'edas', 'waspas', 'copras', 'marcos', 'cocoso', 'mabac', 'moora', 'aras', 'codas', 'promethee-ii', 'electre-i'])
+    expect(listMethods().map((m) => m.id)).toEqual(['critic', 'entropy', 'sd', 'merec', 'lopcow', 'cilos', 'equal', 'bwm', 'ahp', 'roc', 'swara', 'topsis', 'saw', 'vikor', 'edas', 'waspas', 'copras', 'marcos', 'cocoso', 'mabac', 'moora', 'aras', 'codas', 'promethee-ii', 'electre-i', 'electre-iii'])
+    expect(listMethods('ranking').map((m) => m.id)).toEqual(['topsis', 'saw', 'vikor', 'edas', 'waspas', 'copras', 'marcos', 'cocoso', 'mabac', 'moora', 'aras', 'codas', 'promethee-ii', 'electre-i', 'electre-iii'])
     expect(listMethods('weighting').map((m) => m.id)).toEqual(['critic', 'entropy', 'sd', 'merec', 'lopcow', 'cilos', 'equal', 'bwm', 'ahp', 'roc', 'swara'])
     expect(getMethod('topsis')?.kind).toBe('ranking')
     expect(getMethod('swara')?.kind).toBe('weighting')

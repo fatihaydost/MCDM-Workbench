@@ -6,7 +6,7 @@ export const electreIII: MethodContent = {
   name: { en: 'ELECTRE III', tr: 'ELECTRE III' },
   fullName: { en: 'ELimination Et Choix Traduisant la REalité III', tr: 'Gerçeği yansıtan eleme ve seçim III' },
   family: 'ranking-outranking',
-  status: 'research',
+  status: 'available',
   year: 1978,
   origin: {
     authors: 'Roy, B.',
@@ -83,8 +83,8 @@ export const electreIII: MethodContent = {
     doi: '10.1016/j.omega.2005.12.003',
     match: 'match',
     note: {
-      en: 'Published example (Section 3.2, pp. 51-53); this method is not computed here yet, only recomputed during research. Waste incineration strategy, 11 alternatives, 11 criteria, direct relative thresholds, no veto. All 110 credibility cells match at 2 decimals, and both distillation pre-orders and the final result (A7 and A9 on top, incomparable) match. In the modified case the top alternative matches; one lower class is a tie where the paper prints a strict order.',
-      tr: 'Yayımlanmış örnek (Bölüm 3.2, s. 51-53); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Atık yakma stratejisi, 11 alternatif, 11 kriter, doğrudan göreli eşikler, veto yok. Güvenilirlik matrisinin 110 hücresi 2 basamakta örtüşüyor; iki damıtma ön sıralaması ve nihai sonuç (A7 ve A9 en üstte, kıyaslanamaz) aynı. Değiştirilmiş durumda en üstteki alternatif örtüşüyor; alttaki bir sınıfta makale kesin sıra basmışken yeniden hesaplama eşitlik buluyor.',
+      en: 'Published example (Section 3.2, pp. 51-53). Waste incineration strategy, 11 alternatives, 11 criteria, direct relative thresholds, no veto. All 110 credibility cells match at 2 decimals, and both distillation pre-orders and the final result (A7 and A9 on top, incomparable) match. In the modified case the top alternative matches; one lower class is a tie where the paper prints a strict order.',
+      tr: 'Yayımlanmış örnek (Bölüm 3.2, s. 51-53). Atık yakma stratejisi, 11 alternatif, 11 kriter, doğrudan göreli eşikler, veto yok. Güvenilirlik matrisinin 110 hücresi 2 basamakta örtüşüyor; iki damıtma ön sıralaması ve nihai sonuç (A7 ve A9 en üstte, kıyaslanamaz) aynı. Değiştirilmiş durumda en üstteki alternatif örtüşüyor; alttaki bir sınıfta makale kesin sıra basmışken yeniden hesaplama eşitlik buluyor.',
     },
   },
   sources: [

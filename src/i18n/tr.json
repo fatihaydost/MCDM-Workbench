@@ -161,6 +161,9 @@
       },
       "electre-i": {
         "claim": "Uyum C, uyumsuzluk D, üstünlük grafı S ve {A2, A3, A5} çekirdeği {{citation}} Bölüm 3.1 ile {{decimals}} basamağa kadar aynı; Soner ve Önüt (2006) net uyum değerleri de örtüşüyor."
+      },
+      "electre-iii": {
+        "claim": "Tablo 3 içindeki 121 güvenilirlik değerinin tamamı ve iki damıtma zinciri {{citation}} ile 0,005 fark içinde örtüşüyor."
       }
     },
     "catalogue": {
@@ -262,7 +265,8 @@
       "aras": "ARAS",
       "codas": "CODAS",
       "promethee-ii": "PROMETHEE II",
-      "electre-i": "ELECTRE I"
+      "electre-i": "ELECTRE I",
+      "electre-iii": "ELECTRE III"
     },
     "params": {
       "entropy": {
@@ -425,6 +429,24 @@
           "max": "1: veto yok"
         },
         "dHatVariant": "d̂ = {{value}}"
+      },
+      "electre-iii": {
+        "thresholdPreset": "Eşik ön ayarı",
+        "thresholdPresetOptions": {
+          "standard": "Standart (q = %10, p = %25 açıklık, vetosuz)",
+          "strict": "Sıkı (q = %5, p = %15 açıklık, vetosuz)",
+          "veto": "Vetolu (q = %10, p = %25, v = %60 açıklık)"
+        },
+        "thresholdPresetHints": {
+          "standard": "Sütun açıklığının %10'una kadar farklar farksız sayılır, %25'ine kadar kısmi tercih oluşturur, üstü vetosuz tam tercih verir.",
+          "strict": "Her sütun açıklığında vetosuz daha dar farksızlık (%5) ve tercih (%15) bölgeleri kullanır.",
+          "veto": "Sütun açıklığının %60'ına bir veto eşiği ekler; tek bir kriterdeki büyük gerilik güvenilirlik σ(a, b) değerini 0'a indirir."
+        },
+        "thresholdPresetVariant": {
+          "standard": "standart",
+          "strict": "sıkı",
+          "veto": "vetolu"
+        }
       }
     },
     "example": {
@@ -583,7 +605,8 @@
         "aras": "Başa bir optimal satır ekler, her alternatifin m + 1 satırlık sütun toplamlarındaki ağırlıklı paylarını toplar ve optimal satırın toplamına böler; K büyüdükçe sıra yükselir.",
         "codas": "Her alternatifi negatif-ideal noktaya Öklid ve Taxicab uzaklıklarıyla bütün çiftler üzerinden karşılaştırarak puanlar; yüksek H daha iyidir.",
         "promethee-ii": "Her alternatif çiftini her kriterde bir tercih fonksiyonuyla karşılaştırır ve pozitif akıştan negatif akışı çıkarır; φ büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
-        "electre-i": "Her alternatif çiftini çoğunluk uyumu (C ≥ ĉ) ve sınırlı uyumsuzluk (D ≤ d̂) için sınayarak üstünlük çekirdeği K kümesini bulur ve alternatifleri normalize net uyum eksi net uyumsuzluk Φ skoruyla sıralar. Sıfır ve negatif değerlere izin verir."
+        "electre-i": "Her alternatif çiftini çoğunluk uyumu (C ≥ ĉ) ve sınırlı uyumsuzluk (D ≤ d̂) için sınayarak üstünlük çekirdeği K kümesini bulur ve alternatifleri normalize net uyum eksi net uyumsuzluk Φ skoruyla sıralar. Sıfır ve negatif değerlere izin verir.",
+        "electre-iii": "Her çifti farksızlık, tercih ve veto eşikleriyle sınayarak bulanık güvenilirlik σ(a, b) matrisini kurar, azalan ve artan damıtma sıralarını çıkarır; net güvenilirlik Φ büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir."
       },
       "columns": {
         "rank": "Sıra",
@@ -608,7 +631,9 @@
         "negativeFlow": "Negatif akış φ⁻",
         "electreIKernel": "Çekirdek K",
         "electreINetConcordance": "Net uyum Cₐ",
-        "electreINetDiscordance": "Net uyumsuzluk Dₐ"
+        "electreINetDiscordance": "Net uyumsuzluk Dₐ",
+        "descendingRank": "Azalan sıra r↓",
+        "ascendingRank": "Artan sıra r↑"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -680,6 +705,11 @@
         "electre-i": {
           "name": "Net skor Φ",
           "title": "ELECTRE I net üstünlük skoru Φ",
+          "symbol": "Φ"
+        },
+        "electre-iii": {
+          "name": "Net güvenilirlik Φ",
+          "title": "ELECTRE III net güvenilirliği Φ",
           "symbol": "Φ"
         }
       },
@@ -955,6 +985,13 @@
         "netConcordance": "Net uyum Cₐ",
         "netDiscordance": "Net uyumsuzluk Dₐ",
         "netScore": "Net üstünlük skoru Φ"
+      },
+      "electre-iii": {
+        "concordance": "Uyum matrisi C",
+        "credibility": "Güvenilirlik matrisi σ",
+        "descending": "Azalan sıra r↓",
+        "ascending": "Artan sıra r↑",
+        "netCredibility": "Net güvenilirlik Φ"
       }
     },
     "issues": {
@@ -1196,6 +1233,11 @@
         "title": "Net uyum Cₐ, net uyumsuzluk Dₐ, çekirdek K ve net skor Φ",
         "caption": "Sol: net uyum Cₐ (üst) ve ters işaretli net uyumsuzluk -Dₐ (alt); [K] üstünlük çekirdeği üyelerini gösterir. Sağ: sıfır etrafında normalize net üstünlük skoru Φ.",
         "row": "{{alternative}}: Cₐ = {{netC}}, Dₐ = {{netD}}, K = {{kernel}}, Φ = {{score}}"
+      },
+      "electre-iii": {
+        "title": "Azalan sıra r↓, artan sıra r↑ ve net güvenilirlik Φ",
+        "caption": "Sol: azalan sıra r↓ (üst, düşük daha iyi) ve artan sıra r↑ (alt, düşük daha iyi). Sağ: sıfır etrafında net güvenilirlik akışı Φ.",
+        "row": "{{alternative}}: r↓ = {{pos}}, r↑ = {{neg}}, Φ = {{score}}"
       }
     },
     "flow": {
@@ -1338,6 +1380,12 @@
         "concordance": "C ve D",
         "outranking": "S ve K",
         "netScore": "Net Φ"
+      },
+      "electre-iii": {
+        "concordance": "Uyum C",
+        "credibility": "Güvenilirlik σ",
+        "descending": "r↓ ve r↑",
+        "netCredibility": "Net Φ"
       }
     },
     "pipeline": {
@@ -1432,7 +1480,8 @@
       "roc": "ROC",
       "swara": "SWARA",
       "promethee-ii": "PROMETHEE II",
-      "electre-i": "ELECTRE I"
+      "electre-i": "ELECTRE I",
+      "electre-iii": "ELECTRE III"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1505,7 +1554,8 @@
         "roc": "Kriterlerin önem sırasından ağırlıklar.",
         "swara": "Sıralı kriterler arasındaki ardışık önem oranlarını zincirleyerek ağırlığa dönüştürür.",
         "promethee-ii": "İkili tercih fonksiyonları ve pozitif eksi negatif üstünlük akışları.",
-        "electre-i": "Çoğunluk uyumu ve sınırlı uyumsuzluk vetosuyla üstünlük çekirdeği seçimi."
+        "electre-i": "Çoğunluk uyumu ve sınırlı uyumsuzluk vetosuyla üstünlük çekirdeği seçimi.",
+        "electre-iii": "Farksızlık, tercih ve veto eşikli sözde kriterler, bulanık güvenilirlik ve damıtma."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1844,6 +1894,15 @@
             "s2": "Üstünlük çekirdeği K: C ≥ 0,75 ve D ≤ 0,50 koşullarını sağlayan çiftler üstünlük grafını kurar; {A2, A3} döngüsü daraltıldığında [K] ile işaretlenen {A2, A3, A5} çekirdeği kalır.",
             "s3": "Net üstünlük skoru Φ = (Cₐ - Dₐ) / (2(m - 1)): yüksek net uyumu ve düşük net uyumsuzluğu tam bir sıralamada birleştirir."
           }
+        },
+        "electre-iii": {
+          "title": "Azalan damıtma, artan damıtma ve net güvenilirlik",
+          "caption": "Her atık işleme seçeneği bulanık güvenilirlik σ(a, b) ile karşılaştırılır: azalan damıtma r↓ yukarıdan aşağıya seçer, artan damıtma r↑ aşağıdan yukarıya eler, Φ ise net güvenilirliği gösterir.",
+          "steps": {
+            "s1": "Azalan sıra r↓: en yüksek güvenilirlik kesiminden aşağıya doğru yinelemeli nitelik kazandırma, en güçlü seçenekleri önce seçer.",
+            "s2": "Artan sıra r↑: en zayıf seçeneklerden yukarıya doğru yinelemeli eleme; r↓ ile r↑ çeliştiğinde çift karşılaştırılamaz olur.",
+            "s3": "Net güvenilirlik Φ: sıfır etrafında çıkan eksi giren güvenilirlik; seçenekler ortalama damıtma sırası (r↓ + r↑) / 2 ile dizilir, eşitlikleri Φ bozar."
+          }
         }
       }
     }
@@ -2043,6 +2102,13 @@
       "netConcordance": "Net uyum Cₐ: diğer tüm alternatiflere karşı giden uyum toplamı eksi gelen uyum toplamı.",
       "netDiscordance": "Net uyumsuzluk Dₐ: diğer tüm alternatiflere karşı giden uyumsuzluk toplamı eksi gelen uyumsuzluk toplamı; düşük değer daha iyidir.",
       "netScore": "Net üstünlük skoru Φ = (Cₐ - Dₐ) / (2(m - 1)): [-1, 1] aralığında normalize edilmiş net uyum eksi net uyumsuzluk."
+    },
+    "electre-iii": {
+      "concordance": "Uyum matrisi C: her sıralı (a, b) çifti için farksızlık ve tercih eşiklerinden bulunan tek kriterli uyum dereceleri c_j(a, b) değerlerinin ağırlıklı toplamı.",
+      "credibility": "Güvenilirlik matrisi σ: uyum C(a, b) değerinin, uyumsuzluğu d_j(a, b) > C(a, b) olan kriterlerce zayıflatılmış hali; veto eşiğine ulaşan gerilik σ(a, b) değerini 0'a indirir.",
+      "descending": "Azalan damıtma sırası r↓: güvenilirlik matrisi üzerinde yukarıdan aşağıya nitelik kazandırmadan elde edilen sıra.",
+      "ascending": "Artan damıtma sırası r↑: güvenilirlik matrisi üzerinde aşağıdan yukarıya elemeden elde edilen sıra.",
+      "netCredibility": "Net güvenilirlik akışı Φ: diğer tüm alternatifler üzerinden çıkan eksi giren ortalama güvenilirlik."
     }
   },
   "validation": {
