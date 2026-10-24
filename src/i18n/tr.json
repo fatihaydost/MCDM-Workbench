@@ -140,6 +140,9 @@
       },
       "moora": {
         "claim": "Dokuz sütun normunun tamamı, her normalize hücre ve üç oran sistemi skoru {{citation}} ile {{decimals}} basamağa kadar aynı, üç sıra da aynı."
+      },
+      "aras": {
+        "claim": "Tablo 11'deki S₀, S, K ve 11 sıranın tamamı {{citation}} ile {{decimals}} basamağa kadar aynı; THY'nin yinelenen satırı düzeltilince Tablo 9 ve 10 da aynı."
       }
     },
     "catalogue": {
@@ -234,7 +237,8 @@
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
-      "moora": "MOORA"
+      "moora": "MOORA",
+      "aras": "ARAS"
     },
     "params": {
       "entropy": {
@@ -448,7 +452,8 @@
         "marcos": "Her ağırlıklı toplamı hayali bir ideal ve anti-ideal satırla ölçer; f(K) büyüdükçe sıra yükselir, sıra SAW (Doğrusal) ile aynıdır.",
         "cocoso": "Ağırlıklı toplam S ile üs toplamı P'yi üç biçimde okuyup birleştirir; k büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
         "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir.",
-        "moora": "Her değeri sütununun Öklid uzunluğuna böler, ağırlıklı fayda oranlarını toplar ve ağırlıklı maliyet oranlarını çıkarır; y büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir."
+        "moora": "Her değeri sütununun Öklid uzunluğuna böler, ağırlıklı fayda oranlarını toplar ve ağırlıklı maliyet oranlarını çıkarır; y büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
+        "aras": "Başa bir optimal satır ekler, her alternatifin m + 1 satırlık sütun toplamlarındaki ağırlıklı paylarını toplar ve optimal satırın toplamına böler; K büyüdükçe sıra yükselir."
       },
       "columns": {
         "rank": "Sıra",
@@ -465,7 +470,8 @@
         "weightedSum": "Ağırlıklı toplam S",
         "powerSum": "Üs toplamı P",
         "benefitSum": "Fayda toplamı S+",
-        "costSum": "Maliyet toplamı S-"
+        "costSum": "Maliyet toplamı S-",
+        "arasOptimality": "Optimalite S"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -518,6 +524,11 @@
           "name": "Net skor y",
           "title": "MOORA net değerlendirme y",
           "symbol": "y"
+        },
+        "aras": {
+          "name": "Fayda derecesi K",
+          "title": "ARAS fayda derecesi K",
+          "symbol": "K"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -733,6 +744,14 @@
         "benefitSum": "Fayda toplamı S+",
         "costSum": "Maliyet toplamı S-",
         "score": "Net skor y"
+      },
+      "aras": {
+        "optimalRow": "Optimal alternatif A₀",
+        "normalized": "A₀ dahil sütun payları x̄",
+        "weighted": "Ağırlıklı paylar x̂",
+        "optimalScore": "Optimal skor S₀",
+        "optimality": "Optimalite fonksiyonu S",
+        "utilityDegree": "Fayda derecesi K"
       }
     },
     "issues": {
@@ -931,6 +950,13 @@
         "readoutBenefit": "{{alternative}}: {{criterion}}, S+ değerine {{value}} ekler",
         "readoutCost": "{{alternative}}: {{criterion}}, S- üzerinden {{value}} düşer",
         "readoutZero": "{{alternative}}: {{criterion}} katkısı 0"
+      },
+      "aras": {
+        "title": "Optimal satırdaki pay",
+        "caption": "Kesikli satır A₀: her kriterin en iyi değeri, aynı m + 1 satırlık sütun toplamlarında normalize edilmiştir. Her çubuk S₀ ile karşılaştırılan S'dir; sağda K = S / S₀.",
+        "optimal": "Optimal A₀",
+        "bar": "{{alternative}}: S = {{total}}, S₀ = {{optimalTotal}}, K = {{score}}",
+        "readout": "{{alternative}}: S₀ = {{optimalTotal}} içinde S = {{total}}, K = {{score}}"
       }
     },
     "flow": {
@@ -1031,6 +1057,12 @@
         "weighted": "Ağırlıklandır",
         "benefitSum": "S+ ve S-",
         "score": "y"
+      },
+      "aras": {
+        "optimalRow": "Optimal satır",
+        "normalized": "Paylar",
+        "optimalScore": "Toplamlar S",
+        "utilityDegree": "K"
       }
     },
     "pipeline": {
@@ -1118,7 +1150,8 @@
       "mabac": "MABAC",
       "bwm": "BWM",
       "ahp": "AHP",
-      "moora": "MOORA"
+      "moora": "MOORA",
+      "aras": "ARAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1184,7 +1217,8 @@
         "mabac": "Her kriterde bir sınırın üstüne ya da altına uzaklık.",
         "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar.",
         "ahp": "Her kriter çiftini karşılaştırarak ağırlık.",
-        "moora": "Vektör normalizasyonu sonrası fayda oranları eksi maliyet oranları."
+        "moora": "Vektör normalizasyonu sonrası fayda oranları eksi maliyet oranları.",
+        "aras": "Her ağırlıklı pay toplamını bir optimal satırla oranlar."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1446,6 +1480,15 @@
             "s2": "Ağırlıklandırma: her oranı kriter ağırlığıyla çarpın; yığınlar S+ ve S- değerlerinde biter.",
             "s3": "Çıkarma: y = S+ - S- net skordur ve en yüksek y birinci sırada yer alır."
           }
+        },
+        "aras": {
+          "title": "Optimal satırdaki pay",
+          "caption": "Kesikli satır A₀: her kriterin en iyi değeri, aynı m + 1 satırlık sütun toplamlarında normalize edilmiştir. Her çubuk S₀ ile karşılaştırılan S'dir; sağda K = S / S₀.",
+          "steps": {
+            "s1": "Optimalite S: her çubuk bir alternatifin m + 1 satırlık sütun paylarının ağırlıklı toplamıdır.",
+            "s2": "Optimal satır A₀: sütunların en iyi değerleri aynı ölçekte kendi toplamı S₀ değerini alır.",
+            "s3": "Fayda derecesi K = S / S₀: her çubuk S₀ değerine bölünür, en yüksek K ilk sırada yer alır."
+          }
         }
       }
     }
@@ -1595,6 +1638,14 @@
       "benefitSum": "Fayda toplamı S+: fayda kriterlerinin ağırlıklı oranları toplanır.",
       "costSum": "Maliyet toplamı S-: maliyet kriterlerinin ağırlıklı oranları toplanır.",
       "score": "Net değerlendirme skoru y = S+ - S-. Değer büyüdükçe sıra yükselir; maliyet ağırlıkları baskın olduğunda negatif değerler normaldir."
+    },
+    "aras": {
+      "optimalRow": "Optimal satır A₀: normalizasyondan önce başa eklenen, her kriterin en iyi değeri (fayda için en büyük, maliyet için en küçük).",
+      "normalized": "Normalize paylar x̄: maliyet kriterleri 1 / x ile ters çevrilir, ardından her değer m + 1 satırın (A₀ ve m alternatif) toplamına bölünür.",
+      "weighted": "Ağırlıklı paylar x̂ = w x̄: her normalize pay kriter ağırlığıyla çarpılır.",
+      "optimalScore": "Optimal skor S₀: optimal satır A₀ için ağırlıklı satır toplamı, tüm alternatiflerin kıyas noktası.",
+      "optimality": "Optimalite fonksiyonu S: her alternatifin ağırlıklı satır toplamı.",
+      "utilityDegree": "Fayda derecesi K = S / S₀: her alternatifin optimalitesinin optimal skora oranı. Değer büyüdükçe sıra yükselir."
     }
   },
   "validation": {

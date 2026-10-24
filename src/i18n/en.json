@@ -140,6 +140,9 @@
       },
       "moora": {
         "claim": "All nine column norms, every normalized cell and the three ratio-system scores match {{citation}} to {{decimals}} decimals, with the same three ranks."
+      },
+      "aras": {
+        "claim": "S₀, S, K and all 11 ranks of Table 11 match {{citation}} to {{decimals}} decimals, with Tables 9 and 10 once THY's reprinted row is corrected."
       }
     },
     "catalogue": {
@@ -234,7 +237,8 @@
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
-      "moora": "MOORA"
+      "moora": "MOORA",
+      "aras": "ARAS"
     },
     "params": {
       "entropy": {
@@ -448,7 +452,8 @@
         "marcos": "Measures each weighted total against an imaginary ideal and anti-ideal row; a higher f(K) is better, in the same order as SAW (Linear).",
         "cocoso": "Reads a weighted sum S and a power sum P three ways and combines them; a higher k is better. Zeros and negative values are allowed.",
         "mabac": "Adds up how far each alternative lies above or below a border, the geometric mean of every criterion; a higher S is better, in the same order as a min-max weighted sum. Zeros and negative values are allowed.",
-        "moora": "Divides each value by the Euclidean length of its column, adds the weighted benefit ratios and subtracts the weighted cost ratios; a higher y is better. Zeros and negative values are allowed."
+        "moora": "Divides each value by the Euclidean length of its column, adds the weighted benefit ratios and subtracts the weighted cost ratios; a higher y is better. Zeros and negative values are allowed.",
+        "aras": "Prepends an optimal row, adds up each alternative's weighted shares of the m + 1 column totals and divides by the optimal row's total; a higher K is better."
       },
       "columns": {
         "rank": "Rank",
@@ -465,7 +470,8 @@
         "weightedSum": "Weighted sum S",
         "powerSum": "Power sum P",
         "benefitSum": "Benefit sum S+",
-        "costSum": "Cost sum S-"
+        "costSum": "Cost sum S-",
+        "arasOptimality": "Optimality S"
       },
       "tableTitle": "Ranking",
       "score": {
@@ -518,6 +524,11 @@
           "name": "Net score y",
           "title": "MOORA net assessment y",
           "symbol": "y"
+        },
+        "aras": {
+          "name": "Utility degree K",
+          "title": "ARAS utility degree K",
+          "symbol": "K"
         }
       },
       "weightsUsed": "Weights: {{method}}",
@@ -733,6 +744,14 @@
         "benefitSum": "Benefit sum S+",
         "costSum": "Cost sum S-",
         "score": "Net score y"
+      },
+      "aras": {
+        "optimalRow": "Optimal alternative A₀",
+        "normalized": "Shares with A₀ in the total x̄",
+        "weighted": "Weighted shares x̂",
+        "optimalScore": "Optimal score S₀",
+        "optimality": "Optimality function S",
+        "utilityDegree": "Utility degree K"
       }
     },
     "issues": {
@@ -931,6 +950,13 @@
         "readoutBenefit": "{{alternative}}: {{criterion}} adds {{value}} to S+",
         "readoutCost": "{{alternative}}: {{criterion}} subtracts {{value}} via S-",
         "readoutZero": "{{alternative}}: {{criterion}} contributes 0"
+      },
+      "aras": {
+        "title": "Share of the optimal row",
+        "caption": "The dashed row is A₀: the best value of every criterion, normalized in the same m + 1 column totals. Each bar is S, read against S₀; K = S / S₀ on the right.",
+        "optimal": "Optimal A₀",
+        "bar": "{{alternative}}: S = {{total}}, S₀ = {{optimalTotal}}, K = {{score}}",
+        "readout": "{{alternative}}: S = {{total}} of S₀ = {{optimalTotal}}, K = {{score}}"
       }
     },
     "flow": {
@@ -1031,6 +1057,12 @@
         "weighted": "Weight",
         "benefitSum": "S+ and S-",
         "score": "y"
+      },
+      "aras": {
+        "optimalRow": "Optimal row",
+        "normalized": "Shares",
+        "optimalScore": "Totals S",
+        "utilityDegree": "K"
       }
     },
     "pipeline": {
@@ -1118,7 +1150,8 @@
       "mabac": "MABAC",
       "bwm": "BWM",
       "ahp": "AHP",
-      "moora": "MOORA"
+      "moora": "MOORA",
+      "aras": "ARAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1184,7 +1217,8 @@
         "mabac": "Distance above or below a border per criterion.",
         "bwm": "Weights from your answers to a few comparisons.",
         "ahp": "Weights from comparing every pair of criteria.",
-        "moora": "Benefit ratios minus cost ratios after vector normalization."
+        "moora": "Benefit ratios minus cost ratios after vector normalization.",
+        "aras": "Measures each weighted share total against an optimal row."
       },
       "groups": {
         "weighting": "Weighting",
@@ -1446,6 +1480,15 @@
             "s2": "Weight: multiply each ratio by its criterion weight; the stacks end at S+ and S-.",
             "s3": "Subtract: y = S+ - S- is the net score, and the highest y ranks first."
           }
+        },
+        "aras": {
+          "title": "Share of the optimal row",
+          "caption": "The dashed row is A₀: the best value of every criterion, normalized in the same m + 1 column totals. Each bar is S, read against S₀; K = S / S₀ on the right.",
+          "steps": {
+            "s1": "Optimality S: each bar is an alternative's weighted sum of the m + 1 column shares.",
+            "s2": "Optimal row A₀: the column-best values get their own total S₀ on the same scale.",
+            "s3": "Utility degree K = S / S₀: each bar is divided by S₀, and the highest K ranks first."
+          }
         }
       }
     }
@@ -1595,6 +1638,14 @@
       "benefitSum": "Benefit sum S+: the weighted ratios of the benefit criteria, added up.",
       "costSum": "Cost sum S-: the weighted ratios of the cost criteria, added up.",
       "score": "Net assessment score y = S+ - S-. A higher value ranks higher, and negative values are normal when cost weights dominate."
+    },
+    "aras": {
+      "optimalRow": "Optimal row A₀: the best value of each criterion (the maximum for a benefit, the minimum for a cost), prepended before normalizing.",
+      "normalized": "Normalized shares x̄: cost criteria are inverted with 1 / x, then each value is divided by the total of all m + 1 rows (A₀ plus the m alternatives).",
+      "weighted": "Weighted shares x̂ = w x̄: each normalized share multiplied by its criterion weight.",
+      "optimalScore": "Optimal score S₀: the weighted row sum of the optimal row A₀, the benchmark for every alternative.",
+      "optimality": "Optimality function S: the weighted row sum of each alternative.",
+      "utilityDegree": "Utility degree K = S / S₀: each alternative's optimality divided by the optimal score. A higher value ranks higher."
     }
   },
   "validation": {

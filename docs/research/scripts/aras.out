@@ -1,0 +1,54 @@
+== F1a Zavadskas & Turskis 2010 (with paper external optimal norms [15, 50, 24.5, 400, 0.05, 5])
+  R0     [0.154639, 0.07764, 0.084337, 0.084388, 0.083333, 0.106656] (max|diff vs Table 2 row 0| = 0.000212)
+  S0     0.099703 (printed 0.0997)
+  S      [0.066858, 0.065443, 0.062499, 0.062962, 0.054479, 0.05563, 0.056414, 0.077391, 0.077107, 0.059852, 0.067521, 0.06608, 0.063148, 0.064913]
+  K      [0.670574, 0.656376, 0.626853, 0.631494, 0.546418, 0.557955, 0.565824, 0.776221, 0.773369, 0.600308, 0.677223, 0.662769, 0.633359, 0.651066]
+  rank   [4, 6, 10, 9, 14, 13, 12, 1, 2, 11, 3, 5, 8, 7] (corrected rank MATCH: True)
+  max|S - pub| (all 14): 0.000291; excluding room 8: 0.000057
+  max|K - pub| (all 14): 0.003521; excluding room 8: 0.000126
+  Room 8 Table 2 col 4 typo check: true sum(col 4)=4740 -> R0[3]=0.084388, R[7,3]=0.084388; with room 8 col 4 entered as 390 (room 1), sum=4730 -> R0[3]=0.084567 (pub 0.0846), R[0,3]=R[7,3]=0.082452 (pub 0.0825)
+  Recomputed with X[7,3]=390: R0=[0.1546, 0.0776, 0.0843, 0.0846, 0.0833, 0.1067] (matches Table 2 row 0 [0.1546, 0.0776, 0.0843, 0.0846, 0.0833, 0.1067] to 4 d.p.!), max|S - pub|=0.000049, max|K - pub|=0.000050, rank=[4, 6, 10, 9, 14, 13, 12, 2, 1, 11, 3, 5, 8, 7] == pub: True
+
+== F1b Zavadskas & Turskis 2010 (default column-best A0 = [8.1, 50, 21, 400, 0.05, 5], pyDecision convention)
+  x0     [8.1, 50.0, 21.0, 400.0, 0.05, 5.0]
+  S0     0.083204
+  S      [0.068315, 0.066584, 0.063607, 0.064114, 0.055383, 0.056567, 0.057236, 0.078919, 0.078668, 0.060795, 0.068684, 0.06716, 0.064532, 0.066232]
+  K      [0.821047, 0.800242, 0.764467, 0.770563, 0.665628, 0.679851, 0.687891, 0.948502, 0.945484, 0.730671, 0.825491, 0.807174, 0.775587, 0.796014]
+  rank   [4, 6, 10, 9, 14, 13, 12, 1, 2, 11, 3, 5, 8, 7] (same ranking as F1a corrected: True)
+
+== F2 Bakir & Atalik 2018 (11 airlines x 7 criteria, Entropy -> ARAS, column-best A0)
+  Entropy w vs Table 7: max|diff| = 1.33e-05; sum(Table 7 w) = 1.000000
+  x0 vs Table 8 A0: max|diff| = 0.00e+00
+  R_all[0..10] vs Table 9 (A0..Qantas): max|diff| = 0.000057
+  V_all[0..10] vs Table 10 (A0..Qantas): max|diff| = 0.000005
+  THY true R[10] = [0.077, 0.0964, 0.0843, 0.0804, 0.0889, 0.0884, 0.0821], true V[10] = [0.01131, 0.01601, 0.0094, 0.01034, 0.01599, 0.01295, 0.00988], sum = 0.085888 (Table 11 prints 0.085888; Tables 9-10 accidentally reprinted A0 on THY row)
+  S0     0.099651 (printed 0.099651)
+  S      [0.065528, 0.082524, 0.098039, 0.07472, 0.084096, 0.083203, 0.090362, 0.065519, 0.082373, 0.088098, 0.085888] (max|S - Table 11| = 1.22e-06)
+  K      [0.657578, 0.828131, 0.98382, 0.749814, 0.8439, 0.83494, 0.90678, 0.657482, 0.82661, 0.884063, 0.861889] (max|K - Table 11| = 1.35e-05; with unrounded Entropy w: 1.47e-05)
+  rank   [10, 7, 1, 9, 5, 6, 2, 11, 8, 3, 4] (Table 11 MATCH: True; Entropy->ARAS rank MATCH: True)
+
+== F3 Aytac Adali & Tus Isik 2016 (6 air conditioners x 8 criteria, reconstructed AHP weights)
+  R_all vs Table 6: max|diff| = 0.000810
+  V_all[0..5] vs Table 7: max|diff| = 0.000260
+  S0     0.170859 (printed 0.1704); max|S - Table 8| = 0.000358
+  K      [0.96338, 0.796317, 0.818486, 0.776324, 0.821582, 0.676688] (max|K - Table 8| = 0.000620)
+  rank   [1, 4, 3, 5, 2, 6] (Table 8 MATCH: True)
+
+== F4 Keshavarz Ghorabaee 2015 Set 1 (10 x 7 Compare benchmark)
+  S0     0.116447
+  K      [0.936481, 0.899821, 0.687818, 0.579195, 0.674478, 0.647282, 0.88376, 0.854658, 0.839567, 0.584511]
+  rank   [1, 2, 6, 10, 7, 8, 3, 4, 5, 9]
+  SAW linearMax rank: [1, 3, 6, 9, 7, 8, 2, 4, 5, 10]
+  SAW sum rank      : [1, 2, 6, 10, 7, 8, 3, 4, 5, 9]
+
+== Random 2000 problems (m 3..8, n 2..7)
+  max|S_ARAS - SAW_sum(w / (1 + p0))| = 1.7e-16
+  K_i in (0, 1] violated: False; K vs S ranking diff: 0/2000
+  ARAS vs SAW(sum) ranking differs in      : 339/2000 cases
+  ARAS vs SAW(linearMax) ranking differs in: 679/2000 cases
+  User optimal (factor 1..2 beyond data) changes ranking in: 295/2000 cases
+  Constant column rank changes (2000 random): benefit 0/2000, cost 0/2000
+  Rank reversal when dropping alternative 5 (5x4, 2000 random): 305/2000
+  All alternatives equal (m=3): S0=0.250000 (1/4=0.25), S=[0.25, 0.25, 0.25], K=[1.0, 1.0, 1.0], rank=[1, 1, 1]
+  Column scaling invariance on F1b: max|dK| = 3.3e-16
+  Concrete 3x2 example X=[[10.0, 7.0], [7.0, 9.0], [9.0, 1.0]], w=[0.5, 0.5]: ARAS K=[0.8767, 0.8664, 0.4623] rank=[1, 2, 3] vs SAW(sum)=[0.3982, 0.3993, 0.2025] rank=[2, 1, 3] vs SAW(linearMax)=[0.8889, 0.85, 0.5056] rank=[1, 2, 3]

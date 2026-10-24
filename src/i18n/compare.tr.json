@@ -29,7 +29,8 @@
       "marcos": "MARCOS, SAW'ın ağırlıklı toplamını iki sabit sayıya böler; bu yüzden Doğrusal seçenekli SAW ile birebir aynı sıralar.",
       "cocoso": "CoCoSo 0-1 değerlerinin kuvvetlerini toplar, bu yüzden bir kriterde tam sonuncu olmak neredeyse tam bir puana mal olur.",
       "mabac": "MABAC her 0-1 değerin bir sınırın ne kadar üstünde ya da altında kaldığını toplar; 0-1 ağırlıklı toplamdaki gibi güçlü yanlar zayıflığı tam telafi eder.",
-      "moora": "MOORA vektör normalize fayda oranlarını toplar ve maliyet oranlarını çıkarır; bu yüzden Öklid ölçeğinde güçlü yanlar zayıflığı doğrusal olarak telafi eder."
+      "moora": "MOORA vektör normalize fayda oranlarını toplar ve maliyet oranlarını çıkarır; bu yüzden Öklid ölçeğinde güçlü yanlar zayıflığı doğrusal olarak telafi eder.",
+      "aras": "ARAS, optimal satırın da katıldığı ağırlıklı sütun paylarını toplar; bu yüzden güçlü yanlar bir zayıflığı tamamen telafi eder."
     },
     "unanimous": "{{n}} yöntemin hepsi {{a}} alternatifini {{b}} alternatifinin üstüne koyuyor.",
     "crossings": "Başka bir çifti görmek için grafikte bir kesişim seçin.",

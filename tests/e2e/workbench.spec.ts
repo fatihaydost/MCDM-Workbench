@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import * as XLSX from 'xlsx'
-import { cocoso, copras, critic, edas, entropy, mabac, marcos, merec, moora, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
+import { aras, cocoso, copras, critic, edas, entropy, mabac, marcos, merec, moora, saw, sd, topsis, vikor, vikorCompromise, waspas, type CriterionType } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`../fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -833,6 +833,40 @@ test('MOORA: the method page opens the transition projects with MOORA and equal 
   res.scores.forEach((v, i) => expect(Math.abs(v - published[i]!)).toBeLessThanOrEqual(1e-4))
   await expect(page.getByTestId('best-sentence')).toHaveText(`Project A ranks first (y = ${f4(res.scores[0]!)}).`)
   await expect(page.getByTestId('moora-row')).toHaveCount(3)
+})
+
+test('ARAS: the method page opens the airlines with ARAS; published K, S₀ once above the table, the optimal row; a zero blocks', async ({ page }) => {
+  const ex = getExample('bakir-atalik-2018-airlines')!
+  const p = { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix }
+  const res = aras.compute(p, ex.weights!, {})
+  const s0 = res.steps.find((x) => x.key === 'aras.optimalScore')!.scalar!
+
+  await page.goto('/methods/aras')
+  await expect(page.getByTestId('aras-rows')).toBeVisible()
+  await page.getByRole('link', { name: /Open in workbench/ }).first().click()
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(stageHeading(page, 'Ranking')).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'ARAS' })).toHaveAttribute('aria-checked', 'true')
+  const table = page.getByRole('table', { name: 'Ranking' })
+  await expect(table.locator('thead th')).toHaveText(['Rank', 'Alternative', 'Optimality S', 'Utility degree K'])
+  const byName = Object.fromEntries(ex.alternatives.map((a, i) => [a, f4(res.scores[i]!)]))
+  expect(await closenessByName(page)).toEqual(byName)
+  const published = ex.published.find((x) => x.label === 'aras.utilityDegree')!.values as number[]
+  res.scores.forEach((k, i) => expect(Math.abs(k - published[i]!)).toBeLessThanOrEqual(2e-5))
+  await expect(page.getByTestId('best-sentence')).toHaveText(`ANA ranks first (K = ${f4(res.scores[2]!)}).`)
+  await expect(page.getByTestId('ranking-constants')).toHaveText(`The same for every alternative: S₀ = ${f4(s0)}`)
+  // The picture replaces the score chart: the optimal row A₀ above one bar per airline.
+  await expect(page.getByTestId('aras-optimal')).toHaveCount(1)
+  await expect(page.getByTestId('aras-bar')).toHaveCount(11)
+  await expect(page.getByTestId('aras-utility').first()).toHaveText(f4(res.scores[2]!))
+
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Data' }).click()
+  await page.locator('#wb-cell-0-2').click()
+  await page.keyboard.type('0')
+  await page.keyboard.press('Enter')
+  await page.locator('nav[aria-label="Stages"]:visible button', { hasText: 'Ranking' }).click()
+  await expect(page.getByRole('button', { name: /^Air China on Lounge staff service is 0\./ })).toBeVisible()
+  await expect(page.getByTestId('ranking-row')).toHaveCount(0)
 })
 
 test('the ranking control is two full rows of five at 375 px', async ({ page }) => {
