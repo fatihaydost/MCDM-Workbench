@@ -47,6 +47,7 @@ export default function Catalog() {
   usePageMeta(t('methods.meta.title'), t('methods.meta.description'))
   const thumbs = useThumbs()
   const available = allMethods.filter((m) => m.status === 'available')
+  const research = allMethods.filter((m) => m.status === 'research')
 
   return (
     <>
@@ -59,7 +60,7 @@ export default function Catalog() {
         <div className="mt-10 grid grid-cols-1 gap-12 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-16">
           <div className="flex min-w-0 flex-col gap-12">
             <section aria-labelledby="available-title" className="flex flex-col gap-4">
-              <h2 id="available-title" className="text-20 font-semibold text-text">
+              <h2 id="available-title" className={research.length > 0 ? 'text-20 font-semibold text-text' : 'sr-only'}>
                 {t('methods.status.available')}
               </h2>
               {(['weighting', 'ranking'] as const).map((group) => (
@@ -91,37 +92,39 @@ export default function Catalog() {
               ))}
             </section>
 
-            <section aria-labelledby="research-title" className="flex flex-col gap-4">
-              <h2 id="research-title" className="text-20 font-semibold text-text">
-                {t('methods.status.research')}
-              </h2>
-              <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
-                {FAMILY_ORDER.map((family) => {
-                  const items = methodsByFamily(family).filter((m) => m.status === 'research')
-                  if (items.length === 0) return null
-                  return (
-                    <div key={family} className="flex flex-col gap-2 border-t border-line pt-3">
-                      <h3 className="flex items-center gap-2 text-13 font-medium text-text-2">
-                        <MethodGlyph family={family} size={16} />
-                        {t(`methods.families.${family}`)}
-                      </h3>
-                      <ul className="flex flex-wrap gap-1.5">
-                        {items.map((m) => (
-                          <li key={m.id}>
-                            <Link
-                              href={`/methods/${m.id}`}
-                              className="inline-flex h-7 items-center rounded-control border border-line px-2 text-13 text-text no-underline transition-colors hover:border-line-strong hover:bg-surface-2"
-                            >
-                              {m.name[lang]}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )
-                })}
-              </div>
-            </section>
+            {research.length > 0 ? (
+              <section aria-labelledby="research-title" className="flex flex-col gap-4">
+                <h2 id="research-title" className="text-20 font-semibold text-text">
+                  {t('methods.status.research')}
+                </h2>
+                <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {FAMILY_ORDER.map((family) => {
+                    const items = methodsByFamily(family).filter((m) => m.status === 'research')
+                    if (items.length === 0) return null
+                    return (
+                      <div key={family} className="flex flex-col gap-2 border-t border-line pt-3">
+                        <h3 className="flex items-center gap-2 text-13 font-medium text-text-2">
+                          <MethodGlyph family={family} size={16} />
+                          {t(`methods.families.${family}`)}
+                        </h3>
+                        <ul className="flex flex-wrap gap-1.5">
+                          {items.map((m) => (
+                            <li key={m.id}>
+                              <Link
+                                href={`/methods/${m.id}`}
+                                className="inline-flex h-7 items-center rounded-control border border-line px-2 text-13 text-text no-underline transition-colors hover:border-line-strong hover:bg-surface-2"
+                              >
+                                {m.name[lang]}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            ) : null}
           </div>
 
           <aside className="min-w-0">

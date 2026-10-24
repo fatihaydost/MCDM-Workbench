@@ -12,6 +12,7 @@ export default function CataloguePreview() {
   const { t } = useTranslation()
   const [lang] = useLang()
   const available = allMethods.filter((m) => m.status === 'available').length
+  const allAvailable = available === allMethods.length
 
   return (
     <section aria-labelledby="catalogue-title" className="flex flex-col gap-6">
@@ -34,30 +35,45 @@ export default function CataloguePreview() {
                 <MethodGlyph family={family} size={20} className="text-text-2" />
                 {t(`methods.families.${family}`)}
               </h3>
-              <dl className="flex flex-col gap-2 text-14">
-                {groups.map((g) => (
-                  <div key={g.status} className="grid grid-cols-[96px_minmax(0,1fr)] gap-3">
-                    <dt className={g.status === 'available' ? 'text-13 font-medium text-text' : 'text-13 text-text-2'}>
-                      {t(`landing.catalogue.${g.status}`)}
-                    </dt>
-                    <dd className="flex flex-wrap gap-x-3 gap-y-1">
-                      {g.items.map((m) => (
-                        <Link
-                          key={m.id}
-                          href={`/methods/${m.id}`}
-                          className={
-                            g.status === 'available'
-                              ? 'font-medium text-text underline decoration-line-strong underline-offset-2 hover:decoration-text'
-                              : 'text-text-2 no-underline hover:text-text hover:underline'
-                          }
-                        >
-                          {m.name[lang]}
-                        </Link>
-                      ))}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+              {allAvailable ? (
+                <ul className="flex flex-wrap gap-x-3 gap-y-1 text-14">
+                  {items.map((m) => (
+                    <li key={m.id}>
+                      <Link
+                        href={`/methods/${m.id}`}
+                        className="font-medium text-text underline decoration-line-strong underline-offset-2 hover:decoration-text"
+                      >
+                        {m.name[lang]}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <dl className="flex flex-col gap-2 text-14">
+                  {groups.map((g) => (
+                    <div key={g.status} className="grid grid-cols-[96px_minmax(0,1fr)] gap-3">
+                      <dt className={g.status === 'available' ? 'text-13 font-medium text-text' : 'text-13 text-text-2'}>
+                        {t(`landing.catalogue.${g.status}`)}
+                      </dt>
+                      <dd className="flex flex-wrap gap-x-3 gap-y-1">
+                        {g.items.map((m) => (
+                          <Link
+                            key={m.id}
+                            href={`/methods/${m.id}`}
+                            className={
+                              g.status === 'available'
+                                ? 'font-medium text-text underline decoration-line-strong underline-offset-2 hover:decoration-text'
+                                : 'text-text-2 no-underline hover:text-text hover:underline'
+                            }
+                          >
+                            {m.name[lang]}
+                          </Link>
+                        ))}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
             </div>
           )
         })}

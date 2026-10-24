@@ -168,7 +168,7 @@
     },
     "catalogue": {
       "title": "Methods",
-      "lead": "{{available}} of {{total}} methods compute here; the rest are researched drafts.",
+      "lead": "{{available}} of {{total}} methods compute in the browser and are checked against published examples.",
       "available": "Available",
       "research": "In research"
     },
@@ -1397,7 +1397,7 @@
     },
     "meta": {
       "title": "CRITIC and TOPSIS in the browser: MCDM Workbench",
-      "description": "Enter or import a decision matrix, weight the criteria with CRITIC, Entropy, SD, MEREC, equal or your own weights, rank the alternatives with TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo or MABAC and see every step of the calculation."
+      "description": "Enter or import a decision matrix, weight the criteria with 11 objective and subjective methods (CRITIC, Entropy, SD, MEREC, LOPCOW, CILOS, BWM, AHP, ROC, SWARA, Equal) or your own weights, rank the alternatives across 15 methods (TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I, ELECTRE III), test robustness and see every step."
     },
     "pairwise": {
       "question": "Which matters more?",
@@ -1528,7 +1528,7 @@
       "ranking-outranking": "Outranking"
     },
     "catalog": {
-      "lead": "{{available}} of {{total}} methods compute here; the rest are researched drafts.",
+      "lead": "{{available}} of {{total}} methods compute in the browser and are checked against published examples.",
       "oneLiner": {
         "topsis": "Ranks by distance to the best and the worst.",
         "critic": "Weights from contrast and conflict in the data.",

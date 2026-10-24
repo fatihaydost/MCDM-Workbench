@@ -61,10 +61,10 @@ export default function Landing() {
 
         <div className={`${container} flex flex-col gap-20 pt-6 pb-24 md:gap-24`}>
           <Pipeline />
-          <Verified />
           <Suspense fallback={<CatalogueSkeleton />}>
             <CataloguePreview />
           </Suspense>
+          <Verified />
         </div>
       </main>
       <SiteFooter />

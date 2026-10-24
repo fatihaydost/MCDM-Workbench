@@ -168,7 +168,7 @@
     },
     "catalogue": {
       "title": "Yöntemler",
-      "lead": "{{total}} yöntemden {{available}} tanesi burada hesaplanıyor; diğerleri araştırma taslağı.",
+      "lead": "{{total}} yöntemden {{available}} tanesi tarayıcıda hesaplanır ve yayımlanmış örneklerle doğrulanmıştır.",
       "available": "Mevcut",
       "research": "Araştırmada"
     },
@@ -1397,7 +1397,7 @@
     },
     "meta": {
       "title": "Tarayıcıda CRITIC ve TOPSIS: MCDM Workbench",
-      "description": "Karar matrisini girin ya da içe aktarın, kriterleri CRITIC, Entropi, SD, MEREC, eşit ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo ya da MABAC ile sıralayın ve hesabın her adımını görün."
+      "description": "Karar matrisini girin ya da içe aktarın, kriterleri 11 nesnel ve öznel yöntemle (CRITIC, Entropi, SD, MEREC, LOPCOW, CILOS, BWM, AHP, ROC, SWARA, Eşit) ya da kendi ağırlıklarınızla ağırlıklandırın, alternatifleri 15 yöntemle (TOPSIS, SAW, VIKOR, EDAS, WASPAS, COPRAS, MARCOS, CoCoSo, MABAC, MOORA, ARAS, CODAS, PROMETHEE II, ELECTRE I, ELECTRE III) sıralayın, sağlamlığı sınayın ve her adımı görün."
     },
     "pairwise": {
       "question": "Hangisi daha önemli?",
@@ -1528,7 +1528,7 @@
       "ranking-outranking": "Üstünlük"
     },
     "catalog": {
-      "lead": "{{total}} yöntemden {{available}} tanesi burada hesaplanıyor; diğerleri araştırma taslağı.",
+      "lead": "{{total}} yöntemden {{available}} tanesi tarayıcıda hesaplanır ve yayımlanmış örneklerle doğrulanmıştır.",
       "oneLiner": {
         "topsis": "En iyiye ve en kötüye uzaklıkla sıralar.",
         "critic": "Ağırlığı verideki kontrast ve çatışmadan bulur.",
