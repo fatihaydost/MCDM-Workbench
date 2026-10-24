@@ -31,6 +31,7 @@ import mabacPC from './fixtures/mabac-pamucar-cirovic2015-forklifts.json'
 import mooraBZ from './fixtures/moora-brauers-zavadskas2010.json'
 import arasBA from './fixtures/aras-bakir-atalik2018.json'
 import codasG from './fixtures/codas-ghorabaee2016.json'
+import rosz from './fixtures/roc-roszkowska2013.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -215,6 +216,15 @@ describe('examples match the published fixtures', () => {
       { label: 'codas.taxicab', values: codasG.badi2018.published.T, decimals: 4 },
       { label: 'codas.score', values: codasG.badi2018.published.H, decimals: 4 },
     ])
+  })
+  it('Roszkowska 2013 (ROC, 5x5 criteria weighting)', () => {
+    const ex = getExample('roszkowska-2013-rank-weights')!
+    expect(ex.referenceFor).toEqual(['roc'])
+    expect(ex.matrix).toEqual(rosz.matrix)
+    expect(ex.alternatives).toEqual(rosz.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(rosz.types)
+    expect(ex.weights).toBeUndefined()
+    expect(ex.published).toEqual([{ label: 'roc.weights', values: rosz.expected.weights, decimals: 4 }])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {

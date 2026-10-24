@@ -146,6 +146,9 @@
       },
       "codas": {
         "claim": "Tablo 3 ve 4 içindeki E, T, H değerleri ve altı sırasının tamamı {{citation}} ile {{decimals}} basamağa kadar aynı; 2016 özgün makalesinin iki örneği de örtüşüyor."
+      },
+      "roc": {
+        "claim": "ROC, RS ve RR ağırlıkları {{citation}} Tablo 4 ve 6 ile {{decimals}} basamağa kadar aynı, SAW sıralamaları da aynı."
       }
     },
     "catalogue": {
@@ -227,7 +230,8 @@
       "merec": "MEREC",
       "lopcow": "LOPCOW",
       "bwm": "BWM",
-      "ahp": "AHP"
+      "ahp": "AHP",
+      "roc": "ROC"
     },
     "rankingMethod": {
       "label": "Sıralama yöntemi",
@@ -321,6 +325,24 @@
           "max": "0,10: daha büyük E farklarında Taxicab"
         },
         "tauVariant": "τ = {{value}}"
+      },
+      "roc": {
+        "formula": "Sıra formülü",
+        "formulaOptions": {
+          "roc": "ROC (ağırlık merkezi)",
+          "rs": "RS (sıra toplamı)",
+          "rr": "RR (ters sıra)"
+        },
+        "formulaHints": {
+          "roc": "Harmonik kuyruk toplamı 1 / n · Σ 1 / k; sıralı ağırlık simpleksinin ağırlık merkezi (Barron ve Barrett 1996).",
+          "rs": "Doğrusal azalma 2(n + 1 - r) / (n(n + 1)); sıralar arasında en yatay dağılım (Stillwell vd. 1981).",
+          "rr": "Normalize ters sıra (1 / r) / H_n; birinci sırada en dik yoğunlaşma (Stillwell vd. 1981)."
+        },
+        "formulaVariant": {
+          "roc": "ROC",
+          "rs": "RS",
+          "rr": "RR"
+        }
       }
     },
     "example": {
@@ -422,7 +444,8 @@
         "merec": "Ağırlığı, kriteri çıkarmanın neyi değiştirdiğinden bulur. Her değer 0'dan büyük olmalı.",
         "lopcow": "Min-maks ölçeklemesinden sonra her kriterin karesel ortalamasının örneklem standart sapmasına logaritmik oranından bulunan nesnel ağırlıklar.",
         "bwm": "En önemli ve en önemsiz kriteri seçin, diğer her kriteri bu ikisiyle karşılaştırın (1‑9); 2n - 3 yanıt ağırlıkları verir.",
-        "ahp": "Kriterleri 1‑9 ölçeğinde ikişer ikişer karşılaştırın; tüm n(n - 1) / 2 yanıt ağırlıkları ve tutarlılık oranı CR'yi verir."
+        "ahp": "Kriterleri 1‑9 ölçeğinde ikişer ikişer karşılaştırın; tüm n(n - 1) / 2 yanıt ağırlıkları ve tutarlılık oranı CR'yi verir.",
+        "roc": "Kriterlerin önem sırasından (1. sütun en önemliden n. sütun en önemsize) ROC, Sıra Toplamı ya da Ters Sıra formülüyle öznel ağırlıklar."
       },
       "columns": {
         "criterion": "Kriter",
@@ -436,7 +459,8 @@
         "spread": "Yayılım σ",
         "removalEffect": "Çıkarma etkisi E",
         "rms": "RMS",
-        "pv": "Yüzde değer PV"
+        "pv": "Yüzde değer PV",
+        "criterionRank": "Sıra r"
       },
       "tableTitle": "Kriter ağırlıkları",
       "chartTitle": "Kriter ağırlıkları",
@@ -781,6 +805,10 @@
         "taxicab": "Taxicab uzaklığı T",
         "relativeAssessment": "Göreli değerlendirme Ra",
         "score": "Değerlendirme skoru H"
+      },
+      "roc": {
+        "ranks": "Kriter sıraları r",
+        "weights": "Ağırlıklar w"
       }
     },
     "issues": {
@@ -991,6 +1019,14 @@
         "title": "Negatif-idealden E ve T uzaklıkları ile H skoru",
         "caption": "Sol: negatif-ideal nokta ns üzerinden Öklid uzaklığı E (üst) ve Taxicab uzaklığı T (alt). Sağ: sıfır etrafında değerlendirme skoru H.",
         "row": "{{alternative}}: E = {{e}}, T = {{t}}, H = {{score}}"
+      },
+      "roc": {
+        "title": "Önem sıraları sayısal ağırlığa dönüşür",
+        "rank": "Sıra r",
+        "roc": "ROC",
+        "rs": "RS",
+        "rr": "RR",
+        "weight": "Ağırlık w"
       }
     },
     "flow": {
@@ -1105,6 +1141,10 @@
         "euclidean": "E ve T",
         "relativeAssessment": "İkili Ra",
         "score": "H"
+      },
+      "roc": {
+        "ranks": "Sıralar",
+        "weights": "Ağırlıklar"
       }
     },
     "pipeline": {
@@ -1194,7 +1234,8 @@
       "ahp": "AHP",
       "moora": "MOORA",
       "aras": "ARAS",
-      "codas": "CODAS"
+      "codas": "CODAS",
+      "roc": "ROC"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1262,7 +1303,8 @@
         "ahp": "Her kriter çiftini karşılaştırarak ağırlık.",
         "moora": "Vektör normalizasyonu sonrası fayda oranları eksi maliyet oranları.",
         "aras": "Her ağırlıklı pay toplamını bir optimal satırla oranlar.",
-        "codas": "Negatif-ideal noktaya Öklid ve Taxicab uzaklıklarını ikili karşılaştırmada birleştirir."
+        "codas": "Negatif-ideal noktaya Öklid ve Taxicab uzaklıklarını ikili karşılaştırmada birleştirir.",
+        "roc": "Kriterlerin önem sırasından ağırlıklar."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1542,6 +1584,20 @@
             "s2": "Taxicab uzaklığı T: ns noktasına kriter farklarının toplamı; Öklid farkı en az τ olduğunda eklenir.",
             "s3": "Değerlendirme skoru H: ikili karşılaştırmaların satır toplamı; en yüksek H birinci olur."
           }
+        },
+        "roc": {
+          "title": "Önem sıraları sayısal ağırlığa dönüşür",
+          "caption": "Daireler ROC (simpleks ağırlık merkezi), kareler RS (doğrusal) ve eşkenar dörtgenler RR (ters sıra) değerlerini aynı ölçekte gösterir; sağdaki çubuklar seçili formülün ağırlıklarını çizer.",
+          "rank": "Sıra r",
+          "roc": "ROC",
+          "rs": "RS",
+          "rr": "RR",
+          "weight": "Ağırlık w",
+          "steps": {
+            "s1": "Kriterleri 1. sıradan (en önemli) n. sıraya (en önemsiz) dizin; daire ROC harmonik ağırlık merkezini gösterir.",
+            "s2": "Üç sıra formülünü aynı ölçekte karşılaştırın: RS (kare) doğrusal azalır, RR (eşkenar dörtgen) 1. sırada en dik yoğunlaşır, ROC ise ikisinin arasında simpleks ağırlık merkezinde durur.",
+            "s3": "Seçilen formül her kriterin sırasını sağdaki ağırlık çubuğu w değerine dönüştürür; ağırlıkların toplamı 1 olur."
+          }
         }
       }
     }
@@ -1708,6 +1764,10 @@
       "taxicab": "Taxicab uzaklığı T: negatif-ideal çözüme mutlak farkların toplamı.",
       "relativeAssessment": "Göreli değerlendirme matrisi Ra: her (i, k) çifti için |E_i - E_k| en az τ ise (E_i - E_k) + (T_i - T_k), değilse yalnız (E_i - E_k).",
       "score": "Değerlendirme skoru H: Ra satır toplamı. Yüksek değer daha üstte yer alır ve skorların toplamı 0 olur."
+    },
+    "roc": {
+      "ranks": "1 (en önemli) ile n (en önemsiz) arasındaki kriter sıraları r.",
+      "weights": "Seçilen formülden (ROC ağırlık merkezi, Sıra Toplamı ya da Ters Sıra) elde edilen ve toplamı 1 olan sıra ağırlıkları w."
     }
   },
   "validation": {
