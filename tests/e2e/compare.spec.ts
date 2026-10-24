@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test'
-import { compareRankings, RANKING_IDS } from '../../src/core'
+import { COMPARE_ORDER, compareRankings, RANKING_IDS } from '../../src/core'
 import { getExample } from '../../src/data/examples'
 
 // Every registry ranking method is a column; the counts and firsts come from the core on the same example.
 const N = RANKING_IDS.length
-// Registry order, MARCOS next to SAW (it orders like SAW (Linear)).
-const ORDER = RANKING_IDS.filter((id) => id !== 'marcos').flatMap((id) => (id === 'saw' ? ['saw', 'marcos'] : [id]))
+// Compare column order: SAW, AHP and MARCOS sit next to each other.
+const ORDER = COMPARE_ORDER
 const ex = getExample('keshavarz-2015-ten-alternatives')!
 const core = compareRankings(
   { alternatives: ex.alternatives, criteria: ex.criteria.map((c) => ({ name: c.name.en, type: c.type })), matrix: ex.matrix },
@@ -20,7 +20,9 @@ test('compare: one column per ranking method, VIKOR\'s A7 first, Borda at the en
 
   const columns = page.getByTestId('rank-column')
   await expect(columns).toHaveCount(N)
-  expect(await columns.evaluateAll((els) => els.map((el) => el.getAttribute('data-label')))).toEqual(ORDER.map((id) => (id === 'cocoso' ? 'CoCoSo' : id.replace('-', ' ').toUpperCase())))
+  expect(await columns.evaluateAll((els) => els.map((el) => el.getAttribute('data-label')))).toEqual(
+    ORDER.map((id) => (id === 'cocoso' ? 'CoCoSo' : id === 'ahp-ranking' ? 'AHP' : id.replace('-', ' ').toUpperCase())),
+  )
   const firstOf = async (k: number) => columns.nth(k).locator('[data-rank="1"]').first().getAttribute('data-name')
   for (let k = 0; k < N; k++) expect(await firstOf(k)).toBe(firsts[k])
   expect(firsts[ORDER.indexOf('vikor')]).toBe('A7')
@@ -78,6 +80,7 @@ test('compare: a zero cell leaves SAW, WASPAS, COPRAS, MARCOS, ARAS and CODAS ou
   const saw = page.locator('[data-testid="rank-column"][data-method="saw"]')
   await expect(saw).toContainText('This method divides by the values or takes their logarithm, so each must be above 0.')
   await expect(saw.locator('[data-rank]')).toHaveCount(0)
+  await expect(page.locator('[data-testid="rank-column"][data-method="ahp-ranking"] [data-rank]')).toHaveCount(0)
   await expect(page.locator('[data-testid="rank-column"][data-method="waspas"] [data-rank]')).toHaveCount(0)
   await expect(page.locator('[data-testid="rank-column"][data-method="copras"] [data-rank]')).toHaveCount(0)
   await expect(page.locator('[data-testid="rank-column"][data-method="marcos"] [data-rank]')).toHaveCount(0)
@@ -86,7 +89,7 @@ test('compare: a zero cell leaves SAW, WASPAS, COPRAS, MARCOS, ARAS and CODAS ou
   await expect(page.getByTestId('marcos-badge')).toHaveCount(0)
   // CoCoSo normalizes by min-max, so the zero cell is an ordinary value for it.
   await expect(page.locator('[data-testid="rank-column"][data-method="cocoso"] [data-rank]')).toHaveCount(10)
-  await expect(page.getByTestId('compare-summary')).toContainText(`${N - 6} of ${N} methods ranked`)
+  await expect(page.getByTestId('compare-summary')).toContainText(`${N - 7} of ${N} methods ranked`)
 })
 
 test('compare: Turkish', async ({ page }) => {

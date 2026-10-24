@@ -221,24 +221,28 @@ test('CRITIC: σ is drawn to its true length, in the full picture and at the con
   await expect(page.locator('#idea svg').getByText('0.4394')).toBeVisible()
 })
 
-test('the step sentence never moves the text below it (390 and 1440 px, every method with steps)', async ({ page }) => {
-  test.setTimeout(120_000)
-  for (const width of [390, 1440])
-  for (const [method, count] of [['topsis', 5], ['critic', 4], ['entropy', 4], ['saw', 3], ['merec', 4], ['sd', 3], ['lopcow', 4], ['cilos', 4], ['cocoso', 4], ['mabac', 3], ['edas', 3], ['copras', 4], ['marcos', 3], ['moora', 3], ['aras', 3], ['codas', 3], ['promethee-ii', 3], ['bwm', 4], ['ahp', 4], ['roc', 3], ['swara', 3], ['electre-i', 3], ['electre-iii', 3], ['vikor', 3], ['waspas', 3], ['equal', 3]] as const) {
+for (const width of [390, 1440] as const) {
+  test(`the step sentence never moves the text below it (${width} px, every method with steps)`, async ({ page }) => {
+    test.setTimeout(120_000)
     await page.setViewportSize({ width, height: 900 })
-    await page.goto(`/methods/${method}`)
-    await expect(page.locator('#idea figure').first()).toBeVisible()
-    await page.getByRole('button', { name: 'Step through the idea' }).click()
-    const source = page.locator('#idea').getByText(/^Data: /)
-    const tops: number[] = []
-    for (let k = 0; k < count; k++) {
-      if (k > 0) await page.getByRole('button', { name: 'Next' }).click()
-      await expect(counter(page)).toHaveText(`${k + 1} / ${count}`)
-      tops.push((await source.boundingBox())!.y)
+    await page.goto('/methods/topsis')
+    for (const [method, count] of [['topsis', 5], ['critic', 4], ['entropy', 4], ['saw', 3], ['merec', 4], ['sd', 3], ['lopcow', 4], ['cilos', 4], ['cocoso', 4], ['mabac', 3], ['edas', 3], ['copras', 4], ['marcos', 3], ['moora', 3], ['aras', 3], ['codas', 3], ['promethee-ii', 3], ['bwm', 4], ['ahp', 4], ['roc', 3], ['swara', 3], ['electre-i', 3], ['electre-iii', 3], ['vikor', 3], ['waspas', 3], ['equal', 3]] as const) {
+      if (method !== 'topsis') {
+        await page.evaluate((m) => window.history.pushState(null, '', `/methods/${m}`), method)
+      }
+      await expect(page.locator('#idea figure').first()).toBeVisible()
+      await page.getByRole('button', { name: 'Step through the idea' }).click()
+      const source = page.locator('#idea').getByText(/^Data: /)
+      const tops: number[] = []
+      for (let k = 0; k < count; k++) {
+        if (k > 0) await page.getByRole('button', { name: 'Next' }).click()
+        await expect(counter(page)).toHaveText(`${k + 1} / ${count}`)
+        tops.push((await source.boundingBox())!.y)
+      }
+      expect(new Set(tops).size, `${method} ${width}: ${tops.join(', ')}`).toBe(1)
     }
-    expect(new Set(tops).size, `${method} ${width}: ${tops.join(', ')}`).toBe(1)
-  }
-})
+  })
+}
 
 test('closing in the middle gives back the reader\'s view; Finish ends on the distance plane', async ({ page }) => {
   await page.goto('/methods/topsis')
