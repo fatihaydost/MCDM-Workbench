@@ -107,7 +107,7 @@ describe('whySentences', () => {
     expect(identicalRankings(cq)).toBe(true)
     const [i, k] = defaultPair(cq)!
     expect(whySentences(pairFacts(q, ex.weights!, cq, i, k), await ctx('en', q, true))).toEqual([
-      'All 11 methods give the same ranking.',
+      'All 10 methods give the same ranking.',
     ])
   })
 

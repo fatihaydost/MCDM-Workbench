@@ -30,6 +30,7 @@ import cocosoY from './fixtures/cocoso-yazdani2019-logistics.json'
 import mabacPC from './fixtures/mabac-pamucar-cirovic2015-forklifts.json'
 import mooraBZ from './fixtures/moora-brauers-zavadskas2010.json'
 import arasBA from './fixtures/aras-bakir-atalik2018.json'
+import codasG from './fixtures/codas-ghorabaee2016.json'
 
 const draftOf = (id: string): DraftProblem => {
   const ex = getExample(id)!
@@ -201,6 +202,19 @@ describe('examples match the published fixtures', () => {
     expect(ex.criteria.map((c) => c.type)).toEqual(arasBA.types)
     expect(ex.weights).toEqual(arasBA.weights)
     expect(ex.published).toEqual([{ label: 'aras.utilityDegree', values: arasBA.published.K, decimals: 6 }])
+  })
+  it('Badi et al. 2018 (CODAS, steelmaking suppliers)', () => {
+    const ex = getExample('badi-2018-suppliers')!
+    expect(ex.referenceFor).toEqual(['codas'])
+    expect(ex.matrix).toEqual(codasG.badi2018.matrix)
+    expect(ex.alternatives).toEqual(codasG.badi2018.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(codasG.badi2018.types)
+    expect(ex.weights).toEqual(codasG.badi2018.weights)
+    expect(ex.published).toEqual([
+      { label: 'codas.euclidean', values: codasG.badi2018.published.E, decimals: 4 },
+      { label: 'codas.taxicab', values: codasG.badi2018.published.T, decimals: 4 },
+      { label: 'codas.score', values: codasG.badi2018.published.H, decimals: 4 },
+    ])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
@@ -527,6 +541,20 @@ describe('store actions', () => {
     const r = computeRanking(s)
     expectClose(r.value!.scores, arasBA.published.K, arasBA.expected.tolerance_vs_published.K)
     expect(r.value!.ranking).toEqual(arasBA.published.ranking)
+  })
+
+  it('CODAS through the store: the steelmaking suppliers open with CODAS and the paper weights, τ from the slider state', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.setMethodParam('codas', 'tau', 0.08)
+    st.loadExample('badi-2018-suppliers', 'en')
+    const s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('codas')
+    expect(s.weightMethod).toBe('manual')
+    expect(s.methodParams?.codas).toEqual({})
+    const r = computeRanking(s)
+    expectClose(r.value!.scores, codasG.badi2018.published.H, codasG.badi2018.published.tolerance)
+    expect(r.value!.ranking).toEqual(codasG.badi2018.published.ranking)
   })
 
   it('EDAS through the store: the 47 items open with EDAS and equal weights, the ten alternatives through the method page link', () => {

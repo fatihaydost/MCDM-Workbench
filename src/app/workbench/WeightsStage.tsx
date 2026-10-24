@@ -71,9 +71,8 @@ export function WeightsStage() {
           onValueChange={setWeightMethod}
           options={WEIGHTING_VIEW_IDS.map((m) => ({ value: m, label: weightMethodLabel(m, t) }))}
           size="md"
-          // Seven methods do not fit one row at 390 px: below sm the segments form a 4-column grid across the width
-          // (the four data methods, then the ones from you).
-          className="self-start max-sm:grid max-sm:grid-cols-4 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
+          // Nine methods do not fit one row at 390 px: below sm the segments form a 3x3 grid across the width.
+          className="self-start max-sm:grid max-sm:grid-cols-3 max-sm:self-stretch max-sm:[&>*]:px-2 max-sm:[&>*]:text-13"
         />
         <span id={ids.weightMethod} tabIndex={-1} className="sr-only">
           {t('workbench.weightMethod.label')}

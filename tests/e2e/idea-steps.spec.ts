@@ -115,15 +115,7 @@ for (const reducedMotion of ['reduce', 'no-preference'] as const) {
       expect(await drawing(page)).toEqual(full)
     })
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    for (const [method, count] of [['entropy', 4], ['saw', 3], ['merec', 4], ['sd', 3], ['cocoso', 4], ['mabac', 3], ['edas', 3], ['copras', 4], ['marcos', 3], ['ahp', 4]] as const) {
-=======
-    for (const [method, count] of [['entropy', 4], ['saw', 3], ['merec', 4], ['sd', 3], ['cocoso', 4], ['mabac', 3], ['edas', 3], ['copras', 4], ['marcos', 3], ['moora', 3]] as const) {
->>>>>>> feat/method-moora
-=======
-    for (const [method, count] of [['entropy', 4], ['saw', 3], ['merec', 4], ['sd', 3], ['cocoso', 4], ['mabac', 3], ['edas', 3], ['copras', 4], ['marcos', 3], ['aras', 3]] as const) {
->>>>>>> feat/method-aras
+    for (const [method, count] of [['entropy', 4], ['saw', 3], ['merec', 4], ['sd', 3], ['lopcow', 4], ['cocoso', 4], ['mabac', 3], ['edas', 3], ['copras', 4], ['marcos', 3], ['moora', 3], ['aras', 3], ['codas', 3], ['ahp', 4]] as const) {
       test(`${method}: ${count} steps, the last one is the full picture`, async ({ page }) => {
         await page.goto(`/methods/${method}`)
         await expect(page.locator('#idea figure').first()).toBeVisible()

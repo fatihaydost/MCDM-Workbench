@@ -729,7 +729,6 @@ export const examples: readonly ExampleDataset[] = [
     published: [{ label: 'mabac.scores', values: [0.0826, 0.2183, -0.0488, 0.0246, -0.0704, 0.0465, 0.0464], decimals: 4 }],
   },
   {
-<<<<<<< HEAD
     id: 'brauers-zavadskas-2010-projects',
     name: { en: 'Transition projects (Brauers and Zavadskas 2010)', tr: 'Geçiş ekonomisi projeleri (Brauers ve Zavadskas 2010)' },
     summary: {

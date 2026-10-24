@@ -195,14 +195,14 @@ export function RankingStage() {
   return (
     <div className="flex flex-col gap-6 pt-4">
       <div className="flex flex-col gap-2">
-        {/* Ten methods do not fit one row at 390 px: two rows of five below sm, no empty cell. */}
+        {/* Twelve methods do not fit one row at 390 px: three rows of four below sm, no empty cell. */}
         <SegmentedControl<RankingMethodId>
           aria-label={t('workbench.rankingMethod.label')}
           value={rankingMethod}
           onValueChange={setRankingMethod}
           options={RANKING_VIEW_IDS.map((m) => ({ value: m, label: t(`workbench.rankingMethod.${m}`) }))}
           size="md"
-          className="self-start max-sm:grid max-sm:grid-cols-5 max-sm:self-stretch max-sm:[&>*]:px-1.5 max-sm:[&>*]:text-13"
+          className="self-start max-sm:grid max-sm:grid-cols-4 max-sm:self-stretch max-sm:[&>*]:px-1.5 max-sm:[&>*]:text-13"
         />
         <p className="max-w-[72ch] text-13 text-text-2">
           {t(`workbench.ranking.methodHint.${rankingMethod}`)}

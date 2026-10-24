@@ -208,11 +208,13 @@ test('the whole flow works with the keyboard alone', async ({ page }) => {
   await arrow('ArrowRight', 'Entropy')
   await arrow('ArrowRight', 'SD')
   await arrow('ArrowRight', 'MEREC')
+  await arrow('ArrowRight', 'LOPCOW')
   await arrow('ArrowRight', 'Equal weights')
   await arrow('ArrowRight', 'Manual')
   await page.keyboard.press('Space')
   await expect(page.getByRole('radio', { name: 'Manual' })).toHaveAttribute('aria-checked', 'true')
   await arrow('ArrowLeft', 'Equal weights')
+  await arrow('ArrowLeft', 'LOPCOW')
   await arrow('ArrowLeft', 'MEREC')
   await arrow('ArrowLeft', 'SD')
   await arrow('ArrowLeft', 'Entropy')
@@ -869,30 +871,29 @@ test('ARAS: the method page opens the airlines with ARAS; published K, S₀ once
   await expect(page.getByTestId('ranking-row')).toHaveCount(0)
 })
 
-test('the ranking control is two full rows of five at 375 px', async ({ page }) => {
+test('the ranking control is three full rows of four at 375 px', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await page.goto('/app?example=pamucar-cirovic-2015-forklifts&stage=ranking')
   const radios = page.locator('[aria-label="Ranking method"]').getByRole('radio')
-  await expect(radios).toHaveCount(10)
+  await expect(radios).toHaveCount(12)
   const boxes = await radios.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).map((r) => ({ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) })))
   const rows = [...new Set(boxes.map((b) => b.y))]
-  expect(rows).toHaveLength(2)
-  for (const y of rows) expect(boxes.filter((b) => b.y === y)).toHaveLength(5)
+  expect(rows).toHaveLength(3)
+  for (const y of rows) expect(boxes.filter((b) => b.y === y)).toHaveLength(4)
   const widths = new Set(boxes.map((b) => b.w))
   expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(1)
   for (const b of boxes) expect(b.x + b.w).toBeLessThanOrEqual(375)
 })
 
-test('the weighting control is two rows at 375 px: four, then four', async ({ page }) => {
+test('the weighting control is three full rows of three at 375 px', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await page.goto('/app?example=krishnan-2021-smartphones&stage=weights')
   const radios = page.locator('[aria-label="Weighting method"]').getByRole('radio')
-  await expect(radios).toHaveCount(8)
+  await expect(radios).toHaveCount(9)
   const boxes = await radios.evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).map((r) => ({ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) })))
   const rows = [...new Set(boxes.map((b) => b.y))]
-  expect(rows).toHaveLength(2)
-  expect(boxes.filter((b) => b.y === rows[0]).length).toBe(4)
-  expect(boxes.filter((b) => b.y === rows[1]).length).toBe(4)
+  expect(rows).toHaveLength(3)
+  for (const y of rows) expect(boxes.filter((b) => b.y === y)).toHaveLength(3)
   for (const b of boxes) expect(b.x + b.w).toBeLessThanOrEqual(375)
 })
 
