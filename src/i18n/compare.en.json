@@ -28,7 +28,8 @@
       "copras": "COPRAS adds up the benefit shares, and cost enters through the reciprocal of its total share, so a very low-cost alternative gets a big bonus.",
       "marcos": "MARCOS divides SAW's weighted total by two fixed numbers, so it orders exactly like SAW with the Linear option.",
       "cocoso": "CoCoSo adds up powers of the 0-1 values, so being exactly last on a criterion costs almost a full point.",
-      "mabac": "MABAC adds up how far each 0-1 value lies above or below a border, so strengths make up for a weakness fully, as in a 0-1 weighted sum."
+      "mabac": "MABAC adds up how far each 0-1 value lies above or below a border, so strengths make up for a weakness fully, as in a 0-1 weighted sum.",
+      "codas": "CODAS measures the Euclidean and Taxicab distances from the worst weighted value across every pair, so one large lead above the worst value boosts Euclidean distance more than several small ones."
     },
     "unanimous": "All {{n}} methods put {{a}} above {{b}}.",
     "crossings": "Select a crossing in the chart to see another pair.",

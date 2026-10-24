@@ -6,7 +6,7 @@ export const codas: MethodContent = {
   name: { en: 'CODAS', tr: 'CODAS' },
   fullName: { en: 'COmbinative Distance-based ASsessment', tr: 'Birleşik uzaklık tabanlı değerlendirme' },
   family: 'ranking-distance',
-  status: 'research',
+  status: 'available',
   year: 2016,
   origin: {
     authors: 'Keshavarz Ghorabaee, M.; Zavadskas, E.K.; Turskis, Z.; Antucheviciene, J.',
@@ -36,8 +36,8 @@ export const codas: MethodContent = {
       title: { en: 'Relative assessment matrix', tr: 'Göreli değerlendirme matrisi' },
       tex: String.raw`h_{ik} = (E_i - E_k) + \psi(E_i - E_k)\,(T_i - T_k), \qquad \psi(x) = \begin{cases} 1 & |x| \ge \tau \\ 0 & |x| < \tau \end{cases}`,
       note: {
-        en: "psi as printed in Eq. (10) of the origin, which reproduces every published number, although the paper's text says the opposite (use Taxicab when the Euclidean gap is below tau).",
-        tr: "psi, özgün makaledeki Denklem (10)'da basıldığı gibidir ve yayımlanan tüm sayıları verir; makalenin metni ise tersini söyler (Öklid farkı tau'nun altındaysa Taxicab kullanılır).",
+        en: "psi as printed in Eq. (8) of the origin, which reproduces every published number in Section 3, although the paper's prose says the opposite (use Taxicab when the Euclidean gap is below tau).",
+        tr: "psi, özgün makaledeki Denklem (8)'de basıldığı gibidir ve Bölüm 3'te yayımlanan tüm sayıları verir; makalenin metni ise tersini söyler (Öklid farkı tau'nun altındaysa Taxicab kullanılır).",
       },
     },
     {
@@ -52,8 +52,8 @@ export const codas: MethodContent = {
   combinedWith: [
     {
       text: {
-        en: 'The origin uses weights given with the problem: Example 1 from Chakraborty & Zavadskas (2014), Example 2 expert weights from Zavadskas & Turskis (2010).',
-        tr: 'Özgün makale problemle verilen ağırlıkları kullanır: 1. örnekte Chakraborty ve Zavadskas (2014), 2. örnekte Zavadskas ve Turskis (2010) uzman ağırlıkları.',
+        en: 'Expert weights, then CODAS: Badi, Abdulshahed & Shetwan (2018), the example used here; the origin uses weights from Chakraborty & Zavadskas (2014) and Zavadskas & Turskis (2010).',
+        tr: 'Uzman ağırlıkları, ardından CODAS: Badi, Abdulshahed ve Shetwan (2018), buradaki örnek; özgün makale Chakraborty ve Zavadskas (2014) ile Zavadskas ve Turskis (2010) ağırlıklarını kullanır.',
       },
     },
     {
@@ -72,35 +72,39 @@ export const codas: MethodContent = {
     },
   ],
   reference: {
-    source: 'Keshavarz Ghorabaee, M.; Zavadskas, E.K.; Turskis, Z.; Antucheviciene, J. (2016). A new combinative distance-based assessment (CODAS) method for multi-criteria decision-making. Economic Computation and Economic Cybernetics Studies and Research 50(3), 25-44',
+    source: 'Badi, I.; Abdulshahed, A.M.; Shetwan, A. (2018). A case study of supplier selection for a steelmaking company in Libya by using the Combinative Distance-based Assessment (CODAS) model. Decision Making: Applications in Management and Engineering 1(1), 1-12',
+    doi: '10.31181/dmame180101b',
     match: 'match',
     note: {
-      en: 'Published example (Example 1: Tables 1-4; Example 2: Tables 5-8); this method is not computed here yet, only recomputed during research. Industrial-robot selection (7 x 5) and office microclimate (14 x 6). E, T and H match both examples and the rankings are identical. The headers of Tables 1 and 2 swap two columns (tip speed and repeatability); Table 3 confirms which is which. pyDecision uses a different h formula and does not match.',
-      tr: 'Yayımlanmış örnek (Örnek 1: Tablo 1-4; Örnek 2: Tablo 5-8); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Endüstriyel robot seçimi (7 x 5) ve ofis mikrokliması (14 x 6). E, T ve H iki örnekte de örtüşüyor, sıralamalar aynı. Tablo 1 ve 2 başlıklarında iki sütun (uç hızı ve tekrarlanabilirlik) yer değiştirmiş; hangisinin hangisi olduğunu Tablo 3 doğruluyor. pyDecision farklı bir h formülü kullanır ve örtüşmez.',
+      en: 'Published example, reproduced by the tests: six steelmaking suppliers on four criteria, direct cost the only cost, with expert weights (Tables 1-5). E, T and H match to 4 decimals and the rank order over tau (0.01 to 1.00) is identical; Table 3 misprints the third column of ns as 0.0719 for 0.1161, while E, T and H use 0.1161. Also tested: both examples of the origin (Keshavarz Ghorabaee et al. 2016, industrial robots in Tables 1-4, where the headers of Tables 1 and 2 swap tip speed and repeatability, and office microclimate in Tables 5-8), which match E, T, H and rankings. pyDecision uses a different h formula and does not match.',
+      tr: "Yayımlanmış örnek, testlerde yeniden üretiliyor: dört kriterde altı çelik üretimi tedarikçisi, yalnız doğrudan maliyetin maliyet kriteri olduğu uzman ağırlıklı tablo (Tablo 1-5). E, T ve H 4 basamağa kadar örtüşüyor ve tau (0,01'den 1,00'a) boyunca sıralama birebir aynı; Tablo 3, ns satırının üçüncü sütununu 0,1161 yerine 0,0719 basmış ama E, T ve H hesabında 0,1161 kullanılmış. Ayrıca sınananlar: özgün makalenin iki örneği (Keshavarz Ghorabaee vd. 2016; Tablo 1 ve 2 başlıklarında uç hızı ile tekrarlanabilirliğin yer değiştirdiği Tablo 1-4 endüstriyel robot seçimi ve Tablo 5-8 ofis mikrokliması); ikisinde de E, T, H ve sıralamalar örtüşüyor. pyDecision farklı bir h formülü kullanır ve örtüşmez.",
     },
   },
   sources: [
     { label: 'Keshavarz Ghorabaee, Zavadskas, Turskis & Antucheviciene (2016), ECECSR 50(3), 25-44', url: 'https://ideas.repec.org/a/cys/ecocyb/v50y2016i3p25-44.html' },
-    { label: 'pyDecision 5.1.1, codas_method', url: 'https://github.com/Valdecy/pyDecision' },
+    { label: 'Badi, Abdulshahed & Shetwan (2018), Decision Making: Applications in Management and Engineering 1(1), 1-12', doi: '10.31181/dmame180101b' },
+    { label: 'Trung (2022), Applied Engineering Letters 7(2), 54-66', doi: '10.18485/aeletters.2022.7.2.2' },
+    { label: 'pymcdm 1.4.0, pymcdm.methods.CODAS', url: 'https://gitlab.com/shekhand/mcda' },
+    { label: 'pyDecision 5.1.8, codas_method', url: 'https://github.com/Valdecy/pyDecision' },
   ],
   en: {
     summary:
       'CODAS scores each alternative by its distance from the worst point, Euclidean first and Taxicab second. Comparing every pair, the alternative with the largest total margin wins.',
     whenToUse: [
-      'Benefit and cost data.',
+      'Strictly positive benefit and cost data.',
       'You want pairwise aggregation using two notions of distance.',
     ],
     whenNot: [
       'You cannot defend a value for tau: the ranking can change.',
-      'Cost criteria contain zeros (min/x normalization).',
+      'Any criterion contains zero or negative values (linear max/min normalization).',
     ],
     inputs: [
-      'Decision matrix with non-negative values; cost criteria strictly positive.',
+      'Decision matrix with strictly positive values.',
       'Criterion type per column, weights summing to 1.',
-      'Threshold tau, default 0.02, suggested range 0.01-0.05.',
+      'Threshold tau, default 0.02, range 0.01-0.10 (0.01-0.05 suggested).',
     ],
     pitfalls: [
-      'The origin paper contradicts itself on psi; Eq. (10) is the version that reproduces the published numbers.',
+      'The origin paper contradicts itself on psi; Eq. (8) is the version that reproduces the published numbers in Section 3.',
       'tau is in weighted normalized distance units, so its effect depends on the weights and the number of alternatives.',
       'H sums to zero over all alternatives and is not bounded; do not compare it across problems.',
     ],
@@ -109,20 +113,20 @@ export const codas: MethodContent = {
     summary:
       'CODAS her alternatifi en kötü noktaya uzaklığıyla puanlar: önce Öklid, ikinci ölçü olarak Taxicab uzaklığı. Tüm çiftler karşılaştırılır; toplamda en büyük farkla önde olan kazanır.',
     whenToUse: [
-      'Fayda ve maliyet kriterli veri.',
+      'Kesinlikle pozitif fayda ve maliyet kriterli veri.',
       'İki uzaklık kavramını kullanan ikili karşılaştırmalı bir birleştirme istiyorsunuz.',
     ],
     whenNot: [
       'tau için savunulabilir bir değeriniz yok: sıralama buna göre değişebilir.',
-      'Maliyet kriterlerinde sıfır var (min/x normalizasyonu).',
+      'Herhangi bir kriterde sıfır veya negatif değer var (doğrusal maks/min normalizasyonu).',
     ],
     inputs: [
-      'Negatif olmayan değerli karar matrisi; maliyet kriterleri kesinlikle pozitif.',
+      'Kesinlikle pozitif değerli karar matrisi.',
       'Her sütun için kriter türü, toplamı 1 olan ağırlıklar.',
-      'Eşik tau, varsayılan 0,02, önerilen aralık 0,01-0,05.',
+      'Eşik tau, varsayılan 0,02, aralık 0,01-0,10 (önerilen 0,01-0,05).',
     ],
     pitfalls: [
-      "Özgün makale psi konusunda kendisiyle çelişir; yayımlanan sayıları veren Denklem (10)'dur.",
+      "Özgün makale psi konusunda kendisiyle çelişir; Bölüm 3'te yayımlanan sayıları veren Denklem (8)'dir.",
       'tau ağırlıklı normalize uzaklık birimindedir; etkisi ağırlıklara ve alternatif sayısına bağlıdır.',
       'H tüm alternatifler üzerinde sıfıra toplanır ve sınırlı değildir; problemler arasında karşılaştırmayın.',
     ],

@@ -1,6 +1,7 @@
 import type { RankingMethodId, WeightMethodId } from '../../../state/workbench'
 import { bwm } from './bwm'
 import { cocoso } from './cocoso'
+import { codas } from './codas'
 import { copras } from './copras'
 import { critic } from './critic'
 import { edas } from './edas'
@@ -46,6 +47,7 @@ export const methodViews: Readonly<Views> = {
   marcos,
   cocoso,
   mabac,
+  codas,
 }
 
 const ids = Object.keys(methodViews) as ViewId[]

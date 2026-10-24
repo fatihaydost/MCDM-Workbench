@@ -107,7 +107,7 @@ describe('method content', () => {
     const available = allMethods.filter((m) => m.status === 'available').map((m) => m.id).sort()
     const registry = listMethods().map((m) => m.id).sort()
     expect(available).toEqual(registry)
-    expect(available).toEqual(['bwm', 'cocoso', 'copras', 'critic', 'edas', 'entropy', 'equal', 'mabac', 'marcos', 'merec', 'saw', 'sd', 'topsis', 'vikor', 'waspas'])
+    expect(available).toEqual(['bwm', 'cocoso', 'codas', 'copras', 'critic', 'edas', 'entropy', 'equal', 'mabac', 'marcos', 'merec', 'saw', 'sd', 'topsis', 'vikor', 'waspas'])
   })
 
   it('gives each registry method the matching kind of family', () => {

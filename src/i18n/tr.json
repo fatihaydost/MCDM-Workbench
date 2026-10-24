@@ -131,6 +131,9 @@
       },
       "bwm": {
         "claim": "Doğrusal BWM ağırlıkları {{citation}} ile {{decimals}} basamağa kadar aynı."
+      },
+      "codas": {
+        "claim": "Tablo 3 ve 4 içindeki E, T, H değerleri ve altı sırasının tamamı {{citation}} ile {{decimals}} basamağa kadar aynı; 2016 özgün makalesinin iki örneği de örtüşüyor."
       }
     },
     "catalogue": {
@@ -222,7 +225,8 @@
       "copras": "COPRAS",
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
-      "mabac": "MABAC"
+      "mabac": "MABAC",
+      "codas": "CODAS"
     },
     "params": {
       "entropy": {
@@ -278,6 +282,14 @@
           "max": "1: yalnız S"
         },
         "lambdaVariant": "λ = {{value}}"
+      },
+      "codas": {
+        "tau": "Eşik τ",
+        "tauEnds": {
+          "min": "0,01: daha küçük E farklarında Taxicab",
+          "max": "0,10: daha büyük E farklarında Taxicab"
+        },
+        "tauVariant": "τ = {{value}}"
       }
     },
     "example": {
@@ -416,7 +428,8 @@
         "copras": "Her alternatifin fayda kriterlerindeki ağırlıklı payını toplar, maliyet payı küçüldükçe büyüyen bir puan ekler; Q büyüdükçe sıra yükselir.",
         "marcos": "Her ağırlıklı toplamı hayali bir ideal ve anti-ideal satırla ölçer; f(K) büyüdükçe sıra yükselir, sıra SAW (Doğrusal) ile aynıdır.",
         "cocoso": "Ağırlıklı toplam S ile üs toplamı P'yi üç biçimde okuyup birleştirir; k büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
-        "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir."
+        "mabac": "Her alternatifin, her kriterin geometrik ortalaması olan sınırın ne kadar üstünde ya da altında kaldığını toplar; S büyüdükçe sıra yükselir, sıra min-maks ağırlıklı toplamla aynıdır. Sıfır ve negatif değerlere izin verir.",
+        "codas": "Her alternatifi negatif-ideal noktaya Öklid ve Taxicab uzaklıklarıyla bütün çiftler üzerinden karşılaştırarak puanlar; yüksek H daha iyidir."
       },
       "columns": {
         "rank": "Sıra",
@@ -431,7 +444,9 @@
         "wpm": "Çarpım Q2",
         "utility": "Fayda derecesi N (%)",
         "weightedSum": "Ağırlıklı toplam S",
-        "powerSum": "Üs toplamı P"
+        "powerSum": "Üs toplamı P",
+        "euclidean": "Öklid E",
+        "taxicab": "Taxicab T"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -479,6 +494,11 @@
           "name": "Sınıra uzaklık S",
           "title": "MABAC sınıra uzaklık S",
           "symbol": "S"
+        },
+        "codas": {
+          "name": "Değerlendirme H",
+          "title": "CODAS değerlendirme skoru H",
+          "symbol": "H"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -673,6 +693,15 @@
         "consistencyLocal": "Tutarlılık CR^I_j",
         "xi": "Sapma ξ",
         "weights": "Ağırlıklar w"
+      },
+      "codas": {
+        "normalized": "Normalize matris n",
+        "weighted": "Ağırlıklı matris r",
+        "negativeIdeal": "Negatif-ideal ns",
+        "euclidean": "Öklid uzaklığı E",
+        "taxicab": "Taxicab uzaklığı T",
+        "relativeAssessment": "Göreli değerlendirme Ra",
+        "score": "Değerlendirme skoru H"
       }
     },
     "issues": {
@@ -842,6 +871,11 @@
         "best": "En iyi",
         "worst": "En kötü",
         "flagged": "En az uyan"
+      },
+      "codas": {
+        "title": "Negatif-idealden E ve T uzaklıkları ile H skoru",
+        "caption": "Sol: negatif-ideal nokta ns üzerinden Öklid uzaklığı E (üst) ve Taxicab uzaklığı T (alt). Sağ: sıfır etrafında değerlendirme skoru H.",
+        "row": "{{alternative}}: E = {{e}}, T = {{t}}, H = {{score}}"
       }
     },
     "flow": {
@@ -925,6 +959,14 @@
         "border": "Sınır G",
         "distance": "Q",
         "scores": "S"
+      },
+      "codas": {
+        "normalized": "Normalizasyon",
+        "weighted": "Ağırlıklı",
+        "negativeIdeal": "Negatif-ideal",
+        "euclidean": "E ve T",
+        "relativeAssessment": "İkili Ra",
+        "score": "H"
       }
     },
     "pipeline": {
@@ -1009,7 +1051,8 @@
       "marcos": "MARCOS",
       "cocoso": "CoCoSo",
       "mabac": "MABAC",
-      "bwm": "BWM"
+      "bwm": "BWM",
+      "codas": "CODAS"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1072,7 +1115,8 @@
         "marcos": "Hayali bir ideal ve anti-ideale göre ölçer.",
         "cocoso": "Bir toplamın ve bir üs toplamının üç okuması, birleşik.",
         "mabac": "Her kriterde bir sınırın üstüne ya da altına uzaklık.",
-        "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar."
+        "bwm": "Birkaç karşılaştırmaya verdiğiniz yanıtlardan ağırlıklar.",
+        "codas": "Negatif-ideal noktaya Öklid ve Taxicab uzaklıklarını ikili karşılaştırmada birleştirir."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1296,6 +1340,15 @@
             "s3": "En kötüyle ilgili yanıtlar kriteri ikinci kez yerleştirir. İki yer farklıysa yanıtlarınız çelişir; işaretli olan en az uyandır.",
             "s4": "BWM bu aralıkların en büyüğünü olabildiğince küçük tutan ağırlıkları seçer."
           }
+        },
+        "codas": {
+          "title": "En kötü noktadan iki uzaklık, tek ikili skor",
+          "caption": "Her tedarikçi negatif-ideal nokta ns üzerinden Öklid uzaklığı E ve Taxicab uzaklığı T ile ölçülür; H ikili farkları toplar.",
+          "steps": {
+            "s1": "Öklid uzaklığı E: her tedarikçinin negatif-ideal nokta ns üzerinden düz çizgi uzaklığı.",
+            "s2": "Taxicab uzaklığı T: ns noktasına kriter farklarının toplamı; Öklid farkı en az τ olduğunda eklenir.",
+            "s3": "Değerlendirme skoru H: ikili karşılaştırmaların satır toplamı; en yüksek H birinci olur."
+          }
         }
       }
     }
@@ -1424,6 +1477,15 @@
       "consistencyLocal": "Kriter başına tutarlılık: a_Bj ile a_jW çarpımı a_BW değerinden ne kadar uzak.",
       "xi": "Sapma: yanıtlarla uyarlanan ağırlıklar arasındaki en büyük fark.",
       "weights": "BWM ağırlıkları: doğrusal model, kapalı biçimde çözülür, toplamı 1."
+    },
+    "codas": {
+      "normalized": "Doğrusal maks normalizasyonu: her değer sütun maksimumuna bölünür; maliyet kriterinde sütun minimumu değere bölünür, böylece en iyi değer 1 olur.",
+      "weighted": "Ağırlıklı normalize matris r = w n: her normalize değer kriter ağırlığıyla çarpılır.",
+      "negativeIdeal": "Negatif-ideal çözüm ns: her kriter sütunundaki en küçük ağırlıklı değer.",
+      "euclidean": "Her alternatifin negatif-ideal çözüme Öklid uzaklığı E.",
+      "taxicab": "Taxicab uzaklığı T: negatif-ideal çözüme mutlak farkların toplamı.",
+      "relativeAssessment": "Göreli değerlendirme matrisi Ra: her (i, k) çifti için |E_i - E_k| en az τ ise (E_i - E_k) + (T_i - T_k), değilse yalnız (E_i - E_k).",
+      "score": "Değerlendirme skoru H: Ra satır toplamı. Yüksek değer daha üstte yer alır ve skorların toplamı 0 olur."
     }
   },
   "validation": {

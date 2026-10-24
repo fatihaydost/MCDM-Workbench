@@ -28,7 +28,8 @@
       "copras": "COPRAS fayda paylarını toplar, maliyet ise toplam payının tersiyle girer; bu yüzden maliyeti çok düşük bir alternatif büyük bir puan alır.",
       "marcos": "MARCOS, SAW'ın ağırlıklı toplamını iki sabit sayıya böler; bu yüzden Doğrusal seçenekli SAW ile birebir aynı sıralar.",
       "cocoso": "CoCoSo 0-1 değerlerinin kuvvetlerini toplar, bu yüzden bir kriterde tam sonuncu olmak neredeyse tam bir puana mal olur.",
-      "mabac": "MABAC her 0-1 değerin bir sınırın ne kadar üstünde ya da altında kaldığını toplar; 0-1 ağırlıklı toplamdaki gibi güçlü yanlar zayıflığı tam telafi eder."
+      "mabac": "MABAC her 0-1 değerin bir sınırın ne kadar üstünde ya da altında kaldığını toplar; 0-1 ağırlıklı toplamdaki gibi güçlü yanlar zayıflığı tam telafi eder.",
+      "codas": "CODAS her çift için en kötü ağırlıklı değere Öklid ve Taxicab uzaklığını ölçer, bu yüzden en kötü değerin çok üstünde olan tek bir kriter, birkaç küçük farktan daha fazla Öklid uzaklığı kazandırır."
     },
     "unanimous": "{{n}} yöntemin hepsi {{a}} alternatifini {{b}} alternatifinin üstüne koyuyor.",
     "crossings": "Başka bir çifti görmek için grafikte bir kesişim seçin.",

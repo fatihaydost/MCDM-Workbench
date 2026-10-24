@@ -649,6 +649,44 @@ export const examples: readonly ExampleDataset[] = [
     // Table 12 as printed.
     published: [{ label: 'mabac.scores', values: [0.0826, 0.2183, -0.0488, 0.0246, -0.0704, 0.0465, 0.0464], decimals: 4 }],
   },
+  {
+    id: 'badi-2018-suppliers',
+    name: { en: 'Steelmaking suppliers (Badi et al. 2018)', tr: 'Çelik üretimi tedarikçileri (Badi vd. 2018)' },
+    summary: {
+      en: 'Six suppliers for a steelmaking company in Libya on quality, direct cost, lead time and logistics service, with expert weights. The paper reports the CODAS distances and assessment scores.',
+      tr: "Libya'daki bir çelik üretim işletmesi için kalite, doğrudan maliyet, teslimat süresi ve lojistik hizmetinde altı tedarikçi, uzman ağırlıklarıyla. Makale CODAS uzaklıklarını ve değerlendirme skorlarını veriyor.",
+    },
+    referenceFor: ['codas'],
+    citation: {
+      authors: 'Badi, I.; Abdulshahed, A.M.; Shetwan, A.',
+      year: 2018,
+      title: 'A case study of supplier selection for a steelmaking company in Libya by using the Combinative Distance-based Assessment (CODAS) model',
+      venue: 'Decision Making: Applications in Management and Engineering 1(1), 1-12',
+      doi: '10.31181/dmame180101b',
+      tables: { en: 'Table 1 (input and weights), Tables 3 and 4 (output)', tr: 'Tablo 1 (girdi ve ağırlıklar), Tablo 3 ve 4 (çıktı)' },
+    },
+    alternatives: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'],
+    criteria: [
+      { name: { en: 'Quality (points)', tr: 'Kalite (puan)' }, type: 'benefit' },
+      { name: { en: 'Direct cost (USD)', tr: 'Doğrudan maliyet (USD)' }, type: 'cost' },
+      { name: { en: 'Lead time (days)', tr: 'Teslimat süresi (gün)' }, type: 'benefit' },
+      { name: { en: 'Logistics service (points)', tr: 'Lojistik hizmet (puan)' }, type: 'benefit' },
+    ],
+    matrix: [
+      [45, 3600, 45, 0.9],
+      [25, 3800, 60, 0.8],
+      [23, 3100, 35, 0.9],
+      [14, 3400, 50, 0.7],
+      [15, 3300, 40, 0.8],
+      [28, 3000, 30, 0.6],
+    ],
+    weights: [0.2857, 0.3036, 0.2321, 0.1786],
+    published: [
+      { label: 'codas.euclidean', values: [0.2141, 0.1411, 0.1006, 0.0847, 0.0666, 0.1095], decimals: 4 },
+      { label: 'codas.taxicab', values: [0.3277, 0.2256, 0.1901, 0.1254, 0.121, 0.1528], decimals: 4 },
+      { label: 'codas.score', values: [1.3914, 0.3411, -0.217, -0.5381, -0.7292, -0.2481], decimals: 4 },
+    ],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)
