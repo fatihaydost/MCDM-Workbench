@@ -4,6 +4,7 @@ import {
   ahp,
   ahpEigenvector,
   ahpGeometricMean,
+  ahpIncompleteLlsm,
   ahpWorstPair,
   aras,
   assertValid,
@@ -78,6 +79,8 @@ import {
   zeros,
 } from '../src/core/math'
 import { reweight } from '../src/core/reweight'
+import { rankScores, tied } from '../src/core/rank'
+import { ENTROPY_NO_INFORMATION } from '../src/core/methods/entropy'
 import {
   createRng,
   kendallTauB,
@@ -1010,6 +1013,211 @@ describe('Mathematician 2 Ranking Identities and Algebraic Conservation Laws', (
     expect(w).toBeLessThanOrEqual(1)
   })
 })
+
+describe('Mathematician 1 Weighting, Judgements, and Numerical Algebra Audits', () => {
+  it('pearson on min-max normalized collinear floats exhibits 2.22e-16 overshoot above 1.0', () => {
+    const xs = [0, 1, 2, 12, 61]
+    const ys = [0.1, 0.4, 0.7, 3.7, 18.4]
+    const minMax = (arr: number[]) => {
+      const lo = minOf(arr)
+      const hi = maxOf(arr)
+      return arr.map((x) => (x - lo) / (hi - lo))
+    }
+    const rxs = minMax(xs)
+    const rys = minMax(ys)
+    const p = pearson(rxs, rys)
+
+    // In IEEE 754 float64 arithmetic, p computes to 1.0000000000000002 (> 1.0)
+    expect(p).toBeGreaterThan(1.0)
+    expect(p - 1.0).toBeCloseTo(2.22e-16, 17)
+    // 1 - p produces small negative residue
+    expect(1.0 - p).toBeLessThan(0)
+  })
+
+  it('vectorNormalize handles all-zero column and preserves norm on 1e-90 and 1e90 scales', () => {
+    const mat = [
+      [1e-90, 1e90, 0],
+      [2e-90, 2e90, 0],
+      [3e-90, 3e90, 0],
+    ]
+    const { normalized, zeroCols } = vectorNormalize(mat)
+    expect(zeroCols).toEqual([2])
+    expect(normalized[0]![2]).toBe(0)
+    expect(normalized[1]![2]).toBe(0)
+    expect(normalized[2]![2]).toBe(0)
+
+    for (let j = 0; j < 2; j++) {
+      const colNormSq = normalized.reduce((acc, row) => acc + row[j]! * row[j]!, 0)
+      expect(colNormSq).toBeCloseTo(1.0, 14)
+    }
+  })
+
+  it('linearMaxNormalize guarantees max value of 1.0 on both benefit and cost criteria', () => {
+    const p: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'Benefit', type: 'benefit' },
+        { name: 'Cost', type: 'cost' },
+      ],
+      matrix: [
+        [10, 100],
+        [20, 50],
+        [5, 200],
+      ],
+    }
+    const r = linearMaxNormalize(p)
+    // Benefit col: max is 20 -> A2 gets 20/20 = 1.0
+    expect(r[1]![0]).toBe(1.0)
+    expect(maxOf(r.map((row) => row[0]!))).toBe(1.0)
+
+    // Cost col: min is 50 -> A2 gets 50/50 = 1.0
+    expect(r[1]![1]).toBe(1.0)
+    expect(maxOf(r.map((row) => row[1]!))).toBe(1.0)
+  })
+
+  it('rankScores groupScore anchor prevents drift across 0.8e-12 stepped chains and handles 1-ULP equality', () => {
+    // Each step is 0.8e-12 (within TIE_TOLERANCE 1e-12 pairwise, but accumulated diff is 1.6e-12)
+    const steppedScores = [1.0, 1.0 - 0.8e-12, 1.0 - 1.6e-12]
+    const ranks = rankScores(steppedScores, 'desc')
+    // 0 and 1 are tied at rank 1, but 2 is outside tolerance from groupScore 1.0 -> rank 3 (skips 2)
+    expect(ranks).toEqual([1, 1, 3])
+
+    // 1-ULP float differences: 0.3 vs 0.1 + 0.2
+    const u1 = [0.3, 0.1 + 0.2]
+    const u2 = [0.1 + 0.2, 0.3]
+    expect(rankScores(u1, 'desc')).toEqual([1, 1])
+    expect(rankScores(u2, 'desc')).toEqual([1, 1])
+  })
+
+  it('entropy with normalization sum triggers all-constant fallback when total diversification < 1e-12', () => {
+    // Column 0 has tiny spread (1000000 to 1000002) giving d_0 < 1e-12, Column 1 is strictly constant (d_1 = 0)
+    const p: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'benefit' },
+      ],
+      matrix: [
+        [1000000, 5],
+        [1000001, 5],
+        [1000002, 5],
+      ],
+    }
+    const res = entropy.compute(p, { normalization: 'sum' })
+    const dStep = res.steps.find((s) => s.key === 'entropy.diversification')!
+    expect(sum(dStep.vector!)).toBeLessThan(ENTROPY_NO_INFORMATION)
+    expect(res.warnings?.some((w) => w.code === 'entropy.all-constant-equal-weights')).toBe(true)
+    expect(res.weights).toEqual([0.5, 0.5])
+  })
+
+  it('LOPCOW algebraic identity RMS_j^2 - sigma_j^2 >= 0 holds to 1e-14 on arbitrary matrices', () => {
+    const rng = createRng(42)
+    const matrix = Array.from({ length: 6 }, () => Array.from({ length: 4 }, () => rng() * 100 + 1))
+    const p: Problem = {
+      alternatives: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'cost' },
+        { name: 'C3', type: 'benefit' },
+        { name: 'C4', type: 'cost' },
+      ],
+      matrix,
+    }
+    const { r } = minMaxNormalize(p)
+    const m = r.length
+    for (let j = 0; j < 4; j++) {
+      const col = r.map((row) => row[j]!)
+      const sq = col.reduce((acc, v) => acc + v * v, 0)
+      const rms = Math.sqrt(sq / m)
+      const s = sampleStd(col)
+      expect(rms * rms - s * s).toBeGreaterThanOrEqual(-1e-14)
+    }
+  })
+
+  it('MEREC cancellation-free formula prevents floating point cancellation under near-constant column', () => {
+    const p: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'NearConst', type: 'benefit' },
+        { name: 'Wide', type: 'benefit' },
+      ],
+      matrix: [
+        [1.0, 1.0],
+        [1.0 + 5e-10, 500.0],
+        [1.0, 1000.0],
+      ],
+    }
+    const res = merec.compute(p, {})
+    expect(res.weights.every((w) => Number.isFinite(w) && w >= 0)).toBe(true)
+    expect(sum(res.weights)).toBeCloseTo(1.0, 12)
+    expect(res.warnings?.some((w) => w.code === 'merec.near-constant-column')).toBe(true)
+  })
+
+  it('BWM bwmSolve resolves ties deterministically and satisfies partition of unity and symmetry', () => {
+    // bo = [1, 2, 2, 4, 4, 9], ow = [9, 1, 1, 9, 9, 1], B = 0, W = 5
+    // Symmetrical ties in D1 (indices 1, 2) and D2 (indices 3, 4)
+    const bo = [1, 2, 2, 4, 4, 9]
+    const ow = [9, 1, 1, 9, 9, 1]
+    const { weights, xi } = bwmSolve(bo, ow, 0, 5)
+
+    expect(sum(weights)).toBeCloseTo(1.0, 14)
+    expect(weights.every((w) => w > 0)).toBe(true)
+    expect(xi).toBeGreaterThanOrEqual(0)
+
+    // Symmetric criteria must receive identical weights
+    expect(weights[1]).toBeCloseTo(weights[2]!, 14)
+    expect(weights[3]).toBeCloseTo(weights[4]!, 14)
+  })
+
+  it('ahpIncompleteLlsm preserves intra-component ratios across disconnected subgraphs and leaves isolated nodes as NaN', () => {
+    // 5 criteria: Component 1 is {0, 1} with A_01 = 2; Component 2 is {2, 3} with A_23 = 3; Criterion 4 is isolated.
+    const pairs: (number | null)[][] = [
+      [1, 2, null, null, null],
+      [1 / 2, 1, null, null, null],
+      [null, null, 1, 3, null],
+      [null, null, 1 / 3, 1, null],
+      [null, null, null, null, 1],
+    ]
+    const weights = ahpIncompleteLlsm(5, pairs)
+    expect(weights).not.toBeNull()
+    expect(weights).toHaveLength(5)
+
+    // Intra-component ratios
+    expect(weights![0]! / weights![1]!).toBeCloseTo(2.0, 12)
+    expect(weights![2]! / weights![3]!).toBeCloseTo(3.0, 12)
+
+    // Sum of finite weights is 1.0
+    const finiteSum = weights!.slice(0, 4).reduce((acc, w) => acc + w, 0)
+    expect(finiteSum).toBeCloseTo(1.0, 14)
+
+    // Isolated criterion 4 remains NaN
+    expect(Number.isNaN(weights![4])).toBe(true)
+  })
+
+  it('AHP computes consistency ratio for n = 16 using Alonso & Lamata RI formula', () => {
+    const n = 16
+    const prob: Problem = {
+      alternatives: ['A1', 'A2'],
+      criteria: Array.from({ length: n }, (_, k) => ({ name: `C${k + 1}`, type: 'benefit' as const })),
+      matrix: [new Array<number>(n).fill(1), new Array<number>(n).fill(2)],
+    }
+    // Fully answered matrix with slight inconsistency
+    let j = emptyJudgements(n)
+    for (let i = 0; i < n; i++) {
+      for (let k = i + 1; k < n; k++) {
+        j = setPair(j, i, k, i === 0 && k === 1 ? 2 : 1)
+      }
+    }
+    const res = ahp.compute(prob, {}, j)
+    expect(res.diagnostics?.cr).toBeDefined()
+    expect(Number.isFinite(res.diagnostics!.cr)).toBe(true)
+    // riFor(16) = (1.7699 * 16 - 4.3513) / 15 = 23.9671 / 15 ~ 1.5978067
+    const expectedRi = (1.7699 * 16 - 4.3513) / 15
+    const ci = res.diagnostics!.ci!
+    expect(res.diagnostics!.cr).toBeCloseTo(ci / expectedRi, 6)
+  })
+})
+
 
 
 
