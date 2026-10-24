@@ -4,12 +4,15 @@ import {
   ahp,
   ahpEigenvector,
   ahpGeometricMean,
+  ahpWorstPair,
   aras,
   assertValid,
   bordaCount,
   bwm,
   bwmAnswers,
+  bwmProgress,
   bwmSolve,
+  bwmSuggestion,
   cocoso,
   codas,
   compareRankings,
@@ -79,10 +82,13 @@ import {
   createRng,
   kendallTauB,
   midRanks,
+  perturbWeights,
+  removeCriteria,
   sampleDirichlet,
   spearman,
   wsCoefficient,
 } from '../src/core/robustness'
+import { escapeLatex, tableToLatex, type StepTable } from '../src/features/io'
 import { computeRanking } from '../src/state/workbench'
 
 // Base test problem with m=4 alternatives, n=3 criteria (2 benefit, 1 cost).
@@ -771,4 +777,239 @@ describe('Compare and Robustness Invariants', () => {
     }
   })
 })
+
+describe('DSS / KDS Analyst Findings and Robustness Edge Cases', () => {
+  it('removeCriteria with ARAS: custom optimal row length mismatch vs data-derived optimal', () => {
+    const p = makeBaseProblem() // 4 alternatives, 3 criteria
+    const weights = BASE_WEIGHTS
+
+    // Case A: ranker calling aras.compute directly with custom optimal vector of length 3 (n).
+    // In removeCriteria, reduced problems have 2 criteria (n-1).
+    // When params.optimal of length 3 is passed directly to reduced problems,
+    // aras.compute detects row-length-mismatch and throws ProblemValidationError, resulting in blocked rows.
+    const directArasRanker = (prob: Problem) => (w: number[]) =>
+      aras.compute(prob, w, { optimal: [120, 12, 60] })
+    const rowsWithOpt = removeCriteria(p, weights, directArasRanker)
+    expect(rowsWithOpt).toHaveLength(3)
+    for (const r of rowsWithOpt) {
+      expect(r.ranking).toEqual([])
+      expect('blocked' in r && r.blocked.some((iss) => iss.code === 'row-length-mismatch')).toBe(true)
+    }
+
+    // Case B: ARAS with data-derived optimal (params.optimal omitted).
+    // Reduced problems dynamically re-derive column bests for n-1 criteria, succeeding on all removals.
+    const rankForDerived = rankerFor({ methodId: 'aras', params: {} })
+    const rowsDerived = removeCriteria(p, weights, rankForDerived)
+    expect(rowsDerived).toHaveLength(3)
+    for (const r of rowsDerived) {
+      expect(r.ranking).toHaveLength(4)
+      expect('blocked' in r).toBe(false)
+    }
+  })
+
+  it('removeCriteria with recompute weighting: succeeds when weighting supports reduced problems', () => {
+    const p = makeBaseProblem()
+    const weights = BASE_WEIGHTS
+    const topsisRanker = rankerFor({ methodId: 'topsis', params: {} })
+
+    // SD weighting recomputed on reduced problems
+    const rows = removeCriteria(p, weights, topsisRanker, sd)
+    // 3 criteria * 2 modes ('renormalize' and 'recompute') = 6 rows
+    expect(rows).toHaveLength(6)
+    const recomputeRows = rows.filter((r) => r.mode === 'recompute')
+    expect(recomputeRows).toHaveLength(3)
+    for (const r of recomputeRows) {
+      expect(r.ranking).toHaveLength(4)
+      expect('blocked' in r).toBe(false)
+      expect(sum(r.weights)).toBeCloseTo(1.0, 12)
+    }
+  })
+
+  it('ahpWorstPair exhibits actual === suggested when ratio exceeds max Saaty scale 9', () => {
+    // 3 criteria: A_01 = 9, A_12 = 9, but A_02 = 9 (inconsistent, since 9 * 9 = 81)
+    const A = [
+      [1, 9, 9],
+      [1 / 9, 1, 9],
+      [1 / 9, 1 / 9, 1],
+    ]
+    const { weights } = ahpEigenvector(A)
+    const ratio02 = weights[0]! / weights[2]!
+    expect(ratio02).toBeGreaterThan(9)
+
+    const worst = ahpWorstPair(A, weights)
+    expect(worst).not.toBeNull()
+    if (worst?.i === 0 && worst?.k === 2) {
+      expect(worst.actual).toBe(9)
+      expect(worst.suggested).toBe(9)
+      expect(worst.actual === worst.suggested).toBe(true)
+    }
+  })
+
+  it('bwmAnswers filters out a_Bj values above a_BW when a_BW is reduced', () => {
+    let j = emptyJudgements(3)
+    j = { ...j, best: 0, worst: 2 }
+    // User sets a_BW = 8, then a_B1 = 7
+    j = setPair(j, 0, 2, 8)
+    j = setPair(j, 0, 1, 7)
+    const a1 = bwmAnswers(j)
+    expect(a1?.bestToOthers[1]).toBe(7)
+
+    // User reduces a_BW to 5. j.pairs[0][1] is still 7, but cap is now 5.
+    j = setPair(j, 0, 2, 5)
+    const a2 = bwmAnswers(j)
+    // ok(7, 5) -> null
+    expect(a2?.bestToOthers[1]).toBeNull()
+
+    // bwmProgress recognizes missing answers
+    const prog = bwmProgress(j, 3)
+    expect(prog.provisional).toBe(true)
+  })
+
+  it('bwmSuggestion prioritizes othersToWorst side when both gaps are equal', () => {
+    const bo = [1, 3, 6]
+    const ow = [6, 3, 1]
+    const sugg = bwmSuggestion(bo, ow, 0, 2, 1)
+    // With equal gap (|3 * 2 - 6| = 0), 'othersToWorst' is checked first in the loop
+    expect(sugg.side).toBe('othersToWorst')
+    expect(sugg.value).toBe(2)
+  })
+
+  it('perturbWeights clamps to 1.0 when dominant weight w_k * (1 + delta) >= 1.0', () => {
+    const p = makeBaseProblem()
+    const dominantWeights = [0.95, 0.03, 0.02]
+    const topsisRanker = rankerFor({ methodId: 'topsis', params: {} })
+
+    const rows = perturbWeights(p, dominantWeights, topsisRanker, [0.05, 0.10, 0.20])
+    const k0Rows = rows.filter((r) => r.k === 0)
+    const row10 = k0Rows.find((r) => r.delta === 0.10)!
+    const row20 = k0Rows.find((r) => r.delta === 0.20)!
+
+    expect(row10.weights[0]).toBe(1.0)
+    expect(row10.weights[1]).toBe(0.0)
+    expect(row10.weights[2]).toBe(0.0)
+
+    expect(row20.weights[0]).toBe(1.0)
+    expect(row20.weights[1]).toBe(0.0)
+    expect(row20.weights[2]).toBe(0.0)
+  })
+
+  it('escapeLatex and tableToLatex correctly escape reserved LaTeX characters', () => {
+    const raw = 'Cost_50% & Profit #1 ~ $100 ^ 2 {test} \\'
+    const escaped = escapeLatex(raw)
+    expect(escaped).toBe('Cost\\_50\\% \\& Profit \\#1 \\textasciitilde{} \\$100 \\textasciicircum{} 2 \\{test\\} \\textbackslash{}')
+
+    // Table with special characters in labels
+    const table: StepTable = {
+      key: 'test.step',
+      kind: 'matrix',
+      rowAxis: 'alternatives',
+      colAxis: 'criteria',
+      rowLabels: ['Alt_A & 1', 'Alt_B % 2'],
+      colLabels: ['Crit_$1', 'Crit_#2'],
+      values: [
+        [1.2345, 6.789],
+        [-0.5, 100],
+      ],
+    }
+    const tex = tableToLatex(table, { digits: 2, corner: 'Index & Label' })
+    expect(tex).toContain('Index \\& Label & Crit\\_\\$1 & Crit\\_\\#2 \\\\')
+    expect(tex).toContain('Alt\\_A \\& 1 & 1.23 & 6.79 \\\\')
+    expect(tex).toContain('Alt\\_B \\% 2 & $-$0.50 & 100.00 \\\\')
+    expect(tex).toContain('\\toprule')
+    expect(tex).toContain('\\bottomrule')
+  })
+})
+
+describe('Mathematician 2 Ranking Identities and Algebraic Conservation Laws', () => {
+  it('MARCOS scores are strictly proportional to SAW (linearMax) scores by diagnostic constant c', () => {
+    const p = makeBaseProblem()
+    const marcosRes = marcos.compute(p, BASE_WEIGHTS, {})
+    const sawRes = saw.compute(p, BASE_WEIGHTS, { normalization: 'linearMax' })
+    const c = marcosRes.diagnostics!.c!
+    expect(c).toBeGreaterThan(0)
+
+    for (let i = 0; i < p.alternatives.length; i++) {
+      expect(marcosRes.scores[i]).toBeCloseTo(c * sawRes.scores[i]!, 14)
+    }
+    expect(marcosRes.ranking).toEqual(sawRes.ranking)
+  })
+
+  it('WASPAS at lambda = 1 matches SAW (linearMax) scores bit-for-bit', () => {
+    const p = makeBaseProblem()
+    const waspas1 = waspas.compute(p, BASE_WEIGHTS, { lambda: 1 })
+    const sawLinear = saw.compute(p, BASE_WEIGHTS, { normalization: 'linearMax' })
+
+    expect(waspas1.scores).toEqual(sawLinear.scores)
+    expect(waspas1.ranking).toEqual(sawLinear.ranking)
+  })
+
+  it('MABAC score identity: S_i = (minMax weighted sum)_i - border', () => {
+    const p = makeBaseProblem()
+    const mabacRes = mabac.compute(p, BASE_WEIGHTS, {})
+    const { r } = minMaxNormalize(p)
+    const minMaxWeightedSum = r.map((row) => row.reduce((acc, t, j) => acc + t * BASE_WEIGHTS[j]!, 0))
+    const border = mabacRes.diagnostics!.border!
+
+    for (let i = 0; i < p.alternatives.length; i++) {
+      expect(mabacRes.scores[i]).toBeCloseTo(minMaxWeightedSum[i]! - border, 14)
+    }
+  })
+
+  it('COPRAS total significance conservation: sum(Q_i) = 1 (with and without cost criteria)', () => {
+    // Problem with cost criterion
+    const pWithCost = makeBaseProblem()
+    const coprasWithCost = copras.compute(pWithCost, BASE_WEIGHTS, {})
+    expect(sum(coprasWithCost.scores)).toBeCloseTo(1.0, 14)
+
+    // Problem with only benefit criteria
+    const pOnlyBenefit: Problem = {
+      ...pWithCost,
+      criteria: pWithCost.criteria.map((c) => ({ ...c, type: 'benefit' as const })),
+    }
+    const coprasOnlyBenefit = copras.compute(pOnlyBenefit, BASE_WEIGHTS, {})
+    expect(sum(coprasOnlyBenefit.scores)).toBeCloseTo(1.0, 14)
+  })
+
+  it('ARAS extended optimality sum conservation: sum(S_i) + S_0 = 1', () => {
+    const p = makeBaseProblem()
+    const arasRes = aras.compute(p, BASE_WEIGHTS, {})
+    const optScore = arasRes.diagnostics!.optimalScore!
+
+    const optimalityStep = arasRes.steps.find((s) => s.key === 'aras.optimality')!
+    const sSum = sum(optimalityStep.vector!)
+    expect(sSum + optScore).toBeCloseTo(1.0, 14)
+  })
+
+  it('CODAS skew-symmetry and zero total: h_ik + h_ki = 0 and sum(H_i) = 0', () => {
+    const p = makeBaseProblem()
+    const codasRes = codas.compute(p, BASE_WEIGHTS, {})
+    const m = p.alternatives.length
+
+    const hStep = codasRes.steps.find((s) => s.key === 'codas.relativeAssessment')!
+    const H = hStep.matrix!
+
+    for (let i = 0; i < m; i++) {
+      expect(H[i]![i]).toBe(0)
+      for (let k = 0; k < m; k++) {
+        expect(H[i]![k]! + H[k]![i]!).toBe(0)
+      }
+    }
+    // Total sum of all assessment scores H_i = 0
+    expect(sum(codasRes.scores)).toBeCloseTo(0, 14)
+  })
+
+  it('Kendall W correctly handles tied rankings via midRanks and stays in [0, 1]', () => {
+    // Rankings with duplicate / tied competition ranks
+    const tiedRankings = [
+      [1, 1, 3, 4],
+      [1, 2, 2, 4],
+      [2, 1, 3, 3],
+    ]
+    const w = kendallW(tiedRankings)
+    expect(w).toBeGreaterThanOrEqual(0)
+    expect(w).toBeLessThanOrEqual(1)
+  })
+})
+
+
 
