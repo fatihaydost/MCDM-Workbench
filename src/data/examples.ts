@@ -1050,6 +1050,52 @@ export const examples: readonly ExampleDataset[] = [
     ],
     published: [{ label: 'swara.weights', values: [0.22, 0.19, 0.18, 0.14, 0.14, 0.13], decimals: 2 }],
   },
+  {
+    id: 'wang-2008-galway-wastewater',
+    name: {
+      en: 'Galway wastewater treatment plant (Wang and Triantaphyllou 2008)',
+      tr: 'Galway atıksu arıtma tesisi (Wang ve Triantaphyllou 2008)',
+    },
+    summary: {
+      en: 'Five candidate plant sites in Galway rated from 1 to 5 on seven benefit criteria. The paper reports the ELECTRE I concordance and discordance matrices and the outranking kernel.',
+      tr: "Galway'de yedi fayda kriterinde 1 ile 5 arasında puanlanan beş aday tesis alanı. Makale ELECTRE I uyum ve uyumsuzluk matrislerini ve üstünlük çekirdeğini veriyor.",
+    },
+    referenceFor: ['electre-i'],
+    citation: {
+      authors: 'Wang, X.; Triantaphyllou, E.',
+      year: 2008,
+      title: 'Ranking irregularities when evaluating alternatives by using some ELECTRE methods',
+      venue: 'Omega 36(1), 45-63',
+      doi: '10.1016/j.omega.2005.12.003',
+      tables: {
+        en: 'Section 3.1 (input, concordance and discordance matrices, outranking graph)',
+        tr: 'Bölüm 3.1 (girdi, uyum ve uyumsuzluk matrisleri, üstünlük grafı)',
+      },
+    },
+    alternatives: ['A1', 'A2', 'A3', 'A4', 'A5'],
+    criteria: [
+      { name: { en: 'C1', tr: 'C1' }, type: 'benefit' },
+      { name: { en: 'C2', tr: 'C2' }, type: 'benefit' },
+      { name: { en: 'C3', tr: 'C3' }, type: 'benefit' },
+      { name: { en: 'C4', tr: 'C4' }, type: 'benefit' },
+      { name: { en: 'C5', tr: 'C5' }, type: 'benefit' },
+      { name: { en: 'C6', tr: 'C6' }, type: 'benefit' },
+      { name: { en: 'C7', tr: 'C7' }, type: 'benefit' },
+    ],
+    matrix: [
+      [1, 2, 1, 5, 2, 2, 4],
+      [3, 5, 3, 5, 3, 3, 3],
+      [3, 5, 3, 5, 3, 2, 2],
+      [1, 2, 2, 5, 1, 1, 1],
+      [1, 1, 3, 5, 4, 1, 5],
+    ],
+    weights: [0.078, 0.118, 0.157, 0.314, 0.235, 0.039, 0.059],
+    published: [
+      { label: 'electre-i.kernel', values: [0, 1, 1, 0, 1], decimals: 0 },
+      { label: 'electre-i.netConcordance', values: [-1.215, 1.293, 1.058, -1.881, 0.745], decimals: 3 },
+      { label: 'electre-i.netDiscordance', values: [0.5, -2, -1, 2.75, -0.25], decimals: 2 },
+    ],
+  },
 ]
 
 export const getExample = (id: string): ExampleDataset | undefined => examples.find((x) => x.id === id)

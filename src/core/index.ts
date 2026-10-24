@@ -9,6 +9,14 @@ export { mabac } from './methods/mabac'
 export { copras } from './methods/copras'
 export { critic } from './methods/critic'
 export { edas, EDAS_SMALL_AVERAGE } from './methods/edas'
+export {
+  electreI,
+  electreIKernel,
+  ELECTRE_I_DEFAULT_C_HAT,
+  ELECTRE_I_DEFAULT_D_HAT,
+  type ElectreIDiscordanceScale,
+  type ElectreIParams,
+} from './methods/electre-i'
 export { entropy, ENTROPY_DOMINANT_WEIGHT, type EntropyNormalization, type EntropyParams } from './methods/entropy'
 export { equal } from './methods/equal'
 export { cilos } from './methods/cilos'

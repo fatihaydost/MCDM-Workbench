@@ -158,6 +158,9 @@
       },
       "swara": {
         "claim": "Tablo 1 içindeki s, k, q ve altı ağırlığın tamamı {{citation}} ile {{decimals}} basamağa kadar aynı; 2017 tekstil tedarikçisi SWARA ağırlıkları da örtüşüyor."
+      },
+      "electre-i": {
+        "claim": "Uyum C, uyumsuzluk D, üstünlük grafı S ve {A2, A3, A5} çekirdeği {{citation}} Bölüm 3.1 ile {{decimals}} basamağa kadar aynı; Soner ve Önüt (2006) net uyum değerleri de örtüşüyor."
       }
     },
     "catalogue": {
@@ -258,7 +261,8 @@
       "moora": "MOORA",
       "aras": "ARAS",
       "codas": "CODAS",
-      "promethee-ii": "PROMETHEE II"
+      "promethee-ii": "PROMETHEE II",
+      "electre-i": "ELECTRE I"
     },
     "params": {
       "entropy": {
@@ -394,6 +398,33 @@
           "level": "kademeli",
           "gaussian": "Gauss"
         }
+      },
+      "electre-i": {
+        "discordanceScale": "Uyumsuzluk ölçeği",
+        "discordanceScaleOptions": {
+          "global": "Ortak açıklık δ",
+          "range": "Kriter açıklığı Rⱼ"
+        },
+        "discordanceScaleHints": {
+          "global": "Roy (1968): her farkı tüm kriterlerdeki en büyük açıklığa böler; ortak ölçek varsayar.",
+          "range": "Her farkı kendi kriter açıklığına (maks - min) böler; karışık birimler karşılaştırılabilir olur."
+        },
+        "discordanceScaleVariant": {
+          "global": "ortak δ",
+          "range": "kriter açıklığı Rⱼ"
+        },
+        "cHat": "Uyum eşiği ĉ",
+        "cHatEnds": {
+          "min": "0,50: salt çoğunluk",
+          "max": "1,00: oybirliği"
+        },
+        "cHatVariant": "ĉ = {{value}}",
+        "dHat": "Uyumsuzluk eşiği d̂",
+        "dHatEnds": {
+          "min": "0: sıkı veto",
+          "max": "1: veto yok"
+        },
+        "dHatVariant": "d̂ = {{value}}"
       }
     },
     "example": {
@@ -551,7 +582,8 @@
         "moora": "Her değeri sütununun Öklid uzunluğuna böler, ağırlıklı fayda oranlarını toplar ve ağırlıklı maliyet oranlarını çıkarır; y büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
         "aras": "Başa bir optimal satır ekler, her alternatifin m + 1 satırlık sütun toplamlarındaki ağırlıklı paylarını toplar ve optimal satırın toplamına böler; K büyüdükçe sıra yükselir.",
         "codas": "Her alternatifi negatif-ideal noktaya Öklid ve Taxicab uzaklıklarıyla bütün çiftler üzerinden karşılaştırarak puanlar; yüksek H daha iyidir.",
-        "promethee-ii": "Her alternatif çiftini her kriterde bir tercih fonksiyonuyla karşılaştırır ve pozitif akıştan negatif akışı çıkarır; φ büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir."
+        "promethee-ii": "Her alternatif çiftini her kriterde bir tercih fonksiyonuyla karşılaştırır ve pozitif akıştan negatif akışı çıkarır; φ büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
+        "electre-i": "Her alternatif çiftini çoğunluk uyumu (C ≥ ĉ) ve sınırlı uyumsuzluk (D ≤ d̂) için sınayarak üstünlük çekirdeği K kümesini bulur ve alternatifleri normalize net uyum eksi net uyumsuzluk Φ skoruyla sıralar. Sıfır ve negatif değerlere izin verir."
       },
       "columns": {
         "rank": "Sıra",
@@ -573,7 +605,10 @@
         "euclidean": "Öklid E",
         "taxicab": "Taxicab T",
         "positiveFlow": "Pozitif akış φ⁺",
-        "negativeFlow": "Negatif akış φ⁻"
+        "negativeFlow": "Negatif akış φ⁻",
+        "electreIKernel": "Çekirdek K",
+        "electreINetConcordance": "Net uyum Cₐ",
+        "electreINetDiscordance": "Net uyumsuzluk Dₐ"
       },
       "tableTitle": "Sıralama",
       "score": {
@@ -641,6 +676,11 @@
           "name": "Net akış φ",
           "title": "PROMETHEE II net akışı φ",
           "symbol": "φ"
+        },
+        "electre-i": {
+          "name": "Net skor Φ",
+          "title": "ELECTRE I net üstünlük skoru Φ",
+          "symbol": "Φ"
         }
       },
       "weightsUsed": "Ağırlıklar: {{method}}",
@@ -905,6 +945,16 @@
         "positiveFlow": "Pozitif akış φ⁺",
         "negativeFlow": "Negatif akış φ⁻",
         "netFlow": "Net akış φ"
+      },
+      "electre-i": {
+        "oriented": "Yönlendirilmiş matris g",
+        "concordance": "Uyum matrisi C",
+        "discordance": "Uyumsuzluk matrisi D",
+        "outranking": "Üstünlük matrisi S",
+        "kernel": "Çekirdek üyeliği K",
+        "netConcordance": "Net uyum Cₐ",
+        "netDiscordance": "Net uyumsuzluk Dₐ",
+        "netScore": "Net üstünlük skoru Φ"
       }
     },
     "issues": {
@@ -1141,6 +1191,11 @@
         "title": "Pozitif akış φ⁺, negatif akış φ⁻ ve net akış φ",
         "caption": "Sol: ikili tercih derecelerinden pozitif akış φ⁺ (üst) ve negatif akış φ⁻ (alt). Sağ: sıfır etrafında net üstünlük akışı φ = φ⁺ - φ⁻.",
         "row": "{{alternative}}: φ⁺ = {{pos}}, φ⁻ = {{neg}}, φ = {{score}}"
+      },
+      "electre-i": {
+        "title": "Net uyum Cₐ, net uyumsuzluk Dₐ, çekirdek K ve net skor Φ",
+        "caption": "Sol: net uyum Cₐ (üst) ve ters işaretli net uyumsuzluk -Dₐ (alt); [K] üstünlük çekirdeği üyelerini gösterir. Sağ: sıfır etrafında normalize net üstünlük skoru Φ.",
+        "row": "{{alternative}}: Cₐ = {{netC}}, Dₐ = {{netD}}, K = {{kernel}}, Φ = {{score}}"
       }
     },
     "flow": {
@@ -1277,6 +1332,12 @@
         "preferenceMatrix": "İkili π",
         "positiveFlow": "φ⁺ ve φ⁻",
         "netFlow": "φ"
+      },
+      "electre-i": {
+        "oriented": "Yönlendir",
+        "concordance": "C ve D",
+        "outranking": "S ve K",
+        "netScore": "Net Φ"
       }
     },
     "pipeline": {
@@ -1370,7 +1431,8 @@
       "codas": "CODAS",
       "roc": "ROC",
       "swara": "SWARA",
-      "promethee-ii": "PROMETHEE II"
+      "promethee-ii": "PROMETHEE II",
+      "electre-i": "ELECTRE I"
     },
     "fullNames": {
       "critic": "Criteria Importance Through Intercriteria Correlation",
@@ -1442,7 +1504,8 @@
         "codas": "Negatif-ideal noktaya Öklid ve Taxicab uzaklıklarını ikili karşılaştırmada birleştirir.",
         "roc": "Kriterlerin önem sırasından ağırlıklar.",
         "swara": "Sıralı kriterler arasındaki ardışık önem oranlarını zincirleyerek ağırlığa dönüştürür.",
-        "promethee-ii": "İkili tercih fonksiyonları ve pozitif eksi negatif üstünlük akışları."
+        "promethee-ii": "İkili tercih fonksiyonları ve pozitif eksi negatif üstünlük akışları.",
+        "electre-i": "Çoğunluk uyumu ve sınırlı uyumsuzluk vetosuyla üstünlük çekirdeği seçimi."
       },
       "groups": {
         "weighting": "Ağırlıklandırma",
@@ -1772,6 +1835,15 @@
             "s2": "q₁ = 1 değerinden başlayıp her önceki değeri k_j katsayısına bölerek yeniden hesaplanan ağırlıkları zincirleyin: q_j = q_{j-1} / (1 + s_j).",
             "s3": "Her q_j değerini Σq toplamına bölerek sağda toplamı 1 olan nihai ağırlık çubukları w değerlerini elde edin."
           }
+        },
+        "electre-i": {
+          "title": "Uyum çoğunluğu, uyumsuzluk vetosu ve üstünlük çekirdeği",
+          "caption": "Galway arıtma tesisi aday alanları ikişer ikişer karşılaştırılır: net uyum Cₐ ve net uyumsuzluk Dₐ ikili destek ile muhalefeti özetler, [K] {A2, A3} döngüsü daraltıldıktan sonra bastırılmayan çekirdeği gösterir ve Φ alanları sıralar.",
+          "steps": {
+            "s1": "Net uyum Cₐ ve net uyumsuzluk Dₐ: her aday alan için ağırlıklı kriterlerde rakiplerine üstünlüğü ile en büyük ölçekli geriliği hesaplanır.",
+            "s2": "Üstünlük çekirdeği K: C ≥ 0,75 ve D ≤ 0,50 koşullarını sağlayan çiftler üstünlük grafını kurar; {A2, A3} döngüsü daraltıldığında [K] ile işaretlenen {A2, A3, A5} çekirdeği kalır.",
+            "s3": "Net üstünlük skoru Φ = (Cₐ - Dₐ) / (2(m - 1)): yüksek net uyumu ve düşük net uyumsuzluğu tam bir sıralamada birleştirir."
+          }
         }
       }
     }
@@ -1961,6 +2033,16 @@
       "positiveFlow": "Pozitif (çıkan) akış φ⁺: π matrisinin diğer tüm alternatifler üzerindeki satır ortalaması; her alternatifin diğerlerine ortalama üstünlüğünü ölçer.",
       "negativeFlow": "Negatif (giren) akış φ⁻: π matrisinin diğer tüm alternatifler üzerindeki sütun ortalaması; diğerlerinin her alternatife ortalama üstünlüğünü ölçer.",
       "netFlow": "Net üstünlük akışı φ = φ⁺ - φ⁻: yüksek değer daha üstte yer alır ve net akışların toplamı 0 olur."
+    },
+    "electre-i": {
+      "oriented": "Yönlendirilmiş matris g: daha büyük değer her zaman daha iyi olacak şekilde fayda kriterleri olduğu gibi korunur, maliyet kriterlerinin işareti ters çevrilir.",
+      "concordance": "Uyum matrisi C: her (a, b) çifti için a alternatifinin en az b kadar iyi olduğu kriterlerin toplam ağırlık payı.",
+      "discordance": "Uyumsuzluk matrisi D: her (a, b) çifti için a alternatifinin herhangi bir kriterde b gerisinde kaldığı en büyük ölçekli fark.",
+      "outranking": "Üstünlük matrisi S: C(a, b) ≥ ĉ ve D(a, b) ≤ d̂ sağlandığında S(a, b) = 1 olur.",
+      "kernel": "Çekirdek üyeliği K: karşılıklı üstünlük döngüleri daraltıldıktan sonra üstünlük çekirdeğinde yer alan alternatifler için 1, diğerleri için 0.",
+      "netConcordance": "Net uyum Cₐ: diğer tüm alternatiflere karşı giden uyum toplamı eksi gelen uyum toplamı.",
+      "netDiscordance": "Net uyumsuzluk Dₐ: diğer tüm alternatiflere karşı giden uyumsuzluk toplamı eksi gelen uyumsuzluk toplamı; düşük değer daha iyidir.",
+      "netScore": "Net üstünlük skoru Φ = (Cₐ - Dₐ) / (2(m - 1)): [-1, 1] aralığında normalize edilmiş net uyum eksi net uyumsuzluk."
     }
   },
   "validation": {

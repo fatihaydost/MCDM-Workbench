@@ -1,0 +1,100 @@
+{
+  "wang2008": {
+    "source": "Wang, X. & Triantaphyllou, E. (2008). Ranking irregularities when evaluating alternatives by using some ELECTRE methods. Omega, 36(1), 45-63, Section 3.1 (Galway wastewater treatment plant, citing Rogers, Bruen & Maystre 2000).",
+    "doi": "10.1016/j.omega.2005.12.003",
+    "alternatives": ["A1", "A2", "A3", "A4", "A5"],
+    "criteria": [
+      { "name": "C1", "type": "benefit" },
+      { "name": "C2", "type": "benefit" },
+      { "name": "C3", "type": "benefit" },
+      { "name": "C4", "type": "benefit" },
+      { "name": "C5", "type": "benefit" },
+      { "name": "C6", "type": "benefit" },
+      { "name": "C7", "type": "benefit" }
+    ],
+    "matrix": [
+      [1, 2, 1, 5, 2, 2, 4],
+      [3, 5, 3, 5, 3, 3, 3],
+      [3, 5, 3, 5, 3, 2, 2],
+      [1, 2, 2, 5, 1, 1, 1],
+      [1, 1, 3, 5, 4, 1, 5]
+    ],
+    "weights": [0.078, 0.118, 0.157, 0.314, 0.235, 0.039, 0.059],
+    "cHat": 0.75,
+    "dHat": 0.50,
+    "concordanceMatrix": [
+      [1.000, 0.373, 0.412, 0.843, 0.549],
+      [0.941, 1.000, 1.000, 1.000, 0.706],
+      [0.941, 0.902, 1.000, 1.000, 0.706],
+      [0.667, 0.314, 0.314, 1.000, 0.549],
+      [0.843, 0.765, 0.765, 0.882, 1.000]
+    ],
+    "discordanceMatrixGlobal": [
+      [0.00, 0.75, 0.75, 0.25, 0.50],
+      [0.25, 0.00, 0.00, 0.00, 0.50],
+      [0.50, 0.25, 0.00, 0.00, 0.75],
+      [0.75, 0.75, 0.75, 0.00, 1.00],
+      [0.25, 1.00, 1.00, 0.25, 0.00]
+    ],
+    "discordanceMatrixRange": [
+      [0.00, 1.00, 1.00, 0.50, 1.00],
+      [0.25, 0.00, 0.00, 0.00, 0.50],
+      [0.50, 0.50, 0.00, 0.00, 0.75],
+      [0.75, 1.00, 1.00, 0.00, 1.00],
+      [0.50, 1.00, 1.00, 0.25, 0.00]
+    ],
+    "outrankingMatrixAt075": [
+      [0, 0, 0, 1, 0],
+      [1, 0, 1, 1, 0],
+      [1, 1, 0, 1, 0],
+      [0, 0, 0, 0, 0],
+      [1, 0, 0, 1, 0]
+    ],
+    "outrankingMatrixAt085": [
+      [0, 0, 0, 0, 0],
+      [1, 0, 1, 1, 0],
+      [1, 1, 0, 1, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 1, 0]
+    ],
+    "kernelIndices": [1, 2, 4],
+    "kernelVector": [0, 1, 1, 0, 1],
+    "netConcordance": [-1.215, 1.293, 1.058, -1.881, 0.745],
+    "netDiscordance": [0.50, -2.00, -1.00, 2.75, -0.25],
+    "netScore": [-0.214375, 0.411625, 0.25725, -0.578875, 0.124375],
+    "ranking": [4, 1, 2, 5, 3],
+    "tolerance": 0.0005,
+    "exactTolerance": 1e-12
+  },
+  "sonerOnut2006": {
+    "source": "Soner, S. & Önüt, S. (2006). Multi-criteria supplier selection: An ELECTRE-AHP application. Journal of Engineering and Natural Sciences, 2006/4, 110-120.",
+    "alternatives": ["Ted1", "Ted2", "Ted3", "Ted4", "Ted5"],
+    "criteria": [
+      { "name": "Cost", "type": "cost" },
+      { "name": "Reject rate", "type": "cost" },
+      { "name": "Late delivery rate", "type": "cost" },
+      { "name": "Flexibility", "type": "benefit" },
+      { "name": "Scrap rate", "type": "benefit" },
+      { "name": "Documentation", "type": "benefit" },
+      { "name": "Emergency delivery", "type": "benefit" }
+    ],
+    "matrix": [
+      [1168, 108.3, 50, 8, 60, 98, 65],
+      [1100, 36.7, 80, 10, 80, 95, 88],
+      [1150, 89.4, 70, 5, 90, 96, 85],
+      [1100, 36.7, 70, 8, 30, 81, 45],
+      [1090, 26.2, 30, 6, 84, 78, 67]
+    ],
+    "weights": [0.39, 0.07, 0.04, 0.03, 0.11, 0.22, 0.14],
+    "concordanceMatrix": [
+      [1.00, 0.26, 0.29, 0.54, 0.25],
+      [0.74, 1.00, 0.63, 0.96, 0.39],
+      [0.71, 0.37, 1.00, 0.51, 0.47],
+      [0.49, 0.50, 0.53, 1.00, 0.25],
+      [0.75, 0.61, 0.53, 0.75, 1.00]
+    ],
+    "netConcordanceExact": [-1.35, 0.98, 0.08, -0.99, 1.28],
+    "netConcordancePublished": [-1.35, 1.00, 0.08, -1.00, 1.26],
+    "publishedNetConcordanceTolerance": 0.02
+  }
+}

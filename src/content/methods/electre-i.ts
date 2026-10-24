@@ -6,7 +6,7 @@ export const electreI: MethodContent = {
   name: { en: 'ELECTRE I', tr: 'ELECTRE I' },
   fullName: { en: 'ELimination Et Choix Traduisant la REalité I', tr: 'Gerçeği yansıtan eleme ve seçim I' },
   family: 'ranking-outranking',
-  status: 'research',
+  status: 'available',
   year: 1968,
   origin: {
     authors: 'Roy, B.',
@@ -52,6 +52,14 @@ export const electreI: MethodContent = {
         tr: 'S içindeki her döngü tek sınıfa birleştirilir, sonra kendisine ok gelmeyen sınıflar alınıp üstün geldikleri silinir ve bu tekrarlanır; böylece hiçbir üye diğerine üstün gelmez, üye olmayan her alternatife bir üye üstün gelir.',
       },
     },
+    {
+      title: { en: 'Net concordance, discordance, and score', tr: 'Net uyum, uyumsuzluk ve skor' },
+      tex: String.raw`C_a = \sum_{b \ne a}\bigl(C(a,b) - C(b,a)\bigr), \quad D_a = \sum_{b \ne a}\bigl(D(a,b) - D(b,a)\bigr), \quad \Phi(a) = \frac{C_a - D_a}{2(m - 1)}`,
+      note: {
+        en: 'Where a complete ranking is needed, the van Laarhoven and Pedrycz (1983) net concordance and net discordance indices rank alternatives by higher net concordance and lower net discordance.',
+        tr: 'Tam sıralama gerektiğinde van Laarhoven ve Pedrycz (1983) net uyum ve net uyumsuzluk indeksleri alternatifleri yüksek net uyum ve düşük net uyumsuzluğa göre sıralar.',
+      },
+    },
   ],
   combinedWith: [
     {
@@ -80,8 +88,8 @@ export const electreI: MethodContent = {
     doi: '10.1016/j.omega.2005.12.003',
     match: 'match',
     note: {
-      en: 'Published example (Section 3.1, pp. 48-49, concordance and discordance matrices); this method is not computed here yet, only recomputed during research. Galway wastewater plant, 5 alternatives, 7 criteria. Concordance and discordance matrices match exactly. The paper goes on to ELECTRE II, so no kernel is published; the recomputed kernel is {A2 = A3 (a cycle), A5}. A second check on the Turkish Hwang-Yoon variant (Soner & Önüt 2006) matches only partly because of two apparent typos in its discordance table.',
-      tr: 'Yayımlanmış örnek (Bölüm 3.1, s. 48-49, uyum ve uyumsuzluk matrisleri); bu yöntem sitede henüz hesaplanmıyor, yalnız araştırmada yeniden hesaplandı. Galway atık su tesisi, 5 alternatif, 7 kriter. Uyum ve uyumsuzluk matrisleri birebir örtüşüyor. Makale ELECTRE II ile devam ettiği için çekirdek yayımlanmamış; yeniden hesaplanan çekirdek {A2 = A3 (döngü), A5}. Türkçe Hwang-Yoon varyantı üzerindeki ikinci kontrol (Soner ve Önüt 2006) uyumsuzluk tablosundaki iki olası baskı hatası yüzünden kısmen örtüşüyor.',
+      en: 'Published example (Section 3.1, pp. 48-49, concordance and discordance matrices): Galway wastewater plant, 5 alternatives, 7 criteria. Concordance and discordance matrices match to 1e-12. Condensing the mutual outranking cycle between A2 and A3 yields the kernel {A2, A3, A5}. A second check on Soner & Önüt (2006) reproduces the concordance matrix and net concordance indices.',
+      tr: 'Yayımlanmış örnek (Bölüm 3.1, s. 48-49, uyum ve uyumsuzluk matrisleri): Galway atık su tesisi, 5 alternatif, 7 kriter. Uyum ve uyumsuzluk matrisleri 1e-12 duyarlıkla örtüşüyor. A2 ile A3 arasındaki karşılıklı üstünlük döngüsü daraltıldığında {A2, A3, A5} çekirdeği elde edilir. Soner ve Önüt (2006) üzerindeki ikinci kontrol uyum matrisini ve net uyum indekslerini birebir üretir.',
     },
   },
   sources: [

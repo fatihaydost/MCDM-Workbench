@@ -32,6 +32,7 @@ import mabacPC from './fixtures/mabac-pamucar-cirovic2015-forklifts.json'
 import mooraBZ from './fixtures/moora-brauers-zavadskas2010.json'
 import arasBA from './fixtures/aras-bakir-atalik2018.json'
 import codasG from './fixtures/codas-ghorabaee2016.json'
+import electreW from './fixtures/electre-i-wang2008.json'
 import prometheeB from './fixtures/promethee-ii-brans1986.json'
 import rosz from './fixtures/roc-roszkowska2013.json'
 import swaraK from './fixtures/swara-kersuliene2010.json'
@@ -258,6 +259,19 @@ describe('examples match the published fixtures', () => {
     expect(ex.criteria.map((c) => c.type)).toEqual(swaraK.types)
     expect(ex.weights).toBeUndefined()
     expect(ex.published).toEqual([{ label: 'swara.weights', values: swaraK.published.weights, decimals: 2 }])
+  })
+  it('Wang and Triantaphyllou 2008 (ELECTRE I, Galway wastewater plant)', () => {
+    const ex = getExample('wang-2008-galway-wastewater')!
+    expect(ex.referenceFor).toEqual(['electre-i'])
+    expect(ex.matrix).toEqual(electreW.wang2008.matrix)
+    expect(ex.alternatives).toEqual(electreW.wang2008.alternatives)
+    expect(ex.criteria.map((c) => c.type)).toEqual(electreW.wang2008.criteria.map((c) => c.type))
+    expect(ex.weights).toEqual(electreW.wang2008.weights)
+    expect(ex.published).toEqual([
+      { label: 'electre-i.kernel', values: electreW.wang2008.kernelVector, decimals: 0 },
+      { label: 'electre-i.netConcordance', values: electreW.wang2008.netConcordance, decimals: 3 },
+      { label: 'electre-i.netDiscordance', values: electreW.wang2008.netDiscordance, decimals: 2 },
+    ])
   })
   it('every example has a DOI and a table reference', () => {
     for (const ex of examples) {
@@ -617,6 +631,20 @@ describe('store actions', () => {
     const r = computeRanking(s)
     expectClose(r.value!.scores, prometheeB.goswami2020.netFlow, prometheeB.goswami2020.tolerance)
     expect(r.value!.ranking).toEqual(prometheeB.goswami2020.ranking)
+  })
+
+  it('ELECTRE I through the store: the Galway wastewater plant opens with paper weights and ELECTRE I', () => {
+    const st = useWorkbench.getState()
+    st.setRankingMethod('topsis')
+    st.setMethodParam('electre-i', 'cHat', 0.85)
+    st.loadExample('wang-2008-galway-wastewater', 'en')
+    const s = useWorkbench.getState()
+    expect(s.rankingMethod).toBe('electre-i')
+    expect(s.weightMethod).toBe('manual')
+    expect(s.methodParams?.['electre-i']).toEqual({})
+    const r = computeRanking(s)
+    expectClose(r.value!.scores, electreW.wang2008.netScore, electreW.wang2008.exactTolerance)
+    expect(r.value!.ranking).toEqual(electreW.wang2008.ranking)
   })
 
   it('EDAS through the store: the 47 items open with EDAS and equal weights, the ten alternatives through the method page link', () => {
