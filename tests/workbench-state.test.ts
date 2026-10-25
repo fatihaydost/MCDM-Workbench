@@ -63,7 +63,10 @@ describe('examples match the published fixtures', () => {
     expect(ex.matrix).toEqual(zavadskas.matrix)
     expect(ex.alternatives).toEqual(zavadskas.alternatives)
     expect(ex.criteria.map((c) => c.type)).toEqual(zavadskas.types)
-    expect(ex.published).toEqual([{ label: 'entropy.weights', values: zavadskas.expected.weights, decimals: 4 }])
+    expect(ex.published).toEqual([
+      { label: 'entropy.weights', values: zavadskas.expected.weights, decimals: 4 },
+      { label: 'cilos.weights', values: [0.3188, 0.1369, 0.2132, 0.1378, 0.1933], decimals: 4 },
+    ])
   })
   it('Diakoulaki et al. 1995', () => {
     const ex = getExample('diakoulaki-1995-pharma')!

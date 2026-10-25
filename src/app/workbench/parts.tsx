@@ -7,7 +7,7 @@ import { useNumberFormat } from '../../i18n'
 import type { DraftProblem, Stage } from '../../state/workbench'
 import { Button, cn, Notice, Skeleton } from '../../ui'
 import { useWorkbenchNav } from './nav'
-import { criterionName, placeIssue, tr, type PlacedIssue } from './shared'
+import { alternativeName, criterionName, placeIssue, tr, type PlacedIssue } from './shared'
 
 // KaTeX lives in this chunk; it loads the first time a calculation is shown.
 const WorkedCalculation = lazy(() => import('./WorkedCalculation'))
@@ -168,6 +168,7 @@ export function MethodWarnings({ warnings, problem }: { warnings: readonly Metho
           return (
             <li key={`${w.code}-${k}`}>
               {tr(t, `warnings.${code}`, {
+                alternative: w.row !== undefined ? alternativeName(problem, w.row, t) : '',
                 criterion: w.col !== undefined ? criterionName(problem.criteria, w.col, t) : '',
                 ...(w.extra ?? {}),
               })}

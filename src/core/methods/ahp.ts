@@ -254,16 +254,17 @@ export function ahpWorstPair(A: readonly (readonly number[])[], weights: readonl
       const ratio = weights[i]! / weights[k]!
       const eps = Math.max(actual / ratio, ratio / actual)
       if (eps <= 1 + 1e-9) continue
-      let suggested = nearestScale(ratio)
-      if (Math.abs(suggested - actual) <= 1e-9) {
-        let logIndirect = 0
-        for (let j = 0; j < n; j++) {
-          if (j !== i && j !== k) logIndirect += Math.log(A[i]![j]! * A[j]![k]!)
-        }
-        const indirectRatio = Math.exp(logIndirect / (n - 2))
-        const indirectSuggested = nearestScale(indirectRatio)
-        if (Math.abs(indirectSuggested - actual) > 1e-9) {
-          suggested = indirectSuggested
+      let logIndirect = 0
+      for (let j = 0; j < n; j++) {
+        if (j !== i && j !== k) logIndirect += Math.log(A[i]![j]! * A[j]![k]!)
+      }
+      const indirectRatio = Math.exp(logIndirect / (n - 2))
+      const indirectSuggested = nearestScale(indirectRatio)
+      let suggested = indirectSuggested
+      if (Math.abs(indirectSuggested - actual) <= 1e-9) {
+        const ratioSuggested = nearestScale(ratio)
+        if (Math.abs(ratioSuggested - actual) > 1e-9) {
+          suggested = ratioSuggested
         } else {
           let bestLambda = baseLambda - 1e-12
           for (const s of SCALE) {
@@ -412,6 +413,7 @@ export const ahp: WeightingMethod<AhpParams> = {
     const warnings: MethodWarning[] = []
     if (n >= 3 && cr >= AHP_CR_THRESHOLD) warnings.push({ code: 'ahp.inconsistent' })
     if (n >= 8) warnings.push({ code: 'ahp.many-criteria' })
+    if (n > 15) warnings.push({ code: 'ahp.threshold-approximate' })
 
     const steps: Step[] = [
       { key: 'ahp.pairwiseMatrix', matrix, axes: ['criteria', 'criteria'] },

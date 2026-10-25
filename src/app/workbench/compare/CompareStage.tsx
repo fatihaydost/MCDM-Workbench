@@ -16,6 +16,8 @@ export const ECHO_NOTE_KEYS = new Set([
   'copras_saw',
   'copras_ahp-ranking',
   'ahp-ranking_copras',
+  'ahp-ranking_saw',
+  'saw_ahp-ranking',
   'vikor_mabac',
   'mabac_vikor',
   'promethee-ii_mabac',

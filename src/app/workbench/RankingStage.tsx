@@ -72,12 +72,23 @@ export function RankingTable({
   const minScore = finite.length > 0 ? Math.min(...finite) : 0
   const maxScore = finite.length > 0 ? Math.max(...finite) : 0
   const hasBars = !lowerBetter && finite.length > 0 && (minScore < 0 ? maxScore > minScore : maxScore > 0)
-  const barWidth = (sc: number): number => {
-    if (!Number.isFinite(sc)) return 0
-    if (minScore < 0) {
-      return maxScore > minScore ? 12 + ((sc - minScore) / (maxScore - minScore)) * 88 : 100
+  const divergingBars = hasBars && minScore < 0 && maxScore > 0
+  const zeroPct = divergingBars ? (-minScore / (maxScore - minScore)) * 100 : 0
+  const barStyle = (sc: number): { left?: string; width: string } => {
+    if (!Number.isFinite(sc)) return { width: '0%' }
+    if (divergingBars) {
+      const span = maxScore - minScore
+      if (sc >= 0) {
+        return { left: `${zeroPct}%`, width: `${(sc / span) * 100}%` }
+      }
+      return { left: `${((sc - minScore) / span) * 100}%`, width: `${(-sc / span) * 100}%` }
     }
-    return maxScore > 0 ? Math.min(100, (Math.max(sc, 0) / maxScore) * 100) : 0
+    if (minScore < 0) {
+      const w = maxScore > minScore ? 12 + ((sc - minScore) / (maxScore - minScore)) * 88 : 100
+      return { width: `${w}%` }
+    }
+    const w = maxScore > 0 ? Math.min(100, (Math.max(sc, 0) / maxScore) * 100) : 0
+    return { width: `${w}%` }
   }
   const narrowHidden = !compact && view.columnsFromSm === true
   const extraClass = narrowHidden ? 'max-sm:hidden' : undefined
@@ -133,10 +144,14 @@ export function RankingTable({
                 ))}
                 <Td numeric data-testid="closeness" className={cn(first ? 'font-semibold' : 'font-medium')}>
                   {hasBars && (
-                    <span aria-hidden className="mr-3 inline-block h-2 w-20 bg-surface-2 align-middle">
+                    <span aria-hidden className="relative mr-3 inline-block h-2 w-20 bg-surface-2 align-middle">
                       <span
-                        className={cn('block h-full', first ? 'bg-accent' : 'bg-[var(--data-context)]')}
-                        style={{ width: `${barWidth(result.scores[i]!)}%` }}
+                        className={cn(
+                          'block h-full',
+                          divergingBars && 'absolute top-0',
+                          first ? 'bg-accent' : 'bg-[var(--data-context)]',
+                        )}
+                        style={barStyle(result.scores[i]!)}
                       />
                     </span>
                   )}

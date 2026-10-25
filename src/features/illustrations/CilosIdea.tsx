@@ -96,7 +96,7 @@ export function CilosIdea({ problem, format = defaultFormat, labels, step, expla
     columns: [...problem.criteria.map((c) => c.name), l.totalLoss, l.weight],
     rows: problem.criteria.map((c, j) => ({
       label: c.name,
-      cells: [...problem.criteria.map((_, col) => format(parts.lossMatrix[j]?.[col] ?? 0)), lossTexts[j]!, weightTexts[j]!],
+      cells: [...problem.criteria.map((_, col) => format(parts.losses[j]?.[col] ?? 0)), lossTexts[j]!, weightTexts[j]!],
     })),
   }
 

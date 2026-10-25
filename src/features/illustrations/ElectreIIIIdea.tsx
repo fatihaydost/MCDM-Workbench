@@ -145,10 +145,11 @@ export function ElectreIIIIdea({
   const sTexts = scores.map((v) => signed(format, v, 4))
   const rowText = (i: number) => l.row(names[i]!, dTexts[i]!, aTexts[i]!, sTexts[i]!)
 
-  const displayNames = names.map((nm, i) => `${nm} (${dTexts[i]}·${aTexts[i]})`)
+  const fullNames = names.map((nm, i) => `${nm} (${dTexts[i]}·${aTexts[i]})`)
+  const displayNames = names.map((nm, i) => (stage === 0 ? `${nm} (${dTexts[i]})` : `${nm} (${dTexts[i]}·${aTexts[i]})`))
   const valueWidth = Math.ceil(Math.max(...sTexts.map((t) => estimateTextWidth(t, FONT)))) + GAP
   const scoreWidth = Math.round(Math.min(150, Math.max(64, W * 0.24)))
-  const maxName = Math.max(...displayNames.map((x) => estimateTextWidth(x, FONT)))
+  const maxName = Math.max(...fullNames.map((x) => estimateTextWidth(x, FONT)))
   const labelWidth = stacked ? 0 : Math.ceil(Math.min(maxName + GAP * 2, Math.max(W * 0.28, 72)))
 
   const flowLeft = labelWidth
@@ -214,7 +215,7 @@ export function ElectreIIIIdea({
       >
         <g aria-hidden>
           <text className={b.head} x={flowLeft} y={HEAD / 2} textAnchor="start" dominantBaseline="central">
-            {`Φ⁺ (${l.descendingRank}) / Φ⁻ (${l.ascendingRank}) →`}
+            {`φ⁺ (${l.descendingRank}) / φ⁻ (${l.ascendingRank}) →`}
           </text>
           <line className={b.zero} x1={flowLeft} x2={flowLeft} y1={HEAD} y2={height} />
           <text className={`${b.head} ${s.stageItem}`} data-off={scoreOff} x={zero} y={HEAD / 2} textAnchor="middle" dominantBaseline="central">

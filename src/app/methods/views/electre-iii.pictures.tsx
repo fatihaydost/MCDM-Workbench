@@ -46,7 +46,8 @@ function useElectreIIILabels(): ElectreIIIIdeaLabels {
     descendingRank: 'r↓',
     ascendingRank: 'r↑',
     score: 'Φ',
-    row: (alternative, desc, asc, score) => t('workbench.visual.electre-iii.row', { alternative, desc, asc, score }),
+    row: (alternative, desc, asc, score) =>
+      t('workbench.visual.electre-iii.row', { alternative, desc, asc, pos: desc, neg: asc, score }),
     incomparables: (pairs) =>
       t('workbench.visual.electre-iii.incomparables', {
         pairs,

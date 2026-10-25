@@ -228,6 +228,8 @@ describe('ELECTRE I — graph kernel, edge cases & parameter validation', () => 
     }
     const resNear = electreI.compute(nearConst, [0.5, 0.5], {})
     expect(resNear.warnings).toContainEqual({ code: 'electre-i.near-constant-column', col: 1 })
+    const resNearZeroW = electreI.compute(nearConst, [1, 0], {})
+    expect(resNearZeroW.warnings).not.toContainEqual({ code: 'electre-i.near-constant-column', col: 1 })
 
     // Non-kernel leader: A2 (index 1) has the highest net outranking score Φ,
     // but is outranked by A1 (index 0) and is therefore excluded from the kernel K = {0}.
@@ -301,7 +303,12 @@ describe('ELECTRE I — graph kernel, edge cases & parameter validation', () => 
       const resWithZero = electreI.compute(p, [0.5, 0.5, 0], { discordanceScale })
       const resWithout = electreI.compute(pWithout, [0.5, 0.5], { discordanceScale })
       const dWithZero = resWithZero.steps.find((s) => s.key === 'electre-i.discordance')!.matrix!
+      const dWithout = resWithout.steps.find((s) => s.key === 'electre-i.discordance')!.matrix!
       expect(dWithZero[0]![1]).toBe(0)
+      expect(dWithZero[1]![0]).toBeCloseTo(2 / 3, 12)
+      expect(dWithZero).toEqual(dWithout)
+      expect(resWithZero.diagnostics?.delta).toBe(resWithout.diagnostics?.delta)
+      expect(resWithZero.scores).toEqual(resWithout.scores)
       expect(resWithZero.ranking).toEqual(resWithout.ranking)
     }
   })

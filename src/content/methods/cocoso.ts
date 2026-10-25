@@ -91,7 +91,7 @@ export const cocoso: MethodContent = {
   sources: [
     { label: 'Yazdani, Zaraté, Zavadskas & Turskis (2019), Management Decision 57(9), 2501-2519', doi: '10.1108/MD-05-2017-0458' },
     { label: 'Akgül (2021), CRITIC-CoCoSo, Ekonomi ve Finansal Araştırmalar Dergisi 3(2), 71-90', url: 'https://dergipark.org.tr/tr/download/article-file/2114456' },
-    { label: 'Özel Sönmez, F., & Toktaş, P. (2024). Tedarikçi seçiminde CRITIC ve CoCoSo yöntemlerinin entegrasyonu. Journal of Scientific Reports-A, (57), 42-60.', doi: '10.59313/jsr-a.1420728' },
+    { label: 'Özel Sönmez, G., & Toktaş, P. (2024). Supplier selection using the integrated MEREC - CoCoSo methods in a medical device company. Journal of Scientific Reports-A, (056), 116-133.', doi: '10.59313/jsr-a.1420728' },
     { label: 'pyDecision 5.1.8, cocoso_method (adds 1 to all S or P when the minimum is 0; not adopted)', url: 'https://github.com/Valdecy/pyDecision' },
   ],
   en: {

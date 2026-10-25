@@ -59,8 +59,8 @@ export const swara: MethodContent = {
     {
       methodId: 'saw',
       text: {
-        en: 'The origin paper uses SWARA weights to evaluate dispute resolution methods.',
-        tr: 'Özgün makale SWARA ağırlıklarını uyuşmazlık çözüm yöntemlerini değerlendirmek için kullanır.',
+        en: 'The origin paper derives SWARA weights for six dispute-resolution criteria (Table 1); the workbench pairs them with an illustrative 4 x 6 rating matrix to demonstrate ranking.',
+        tr: 'Özgün makale altı uyuşmazlık çözümü kriteri için SWARA ağırlıklarını türetir (Tablo 1); çalışma alanı sıralama gösterimi için bunları ilüstratif 4 x 6 puan matrisiyle eşleştirir.',
       },
     },
   ],
@@ -69,13 +69,14 @@ export const swara: MethodContent = {
     doi: '10.3846/jbem.2010.12',
     match: 'match',
     note: {
-      en: 'Published example (Table 1): six criteria for choosing a dispute resolution method. k, q and w match the printed 2 decimals (largest gap 0.0028 on w).',
-      tr: 'Yayımlanmış örnek (Tablo 1): uyuşmazlık çözüm yöntemi seçimi için altı kriter. k, q ve w basılı 2 basamakta örtüşüyor (w üzerinde en büyük fark 0,0028).',
+      en: 'Published example (Table 1): six criteria for choosing a dispute resolution method. k, q and w match the printed 2 decimals (largest gap 0.0028 on w); the 4 x 6 alternative matrix in the workbench is illustrative.',
+      tr: 'Yayımlanmış örnek (Tablo 1): uyuşmazlık çözüm yöntemi seçimi için altı kriter. k, q ve w basılı 2 basamakta örtüşüyor (w üzerinde en büyük fark 0,0028); çalışma alanındaki 4 x 6 alternatif matrisi ilüstratiftir.',
     },
   },
   sources: [
     { label: 'Keršulienė, Zavadskas & Turskis (2010), Journal of Business Economics and Management 11(2), 243-258', doi: '10.3846/jbem.2010.12' },
     { label: 'Keshavarz-Ghorabaee et al. (2021), Symmetry 13(4), 525', doi: '10.3390/sym13040525' },
+    { label: 'Torkashvand, Neshat, Javadi & Yousefi (2021), Environmental Science and Pollution Research 28, 46704-46724', doi: '10.1007/s11356-020-11406-7' },
   ],
   en: {
     summary:

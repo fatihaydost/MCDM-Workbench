@@ -39,7 +39,8 @@ export function mabacParts(problem: Problem, weights: readonly number[]): MabacP
 
 const defaultFormat = (v: number, d: number) => v.toFixed(d)
 /** A signed number: "+0.2183", "-0.0488" (the sign is part of the reading, so a positive one says so too). */
-const signed = (format: (v: number, d: number) => string, v: number, d: number) => (v > 0 ? `+${format(v, d)}` : format(v, d))
+const signed = (format: (v: number, d: number) => string, v: number, d: number) =>
+  v >= 0.5 * 10 ** -d ? `+${format(v, d)}` : format(Math.abs(v) < 0.5 * 10 ** -d ? 0 : v, d)
 const sign = (v: number) => (v > 0 ? 'up' : v < 0 ? 'down' : undefined)
 
 export type MabacBorderLabels = {
@@ -322,7 +323,7 @@ export type MabacSumLineProps = {
   className?: string | undefined
 }
 
-const PAD = { left: 52, right: 16, top: 16, bottom: 40 }
+const PAD = { left: 52, right: 16, top: 28, bottom: 40 }
 
 /**
  * Why MABAC orders like a min-max weighted sum: x is that sum, y is S, one dot per alternative. S = sum - B with one B
@@ -378,11 +379,11 @@ export function MabacSumLine({ problem, weights, format = defaultFormat, labels,
           <text className={s.axisName} x={x(0.5)} y={y(-border) + 32} textAnchor="middle" dominantBaseline="central">
             {l.x}
           </text>
-          <text className={s.axisName} x={x(0)} y={PAD.top - 8} textAnchor="start" dominantBaseline="central">
+          <text className={s.axisName} x={x(0)} y={PAD.top - 12} textAnchor="start" dominantBaseline="central">
             {l.y}
           </text>
           <line className={s.marcosLine} x1={x(0)} y1={y(-border)} x2={x(1)} y2={y(1 - border)} data-testid="mabac-line" data-border={border} />
-          <text className={s.marcosLineLabel} x={x(1)} y={y(1 - border) - 12} textAnchor="end" dominantBaseline="central">
+          <text className={s.marcosLineLabel} x={x(1)} y={Math.max(PAD.top + 14, y(1 - border) - 12)} textAnchor="end" dominantBaseline="central">
             {l.line(format(border, 4))}
           </text>
           {names.map((name, i) => (

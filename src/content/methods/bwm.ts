@@ -95,8 +95,8 @@ export const bwm: MethodContent = {
     doi: '10.1016/j.omega.2015.12.001',
     match: 'match',
     note: {
-      en: 'Published example (Tables 2-3 (input), Sections 3 and 4 (output)). Car purchase, five criteria, best = price, worst = style. The linear-model weights match for the consistent and the inconsistent example (largest difference 4.6e-5, xi^L = 0.0109). The site computes the linear model only.',
-      tr: 'Yayımlanmış örnek (Tablo 2-3 (girdi), Bölüm 3 ve 4 (çıktı)). Araba satın alma, beş kriter, en iyi = fiyat, en kötü = stil. Doğrusal model ağırlıkları tutarlı ve tutarsız örnekte örtüşüyor (en büyük fark 4,6e-5, xi^L = 0,0109). Site yalnız doğrusal modeli hesaplar.',
+      en: 'Published examples (Tables 2-4 (input), Sections 3 and 4 (output)): car purchase, five criteria, best = price, worst = style. All three examples are verified: consistent (Table 2, xi^L = 0), slightly inconsistent (Table 3, xi^L = 0.0109, largest difference 4.6e-5) and higher-inconsistency (Table 4, xi^L = 0.0615, shown on this page and in the workbench). The site computes the linear model only.',
+      tr: 'Yayımlanmış örnekler (Tablo 2-4 (girdi), Bölüm 3 ve 4 (çıktı)): otomobil satın alma, beş kriter, en iyi = fiyat, en kötü = stil. Üç örnek de doğrulandı: tutarlı (Tablo 2, xi^L = 0), az tutarsız (Tablo 3, xi^L = 0,0109, en büyük fark 4,6e-5) ve yüksek tutarsızlıklı (Tablo 4, xi^L = 0,0615; bu sayfada ve çalışma alanında gösterilen örnek). Site yalnız doğrusal modeli hesaplar.',
     },
   },
   sources: [
@@ -107,7 +107,7 @@ export const bwm: MethodContent = {
     { label: 'Mi, Tang, Liao, Shen & Lev (2019), Omega 87, 205-225', doi: '10.1016/j.omega.2019.01.009' },
     { label: 'You et al. (2017), Sustainability 9(12), 2329', doi: '10.3390/su9122329' },
     { label: 'Gupta (2018), Journal of Air Transport Management 68, 35-47', doi: '10.1016/j.jairtraman.2017.06.001' },
-    { label: 'Telli & Ayçin (2021), BWM-MABAC teacher selection, Süleyman Demirel Üniversitesi Vizyoner Dergisi 12(31), 912-932', doi: '10.21076/vizyoner.824056' },
+    { label: 'Telli & Ayçin (2021), BWM-MABAC teacher selection, TroyAcademy 6(2), 733-750', doi: '10.31454/troyacademy.899397' },
   ],
   en: {
     summary:

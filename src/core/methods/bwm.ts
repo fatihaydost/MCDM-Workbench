@@ -68,7 +68,12 @@ export function bwmSolve(
     best >= n ||
     worst < 0 ||
     worst >= n ||
-    best === worst
+    best === worst ||
+    !bo.every((v) => typeof v === 'number' && Number.isFinite(v) && v >= 1) ||
+    !ow.every((v) => typeof v === 'number' && Number.isFinite(v) && v >= 1) ||
+    Math.abs(bo[best]! - 1) > 1e-9 ||
+    Math.abs(ow[worst]! - 1) > 1e-9 ||
+    Math.abs(bo[worst]! - ow[best]!) > 1e-9
   ) {
     throw new RangeError('Invalid BWM dimensions or anchor indices')
   }

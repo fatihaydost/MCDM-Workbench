@@ -258,7 +258,7 @@ export function PrometheeIdea({
                   y={mid - 7}
                   width={1}
                   height={14}
-                  style={{ transform: `translate(${zero}px, 0px) scale(${(stage >= 2 && end) || 0.001}, 1)` }}
+                  style={{ transform: `translate(${zero}px, 0px) scale(${stage >= 2 ? end : 0.001}, 1)` }}
                   aria-hidden
                 />
                 <text className={`${s.sawValue} ${s.stageItem}`} data-off={scoreOff} x={W} y={mid} textAnchor="end" dominantBaseline="central" data-testid="promethee-ii-phi">

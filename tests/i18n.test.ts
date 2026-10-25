@@ -212,12 +212,16 @@ describe('i18n resources', () => {
       mabac.compute({ ...p, matrix: [[1, 5], [3, 5 + 1e-10], [2, 5]] }, [0.5, 0.5], {}),
     ]
     expect(mb.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual(['mabac.near-constant-column'])
-    // MOORA: negatives allowed, and its one notice (an all-zero column).
+    // MOORA: negatives allowed (with notice), and an all-zero column notice.
     const mo = [
       moora.compute({ ...p, matrix: [[-1, 2], [3, -1], [2, 3]] }, [0.5, 0.5], {}),
       moora.compute({ ...p, matrix: [[0, 1], [0, 2], [0, 4]] }, [0.5, 0.5], {}),
     ]
-    expect(mo.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual(['moora.zero-column'])
+    expect(mo.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual([
+      'moora.negative-values',
+      'moora.negative-values',
+      'moora.zero-column',
+    ])
     // BWM: the Demir & Bircan answers (F3, n = 9, inconsistent on K7) and n = 10 with aBW = 3 (approximate threshold).
     const bwmProblem = (n: number) => ({ ...p, criteria: Array.from({ length: n }, (_, j) => ({ name: `C${j + 1}`, type: 'benefit' as const })), matrix: [new Array<number>(n).fill(1), new Array<number>(n).fill(2)] })
     const aB10 = [1, 2, 2, 2, 2, 2, 2, 2, 2, 3]

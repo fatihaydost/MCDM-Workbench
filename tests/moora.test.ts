@@ -122,7 +122,7 @@ describe('MOORA (Brauers & Zavadskas 2006, 2010; Vujičić et al. 2017)', () => 
     expect(mat(zRes.steps, 'moora.normalized').map((r) => r[0])).toEqual([0, 0, 0])
     expect(zRes.ranking).toEqual([3, 2, 1])
 
-    // Negative values work without error.
+    // Negative values work without error and emit moora.negative-values on active varying columns.
     const neg = makeProblem(
       [
         [-5, 10],
@@ -134,6 +134,8 @@ describe('MOORA (Brauers & Zavadskas 2006, 2010; Vujičić et al. 2017)', () => 
     const negRes = moora.compute(neg, [0.5, 0.5], {})
     expect(negRes.scores.every(Number.isFinite)).toBe(true)
     expect(negRes.ranking).toEqual([3, 2, 1])
+    expect(negRes.warnings).toEqual([{ code: 'moora.negative-values', col: 0 }])
+    expect(moora.compute(neg, [0, 1], {}).warnings).toEqual([])
 
     // All-cost criteria: S+ = 0, y = -S-, smallest cost sum ranks 1st.
     const allCost = makeProblem(

@@ -206,6 +206,13 @@ describe('VIKOR: v, guards and edge cases', () => {
     expect(vikor.compute(prob, w, { v: 0 }).warnings).toEqual([])
     const c = compromiseOf(res)
     expect([c.bestByS, c.bestByR, c.c2]).toEqual([false, true, true])
+    // At v = 1 with sFlat && !rFlat, Q is all 0 (noSpread), and A1 (first = 0) has R = 0.5 > R(A3) = 0.25, so C2 must be false.
+    const resV1 = vikor.compute(prob, w, { v: 1 })
+    expect(resV1.scores).toEqual([0, 0, 0])
+    expect(resV1.warnings).toContainEqual({ code: 'vikor.no-spread' })
+    const cV1 = compromiseOf(resV1)
+    expect([cV1.first, cV1.bestByS, cV1.bestByR, cV1.c2]).toEqual([0, false, false, false])
+    expect(resV1.diagnostics?.c2).toBe(0)
   })
   it('every R equal: the R term is 0, Q comes from S alone, with a notice when v < 1 (and no equal-regret notice at v = 1)', () => {
     // d = [.5, 0], [.5, .5], [0, .5]: R = .5 for all, S = .5, 1, .5.

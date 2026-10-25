@@ -60,6 +60,13 @@ export function switchMarks(intervals: readonly StableInterval[], scoresAt: (wk:
     const q = sorted[best + 1]!
     const sp = s[p] ?? 0
     const sq = s[q] ?? 0
+    if (
+      a.ranking[p] !== a.ranking[q] &&
+      b.ranking[p] !== b.ranking[q] &&
+      Math.abs(sp - sq) > 1e-3 * Math.max(1, Math.abs(sp), Math.abs(sq))
+    ) {
+      continue
+    }
     const y = Math.abs(sp - sq) > 1e-6 ? (b.ranking[p]! < b.ranking[q]! ? sp : sq) : (sp + sq) / 2
     out.push({ x: a.to, y })
   }
@@ -82,6 +89,13 @@ export function topSwitchMarks(intervals: readonly StableInterval[], scoresAt: (
     const q = b.top.find((i) => !a.top.includes(i)) ?? b.top[0]!
     const sp = s[p] ?? 0
     const sq = s[q] ?? 0
+    if (
+      a.top.length === 1 &&
+      b.top.length === 1 &&
+      Math.abs(sp - sq) > 1e-3 * Math.max(1, Math.abs(sp), Math.abs(sq))
+    ) {
+      continue
+    }
     const y = Math.abs(sp - sq) > 1e-6 ? sq : players.reduce((sum, i) => sum + s[i]!, 0) / players.length
     out.push({ x: a.to, y })
   }

@@ -146,7 +146,10 @@ export const examples: readonly ExampleDataset[] = [
     ],
     // Table 8 prints these values on permuted rows (printed row k = data column [2, 4, 0, 1, 3][k]); listed here in
     // the data's column order, which is what the data give (docs/research/methods/entropy.md, Reference example).
-    published: [{ label: 'entropy.weights', values: [0.0308, 0.2196, 0.1879, 0.2648, 0.297], decimals: 4 }],
+    published: [
+      { label: 'entropy.weights', values: [0.0308, 0.2196, 0.1879, 0.2648, 0.297], decimals: 4 },
+      { label: 'cilos.weights', values: [0.3188, 0.1369, 0.2132, 0.1378, 0.1933], decimals: 4 },
+    ],
   },
   {
     id: 'diakoulaki-1995-pharma',
@@ -1028,8 +1031,8 @@ export const examples: readonly ExampleDataset[] = [
     },
     buttonLabel: { en: 'Dispute resolution', tr: 'Uyuşmazlık çözümü' },
     summary: {
-      en: 'Four commercial dispute resolution methods on six criteria ordered from most important (expedition) to least important (legal advice). The paper introduces SWARA and reports the step-down ratios, coefficients, recalculated weights and final weights in Table 1.',
-      tr: 'En önemliden (çözüm hızı) en az önemliye (hukuki danışmanlık) sıralanmış altı kriterde dört ticari uyuşmazlık çözüm yöntemi. Makale SWARA yöntemini tanıtır ve Tablo 1 içinde ardışık oranları, katsayıları, yeniden hesaplanan ağırlıkları ve nihai ağırlıkları verir.',
+      en: 'Four commercial dispute resolution methods on six criteria ordered from most important (expedition) to least important (legal advice). The paper introduces SWARA and reports the step-down ratios, coefficients, recalculated weights and final weights in Table 1; the 4 x 6 alternative ratings are illustrative for ranking in the workbench.',
+      tr: 'En önemliden (çözüm hızı) en az önemliye (hukuki danışmanlık) sıralanmış altı kriterde dört ticari uyuşmazlık çözüm yöntemi. Makale SWARA yöntemini tanıtır ve Tablo 1 içinde ardışık oranları, katsayıları, yeniden hesaplanan ağırlıkları ve nihai ağırlıkları verir; 4 x 6 alternatif puan matrisi çalışma alanında sıralama gösterimi için ilüstratiftir.',
     },
     referenceFor: ['swara'],
     citation: {
@@ -1039,8 +1042,8 @@ export const examples: readonly ExampleDataset[] = [
       venue: 'Journal of Business Economics and Management 11(2), 243-258',
       doi: '10.3846/jbem.2010.12',
       tables: {
-        en: 'Figures 3 and 4 (alternatives and criteria), Table 1 (SWARA weights)',
-        tr: 'Şekil 3 ve 4 (alternatifler ve kriterler), Tablo 1 (SWARA ağırlıkları)',
+        en: 'Figures 3 and 4 (alternatives and criteria), Table 1 (SWARA weights); illustrative 4 x 6 alternative matrix',
+        tr: 'Şekil 3 ve 4 (alternatifler ve kriterler), Tablo 1 (SWARA ağırlıkları); ilüstratif 4 x 6 alternatif matrisi',
       },
     },
     alternatives: ['Negotiation', 'Mediation', 'Arbitration', 'Litigation'],
@@ -1182,8 +1185,8 @@ export const examples: readonly ExampleDataset[] = [
     },
     buttonLabel: { en: 'Car purchase', tr: 'Otomobil seçimi' },
     summary: {
-      en: 'Five car-buying criteria where price is best and style is worst. The paper introduces the linear BWM model and solves the best-to-others and others-to-worst comparison vectors.',
-      tr: 'Fiyatın en önemli, stilin en önemsiz olduğu beş otomobil satın alma kriteri. Makale doğrusal BWM modelini tanıtır ve en iyinin diğerlerine ile diğerlerinin en kötüye karşılaştırma vektörlerini çözer.',
+      en: 'Five car-buying criteria where price is best and style is worst. The paper introduces the linear BWM model and solves the best-to-others and others-to-worst comparison vectors (Table 4, Example 3); the 3 x 5 car matrix is illustrative for ranking in the workbench.',
+      tr: 'Fiyatın en önemli, stilin en önemsiz olduğu beş otomobil satın alma kriteri. Makale doğrusal BWM modelini tanıtır ve en iyinin diğerlerine ile diğerlerinin en kötüye karşılaştırma vektörlerini çözer (Tablo 4, Örnek 3); 3 x 5 araç matrisi çalışma alanında sıralama gösterimi için ilüstratiftir.',
     },
     referenceFor: ['bwm'],
     citation: {
@@ -1193,8 +1196,8 @@ export const examples: readonly ExampleDataset[] = [
       venue: 'Omega 64, 126-130',
       doi: '10.1016/j.omega.2015.12.001',
       tables: {
-        en: 'Tables 2-4 (input), Sections 3-4 (output)',
-        tr: 'Tablo 2-4 (girdi), Bölüm 3-4 (çıktı)',
+        en: 'Table 4, Example 3 (BWM comparison vectors), Section 4 (linear BWM weights); illustrative 3 x 5 car matrix',
+        tr: 'Tablo 4, Örnek 3 (BWM karşılaştırma vektörleri), Bölüm 4 (doğrusal BWM ağırlıkları); ilüstratif 3 x 5 araç matrisi',
       },
     },
     alternatives: ['Car A', 'Car B', 'Car C'],
@@ -1211,10 +1214,10 @@ export const examples: readonly ExampleDataset[] = [
       [7, 18000, 6, 8, 7],
       [9, 26000, 8, 9, 8],
     ],
-    judgements: judgementsFromBwm(5, 1, 4, [2, 1, 4, 2, 8], [4, 8, 2, 3, 1]),
+    judgements: judgementsFromBwm(5, 1, 4, [2, 1, 4, 3, 8], [4, 8, 4, 2, 1]),
     published: [
-      { label: 'bwm.weights', values: [0.2457, 0.4224, 0.1207, 0.1638, 0.0474], decimals: 4 },
-      { label: 'bwm.xi', values: [0.069], decimals: 4 },
+      { label: 'bwm.weights', values: [0.2462, 0.4308, 0.1231, 0.1538, 0.0462], decimals: 4 },
+      { label: 'bwm.xi', values: [0.0615], decimals: 4 },
     ],
   },
 ]

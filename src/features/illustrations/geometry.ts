@@ -810,6 +810,8 @@ export type CoprasParts = {
   bonus: number[]
   /** Cost share S-_i (the core's 'copras.sMinus' step). */
   sMinus: number[]
+  /** Total weight of cost criteria W_C (0 when no active cost criterion exists). */
+  wCost: number
   scores: number[]
   /** Utility degree N_i in percent of the best Q. */
   utility: number[]
@@ -827,11 +829,13 @@ export function coprasParts(problem: Problem, weights: readonly number[]): Copra
   }
   const order = result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b)
   const sPlus = stepVector(result.steps, 'copras.sPlus')
+  const wCost = problem.criteria.reduce((acc, c, j) => (c.type === 'cost' ? acc + (weights[j] ?? 0) : acc), 0)
   return {
     result,
     sPlus,
     bonus: result.scores.map((q, i) => q - sPlus[i]!),
     sMinus: stepVector(result.steps, 'copras.sMinus'),
+    wCost,
     scores: result.scores,
     utility: stepVector(result.steps, 'copras.utility'),
     order,
@@ -978,18 +982,8 @@ export function mooraParts(problem: Problem, weights: readonly number[]): MooraP
   const normalized = stepMatrix(result.steps, 'moora.normalized')
   const weighted = stepMatrix(result.steps, 'moora.weighted')
   const isCost = problem.criteria.map((c) => c.type === 'cost')
-  const benefit = weighted.map((row) =>
-    row.map((v, j) => {
-      const signed = isCost[j] ? -v : v
-      return signed > 0 ? signed : 0
-    }),
-  )
-  const cost = weighted.map((row) =>
-    row.map((v, j) => {
-      const signed = isCost[j] ? -v : v
-      return signed < 0 ? -signed : 0
-    }),
-  )
+  const benefit = weighted.map((row) => row.map((v, j) => (isCost[j] ? 0 : v)))
+  const cost = weighted.map((row) => row.map((v, j) => (isCost[j] ? v : 0)))
   const order = result.ranking.map((_, i) => i).sort((a, b) => result.ranking[a]! - result.ranking[b]! || a - b)
   return {
     result,

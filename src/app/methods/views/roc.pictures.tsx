@@ -3,15 +3,30 @@ import { useTranslation } from 'react-i18next'
 import type { RocFormula } from '../../../core'
 import { ChartTableModeProvider } from '../../../features/charts'
 import { IdeaSteps, useIdeaSteps } from '../../../features/illustrations/IdeaSteps'
-import { ROC_IDEA_STEPS, RocIdea } from '../../../features/illustrations/RocIdea'
+import { ROC_IDEA_STEPS, RocIdea, type RocIdeaLabels } from '../../../features/illustrations/RocIdea'
 import { useNumberFormat } from '../../../i18n'
 import { DECIMALS } from '../../workbench/shared'
 import { IdeaSource, useStepLabels } from './parts'
 import type { IdeaPictureProps, StagePictureProps } from './types'
 
+function useRocLabels(): RocIdeaLabels {
+  const { t } = useTranslation()
+  return {
+    title: t('workbench.visual.roc.title'),
+    caption: t('workbench.visual.roc.caption', { defaultValue: '● ROC · ■ RS · ◆ RR' }),
+    rank: t('workbench.visual.roc.rank'),
+    roc: t('workbench.visual.roc.roc'),
+    rs: t('workbench.visual.roc.rs'),
+    rr: t('workbench.visual.roc.rr'),
+    weight: t('workbench.visual.roc.weight'),
+    showTable: t('workbench.chart.showTable'),
+    criterion: t('workbench.criterion'),
+  }
+}
+
 /** Weights stage: each criterion's rank, its ROC / RS / RR curve position and the active weight bar. */
 export function Stage({ problem, params }: StagePictureProps) {
-  const { t } = useTranslation()
+  const labels = useRocLabels()
   const nf = useNumberFormat(DECIMALS.weight)
   const format = useCallback((v: number) => nf.format(v), [nf])
   const formula: RocFormula = params.formula === 'rs' || params.formula === 'rr' ? params.formula : 'roc'
@@ -23,16 +38,7 @@ export function Stage({ problem, params }: StagePictureProps) {
         formula={formula}
         ranks={ranks}
         format={format}
-        labels={{
-          title: t('workbench.visual.roc.title'),
-          rank: t('workbench.visual.roc.rank'),
-          roc: t('workbench.visual.roc.roc'),
-          rs: t('workbench.visual.roc.rs'),
-          rr: t('workbench.visual.roc.rr'),
-          weight: t('workbench.visual.roc.weight'),
-          showTable: t('workbench.chart.showTable'),
-          criterion: t('workbench.criterion'),
-        }}
+        labels={labels}
         className="max-w-[760px]"
       />
     </ChartTableModeProvider>

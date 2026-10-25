@@ -72,7 +72,7 @@ function solveCilosSystem(fActive: readonly (readonly number[])[]): number[] | n
  * CILOS — Criterion Impact LOSs (Mirkin 1974; Zavadskas & Podvezko 2016; Zavadskas et al. 2017, Sec. 5.1.2, Eqs. 5-8):
  * 1. Cost criteria inverted to benefit: x̃_ij = min_r x_rj / x_ij (cost), x̃_ij = x_ij (benefit).
  * 2. Sum normalization: x̄_ij = x̃_ij / Σ_r x̃_rj.
- * 3. Square matrix A (n × n): row i is row k_i of X̄ where k_i = argmax_r x̄_ri (first occurrence on ties), so a_ii = max_r x̄_ri.
+ * 3. Square matrix A (n × n): row i is row k_i of X̄ where k_i = argmax_r x̄_ri (averaging tied winning rows W_i on ties), so a_ii = max_r x̄_ri.
  * 4. Relative impact-loss matrix P (n × n): p_ij = (a_jj - a_ij) / a_jj, p_ii = 0.
  * 5. System matrix F (n × n): f_ij = p_ij (i ≠ j), f_jj = -Σ_{i ≠ j} p_ij.
  * 6. Solve F q = 0 with Σ_j q_j = 1; weights w_j = q_j.

@@ -22,6 +22,9 @@ export const mabac: RankingMethod = {
     const { r, constant, nearConstant } = minMaxNormalize(problem)
     const warnings: MethodWarning[] = []
     nearConstant.forEach((near, j) => near && warnings.push({ code: 'mabac.near-constant-column', col: j }))
+    if (constant.every((c, j) => c || (weights[j] ?? 0) <= 0)) {
+      warnings.push({ code: 'mabac.no-spread' })
+    }
 
     const m = r.length
     const v = r.map((row) => row.map((t, j) => weights[j]! * (t + 1)))

@@ -21,7 +21,7 @@ export default defineConfig({
     viewport: { width: 1440, height: 900 },
   },
   webServer: {
-    command: `pnpm exec vite --host 127.0.0.1 --port ${PORT} --strictPort`,
+    command: `node --no-turbo-fast-api-calls ./node_modules/vite/bin/vite.js --host 127.0.0.1 --port ${PORT} --strictPort`,
     cwd: '../..',
     url: `http://127.0.0.1:${PORT}/`,
     reuseExistingServer: false,

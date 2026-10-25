@@ -155,12 +155,17 @@ describe('BWM: thresholds, suggestion, answers, validation, progress', () => {
     expect(bwmSuggestion([1, null, 9], [9, 4, 1], 0, 2, 1)).toBeNull()
     expect(bwmSuggestion([1, 4, 9], [9, null, 1], 0, 2, 1)).toBeNull()
   })
-  it('bwmSolve: rejects mismatched lengths or invalid best/worst indices', () => {
+  it('bwmSolve: rejects mismatched lengths, invalid best/worst indices, entries < 1, or anchor inconsistencies', () => {
     expect(() => bwmSolve([1, 2, 3], [3, 2, 1], 1, 1)).toThrow(RangeError)
     expect(() => bwmSolve([1, 2, 3], [3, 2], 0, 2)).toThrow(RangeError)
     expect(() => bwmSolve([1], [1], 0, 0)).toThrow(RangeError)
     expect(() => bwmSolve([1, 2, 3], [3, 2, 1], -1, 2)).toThrow(RangeError)
     expect(() => bwmSolve([1, 2, 3], [3, 2, 1], 0, 3)).toThrow(RangeError)
+    expect(() => bwmSolve([1, 0.5, 3], [3, 2, 1], 0, 2)).toThrow(RangeError)
+    expect(() => bwmSolve([1, 2, 3], [3, Number.NaN, 1], 0, 2)).toThrow(RangeError)
+    expect(() => bwmSolve([2, 2, 3], [3, 2, 1], 0, 2)).toThrow(RangeError)
+    expect(() => bwmSolve([1, 2, 3], [3, 2, 2], 0, 2)).toThrow(RangeError)
+    expect(() => bwmSolve([1, 2, 4], [3, 2, 1], 0, 2)).toThrow(RangeError)
   })
   it('bwmAnswers: an answer above a_BW or in AHP direction is unanswered; raising a_BW brings it back', () => {
     const c = f1.cases[1]!

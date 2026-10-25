@@ -14,7 +14,7 @@ export const mabac: MethodView<'ranking'> = {
   // Every forklift's S in rank order, from zero: right of the line above the border, left of it below.
   thumb: ({ problem, weights }) => {
     const res = method.compute(problem(EXAMPLE), weights(EXAMPLE), {})
-    const order = res.scores.map((_, i) => i).sort((a, b) => res.ranking[a]! - res.ranking[b]!)
+    const order = res.scores.map((_, i) => i).sort((a, b) => res.ranking[a]! - res.ranking[b]! || a - b)
     return { kind: 'diverging', rows: order.map((i) => ({ below: Math.max(-res.scores[i]!, 0), above: Math.max(res.scores[i]!, 0) })) }
   },
   // The picture draws every row's distances and S in rank order, so it takes the score chart's place.

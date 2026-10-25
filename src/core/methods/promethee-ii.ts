@@ -93,9 +93,10 @@ function defaultThresholds(
   switch (type) {
     case 'usual':
     case 'I':
+      return { q: 0, p: 0, s: 0 }
     case 'u-shape':
     case 'II':
-      return { q: 0, p: 0, s: 0 }
+      return { q: 0.2 * range, p: 0, s: 0 }
     case 'v-shape':
     case 'III':
     case 'linear':
@@ -212,13 +213,10 @@ export const prometheeII: RankingMethod<PrometheeParams> = {
     const warnings: MethodWarning[] = []
 
     for (let j = 0; j < n; j++) {
-      const wj = weights[j]!
-      if (wj === 0) continue
+      const wj = weights[j] ?? 0
+      if (wj <= 0) continue
 
       const col = column(matrix, j)
-      if (isNearConstant(col)) {
-        warnings.push({ code: 'promethee-ii.near-constant-column', col: j })
-      }
 
       let min = Infinity
       let max = -Infinity
@@ -240,6 +238,9 @@ export const prometheeII: RankingMethod<PrometheeParams> = {
       const eps = BOUNDARY_EPS * Math.max(range, Math.abs(p), Math.abs(q), Math.abs(s), 1e-100)
       if ((type === 'level' || type === 'IV' || type === 'linear' || type === 'V') && q > p + eps) {
         throw new RangeError(`PROMETHEE II threshold q (${q}) exceeds p (${p}) on criterion ${j}`)
+      }
+      if (isNearConstant(col) && (spec?.q ?? 0) < range - eps) {
+        warnings.push({ code: 'promethee-ii.near-constant-column', col: j })
       }
 
       for (let a = 0; a < m; a++) {

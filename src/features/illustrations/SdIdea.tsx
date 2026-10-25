@@ -15,7 +15,7 @@ export type SdIdeaLabels = {
   spread: string
   weight: string
   /** Optional head of the weight column with the divisor, e.g. (1.0729) => "Weight = σ / 1.0729". */
-  weightHead?: ((total: string) => string) | undefined
+  weightHead?: ((total: string) => string) | string | undefined
   showTable: string
   /** Header of the first table column. */
   criterion: string
@@ -70,16 +70,21 @@ export function SdIdea({ problem, format = defaultFormat, labels, step, explain 
   const hi = hasSpread ? argMax(parts.weights) : -1
   const weightTexts = parts.weights.map((w) => format(w))
   const total = parts.sigma.reduce((a, b) => a + b, 0)
-  const weightHead = l.weightHead && total > 0 ? l.weightHead(format(total)) : l.weight
+  const weightHead =
+    typeof l.weightHead === 'function'
+      ? total > 0
+        ? l.weightHead(format(total))
+        : l.weight
+      : (l.weightHead ?? l.weight)
 
   // Columns: name | strip | → | weight + value.
   const W = Math.max(width, 280)
   // No fixed cap: on a wide figure long names fit; on a phone the 26 % share still truncates them.
   const nameW = Math.ceil(Math.min(Math.max(...problem.criteria.map((c) => estimateTextWidth(c.name, 13))) + 12, W * 0.26))
   const valueW = Math.ceil(Math.max(...weightTexts.map((t) => estimateTextWidth(t, 13))) + 8)
-  const free = Math.max(120, W - nameW - valueW - OP)
-  const stripW = free * 0.55
-  const weightW = free - stripW
+  const free = Math.max(40, W - nameW - OP)
+  const stripW = Math.max(20, (free - valueW) * 0.55)
+  const weightW = Math.max(16, free - valueW - stripW)
   const x0 = nameW
   const x1 = x0 + stripW + OP
   const pad = 6
@@ -160,7 +165,7 @@ export function SdIdea({ problem, format = defaultFormat, labels, step, explain 
                       : `translate(${lo}px, ${y + 5}px) scale(${Math.max(hiX - lo, 1)}, 4)`,
                 }}
               />
-              <text className={`${s.barValue} ${s.stageItem} ${s.criticValue}`} data-off={off(2)} data-highlight={on || undefined} x={x1 + ww + 6} y={y} dominantBaseline="central">
+              <text className={`${s.barValue} ${s.stageItem} ${s.criticValue}`} data-off={off(2)} data-highlight={on || undefined} x={Math.min(x1 + ww + 6, W - valueW + 8)} y={y} dominantBaseline="central">
                 {weightTexts[j]}
               </text>
               {j < n - 1 ? <line className={s.rowRule} x1={0} x2={W} y1={y + ROW / 2 - 0.5} y2={y + ROW / 2 - 0.5} /> : null}

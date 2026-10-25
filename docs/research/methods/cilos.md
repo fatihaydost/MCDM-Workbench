@@ -42,9 +42,9 @@ Given an $m \times n$ decision matrix $X = [x_{ij}]$ with $x_{ij} > 0$ (Zavadska
    $$\bar{x}_{ij} = \frac{(\min_r x_{rj}) / x_{ij}}{\sum_{k=1}^{m} (\min_r x_{rj}) / x_{kj}} = \frac{1 / x_{ij}}{\sum_{k=1}^{m} (1 / x_{kj})}.$$
    In the workbench step breakdown, Steps 1 and 2 are presented together as the oriented sum-normalized matrix $\bar{X}$ (`cilos.normalized`), matching the pattern of `aras.normalized` and `merec.normalized`.
 
-3. **Square matrix $A$ of column winners (`cilos.squareMatrix`):** For each criterion $i \in \{1, \dots, n\}$, find the index $k_i \in \{1, \dots, m\}$ of the alternative that maximizes column $i$ of $\bar{X}$ (using first-occurrence tie-breaking when two alternatives tie for the column maximum):
-   $$k_i = \arg\max_{1 \le r \le m} \bar{x}_{ri}, \qquad a_{ij} = \bar{x}_{k_i j} \quad (i, j = 1, \dots, n).$$
-   Row $i$ of the $n \times n$ matrix $A = [a_{ij}]$ is row $k_i$ of $\bar{X}$, and the main diagonal holds the column maxima $a_{ii} = \max_{1 \le r \le m} \bar{x}_{ri}$.
+3. **Square matrix $A$ of column winners (`cilos.squareMatrix`):** For each criterion $i \in \{1, \dots, n\}$, find the winning alternative set $W_i = \{r \in \{1, \dots, m\} : \bar{x}_{ri} = \max_{1 \le s \le m} \bar{x}_{si}\}$ that maximizes column $i$ of $\bar{X}$ (when a single alternative $k_i$ achieves the maximum, $a_{ij} = \bar{x}_{k_i j}$; when multiple alternatives tie for the column maximum, row $i$ of $A$ averages their rows in $\bar{X}$ so the result is invariant to alternative ordering):
+   $$W_i = \arg\max_{1 \le r \le m} \bar{x}_{ri}, \qquad a_{ij} = \frac{1}{|W_i|} \sum_{r \in W_i} \bar{x}_{rj} \quad (i, j = 1, \dots, n).$$
+   Row $i$ of the $n \times n$ matrix $A = [a_{ij}]$ is the winning row $k_i$ of $\bar{X}$ (or the average across tied winners $W_i$), and the main diagonal holds the column maxima $a_{ii} = \max_{1 \le r \le m} \bar{x}_{ri}$.
 
 4. **Relative impact-loss matrix $P$ (Eq. 6, `cilos.lossMatrix`):** Compute the relative loss on criterion $j$ when the optimal alternative $k_i$ for criterion $i$ is selected:
    $$p_{ij} = \frac{a_{jj} - a_{ij}}{a_{jj}} = 1 - \frac{a_{ij}}{a_{jj}}, \qquad p_{ii} = 0 \quad (i, j = 1, \dots, n).$$

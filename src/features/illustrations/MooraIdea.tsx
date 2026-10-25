@@ -123,22 +123,12 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
   const sum = (row: readonly number[]) => row.reduce((a, b) => a + b, 0)
   const isCost = problem.criteria.map((c) => c.type === 'cost')
   // Step 0 draws the unweighted normalized ratios x*_ij on a scale of their own; step 1+ draws weighted v_ij.
-  const normBenefit = normalized.map((row) =>
-    row.map((v, j) => {
-      const sVal = isCost[j] ? -v : v
-      return sVal > 0 ? sVal : 0
-    }),
-  )
-  const normCost = normalized.map((row) =>
-    row.map((v, j) => {
-      const sVal = isCost[j] ? -v : v
-      return sVal < 0 ? -sVal : 0
-    }),
-  )
-  const drawAbove = stage === 0 ? normBenefit : benefit
-  const drawBelow = stage === 0 ? normCost : cost
-  const drawSp = drawAbove.map(sum)
-  const drawSn = drawBelow.map(sum)
+  const normBenefit = normalized.map((row) => row.map((v, j) => (isCost[j] ? 0 : Math.max(0, v))))
+  const normCost = normalized.map((row) => row.map((v, j) => (isCost[j] ? Math.max(0, v) : 0)))
+  const drawAbove = stage === 0 ? normBenefit : benefit.map((row) => row.map((v) => Math.max(0, v)))
+  const drawBelow = stage === 0 ? normCost : cost.map((row) => row.map((v) => Math.max(0, v)))
+  const drawSp = stage === 0 ? drawAbove.map(sum) : sPlus.map((v, i) => Math.max(0, v, sum(drawAbove[i]!)))
+  const drawSn = stage === 0 ? drawBelow.map(sum) : sMinus.map((v, i) => Math.max(0, v, sum(drawBelow[i]!)))
   const m = problem.alternatives.length
   const n = problem.criteria.length
   const names = problem.alternatives
@@ -280,7 +270,7 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
                   const rawVal = stage === 0 ? normalized[i]![g.col]! : parts.weighted[i]![g.col]!
                   const fmtVal = format(rawVal)
                   const label =
-                    g.side === 'at'
+                    rawVal === 0
                       ? l.segmentZero(name, critNames[g.col]!, texts[i]!)
                       : isCost[g.col]
                         ? cleanSignedText(l.segmentCost(name, critNames[g.col]!, fmtVal, texts[i]!))

@@ -1292,6 +1292,7 @@
       },
       "roc": {
         "title": "Önem sıraları sayısal ağırlığa dönüşür",
+        "caption": "Daire = ROC, kare = RS (Sıra Toplamı), eşkenar dörtgen = RR (Sıra Çarpmaya Göre Ters).",
         "rank": "Sıra r",
         "roc": "ROC",
         "rs": "RS",
@@ -1319,7 +1320,9 @@
       "electre-iii": {
         "title": "Azalan sıra r↓, artan sıra r↑ ve net güvenilirlik Φ",
         "caption": "Sol: çıkan güvenilirlik Φ⁺ (üst, yeşil; yanında azalan sıra r↓) ve giren güvenilirlik Φ⁻ (alt, kırmızı; yanında artan sıra r↑). Sağ: sıfır etrafında net güvenilirlik akışı Φ.",
-        "row": "{{alternative}}: r↓ = {{pos}}, r↑ = {{neg}}, Φ = {{score}}"
+        "row": "{{alternative}}: r↓ = {{desc}}, r↑ = {{asc}}, Φ = {{score}}",
+        "incomparables": "Karşılaştırılamaz çiftler (r↓ ile r↑): {{pairs}}",
+        "incomparablesNone": "Karşılaştırılamaz çift yok (r↓ ve r↑ tüm çiftlerde uyuşuyor)."
       }
     },
     "flow": {
@@ -2357,7 +2360,8 @@
       "no-spread": "Etkin kriterlerin tamamı sabit, bu yüzden bütün alternatifler 1. sırayı paylaşıyor."
     },
     "mabac": {
-      "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin."
+      "near-constant-column": "{{criterion}} yalnız yuvarlama kadar değişiyor, ama min-maks onu 0-1 aralığına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
+      "no-spread": "Etkin kriterlerin tamamı sabit, bu yüzden bütün alternatifler S = 0 skoruyla 1. sırayı paylaşıyor."
     },
     "bwm": {
       "inconsistent": "{{criterion}} hakkındaki yanıtlarınız en az tutarlı olanlar; ağırlıklar yine de hesaplanır.",
@@ -2366,7 +2370,8 @@
     "ahp": {
       "inconsistent": "Tutarlılık oranı CR 0,10 veya üzerinde; ağırlıklar yine de hesaplanır, ancak işaretlenen çifti kontrol edin.",
       "inconsistent-criterion": "{{criterion}} kriterinde tutarlılık oranı CR 0,10 veya üzerinde; öncelikler yine de hesaplanır, ancak işaretlenen çifti kontrol edin.",
-      "many-criteria": "8 veya daha fazla kriterde AHP en az 28 karşılaştırma ister ve tutarlılığı korumak zorlaşır; daha az soru için BWM'yi düşünebilirsiniz."
+      "many-criteria": "8 veya daha fazla kriterde AHP en az 28 karşılaştırma ister ve tutarlılığı korumak zorlaşır; daha az soru için BWM'yi düşünebilirsiniz.",
+      "threshold-approximate": "15'ten fazla kriterde rastgele indeks RI yaklaşıktır (Alonso ve Lamata 2006 doğrusal yaklaşımı kullanılır)."
     },
     "ahp-ranking": {
       "pairwise-ignored-above-cap": "7'den fazla alternatif olduğunda ikili alternatif karşılaştırmaları yok sayılır ve yerel öncelikler karar matrisinden hesaplanır."
@@ -2384,7 +2389,11 @@
     },
     "moora": {
       "zero-column": "{{criterion}} kriterinin bütün değerleri 0, bu yüzden sıralamayı etkilemiyor.",
-      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, bu yüzden vektör normalize oranları alternatifler arasında neredeyse aynı kalıyor. Farkın gerçek olup olmadığını kontrol edin."
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, bu yüzden vektör normalize oranları alternatifler arasında neredeyse aynı kalıyor. Farkın gerçek olup olmadığını kontrol edin.",
+      "negative-values": "{{criterion}} negatif değerler içeriyor; vektör normalizasyonu sütun normunda karelerini alıp işaretlerini koruduğundan MOORA öteleme-değişmez değildir."
+    },
+    "equal": {
+      "constant-column": "{{criterion}} kriteri tüm alternatiflerde sabittir; eşit ağırlıklandırma yine de 1/n ağırlık verir ve toplamsal sıralamalara sabit bir kayma ekler."
     }
   }
 }

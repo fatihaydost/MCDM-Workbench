@@ -71,9 +71,13 @@ export function vikorCompromise(S: readonly number[], R: readonly number[], Q: r
   const rankR = rankScores([...R], 'asc')
   const sFlat = vikorFlat(S)
   const rFlat = vikorFlat(R)
+  const qFlat = vikorFlat(Q)
   const tiedFirst = order.filter((i) => tied(Q[i]!, Q[first]!))
-  const bestByS = (sFlat && rFlat) || (!sFlat && tiedFirst.some((i) => rankS[i] === 1))
-  const bestByR = (sFlat && rFlat) || (!rFlat && tiedFirst.some((i) => rankR[i] === 1))
+  const firstStable = (sFlat && rFlat) || (!sFlat && rankS[first] === 1) || (!rFlat && rankR[first] === 1)
+  const bestByS =
+    (sFlat && rFlat) || (!sFlat && (qFlat ? rankS[first] === 1 : firstStable && tiedFirst.some((i) => rankS[i] === 1)))
+  const bestByR =
+    (sFlat && rFlat) || (!rFlat && (qFlat ? rankR[first] === 1 : firstStable && tiedFirst.some((i) => rankR[i] === 1)))
   const c2 = (sFlat && rFlat) || bestByS || bestByR
   const set = c1 ? (c2 ? [first] : [first, second]) : order.filter((i) => Q[i]! - Q[first]! < dq - DQ_TOLERANCE)
   return { order, first, second, dq, advantage, c1, c2, bestByS, bestByR, tieAtTop: qRank[second] === qRank[first], set }

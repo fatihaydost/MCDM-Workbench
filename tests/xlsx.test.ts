@@ -1,6 +1,24 @@
 import * as XLSX from 'xlsx'
 import { describe, expect, it } from 'vitest'
-import { ahp, aras, bwm, electreI, electreIII, judgementsFromBwm, judgementsFromUpper, marcos, roc, setPair, type Problem } from '../src/core'
+import {
+  ahp,
+  ahpRanking,
+  aras,
+  bwm,
+  electreI,
+  electreIII,
+  emptyAlternativeJudgements,
+  entropy,
+  judgementsFromBwm,
+  judgementsFromUpper,
+  marcos,
+  prometheeII,
+  roc,
+  setAlternativePair,
+  setAlternativeSource,
+  setPair,
+  type Problem,
+} from '../src/core'
 import { buildWorkbook, COMPUTED_NUMBER_FORMAT, importWorkbook, INTEGER_NUMBER_FORMAT, parseCellNumber } from '../src/features/io/xlsx'
 import { useWorkbench } from '../src/state/workbench'
 
@@ -258,5 +276,58 @@ describe('xlsx export and import', () => {
     expect(importedBwm.judgements!.pairs[0]![1]).toBe(2)
     expect(importedBwm.judgements!.pairs[1]![3]).toBe(4)
     expect(importedBwm.judgements!.pairs[1]![2]).toBeNull()
+  })
+
+  it('round-trips alternativeJudgements, weightMethod, and rankingMethod through importWorkbook and importProblem', () => {
+    const ahpJ = judgementsFromUpper(3, [3, 5, 2])
+    const ahpRes = ahp.compute(problem, {}, ahpJ)
+    let altJ = emptyAlternativeJudgements(3)
+    altJ = setAlternativeSource(altJ, 3, 3, 1, 'pairwise')
+    altJ = setAlternativePair(altJ, 3, 3, 1, 0, 1, 4)
+    altJ = setAlternativePair(altJ, 3, 3, 1, 0, 2, 2)
+    altJ = setAlternativePair(altJ, 3, 3, 1, 1, 2, 1 / 3)
+    const rankRes = ahpRanking.compute(problem, ahpRes.weights, {}, altJ)
+
+    const wb = buildWorkbook(XLSX, {
+      problem,
+      weighting: { method: 'AHP (eigenvector)', result: ahpRes },
+      ranking: { method: 'AHP (eigenvector)', result: rankRes },
+      judgements: ahpJ,
+      alternativeJudgements: altJ,
+    })
+
+    const imported = importWorkbook(XLSX, wb)
+    expect(imported.weightMethod).toBe('ahp')
+    expect(imported.rankingMethod).toBe('ahp-ranking')
+    expect(imported.alternativeJudgements).toBeDefined()
+    expect(imported.alternativeJudgements![0]).toBeNull()
+    expect(imported.alternativeJudgements![1]).not.toBeNull()
+    expect(imported.alternativeJudgements![1]![0]![1]).toBe(4)
+    expect(imported.alternativeJudgements![1]![0]![2]).toBe(2)
+    expect(imported.alternativeJudgements![1]![1]![2]).toBeCloseTo(1 / 3, 6)
+
+    useWorkbench.getState().importProblem(imported.problem, 'ahp-full.xlsx')
+    const st = useWorkbench.getState()
+    expect(st.weightMethod).toBe('ahp')
+    expect(st.rankingMethod).toBe('ahp-ranking')
+    expect(st.alternativeJudgements?.[1]?.[0]?.[1]).toBe(4)
+    expect(st.alternativeJudgements?.[1]?.[0]?.[2]).toBe(2)
+    expect(st.alternativeJudgements?.[1]?.[1]?.[2]).toBeCloseTo(1 / 3, 6)
+
+    // Also restores weightMethod and rankingMethod with variant suffixes or from About sheet
+    const entRes = entropy.compute(problem, { normalization: 'minmax' })
+    const promRes = prometheeII.compute(problem, entRes.weights, {})
+    const wbVariants = buildWorkbook(XLSX, {
+      problem,
+      weighting: { method: 'Entropy (min-max)', result: entRes },
+      ranking: { method: 'PROMETHEE II (usual)', result: promRes },
+    })
+    const impVariants = importWorkbook(XLSX, wbVariants)
+    expect(impVariants.weightMethod).toBe('entropy')
+    expect(impVariants.rankingMethod).toBe('promethee-ii')
+
+    useWorkbench.getState().importProblem(impVariants.problem, 'variants.xlsx')
+    expect(useWorkbench.getState().weightMethod).toBe('entropy')
+    expect(useWorkbench.getState().rankingMethod).toBe('promethee-ii')
   })
 })

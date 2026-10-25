@@ -29,8 +29,12 @@ export const moora: RankingMethod = {
       .map((col) => ({ code: 'moora.zero-column', col }))
     for (let j = 0; j < n; j++) {
       const rawCol = column(matrix, j)
-      if (!isConstant(rawCol) && isNearConstant(rawCol) && (weights[j] ?? 0) > 0) {
+      if ((weights[j] ?? 0) <= 0 || isConstant(rawCol)) continue
+      if (isNearConstant(rawCol)) {
         warnings.push({ code: 'moora.near-constant-column', col: j })
+      }
+      if (rawCol.some((v) => v < 0)) {
+        warnings.push({ code: 'moora.negative-values', col: j })
       }
     }
 

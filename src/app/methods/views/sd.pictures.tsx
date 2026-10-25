@@ -22,6 +22,7 @@ export function Stage({ problem }: StagePictureProps) {
           title: t('workbench.visual.sd.title'),
           spread: t('workbench.visual.sd.spread'),
           weight: t('workbench.visual.sd.weight'),
+          weightHead: t('workbench.weights.columns.weight'),
           showTable: t('workbench.chart.showTable'),
           criterion: t('workbench.criterion'),
         }}

@@ -25,6 +25,7 @@ export type RocIdeaLabels = {
 /** Development defaults only: the pages pass translated labels. */
 export const ROC_IDEA_LABELS_EN: RocIdeaLabels = {
   title: 'Ordinal ranks become cardinal weights',
+  caption: '● ROC · ■ RS · ◆ RR',
   rank: 'Rank r',
   roc: 'ROC',
   rs: 'RS',
@@ -195,13 +196,22 @@ export function RocIdea({
               <path
                 className={s.sigma}
                 data-emph={formula === 'roc' ? '' : undefined}
-                d={`M${xZero} ${y}H${xActive}`}
+                d={`M${xZero} ${y}H${stage === 0 ? xRoc : Math.max(xRoc, xRs, xRr, xActive)}`}
               />
-              <circle className={s.stripDot} cx={xRoc} cy={y} r={4} />
+              <circle
+                className={s.stripDot}
+                data-active={formula === 'roc' ? '' : undefined}
+                style={formula === 'roc' ? { fill: 'var(--data-accent)' } : undefined}
+                cx={xRoc}
+                cy={y}
+                r={4}
+              />
               {/* Stage 1+: RS (square) and RR (diamond) markers on the same strip */}
               <rect
                 className={`${s.stripDot} ${s.stageItem}`}
                 data-off={off(1)}
+                data-active={formula === 'rs' ? '' : undefined}
+                style={formula === 'rs' ? { fill: 'var(--data-accent)' } : undefined}
                 x={xRs - 3}
                 y={y - 3}
                 width={6}
@@ -210,6 +220,8 @@ export function RocIdea({
               <polygon
                 className={`${s.stripDot} ${s.stageItem}`}
                 data-off={off(1)}
+                data-active={formula === 'rr' ? '' : undefined}
+                style={formula === 'rr' ? { fill: 'var(--data-accent)' } : undefined}
                 points={`${xRr},${y - 4.5} ${xRr + 4.5},${y} ${xRr},${y + 4.5} ${xRr - 4.5},${y}`}
               />
               {/* Stage 2+: arrow and active weight bar */}

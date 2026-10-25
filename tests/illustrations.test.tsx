@@ -77,7 +77,7 @@ describe('Illustrations and Method Views fixes (Work Package 2)', () => {
     expect(textX).toBeGreaterThan(x1)
   })
 
-  it('4. MerecIdea & CilosIdea reserve effectW/lossW and CilosIdea table uses non-transposed lossMatrix rows', () => {
+  it('4. MerecIdea & CilosIdea reserve effectW/lossW and CilosIdea table rows match column loss breakdown summing to |f_jj|', () => {
     const merecProb = problemOf('keshavarz-2021-merec')
     const merecHtml = renderToStaticMarkup(createElement(MerecIdea, { problem: merecProb }))
     expect(merecHtml).toContain('<svg')
@@ -85,7 +85,7 @@ describe('Illustrations and Method Views fixes (Work Package 2)', () => {
     const cilosProb = problemOf('zavadskas-2017-vilnius-social')
     const parts = cilosParts(cilosProb)!
     const cilosHtml = renderToStaticMarkup(createElement(CilosIdea, { problem: cilosProb }))
-    const expectedCell = parts.lossMatrix[0]![1]!.toFixed(4)
+    const expectedCell = parts.losses[0]![1]!.toFixed(4)
     const firstRowMatch = cilosHtml.match(/<tbody><tr>[\s\S]*?<\/tr>/)
     expect(firstRowMatch).not.toBeNull()
     expect(firstRowMatch![0]).toContain(`>${expectedCell}</td>`)

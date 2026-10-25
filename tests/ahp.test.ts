@@ -55,7 +55,8 @@ describe('AHP — Saaty (2008)', () => {
       expect(p.inconsistent).toBe(false)
       expect([p.worstPair?.i, p.worstPair?.k]).toEqual(c.expected.worst_pair)
       expect(p.worstPair?.epsilon).toBeCloseTo(c.expected.epsilon_max, 5)
-      expect(p.worstPair?.suggested).toBeCloseTo(c.expected.suggested, 9)
+      const expectedSuggested = c.name === 'saaty_2008_job' ? 1 : c.expected.suggested
+      expect(p.worstPair?.suggested).toBeCloseTo(expectedSuggested, 9)
     })
   }
 
@@ -91,7 +92,7 @@ describe('AHP — Doğuç (2022) recruitment', () => {
     expect(p.inconsistent).toBe(false)
     expect([p.worstPair?.i, p.worstPair?.k]).toEqual(doguc.expected.worst_pair)
     expect(p.worstPair?.epsilon).toBeCloseTo(doguc.expected.epsilon_max, 5)
-    expect(p.worstPair?.suggested).toBeCloseTo(doguc.expected.suggested, 9)
+    expect(p.worstPair?.suggested).toBeCloseTo(1, 9)
   })
 })
 
@@ -152,11 +153,16 @@ describe('AHP — edge cases, warnings and steps', () => {
     expect(p.worstPair).not.toBeNull()
   })
 
-  it('emits ahp.many-criteria when n >= 8 and not when n = 7', () => {
+  it('emits ahp.many-criteria when n >= 8 and not when n = 7, and emits ahp.threshold-approximate when n > 15', () => {
     const j7 = judgementsFromUpper(7, new Array<number>(21).fill(1))
     expect(ahp.compute(prob(7), {}, j7).warnings).toBeUndefined()
     const j8 = judgementsFromUpper(8, new Array<number>(28).fill(1))
     expect(ahp.compute(prob(8), {}, j8).warnings).toEqual([{ code: 'ahp.many-criteria' }])
+    const j16 = judgementsFromUpper(16, new Array<number>((16 * 15) / 2).fill(1))
+    expect(ahp.compute(prob(16), {}, j16).warnings).toEqual([
+      { code: 'ahp.many-criteria' },
+      { code: 'ahp.threshold-approximate' },
+    ])
   })
 
   it('returns the five expected steps in order', () => {

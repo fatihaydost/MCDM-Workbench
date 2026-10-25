@@ -149,10 +149,13 @@ describe('MABAC: edge cases', () => {
     })
     expectClose(res.scores.map((s) => s + (res.diagnostics!.border as number)), minMaxSum(p, w), 1e-12)
   })
-  it('all alternatives equal: every S is 0 and all tie at rank 1', () => {
+  it('all alternatives equal: every S is 0, all tie at rank 1, and emits mabac.no-spread', () => {
     const res = mabac.compute(makeProblem([[2, 2, 2], [2, 2, 2], [2, 2, 2]], types), [0.3, 0.3, 0.4], {})
     expectClose(res.scores, [0, 0, 0], 1e-15)
     expect(res.ranking).toEqual([1, 1, 1])
+    expect(res.warnings).toEqual([{ code: 'mabac.no-spread' }])
+    const resZeroVarying = mabac.compute(makeProblem([[2, 1], [2, 5], [2, 9]], ['benefit', 'benefit']), [1, 0], {})
+    expect(resZeroVarying.warnings).toEqual([{ code: 'mabac.no-spread' }])
   })
   it('two alternatives: the better one above the border, the other below', () => {
     const res = mabac.compute(makeProblem([[1, 9, 2], [5, 3, 4]], types), [0.3, 0.3, 0.4], {})

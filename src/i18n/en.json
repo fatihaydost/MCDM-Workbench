@@ -1292,6 +1292,7 @@
       },
       "roc": {
         "title": "Ordinal ranks become cardinal weights",
+        "caption": "Circle = ROC, square = RS (Rank Sum), diamond = RR (Rank Reciprocal).",
         "rank": "Rank r",
         "roc": "ROC",
         "rs": "RS",
@@ -1319,7 +1320,9 @@
       "electre-iii": {
         "title": "Descending rank r↓, ascending rank r↑, and net credibility Φ",
         "caption": "Left: leaving credibility Φ⁺ (top, green; with descending rank r↓) and entering credibility Φ⁻ (bottom, red; with ascending rank r↑). Right: net credibility flow Φ around zero.",
-        "row": "{{alternative}}: r↓ = {{pos}}, r↑ = {{neg}}, Φ = {{score}}"
+        "row": "{{alternative}}: r↓ = {{desc}}, r↑ = {{asc}}, Φ = {{score}}",
+        "incomparables": "Incomparable pairs (r↓ vs r↑): {{pairs}}",
+        "incomparablesNone": "No incomparable pairs (r↓ and r↑ agree on all pairs)."
       }
     },
     "flow": {
@@ -2357,7 +2360,8 @@
       "no-spread": "Every active criterion is constant, so all alternatives tie at rank 1."
     },
     "mabac": {
-      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real."
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",
+      "no-spread": "Every active criterion is constant, so all alternatives get S = 0 and tie at rank 1."
     },
     "bwm": {
       "inconsistent": "Answers about {{criterion}} fit worst; the weights are still computed.",
@@ -2366,7 +2370,8 @@
     "ahp": {
       "inconsistent": "The consistency ratio CR is at or above 0.10; check the highlighted pair, though the weights are still computed.",
       "inconsistent-criterion": "On {{criterion}}, the consistency ratio CR is at or above 0.10; check the highlighted pair, though the priorities are still computed.",
-      "many-criteria": "With 8 or more criteria AHP asks at least 28 comparisons and consistency is harder to keep; consider BWM for fewer questions."
+      "many-criteria": "With 8 or more criteria AHP asks at least 28 comparisons and consistency is harder to keep; consider BWM for fewer questions.",
+      "threshold-approximate": "With more than 15 criteria the random index RI is approximate (the Alonso & Lamata 2006 linear fit)."
     },
     "ahp-ranking": {
       "pairwise-ignored-above-cap": "With more than 7 alternatives, pairwise alternative comparisons are ignored and local priorities come from the decision matrix."
@@ -2384,7 +2389,11 @@
     },
     "moora": {
       "zero-column": "Every value of {{criterion}} is 0, so it does not affect the ranking.",
-      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, so its vector-normalized ratios are nearly identical across alternatives. Check whether the difference is real."
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, so its vector-normalized ratios are nearly identical across alternatives. Check whether the difference is real.",
+      "negative-values": "{{criterion}} has negative values; vector normalization squares them in the column norm while keeping their sign, so MOORA is not shift-invariant."
+    },
+    "equal": {
+      "constant-column": "Criterion {{criterion}} is constant across all alternatives; equal weighting still assigns it 1/n, which adds a constant offset to additive rankings."
     }
   }
 }

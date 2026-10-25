@@ -220,12 +220,13 @@ export const electreI: RankingMethod<ElectreIParams> = {
         ranges[j] = 0
         continue
       }
-      if (isNearConstant(col)) {
+      const active = (weights[j] ?? 0) > 0
+      if (active && isNearConstant(col)) {
         warnings.push({ code: 'electre-i.near-constant-column', col: j })
       }
       const r = hi - lo
       ranges[j] = r
-      if (r > delta) delta = r
+      if (active && r > delta) delta = r
     }
 
     // 2. Concordance C(a, b) and 3. Discordance D(a, b).

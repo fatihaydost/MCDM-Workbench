@@ -7,8 +7,8 @@
 - **Secondary sources:**
   - Badi, I., Abdulshahed, A. M., & Shetwan, A. (2018). A case study of supplier selection for a steelmaking company in Libya by using the Combinative Distance-based Assessment (CODAS) model. *Decision Making: Applications in Management and Engineering*, 1(1), 1-12. DOI: `10.31181/dmame180101b`. (Note: an earlier draft of this card cited `10.22190/FUACR1801001B` in *Facta Universitatis*; Crossref verification showed that DOI belongs to an unrelated paper, and the true supplier-selection benchmark is `10.31181/dmame180101b`, which is also the worked example in `pymcdm.methods.CODAS`.)
   - Trung, D. D. (2022). Expanding data normalization method to CODAS method for multi-criteria decision making. *Applied Engineering Letters*, 7(2), 54-66. DOI: `10.18485/aeletters.2022.7.2.2`.
-  - Çınaroğlu, E. (2021). Entropi tabanlı CODAS ve EDAS yöntemleri ile İSO 500'deki otomotiv işletmelerinin performans analizi. *Bingöl Üniversitesi İktisadi ve İdari Bilimler Fakültesi Dergisi*, 5(1), 337-364. DOI: `10.33399/biibfad.868418`.
-  - Akgün, M. (2022). CRITIC temelli CODAS yöntemi ile e-ticaret sitelerinin değerlendirilmesi. *Selçuk Üniversitesi Sosyal Bilimler Enstitüsü Dergisi*, (48), 338-356. DOI: `10.52642/susbed.1111547`.
+  - Çınaroğlu, E. (2021). CRITIC temelli CODAS ve ROV yöntemleri ile AB ülkeleri yaşam kalitesi analizi. *Bingöl Üniversitesi İktisadi ve İdari Bilimler Fakültesi Dergisi*, 5(1), 337-364. DOI: `10.33399/biibfad.868418`.
+  - Akgün, A. (2022). BİST enerji şirketlerinin CRITIC ve CODAS bütünleşik yaklaşımı ile finansal açıdan değerlendirilmesi. *Selçuk Üniversitesi Sosyal Bilimler Enstitüsü Dergisi*, (48), 338-356. DOI: `10.52642/susbed.1111547`.
 - **Verification script:** [`scripts/codas.py`](../scripts/codas.py)
 - **Test fixture:** [`tests/fixtures/codas-ghorabaee2016.json`](../../../tests/fixtures/codas-ghorabaee2016.json)
 

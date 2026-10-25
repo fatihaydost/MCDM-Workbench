@@ -63,6 +63,9 @@ export type DraftProblem = {
   matrix: (number | null)[][]
   weights?: number[]
   judgements?: Judgements
+  alternativeJudgements?: AlternativeJudgements
+  weightMethod?: WeightMethodId
+  rankingMethod?: RankingMethodId
 }
 
 export type WorkbenchData = {
@@ -93,7 +96,13 @@ export type WorkbenchActions = {
    */
   setProblem: (problem: DraftProblem) => void
   /** Replaces the problem with one read from a file and remembers the file name as the source. */
-  importProblem: (problem: DraftProblem, fileName: string, weights?: number[], judgements?: Judgements) => void
+  importProblem: (
+    problem: DraftProblem,
+    fileName: string,
+    weights?: number[],
+    judgements?: Judgements,
+    alternativeJudgements?: AlternativeJudgements,
+  ) => void
   /** Loads a published example; criterion names in `lang`. Sets manual weights when the paper gives them. */
   /**
    * Loads a published example. `method` (a ranking method id the example is a reference for) picks which of its
@@ -421,6 +430,8 @@ export function isLocalization(p: Pick<DraftProblem, 'alternatives' | 'criteria'
 
 const importedWeightsByMatrix = new WeakMap<object, number[]>()
 const importedJudgementsByMatrix = new WeakMap<object, Judgements>()
+const importedAltJudgementsByMatrix = new WeakMap<object, AlternativeJudgements>()
+const importedMethodsByMatrix = new WeakMap<object, { weightMethod?: WeightMethodId; rankingMethod?: RankingMethodId }>()
 
 export function registerImportedWeights(matrix: object, weights: number[] | undefined): void {
   if (weights && weights.length > 0) importedWeightsByMatrix.set(matrix, weights)
@@ -428,6 +439,13 @@ export function registerImportedWeights(matrix: object, weights: number[] | unde
 
 export function registerImportedJudgements(matrix: object, judgements: Judgements | undefined): void {
   if (judgements) importedJudgementsByMatrix.set(matrix, judgements)
+}
+
+export function registerImportedAlternativeJudgements(
+  matrix: object,
+  alternativeJudgements: AlternativeJudgements | undefined,
+): void {
+  if (alternativeJudgements) importedAltJudgementsByMatrix.set(matrix, alternativeJudgements)
 }
 
 /**
@@ -665,15 +683,36 @@ export const useWorkbench = create<WorkbenchState>()(
           return { problem, exampleId: null, importedFrom: null, methodParams, manualWeights, judgements, alternativeJudgements }
         }),
 
-      importProblem: (problem, fileName, weights, importedJudgements) =>
+      importProblem: (problem, fileName, weights, importedJudgements, importedAlternativeJudgements) =>
         set((s) => {
           remember(s, true)
-          const importedWeights = weights ?? problem.weights ?? importedWeightsByMatrix.get(problem.matrix)
+          const matrixMeta = problem.matrix as {
+            weights?: number[]
+            judgements?: Judgements
+            alternativeJudgements?: AlternativeJudgements
+            weightMethod?: WeightMethodId
+            rankingMethod?: RankingMethodId
+          }
+          const importedWeights = weights ?? problem.weights ?? matrixMeta.weights ?? importedWeightsByMatrix.get(problem.matrix)
           const rawJudgements =
             importedJudgements ??
             problem.judgements ??
-            (problem.matrix as { judgements?: Judgements }).judgements ??
+            matrixMeta.judgements ??
             importedJudgementsByMatrix.get(problem.matrix)
+          const rawAltJudgements =
+            importedAlternativeJudgements ??
+            problem.alternativeJudgements ??
+            matrixMeta.alternativeJudgements ??
+            importedAltJudgementsByMatrix.get(problem.matrix)
+          const rawWeightMethod =
+            problem.weightMethod ??
+            matrixMeta.weightMethod ??
+            importedMethodsByMatrix.get(problem.matrix)?.weightMethod
+          const rawRankingMethod =
+            problem.rankingMethod ??
+            matrixMeta.rankingMethod ??
+            importedMethodsByMatrix.get(problem.matrix)?.rankingMethod
+          const m = problem.alternatives.length
           const n = problem.criteria.length
           const hasValidWeights =
             Array.isArray(importedWeights) &&
@@ -687,19 +726,33 @@ export const useWorkbench = create<WorkbenchState>()(
           const judgements = rawJudgements
             ? sanitizeJudgements(rawJudgements, n)
             : carryJudgements(s.problem.criteria, s.judgements, problem.criteria, false)
-          const alternativeJudgements = carryAlternativeJudgements(s.problem, s.alternativeJudgements, problem, false)
-          if (Object.prototype.propertyIsEnumerable.call(problem, 'weights')) {
-            delete (problem as { weights?: number[] }).weights
-          }
-          if (Object.prototype.propertyIsEnumerable.call(problem, 'judgements')) {
-            delete (problem as { judgements?: Judgements }).judgements
+          const alternativeJudgements = rawAltJudgements
+            ? sanitizeAlternativeJudgements(rawAltJudgements, m, n)
+            : carryAlternativeJudgements(s.problem, s.alternativeJudgements, problem, false)
+          const validWeightMethod =
+            rawWeightMethod === 'manual' || (typeof rawWeightMethod === 'string' && getWeightingMethod(rawWeightMethod) !== undefined)
+              ? rawWeightMethod
+              : undefined
+          const validRankingMethod =
+            typeof rawRankingMethod === 'string' && getRankingMethod(rawRankingMethod) !== undefined
+              ? rawRankingMethod
+              : undefined
+          for (const k of ['weights', 'judgements', 'alternativeJudgements', 'weightMethod', 'rankingMethod'] as const) {
+            if (Object.prototype.propertyIsEnumerable.call(problem, k)) {
+              delete (problem as Record<string, unknown>)[k]
+            }
           }
           return {
             problem,
             exampleId: null,
             importedFrom: fileName,
             methodParams: {},
-            ...(hasValidWeights ? { weightMethod: 'manual' as const } : {}),
+            ...(validWeightMethod
+              ? { weightMethod: validWeightMethod }
+              : hasValidWeights
+                ? { weightMethod: 'manual' as const }
+                : {}),
+            ...(validRankingMethod ? { rankingMethod: validRankingMethod } : {}),
             manualWeights,
             judgements,
             alternativeJudgements,
@@ -932,27 +985,7 @@ export const useWorkbench = create<WorkbenchState>()(
         })),
 
       setJudgement: (i, k, value) =>
-        set((s) => {
-          if (i === k) return {}
-          let next = setPair(judgementsOf(s), i, k, value)
-          const { best, worst } = next
-          if (
-            s.weightMethod !== 'ahp' &&
-            value === 1 &&
-            best !== null &&
-            worst !== null &&
-            ((i === best && k === worst) || (i === worst && k === best))
-          ) {
-            const n = s.problem.criteria.length
-            for (let j = 0; j < n; j++) {
-              if (j !== best && j !== worst) {
-                next = setPair(next, best, j, 1)
-                next = setPair(next, j, worst, 1)
-              }
-            }
-          }
-          return { judgements: next }
-        }),
+        set((s) => (i === k ? {} : { judgements: setPair(judgementsOf(s), i, k, value) })),
 
       setAnchors: (best, worst) =>
         set((s) => ({ judgements: { ...judgementsOf(s), best, worst: best !== null && best === worst ? null : worst } })),

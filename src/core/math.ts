@@ -47,17 +47,14 @@ export function isConstant(xs: readonly number[]): boolean {
  */
 export const NEAR_CONSTANT_TOLERANCE = 1e-9
 
-/** Not constant (isConstant), but max - min <= 1e-9 * max(|max|, |min|) (or <= 1e-9 across zero). */
+/** Not constant (isConstant), but max - min <= 1e-9 * max(|max|, |min|) (or <= 1e-9 across/from zero). */
 export function isNearConstant(xs: readonly number[]): boolean {
   if (isConstant(xs)) return false
   const hi = maxOf(xs)
   const lo = minOf(xs)
   const span = hi - lo
   const scale = Math.max(Math.abs(hi), Math.abs(lo))
-  return (
-    span <= NEAR_CONSTANT_TOLERANCE * scale ||
-    (lo < 0 && hi > 0 && span <= NEAR_CONSTANT_TOLERANCE)
-  )
+  return span <= NEAR_CONSTANT_TOLERANCE * scale || (lo < 0 && hi > 0 && span <= NEAR_CONSTANT_TOLERANCE)
 }
 
 /**

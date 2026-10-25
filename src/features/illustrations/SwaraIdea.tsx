@@ -116,7 +116,7 @@ export function SwaraIdea({
   const hasSpread = computed.weights.length > 1 && Math.max(...computed.weights) - Math.min(...computed.weights) > 1e-12
   const hi = hasSpread ? argMax(computed.weights) : -1
   const weightTexts = computed.weights.map((w) => format(w))
-  const sTexts = computed.s.map((v, j) => (perm.indexOf(j) === 0 && v === 0 ? '0' : format(v)))
+  const sTexts = computed.s.map((v, j) => (perm.indexOf(j) === 0 ? '—' : format(v)))
 
   // Columns: name | s_j | strip (q_j chain in 0..1) | -> | weight + value.
   const W = Math.max(width, 280)

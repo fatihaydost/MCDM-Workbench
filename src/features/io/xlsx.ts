@@ -3,13 +3,18 @@
 import type * as XLSX from 'xlsx'
 import {
   AHP_MAX_PAIRWISE_ALTERNATIVES,
+  emptyAlternativeJudgements,
   emptyJudgements,
   SCALE,
+  setAlternativePair,
+  setAlternativeSource,
   setPair,
   type AlternativeJudgements,
   type Judgements,
+  type RankingId,
   type RankingResult,
   type Step,
+  type WeightingId,
   type WeightingResult,
 } from '../../core'
 import { gridToProblem, problemToGrid, tokenKey, type GridImportOptions, type ImportedProblem, type ImportResult, type TypeWords } from './grid'
@@ -28,16 +33,114 @@ export type XlsxImportOptions = GridImportOptions & {
 }
 
 export type XlsxImportResult = Omit<ImportResult, 'problem'> & {
-  problem: ImportedProblem & { weights?: number[]; judgements?: Judgements }
+  problem: ImportedProblem & {
+    weights?: number[]
+    judgements?: Judgements
+    alternativeJudgements?: AlternativeJudgements
+    weightMethod?: WeightingId | 'manual'
+    rankingMethod?: RankingId
+  }
   sheet: string
   judgements?: Judgements
+  alternativeJudgements?: AlternativeJudgements
+  weightMethod?: WeightingId | 'manual'
+  rankingMethod?: RankingId
 }
 
 const PREFERRED_SHEET_KEYS = new Set(['decision matrix', 'karar matrisi', 'data', 'veri'])
 const WEIGHT_SHEET_KEYS = new Set(['weights', 'weight', 'agirliklar', 'agirlik', 'ağirliklar', 'ağirlik'])
+const RANKING_SHEET_KEYS = new Set(['ranking', 'siralama', 'sıralama'])
+const ABOUT_SHEET_KEYS = new Set(['about', 'hakkinda', 'hakkında'])
 const JUDGEMENT_SHEET_KEYS = new Set(['judgements', 'judgments', 'yargilar', 'yargılar'])
 const BEST_KEYS = new Set(['best', 'en iyi', 'best criterion', 'en iyi kriter'])
 const WORST_KEYS = new Set(['worst', 'en kotu', 'en kötü', 'worst criterion', 'en kotu kriter'])
+const METHOD_ROW_KEYS = new Set(['method', 'yontem'])
+const ABOUT_WEIGHTING_KEYS = new Set([
+  'weighting',
+  'weighting method',
+  'agirliklandirma',
+  'agirliklandirma yontemi',
+  'agirlik yontemi',
+  'agirlik',
+])
+const ABOUT_RANKING_KEYS = new Set(['ranking', 'ranking method', 'siralama', 'siralama yontemi'])
+
+const WEIGHT_METHOD_TOKENS: Readonly<Record<string, WeightingId | 'manual'>> = {
+  critic: 'critic',
+  entropy: 'entropy',
+  entropi: 'entropy',
+  equal: 'equal',
+  'equal weights': 'equal',
+  'equal weight': 'equal',
+  'esit agirlik': 'equal',
+  'esit agirliklar': 'equal',
+  manual: 'manual',
+  manuel: 'manual',
+  elle: 'manual',
+  'manual weights': 'manual',
+  'elle girilen agirliklar': 'manual',
+  sd: 'sd',
+  'standard deviation': 'sd',
+  'standart sapma': 'sd',
+  merec: 'merec',
+  lopcow: 'lopcow',
+  cilos: 'cilos',
+  bwm: 'bwm',
+  'best worst': 'bwm',
+  'best-worst': 'bwm',
+  'best worst method': 'bwm',
+  ahp: 'ahp',
+  roc: 'roc',
+  'rank order centroid': 'roc',
+  swara: 'swara',
+}
+
+const RANKING_METHOD_TOKENS: Readonly<Record<string, RankingId>> = {
+  topsis: 'topsis',
+  saw: 'saw',
+  wsm: 'saw',
+  'ahp-ranking': 'ahp-ranking',
+  ahp: 'ahp-ranking',
+  vikor: 'vikor',
+  edas: 'edas',
+  waspas: 'waspas',
+  copras: 'copras',
+  marcos: 'marcos',
+  cocoso: 'cocoso',
+  mabac: 'mabac',
+  moora: 'moora',
+  aras: 'aras',
+  codas: 'codas',
+  'promethee-ii': 'promethee-ii',
+  'promethee ii': 'promethee-ii',
+  'promethee 2': 'promethee-ii',
+  promethee: 'promethee-ii',
+  'electre-i': 'electre-i',
+  'electre i': 'electre-i',
+  'electre 1': 'electre-i',
+  'electre-iii': 'electre-iii',
+  'electre iii': 'electre-iii',
+  'electre 3': 'electre-iii',
+}
+
+function methodToken(raw: unknown): string {
+  if (typeof raw !== 'string') return ''
+  const base = raw.replace(/\s*\(.*\)\s*$/, '').trim()
+  return tokenKey(base)
+    .replace(/ş/g, 's')
+    .replace(/ü/g, 'u')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/\s+/g, ' ')
+}
+
+function parseWeightMethodLabel(raw: unknown): WeightingId | 'manual' | undefined {
+  return WEIGHT_METHOD_TOKENS[methodToken(raw)]
+}
+
+function parseRankingMethodLabel(raw: unknown): RankingId | undefined {
+  return RANKING_METHOD_TOKENS[methodToken(raw)]
+}
 const WEIGHT_MARKS = /^(?:weights?|agirlik(?:lar)?|ağirlik(?:lar)?|ağırlık(?:lar)?)(?:\s*\(.*\))?$/i
 
 export function isWeightRowLabel(cell: unknown): boolean {
@@ -165,38 +268,76 @@ export function importWorkbook(X: SheetJS, wb: WorkBook, opts: XlsxImportOptions
   }
 
   // Also check if the workbook has a companion Weights / Ağırlıklar sheet (from buildWorkbook).
-  if (extractedWeights === undefined && n > 0) {
+  let extractedWeightMethod: WeightingId | 'manual' | undefined
+  let extractedRankingMethod: RankingId | undefined
+  if (n > 0) {
     const weightSheetName = wb.SheetNames.find((s) => s !== name && WEIGHT_SHEET_KEYS.has(tokenKey(s)))
     const wWs = weightSheetName ? wb.Sheets[weightSheetName] : undefined
     if (wWs && wWs['!ref']) {
       const wRows = X.utils.sheet_to_json<unknown[]>(wWs, { header: 1, raw: true, defval: null, blankrows: true })
-      // In buildWorkbook, row 2 is [Criterion, Type, ..., Weight] and rows 3..3+n-1 hold the criteria.
-      const headerRowIdx = wRows.findIndex(
-        (r) => Array.isArray(r) && r.length >= 3 && r.some((c) => isWeightRowLabel(c)),
-      )
-      if (headerRowIdx >= 0 && wRows.length >= headerRowIdx + 1 + n) {
-        const headerRow = wRows[headerRowIdx]!
-        let weightCol = -1
-        for (let c = headerRow.length - 1; c >= 0; c--) {
-          if (isWeightRowLabel(headerRow[c])) {
-            weightCol = c
-            break
+      for (const r of wRows) {
+        if (Array.isArray(r) && r.length >= 2 && METHOD_ROW_KEYS.has(methodToken(r[0]))) {
+          extractedWeightMethod = parseWeightMethodLabel(r[1])
+          if (extractedWeightMethod) break
+        }
+      }
+      if (extractedWeights === undefined) {
+        // In buildWorkbook, row 2 is [Criterion, Type, ..., Weight] and rows 3..3+n-1 hold the criteria.
+        const headerRowIdx = wRows.findIndex(
+          (r) => Array.isArray(r) && r.length >= 3 && r.some((c) => isWeightRowLabel(c)),
+        )
+        if (headerRowIdx >= 0 && wRows.length >= headerRowIdx + 1 + n) {
+          const headerRow = wRows[headerRowIdx]!
+          let weightCol = -1
+          for (let c = headerRow.length - 1; c >= 0; c--) {
+            if (isWeightRowLabel(headerRow[c])) {
+              weightCol = c
+              break
+            }
+          }
+          if (weightCol >= 0) {
+            const parsed = Array.from({ length: n }, (_, j) =>
+              parseCellNumber(wRows[headerRowIdx + 1 + j]?.[weightCol], result.decimal),
+            )
+            if (parsed.every((w): w is number => w !== null && Number.isFinite(w) && w >= 0)) {
+              const sum = parsed.reduce((a, b) => a + b, 0)
+              if (sum > 0) extractedWeights = parsed
+            }
           }
         }
-        if (weightCol >= 0) {
-          const parsed = Array.from({ length: n }, (_, j) =>
-            parseCellNumber(wRows[headerRowIdx + 1 + j]?.[weightCol], result.decimal),
-          )
-          if (parsed.every((w): w is number => w !== null && Number.isFinite(w) && w >= 0)) {
-            const sum = parsed.reduce((a, b) => a + b, 0)
-            if (sum > 0) extractedWeights = parsed
-          }
+      }
+    }
+
+    const rankingSheetName = wb.SheetNames.find((s) => s !== name && RANKING_SHEET_KEYS.has(tokenKey(s)))
+    const rWs = rankingSheetName ? wb.Sheets[rankingSheetName] : undefined
+    if (rWs && rWs['!ref']) {
+      const rRows = X.utils.sheet_to_json<unknown[]>(rWs, { header: 1, raw: true, defval: null, blankrows: true })
+      for (const r of rRows) {
+        if (Array.isArray(r) && r.length >= 2 && METHOD_ROW_KEYS.has(methodToken(r[0]))) {
+          extractedRankingMethod = parseRankingMethodLabel(r[1])
+          if (extractedRankingMethod) break
+        }
+      }
+    }
+
+    const aboutSheetName = wb.SheetNames.find((s) => s !== name && ABOUT_SHEET_KEYS.has(tokenKey(s)))
+    const aWs = aboutSheetName ? wb.Sheets[aboutSheetName] : undefined
+    if (aWs && aWs['!ref']) {
+      const aRows = X.utils.sheet_to_json<unknown[]>(aWs, { header: 1, raw: true, defval: null, blankrows: true })
+      for (const r of aRows) {
+        if (!Array.isArray(r) || r.length < 2) continue
+        const key = methodToken(r[0])
+        if (!extractedWeightMethod && ABOUT_WEIGHTING_KEYS.has(key)) {
+          extractedWeightMethod = parseWeightMethodLabel(r[1])
+        } else if (!extractedRankingMethod && ABOUT_RANKING_KEYS.has(key)) {
+          extractedRankingMethod = parseRankingMethodLabel(r[1])
         }
       }
     }
   }
 
   let extractedJudgements: Judgements | undefined
+  let extractedAltJudgements: AlternativeJudgements | undefined
   if (n > 0) {
     const jSheetName = wb.SheetNames.find((s) => s !== name && JUDGEMENT_SHEET_KEYS.has(tokenKey(s)))
     const jWs = jSheetName ? wb.Sheets[jSheetName] : undefined
@@ -211,6 +352,27 @@ export function importWorkbook(X: SheetJS, wb: WorkBook, opts: XlsxImportOptions
         if (exact >= 0) return exact
         const k = tokenKey(s)
         return k ? critKeys.indexOf(k) : -1
+      }
+      const matchCritTitle = (cell: unknown): number => {
+        const direct = matchCrit(cell)
+        if (direct >= 0) return direct
+        if (typeof cell !== 'string') return -1
+        const firstColon = cell.indexOf(':')
+        if (firstColon >= 0) {
+          const afterFirst = matchCrit(cell.slice(firstColon + 1))
+          if (afterFirst >= 0) return afterFirst
+          const lastColon = cell.lastIndexOf(':')
+          if (lastColon > firstColon) {
+            const afterLast = matchCrit(cell.slice(lastColon + 1))
+            if (afterLast >= 0) return afterLast
+          }
+        }
+        return -1
+      }
+      const toRatio = (cell: unknown) => {
+        const v = parseCellNumber(cell, result.decimal)
+        if (v === null || !(v > 0)) return null
+        return SCALE.find((s) => Math.abs(s - v) < 1e-3) ?? null
       }
       const headerIdx = jRows.findIndex(
         (r) =>
@@ -242,11 +404,6 @@ export function importWorkbook(X: SheetJS, wb: WorkBook, opts: XlsxImportOptions
           worst: best !== null && best === worst ? null : worst,
         }
         let hasAny = best !== null || worst !== null
-        const toRatio = (cell: unknown) => {
-          const v = parseCellNumber(cell, result.decimal)
-          if (v === null || !(v > 0)) return null
-          return SCALE.find((s) => Math.abs(s - v) < 1e-3) ?? null
-        }
         for (let i = 0; i < n; i++) {
           for (let k = i + 1; k < n; k++) {
             const ratio = toRatio(jRows[headerIdx + 1 + i]?.[1 + k])
@@ -269,38 +426,103 @@ export function importWorkbook(X: SheetJS, wb: WorkBook, opts: XlsxImportOptions
         }
         if (hasAny) extractedJudgements = parsedJ
       }
+
+      const m = result.problem.alternatives.length
+      if (m >= 2 && m <= AHP_MAX_PAIRWISE_ALTERNATIVES) {
+        const altNames = result.problem.alternatives.map((a) => a.trim())
+        const altKeys = altNames.map((a) => tokenKey(a))
+        let parsedAltJ: AlternativeJudgements = emptyAlternativeJudgements(n)
+        let hasAnyAlt = false
+        for (let rIdx = 0; rIdx < jRows.length; rIdx++) {
+          if (rIdx === headerIdx) continue
+          const row = jRows[rIdx]
+          if (
+            !Array.isArray(row) ||
+            row.length < 1 + m ||
+            jRows.length < rIdx + 1 + m ||
+            !altNames.every((an, i) => {
+              const cellStr = String(row[1 + i] ?? '').trim()
+              return cellStr === an || (tokenKey(cellStr) !== '' && tokenKey(cellStr) === altKeys[i])
+            })
+          ) {
+            continue
+          }
+          let critCol = -1
+          for (let back = rIdx - 1; back >= 0 && back >= rIdx - 4; back--) {
+            const prevRow = jRows[back]
+            if (!Array.isArray(prevRow)) continue
+            const c0 = matchCritTitle(prevRow[0])
+            if (c0 >= 0) {
+              critCol = c0
+              break
+            }
+            const c1 = matchCritTitle(prevRow[1])
+            if (c1 >= 0) {
+              critCol = c1
+              break
+            }
+          }
+          if (critCol < 0 || critCol >= n) continue
+          parsedAltJ = setAlternativeSource(parsedAltJ, m, n, critCol, 'pairwise')
+          hasAnyAlt = true
+          for (let i = 0; i < m; i++) {
+            for (let k = i + 1; k < m; k++) {
+              const ratio = toRatio(jRows[rIdx + 1 + i]?.[1 + k])
+              if (ratio !== null) {
+                parsedAltJ = setAlternativePair(parsedAltJ, m, n, critCol, i, k, ratio)
+              }
+            }
+          }
+          for (let i = 0; i < m; i++) {
+            for (let k = 0; k < i; k++) {
+              if (parsedAltJ[critCol]?.[i]?.[k] === null) {
+                const ratio = toRatio(jRows[rIdx + 1 + i]?.[1 + k])
+                if (ratio !== null) {
+                  parsedAltJ = setAlternativePair(parsedAltJ, m, n, critCol, i, k, ratio)
+                }
+              }
+            }
+          }
+          rIdx += m
+        }
+        if (hasAnyAlt) {
+          extractedAltJudgements = parsedAltJ
+          if (!extractedRankingMethod) extractedRankingMethod = 'ahp-ranking'
+        }
+      }
     }
   }
 
-  const problemWithWeights: ImportedProblem & { weights?: number[]; judgements?: Judgements } = { ...result.problem }
-  if (extractedWeights) {
-    Object.defineProperty(problemWithWeights, 'weights', {
-      value: extractedWeights,
+  const problemWithWeights: XlsxImportResult['problem'] = { ...result.problem }
+  const defineHidden = (key: string, value: unknown) => {
+    if (value === undefined) return
+    Object.defineProperty(problemWithWeights, key, {
+      value,
+      enumerable: false,
+      configurable: true,
+      writable: true,
+    })
+    Object.defineProperty(problemWithWeights.matrix, key, {
+      value,
       enumerable: false,
       configurable: true,
       writable: true,
     })
   }
-  if (extractedJudgements) {
-    Object.defineProperty(problemWithWeights, 'judgements', {
-      value: extractedJudgements,
-      enumerable: false,
-      configurable: true,
-      writable: true,
-    })
-    Object.defineProperty(problemWithWeights.matrix, 'judgements', {
-      value: extractedJudgements,
-      enumerable: false,
-      configurable: true,
-      writable: true,
-    })
-  }
+  defineHidden('weights', extractedWeights)
+  defineHidden('judgements', extractedJudgements)
+  defineHidden('alternativeJudgements', extractedAltJudgements)
+  defineHidden('weightMethod', extractedWeightMethod)
+  defineHidden('rankingMethod', extractedRankingMethod)
 
   return {
     ...result,
     problem: problemWithWeights,
     sheet: name,
     ...(extractedJudgements ? { judgements: extractedJudgements } : {}),
+    ...(extractedAltJudgements ? { alternativeJudgements: extractedAltJudgements } : {}),
+    ...(extractedWeightMethod ? { weightMethod: extractedWeightMethod } : {}),
+    ...(extractedRankingMethod ? { rankingMethod: extractedRankingMethod } : {}),
   }
 }
 

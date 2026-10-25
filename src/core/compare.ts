@@ -54,17 +54,17 @@ function findEchoes(
   problem: Problem,
   weights: readonly number[],
 ): Echo[] {
-  const m = problem.alternatives.length
   const echoes: Echo[] = []
   const sawLinear =
     ranked.has('saw') && runs.some((r) => r.methodId === 'saw' && (r.params.normalization ?? 'linearMax') === 'linearMax')
   const sawSum =
     ranked.has('saw') && runs.some((r) => r.methodId === 'saw' && r.params.normalization === 'sum')
-  const ahpRun = runs.find((r) => r.methodId === 'ahp-ranking')
-  const hasPairwise =
-    m <= AHP_MAX_PAIRWISE_ALTERNATIVES &&
-    Boolean(ahpRun?.judgements?.some((mat, j) => mat != null && (weights[j] ?? 0) > 0))
-  const ahpFromTable = ranked.has('ahp-ranking') && !hasPairwise
+  const ahpJudgements = runs.find((r) => r.methodId === 'ahp-ranking')?.judgements
+  const ahpFromTable =
+    ranked.has('ahp-ranking') &&
+    (problem.alternatives.length > AHP_MAX_PAIRWISE_ALTERNATIVES ||
+      !ahpJudgements ||
+      problem.criteria.every((_, j) => (weights[j] ?? 0) <= 0 || ahpJudgements[j] == null))
   if (ranked.has('marcos') && sawLinear) {
     echoes.push({ methodId: 'marcos', of: 'saw' })
   }

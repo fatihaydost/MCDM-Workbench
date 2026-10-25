@@ -442,11 +442,7 @@ function planeDrawing(
   const P = (p: Point): Screen => ({ x: fit.x(p.x), y: fit.y(p.y) })
   const short = (v: number) => trimZeros(format(v))
   const xLabelW = box.right + 12
-  const ideal = P(proj.ideal)
-  const anti = P(proj.antiIdeal)
   const obstacles: PlotBox[] = [
-    { left: ideal.x - 6, right: ideal.x + 6, top: ideal.y - 6, bottom: ideal.y + 6 },
-    { left: anti.x - 6, right: anti.x + 6, top: anti.y - 6, bottom: anti.y + 6 },
     { left: box.left - 6, right: box.left + 6, top: box.bottom - 6, bottom: box.bottom + 6 },
   ]
   return {

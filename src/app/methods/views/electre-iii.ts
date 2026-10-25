@@ -72,6 +72,44 @@ export const electreIII: MethodView<'ranking'> = {
   ],
   stage: preloadable(() => pictures().then((m) => ({ default: m.Stage }))),
   pictureShowsScores: true,
+  verdict: (result, names, t, format) => {
+    const descStep = result.steps.find((s) => s.key === 'electre-iii.descending')
+    const ascStep = result.steps.find((s) => s.key === 'electre-iii.ascending')
+    const desc = descStep && 'vector' in descStep ? descStep.vector : undefined
+    const asc = ascStep && 'vector' in ascStep ? ascStep.vector : undefined
+    if (!desc || !asc) return null
+    const set = result.ranking
+      .map((r, i) => (r === 1 ? i : -1))
+      .filter((i) => i >= 0)
+      .sort((a, b) => a - b)
+    if (set.length === 0) return null
+    const setNames = set.map((i) => names[i] ?? `#${i + 1}`)
+    const list = setNames.join(', ')
+    const meanRank = 0.5 * ((desc[set[0]!] ?? 0) + (asc[set[0]!] ?? 0))
+    const dec = format(0.5).includes(',') ? ',' : '.'
+    const meanRankStr = meanRank.toFixed(1).replace('.', dec)
+    const rankDetails = set.map((i) => `r↓ = ${desc[i] ?? 1}, r↑ = ${asc[i] ?? 1}`).join(' / ')
+    const isTr = t('workbench.ranking.columns.rank') === 'Sıra'
+    const resultText =
+      set.length === 1
+        ? isTr
+          ? `İlk sırada ${list} (r̄ = ${meanRankStr}: ${rankDetails})`
+          : `${list} ranks first (r̄ = ${meanRankStr}: ${rankDetails})`
+        : isTr
+          ? `${list} ilk sırayı paylaşıyor (r̄ = ${meanRankStr}: ${rankDetails})`
+          : `${list} share first place (r̄ = ${meanRankStr}: ${rankDetails})`
+    return {
+      set,
+      failed: [],
+      result: resultText,
+      about: [
+        [
+          isTr ? 'Damıtma sırası (r̄)' : 'Distillation rank (r̄)',
+          `${list} (r̄ = ${meanRankStr}: ${rankDetails})`,
+        ],
+      ],
+    }
+  },
   ledger: {
     example: 'wang-2008-waste-incineration',
     fixture: 'electre-iii-wang2008.json#expected.tolerance',

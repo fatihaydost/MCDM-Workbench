@@ -74,7 +74,7 @@ export function variantLabel(methodId: string, raw: Readonly<Record<string, unkn
         ? tr(t, `workbench.params.${methodId}.${d.key}Variant.${String(v)}`)
         : tr(t, `workbench.params.${methodId}.${d.key}Variant`, { value: formatNumber(Number(v), isLang(i18n.resolvedLanguage) ? i18n.resolvedLanguage : 'en', 2) }),
     )
-  if (hasCustomSwaraOrder || hasCustomSwaraS) {
+  if (hasCustomSwaraOrder || hasCustomSwaraS || hasCustomElectre || hasCustomPromethee) {
     const lang = isLang(i18n.resolvedLanguage) ? i18n.resolvedLanguage : 'en'
     parts.push(tr(t, 'workbench.params.swara.customVariant', { defaultValue: lang === 'tr' ? 'özel' : 'custom' }))
   }

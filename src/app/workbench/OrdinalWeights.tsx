@@ -57,6 +57,14 @@ export function OrdinalWeights({ problem, method }: Props) {
       nextOrder[rankIdx] = nextOrder[target]!
       nextOrder[target] = tmp
       setMethodParam('swara', 'order', nextOrder)
+      if (isCustomS && rankIdx >= 1 && target >= 1) {
+        const nextS = [...sVec]
+        nextS[0] = 0
+        const tmpS = nextS[rankIdx]!
+        nextS[rankIdx] = nextS[target]!
+        nextS[target] = tmpS
+        setMethodParam('swara', 's', nextS)
+      }
     }
 
     const changeS = (rankIdx: number, val: number | null) => {
@@ -180,6 +188,7 @@ export function OrdinalWeights({ problem, method }: Props) {
     const b = ordered[target]!
     const nextRanks = ranks.map((rk) => 1 + ranks.filter((other) => other < rk).length)
     const r = nextRanks[j]!
+    const rb = nextRanks[b]!
     const tiesAtR = nextRanks.filter((rk) => rk === r)
     if (tiesAtR.length > 1) {
       if (delta === 1) {
@@ -187,13 +196,19 @@ export function OrdinalWeights({ problem, method }: Props) {
           if (nextRanks[idx]! > r) nextRanks[idx] = nextRanks[idx]! + 1
         }
         nextRanks[j] = r + 1
-      } else {
+      } else if (rb === r) {
         for (let idx = 0; idx < n; idx++) {
           if (idx !== j && nextRanks[idx]! >= r) nextRanks[idx] = nextRanks[idx]! + 1
         }
+      } else {
+        for (let idx = 0; idx < n; idx++) {
+          if (idx === j) continue
+          if (nextRanks[idx]! === rb) nextRanks[idx] = r
+          else if (nextRanks[idx]! >= r) nextRanks[idx] = nextRanks[idx]! + 1
+        }
+        nextRanks[j] = rb
       }
     } else {
-      const rb = nextRanks[b]!
       for (let idx = 0; idx < n; idx++) {
         if (nextRanks[idx] === rb) nextRanks[idx] = r
       }

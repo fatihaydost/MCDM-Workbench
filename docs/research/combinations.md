@@ -80,7 +80,7 @@ Per-method details and edge-case decisions are in the individual cards under `me
 | Standard deviation | any sign | depends on normalization (Mukhametzyanov 2021) | constant column → 0 |
 | MEREC (Keshavarz-Ghorabaee et al. 2021, DOI [10.3390/sym13040525](https://doi.org/10.3390/sym13040525)) | strictly positive (uses ln and min/x, x/max) | – | zeros break ln |
 | AHP (Saaty) | pairwise judgments, 1–9 scale | – | CR ≥ 0.10 → ask to revise |
-| BWM (Rezaei 2015, DOI [10.1016/j.omega.2014.11.009](https://doi.org/10.1016/j.omega.2014.11.009); linear model 2016, DOI [10.1016/j.omega.2015.12.001](https://doi.org/10.1016/j.omega.2015.12.001)) | best-to-others and others-to-worst vectors | – | needs an LP (linear model) or NLP; multiple optima in the non-linear model |
+| BWM (Rezaei 2015, DOI [10.1016/j.omega.2014.11.009](https://doi.org/10.1016/j.omega.2014.11.009); linear model 2016, DOI [10.1016/j.omega.2015.12.001](https://doi.org/10.1016/j.omega.2015.12.001); e.g., BWM-MABAC teacher selection in Telli & Ayçin 2021, *TroyAcademy* 6(2), 733-750, DOI [10.31454/troyacademy.899397](https://doi.org/10.31454/troyacademy.899397)) | best-to-others and others-to-worst vectors | – | needs an LP (linear model) or NLP; multiple optima in the non-linear model |
 | SWARA (Keršulienė, Zavadskas & Turskis 2010, DOI [10.3846/jbem.2010.12](https://doi.org/10.3846/jbem.2010.12)) | criteria ranked + comparative importance s_j | – | – |
 
 Report the normalization together with the weighting method whenever the weights depend on it (Mukhametzyanov 2021).

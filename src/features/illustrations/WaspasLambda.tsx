@@ -66,7 +66,7 @@ export const WASPAS_IDEA_STEPS = 3
 const defaultFormat = (v: number, d: number) => v.toFixed(d)
 const HIT = 6
 
-type Active = { i: number; k: number }
+type FocusKey = { i: number; k: number }
 
 /**
  * WASPAS as a picture: Q of every alternative against λ = 0, 0.1, ..., 1 (the core's `waspas.lambdaSweep` step). Q is
@@ -92,11 +92,8 @@ export function WaspasLambda({
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const animate = useAnimateValues(width)
-  const [active, setActive] = useState<Active | null>(null)
-  const [focusKey, setFocusKey] = useState<Active>(() => ({
-    i: 0,
-    k: Math.round(Math.min(1, Math.max(0, lambda)) * 10),
-  }))
+  const [active, setActive] = useState<FocusKey | null>(null)
+  const [focusKey, setFocusKey] = useState<FocusKey | null>(null)
   const stepping = step !== null && step !== undefined
   const stage = stepping ? Math.min(Math.max(step, 0), WASPAS_IDEA_STEPS - 1) : WASPAS_IDEA_STEPS - 1
   const off = (from: number) => (stage >= from ? undefined : '')
@@ -143,14 +140,16 @@ export function WaspasLambda({
 
   // Up / down follow the order at the focused λ, so the next point is the next line on screen.
   const byRank = (k: number) => names.map((_, i) => i).sort((a, b) => ranksAt[k]![a]! - ranksAt[k]![b]! || a - b)
-  const focus = { i: Math.min(focusKey.i, m - 1), k: focusKey.k }
+  const defaultFocus = { i: 0, k: Math.round(Math.min(1, Math.max(0, lambda)) * 10) }
+  const focus = focusKey ? { i: Math.min(focusKey.i, m - 1), k: focusKey.k } : defaultFocus
   const move = (e: KeyboardEvent<SVGGElement>) => {
     if (stepping) return
-    const next = { ...focus }
-    const order = byRank(focus.k)
-    const pos = order.indexOf(focus.i)
-    if (e.key === 'ArrowRight') next.k = Math.min(last, focus.k + 1)
-    else if (e.key === 'ArrowLeft') next.k = Math.max(0, focus.k - 1)
+    const cur = focusKey ? { i: Math.min(focusKey.i, m - 1), k: focusKey.k } : defaultFocus
+    const next = { ...cur }
+    const order = byRank(cur.k)
+    const pos = order.indexOf(cur.i)
+    if (e.key === 'ArrowRight') next.k = Math.min(last, cur.k + 1)
+    else if (e.key === 'ArrowLeft') next.k = Math.max(0, cur.k - 1)
     else if (e.key === 'ArrowDown') next.i = order[Math.min(m - 1, pos + 1)]!
     else if (e.key === 'ArrowUp') next.i = order[Math.max(0, pos - 1)]!
     else if (e.key === 'Home') next.k = 0
@@ -303,7 +302,7 @@ export function WaspasLambda({
         </g>
       </svg>
       {/* The focused point's own name says the same to a screen reader, so the readout is for the eyes only. */}
-      <p className={s.readout} data-order={order(focus.k)}>
+      <p className={s.readout} data-order={order(shownActive ? shownActive.k : defaultFocus.k)}>
         {shownActive ? (
           <span className={s.readoutC} aria-hidden>
             {l.readout(grid(shownActive.k), order(shownActive.k))}

@@ -104,7 +104,8 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
   const [focusKey, setFocusKey] = useState<Active>({ row: 0, col: 0 })
   if (!parts) return null
 
-  const { sPlus, bonus, sMinus, scores, utility, order } = parts
+  const { sPlus, bonus, sMinus, wCost, scores, utility, order } = parts
+  const hasCost = wCost > 0
   const stepping = step !== null && step !== undefined
   const stage = stepping ? Math.min(Math.max(step, 0), COPRAS_BONUS_STEPS - 1) : COPRAS_BONUS_STEPS - 1
   const off = (from: number) => (stage >= from ? undefined : '')
@@ -130,7 +131,7 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
   const barY = stacked ? NAME_LINE : (ROW - BAR) / 2
   const height = m * rowStep
   const best = order[0]!
-  const focus = { row: Math.min(focusKey.row, m - 1), col: stage >= 1 ? focusKey.col : 0 }
+  const focus = { row: Math.min(focusKey.row, m - 1), col: stage >= 1 && hasCost ? focusKey.col : 0 }
 
   const table: ChartTable = {
     corner: l.alternative,
@@ -140,7 +141,7 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
 
   const move = (e: KeyboardEvent<SVGGElement>) => {
     const next = { ...focus }
-    if (e.key === 'ArrowRight' || e.key === 'End') next.col = stage >= 1 ? 1 : 0
+    if (e.key === 'ArrowRight' || e.key === 'End') next.col = stage >= 1 && hasCost ? 1 : 0
     else if (e.key === 'ArrowLeft' || e.key === 'Home') next.col = 0
     else if (e.key === 'ArrowDown') next.row = Math.min(m - 1, focus.row + 1)
     else if (e.key === 'ArrowUp') next.row = Math.max(0, focus.row - 1)
@@ -190,7 +191,7 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
                   {short}
                 </text>
                 {segs.map((g) => {
-                  const hiddenBonus = stage === 0 && g.col === 1
+                  const hiddenBonus = (stage === 0 || !hasCost) && g.col === 1
                   return (
                     <rect
                       key={g.col}
@@ -227,17 +228,19 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
                   <rect className={`${s.sawGap} ${s.stageItem}`} data-off={off(1)} x={-1} y={barY} width={2} height={BAR} style={{ transform: `translate(${segs[1]!.x}px, 0px)` }} aria-hidden />
                 )}
                 {/* The cost share that sets the bonus: at the bar end for step 1 only, where Q takes its place. */}
-                <text
-                  className={`${s.sawValue} ${s.stageItem}`}
-                  data-off={stage === 1 ? undefined : ''}
-                  x={0}
-                  y={barY + BAR / 2}
-                  dominantBaseline="central"
-                  style={{ transform: `translate(${end + VALUE_GAP}px, 0px)` }}
-                  aria-hidden
-                >
-                  {`S− ${format(sMinus[i]!)}`}
-                </text>
+                {hasCost && (
+                  <text
+                    className={`${s.sawValue} ${s.stageItem}`}
+                    data-off={stage === 1 ? undefined : ''}
+                    x={0}
+                    y={barY + BAR / 2}
+                    dominantBaseline="central"
+                    style={{ transform: `translate(${end + VALUE_GAP}px, 0px)` }}
+                    aria-hidden
+                  >
+                    {`S− ${format(sMinus[i]!)}`}
+                  </text>
+                )}
                 <text className={`${s.sawValue} ${s.stageItem}`} data-off={off(2)} x={0} y={barY + BAR / 2} dominantBaseline="central" style={{ transform: `translate(${end + VALUE_GAP}px, 0px)` }}>
                   {texts[i]}
                 </text>
@@ -260,7 +263,7 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
         )}
       </p>
       <ul className={s.sawLegend} aria-label={l.legend}>
-        {partNames.map((p, j) => (
+        {(hasCost ? partNames : [l.benefit]).map((p, j) => (
           <li key={j} className={s.sawLegendItem} data-on={shown?.j === j || undefined}>
             <svg width={12} height={12} aria-hidden className={s.sawSwatch}>
               <rect className={s.sawSeg} data-cat={PART_COLOURS[j]} width={12} height={12} />

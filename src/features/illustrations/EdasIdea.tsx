@@ -159,8 +159,9 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, ste
   const full = center - 6 - estimateTextWidth(`← ${l.below}`, HEAD_FONT) >= 0 && center + 6 + estimateTextWidth(`${l.above} →`, HEAD_FONT) <= W
   const belowText = stage === 0 ? '← NDA' : full ? `← ${l.below}` : `← ${l.sn}`
   const aboveText = stage === 0 ? 'PDA →' : full ? `${l.above} →` : `${l.sp} →`
-  const belowX = Math.max(center - 6, estimateTextWidth(belowText, HEAD_FONT))
-  const aboveX = Math.min(center + 6, W - estimateTextWidth(aboveText, HEAD_FONT))
+  const rawBelowX = Math.max(center - 6, estimateTextWidth(belowText, HEAD_FONT))
+  const aboveX = Math.max(rawBelowX + 12, Math.min(center + 6, W - estimateTextWidth(aboveText, HEAD_FONT)))
+  const belowX = Math.min(rawBelowX, aboveX - 12)
 
   const signed = (i: number, j: number) => {
     const v = above[i]![j]! > 0 ? above[i]![j]! : -below[i]![j]!

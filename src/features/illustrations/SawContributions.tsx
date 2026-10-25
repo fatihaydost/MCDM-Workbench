@@ -227,7 +227,11 @@ export function SawContributions({ problem, weights, params, parts: partsProp, f
                       style={{ transform: `translate(${g.x}px, 0px) scale(${Math.max(g.width, ZERO_WIDTH)}, 1)` }}
                       tabIndex={tabbable ? 0 : -1}
                       role="img"
-                      aria-label={l.segment(name, critNames[g.col]!, format(g.value), texts[i]!)}
+                      aria-label={
+                        stage === 0
+                          ? `${name} · ${critNames[g.col]!}: ${format(g.value)}`
+                          : l.segment(name, critNames[g.col]!, format(g.value), texts[i]!)
+                      }
                       onMouseEnter={() => setActive({ row: place, col: g.col })}
                       onFocus={() => {
                         setFocusKey({ row: place, col: g.col })
@@ -269,12 +273,14 @@ export function SawContributions({ problem, weights, params, parts: partsProp, f
       <p className={s.readout}>
         {shown ? (
           <span className={s.readoutC} aria-hidden>
-            {l.readout(
-              names[shown.i]!,
-              critNames[shown.j]!,
-              format((stage === 0 ? parts.normalized : contributions)[shown.i]![shown.j]!),
-              texts[shown.i]!,
-            )}
+            {stage === 0
+              ? `${names[shown.i]!} · ${critNames[shown.j]!}: ${format(parts.normalized[shown.i]![shown.j]!)}`
+              : l.readout(
+                  names[shown.i]!,
+                  critNames[shown.j]!,
+                  format(contributions[shown.i]![shown.j]!),
+                  texts[shown.i]!,
+                )}
           </span>
         ) : (
           // Hidden, not removed, before the last step: the picture below keeps its place.

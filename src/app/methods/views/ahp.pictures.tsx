@@ -104,8 +104,10 @@ export function RankingStage({ problem, weights, params, alternativeJudgements, 
         score: scoreWords('ahp-ranking', t).name,
         legend: t('workbench.visual.saw.legend'),
         others: t('workbench.visual.saw.others'),
-        segment: (alternative, criterion, value, score) => t('workbench.visual.saw.segment', { alternative, criterion, value, score }),
-        readout: (alternative, criterion, value, score) => t('workbench.visual.saw.readout', { alternative, criterion, value, score }),
+        segment: (alternative, criterion, value, score) =>
+          t('workbench.visual.saw.segment', { alternative, criterion, value, score }).replace(/\bS =/g, 'P ='),
+        readout: (alternative, criterion, value, score) =>
+          t('workbench.visual.saw.readout', { alternative, criterion, value, score }).replace(/\bS =/g, 'P ='),
       }}
       className={cn('max-w-[760px]', className)}
     />

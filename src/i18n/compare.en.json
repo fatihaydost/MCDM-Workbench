@@ -58,6 +58,8 @@
     "copras_saw": "COPRAS with no active cost criterion, a single cost criterion, or only two alternatives reduces to SAW (Sum), so it is counted once.",
     "copras_ahp-ranking": "COPRAS with no active cost criterion, a single active cost criterion, or only two alternatives and table-derived AHP local priorities compute the same weighted shares, so they are counted once.",
     "ahp-ranking_copras": "AHP with table-derived local priorities and COPRAS with no active cost criterion, a single active cost criterion, or only two alternatives compute the same weighted shares, so they are counted once.",
+    "ahp-ranking_saw": "AHP with table-derived local priorities on all criteria and SAW (Sum) compute the same weighted column shares, so they are counted once.",
+    "saw_ahp-ranking": "SAW (Sum) and AHP with table-derived local priorities on all criteria compute the same weighted column shares, so they are counted once.",
     "vikor_mabac": "VIKOR at v = 1 (pure group utility S) and MABAC both rank by the 0-1 weighted sum, so they are counted once.",
     "mabac_vikor": "MABAC and VIKOR at v = 1 (pure group utility S) both rank by the 0-1 weighted sum, so they are counted once.",
     "promethee-ii_mabac": "PROMETHEE II with the V-shape preference function over the column range and MABAC both rank by the 0-1 weighted sum, so they are counted once.",

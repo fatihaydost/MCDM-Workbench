@@ -52,6 +52,14 @@ export const ahp: MethodContent = {
         tr: 'Rastgele indeks RI: n = 3: 0,58, 4: 0,90, 5: 1,12, 6: 1,24, 7: 1,32, 8: 1,41, 9: 1,45, 10: 1,49, 11: 1,51, 12: 1,48, 13: 1,56, 14: 1,57, 15: 1,59 ve n > 15 için Alonso ve Lamata (2006) doğrusal yaklaşımı; n = 1 veya 2 için CR anlamsızdır.',
       },
     },
+    {
+      title: { en: 'Alternative local priorities and distributive synthesis', tr: 'Alternatif yerel öncelikleri ve dağıtıcı sentez' },
+      tex: String.raw`P_i = \sum_{j=1}^{n} w_j\, p_{ij}, \qquad \sum_{i=1}^{m} p_{ij} = 1, \qquad \sum_{i=1}^{m} P_i = 1`,
+      note: {
+        en: 'When AHP also ranks the alternatives, each criterion j yields local priorities p_ij (from an m x m pairwise matrix or from sum-normalized table shares, with 1/x for cost) and distributive synthesis combines them into global priorities P_i.',
+        tr: 'AHP alternatifleri de sıraladığında her j kriteri için yerel öncelikler p_ij (m x m ikili karşılaştırma matrisinden ya da maliyette 1/x ile toplam-normalize tablo paylarından) elde edilir ve dağıtıcı sentezle genel öncelikler P_i hesaplanır.',
+      },
+    },
   ],
   combinedWith: [
     {

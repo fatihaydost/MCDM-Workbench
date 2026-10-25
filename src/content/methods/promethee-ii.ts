@@ -25,7 +25,7 @@ export const prometheeII: MethodContent = {
   steps: [
     {
       title: { en: 'Pairwise differences', tr: 'İkili farklar' },
-      tex: String.raw`d_j(a,b) = s_j\left(x_{aj} - x_{bj}\right), \qquad s_j = \begin{cases} +1 & j \in J^{+} \\ -1 & j \in J^{-} \end{cases}`,
+      tex: String.raw`d_j(a,b) = \sigma_j\left(x_{aj} - x_{bj}\right), \qquad \sigma_j = \begin{cases} +1 & j \in J^{+} \\ -1 & j \in J^{-} \end{cases}`,
       note: {
         en: 'Only differences are used, so there is no normalization step and negative values are fine.',
         tr: 'Yalnız farklar kullanıldığından normalizasyon adımı yoktur; negatif değerler sorun değildir.',
@@ -135,7 +135,7 @@ export const prometheeII: MethodContent = {
       'Decision matrix, at least 2 alternatives, any real values.',
       'Criterion type per column: benefit or cost.',
       'Weights, non-negative, normalized to sum 1.',
-      'Per criterion a preference function and its parameters (q, p or s) in the units of that criterion. Suggested start: type V with q = 0 and p = the column range.',
+      'Per criterion a preference function and its parameters (q, p or s) in the units of that criterion. Suggested start: V-shape (type III, linear with q = 0 and p = the column range).',
     ],
     pitfalls: [
       'Rank reversal: removing an alternative cannot swap a and b whose net flows differ by more than 2/(m-1); closer pairs can swap.',
@@ -160,7 +160,7 @@ export const prometheeII: MethodContent = {
       'Karar matrisi, en az 2 alternatif, herhangi gerçek değerler.',
       'Her sütun için kriter türü: fayda ya da maliyet.',
       "Negatif olmayan, toplamı 1'e normalize edilen ağırlıklar.",
-      'Her kriter için bir tercih fonksiyonu ve o kriterin biriminde parametreleri (q, p ya da s). Önerilen başlangıç: q = 0 ve p = sütun aralığı olan V türü.',
+      'Her kriter için bir tercih fonksiyonu ve o kriterin biriminde parametreleri (q, p ya da s). Önerilen başlangıç: V biçimli (Tip III, q = 0 ve p = sütun açıklığı olan doğrusal fonksiyon).',
     ],
     pitfalls: [
       "Sıralama tersine dönebilir: net akışları 2/(m-1)'den fazla farklı a ile b, bir alternatif çıkarılınca yer değiştiremez; daha yakın çiftler değiştirebilir.",
