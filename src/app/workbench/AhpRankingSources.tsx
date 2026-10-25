@@ -258,7 +258,22 @@ export function AhpRankingSources({
       )}
 
       {m > AHP_MAX_PAIRWISE_ALTERNATIVES ? (
-        <Notice tone="info">{t('workbench.ranking.ahp.capNotice', { max: AHP_MAX_PAIRWISE_ALTERNATIVES })}</Notice>
+        <Notice tone="info">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span>{t('workbench.ranking.ahp.capNotice', { max: AHP_MAX_PAIRWISE_ALTERNATIVES })}</span>
+            {alternativeJudgements?.some((g) => g != null) && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  for (let j = 0; j < problem.criteria.length; j++) setCriterionSource(j, 'table')
+                }}
+              >
+                {t('workbench.ranking.ahp.sourceTable')}
+              </Button>
+            )}
+          </div>
+        </Notice>
       ) : (
         <section className="flex flex-col gap-4" aria-labelledby="wb-ahp-sources-title">
           <div className="flex flex-col gap-1">

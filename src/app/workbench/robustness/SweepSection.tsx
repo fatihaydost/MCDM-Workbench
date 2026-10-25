@@ -47,8 +47,15 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
   const nf = useNumberFormat(DECIMALS.weight)
   const uid = useId()
   const [k, setK] = useState(() => largestWeight(weights))
-  const base = weights[k] ?? 0
+  const safeK = k >= 0 && k < weights.length ? k : largestWeight(weights)
+  const base = weights[safeK] ?? 0
   const [wk, setWk] = useState(base)
+  const [prevWeights, setPrevWeights] = useState(weights)
+  if (prevWeights !== weights || safeK !== k) {
+    setPrevWeights(weights)
+    if (safeK !== k) setK(safeK)
+    setWk(base)
+  }
   const [boxRef, boxWidth] = useElementWidth<HTMLElement>()
   // Set by the key handler just before the weight changes: a held-down key makes the rows jump instead of slide.
   const keyRepeat = useRef(false)
@@ -63,22 +70,22 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
     setWk(v)
   }
 
-  const job = useSweep(problem, weights, run, k)
+  const job = useSweep(problem, weights, run, safeK)
   const result = job.result
   const sweep = result?.sweep ?? null
-  const current = sweep !== null && sweep.k === k
+  const current = sweep !== null && sweep.k === safeK
   const xs = useMemo(() => sweep?.points.map((p) => p.wk) ?? [], [sweep])
   const series = useMemo(() => (sweep ? names.map((_, i) => sweep.points.map((p) => p.scores[i]!)) : []), [sweep, names])
   // The ranking at the slider's weight: computed exactly there, never read off the grid. Where the method cannot rank
   // (CoCoSo at w_k = 1: an alternative is then worst on every weighted criterion) there is no ranking, only a note.
   const at = useMemo(() => {
     try {
-      return rankerFor(run)(problem)(reweight(weights, k, wk))
+      return rankerFor(run)(problem)(reweight(weights, safeK, wk))
     } catch (err) {
       if (err instanceof ProblemValidationError) return err
       throw err
     }
-  }, [run, problem, weights, k, wk])
+  }, [run, problem, weights, safeK, wk])
   const atRes = at instanceof ProblemValidationError ? null : at
   const scoreOrder: 'asc' | 'desc' = atRes?.order ?? (run.methodId === 'vikor' ? 'asc' : 'desc')
   const atRanking = atRes?.ranking ?? NO_LINES
@@ -86,7 +93,7 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
   const order = rankOrder(atRanking)
   const leaders = order.filter((i) => atRanking[i] === 1)
   const baseLeaders = rankOrder(baseRanking).filter((i) => baseRanking[i] === 1)
-  const criterion = criteria[k] ?? ''
+  const criterion = criteria[safeK] ?? ''
   // shortcut: names only CoCoSo's all-worst alternative, the one block a sweep end meets; another block would read "can't rank: ".
   const blockedNote =
     at instanceof ProblemValidationError
@@ -150,7 +157,7 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
         {useSegments ? (
           <SegmentedControl<string>
             aria-label={t('sweep.criterion')}
-            value={String(k)}
+            value={String(safeK)}
             onValueChange={(v) => choose(Number(v))}
             options={criteria.map((c, j) => ({ value: String(j), label: c }))}
             size="md"
@@ -159,7 +166,7 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
         ) : (
           <Select
             aria-labelledby={`${uid}-crit`}
-            value={String(k)}
+            value={String(safeK)}
             onChange={(e) => choose(Number(e.target.value))}
             options={criteria.map((c, j) => ({ value: String(j), label: c }))}
             className="max-w-[320px]"
@@ -185,7 +192,7 @@ export function SweepSection({ problem, weights, run, baseRanking, names, criter
             series={series}
             cursor={current ? wk : null}
             cursorValues={atScores}
-            base={weights[sweep?.k ?? k] ?? 0}
+            base={weights[sweep?.k ?? safeK] ?? 0}
             switches={!result ? NO_MARKS : many ? result.topMarks : result.marks}
             topBand={sweep ? [sweep.baseTopInterval.from, sweep.baseTopInterval.to] : [base, base]}
             rankingBand={sweep ? [sweep.baseRankingInterval.from, sweep.baseRankingInterval.to] : [base, base]}

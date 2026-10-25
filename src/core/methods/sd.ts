@@ -2,6 +2,8 @@ import { column, minMaxNormalize, sampleStd, sum } from '../math'
 import type { MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
 import { assertValid, validateProblem } from '../validate'
 
+export const SD_DOMINANT_WEIGHT = 0.5
+
 /**
  * SD weighting (Diakoulaki, Mavrotas & Papayannakis 1995, Sec. 4, Eqs. 2 and 7; Mukhametzyanov 2021 Eq. 11), origin
  * variant: min-max normalization with cost inversion, sample SD σ_j (1 / (m - 1); Diakoulaki prints the population
@@ -20,10 +22,11 @@ export const sd: WeightingMethod = {
 
     // 1. Min-max normalization; a constant column stays all zeros (σ 0 -> weight 0).
     const { r, constant, nearConstant } = minMaxNormalize(problem)
+    const varying = constant.filter((c) => !c).length
     constant.forEach((c, j) => c && warnings.push({ code: 'sd.constant-column', col: j }))
     nearConstant.forEach((near, j) => near && warnings.push({ code: 'sd.near-constant-column', col: j }))
     // Every varying column becomes {0, 1} with the same σ: equal weights over them.
-    if (m === 2 && constant.filter((c) => !c).length >= 2) warnings.push({ code: 'sd.two-alternatives' })
+    if (m === 2 && varying >= 2) warnings.push({ code: 'sd.two-alternatives' })
 
     // 2. Contrast: sample standard deviation per column.
     const sigma = Array.from({ length: n }, (_, j) => sampleStd(column(r, j)))
@@ -34,7 +37,7 @@ export const sd: WeightingMethod = {
     if (allConstant) warnings.push({ code: 'sd.all-constant-equal-weights' })
     const weights = allConstant ? new Array<number>(n).fill(1 / n) : sigma.map((s) => s / total)
     const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
-    if (!allConstant && weights[top]! > 0.5) warnings.push({ code: 'sd.dominant-weight', col: top })
+    if (!allConstant && varying > 1 && weights[top]! > SD_DOMINANT_WEIGHT) warnings.push({ code: 'sd.dominant-weight', col: top })
 
     return {
       weights,

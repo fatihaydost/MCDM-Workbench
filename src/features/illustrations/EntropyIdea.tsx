@@ -96,7 +96,8 @@ export function EntropyIdea({ problem, params, format = defaultFormat, labels, s
   const slot = panelW / m
   const bw = Math.max(1, slot * (m > 40 ? 0.85 : 0.7))
   const maxW = Math.max(parts.weights[a]!, parts.weights[b]!, 1e-12)
-  const hi = parts.weights[b]! >= parts.weights[a]! ? b : a
+  const hasSpread = Math.abs(parts.weights[b]! - parts.weights[a]!) > 1e-12
+  const hi = hasSpread ? (parts.weights[b]! >= parts.weights[a]! ? b : a) : -1
   const yE = base + LINE
   const yW = yE + LINE
   const yBar = yW + 12

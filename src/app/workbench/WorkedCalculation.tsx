@@ -3,6 +3,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isStepKey, stepContent, stepFlow } from '../../content/steps'
 import type { Criterion, Step } from '../../core'
+import { maxOf, minOf } from '../../core/math'
 import { StepFlow } from '../../features/illustrations/StepFlow'
 import { escapeLatex, stepToTable, tableToLatex, tableToTsv, type StepTable } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
@@ -64,14 +65,12 @@ export default function WorkedCalculation({ groups, problem, headingLevel = 'h3'
 
   const jump = (key: string) => {
     let resolved = key
-    if (!keys.includes(resolved)) {
-      for (const g of groups) {
-        const node = flowFor(g.steps)?.find((n) => n.key === key)
-        const firstKey = node?.stepKeys?.find((k) => keys.includes(k))
-        if (firstKey) {
-          resolved = firstKey
-          break
-        }
+    for (const g of groups) {
+      const node = flowFor(g.steps)?.find((n) => n.key === key)
+      const firstKey = node?.stepKeys?.find((k) => keys.includes(k))
+      if (firstKey) {
+        resolved = firstKey
+        break
       }
     }
     const i = keys.indexOf(resolved)
@@ -326,6 +325,7 @@ const NO_PEAK_STEPS = new Set<string>([
   'electre-iii.credibility',
   'promethee-ii.preferenceMatrix',
   'codas.relativeAssessment',
+  'codas.negativeIdeal',
   'vikor.best',
   'vikor.worst',
   'topsis.idealBest',
@@ -335,6 +335,16 @@ const NO_PEAK_STEPS = new Set<string>([
   'cilos.systemMatrix',
   'ahp.pairwiseMatrix',
   'equal.weights',
+  'edas.average',
+  'aras.optimalRow',
+  'aras.optimalNormalized',
+  'aras.optimalWeighted',
+  'mabac.border',
+  'bwm.bestToOthers',
+  'bwm.othersToWorst',
+  'merec.performanceRemoved',
+  'swara.s',
+  'swara.k',
 ])
 
 const MIN_PEAK_STEPS = new Set<string>([
@@ -356,11 +366,10 @@ const MIN_PEAK_STEPS = new Set<string>([
   'electre-iii.descending',
   'electre-iii.ascending',
   'entropy.entropy',
-  'cilos.relativeLoss',
+  'cilos.totalLoss',
   'bwm.consistencyLocal',
   'ahpRanking.consistency',
   'roc.ranks',
-  'swara.s',
 ])
 
 const UNORIENTED_MATRIX_STEPS = new Set<string>([
@@ -368,8 +377,11 @@ const UNORIENTED_MATRIX_STEPS = new Set<string>([
   'topsis.weighted',
   'moora.normalized',
   'moora.weighted',
+  'moora:normalized',
+  'moora:weighted',
   'copras.normalizedSum',
   'copras.weighted',
+  'copras:weighted',
   'electre-i.oriented',
   'entropy.proportionsSum',
 ])
@@ -406,8 +418,8 @@ function StepTableView({
     if (table.values.length === 1) {
       const finite = (table.values[0] ?? []).filter(Number.isFinite)
       if (finite.length < 2) return null
-      const min = Math.min(...finite)
-      const max = Math.max(...finite)
+      const min = minOf(finite)
+      const max = maxOf(finite)
       const peak = lowerIsBetterStep ? min : max
       if (max - min <= 1e-12 * Math.max(1, Math.abs(peak))) return null
       return Array.from({ length: cols }, () => peak)
@@ -415,8 +427,8 @@ function StepTableView({
     return Array.from({ length: cols }, (_, c) => {
       const colVals = table.values.map((r) => r[c]!).filter(Number.isFinite)
       if (colVals.length < 2) return null
-      const min = Math.min(...colVals)
-      const max = Math.max(...colVals)
+      const min = minOf(colVals)
+      const max = maxOf(colVals)
       const wantMin =
         lowerIsBetterStep ||
         (unorientedMatrix && stepKey !== 'electre-i.oriented' && criteria?.[c]?.type === 'cost')

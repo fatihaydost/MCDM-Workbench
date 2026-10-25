@@ -318,9 +318,11 @@ export function MarcosSawLine({ problem, weights, format = defaultFormat, labels
           {ticks.map((v) => (
             <g key={v}>
               <line className={s.marcosGrid} x1={x(0)} x2={x(1)} y1={y(v)} y2={y(v)} />
-              <text className={s.colHead} x={x(0) - 6} y={y(v)} textAnchor="end" dominantBaseline="central">
-                {format(v, v === 0.5 ? 1 : 0)}
-              </text>
+              {!(v === 1 && (1 - c) * side < 14) && (
+                <text className={s.colHead} x={x(0) - 6} y={y(v)} textAnchor="end" dominantBaseline="central">
+                  {format(v, v === 0.5 ? 1 : 0)}
+                </text>
+              )}
               <text className={s.colHead} x={x(v)} y={y(0) + 14} textAnchor="middle" dominantBaseline="central">
                 {format(v, v === 0.5 ? 1 : 0)}
               </text>

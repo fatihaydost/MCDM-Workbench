@@ -13,6 +13,7 @@ const clamp01 = (x: number): number => Math.min(1, Math.max(0, x))
 export function reweight(weights: readonly number[], k: number, wk: number): number[] {
   const n = weights.length
   if (k < 0 || k >= n || !Number.isInteger(k)) throw new RangeError(`criterion index ${k} out of range`)
+  if (!Number.isFinite(wk)) throw new RangeError('reweight: target weight must be finite')
   if (n === 1) return [1]
   const target = clamp01(wk)
   let others = 0
@@ -21,7 +22,7 @@ export function reweight(weights: readonly number[], k: number, wk: number): num
   const out = new Array<number>(n)
   for (let j = 0; j < n; j++) {
     if (j === k) out[j] = target
-    else out[j] = others > 0 ? (weights[j]! * rest) / others : rest / (n - 1)
+    else out[j] = others > 1e-12 ? (weights[j]! / others) * rest : rest / (n - 1)
   }
   return out
 }

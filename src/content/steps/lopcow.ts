@@ -53,8 +53,8 @@ export const lopcow = {
       tr: 'LOPCOW ağırlıkları: her kriterin toplam logaritmik yüzde değer içindeki payı.',
       tex: String.raw`w_j = \frac{PV_j}{\sum_{k=1}^{n} PV_k}`,
       edgeCase: {
-        en: 'When total PV is 0 (all constant or m = 2), weights are 1/n.',
-        tr: 'Toplam PV 0 ise (tümü sabit veya m = 2) her ağırlık 1/n olur.',
+        en: 'When total PV is 0, k varying criteria share 1/k equally (or 1/n).',
+        tr: 'Toplam PV 0 ise k değişken kriter 1/k eşit ağırlık alır (veya 1/n).',
       },
       symbol: 'w',
       texSymbol: '$w_j$',

@@ -68,7 +68,8 @@ export function CilosIdea({ problem, format = defaultFormat, labels, step, expla
   if (!parts) return null
 
   const n = problem.criteria.length
-  const hi = argMax(parts.weights)
+  const hasSpread = parts.weights.length > 1 && Math.max(...parts.weights) - Math.min(...parts.weights) > 1e-12
+  const hi = hasSpread ? argMax(parts.weights) : -1
   const weightTexts = parts.weights.map((w) => format(w))
   const lossTexts = parts.totalLoss.map((tl) => format(tl))
   const weightHead = l.weightHead ?? l.weight

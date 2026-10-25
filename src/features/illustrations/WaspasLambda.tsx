@@ -93,7 +93,10 @@ export function WaspasLambda({
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const animate = useAnimateValues(width)
   const [active, setActive] = useState<Active | null>(null)
-  const [focusKey, setFocusKey] = useState<Active>({ i: 0, k: 5 })
+  const [focusKey, setFocusKey] = useState<Active>(() => ({
+    i: 0,
+    k: Math.round(Math.min(1, Math.max(0, lambda)) * 10),
+  }))
   const stepping = step !== null && step !== undefined
   const stage = stepping ? Math.min(Math.max(step, 0), WASPAS_IDEA_STEPS - 1) : WASPAS_IDEA_STEPS - 1
   const off = (from: number) => (stage >= from ? undefined : '')

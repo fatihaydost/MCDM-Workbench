@@ -58,7 +58,10 @@ export function RankingTable({
   const { t } = useTranslation()
   const nf = useNumberFormat(DECIMALS.score)
   const view = methodViews[method]
-  const extra = compact ? [] : (view.columns ?? []).map((c) => ({ ...c, values: findStep(result.steps, c.step)?.vector }))
+  const extra =
+    compact && method !== 'electre-iii' && method !== 'electre-i'
+      ? []
+      : (view.columns ?? []).map((c) => ({ ...c, values: findStep(result.steps, c.step)?.vector }))
   const before = extra.filter((c) => !c.after)
   const after = extra.filter((c) => c.after)
   const order = rankOrder(result)
@@ -66,7 +69,16 @@ export function RankingTable({
   // A lower-is-better score (VIKOR's Q) has its best row on the shortest bar, so it gets none.
   const finite = result.scores.filter(Number.isFinite)
   const lowerBetter = result.order === 'asc'
-  const topScore = lowerBetter ? 0 : Math.max(...finite.map((v) => Math.max(v, 0)), 0)
+  const minScore = finite.length > 0 ? Math.min(...finite) : 0
+  const maxScore = finite.length > 0 ? Math.max(...finite) : 0
+  const hasBars = !lowerBetter && finite.length > 0 && (minScore < 0 ? maxScore > minScore : maxScore > 0)
+  const barWidth = (sc: number): number => {
+    if (!Number.isFinite(sc)) return 0
+    if (minScore < 0) {
+      return maxScore > minScore ? 12 + ((sc - minScore) / (maxScore - minScore)) * 88 : 100
+    }
+    return maxScore > 0 ? Math.min(100, (Math.max(sc, 0) / maxScore) * 100) : 0
+  }
   const narrowHidden = !compact && view.columnsFromSm === true
   const extraClass = narrowHidden ? 'max-sm:hidden' : undefined
   // A column after the score (COPRAS's N) comes with long words ("Relative significance Q", "Utility degree N (%)"):
@@ -120,11 +132,11 @@ export function RankingTable({
                   </Td>
                 ))}
                 <Td numeric data-testid="closeness" className={cn(first ? 'font-semibold' : 'font-medium')}>
-                  {topScore > 0 && (
+                  {hasBars && (
                     <span aria-hidden className="mr-3 inline-block h-2 w-20 bg-surface-2 align-middle">
                       <span
                         className={cn('block h-full', first ? 'bg-accent' : 'bg-[var(--data-context)]')}
-                        style={{ width: `${Math.min(100, (Math.max(result.scores[i]!, 0) / topScore) * 100)}%` }}
+                        style={{ width: `${barWidth(result.scores[i]!)}%` }}
                       />
                     </span>
                   )}

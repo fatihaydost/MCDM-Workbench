@@ -1,8 +1,8 @@
 import { ArrowsDownUp, Check, Prohibit } from '@phosphor-icons/react'
 import { useId, useMemo, useState } from 'react'
 import { removeCriteria, type RemovalRow } from '../../../core/robustness'
-import { rankerFor, type RankerFor, type RankingRun } from '../../../core/run'
-import type { MethodParams, MethodParamValue, Problem, WeightingMethod } from '../../../core/types'
+import { rankerFor, type RankingRun } from '../../../core/run'
+import type { MethodParams, Problem, WeightingMethod } from '../../../core/types'
 import { useNumberFormat } from '../../../i18n'
 import { useWorkbench } from '../../../state/workbench'
 import { cn, Notice, SegmentedControl, Table, TBody, Td, Th, THead, Tr } from '../../../ui'
@@ -40,22 +40,10 @@ export function RemovalSection({ problem, weights, run, weighting, weightingPara
     () => ({ ...rawWeightingParams, ...weightingParams }),
     [rawWeightingParams, weightingParams],
   )
-  const rows = useMemo(() => {
-    const baseRankFor = rankerFor(run)
-    const n = problem.criteria.length
-    const adjustedRankFor: RankerFor = (p, removed) => {
-      if (removed === undefined) return baseRankFor(p)
-      const nextParams: Record<string, MethodParamValue> = { ...run.params }
-      for (const key of ['q', 'p', 'v', 'mode', 'criteriaFunctions'] as const) {
-        const val = run.params[key] as unknown
-        if (Array.isArray(val) && val.length === n) {
-          nextParams[key] = val.filter((_, idx) => idx !== removed) as unknown as MethodParamValue
-        }
-      }
-      return rankerFor({ ...run, params: nextParams })(p, removed)
-    }
-    return removeCriteria(problem, weights, adjustedRankFor, weighting, { weightingParams: effectiveWeightingParams })
-  }, [problem, weights, run, weighting, effectiveWeightingParams])
+  const rows = useMemo(
+    () => removeCriteria(problem, weights, rankerFor(run), weighting, { weightingParams: effectiveWeightingParams }),
+    [problem, weights, run, weighting, effectiveWeightingParams],
+  )
   const shown = rows.filter((r) => r.mode === (weighting ? mode : 'renormalize'))
   const leader = (ranking: readonly number[]) =>
     ranking

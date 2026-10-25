@@ -204,13 +204,15 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
 
   const shown = active && !stepping ? { i: order[active.row]!, j: active.col } : null
   const legendCols = Array.from({ length: Math.min(n, SAW_CATEGORY_COLOURS) }, (_, j) => j)
+  const cleanSignedText = (text: string) => text.replace(/\+[−-]/g, '−').replace(/[−-][−-]/g, '+')
   const readout = (i: number, j: number) => {
     const val = stage === 0 ? normalized[i]![j]! : parts.weighted[i]![j]!
     if (val === 0) return l.readoutZero(names[i]!, critNames[j]!)
     const isCostCol = problem.criteria[j]?.type === 'cost'
-    return isCostCol
+    const text = isCostCol
       ? l.readoutCost(names[i]!, critNames[j]!, format(val))
       : l.readoutBenefit(names[i]!, critNames[j]!, format(val))
+    return cleanSignedText(text)
   }
 
   return (
@@ -266,14 +268,14 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
                 {segs.map((g) => {
                   const on = shown?.j === g.col
                   const tabbable = !stepping && focus.row === row && focus.col === g.col
-                  const isCostCol = problem.criteria[g.col]?.type === 'cost'
                   const rawVal = stage === 0 ? normalized[i]![g.col]! : parts.weighted[i]![g.col]!
+                  const absVal = format(Math.abs(rawVal))
                   const label =
                     g.side === 'at'
                       ? l.segmentZero(name, critNames[g.col]!, texts[i]!)
-                      : isCostCol
-                        ? l.segmentCost(name, critNames[g.col]!, format(rawVal), texts[i]!)
-                        : l.segmentBenefit(name, critNames[g.col]!, format(rawVal), texts[i]!)
+                      : g.side === 'below'
+                        ? cleanSignedText(l.segmentCost(name, critNames[g.col]!, absVal, texts[i]!))
+                        : cleanSignedText(l.segmentBenefit(name, critNames[g.col]!, absVal, texts[i]!))
                   return (
                     <rect
                       key={g.col}

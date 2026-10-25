@@ -77,11 +77,14 @@ export const merec: WeightingMethod = {
     const total = effect.reduce((a, b) => a + b, 0)
     // total === 0 is defensive only: isConstant already catches every column whose min/x rounds to 1.
     const allConstant = constant.every(Boolean) || total === 0
+    const varying = constant.filter((c) => !c).length
     if (allConstant) warnings.push({ code: 'merec.all-constant-equal-weights' })
     const weights = allConstant ? new Array<number>(n).fill(1 / n) : effect.map((e) => e / total)
 
     const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
-    if (weights[top]! > MEREC_DOMINANT_WEIGHT) warnings.push({ code: 'merec.dominant-weight', col: top })
+    if (!allConstant && varying > 1 && weights[top]! > MEREC_DOMINANT_WEIGHT) {
+      warnings.push({ code: 'merec.dominant-weight', col: top })
+    }
 
     return {
       weights,

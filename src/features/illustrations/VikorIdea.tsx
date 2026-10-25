@@ -1,7 +1,7 @@
 import { Check, X } from '@phosphor-icons/react'
 import { useId, useMemo } from 'react'
 import { maxOf } from '../../core/math'
-import type { VikorParams } from '../../core/methods/vikor'
+import { vikorFlat, type VikorParams } from '../../core/methods/vikor'
 import type { Problem } from '../../core/types'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
 import { estimateTextWidth, truncate } from '../charts/layout'
@@ -166,8 +166,8 @@ export function VikorIdea({
     order,
     { fontSize: FONT, dotRadius: 5, obstacles },
   )
-  const sFlat = S.length > 0 && Math.max(...S) - Math.min(...S) <= 1e-12
-  const rFlat = R.length > 0 && Math.max(...R) - Math.min(...R) <= 1e-12
+  const sFlat = vikorFlat(S)
+  const rFlat = vikorFlat(R)
   const effV = sFlat && !rFlat ? 0 : rFlat && !sFlat ? 1 : parts.v
   const seg = isoQSegment(effV, Math.min(thr, 1))
   const region = thr >= 1 ? isoQRegion(effV, 1.0000001) : isoQRegion(effV, thr)

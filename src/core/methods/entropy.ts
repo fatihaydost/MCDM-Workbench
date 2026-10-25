@@ -94,9 +94,11 @@ export const entropy: WeightingMethod<EntropyParams> = {
         : new Array<number>(n).fill(1 / n)
       : d.map((x) => x / totalD)
 
-    if (variant === 'minmax' && m === 2) warnings.push({ code: 'entropy.two-alternatives-minmax' })
+    if (isMinMax && m === 2 && varying > 1) warnings.push({ code: 'entropy.two-alternatives-minmax' })
     const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
-    if (!allConstant && weights[top]! > ENTROPY_DOMINANT_WEIGHT) warnings.push({ code: 'entropy.dominant-weight', col: top })
+    if (!allConstant && totalD >= ENTROPY_NO_INFORMATION && varying > 1 && weights[top]! > ENTROPY_DOMINANT_WEIGHT) {
+      warnings.push({ code: 'entropy.dominant-weight', col: top })
+    }
 
     return {
       weights,

@@ -72,8 +72,8 @@ export function vikorCompromise(S: readonly number[], R: readonly number[], Q: r
   const sFlat = vikorFlat(S)
   const rFlat = vikorFlat(R)
   const tiedFirst = order.filter((i) => tied(Q[i]!, Q[first]!))
-  const bestByS = !sFlat && tiedFirst.some((i) => rankS[i] === 1)
-  const bestByR = !rFlat && tiedFirst.some((i) => rankR[i] === 1)
+  const bestByS = (sFlat && rFlat) || (!sFlat && tiedFirst.some((i) => rankS[i] === 1))
+  const bestByR = (sFlat && rFlat) || (!rFlat && tiedFirst.some((i) => rankR[i] === 1))
   const c2 = (sFlat && rFlat) || bestByS || bestByR
   const set = c1 ? (c2 ? [first] : [first, second]) : order.filter((i) => Q[i]! - Q[first]! < dq - DQ_TOLERANCE)
   return { order, first, second, dq, advantage, c1, c2, bestByS, bestByR, tieAtTop: qRank[second] === qRank[first], set }
@@ -125,7 +125,7 @@ export const vikor: RankingMethod<VikorParams> = {
       } else if (isNearConstant(col)) {
         warnings.push({ code: 'vikor.near-constant-column', col: j })
       }
-      for (let i = 0; i < m; i++) d[i]![j] = (weights[j]! * (best[j]! - matrix[i]![j]!)) / span
+      for (let i = 0; i < m; i++) d[i]![j] = weights[j]! * ((best[j]! - matrix[i]![j]!) / span) + 0
     }
 
     // 3. Group utility S (L1) and individual regret R (L∞).
@@ -136,13 +136,14 @@ export const vikor: RankingMethod<VikorParams> = {
     //    and never stretches rounding noise to [0, 1].
     const sFlat = vikorFlat(S)
     const rFlat = vikorFlat(R)
-    if (sFlat && rFlat) warnings.push({ code: 'vikor.no-spread' })
-    if (sFlat && !rFlat && v > 0) warnings.push({ code: 'vikor.equal-group-utility' })
-    if (rFlat && !sFlat && v < 1) warnings.push({ code: 'vikor.equal-regret' })
+    const noSpread = (sFlat && rFlat) || (sFlat && v === 1) || (rFlat && v === 0)
+    if (noSpread) warnings.push({ code: 'vikor.no-spread' })
+    if (sFlat && !rFlat && v > 0 && v < 1) warnings.push({ code: 'vikor.equal-group-utility' })
+    if (rFlat && !sFlat && v < 1 && v > 0) warnings.push({ code: 'vikor.equal-regret' })
     const sTerm = vikorTerm(S)
     const rTerm = vikorTerm(R)
     const Q = S.map((_, i) => {
-      if (sFlat && rFlat) return 0
+      if (noSpread) return 0
       if (sFlat) return rTerm[i]!
       if (rFlat) return sTerm[i]!
       return v * sTerm[i]! + (1 - v) * rTerm[i]!
@@ -150,7 +151,7 @@ export const vikor: RankingMethod<VikorParams> = {
 
     // 5. Acceptance conditions; a tie for first by Q is reported (the order between the tied is the input order).
     const c = vikorCompromise(S, R, Q)
-    if (c.tieAtTop && !(sFlat && rFlat)) warnings.push({ code: 'vikor.tie-for-first' })
+    if (c.tieAtTop && !noSpread) warnings.push({ code: 'vikor.tie-for-first' })
 
     return {
       scores: Q,

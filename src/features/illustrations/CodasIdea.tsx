@@ -13,6 +13,8 @@ export type CodasParts = {
   scores: number[]
   ranking: number[]
   order: number[]
+  activePairs: number
+  totalPairs: number
 }
 
 /** CODAS numbers for the pictures, or null when the core cannot rank this problem. */
@@ -26,7 +28,15 @@ export function codasParts(problem: Problem, weights: readonly number[], tau: nu
   const euclidean = res.steps.find((x) => x.key === 'codas.euclidean')!.vector!
   const taxicab = res.steps.find((x) => x.key === 'codas.taxicab')!.vector!
   const order = res.scores.map((_, i) => i).sort((x, y) => res.ranking[x]! - res.ranking[y]! || x - y)
-  return { euclidean, taxicab, scores: res.scores, ranking: res.ranking, order }
+  const m = euclidean.length
+  const totalPairs = (m * (m - 1)) / 2
+  let activePairs = 0
+  for (let i = 0; i < m; i++) {
+    for (let k = i + 1; k < m; k++) {
+      if (Math.abs(euclidean[i]! - euclidean[k]!) >= tau - 1e-12) activePairs++
+    }
+  }
+  return { euclidean, taxicab, scores: res.scores, ranking: res.ranking, order, activePairs, totalPairs }
 }
 
 const defaultFormat = (v: number, d: number) => v.toFixed(d)
@@ -109,7 +119,7 @@ export function CodasIdea({
   const taxicabOff = stage >= 1 ? undefined : ''
   const scoreOff = stage >= 2 ? undefined : ''
 
-  const { euclidean, taxicab, scores, ranking, order } = parts
+  const { euclidean, taxicab, scores, ranking, order, activePairs, totalPairs } = parts
   const names = problem.alternatives
   const m = names.length
   const W = Math.max(width, 240)
@@ -178,10 +188,12 @@ export function CodasIdea({
         aria-labelledby={`${uid}-title`}
         aria-describedby={`${uid}-table`}
         data-testid="codas-idea"
+        data-tau={tau}
+        data-active-pairs={activePairs}
       >
         <g aria-hidden>
-          <text className={b.head} x={distLeft} y={HEAD / 2} textAnchor="start" dominantBaseline="central">
-            { `${l.euclidean} / ${l.taxicab} →` }
+          <text className={b.head} x={distLeft} y={HEAD / 2} textAnchor="start" dominantBaseline="central" data-testid="codas-tau-status">
+            {`${l.euclidean} / ${l.taxicab} (τ = ${format(tau, 3)}, ψ = 1: ${activePairs}/${totalPairs}) →`}
           </text>
           <line className={b.zero} x1={distLeft} x2={distLeft} y1={HEAD} y2={height} />
           <text className={`${b.head} ${s.stageItem}`} data-off={scoreOff} x={zero} y={HEAD / 2} textAnchor="middle" dominantBaseline="central">

@@ -1,4 +1,4 @@
-import { column, maxOf, sum } from '../math'
+import { column, isConstant, maxOf, sum } from '../math'
 import { rankScores } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, hasErrors, validateProblem, validateRequirements, validateWeights } from '../validate'
@@ -38,12 +38,21 @@ export const copras: RankingMethod = {
 
     // 3. Relative significance (Eq. 5, simplified): the cost weight W_C handed out by the reciprocal of each S-.
     const activeCostCount = weights.filter((w, j) => isCost[j] && w > 0).length
+    if (activeCostCount >= 2) {
+      for (let j = 0; j < n; j++) {
+        if (isCost[j] && weights[j]! > 0 && isConstant(column(matrix, j))) {
+          warnings.push({ code: 'copras.constant-cost-criterion', col: j })
+        }
+      }
+    }
     const wCost = sum(weights.filter((_, j) => isCost[j]))
-    const sMax = Math.max(...sMinus)
+    const wCostNorm = weights.map((w, j) => (isCost[j] && wCost > 0 ? w / wCost : 0))
+    const sMinusNorm = shares.map((row) => sum(row.map((x, j) => wCostNorm[j]! * x)))
+    const sMax = maxOf(sMinusNorm)
     let scores: number[]
-    if (wCost > 0 && sMax > 0 && sMinus.every((s) => s > 0)) {
+    if (wCost > 0 && sMax > 0 && sMinusNorm.every((s) => s > 0)) {
       if (activeCostCount === 1) warnings.push({ code: 'copras.single-cost-criterion' })
-      const inv = sMinus.map((s) => sMax / s)
+      const inv = sMinusNorm.map((s) => sMax / s)
       const invTotal = sum(inv)
       scores = sPlus.map((sp, i) => sp + (wCost * inv[i]!) / invTotal)
     } else {

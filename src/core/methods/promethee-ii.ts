@@ -152,6 +152,29 @@ export const prometheeII: RankingMethod<PrometheeParams> = {
     if (specs && specs.length !== n) {
       throw new RangeError(`PROMETHEE II criteriaFunctions length (${specs.length}) must match criteria count (${n})`)
     }
+    if (specs) {
+      for (let j = 0; j < n; j++) {
+        const spec = specs[j]!
+        if (spec.q !== undefined && (!Number.isFinite(spec.q) || spec.q < 0)) {
+          throw new RangeError(`PROMETHEE II threshold q must be >= 0 on criterion ${j}`)
+        }
+        if (spec.p !== undefined && (!Number.isFinite(spec.p) || spec.p < 0)) {
+          throw new RangeError(`PROMETHEE II threshold p must be >= 0 on criterion ${j}`)
+        }
+        if (
+          spec.s !== undefined &&
+          (!Number.isFinite(spec.s) || ((spec.type === 'gaussian' || spec.type === 'VI') ? spec.s <= 0 : spec.s < 0))
+        ) {
+          throw new RangeError(`PROMETHEE II threshold s is invalid on criterion ${j}`)
+        }
+        if (
+          (spec.type === 'level' || spec.type === 'IV' || spec.type === 'linear' || spec.type === 'V') &&
+          (spec.q ?? 0) > (spec.p ?? 0) + BOUNDARY_EPS
+        ) {
+          throw new RangeError(`PROMETHEE II threshold q (${spec.q ?? 0}) exceeds p (${spec.p ?? 0}) on criterion ${j}`)
+        }
+      }
+    }
 
     const { matrix, criteria } = problem
     const pi = zeros(m, m)

@@ -63,7 +63,7 @@ export function OrdinalWeights({ problem, method }: Props) {
       if (rankIdx < 1 || val === null || !Number.isFinite(val) || val < 0) return
       const nextS = [...sVec]
       nextS[0] = 0
-      nextS[rankIdx] = Math.min(1, Math.max(0, val))
+      nextS[rankIdx] = Math.min(2, Math.max(0, val))
       setMethodParam('swara', 's', nextS)
     }
 
@@ -144,9 +144,9 @@ export function OrdinalWeights({ problem, method }: Props) {
                         id={`wb-swara-s-${rankIdx}`}
                         aria-label={`${tr(t, 'workbench.ordinal.stepRatio', { defaultValue: 'Comparative ratio s' })} ${names[critIdx]}`}
                         value={sVec[rankIdx] ?? defaultRatio}
-                        decimals={2}
+                        decimals={3}
                         min={0}
-                        max={1}
+                        max={2}
                         step={0.05}
                         controlSize="sm"
                         onValueChange={(v) => changeS(rankIdx, v)}
@@ -185,10 +185,22 @@ export function OrdinalWeights({ problem, method }: Props) {
       nextRanks[a] = nextRanks[b]!
       nextRanks[b] = tmp
     } else {
-      nextOrdered[pos] = b
-      nextOrdered[target] = a
+      const r = nextRanks[a]!
+      const upper = delta === 1 ? b : a
+      const lower = delta === 1 ? a : b
+      const hiPos = Math.max(pos, target)
+      const needsShift = nextRanks.some((rk) => rk > r && rk <= r + 1)
+      if (needsShift) {
+        for (let j = 0; j < n; j++) {
+          if (nextRanks[j]! > r) nextRanks[j] = Math.min(n, nextRanks[j]! + 1)
+        }
+      }
+      nextRanks[upper] = r
+      nextRanks[lower] = Math.min(n, r + 1)
       nextOrdered.forEach((critIdx, idx) => {
-        nextRanks[critIdx] = idx + 1
+        if (critIdx !== upper && critIdx !== lower && ranks[critIdx] === r && idx > hiPos) {
+          nextRanks[critIdx] = Math.min(n, r + 1)
+        }
       })
     }
     setMethodParam('roc', 'ranks', nextRanks)

@@ -106,12 +106,35 @@ export function JudgementWeights({ problem, method, result }: Props) {
   }
   const flaggedIndex = questions.findIndex(isFlagged)
   const value = question ? (judgements.pairs[question.a]?.[question.b] ?? null) : null
-  const suggestedValue = isAhp ? (worstPair?.suggested ?? null) : (bwmSuggestion?.value ?? null)
+  const aBW = !isAhp && worst !== null ? (answers?.bestToOthers[worst] ?? null) : null
+  const currentSide =
+    !isAhp && question && bwmFlagged !== null
+      ? question.a === best && question.b === bwmFlagged
+        ? 'bestToOthers'
+        : question.a === bwmFlagged && question.b === worst
+          ? 'othersToWorst'
+          : null
+      : null
+  const bwmQuestionSuggestion =
+    currentSide !== null && bwmFlagged !== null
+      ? bwmSuggestion && bwmSuggestion.side === currentSide
+        ? bwmSuggestion.value
+        : (() => {
+            const otherVal =
+              currentSide === 'bestToOthers'
+                ? (answers?.othersToWorst[bwmFlagged] ?? null)
+                : (answers?.bestToOthers[bwmFlagged] ?? null)
+            return aBW !== null && otherVal !== null && otherVal > 0
+              ? Math.min(aBW, Math.max(1, Math.round(aBW / otherVal)))
+              : null
+          })()
+      : null
+  const suggestedValue = isAhp ? (worstPair?.suggested ?? null) : bwmQuestionSuggestion
   const flag =
     question &&
     mode &&
     suggestedValue !== null &&
-    isFlagged(question) &&
+    (isAhp ? isFlagged(question) : currentSide !== null) &&
     withinCap(suggestedValue, mode) !== null &&
     Math.abs(suggestedValue - (value ?? 0)) > 1e-9
       ? { suggestion: suggestedValue }
@@ -195,7 +218,6 @@ export function JudgementWeights({ problem, method, result }: Props) {
     flagged: t('workbench.pairwise.list.flagged'),
   }
 
-  const aBW = !isAhp && worst !== null ? (answers?.bestToOthers[worst] ?? null) : null
   const consistency: Consistency | null = isAhp
     ? ahpProg && ahpProg.cr !== null && ahpProg.threshold !== null
       ? { value: ahpProg.cr, threshold: ahpProg.threshold, approximate: false, inclusive: true }
@@ -212,6 +234,12 @@ export function JudgementWeights({ problem, method, result }: Props) {
     : undefined
 
   const jump = (i: number) => setAt({ key, index: i })
+  const onSelectCriterion = (c: number) => {
+    if (isAhp) return
+    const side = c === bwmFlagged && bwmSuggestion ? bwmSuggestion.side : 'bestToOthers'
+    const idx = questions.findIndex((q) => (side === 'bestToOthers' ? q.a === best && q.b === c : q.a === c && q.b === worst))
+    if (idx >= 0) jump(idx)
+  }
   const list = (className?: string) => (
     <PairList
       questions={questions}
@@ -283,7 +311,13 @@ export function JudgementWeights({ problem, method, result }: Props) {
                     consistency={consistency}
                     flagged={flaggedCriterion}
                     flaggedLabel={flaggedLabel}
-                    onFlagClick={flaggedIndex >= 0 ? () => jump(flaggedIndex) : undefined}
+                    onFlagClick={
+                      flaggedIndex >= 0
+                        ? () => jump(flaggedIndex)
+                        : bwmFlagged !== null
+                          ? () => onSelectCriterion(bwmFlagged)
+                          : undefined
+                    }
                     labels={panelLabels}
                   />
                 )}

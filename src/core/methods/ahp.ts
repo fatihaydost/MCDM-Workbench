@@ -238,7 +238,7 @@ export function ahpIncompleteLlsm(n: number, pairs: readonly (readonly (Ratio | 
 export function ahpWorstPair(A: readonly (readonly number[])[], weights: readonly number[]): AhpWorstPair | null {
   const n = A.length
   if (n < 3) return null
-  const baseLambda = rayleighLambdaMax(A, weights)
+  const baseLambda = ahpEigenvector(A).lambdaMax
   const ri = riFor(n)
   const baseCr = ri > 0 ? Math.max(0, (baseLambda - n) / (n - 1)) / ri : 0
   let best: AhpWorstPair | null = null
@@ -502,6 +502,8 @@ export const ahpRanking: RankingMethod<AhpParams> = {
     assertValid([...issues, ...cells, ...validateWeights(weights, n), ...jIssues])
 
     const local = zeros(m, n)
+    const crPerCriterion = new Array<number>(n).fill(0)
+    const pairwiseCriteria: number[] = []
     const warnings: MethodWarning[] = []
     if (m > AHP_MAX_PAIRWISE_ALTERNATIVES && judgements?.some((mat) => mat != null)) {
       warnings.push({ code: 'ahp-ranking.pairwise-ignored-above-cap' })
@@ -510,6 +512,7 @@ export const ahpRanking: RankingMethod<AhpParams> = {
     for (let j = 0; j < n; j++) {
       const rawMat = m <= AHP_MAX_PAIRWISE_ALTERNATIVES ? judgements?.[j] : null
       if (rawMat) {
+        pairwiseCriteria.push(j)
         const A: number[][] = Array.from({ length: m }, (_, i) =>
           Array.from({ length: m }, (_, k) => (i === k ? 1 : 0)),
         )
@@ -521,6 +524,7 @@ export const ahpRanking: RankingMethod<AhpParams> = {
           }
         }
         const { weights: pj, cr } = solveMatrix(A, params)
+        crPerCriterion[j] = cr
         for (let i = 0; i < m; i++) local[i]![j] = pj[i]!
         if (m >= 3 && cr >= AHP_CR_THRESHOLD) {
           const worst = ahpWorstPair(A, pj)
@@ -554,6 +558,9 @@ export const ahpRanking: RankingMethod<AhpParams> = {
 
     const steps: Step[] = [
       { key: 'ahpRanking.local', matrix: local, axes: ['alternatives', 'criteria'] },
+      ...(pairwiseCriteria.length > 0
+        ? [{ key: 'ahpRanking.consistency', vector: crPerCriterion, axes: 'criteria' as const }]
+        : []),
       { key: 'ahpRanking.weighted', matrix: weighted, axes: ['alternatives', 'criteria'] },
       { key: 'ahpRanking.scores', vector: scores, axes: 'alternatives' },
     ]

@@ -351,7 +351,7 @@ export const rankingRequirements: readonly RankingRequirement[] = [
       en: 'Negatives are computable, but vector normalization is not shift-invariant, so the result depends on where zero is. An all-zero column gives 0/0.',
       tr: 'Negatif değerlerle hesap yapılabilir, ama vektör normalizasyonu kaydırmaya duyarlıdır; sonuç sıfırın nerede olduğuna bağlıdır. Tamamı sıfır olan sütun 0/0 verir.',
     },
-    params: { en: 'Distance, Euclidean by default', tr: 'Uzaklık, varsayılan Öklid' },
+    params: null,
     output: { en: 'Closeness in [0, 1]', tr: '[0, 1] aralığında yakınlık' },
   },
   {
@@ -613,9 +613,15 @@ export const weightingRequirements: readonly WeightingRequirement[] = [
   },
   {
     methodId: 'roc',
-    data: { en: 'A strict ranking of the criteria', tr: 'Kriterlerin kesin bir sıralaması' },
+    data: {
+      en: 'An ordinal ranking of the criteria (ties allowed)',
+      tr: 'Kriterlerin sıra numaraları (eşit sıralara izin verilir)',
+    },
     normalization: null,
-    degenerate: { en: 'Ties are undefined in the formulas', tr: 'Formüllerde eşitlik tanımsızdır' },
+    degenerate: {
+      en: 'Tied criteria receive the average of the weights of the positions they span; if all tie, weights are 1/n',
+      tr: 'Eşit sıradaki kriterler kapladıkları sıraların ortalama ağırlığını alır; tümü eşitse ağırlıklar 1/n olur',
+    },
     sources: [{ label: 'Roszkowska (2013), Optimum. Studia Ekonomiczne 5(65), 14-33', doi: '10.15290/ose.2013.05.65.02' }],
   },
   {
@@ -666,7 +672,7 @@ export const riskyCombinations: readonly RiskyCombination[] = [
       en: 'With objective dispersion weights, check the Robustness (Monte Carlo and weight sweep) and Compare stages, and watch for the dominant-weight (> 0.50) warning.',
       tr: 'Yayılıma dayalı nesnel ağırlıklarla Sağlamlık (Monte Carlo ve ağırlık taraması) ile Karşılaştırma aşamalarını inceleyin ve baskın ağırlık (> 0,50) uyarısına dikkat edin.',
     },
-    methodIds: ['entropy', 'sd', 'critic', 'lopcow', 'merec', 'cilos', 'topsis', 'vikor', 'mabac', 'cocoso'],
+    methodIds: ['entropy', 'sd', 'critic', 'lopcow', 'merec', 'cilos', 'topsis', 'vikor', 'mabac', 'cocoso', 'codas'],
     sources: [
       { label: 'Choo, Schoner & Wedley (1999), Computers & Industrial Engineering 37, 527-541', doi: '10.1016/S0360-8352(00)00019-X' },
       { label: 'Mukhametzyanov (2021), DMAME 4(2), 76-105', doi: '10.31181/dmame210402076i' },

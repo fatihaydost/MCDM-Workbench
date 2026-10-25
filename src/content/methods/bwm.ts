@@ -15,8 +15,8 @@ export const bwm: MethodContent = {
     venue: 'Omega 53, 49-57',
     doi: '10.1016/j.omega.2014.11.009',
     note: {
-      en: 'The 2015 paper has the non-linear model. The linear model with a unique solution is Rezaei (2016), Omega 64, 126-130. The input-based consistency ratio is from Liang, Brunelli & Rezaei (2020).',
-      tr: "2015 makalesinde doğrusal olmayan model vardır. Tek çözümlü doğrusal model Rezaei (2016), Omega 64, 126-130'dadır. Girdiye dayalı tutarlılık oranı Liang, Brunelli ve Rezaei (2020) kaynaklıdır.",
+      en: 'The 2015 paper introduces the non-linear minimax model. The linear (LP) model with a unique solution is Rezaei (2016), Omega 64, 126-130, which this site solves in exact closed form without an LP solver via Ratandhara & Kumar (2025). The input-based consistency ratio is from Liang, Brunelli & Rezaei (2020).',
+      tr: "2015 makalesi doğrusal olmayan minimaks modeli tanıtır. Tek çözümlü doğrusal (LP) model Rezaei (2016), Omega 64, 126-130'dadır ve bu sitede Ratandhara ve Kumar (2025) kapalı form analitik çözümüyle LP çözücüsüz kesin olarak çözülür. Girdiye dayalı tutarlılık oranı Liang, Brunelli ve Rezaei (2020) kaynaklıdır.",
     },
   },
   steps: [
@@ -32,16 +32,16 @@ export const bwm: MethodContent = {
       title: { en: 'Linear model (default)', tr: 'Doğrusal model (varsayılan)' },
       tex: String.raw`\begin{aligned} &\min\ \xi^{L} \\ &\left|w_B - a_{Bj} w_j\right| \le \xi^{L},\ \ \left|w_j - a_{jW} w_W\right| \le \xi^{L}\ \ \forall j, \qquad \sum_j w_j = 1,\ \ w_j \ge 0 \end{aligned}`,
       note: {
-        en: 'Rezaei (2016): each absolute value becomes two linear inequalities, giving a small linear program with a unique solution, and xi close to 0 means high consistency.',
-        tr: "Rezaei (2016): her mutlak değer iki doğrusal eşitsizliğe açılır, sonuç tek çözümlü küçük bir doğrusal programdır ve 0'a yakın xi yüksek tutarlılık demektir.",
+        en: 'Rezaei (2016): each absolute value becomes two linear inequalities, giving a linear program with a unique optimal weight vector; solved here in exact closed form via Ratandhara & Kumar (2025) without an external LP solver, and xi close to 0 means high consistency.',
+        tr: "Rezaei (2016): her mutlak değer iki doğrusal eşitsizliğe açılır ve tek optimal ağırlık vektörlü bir doğrusal program verir; burada Ratandhara ve Kumar (2025) kapalı form analitik formülüyle harici LP çözücü olmadan kesin çözülür ve 0'a yakın xi yüksek tutarlılık demektir.",
       },
     },
     {
       title: { en: 'Non-linear model (not offered)', tr: 'Doğrusal olmayan model (sunulmuyor)' },
       tex: String.raw`\begin{aligned} &\min\ \xi \\ &\left|\frac{w_B}{w_j} - a_{Bj}\right| \le \xi,\ \ \left|\frac{w_j}{w_W} - a_{jW}\right| \le \xi\ \ \forall j, \qquad \sum_j w_j = 1,\ \ w_j \ge 0 \end{aligned}`,
       note: {
-        en: 'Rezaei (2015): xi* is unique but the weights may not be; this site does not offer it, because it needs an LP solver and its weights are intervals.',
-        tr: 'Rezaei (2015): en iyi xi* tektir, ağırlıklar tek olmayabilir; bu site sunmaz, çünkü bir LP çözücü gerekir ve ağırlıkları aralıktır.',
+        en: 'Rezaei (2015): the original non-linear minimax model where xi* is unique but inconsistent comparisons produce weight intervals rather than a single vector; this site computes the unique Rezaei (2016) linear model instead.',
+        tr: 'Rezaei (2015): en iyi xi* değerinin tek olduğu ancak tutarsız yargılarda tek bir vektör yerine ağırlık aralıkları üreten özgün doğrusal olmayan minimaks modeldir; bu site bunun yerine tek çözümlü Rezaei (2016) doğrusal modelini hesaplar.',
       },
     },
     {
@@ -89,6 +89,7 @@ export const bwm: MethodContent = {
     { label: 'Rezaei (2015), Omega 53, 49-57', doi: '10.1016/j.omega.2014.11.009' },
     { label: 'Rezaei (2016), Omega 64, 126-130', doi: '10.1016/j.omega.2015.12.001' },
     { label: 'Liang, Brunelli & Rezaei (2020), Omega 96, 102175', doi: '10.1016/j.omega.2019.102175' },
+    { label: 'Ratandhara & Kumar (2025), Operations Research Forum 6, 22', doi: '10.1007/s43069-025-00422-1' },
     { label: 'Mi, Tang, Liao, Shen & Lev (2019), Omega 87, 205-225', doi: '10.1016/j.omega.2019.01.009' },
     { label: 'You et al. (2017), Sustainability 9(12), 2329', doi: '10.3390/su9122329' },
     { label: 'Gupta (2018), Journal of Air Transport Management 68, 35-47', doi: '10.1016/j.jairtraman.2017.06.001' },

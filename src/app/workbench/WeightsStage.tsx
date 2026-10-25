@@ -180,11 +180,15 @@ export function ComputedWeights({ problem, method, result }: { problem: DraftPro
                       <Td className="text-text-2">
                         <DirectionLabel type={c.type} />
                       </Td>
-                      {extra.map((col) => (
-                        <Td key={col.step} numeric className="hidden sm:table-cell">
-                          {nf.format(col.values?.[j], col.decimals)}
-                        </Td>
-                      ))}
+                      {extra.map((col) => {
+                        const v = col.values?.[j]
+                        const d = col.decimals === 0 && typeof v === 'number' && !Number.isInteger(v) ? 1 : col.decimals
+                        return (
+                          <Td key={col.step} numeric className="hidden sm:table-cell">
+                            {nf.format(v, d)}
+                          </Td>
+                        )
+                      })}
                       <Td numeric className={cn(isTop ? 'font-semibold' : 'font-medium')}>
                         {maxW > 0 && (
                           <span aria-hidden className="mr-2.5 inline-block h-2 w-14 bg-surface-2 align-middle">
@@ -274,7 +278,12 @@ function ManualWeights({ problem, issues, showErrors, summaryRoot }: ManualProps
   const fromPaper = example?.weights && example.weights.length === n && example.weights.every((x, j) => x === w[j])
 
   const fill = (values: number[]) => values.forEach((v, j) => setManualWeight(j, v))
-  const normalize = () => fill(w.map((x) => (x ?? 0) / sum))
+  const normalize = () => {
+    const maxW = Math.max(...w.map((x) => Math.abs(x ?? 0)), 1e-300)
+    const scaled = w.map((x) => (x ?? 0) / maxW)
+    const scaledSum = scaled.reduce((a, b) => a + b, 0)
+    if (scaledSum > 0) fill(scaled.map((x) => x / scaledSum))
+  }
 
   const errorFor = (j: number): string | undefined => {
     const x = issues.find((i) => i.col === j && (i.code === 'invalid-weight' || i.code === 'negative-weight'))

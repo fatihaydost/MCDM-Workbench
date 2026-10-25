@@ -372,7 +372,7 @@
         "formulaHints": {
           "roc": "Harmonik kuyruk toplamı 1 / n · Σ 1 / k; sıralı ağırlık simpleksinin ağırlık merkezi (Barron ve Barrett 1996).",
           "rs": "Doğrusal azalma 2(n + 1 - r) / (n(n + 1)); sıralar arasında en yatay dağılım (Stillwell vd. 1981).",
-          "rr": "Normalize ters sıra (1 / r) / H_n; birinci sırada en dik yoğunlaşma (Stillwell vd. 1981)."
+          "rr": "Normalize ters sıra (1 / r) / H_n; 1. sıradan 2. sıraya yarıya inen hiperbolik 1 / r azalma ve n ≥ 7 için 1. sırada ROC'tan daha yüksek yoğunlaşma (Stillwell vd. 1981)."
         },
         "formulaVariant": {
           "roc": "ROC",
@@ -994,6 +994,7 @@
       },
       "ahpRanking": {
         "local": "Yerel öncelikler p",
+        "consistency": "Alternatif tutarlılığı CR_j",
         "weighted": "Ağırlıklı öncelikler v = w p",
         "scores": "Genel öncelik P"
       },
@@ -1297,7 +1298,8 @@
       "promethee-ii": {
         "title": "Pozitif akış φ⁺, negatif akış φ⁻ ve net akış φ",
         "caption": "Sol: ikili tercih derecelerinden pozitif akış φ⁺ (üst) ve negatif akış φ⁻ (alt). Sağ: sıfır etrafında net üstünlük akışı φ = φ⁺ - φ⁻.",
-        "row": "{{alternative}}: φ⁺ = {{pos}}, φ⁻ = {{neg}}, φ = {{score}}"
+        "row": "{{alternative}}: φ⁺ = {{pos}}, φ⁻ = {{neg}}, φ = {{score}}",
+        "incomparable": "PROMETHEE I karşılaştırılamaz çiftler: {{pairs}}"
       },
       "electre-i": {
         "title": "Net uyum Cₐ, net uyumsuzluk Dₐ, çekirdek K ve net skor Φ",
@@ -1974,13 +1976,14 @@
           "weight": "Ağırlık w",
           "steps": {
             "s1": "Kriterleri 1. sıradan (en önemli) n. sıraya (en önemsiz) dizin; daire ROC harmonik ağırlık merkezini gösterir.",
-            "s2": "Üç sıra formülünü aynı ölçekte karşılaştırın: RS (kare) doğrusal azalır, RR (eşkenar dörtgen) 1. sırada en dik yoğunlaşır, ROC ise ikisinin arasında simpleks ağırlık merkezinde durur.",
+            "s2": "Üç sıra formülünü aynı ölçekte karşılaştırın: RS (kare) doğrusal azalır, RR (eşkenar dörtgen) 1 / r ile hiperbolik düşer (n ≥ 7 olduğunda 1. sırada ROC'u geçer), ROC (daire) ise simpleks ağırlık merkezinde durur ve n ≤ 6 için en yüksek 1. sıra payını verir.",
             "s3": "Seçilen formül her kriterin sırasını sağdaki ağırlık çubuğu w değerine dönüştürür; ağırlıkların toplamı 1 olur."
           }
         },
         "promethee-ii": {
           "title": "Pozitif akış, negatif akış ve net üstünlük akışı",
           "caption": "Her dizüstü bilgisayar modeli kriterlerde ikişer ikişer karşılaştırılır: pozitif akış φ⁺ (diğerlerine üstünlüğü) eksi negatif akış φ⁻ (diğerlerinin üstünlüğü) net akış φ değerini verir.",
+          "incomparable": "PROMETHEE I karşılaştırılamaz çiftler: {{pairs}}",
           "steps": {
             "s1": "Pozitif akış φ⁺: ikili tercih derecelerinin satır ortalaması; her modelin diğerlerine ortalama üstünlüğünü gösterir.",
             "s2": "Negatif akış φ⁻: ikili tercih derecelerinin sütun ortalaması; diğerlerinin her modele ortalama üstünlüğünü gösterir.",
@@ -2170,6 +2173,7 @@
     },
     "ahpRanking": {
       "local": "Yerel öncelikler p: tablodaki sütun payları (maliyette 1 / x) ya da kriterin ikili karşılaştırma matrisinin öncelik vektörü.",
+      "consistency": "Her kriterdeki ikili alternatif karşılaştırma matrisinin tutarlılık oranı CR_j (yerel öncelikler tablodan geldiğinde ya da m ≤ 2 olduğunda 0).",
       "weighted": "Ağırlıklı yerel öncelikler v = w p: her alternatifin yerel önceliğinin kriter ağırlığıyla çarpımı.",
       "scores": "Genel öncelik P: bir alternatifin tüm kriterlerdeki ağırlıklı yerel önceliklerinin toplamı; toplamları 1 eder."
     },
@@ -2294,6 +2298,7 @@
     },
     "edas": {
       "constant-column": "{{criterion}} kriterinin bütün değerleri aynı; SP'ye ve SN'ye bir şey katmıyor.",
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ancak SP ve SN değerlerini maksimumlarına bölmek diğer kriterler düz olduğunda bu küçük farkları büyütebilir. Farkın gerçek olup olmadığını kontrol edin.",
       "negative-values": "{{criterion}} kriterinde negatif değerler var. EDAS uzaklığı ortalamanın oranı olarak ölçer, bu yüzden sonuç sıfırın nerede olduğuna bağlıdır.",
       "small-average": "{{criterion}} kriterinin ortalaması değerlerine göre 0'a çok yakın; uzaklıkları çok büyür ve küçük bir ağırlıkla bile sıralamayı belirleyebilir.",
       "no-spread": "Ağırlığı olan hiçbir kriterde ortalamanın üstünde ya da altında alternatif yok, bu yüzden hepsi AS = 0,5 alıyor."
@@ -2323,13 +2328,14 @@
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden CILOS ağırlığı 0.",
       "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, yine de CILOS bu küçük kayıpları sistemin geri kalanıyla oranlıyor. Farkın gerçek olup olmadığını kontrol edin.",
       "shared-optimum": "İki ya da daha fazla kriter en iyi değerine aynı alternatifte ulaşıyor; A matrisinin ilgili satırları çakışır ve aralarındaki göreli kayıp 0 olur.",
-      "zero-loss-equal-weights": "Tek bir alternatif değişen her kriterde aynı anda en iyidir (ya da kayıp sistemi dejeneredir); tüm göreli kayıplar sıfırlanır (P = 0, F = 0) ve etkin kriterler ağırlığı eşit paylaşır.",
+      "zero-loss-equal-weights": "Değişen bir ya da daha fazla kriterin toplam etki kaybı sıfırdır (tek bir alternatif değişen her kriterde en iyi olduğu için P = 0 ve F = 0 olur ya da kayıp sistemi |f_jj| = 0 ile indirgenebilirdir); homojen sistemin kesin pozitif çözümü olmadığından etkin kriterler ağırlığı eşit paylaşır.",
       "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı.",
       "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; düşük etki kaybının gerçek olup olmadığına bakın."
     },
     "copras": {
       "no-cost-criteria": "Ağırlığı 0'dan büyük maliyet kriteri yok; bu yüzden Q = S+ ve COPRAS, SAW'ın toplam seçeneğiyle aynı sonucu veriyor.",
-      "single-cost-criterion": "Tek bir etkin maliyet kriteri olduğunda sütun toplamı 1 / S- içinde sadeleşir ve maliyet doğrudan 1 / x ters değerleriyle hesaba katılır."
+      "single-cost-criterion": "Tek bir etkin maliyet kriteri olduğunda sütun toplamı 1 / S- içinde sadeleşir ve maliyet doğrudan 1 / x ters değerleriyle hesaba katılır.",
+      "constant-cost-criterion": "{{criterion}} kriterinde her alternatifin değeri aynı olduğundan her S- toplamına eşit maliyet payı ekler."
     },
     "codas": {
       "no-spread": "Bütün alternatiflerin negatif-ideal çözüme Öklid uzaklığı 0 olduğundan hepsi 1. sırayı paylaşıyor.",
@@ -2362,8 +2368,12 @@
       "cycle-detected": "Üstünlük matrisi S içinde karşılıklı üstünlük döngüleri var; çekirdek K bulunmadan önce her döngü tek bir eşdeğerlik sınıfına daraltıldı.",
       "non-kernel-leader": "En yüksek net skora sahip alternatif üstünlük çekirdeği K dışında yer alıyor; çekirdek sütununu da kontrol edin."
     },
+    "electre-iii": {
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama açıklığa dayalı farksızlık ve tercih eşikleri onu 0 ile 1 arasına ölçekliyor. Farkın gerçek olup olmadığını kontrol edin."
+    },
     "moora": {
-      "zero-column": "{{criterion}} kriterinin bütün değerleri 0, bu yüzden sıralamayı etkilemiyor."
+      "zero-column": "{{criterion}} kriterinin bütün değerleri 0, bu yüzden sıralamayı etkilemiyor.",
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, bu yüzden vektör normalize oranları alternatifler arasında neredeyse aynı kalıyor. Farkın gerçek olup olmadığını kontrol edin."
     }
   }
 }

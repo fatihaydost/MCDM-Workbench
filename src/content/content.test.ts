@@ -201,11 +201,17 @@ function runsOf(method: Method): Step[][] {
   const n = problem.criteria.length
   const ones = new Array<number>(n).fill(1)
   const answers = judgementsFromBwm(n, 0, n - 1, ones, ones)
-  return variants.map((params) =>
+  const baseRuns = variants.map((params) =>
     method.kind === 'weighting'
       ? method.compute(problem, params, method.reads === 'judgements' ? answers : undefined).steps
       : method.compute(problem, [0.4, 0.3, 0.3], params).steps,
   )
+  if (method.id === 'ahp-ranking' && method.kind === 'ranking') {
+    const m = problem.alternatives.length
+    const altPairs = Array.from({ length: m }, () => new Array<number>(m).fill(1))
+    baseRuns.push(method.compute(problem, [0.4, 0.3, 0.3], {}, [altPairs, null, null]).steps)
+  }
+  return baseRuns
 }
 
 /** Steps the store builds itself (src/state/workbench.ts) rather than a registry method. */

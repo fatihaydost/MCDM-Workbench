@@ -6,12 +6,12 @@ export function isValidParam(d: ParamDescriptor, value: unknown): value is Metho
   return typeof value === 'number' && Number.isFinite(value) && value >= d.min && value <= d.max
 }
 
-const PASSTHROUGH_ARRAY_KEYS = ['s', 'order', 'ranks', 'q', 'p', 'v', 'mode', 'criteriaFunctions'] as const
+const PASSTHROUGH_ARRAY_KEYS = ['s', 'order', 'ranks', 'q', 'p', 'v', 'mode', 'criteriaFunctions', 'optimal'] as const
 
 /**
  * The options a method is run with: every declared key, from `raw` when valid, else the default. Unknown keys
  * and invalid values (an old or hand-edited saved state) are dropped, so a method never sees them.
- * Per-criterion array parameters (`s`, `order`, `ranks`, `q`, `p`, `v`, `mode`, `criteriaFunctions`) are preserved.
+ * Per-criterion array parameters (`s`, `order`, `ranks`, `q`, `p`, `v`, `mode`, `criteriaFunctions`, `optimal`) are preserved.
  */
 export function resolveParams(
   descriptors: readonly ParamDescriptor[] | undefined,
@@ -29,10 +29,16 @@ export function resolveParams(
     }
     if (Array.isArray(raw.mode)) {
       const modes = raw.mode
-      for (const k of ['q', 'p'] as const) {
+      for (const k of ['q', 'p', 'v'] as const) {
         const arr = raw[k]
-        if (Array.isArray(arr) && arr.length === modes.length && arr.every((x) => typeof x === 'number')) {
-          out[k] = arr.map((x, j) => (modes[j] === 'rel' ? { rel: x as number } : { abs: x as number })) as unknown as MethodParamValue
+        if (
+          Array.isArray(arr) &&
+          arr.length === modes.length &&
+          arr.every((x) => typeof x === 'number' || (k === 'v' && x === null))
+        ) {
+          out[k] = arr.map((x, j) =>
+            typeof x === 'number' ? (modes[j] === 'rel' ? { rel: x } : { abs: x }) : x,
+          ) as unknown as MethodParamValue
         }
       }
     }
@@ -46,5 +52,8 @@ export function changedParams(
   raw: Readonly<Record<string, unknown>> | undefined,
 ): [ParamDescriptor, MethodParamValue][] {
   const resolved = resolveParams(descriptors, raw)
-  return (descriptors ?? []).filter((d) => resolved[d.key] !== d.default).map((d) => [d, resolved[d.key]!])
+  const hasPerCriterionS = Array.isArray(raw?.s)
+  return (descriptors ?? [])
+    .filter((d) => !(hasPerCriterionS && d.key === 'stepRatio') && resolved[d.key] !== d.default)
+    .map((d) => [d, resolved[d.key]!])
 }

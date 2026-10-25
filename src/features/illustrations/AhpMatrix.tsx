@@ -86,9 +86,12 @@ export function AhpMatrix(props: AhpMatrixProps) {
   const stage = stepping ? Math.min(Math.max(step, 0), AHP_IDEA_STEPS - 1) : AHP_IDEA_STEPS - 1
   const off = (from: number) => (stage >= from ? undefined : '')
 
-  const hi = weights ? argMax(weights) : -1
-  const maxW = weights ? Math.max(...weights, 1e-9) : 1
-  const weightTexts = weights?.map((w) => format(w)) ?? null
+  const dash = '—'
+  const finiteWeights = weights ? weights.filter((w) => Number.isFinite(w)) : []
+  const hasWeightSpread = finiteWeights.length > 1 && Math.max(...finiteWeights) - Math.min(...finiteWeights) > 1e-12
+  const hi = weights && hasWeightSpread ? argMax(weights) : -1
+  const maxW = finiteWeights.length > 0 ? Math.max(...finiteWeights, 1e-9) : 1
+  const weightTexts = weights?.map((w) => (Number.isFinite(w) ? format(w) : dash)) ?? null
 
   const W = Math.max(width, 300)
   const nameW = Math.ceil(Math.min(Math.max(...criteria.map((c) => estimateTextWidth(c, 13))) + 10, W * 0.24))
@@ -105,7 +108,6 @@ export function AhpMatrix(props: AhpMatrixProps) {
   const xBarScale = scaleLinear([0, maxW], [xBar0, xBar1])
   const showFittedInCell = weights !== null && cellW >= 42 && n <= 6
   const height = HEAD + n * ROW + FOOT
-  const dash = '—'
 
   const cellValue = (i: number, k: number): number | null => {
     if (i === k) return 1
@@ -122,7 +124,7 @@ export function AhpMatrix(props: AhpMatrixProps) {
           const v = cellValue(i, k)
           return v === null ? dash : formatRatio(v)
         }),
-        ...(weights ? [format(weights[i]!)] : []),
+        ...(weightTexts ? [weightTexts[i]!] : []),
       ],
     })),
   }

@@ -137,7 +137,9 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, ste
   const W = Math.max(width, 240)
   const stacked = W < STACK_BELOW
   const texts = scores.map((v) => format(v))
-  const valueWidth = Math.ceil(maxOf(texts.map((t) => estimateTextWidth(t, FONT)))) + VALUE_GAP
+  const spTexts = sp.map((v) => format(v))
+  const snTexts = sn.map((v) => format(v))
+  const valueWidth = Math.ceil(maxOf([...texts, ...spTexts, ...snTexts].map((t) => estimateTextWidth(t, FONT)))) + VALUE_GAP
   const maxName = maxOf(names.map((a) => estimateTextWidth(a, FONT)))
   const labelWidth = stacked ? 0 : Math.ceil(Math.min(maxName + GAP * 2, Math.max(W * 0.24, 56)))
   const plotLeft = labelWidth

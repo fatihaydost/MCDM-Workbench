@@ -1,5 +1,10 @@
 import { useId, useMemo, useState, type KeyboardEvent } from 'react'
-import { prometheeII, type PrometheeCriterionFunction, type PrometheePreferenceFunction } from '../../core/methods/promethee-ii'
+import {
+  prometheeII,
+  prometheeIncomparablePairs,
+  type PrometheeCriterionFunction,
+  type PrometheePreferenceFunction,
+} from '../../core/methods/promethee-ii'
 import type { Problem } from '../../core/types'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
 import { estimateTextWidth, truncate } from '../charts/layout'
@@ -13,6 +18,7 @@ export type PrometheeParts = {
   scores: number[]
   ranking: number[]
   order: number[]
+  incomparables: [number, number][]
 }
 
 /** PROMETHEE II flows for the pictures, or null when the core cannot rank this problem. */
@@ -34,7 +40,8 @@ export function prometheeParts(
   const positiveFlow = res.steps.find((x) => x.key === 'promethee-ii.positiveFlow')!.vector!
   const negativeFlow = res.steps.find((x) => x.key === 'promethee-ii.negativeFlow')!.vector!
   const order = res.scores.map((_, i) => i).sort((x, y) => res.ranking[x]! - res.ranking[y]! || x - y)
-  return { positiveFlow, negativeFlow, scores: res.scores, ranking: res.ranking, order }
+  const incomparables = prometheeIncomparablePairs(positiveFlow, negativeFlow)
+  return { positiveFlow, negativeFlow, scores: res.scores, ranking: res.ranking, order, incomparables }
 }
 
 const defaultFormat = (v: number, d: number) => v.toFixed(d)
@@ -50,6 +57,7 @@ export type PrometheeIdeaLabels = {
   negativeFlow: string
   score: string
   row: (alternative: string, pos: string, neg: string, score: string) => string
+  incomparable?: ((pairs: string) => string) | undefined
 }
 
 export const PROMETHEE_IDEA_LABELS_EN: PrometheeIdeaLabels = {
@@ -60,6 +68,7 @@ export const PROMETHEE_IDEA_LABELS_EN: PrometheeIdeaLabels = {
   negativeFlow: 'φ⁻',
   score: 'φ',
   row: (a, pos, neg, sc) => `${a}: φ⁺ = ${pos}, φ⁻ = ${neg}, φ = ${sc}`,
+  incomparable: (pairs) => `PROMETHEE I incomparable pairs (a R b): ${pairs}`,
 }
 
 export type PrometheeIdeaProps = {
@@ -122,7 +131,7 @@ export function PrometheeIdea({
   const negOff = stage >= 1 ? undefined : ''
   const scoreOff = stage >= 2 ? undefined : ''
 
-  const { positiveFlow, negativeFlow, scores, ranking, order } = parts
+  const { positiveFlow, negativeFlow, scores, ranking, order, incomparables } = parts
   const names = problem.alternatives
   const m = names.length
   const W = Math.max(width, 240)
@@ -283,6 +292,13 @@ export function PrometheeIdea({
           })}
         </g>
       </svg>
+      {incomparables.length > 0 && (
+        <p className={s.caption} data-testid="promethee-ii-incomparable">
+          {(l.incomparable ?? PROMETHEE_IDEA_LABELS_EN.incomparable!)(
+            incomparables.map(([a, b]) => `${names[a]!} ↔ ${names[b]!}`).join(', '),
+          )}
+        </p>
+      )}
       {(shown !== null || l.caption) && (
         <p className={s.caption} aria-live="polite">
           {shown !== null ? rowText(shown) : l.caption}

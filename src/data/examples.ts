@@ -614,6 +614,7 @@ export const examples: readonly ExampleDataset[] = [
       [3, 15, 1.5, 125, 40, 4],
     ],
     weights: [0.221, 0.159, 0.175, 0.127, 0.117, 0.201],
+    methodParams: { swara: { order: [0, 5, 2, 1, 3, 4], s: [0, 0.1, 0.15, 0.1, 0.25, 0.083] } },
     // Table 7 at λ = 0.5, the slider's default; the paper prints every λ from 0 to 1 (tests/fixtures/waspas-adali2017.json).
     published: [{ label: 'waspas.scores', values: [0.805, 0.7751, 0.7702, 0.7964, 0.7882], decimals: 4 }],
   },

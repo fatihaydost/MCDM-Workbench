@@ -3,6 +3,8 @@ import { tied } from '../rank'
 import type { MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
 import { assertValid, validateProblem } from '../validate'
 
+export const LOPCOW_DOMINANT_WEIGHT = 0.5
+
 /**
  * LOPCOW weighting (Ecer & Pamucar 2022, Omega 112:102690; verified on Keles 2023 Tables 6-8):
  * min-max normalization with cost inversion, root-mean-square RMS_j = sqrt(sum(r_ij^2) / m),
@@ -42,11 +44,13 @@ export const lopcow: WeightingMethod = {
       rms[j] = q
       stdDev[j] = sd
       pv[j] = constant[j] || sd === 0 || tied(q, sd) ? 0 : Math.abs(Math.log(q / sd) * 100)
-      if (!constant[j] && m > 2 && pv[j] === 0) warnings.push({ code: 'lopcow.zero-pv-column', col: j })
     }
 
     // 3. Weights; when all columns are constant fall back to 1/n, when every PV is 0 share equally among varying columns.
     const total = sum(pv)
+    for (let j = 0; j < n; j++) {
+      if (m > 2 && total > 0 && !constant[j] && pv[j] === 0) warnings.push({ code: 'lopcow.zero-pv-column', col: j })
+    }
     const allConstant = constant.every(Boolean)
     if (allConstant) warnings.push({ code: 'lopcow.all-constant-equal-weights' })
     const weights = allConstant
@@ -55,7 +59,9 @@ export const lopcow: WeightingMethod = {
         ? constant.map((c) => (c ? 0 : 1 / varying))
         : pv.map((v) => v / total)
     const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
-    if (!allConstant && weights[top]! > 0.5) warnings.push({ code: 'lopcow.dominant-weight', col: top })
+    if (!allConstant && total > 0 && varying > 1 && weights[top]! > LOPCOW_DOMINANT_WEIGHT) {
+      warnings.push({ code: 'lopcow.dominant-weight', col: top })
+    }
 
     return {
       weights,

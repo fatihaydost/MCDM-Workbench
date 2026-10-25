@@ -31,6 +31,7 @@ export function MethodParams({ methodId, descriptors }: { methodId: string; desc
 function MethodParam({ methodId, d }: { methodId: string; d: ParamDescriptor }) {
   const { t, i18n } = useTranslation()
   const params = useMethodParams(methodId)
+  const rawParams = useWorkbench((s) => s.methodParams?.[methodId])
   const setMethodParam = useWorkbench((s) => s.setMethodParam)
   const labelId = useId()
   const label = paramLabel(methodId, d, t)
@@ -59,7 +60,8 @@ function MethodParam({ methodId, d }: { methodId: string; d: ParamDescriptor }) 
     )
   }
 
-  const current = typeof value === 'string' ? value : d.default
+  const hasCustomSwaraS = methodId === 'swara' && d.key === 'stepRatio' && Array.isArray(rawParams?.s)
+  const current = hasCustomSwaraS ? '' : typeof value === 'string' ? value : d.default
   const hintKey = `workbench.params.${methodId}.${d.key}Hints.${current}`
   return (
     <div className="flex flex-col gap-1">
@@ -74,7 +76,17 @@ function MethodParam({ methodId, d }: { methodId: string; d: ParamDescriptor }) 
         size="sm"
         className="self-start"
       />
-      {i18n.exists(hintKey) && <p className="text-13 text-text-3">{tr(t, hintKey)}</p>}
+      {hasCustomSwaraS ? (
+        <p className="text-13 text-text-3">
+          {tr(t, 'workbench.params.swara.stepRatioHints.custom', {
+            defaultValue: i18n.language?.startsWith('tr')
+              ? 'Özel adım oranları s etkin; ön ayara dönmek için bir seçenek seçin.'
+              : 'Custom step ratios s active; pick a preset to replace them.',
+          })}
+        </p>
+      ) : (
+        i18n.exists(hintKey) && <p className="text-13 text-text-3">{tr(t, hintKey)}</p>
+      )}
     </div>
   )
 }

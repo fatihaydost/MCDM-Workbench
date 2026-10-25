@@ -673,10 +673,14 @@ export function stackSegments(values: readonly number[], x0: number, pxPerUnit: 
   })
 }
 
-/** Index of the largest value (first on ties), or -1 for an empty list. */
+/** Index of the largest finite value (first on ties), or -1 when empty or no finite values exist. */
 export function argMax(values: readonly number[]): number {
   let best = -1
-  for (let i = 0; i < values.length; i++) if (best < 0 || values[i]! > values[best]!) best = i
+  for (let i = 0; i < values.length; i++) {
+    const v = values[i]!
+    if (!Number.isFinite(v)) continue
+    if (best < 0 || v > values[best]!) best = i
+  }
   return best
 }
 

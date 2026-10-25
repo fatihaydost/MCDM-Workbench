@@ -17,7 +17,9 @@ export const topsis: RankingMethod = {
 
     // 1. Vector normalization r_ij = x_ij / sqrt(Σ_i x_ij²); an all-zero column stays 0.
     const { normalized: r, zeroCols } = vectorNormalize(matrix)
-    const warnings: MethodWarning[] = zeroCols.map((col) => ({ code: 'topsis.zero-column', col }))
+    const warnings: MethodWarning[] = zeroCols
+      .filter((col) => (weights[col] ?? 0) > 0)
+      .map((col) => ({ code: 'topsis.zero-column', col }))
 
     // 2. Weighted normalized matrix v_ij = w_j r_ij.
     const v = r.map((row) => row.map((x, j) => x * weights[j]!))

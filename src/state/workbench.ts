@@ -17,6 +17,7 @@ import {
   setAlternativePair,
   setAlternativeSource,
   setPair,
+  SWARA_STEP_RATIOS,
   validateProblem,
   validateWeights,
   type AlternativeJudgements,
@@ -446,12 +447,19 @@ export function sanitizeMethodParams(params: MethodParamsState | undefined, n: n
           (sArr.length === n || sArr.length === n - 1) &&
           sArr.every((v, idx) => (sArr.length === n && idx === 0 && (v === null || v === undefined)) || (typeof v === 'number' && Number.isFinite(v) && v >= 0))
         if (!validS) delete next.s
+        else next.s = sArr.length === n ? [0, ...(sArr.slice(1) as number[])] : [0, ...(sArr as number[])]
       }
     } else if (methodId === 'roc') {
       if (Array.isArray(next.ranks)) {
         const rArr = next.ranks
         const validRanks = rArr.length === n && rArr.every((r) => typeof r === 'number' && Number.isFinite(r))
         if (!validRanks) delete next.ranks
+      }
+    } else if (methodId === 'aras') {
+      if (Array.isArray(next.optimal)) {
+        const opt = next.optimal
+        const validOpt = opt.length === n && opt.every((v) => typeof v === 'number' && Number.isFinite(v) && v > 0)
+        if (!validOpt) delete next.optimal
       }
     } else if (methodId === 'electre-iii') {
       for (const k of ['q', 'p', 'v', 'mode'] as const) {
@@ -499,8 +507,11 @@ export function resizeMethodParamsOnCriterionChange(
         sw.order = oldOrder.filter((idx) => idx !== deletedIndex).map((idx) => (idx > deletedIndex ? idx - 1 : idx))
       }
       if (Array.isArray(sw.s) && (sw.s.length === prevN || sw.s.length === prevN - 1)) {
-        const fullS = sw.s.length === prevN ? [...(sw.s as number[])] : [0, ...(sw.s as number[])]
+        const fullS = sw.s.length === prevN ? [0, ...(sw.s.slice(1) as number[])] : [0, ...(sw.s as number[])]
         const rmIdx = delRankIdx >= 0 ? delRankIdx : deletedIndex
+        if (rmIdx > 0 && rmIdx < prevN - 1) {
+          fullS[rmIdx + 1] = Number(((1 + fullS[rmIdx]!) * (1 + fullS[rmIdx + 1]!) - 1).toFixed(6))
+        }
         const nextS = fullS.filter((_, r) => r !== rmIdx)
         if (nextS.length > 0) nextS[0] = 0
         sw.s = nextS
@@ -509,12 +520,25 @@ export function resizeMethodParamsOnCriterionChange(
     }
     if (next.roc && Array.isArray(next.roc.ranks) && next.roc.ranks.length === prevN) {
       const oldRanks = next.roc.ranks as number[]
-      const rDel = oldRanks[deletedIndex]!
       const remaining = oldRanks.filter((_, j) => j !== deletedIndex)
-      const hasTie = remaining.includes(rDel)
+      const sorted = remaining.map((r, i) => ({ r, i })).sort((a, b) => a.r - b.r)
+      const canonical = new Array<number>(remaining.length)
+      for (let k = 0; k < sorted.length; ) {
+        let end = k + 1
+        while (end < sorted.length && Math.abs(sorted[end]!.r - sorted[k]!.r) <= 1e-9) end++
+        const compRank = k + 1
+        for (let t = k; t < end; t++) canonical[sorted[t]!.i] = compRank
+        k = end
+      }
       next.roc = {
         ...next.roc,
-        ranks: remaining.map((r) => Math.min(nextN, Math.max(1, !hasTie && r > rDel ? r - 1 : r))),
+        ranks: canonical,
+      }
+    }
+    if (next.aras && Array.isArray(next.aras.optimal) && (next.aras.optimal as unknown[]).length === prevN) {
+      next.aras = {
+        ...next.aras,
+        optimal: (next.aras.optimal as unknown[]).filter((_, j) => j !== deletedIndex),
       }
     }
     if (next['electre-iii']) {
@@ -530,6 +554,25 @@ export function resizeMethodParamsOnCriterionChange(
       next['promethee-ii'] = {
         ...next['promethee-ii'],
         criteriaFunctions: (next['promethee-ii'].criteriaFunctions as unknown[]).filter((_, j) => j !== deletedIndex),
+      }
+    }
+  } else if (nextN === prevN + 1 && prevN >= 1) {
+    if (next.swara) {
+      const sw = { ...next.swara }
+      if (Array.isArray(sw.order) && sw.order.length === prevN) {
+        sw.order = [...(sw.order as number[]), prevN]
+      }
+      if (Array.isArray(sw.s) && (sw.s.length === prevN || sw.s.length === prevN - 1)) {
+        const fullS = sw.s.length === prevN ? [0, ...(sw.s.slice(1) as number[])] : [0, ...(sw.s as number[])]
+        const stepKey = sw.stepRatio === 'gentle' || sw.stepRatio === 'steep' ? sw.stepRatio : 'moderate'
+        sw.s = [...fullS, SWARA_STEP_RATIOS[stepKey]]
+      }
+      next.swara = sw
+    }
+    if (next.roc && Array.isArray(next.roc.ranks) && next.roc.ranks.length === prevN) {
+      next.roc = {
+        ...next.roc,
+        ranks: [...(next.roc.ranks as number[]), nextN],
       }
     }
   }
@@ -634,11 +677,14 @@ export const useWorkbench = create<WorkbenchState>()(
         memorize(get().problem.criteria, get().manualWeights)
         memorizeJudgements(get().problem.criteria, judgementsOf(get()))
         memorizeAlternativeJudgements(get().problem, altJudgementsOf(get()))
-        const nextMethodParams: MethodParamsState = {
-          ...(reference && { [reference]: {} }),
-          ...(ranking && { [ranking]: {} }),
-          ...(ex.methodParams ? (structuredClone(ex.methodParams) as MethodParamsState) : {}),
-        }
+        const nextMethodParams = sanitizeMethodParams(
+          {
+            ...(reference && { [reference]: {} }),
+            ...(ranking && { [ranking]: {} }),
+            ...(ex.methodParams ? (structuredClone(ex.methodParams) as MethodParamsState) : {}),
+          },
+          ex.criteria.length,
+        )
         set({
           methodParams: nextMethodParams,
           ...(ranking && { rankingMethod: ranking }),
@@ -895,6 +941,8 @@ export const useWorkbench = create<WorkbenchState>()(
           }
           if (methodId === 'swara' && key === 'stepRatio') {
             delete nextMethod.s
+          } else if (methodId === 'swara' && key === 's') {
+            delete nextMethod.stepRatio
           } else if (methodId === 'electre-iii' && (key === 'thresholdPreset' || key === 'thresholds')) {
             if (key === 'thresholds' && value !== undefined) nextMethod.thresholdPreset = value
             delete nextMethod.q

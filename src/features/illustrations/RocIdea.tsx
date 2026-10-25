@@ -99,8 +99,10 @@ export function RocIdea({
 
   const activeWeights = formula === 'rs' ? computed.rs : formula === 'rr' ? computed.rr : computed.roc
   const n = problem.criteria.length
-  const hi = argMax(activeWeights)
+  const hasSpread = activeWeights.length > 1 && Math.max(...activeWeights) - Math.min(...activeWeights) > 1e-12
+  const hi = hasSpread ? argMax(activeWeights) : -1
   const weightTexts = activeWeights.map((w) => format(w))
+  const formatRank = (rVal: number) => (Number.isInteger(rVal) ? String(rVal) : format(rVal))
 
   // Columns: name | rank | strip (ROC / RS / RR) | → | weight + value.
   const W = Math.max(width, 280)
@@ -130,7 +132,7 @@ export function RocIdea({
     rows: problem.criteria.map((c, j) => ({
       label: c.name,
       cells: [
-        String(computed.ranks[j]!),
+        formatRank(computed.ranks[j]!),
         format(computed.roc[j]!),
         format(computed.rs[j]!),
         format(computed.rr[j]!),
@@ -186,7 +188,7 @@ export function RocIdea({
                 {short}
               </text>
               <text className={s.barValue} x={xRank} y={y} dominantBaseline="central" data-highlight={on || undefined}>
-                #{rVal}
+                #{formatRank(rVal)}
               </text>
               <line className={s.stripBase} x1={xZero} x2={strip(maxAll)} y1={y} y2={y} />
               {/* Stage 0+: ROC ruler from 0 to w_j(ROC) and circle marker */}

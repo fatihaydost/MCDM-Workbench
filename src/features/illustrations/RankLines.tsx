@@ -68,13 +68,17 @@ type Crossing = { i: number; k: number; from: number; to: number; x: number; y: 
  * (click, Enter or Space; arrow keys move between crossings). The Borda rank closes each line on the right, next to the
  * individual rankings, never instead of them. The selected pair takes two fixed contrasting colours (a blue, b ochre), the other lines step back.
  */
-export function RankLines({ columns, borda, names, selected, onSelectPair, labels, className }: RankLinesProps) {
+export function RankLines({ columns: rawColumns, borda, names, selected, onSelectPair, labels, className }: RankLinesProps) {
   const l = { ...RANK_LINES_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const [focusKey, setFocusKey] = useState(0)
   const [hoverAlt, setHoverAlt] = useState<number | null>(null)
 
+  const columns = [
+    ...rawColumns.filter((c) => c.ranking !== null),
+    ...rawColumns.filter((c) => c.ranking === null),
+  ]
   const n = names.length
   const W = Math.max(width, 280)
   const ranked = columns.map((c, j) => (c.ranking ? j : -1)).filter((j) => j >= 0)
@@ -133,6 +137,24 @@ export function RankLines({ columns, borda, names, selected, onSelectPair, label
     }
   }
   crossings.sort((p, q) => p.x - q.x || p.y - q.y)
+  for (let a = 0; a < crossings.length; ) {
+    let b = a + 1
+    while (
+      b < crossings.length &&
+      Math.abs(crossings[b]!.x - crossings[a]!.x) < 2 &&
+      Math.abs(crossings[b]!.y - crossings[a]!.y) < 2
+    ) {
+      b++
+    }
+    const count = b - a
+    if (count > 1) {
+      const baseX = crossings[a]!.x
+      for (let m = 0; m < count; m++) {
+        crossings[a + m]!.x = baseX + (m - (count - 1) / 2) * 10
+      }
+    }
+    a = b
+  }
   const focus = Math.min(focusKey, Math.max(0, crossings.length - 1))
 
   const move = (e: KeyboardEvent<SVGGElement>) => {

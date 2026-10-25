@@ -372,7 +372,7 @@
         "formulaHints": {
           "roc": "Harmonic tail sum 1 / n · Σ 1 / k; centroid of the ordered weight simplex (Barron and Barrett 1996).",
           "rs": "Linear decay 2(n + 1 - r) / (n(n + 1)); flattest spread across ranks (Stillwell et al. 1981).",
-          "rr": "Normalized reciprocal (1 / r) / H_n; steepest top-rank concentration (Stillwell et al. 1981)."
+          "rr": "Normalized reciprocal (1 / r) / H_n; hyperbolic 1 / r decay that halves from rank 1 to rank 2 and concentrates more on rank 1 than ROC for n ≥ 7 (Stillwell et al. 1981)."
         },
         "formulaVariant": {
           "roc": "ROC",
@@ -994,6 +994,7 @@
       },
       "ahpRanking": {
         "local": "Local priorities p",
+        "consistency": "Alternative consistency CR_j",
         "weighted": "Weighted priorities v = w p",
         "scores": "Global priority P"
       },
@@ -1297,7 +1298,8 @@
       "promethee-ii": {
         "title": "Leaving flow φ⁺, entering flow φ⁻, and net flow φ",
         "caption": "Left: leaving flow φ⁺ (top) and entering flow φ⁻ (bottom) from pairwise preference degrees. Right: net outranking flow φ = φ⁺ - φ⁻ around zero.",
-        "row": "{{alternative}}: φ⁺ = {{pos}}, φ⁻ = {{neg}}, φ = {{score}}"
+        "row": "{{alternative}}: φ⁺ = {{pos}}, φ⁻ = {{neg}}, φ = {{score}}",
+        "incomparable": "PROMETHEE I incomparable pairs: {{pairs}}"
       },
       "electre-i": {
         "title": "Net concordance Cₐ, net discordance Dₐ, kernel K, and net score Φ",
@@ -1974,13 +1976,14 @@
           "weight": "Weight w",
           "steps": {
             "s1": "Order the criteria from rank 1 (most important) to rank n (least important); the circle shows the ROC harmonic centroid weight.",
-            "s2": "Compare the three rank-order rules on one scale: RS (square) decays linearly, RR (diamond) concentrates steepest on rank 1, and ROC sits at the simplex centroid between them.",
+            "s2": "Compare the three rank-order rules on one scale: RS (square) decays linearly, RR (diamond) drops hyperbolically as 1 / r (exceeding ROC on rank 1 once n ≥ 7), and ROC (circle) sits at the simplex centroid with the highest rank-1 share for n ≤ 6.",
             "s3": "The chosen formula turns each criterion's rank into its weight bar w on the right, summing to 1."
           }
         },
         "promethee-ii": {
           "title": "Leaving flow, entering flow, and net outranking flow",
           "caption": "Each laptop model is compared pair by pair across criteria: leaving flow φ⁺ (how much it beats others) minus entering flow φ⁻ (how much others beat it) gives the net flow φ.",
+          "incomparable": "PROMETHEE I incomparable pairs: {{pairs}}",
           "steps": {
             "s1": "Leaving flow φ⁺: the row average of pairwise preference degrees, showing how strongly each model beats the others.",
             "s2": "Entering flow φ⁻: the column average of pairwise preference degrees, showing how strongly the others beat each model.",
@@ -2170,6 +2173,7 @@
     },
     "ahpRanking": {
       "local": "Local priorities p: column shares from the table (1 / x for cost) or the priority vector of the criterion's pairwise comparison matrix.",
+      "consistency": "Consistency ratio CR_j of the alternative pairwise comparison matrix on each criterion (0 when local priorities come from the table or m ≤ 2).",
       "weighted": "Weighted local priorities v = w p: each alternative's local priority multiplied by the criterion weight.",
       "scores": "Global priority P: the sum of an alternative's weighted local priorities across all criteria, summing to 1."
     },
@@ -2294,6 +2298,7 @@
     },
     "edas": {
       "constant-column": "Every value of {{criterion}} is the same, so it adds nothing to SP or SN.",
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet normalizing SP and SN by their maxima can amplify tiny gaps when other criteria are flat. Check whether the difference is real.",
       "negative-values": "{{criterion}} has negative values. EDAS measures distance as a share of the average, so the result depends on where zero is.",
       "small-average": "The average of {{criterion}} is close to 0 next to its values, so its distances grow very large and it can decide the ranking even with a small weight.",
       "no-spread": "No alternative is above or below the average on a weighted criterion, so every alternative gets AS = 0.5."
@@ -2323,13 +2328,14 @@
       "constant-column": "{{criterion}} has the same value for every alternative, so its CILOS weight is 0.",
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet CILOS normalizes its tiny losses against the rest of the system. Check whether the difference is real.",
       "shared-optimum": "Two or more criteria reach their best value on the same alternative, so the corresponding rows of A coincide and the relative loss between them is 0.",
-      "zero-loss-equal-weights": "One alternative is simultaneously the best on every varying criterion (or the loss system is degenerate), so all relative losses vanish (P = 0, F = 0) and active criteria share the weight equally.",
+      "zero-loss-equal-weights": "One or more varying criteria suffer zero total impact loss (a single alternative wins every varying criterion so P = 0 and F = 0, or the loss system is reducible with |f_jj| = 0), so the homogeneous system has no strictly positive solution and active criteria share the weight equally.",
       "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead.",
       "dominant-weight": "{{criterion}} takes more than half of the weight, so check whether its low impact loss is real."
     },
     "copras": {
       "no-cost-criteria": "There is no cost criterion with a weight above 0, so Q = S+ and COPRAS gives the same result as SAW with the sum option.",
-      "single-cost-criterion": "With a single active cost criterion, the column sum cancels out in 1 / S-, so cost enters through raw reciprocals 1 / x."
+      "single-cost-criterion": "With a single active cost criterion, the column sum cancels out in 1 / S-, so cost enters through raw reciprocals 1 / x.",
+      "constant-cost-criterion": "{{criterion}} has the same value for every alternative, so it adds the same cost share to every S-."
     },
     "codas": {
       "no-spread": "Every alternative has Euclidean distance 0 from the negative-ideal solution, so all alternatives tie at rank 1.",
@@ -2362,8 +2368,12 @@
       "cycle-detected": "Mutual outranking cycles exist in S; each cycle is condensed into an equivalence class before finding the kernel K.",
       "non-kernel-leader": "The alternative with the highest net score is outside the outranking kernel K; check the kernel column as well."
     },
+    "electre-iii": {
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet range-based indifference and preference thresholds rescale it to 0 to 1. Check whether the difference is real."
+    },
     "moora": {
-      "zero-column": "Every value of {{criterion}} is 0, so it does not affect the ranking."
+      "zero-column": "Every value of {{criterion}} is 0, so it does not affect the ranking.",
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, so its vector-normalized ratios are nearly identical across alternatives. Check whether the difference is real."
     }
   }
 }

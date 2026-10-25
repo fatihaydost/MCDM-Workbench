@@ -13,7 +13,9 @@ export const cilos: MethodView<'weighting'> = {
   // The weights as bars, the largest in the accent.
   thumb: ({ problem, geometry }) => {
     const weights = method.compute(problem('zavadskas-2017-vilnius-social'), {}).weights
-    return { kind: 'bars', values: weights, highlight: geometry.argMax(weights) }
+    const highlight =
+      weights.length > 1 && Math.max(...weights) - Math.min(...weights) > 1e-12 ? geometry.argMax(weights) : -1
+    return { kind: 'bars', values: weights, highlight }
   },
   columns: [{ step: 'cilos.totalLoss', label: 'workbench.weights.columns.totalLoss', decimals: 4 }],
   stage: preloadable(() => pictures().then((m) => ({ default: m.Stage }))),

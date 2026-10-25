@@ -3,6 +3,7 @@ import { tied } from '../rank'
 import type { MethodWarning, Problem, WeightingMethod, WeightingResult } from '../types'
 import { assertValid, validateProblem, type ValidationIssue } from '../validate'
 
+export const CILOS_DOMINANT_WEIGHT = 0.5
 const PIVOT_TOL = 1e-12
 
 /**
@@ -202,7 +203,9 @@ export const cilos: WeightingMethod = {
     }
 
     const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
-    if (!allConstant && weights[top]! > 0.5) warnings.push({ code: 'cilos.dominant-weight', col: top })
+    if (active.length > 1 && !zeroLoss && weights[top]! > CILOS_DOMINANT_WEIGHT) {
+      warnings.push({ code: 'cilos.dominant-weight', col: top })
+    }
 
     return {
       weights,

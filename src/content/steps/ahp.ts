@@ -3,7 +3,7 @@ import type { MethodSteps } from './types'
 export type StepModule = MethodSteps
 
 const ahpRankingFlow = [
-  { key: 'ahpRanking.local', symbol: 'P', stepKeys: ['ahpRanking.local'] },
+  { key: 'ahpRanking.local', symbol: 'P', stepKeys: ['ahpRanking.local', 'ahpRanking.consistency'] },
   { key: 'ahpRanking.weighted', symbol: 'wP', stepKeys: ['ahpRanking.weighted'] },
   { key: 'ahpRanking.scores', symbol: 'S', stepKeys: ['ahpRanking.scores'] },
 ]
@@ -18,6 +18,13 @@ export const ahpRankingSteps = {
       tex: String.raw`A_j\, p_j = \lambda_{\max}\, p_j \quad \vee \quad p_{ij} = r_{ij}, \qquad \sum_{i=1}^{m} p_{ij} = 1`,
       symbol: 'p',
       texSymbol: '$p_{ij}$',
+    },
+    'ahpRanking.consistency': {
+      en: 'Consistency ratio per criterion for pairwise alternative comparison matrices.',
+      tr: 'İkili alternatif karşılaştırma matrisleri için kriter başına tutarlılık oranı.',
+      tex: String.raw`CR_j = \frac{CI_j}{RI_m}, \qquad CI_j = \frac{\lambda_{\max,j} - m}{m - 1}`,
+      symbol: 'CR',
+      texSymbol: '$CR_j$',
     },
     'ahpRanking.weighted': {
       en: 'Weighted priorities: each local priority multiplied by its criterion weight.',

@@ -23,6 +23,12 @@ import { SourceItem, StatusLabel } from './shared'
 type Answer = { node: GuideNode; option: GuideOption }
 
 const NON_POSITIVE_OPTIONS = new Set(['negatives', 'zeros', 'rank-negatives', 'rank-zeros'])
+const POSITIVE_OPTIONS = new Set(['positive', 'rank-positive'])
+const DATA_TO_RANK_SIGN: Readonly<Record<string, string>> = {
+  negatives: 'rank-negatives',
+  zeros: 'rank-zeros',
+  positive: 'rank-positive',
+}
 
 /**
  * A risk applies when the path recommends at least two of its methods (a weighting and a ranking
@@ -31,18 +37,36 @@ const NON_POSITIVE_OPTIONS = new Set(['negatives', 'zeros', 'rank-negatives', 'r
 export function risksFor(
   picked: Set<MethodId>,
   rankingStages = 1,
-  answers?: readonly { option: { id: string } }[],
+  answers?: readonly { node?: GuideNode; option: { id: string; recommend?: { methodIds: MethodId[] } } }[],
 ): RiskyCombination[] {
+  const hasExplicitPositive = answers ? answers.some((a) => POSITIVE_OPTIONS.has(a.option.id)) : false
   const hasNonPositive = answers ? answers.some((a) => NON_POSITIVE_OPTIONS.has(a.option.id)) : true
+  const weightRecs = answers
+    ? new Set<MethodId>(
+        answers
+          .filter((a) => a.node?.stage === 'weighting' && a.option.recommend)
+          .flatMap((a) => a.option.recommend!.methodIds),
+      )
+    : null
+  const rankRecs = answers
+    ? new Set<MethodId>(
+        answers
+          .filter((a) => a.node?.stage === 'ranking' && a.option.recommend)
+          .flatMap((a) => a.option.recommend!.methodIds),
+      )
+    : null
   return riskyCombinations.filter((r) => {
     if (r.id === 'chaining-rankers') {
       return rankingStages >= 2 && r.methodIds.filter((id) => picked.has(id)).length >= 2
     }
     if (r.id === 'weights-twice') {
+      if (weightRecs && rankRecs && (weightRecs.size > 0 || rankRecs.size > 0)) {
+        return weightRecs.has('ahp') && rankRecs.has('ahp')
+      }
       return rankingStages >= 2 && picked.has('ahp')
     }
     if (r.id === 'ratio-shifted') {
-      return hasNonPositive && r.methodIds.some((id) => picked.has(id))
+      return !hasExplicitPositive && hasNonPositive && r.methodIds.some((id) => picked.has(id))
     }
     const wIds = r.methodIds.filter((id) => methodMeta[id].family.startsWith('weighting'))
     const rIds = r.methodIds.filter((id) => !methodMeta[id].family.startsWith('weighting'))
@@ -79,8 +103,21 @@ export function Guide() {
     return risksFor(picked, rankingStages, path)
   }, [recommendations, path])
 
+  const hasDataSign = path.some((a) => a.node.id === 'data-sign')
   const answer = (node: GuideNode, option: GuideOption) => {
-    setPath((p) => [...p, { node, option }])
+    setPath((p) => {
+      const nextPath = [...p, { node, option }]
+      if (option.next === 'ranking-sign') {
+        const dataSignAns = nextPath.find((a) => a.node.id === 'data-sign')
+        const mappedId = dataSignAns ? DATA_TO_RANK_SIGN[dataSignAns.option.id] : undefined
+        const rankingSignNode = mappedId ? getGuideNode('ranking-sign') : undefined
+        const mappedOpt = rankingSignNode?.options.find((o) => o.id === mappedId)
+        if (rankingSignNode && mappedOpt) {
+          nextPath.push({ node: rankingSignNode, option: mappedOpt })
+        }
+      }
+      return nextPath
+    })
     // Keep the keyboard where the next question appears.
     requestAnimationFrame(() => questionRef.current?.focus())
   }
@@ -102,22 +139,25 @@ export function Guide() {
         <div className="flex flex-col gap-2">
           <h3 className="text-13 font-medium text-text-2">{t('methods.guide.answers')}</h3>
           <ol className="flex flex-col border-t border-line">
-            {path.map((a, i) => (
-              <li key={a.node.id} className="flex items-start justify-between gap-3 border-b border-line py-2">
-                <div className="flex min-w-0 flex-col gap-0.5">
-                  <span className="text-13 text-text-2">{a.node.question[lang]}</span>
-                  <span className="text-14 text-text">{a.option.label[lang]}</span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => changeFrom(i)}
-                  aria-label={`${t('methods.guide.change')}: ${a.node.question[lang]}`}
-                >
-                  {t('methods.guide.change')}
-                </Button>
-              </li>
-            ))}
+            {path.map((a, i) => {
+              if (a.node.id === 'ranking-sign' && hasDataSign) return null
+              return (
+                <li key={a.node.id} className="flex items-start justify-between gap-3 border-b border-line py-2">
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="text-13 text-text-2">{a.node.question[lang]}</span>
+                    <span className="text-14 text-text">{a.option.label[lang]}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => changeFrom(i)}
+                    aria-label={`${t('methods.guide.change')}: ${a.node.question[lang]}`}
+                  >
+                    {t('methods.guide.change')}
+                  </Button>
+                </li>
+              )
+            })}
           </ol>
         </div>
       )}

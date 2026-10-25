@@ -35,8 +35,13 @@ import {
   vikor,
   waspas,
 } from '../src/core'
-import { removeCriteria, sweepWeight } from '../src/core/robustness'
+import { removeCriteria, reweight, sweepWeight } from '../src/core/robustness'
 import { pearson } from '../src/core/math'
+import { resolveParams } from '../src/core/params'
+import { prepareRanking, rankerFor } from '../src/core/run'
+import { swara } from '../src/core/methods/swara'
+import { roc } from '../src/core/methods/roc'
+import { tokenKey } from '../src/features/io/grid'
 import { makeProblem, rankerOf, step } from './helpers'
 
 const w2 = [0.5, 0.5]
@@ -89,7 +94,7 @@ describe('1. Minimum dimensions (m = 2 alternatives, n = 2 criteria)', () => {
     it('positively correlated columns (+1) trigger critic.no-conflict-equal-weights without NaN', () => {
       const p = makeProblem([[10, 20], [30, 60]], b2)
       const res = critic.compute(p, {})
-      expect(res.warnings).toContainEqual({ code: 'critic.few-alternatives' })
+      expect(res.warnings).toContainEqual({ code: 'critic.two-alternatives' })
       expect(res.warnings).toContainEqual({ code: 'critic.no-conflict-equal-weights' })
       expect(res.weights).toEqual([0.5, 0.5])
       const rho = step(res.steps, 'critic.correlation').matrix!
@@ -99,7 +104,7 @@ describe('1. Minimum dimensions (m = 2 alternatives, n = 2 criteria)', () => {
     it('negatively correlated columns (-1) compute contrast and conflict without NaN', () => {
       const p = makeProblem([[10, 60], [30, 20]], b2)
       const res = critic.compute(p, {})
-      expect(res.warnings).toContainEqual({ code: 'critic.few-alternatives' })
+      expect(res.warnings).toContainEqual({ code: 'critic.two-alternatives' })
       expect(res.warnings).not.toContainEqual({ code: 'critic.no-conflict-equal-weights' })
       expect(res.weights).toEqual([0.5, 0.5])
       const rho = step(res.steps, 'critic.correlation').matrix!
@@ -802,10 +807,22 @@ describe('3. Constant, near-constant, and tied data states', () => {
         expect(res.weights).toEqual([0, 1])
       })
 
-      it('emits lopcow.zero-pv-column warnings when single best alternative yields PV = 0', () => {
-        // m = 3, n = 2. On each criterion, exactly one alternative is 1 and all others are 0.
-        // For normalized column [1, 0, 0]: RMS = 1/sqrt(3) and sampleStd = 1/sqrt(3).
-        // Because RMS === sampleStd, PV collapses to 0 on both columns.
+      it('emits lopcow.zero-pv-column only when a PV = 0 column actually receives 0 weight (total > 0)', () => {
+        // When one column has PV = 0 ([10, 0, 0]) and another has PV > 0 ([10, 5, 0]), total > 0 so col 0 gets weight 0:
+        const pOneZeroPv = makeProblem(
+          [
+            [10, 10],
+            [0, 5],
+            [0, 0],
+          ],
+          b2,
+        )
+        const resOne = lopcow.compute(pOneZeroPv, {})
+        expect(resOne.weights[0]).toBe(0)
+        expect(resOne.weights[1]).toBe(1)
+        expect(resOne.warnings).toContainEqual({ code: 'lopcow.zero-pv-column', col: 0 })
+
+        // When ALL columns have PV = 0, total === 0 so they fall back to equal weights [0.5, 0.5] (not 0 weight):
         const pDegenerate = makeProblem(
           [
             [10, 0],
@@ -818,10 +835,7 @@ describe('3. Constant, near-constant, and tied data states', () => {
         const pv = step(res.steps, 'lopcow.pv').vector!
         expect(pv).toEqual([0, 0])
         expect(res.weights).toEqual([0.5, 0.5])
-        expect(res.warnings).toEqual([
-          { code: 'lopcow.zero-pv-column', col: 0 },
-          { code: 'lopcow.zero-pv-column', col: 1 },
-        ])
+        expect(res.warnings).toEqual([])
         expect(res.diagnostics?.allConstant).toBe(0)
       })
 
@@ -881,6 +895,171 @@ describe('3. Constant, near-constant, and tied data states', () => {
         j6 = setPair(j6, 2, 5, 3)
 
         expect(() => bwm.compute(p4, {}, j6)).toThrow(ProblemValidationError)
+      })
+    })
+
+    describe('5. Round 3 10-agent audit regression tests', () => {
+      it('vectorNormalize neutralizes zero-crossing constant noise in MOORA and TOPSIS', () => {
+        const p = makeProblem(
+          [
+            [-1e-13, 10],
+            [0, 10.5],
+            [1e-13, 11],
+          ],
+          ['benefit', 'cost'],
+        )
+        const resMoora = moora.compute(p, [0.5, 0.5], {})
+        expect(resMoora.ranking).toEqual([1, 2, 3])
+        expect(resMoora.warnings).toContainEqual({ code: 'moora.zero-column', col: 0 })
+
+        const resTopsis = topsis.compute(p, [0.5, 0.5], {})
+        expect(resTopsis.ranking).toEqual([1, 2, 3])
+      })
+
+      it('linearMaxNormalize flattens constant columns within CONSTANT_TOLERANCE so CODAS no-spread always ranks [1, 1, 1]', () => {
+        const p = makeProblem(
+          [
+            [1 + 8e-13, 10],
+            [1, 10],
+            [1, 10],
+          ],
+          ['benefit', 'benefit'],
+        )
+        const res = codas.compute(p, [1, 0], { tau: CODAS_DEFAULT_TAU })
+        expect(res.warnings).toContainEqual({ code: 'codas.no-spread' })
+        expect(res.scores).toEqual([0, 0, 0])
+        expect(res.ranking).toEqual([1, 1, 1])
+      })
+
+      it('reweight preserves unit sum on subnormal weights and rejects NaN target', () => {
+        const w = reweight([1, Number.MIN_VALUE, 0], 0, 0.4)
+        expect(w.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12)
+        expect(() => reweight([0.5, 0.5], 0, Number.NaN)).toThrow(RangeError)
+      })
+
+      it('COPRAS avoids underflow on tiny cost weight * tiny share and warns on constant active cost criterion', () => {
+        const pTiny = makeProblem(
+          [
+            [1, 1e-100],
+            [2, 1],
+            [3, 1e100],
+          ],
+          ['benefit', 'cost'],
+        )
+        const resTiny = copras.compute(pTiny, [1 - 1e-130, 1e-130], {})
+        expect(resTiny.warnings).not.toContainEqual({ code: 'copras.no-cost-criteria' })
+
+        const pConstCost = makeProblem(
+          [
+            [10, 5, 20],
+            [15, 5, 10],
+            [12, 5, 30],
+          ],
+          ['benefit', 'cost', 'cost'],
+        )
+        const resConstCost = copras.compute(pConstCost, [0.4, 0.3, 0.3], {})
+        expect(resConstCost.warnings).toContainEqual({ code: 'copras.constant-cost-criterion', col: 1 })
+      })
+
+      it('ARAS preserves custom optimal vector through prepareRanking and slices it under rankerFor criterion removal', () => {
+        const p = makeProblem(
+          [
+            [10, 4],
+            [4, 9],
+          ],
+          ['benefit', 'benefit'],
+        )
+        const direct = aras.compute(p, [0.5, 0.5], { optimal: [100, 9] })
+        const prep = prepareRanking(p, {
+          methodId: 'aras',
+          params: { optimal: [100, 9] } as unknown as Record<string, number>,
+        })
+        expect(prep.issues).toEqual([])
+        const prepRes = prep.rank!([0.5, 0.5])
+        expect(prepRes.value?.ranking).toEqual(direct.ranking)
+
+        const ranker = rankerFor({
+          methodId: 'aras',
+          params: { optimal: [100, 9, 10] } as unknown as Record<string, number>,
+        })
+        const reducedP = makeProblem(
+          [
+            [10, 4],
+            [4, 9],
+          ],
+          ['benefit', 'benefit'],
+        )
+        expect(ranker(reducedP, 2)([0.5, 0.5]).ranking).toEqual(direct.ranking)
+      })
+
+      it('resolveParams maps relative veto thresholds v alongside q and p for ELECTRE III', () => {
+        const resolved = resolveParams(undefined, {
+          mode: ['rel', 'abs'],
+          q: [0.1, 1],
+          p: [0.2, 2],
+          v: [0.5, 5],
+        })
+        expect(resolved.v).toEqual([{ rel: 0.5 }, { abs: 5 }])
+      })
+
+      it('VIKOR at v = 1 with sFlat and v = 0 with rFlat returns Q = 0 and ties all alternatives at rank 1', () => {
+        const pSFlat = makeProblem(
+          [
+            [10, 0],
+            [5, 5],
+            [0, 10],
+          ],
+          ['benefit', 'benefit'],
+        )
+        const rV1 = vikor.compute(pSFlat, [0.5, 0.5], { v: 1 })
+        expect(rV1.scores).toEqual([0, 0, 0])
+        expect(rV1.ranking).toEqual([1, 1, 1])
+      })
+
+      it('removeCriteria compounds SWARA step ratios when an intermediate criterion is removed and canonicalizes tied ROC ranks', () => {
+        const p4 = makeProblem(
+          [
+            [10, 20, 30, 40],
+            [15, 25, 10, 35],
+            [20, 10, 25, 30],
+          ],
+          ['benefit', 'benefit', 'benefit', 'benefit'],
+        )
+        const baseSwara = swara.compute(p4, { s: [0, 0.2, 0.5, 0.1] }).weights
+        const remSwara = removeCriteria(p4, baseSwara, rankerFor({ methodId: 'saw', params: {} }), swara, {
+          weightingParams: { s: [0, 0.2, 0.5, 0.1] } as unknown as Record<string, number>,
+        })
+        const renorm1 = remSwara.find((r) => r.j === 1 && r.mode === 'renormalize')!
+        const recomp1 = remSwara.find((r) => r.j === 1 && r.mode === 'recompute')!
+        // When criterion 1 (s_1 = 0.2) is removed, criterion 2's ratio against criterion 0 is (1+0.2)*(1+0.5) - 1 = 0.8,
+        // so recomputed weights match renormalized weights:
+        for (let j = 0; j < 4; j++) {
+          expect(recomp1.weights[j]).toBeCloseTo(renorm1.weights[j]!, 12)
+        }
+
+        const baseRoc = roc.compute(p4, { ranks: [1, 1, 3, 4] }).weights
+        const remRoc = removeCriteria(p4, baseRoc, rankerFor({ methodId: 'saw', params: {} }), roc, {
+          weightingParams: { ranks: [1, 1, 3, 4] } as unknown as Record<string, number>,
+        })
+        const recompRoc0 = remRoc.find((r) => r.j === 0 && r.mode === 'recompute')!
+        // Removing criterion 0 leaves criteria [1, 2, 3] with canonical ranks [1, 2, 3], not [1, 3, 3]:
+        expect(recompRoc0.weights[2]).toBeGreaterThan(recompRoc0.weights[3]!)
+      })
+
+      it('tokenKey normalizes Turkish ğ -> g so "Ağırlıklar" matches WEIGHT_SHEET_KEYS', () => {
+        expect(tokenKey('Ağırlıklar')).toBe('agirliklar')
+        expect(tokenKey('Ağırlık')).toBe('agirlik')
+      })
+
+      it('bwmProgress safely handles uninitialized judgements and reports CR once aBW is answered', () => {
+        let j = emptyJudgements(4)
+        j = { ...j, best: 0, worst: 3 }
+        const progBeforeAbw = bwmProgress(j, 4)
+        expect(progBeforeAbw.crInput).toBeNull()
+        j = setPair(j, 0, 3, 8)
+        const progPartial = bwmProgress(j, 4)
+        expect(progPartial.crInput).toBe(0)
+        expect(progPartial.threshold).not.toBeNull()
       })
     })
   })

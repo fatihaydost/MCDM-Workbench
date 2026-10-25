@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { COMPARE_ORDER, compareRankings, defaultPair, type Comparison } from '../../../core'
+import { COMPARE_ORDER, compareRankings, defaultPair, identicalRankings, pairFacts, type Comparison } from '../../../core'
 import { RankLines, type RankLinesColumn } from '../../../features/illustrations/RankLines'
 import { useNumberFormat } from '../../../i18n'
 import { isEmptyProblem, runFor, toProblem, useWeights, useWorkbench } from '../../../state/workbench'
@@ -8,9 +8,17 @@ import { Button, cn, EmptyState } from '../../../ui'
 import { viewOf } from '../../methods/views'
 import { useWorkbenchNav } from '../nav'
 import { BlockedByIssues } from '../parts'
-import { alternativeName, placeIssue, tr } from '../shared'
+import { alternativeName, criterionName, placeIssue, tr } from '../shared'
 import { useCompareText } from './text'
-import { WhyPanel } from './WhyPanel'
+import { whySentences } from './why'
+
+const ECHO_NOTE_KEYS = new Set([
+  'copras_saw',
+  'copras_ahp-ranking',
+  'ahp-ranking_copras',
+  'vikor_mabac',
+  'mabac_vikor',
+])
 
 /**
  * Compare: every ranking method on the same data and weights, each with its own saved options. Read only: nothing
@@ -55,28 +63,27 @@ export default function CompareStage() {
     // Only one independent ranking and its echoes ranked: one ranking, not a blocked comparison.
     const firstEcho = comparison?.echoes[0]
     const onlyEcho = !!comparison && !!firstEcho && comparison.ranked.length - comparison.echoes.length === 1
-    const echoSummary = firstEcho
-      ? tc('onlyOneRankingEcho', {
-          method: tr(t, `workbench.rankingMethod.${firstEcho.methodId}`),
-          of:
-            firstEcho.of === 'saw'
-              ? tc(firstEcho.methodId === 'ahp-ranking' || firstEcho.methodId === 'copras' ? 'sawSum' : 'sawLinear')
-              : tr(t, `workbench.rankingMethod.${firstEcho.of}`),
-        })
+    const echoSummary = comparison
+      ? comparison.echoes
+          .map((e) => {
+            if (e.methodId === 'marcos' && e.of === 'saw' && comparison.echoes.length === 1) return tc('onlyOneRanking')
+            const noteKey = `${e.methodId}_${e.of}`
+            if (ECHO_NOTE_KEYS.has(noteKey)) return tc(`echoNote.${noteKey}` as 'onlyOneRanking')
+            return tc('onlyOneRankingEcho', {
+              method: tr(t, `workbench.rankingMethod.${e.methodId}`),
+              of:
+                e.of === 'saw'
+                  ? tc(e.methodId === 'ahp-ranking' || e.methodId === 'copras' ? 'sawSum' : 'sawLinear')
+                  : tr(t, `workbench.rankingMethod.${e.of}`),
+            })
+          })
+          .join(' ')
       : ''
     return (
       <div className="flex flex-col gap-4">
         <EmptyState
           title={t('workbench.empty.compare.title')}
-          description={
-            comparison
-              ? onlyEcho
-                ? firstEcho.methodId === 'marcos' && firstEcho.of === 'saw'
-                  ? tc('onlyOneRanking')
-                  : echoSummary
-                : tc('blocked')
-              : tc('weightsBlocked')
-          }
+          description={comparison ? (onlyEcho ? echoSummary : tc('blocked')) : tc('weightsBlocked')}
           className="pb-2"
         />
         <BlockedByIssues issues={issues} problem={draft} />
@@ -90,7 +97,7 @@ export default function CompareStage() {
 /** The chart, its summary line and the "why" panel for the selected pair. */
 function CompareReady({ comparison, weights }: { comparison: Comparison; weights: number[] }) {
   const { t } = useTranslation()
-  const { t: tc } = useCompareText()
+  const { t: tc, i18n } = useCompareText()
   const draft = useWorkbench((s) => s.problem)
   const nf = useNumberFormat()
   // The pair belongs to one comparison: after an edit (other data, weights or options) it starts from the top two again.
@@ -99,6 +106,23 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
   const selected = pick.comparison === comparison ? pick.pair : defaultPair(comparison)
   const setSelected = (pair: [number, number]) => setPick({ comparison, pair })
   const names = draft.alternatives.map((_, i) => alternativeName(draft, i, t))
+
+  const hasCrossings = useMemo(() => {
+    const rs = comparison.runs.flatMap((r) => (r.result ? [r.result.ranking] : []))
+    const m = draft.alternatives.length
+    for (let p = 0; p < m; p++) {
+      for (let q = p + 1; q < m; q++) {
+        let aWins = false
+        let bWins = false
+        for (const r of rs) {
+          if (r[p]! < r[q]!) aWins = true
+          else if (r[p]! > r[q]!) bWins = true
+          if (aWins && bWins) return true
+        }
+      }
+    }
+    return false
+  }, [comparison, draft.alternatives.length])
 
   const columns: RankLinesColumn[] = comparison.runs.map((r) => {
     const label = tr(t, `workbench.rankingMethod.${r.methodId}`)
@@ -134,21 +158,26 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
       />
       <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-13 text-text-2" data-testid="compare-summary">
         {/* MARCOS = c x SAW (Linear): one order, counted once in Borda, W and the first place (decision 4, 18.10). */}
-        {echoes.map((e) => (
-          <span
-            key={e.methodId}
-            className="inline-flex h-5 items-center rounded-control border border-line-strong px-1.5 text-12 font-medium whitespace-nowrap text-text"
-            data-testid={`${e.methodId}-badge`}
-          >
-            {tc('echo', {
-              method: tr(t, `workbench.rankingMethod.${e.methodId}`),
-              of:
-                e.of === 'saw'
-                  ? tc(e.methodId === 'ahp-ranking' || e.methodId === 'copras' ? 'sawSum' : 'sawLinear')
-                  : tr(t, `workbench.rankingMethod.${e.of}`),
-            })}
-          </span>
-        ))}
+        {echoes.map((e) => {
+          const noteKey = `${e.methodId}_${e.of}`
+          const note = ECHO_NOTE_KEYS.has(noteKey) ? tc(`echoNote.${noteKey}` as 'onlyOneRanking') : undefined
+          return (
+            <span
+              key={e.methodId}
+              title={note}
+              className="inline-flex h-5 items-center rounded-control border border-line-strong px-1.5 text-12 font-medium whitespace-nowrap text-text"
+              data-testid={`${e.methodId}-badge`}
+            >
+              {tc('echo', {
+                method: tr(t, `workbench.rankingMethod.${e.methodId}`),
+                of:
+                  e.of === 'saw'
+                    ? tc(e.methodId === 'ahp-ranking' || e.methodId === 'copras' ? 'sawSum' : 'sawLinear')
+                    : tr(t, `workbench.rankingMethod.${e.of}`),
+              })}
+            </span>
+          )
+        })}
         {kendallW !== null && <span>{tc('summary.w', { w: nf.format(kendallW, 2) })}</span>}
         {firstPlace && <span>{tc('summary.first', { name: names[firstPlace.alternative]!, n: firstPlace.methods, of: firstPlace.of })}</span>}
         {ranked.length < runs.length && <span>{tc('summary.ranked', { n: ranked.length, of: runs.length })}</span>}
@@ -192,7 +221,28 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
           <span className="text-12 text-text-3">{tc('pair.hint')}</span>
         </div>
       )}
-      {selected && <WhyPanel comparison={comparison} weights={weights} pair={selected} names={names} />}
+      {selected && (() => {
+        const facts = pairFacts(toProblem(draft), weights, comparison, selected[0], selected[1])
+        const sentences = whySentences(facts, {
+          names,
+          criteria: draft.criteria.map((_, j) => criterionName(draft.criteria, j, t)),
+          methodLabel: (id) => tr(t, `workbench.rankingMethod.${id}`),
+          t: tc,
+          lang: i18n.language,
+          identical: identicalRankings(comparison),
+          hasCrossings,
+        })
+        return (
+          <section className="flex max-w-[880px] flex-col gap-1.5" data-testid="why-panel" aria-live="polite">
+            <h3 className="text-14 font-medium text-text">{tc('why.title', { a: names[facts.a], b: names[facts.b] })}</h3>
+            {sentences.map((s, i) => (
+              <p key={i} className="text-13 text-text-2">
+                {s}
+              </p>
+            ))}
+          </section>
+        )
+      })()}
       <CompareRankMatrix
         columns={columns}
         borda={comparison.borda?.ranking ?? null}

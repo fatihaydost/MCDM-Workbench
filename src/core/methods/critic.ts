@@ -5,6 +5,7 @@ import { assertValid, validateProblem } from '../validate'
 
 /** Below this many alternatives the correlations are unstable (m = 2 gives only ±1). */
 export const CRITIC_SMALL_M = 4
+export const CRITIC_DOMINANT_WEIGHT = 0.5
 
 /**
  * CRITIC (Diakoulaki, Mavrotas & Papayannakis 1995), origin variant:
@@ -25,10 +26,12 @@ export const critic: WeightingMethod = {
     const warnings: MethodWarning[] = issues
       .filter((x) => x.code === 'constant-column')
       .map((x) => ({ code: 'critic.constant-column', ...(x.col !== undefined && { col: x.col }) }))
-    if (m < CRITIC_SMALL_M) warnings.push({ code: 'critic.few-alternatives' })
 
     // 1. Min-max normalization; a constant column becomes all zeros (sigma 0 -> weight 0).
     const { r, constant, nearConstant } = minMaxNormalize(problem)
+    const allConstant = constant.every(Boolean)
+    const varying = constant.filter((c) => !c).length
+    if (m > 2 && m < CRITIC_SMALL_M && !allConstant) warnings.push({ code: 'critic.few-alternatives' })
     nearConstant.forEach((near, j) => near && warnings.push({ code: 'critic.near-constant-column', col: j }))
 
     // 2. Contrast: sample standard deviation per column.
@@ -54,25 +57,29 @@ export const critic: WeightingMethod = {
 
     // 5. Weights. With no information at all: every column constant -> equal weights; otherwise the columns that vary
     //    have no conflict with each other (only one varies, or they are perfectly correlated) -> they share equally.
-    const total = sum(information)
-    const allConstant = constant.every(Boolean)
-    const varying = constant.filter((c) => !c).length
-    if (m === 2 && !allConstant) warnings.push({ code: 'critic.two-alternatives' })
+    const rawTotal = sum(information)
+    const noConflict = !allConstant && (varying <= 1 || tied(rawTotal, 0))
+    if (m === 2 && varying >= 2) warnings.push({ code: 'critic.two-alternatives' })
     let weights: number[]
     if (allConstant) {
       warnings.push({ code: 'critic.all-constant-equal-weights' })
       weights = new Array<number>(n).fill(1 / n)
-    } else if (tied(total, 0)) {
+    } else if (noConflict) {
       // Exactly 0 in practice (min-max makes affinely related columns identical, so ρ = 1); the tolerance guards a
       // future normalization that leaves ρ a rounding error below 1.
+      conflict.fill(0)
+      information.fill(0)
       warnings.push({ code: 'critic.no-conflict-equal-weights' })
       weights = constant.map((c) => (c ? 0 : 1 / varying))
     } else {
-      weights = information.map((c) => c / total)
+      weights = information.map((c) => c / rawTotal)
     }
+    const total = sum(information)
 
     const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
-    if (!allConstant && weights[top]! > 0.5) warnings.push({ code: 'critic.dominant-weight', col: top })
+    if (!allConstant && varying > 1 && !noConflict && weights[top]! > CRITIC_DOMINANT_WEIGHT) {
+      warnings.push({ code: 'critic.dominant-weight', col: top })
+    }
 
     return {
       weights,

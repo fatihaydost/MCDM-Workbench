@@ -15,10 +15,12 @@ export const swara: MethodView<'weighting'> = {
   // The weights as bars, the largest in the accent.
   thumb: ({ problem, geometry }) => {
     const weights = method.compute(problem(EXAMPLE), { s: KERSULIENE_2010_S }).weights
-    return { kind: 'bars', values: weights, highlight: geometry.argMax(weights) }
+    const highlight =
+      weights.length > 1 && Math.max(...weights) - Math.min(...weights) > 1e-12 ? geometry.argMax(weights) : -1
+    return { kind: 'bars', values: weights, highlight }
   },
   columns: [
-    { step: 'swara.s', label: 'workbench.weights.columns.stepRatio', decimals: 2 },
+    { step: 'swara.s', label: 'workbench.weights.columns.stepRatio', decimals: 3 },
     { step: 'swara.q', label: 'workbench.weights.columns.recalculatedWeight', decimals: 4 },
   ],
   stage: preloadable(() => pictures().then((m) => ({ default: m.Stage }))),

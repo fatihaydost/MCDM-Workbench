@@ -102,6 +102,9 @@ export const codas: RankingMethod<CodasParams> = {
     const warnings: MethodWarning[] = []
     const maxE = maxOf(euclidean)
     if (maxE <= 1e-12) {
+      euclidean.fill(0)
+      taxicab.fill(0)
+      for (let i = 0; i < m; i++) relativeAssessment[i]!.fill(0)
       warnings.push({ code: 'codas.no-spread' })
     } else if (m >= 2 && !taxicabActive) {
       warnings.push({ code: 'codas.taxicab-inactive' })
@@ -109,12 +112,14 @@ export const codas: RankingMethod<CodasParams> = {
 
     // Step 6 (Eq. 9): Assessment score H_i = sum_k h_ik
     const scores = new Array<number>(m).fill(0)
-    for (let i = 0; i < m; i++) {
-      let total = 0
-      for (let k = 0; k < m; k++) {
-        total += relativeAssessment[i]![k]!
+    if (maxE > 1e-12) {
+      for (let i = 0; i < m; i++) {
+        let total = 0
+        for (let k = 0; k < m; k++) {
+          total += relativeAssessment[i]![k]!
+        }
+        scores[i] = total + 0
       }
-      scores[i] = total + 0
     }
 
     const steps: Step[] = [

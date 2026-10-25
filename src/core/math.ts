@@ -101,6 +101,10 @@ export function linearMaxNormalize(problem: Problem): number[][] {
   const r = zeros(m, n)
   for (let j = 0; j < n; j++) {
     const col = column(matrix, j)
+    if (isConstant(col)) {
+      for (let i = 0; i < m; i++) r[i]![j] = 1
+      continue
+    }
     const isCost = criteria[j]!.type === 'cost'
     const hi = maxOf(col)
     const lo = minOf(col)
@@ -130,8 +134,13 @@ export function pearson(xs: number[], ys: number[]): number {
     sxx += dx * dx
     syy += dy * dy
   }
-  const den = Math.sqrt(sxx) * Math.sqrt(syy)
-  return den === 0 ? 0 : Math.max(-1, Math.min(1, num / den))
+  const prod = sxx * syy
+  const den = Number.isFinite(prod) ? Math.sqrt(prod) : Math.sqrt(sxx) * Math.sqrt(syy)
+  if (den === 0) return 0
+  const r = Math.max(-1, Math.min(1, num / den))
+  if (Math.abs(1 - r) <= 1e-12) return 1
+  if (Math.abs(1 + r) <= 1e-12) return -1
+  return r
 }
 
 export const zeros = (m: number, n: number): number[][] => Array.from({ length: m }, () => new Array<number>(n).fill(0))
@@ -147,6 +156,17 @@ export function vectorNormalize(matrix: number[][]): { normalized: number[][]; z
   const zeroCols: number[] = []
 
   for (let j = 0; j < n; j++) {
+    const col = column(matrix, j)
+    if (isConstant(col)) {
+      const mu = mean(col)
+      if (Math.abs(mu) <= CONSTANT_TOLERANCE) {
+        zeroCols.push(j)
+        continue
+      }
+      const flat = (mu < 0 ? -1 : 1) / Math.sqrt(m)
+      for (let i = 0; i < m; i++) normalized[i]![j] = flat
+      continue
+    }
     let sumSq = 0
     for (let i = 0; i < m; i++) {
       const x = matrix[i]![j]!

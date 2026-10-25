@@ -251,7 +251,7 @@ export function ElectreIIdea({
                 key={i}
                 className={s.sawRow}
                 style={{ transform: `translate(0px, ${HEAD + row * rowStep}px)` }}
-                data-highlight={row === 0 || (stage >= 1 && inK) || undefined}
+                data-highlight={(stage >= 1 ? inK : row === 0) || undefined}
                 data-off={stage === 1 && !inK ? kernelOff : undefined}
                 data-testid="electre-i-row"
               >

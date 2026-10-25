@@ -1,4 +1,4 @@
-import { column, isConstant, maxOf, mean, sum, zeros } from '../math'
+import { column, isConstant, isNearConstant, maxOf, mean, sum, zeros } from '../math'
 import { rankScores } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, hasErrors, validateProblem, validateWeights, type ValidationIssue } from '../validate'
@@ -56,6 +56,9 @@ export const edas: RankingMethod = {
       if (isConstant(col)) {
         warnings.push({ code: 'edas.constant-column', col: j })
         continue
+      }
+      if ((weights[j] ?? 0) > 0 && isNearConstant(col)) {
+        warnings.push({ code: 'edas.near-constant-column', col: j })
       }
       if (col.some((x) => x < 0)) {
         warnings.push({ code: 'edas.negative-values', col: j })

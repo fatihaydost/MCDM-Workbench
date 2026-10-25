@@ -156,7 +156,7 @@ export function SdIdea({ problem, format = defaultFormat, labels, step, explain 
                 style={{
                   transform:
                     stage >= 2
-                      ? `translate(${x1}px, ${y - 7}px) scale(${Math.max(ww, 1)}, 14)`
+                      ? `translate(${x1}px, ${y - 7}px) scale(${ww > 0 ? Math.max(ww, 1) : 0}, 14)`
                       : `translate(${lo}px, ${y + 5}px) scale(${Math.max(hiX - lo, 1)}, 4)`,
                 }}
               />

@@ -126,17 +126,19 @@ export function MabacBorder({ problem, weights, format = defaultFormat, labels, 
   const rowText = (i: number) => l.row(names[i]!, texts[i]!, above[i]!, n)
 
   const valueWidth = Math.ceil(Math.max(...texts.map((t) => estimateTextWidth(t, FONT)))) + GAP
-  const scoreWidth = Math.round(Math.min(140, Math.max(56, W * 0.2)))
   const maxName = Math.max(...names.map((x) => estimateTextWidth(x, FONT)))
   const labelWidth = stacked ? 0 : Math.ceil(Math.min(maxName + GAP * 2, Math.max(W * 0.26, 64)))
   const stripLeft = labelWidth
-  const stripRight = Math.max(stripLeft + n, W - valueWidth - scoreWidth - GAP * 2)
-  const cell = (stripRight - stripLeft) / n
+  const avail = Math.max(80, W - stripLeft - valueWidth - GAP * 2)
+  const scoreWidth = Math.round(Math.min(140, Math.max(40, avail * 0.35)))
+  const stripRight = Math.max(stripLeft + 40, W - valueWidth - scoreWidth - GAP * 2)
+  const gridW = Math.max(stripRight - stripLeft, 40)
+  const cell = gridW / n
   const stick = Math.max(2, Math.min(14, cell * 0.55))
   const maxQ = Math.max(...q.flat().map(Math.abs), 1e-12)
   const unitQ = HALF / maxQ
 
-  const sLeft = stripRight + GAP * 2
+  const sLeft = stripLeft + gridW + GAP * 2
   const neg = Math.max(-Math.min(...scores), 0)
   const pos = Math.max(Math.max(...scores), 0)
   const unitS = scoreWidth / Math.max(neg + pos, 1e-12)
@@ -361,7 +363,10 @@ export function MabacSumLine({ problem, weights, format = defaultFormat, labels,
               </text>
             </g>
           ))}
-          {(Math.abs(border) <= 1e-9 ? [0, 1] : [-border, 0, 1 - border]).map((v, k) => (
+          {(Math.abs(border) <= 1e-9
+            ? [0, 1]
+            : [...(border * side >= 14 ? [-border] : []), 0, ...((1 - border) * side >= 14 ? [1 - border] : [])]
+          ).map((v, k) => (
             <text key={k} className={s.colHead} x={x(0) - 6} y={y(v)} textAnchor="end" dominantBaseline="central">
               {v === 0 ? format(0, 0) : signed(format, v, 2)}
             </text>

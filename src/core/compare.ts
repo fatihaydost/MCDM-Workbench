@@ -7,7 +7,7 @@
  */
 import { isConstant, maxOf, minOf } from './math'
 import { AHP_MAX_PAIRWISE_ALTERNATIVES } from './methods/ahp'
-import { rankScores } from './rank'
+import { rankScores, TIE_TOLERANCE } from './rank'
 import type { RankingId } from './registry'
 import { midRanks } from './robustness'
 import { prepareRanking, type RankingRun } from './run'
@@ -61,7 +61,9 @@ function findEchoes(
   const sawSum =
     ranked.has('saw') && runs.some((r) => r.methodId === 'saw' && r.params.normalization === 'sum')
   const ahpRun = runs.find((r) => r.methodId === 'ahp-ranking')
-  const hasPairwise = m <= AHP_MAX_PAIRWISE_ALTERNATIVES && Boolean(ahpRun?.judgements?.some((mat) => mat != null))
+  const hasPairwise =
+    m <= AHP_MAX_PAIRWISE_ALTERNATIVES &&
+    Boolean(ahpRun?.judgements?.some((mat, j) => mat != null && (weights[j] ?? 0) > 0))
   const ahpFromTable = ranked.has('ahp-ranking') && !hasPairwise
   if (ranked.has('marcos') && sawLinear) {
     echoes.push({ methodId: 'marcos', of: 'saw' })
@@ -81,17 +83,17 @@ function findEchoes(
     if (sawSum) echoes.push({ methodId: 'copras', of: 'saw' })
     else if (ahpFromTable) echoes.push({ methodId: 'copras', of: 'ahp-ranking' })
   }
-  if (ranked.has('vikor') && ranked.has('mabac')) {
+  const promRun = runs.find((r) => r.methodId === 'promethee-ii')
+  const promDefault = (promRun?.params.preferenceFunction ?? 'v-shape') === 'v-shape' && !promRun?.params.criteriaFunctions
+  if (ranked.has('vikor')) {
     const vikorRun = runs.find((r) => r.methodId === 'vikor')
     if (vikorRun && Number(vikorRun.params.v ?? 0.5) === 1) {
-      echoes.push({ methodId: 'vikor', of: 'mabac' })
+      if (ranked.has('mabac')) echoes.push({ methodId: 'vikor', of: 'mabac' })
+      else if (ranked.has('promethee-ii') && promDefault) echoes.push({ methodId: 'vikor', of: 'promethee-ii' })
     }
   }
-  if (ranked.has('promethee-ii') && ranked.has('mabac')) {
-    const promRun = runs.find((r) => r.methodId === 'promethee-ii')
-    if ((promRun?.params.preferenceFunction ?? 'v-shape') === 'v-shape' && !promRun?.params.criteriaFunctions) {
-      echoes.push({ methodId: 'promethee-ii', of: 'mabac' })
-    }
+  if (ranked.has('promethee-ii') && ranked.has('mabac') && promDefault) {
+    echoes.push({ methodId: 'promethee-ii', of: 'mabac' })
   }
   return echoes
 }
@@ -197,7 +199,7 @@ export function identicalRankings(c: Comparison): boolean {
   return rs.every((r) => r.every((x, i) => x === rs[0]![i]))
 }
 
-const argmax = (row: number[]) => row.reduce((best, x, j) => (x > row[best]! ? j : best), 0)
+const argmax = (row: number[]) => row.reduce((best, x, j) => (x > row[best]! + TIE_TOLERANCE ? j : best), 0)
 
 export function pairFacts(problem: Problem, weights: number[], c: Comparison, i: number, k: number): PairFacts {
   const br = c.borda?.ranking
@@ -222,21 +224,27 @@ export function pairFacts(problem: Problem, weights: number[], c: Comparison, i:
     .filter((x) => x.value > 0)
     .sort((x, y) => y.value - x.value)
   const top = allDecisive.slice(0, 3)
-  const split = methods.some((m) => m.higher === 'a') && methods.some((m) => m.higher === 'b')
+  const unanimous = methods.every((m) => m.higher === methods[0]!.higher)
+  const split = !unanimous
   if (split && top.length === 3 && top.every((x) => x.better === top[0]!.better)) {
     const other = allDecisive.find((x) => x.better !== top[0]!.better)
     if (other) top[2] = other
   }
   const decisive = top.map(({ col, better }) => ({ col, better }))
   const d = c.runs.find((r) => r.methodId === 'vikor')?.result?.steps.find((s) => s.key === 'vikor.weightedDistance')
+  const rowA = d?.matrix?.[a]
+  const rowB = d?.matrix?.[b]
+  const ra = rowA ? maxOf(rowA) : 0
+  const rb = rowB ? maxOf(rowB) : 0
   return {
     a,
     b,
     criteria: decisive,
     methods,
-    vikorRegret: d?.matrix
-      ? { a: argmax(d.matrix[a]!), b: argmax(d.matrix[b]!), ra: maxOf(d.matrix[a]!), rb: maxOf(d.matrix[b]!) }
-      : null,
-    unanimous: methods.every((m) => m.higher === methods[0]!.higher),
+    vikorRegret:
+      rowA && rowB && ra > 1e-12 && rb > 1e-12
+        ? { a: argmax(rowA), b: argmax(rowB), ra, rb }
+        : null,
+    unanimous,
   }
 }

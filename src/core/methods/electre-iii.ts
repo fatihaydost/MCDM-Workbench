@@ -1,6 +1,6 @@
-import { column, maxOf, minOf, sum } from '../math'
+import { column, isConstant, isNearConstant, maxOf, minOf, sum } from '../math'
 import { rankScores, TIE_TOLERANCE } from '../rank'
-import type { Problem, RankingMethod, Step } from '../types'
+import type { MethodWarning, Problem, RankingMethod, Step } from '../types'
 import { assertValid, validateProblem, validateRequirements, validateWeights } from '../validate'
 
 export type ElectreIIIThresholdPreset = 'standard' | 'strict' | 'veto'
@@ -245,8 +245,12 @@ export const electreIII: RankingMethod<ElectreIIIParams> = {
       throw new RangeError(`ELECTRE III v length (${params.v.length}) must match criteria count (${n})`)
     }
 
+    const warnings: MethodWarning[] = []
     const ranges = Array.from({ length: n }, (_, j) => {
       const col = column(matrix, j)
+      if ((weights[j] ?? 0) > 0 && !isConstant(col) && isNearConstant(col)) {
+        warnings.push({ code: 'electre-iii.near-constant-column', col: j })
+      }
       return maxOf(col) - minOf(col)
     })
 
@@ -348,7 +352,7 @@ export const electreIII: RankingMethod<ElectreIIIParams> = {
       ranking: rankScores(meanRank, 'asc'),
       steps,
       diagnostics: { incomparablePairs: incomparablePairs.length },
-      warnings: [],
+      warnings,
     }
   },
 }

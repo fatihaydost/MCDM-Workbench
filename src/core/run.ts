@@ -50,7 +50,7 @@ export type Ranker = (weights: number[]) => RankingResult
 /** What robustness analyses take: the ranker for a problem (the reduced one, for criterion removal). */
 export type RankerFor = (problem: Problem, removed?: number) => Ranker
 
-const PER_CRITERION_ARRAY_KEYS = ['q', 'p', 'v', 'mode', 'criteriaFunctions'] as const
+const PER_CRITERION_ARRAY_KEYS = ['q', 'p', 'v', 'mode', 'criteriaFunctions', 'optimal'] as const
 
 /** The throwing form for analyses: an unknown method is an Error, blocking issues a ProblemValidationError. */
 export const rankerFor =
@@ -59,17 +59,25 @@ export const rankerFor =
     if (!getRankingMethod(run.methodId)) throw new Error(`unknown ranking method ${run.methodId}`)
     let effectiveRun = run
     if (removed !== undefined) {
+      const fullCount = problem.criteria.length + 1
       const nextParams: Record<string, MethodParamValue> = { ...run.params }
       for (const key of PER_CRITERION_ARRAY_KEYS) {
         const val = run.params[key]
-        if (Array.isArray(val)) {
+        if (Array.isArray(val) && val.length === fullCount) {
           nextParams[key] = val.filter((_, idx) => idx !== removed) as unknown as MethodParamValue
         }
       }
       effectiveRun = {
         ...run,
         params: nextParams,
-        ...(run.judgements ? { judgements: run.judgements.filter((_, idx) => idx !== removed) } : {}),
+        ...(run.judgements
+          ? {
+              judgements:
+                run.judgements.length === fullCount
+                  ? run.judgements.filter((_, idx) => idx !== removed)
+                  : run.judgements,
+            }
+          : {}),
       }
     }
     const { issues, rank } = prepareRanking(problem, effectiveRun)

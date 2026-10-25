@@ -52,9 +52,17 @@ export function NumberInput({
   const display = (v: number | null) => (decimals === undefined ? nf.formatRaw(v) : nf.format(v, decimals))
   // Draft text while editing; null means "show the formatted value".
   const [draft, setDraft] = useState<string | null>(null)
-  const text = draft ?? display(value)
+  const [prevValue, setPrevValue] = useState(value)
   const parsed = draft === null ? value : nf.parse(draft)
-  const draftInvalid = draft !== null && draft.trim() !== '' && parsed === null
+  if (prevValue !== value) {
+    setPrevValue(value)
+    if (draft !== null && value !== parsed) {
+      setDraft(null)
+    }
+  }
+  const activeDraft = prevValue !== value && draft !== null && value !== parsed ? null : draft
+  const text = activeDraft ?? display(value)
+  const draftInvalid = activeDraft !== null && activeDraft.trim() !== '' && (activeDraft === null ? value : nf.parse(activeDraft)) === null
 
   const f = useFieldProps({
     id,

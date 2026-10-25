@@ -633,18 +633,35 @@ export function removeCriteria(
       next.order = rawOrder
         .filter((c) => c !== j)
         .map((c) => (typeof c === 'number' && c > j ? c - 1 : c)) as unknown as MethodParamValue
-      if (Array.isArray(rawS) && rawS.length === n && pos >= 0) {
-        const reducedS = rawS.filter((_, idx) => idx !== pos)
+      if (Array.isArray(rawS) && (rawS.length === n || rawS.length === n - 1) && pos >= 0) {
+        const fullS = (rawS.length === n ? [...rawS] : [0, ...rawS]).map((x) => Number(x ?? 0))
+        if (pos > 0 && pos < n - 1) {
+          fullS[pos + 1] = (1 + fullS[pos]!) * (1 + fullS[pos + 1]!) - 1
+        }
+        const reducedS = fullS.filter((_, idx) => idx !== pos)
         if (reducedS.length > 0) reducedS[0] = 0
         next.s = reducedS as unknown as MethodParamValue
       }
-    } else if (Array.isArray(rawS) && rawS.length === n) {
-      const reducedS = rawS.filter((_, c) => c !== j)
+    } else if (Array.isArray(rawS) && (rawS.length === n || rawS.length === n - 1)) {
+      const fullS = (rawS.length === n ? [...rawS] : [0, ...rawS]).map((x) => Number(x ?? 0))
+      if (j > 0 && j < n - 1) {
+        fullS[j + 1] = (1 + fullS[j]!) * (1 + fullS[j + 1]!) - 1
+      }
+      const reducedS = fullS.filter((_, c) => c !== j)
       if (reducedS.length > 0) reducedS[0] = 0
       next.s = reducedS as unknown as MethodParamValue
     }
     if (Array.isArray(rawRanks) && rawRanks.length === n) {
-      next.ranks = rawRanks.filter((_, c) => c !== j) as unknown as MethodParamValue
+      const filtered = rawRanks.filter((_, c) => c !== j).map((r) => Number(r))
+      const sorted = filtered.map((v, idx) => ({ v, idx })).sort((a, b) => a.v - b.v)
+      const compRanks = new Array<number>(filtered.length).fill(1)
+      for (let start = 0; start < sorted.length; ) {
+        let end = start
+        while (end + 1 < sorted.length && sorted[end + 1]!.v === sorted[start]!.v) end++
+        for (let p = start; p <= end; p++) compRanks[sorted[p]!.idx] = start + 1
+        start = end + 1
+      }
+      next.ranks = compRanks as unknown as MethodParamValue
     }
     return next
   }

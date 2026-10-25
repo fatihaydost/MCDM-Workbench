@@ -22,8 +22,8 @@ export type XlsxImportResult = Omit<ImportResult, 'problem'> & {
   sheet: string
 }
 
-const PREFERRED_SHEET_KEYS = new Set(['decision matrix', 'karar matrisi'])
-const WEIGHT_SHEET_KEYS = new Set(['weights', 'weight', 'agirliklar', 'agirlik'])
+const PREFERRED_SHEET_KEYS = new Set(['decision matrix', 'karar matrisi', 'data', 'veri'])
+const WEIGHT_SHEET_KEYS = new Set(['weights', 'weight', 'agirliklar', 'agirlik', 'ağirliklar', 'ağirlik'])
 const WEIGHT_MARKS = /^(?:weights?|agirlik(?:lar)?|ağirlik(?:lar)?|ağırlık(?:lar)?)(?:\s*\(.*\))?$/i
 
 export function isWeightRowLabel(cell: unknown): boolean {
@@ -297,7 +297,7 @@ function toSheet(
       row.forEach((c, j) => {
         if (typeof c !== 'number' || countColumns.includes(j)) return
         const cell = ws[X.utils.encode_cell({ r, c: j })] as XLSX.CellObject | undefined
-        if (cell && cell.t === 'n') cell.z = intCell?.(r, j) ? INTEGER_NUMBER_FORMAT : numFmt
+        if (cell && cell.t === 'n') cell.z = intCell?.(r, j) ? (Number.isInteger(c) ? INTEGER_NUMBER_FORMAT : '0.0') : numFmt
       }),
     )
   }

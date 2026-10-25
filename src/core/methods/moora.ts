@@ -1,4 +1,4 @@
-import { vectorNormalize } from '../math'
+import { column, isConstant, isNearConstant, vectorNormalize } from '../math'
 import { rankScores } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, validateProblem, validateWeights } from '../validate'
@@ -24,7 +24,15 @@ export const moora: RankingMethod = {
     const m = matrix.length
 
     const { normalized, zeroCols } = vectorNormalize(matrix)
-    const warnings: MethodWarning[] = zeroCols.map((col) => ({ code: 'moora.zero-column', col }))
+    const warnings: MethodWarning[] = zeroCols
+      .filter((col) => (weights[col] ?? 0) > 0)
+      .map((col) => ({ code: 'moora.zero-column', col }))
+    for (let j = 0; j < n; j++) {
+      const rawCol = column(matrix, j)
+      if (!isConstant(rawCol) && isNearConstant(rawCol) && (weights[j] ?? 0) > 0) {
+        warnings.push({ code: 'moora.near-constant-column', col: j })
+      }
+    }
 
     const weighted = normalized.map((row) => row.map((r, j) => r * weights[j]! + 0))
 

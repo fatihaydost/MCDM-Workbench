@@ -63,20 +63,22 @@ export function PerturbSection({ problem, weights, run, names, criteria }: Props
   const table = {
     corner: t('sweep.criterion'),
     columns: [t('perturb.change'), t('perturb.firstPlace'), t('perturb.ws'), 'ρ'],
-    rows: rows.map((r) => {
-      const na = !applicable(r, weights)
-      if (r.blocked && !na)
-        return { label: criteria[r.k] ?? '', cells: [formatDelta(r.delta, nf.lang), blockedText(r), '', ''] }
-      return {
-        label: criteria[r.k] ?? '',
-        cells: [
-          formatDelta(r.delta, nf.lang),
-          na ? t('perturb.na') : r.sameTop ? t('perturb.same') : t('perturb.changed', { name: leader(r.ranking) }),
-          na ? t('perturb.na') : nf.format(r.ws),
-          na ? t('perturb.na') : nf.format(r.spearman, 3),
-        ],
-      }
-    }),
+    rows: grid.flatMap((cells, j) =>
+      cells.map((r, d) => {
+        const na = !r || !applicable(r, weights)
+        if (!na && r.blocked)
+          return { label: criteria[j] ?? '', cells: [deltaText[d]!, blockedText(r), '', ''] }
+        return {
+          label: criteria[j] ?? '',
+          cells: [
+            deltaText[d]!,
+            na ? t('perturb.na') : r.sameTop ? t('perturb.same') : t('perturb.changed', { name: leader(r.ranking) }),
+            na ? t('perturb.na') : nf.format(r.ws),
+            na ? t('perturb.na') : nf.format(r.spearman, 3),
+          ],
+        }
+      }),
+    ),
   }
   const changes = rows.filter((r) => applicable(r, weights) && !r.sameTop && !r.blocked)
   const blocked = rows.filter((r) => applicable(r, weights) && r.blocked)

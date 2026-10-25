@@ -220,7 +220,7 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
               {/* × */}
               <path className={`${s.op} ${s.stageItem}`} data-off={off(1)} d={`M${x1 - OP / 2 - 3} ${y - 3}l6 6m0 -6l-6 6`} />
               {/* Conflict. */}
-              <rect className={`${s.bar} ${s.stageItem}`} data-off={off(1)} x={x1} y={y - 5} width={Math.max(cw, 1)} height={10} />
+              <rect className={`${s.bar} ${s.stageItem}`} data-off={off(1)} x={x1} y={y - 5} width={cw > 0 ? Math.max(cw, 1) : 0} height={10} />
               {/* → */}
               <path className={`${s.op} ${s.stageItem}`} data-off={off(2)} d={`M${x2 - OP + 5} ${y}h${OP - 10}m-3.5 -3.5 3.5 3.5 -3.5 3.5`} />
               {/* Information, then weight: a unit square moved and stretched by transform. Before step 2 it waits,
@@ -235,7 +235,7 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
                   transform:
                     stage >= 2
                       ? `translate(${x2}px, ${y - 7}px) scale(${bw > 0 ? Math.max(bw, 1) : 0}, 14)`
-                      : `translate(${x1}px, ${y - 5}px) scale(${Math.max(cw, 1)}, 10)`,
+                      : `translate(${x1}px, ${y - 5}px) scale(${cw > 0 ? Math.max(cw, 1) : 0}, 10)`,
                 }}
               />
               {/* Information C at step 2, the weight after it: two texts that cross-fade, not one that swaps. */}

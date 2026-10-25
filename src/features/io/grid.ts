@@ -88,6 +88,7 @@ export function tokenKey(text: string): string {
     .toLowerCase()
     .replace(/̇/g, '')
     .replace(/ı/g, 'i')
+    .replace(/ğ/g, 'g')
     .replace(/[↑↓▲▼]/g, '')
     .replace(/[.:]+$/, '')
     .trim()

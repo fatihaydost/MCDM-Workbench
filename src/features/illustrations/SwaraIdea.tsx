@@ -110,7 +110,11 @@ export function SwaraIdea({
     new Set(order).size === n
       ? order
       : problem.criteria.map((_, j) => j)
-  const hi = argMax(computed.weights)
+  const hasCustomOrder = perm.some((c, i) => c !== i)
+  const displayName = (j: number) =>
+    hasCustomOrder ? `${problem.criteria[j]!.name} (#${perm.indexOf(j) + 1})` : problem.criteria[j]!.name
+  const hasSpread = computed.weights.length > 1 && Math.max(...computed.weights) - Math.min(...computed.weights) > 1e-12
+  const hi = hasSpread ? argMax(computed.weights) : -1
   const weightTexts = computed.weights.map((w) => format(w))
   const sTexts = computed.s.map((v, j) => (perm.indexOf(j) === 0 && v === 0 ? '0' : format(v)))
 
@@ -118,7 +122,7 @@ export function SwaraIdea({
   const W = Math.max(width, 280)
   const sColW = Math.ceil(Math.max(44, ...sTexts.map((t) => estimateTextWidth(t, 12) + 10)))
   const nameW = Math.ceil(
-    Math.min(Math.max(...problem.criteria.map((c) => estimateTextWidth(c.name, 13))) + 12, W * 0.24),
+    Math.min(Math.max(...problem.criteria.map((_, j) => estimateTextWidth(displayName(j), 13))) + 12, W * 0.24),
   )
   const valueW = Math.ceil(Math.max(...weightTexts.map((t) => estimateTextWidth(t, 13))) + 8)
   const free = Math.max(120, W - nameW - sColW - valueW - OP)
@@ -178,10 +182,11 @@ export function SwaraIdea({
           {truncate(l.weight, weightW + valueW, 12)}
         </text>
         <line className={s.rowRule} x1={0} x2={W} y1={HEAD - 0.5} y2={HEAD - 0.5} />
-        {problem.criteria.map((c, j) => {
+        {problem.criteria.map((_c, j) => {
           const y = HEAD + j * ROW + ROW / 2
           const rankIdx = perm.indexOf(j)
           const isFirstRank = rankIdx === 0
+          const isAdjacentChain = rankIdx > 0 && perm[rankIdx - 1] === j - 1
           const qVal = computed.q[j]!
           const prevQ = !isFirstRank && rankIdx > 0 ? computed.q[perm[rankIdx - 1]!]! : qVal
           const xZero = strip(0)
@@ -189,11 +194,12 @@ export function SwaraIdea({
           const xPrevQ = strip(Math.min(1, Math.max(0, prevQ)))
           const ww = (computed.weights[j]! / maxW) * weightW
           const on = j === hi
-          const short = truncate(c.name, nameW - 12, 13)
+          const labelText = displayName(j)
+          const short = truncate(labelText, nameW - 12, 13)
           return (
             <g key={j} data-criterion={j}>
               <text className={s.critName} x={0} y={y} dominantBaseline="central">
-                {short !== c.name ? <title>{c.name}</title> : null}
+                {short !== labelText ? <title>{labelText}</title> : null}
                 {short}
               </text>
               <text className={s.barValue} x={xS} y={y} dominantBaseline="central" data-highlight={on || undefined}>
@@ -201,7 +207,7 @@ export function SwaraIdea({
               </text>
               <line className={s.stripBase} x1={xZero} x2={strip(1)} y1={y} y2={y} />
               {/* Stage 1+: step-down guide from previous ranked criterion's q and q_j ruler */}
-              {!isFirstRank && xPrevQ > xQ + 0.5 ? (
+              {isAdjacentChain && xPrevQ > xQ + 0.5 ? (
                 <path
                   className={`${s.op} ${s.stageItem}`}
                   data-off={off(1)}

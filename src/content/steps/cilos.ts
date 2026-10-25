@@ -50,8 +50,8 @@ export const cilos = {
       tr: 'Ağırlıklar toplamı 1 olacak biçimde F q = 0 doğrusal sistemini çözün.',
       tex: 'F q = 0, \\qquad \\sum_{j=1}^{n} q_j = 1, \\qquad w_j = q_j',
       edgeCase: {
-        en: 'If all varying criteria share one winner, they share the weight equally.',
-        tr: 'Değişen tüm kriterler aynı kazananı paylaşırsa ağırlığı eşit paylaşırlar.',
+        en: 'In zero-loss or reducible systems, k varying criteria share 1/k equally (or 1/n).',
+        tr: 'Sıfır kayıplı veya indirgenebilir sistemde k değişken kriter 1/k eşit alır (veya 1/n).',
       },
       symbol: 'w',
       texSymbol: '$w_j$',
