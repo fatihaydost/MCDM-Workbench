@@ -89,22 +89,18 @@ export const electreIII: MethodView<'ranking'> = {
     const dec = format(0.5).includes(',') ? ',' : '.'
     const meanRankStr = meanRank.toFixed(1).replace('.', dec)
     const rankDetails = set.map((i) => `r↓ = ${desc[i] ?? 1}, r↑ = ${asc[i] ?? 1}`).join(' / ')
-    const isTr = t('workbench.ranking.columns.rank') === 'Sıra'
-    const resultText =
+    const key =
       set.length === 1
-        ? isTr
-          ? `İlk sırada ${list} (r̄ = ${meanRankStr}: ${rankDetails})`
-          : `${list} ranks first (r̄ = ${meanRankStr}: ${rankDetails})`
-        : isTr
-          ? `${list} ilk sırayı paylaşıyor (r̄ = ${meanRankStr}: ${rankDetails})`
-          : `${list} share first place (r̄ = ${meanRankStr}: ${rankDetails})`
+        ? 'workbench.results.electreIIIVerdict.rankFirst'
+        : 'workbench.results.electreIIIVerdict.shareFirst'
+    const resultText = t(key, { names: list, meanRank: meanRankStr, details: rankDetails })
     return {
       set,
       failed: [],
       result: resultText,
       about: [
         [
-          isTr ? 'Damıtma sırası (r̄)' : 'Distillation rank (r̄)',
+          t('workbench.results.electreIIIVerdict.distillationRank'),
           `${list} (r̄ = ${meanRankStr}: ${rankDetails})`,
         ],
       ],

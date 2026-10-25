@@ -797,32 +797,6 @@ export const riskyCombinations: readonly RiskyCombination[] = [
   },
 ]
 
-export type PairAdvisory = {
-  id: string
-  weighting: MethodId
-  ranking: MethodId[]
-  basis: Basis
-  note: Bilingual
-  sources: Source[]
-}
-
-export const pairAdvisories: readonly PairAdvisory[] = [
-  {
-    id: 'sd-range-ranking',
-    weighting: 'sd',
-    ranking: ['topsis', 'vikor', 'mabac', 'cocoso', 'edas', 'codas', 'moora'],
-    basis: 'analysis',
-    note: {
-      en: 'SD weights criteria by their min-max standard deviation; when paired with a min-max or distance-based ranking method, the spread of a noisy criterion enters both the weights and the normalized distances.',
-      tr: 'SD kriterleri min-maks standart sapmalarına göre ağırlıklandırır; min-maks ya da uzaklık tabanlı bir sıralama yöntemiyle eşleştirildiğinde gürültülü bir kriterin yayılımı hem ağırlıklara hem de normalize uzaklıklara girer.',
-    },
-    sources: [
-      { label: 'Choo, Schoner & Wedley (1999), Computers & Industrial Engineering 37, 527-541', doi: '10.1016/S0360-8352(00)00019-X' },
-      { label: 'Mukhametzyanov (2021), DMAME 4(2), 76-105', doi: '10.31181/dmame210402076i' },
-    ],
-  },
-]
-
 // ---------------------------------------------------------------------------
 // C-D. Robustness and rank aggregation
 // ---------------------------------------------------------------------------

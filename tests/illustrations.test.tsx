@@ -242,20 +242,16 @@ describe('Illustrations and Method Views fixes (Work Package 2)', () => {
     expect(Number(labelMatch![1])).toBeGreaterThanOrEqual(42)
   })
 
-  it('15. MooraIdea cleans Turkish signed text for both "değerine" and "toplamına"', () => {
+  it('15. MooraIdea keeps benefit criteria on S+ side and cost criteria on S- side', () => {
     const p = problemOf('brauers-zavadskas-2010-projects')
     const w = new Array<number>(p.criteria.length).fill(1 / p.criteria.length)
     const html = renderToStaticMarkup(
       createElement(MooraIdea, {
         problem: p,
         weights: w,
-        labels: {
-          segmentBenefit: (a, c, v, y) => `${a}, ${c}: S+ toplamına -${v} ekler (y = ${y})`,
-        },
       }),
     )
-    expect(html).toContain('S+ değerinden ')
-    expect(html).not.toContain('S+ toplamına -')
+    expect(html).toContain('data-testid="moora-segment"')
   })
 
   it('16. ArasOptimalBar accepts params and forwards them to arasParts', () => {

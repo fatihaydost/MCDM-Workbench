@@ -8,8 +8,6 @@ export type EntropyParams = { normalization?: EntropyNormalization }
 
 /** A weight above this share gets a notice: one criterion decides most of the result. */
 export const ENTROPY_DOMINANT_WEIGHT = 0.5
-/** Below this total diversification every criterion counts as constant and the weights fall back to 1/n. */
-export const ENTROPY_NO_INFORMATION = 1e-12
 
 /**
  * Entropy weighting (Shannon information measure as an MCDM weighting; Zeleny 1982, Hwang & Yoon 1981).
@@ -44,7 +42,7 @@ export const entropy: WeightingMethod<EntropyParams> = {
     const { matrix, criteria } = problem
     const m = matrix.length
     const n = criteria.length
-    const mLogM = m * Math.log(m)
+    const k = 1 / Math.log(m)
     const warnings: MethodWarning[] = []
     // Constant up to rounding (0.3 and 0.1 + 0.2 are the same value), so min-max never stretches noise to [0, 1].
     const constant = Array.from({ length: n }, (_, j) => isConstant(column(matrix, j)))
@@ -72,30 +70,20 @@ export const entropy: WeightingMethod<EntropyParams> = {
       }
       // Not constant, so the column total is above 0: (sum) values are >= 0 and not all equal, (minmax) the best is 1.
       const total = sum(column(base, j))
-      let klSum = 0
+      let h = 0
       for (let i = 0; i < m; i++) {
         const pij = base[i]![j]! / total
         p[i]![j] = pij
-        if (pij === 0) {
-          klSum += 1
-        } else {
-          const u = m * pij - 1
-          if (Math.abs(u) < 1e-4) {
-            klSum += u * u * (1 / 2 - u / 6 + (u * u) / 12 - (u * u * u) / 20 + (u * u * u * u) / 30)
-          } else {
-            klSum += (1 + u) * Math.log1p(u) - u
-          }
-        }
+        if (pij > 0) h += pij * Math.log(pij)
       }
-      const dj = Math.max(0, klSum / mLogM)
-      d[j] = dj
-      e[j] = 1 - dj
+      e[j] = -k * h
+      d[j] = Math.max(0, 1 - e[j]!)
       if (variant === 'sum' && rawCol.some((v) => v === 0)) warnings.push({ code: 'entropy.zeros-in-column', col: j })
     }
 
     // 5. Weights; with no diversification at all there is nothing to weigh: equal weights across varying columns (or all if all constant).
     const totalD = sum(d)
-    const allConstant = constant.every(Boolean) || totalD <= Number.MIN_VALUE
+    const allConstant = constant.every(Boolean) || totalD === 0
     if (allConstant) warnings.push({ code: 'entropy.all-constant-equal-weights' })
     const varying = constant.filter((c) => !c).length
     const weights = allConstant

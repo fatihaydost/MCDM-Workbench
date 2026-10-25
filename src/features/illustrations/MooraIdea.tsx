@@ -195,23 +195,13 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
   const altAt = (r: number) => (stage >= 2 ? order[r]! : r)
   const shown = active && !stepping ? { i: altAt(active.row), j: active.col } : null
   const legendCols = Array.from({ length: Math.min(n, SAW_CATEGORY_COLOURS) }, (_, j) => j)
-  const cleanSignedText = (text: string) =>
-    text
-      .replace(/\+\s*[−-]/g, '−')
-      .replace(/[−-]\s*[−-]/g, '+')
-      .replace(/\badds\s+[−-](\S+)\s+to\b/g, 'subtracts $1 from')
-      .replace(/\badds\s+[−-]/g, 'subtracts ')
-      .replace(/\bsubtracts\s+[−-]/g, 'adds ')
-      .replace(/S\+\s+(?:değerine|toplamına)\s+[−-](\S+)\s+ekler/g, 'S+ değerinden $1 düşer')
-      .replace(/[−-](\S+)\s+düşer/g, '$1 ekler')
   const readout = (i: number, j: number) => {
     const val = stage === 0 ? normalized[i]![j]! : parts.weighted[i]![j]!
     if (val === 0) return l.readoutZero(names[i]!, critNames[j]!)
     const isCostCol = problem.criteria[j]?.type === 'cost'
-    const text = isCostCol
+    return isCostCol
       ? l.readoutCost(names[i]!, critNames[j]!, format(val))
       : l.readoutBenefit(names[i]!, critNames[j]!, format(val))
-    return cleanSignedText(text)
   }
 
   return (
@@ -273,8 +263,8 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
                     rawVal === 0
                       ? l.segmentZero(name, critNames[g.col]!, texts[i]!)
                       : isCost[g.col]
-                        ? cleanSignedText(l.segmentCost(name, critNames[g.col]!, fmtVal, texts[i]!))
-                        : cleanSignedText(l.segmentBenefit(name, critNames[g.col]!, fmtVal, texts[i]!))
+                        ? l.segmentCost(name, critNames[g.col]!, fmtVal, texts[i]!)
+                        : l.segmentBenefit(name, critNames[g.col]!, fmtVal, texts[i]!)
                   return (
                     <rect
                       key={g.col}

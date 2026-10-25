@@ -24,7 +24,6 @@ import {
 
 registerLanguages({ en: enJson })
 initI18n('en')
-useWorkbench.getInitialState = useWorkbench.getState
 
 const mockNav: WorkbenchNav = {
   goTo: () => {},
@@ -44,7 +43,7 @@ function withProviders(node: ReactNode) {
 }
 
 describe('Workbench UI, State Store, and WorkedCalculation fixes (Work Package 3)', () => {
-  it('1a. computeWeights with equal method preserves equal.constant-column warning and ComputedWeights renders it', () => {
+  it('1a. computeWeights with equal method does not inspect the matrix and ComputedWeights renders it', () => {
     const draft: DraftProblem = {
       alternatives: ['A1', 'A2', 'A3'],
       criteria: [
@@ -59,7 +58,8 @@ describe('Workbench UI, State Store, and WorkedCalculation fixes (Work Package 3
     }
     const w = computeWeights({ problem: draft, weightMethod: 'equal', manualWeights: [] })
     expect(w.value).not.toBeNull()
-    expect(w.value!.warnings).toEqual([{ code: 'equal.constant-column', col: 0 }])
+    expect(w.value!.weights).toEqual([0.5, 0.5])
+    expect(w.value!.warnings).toBeUndefined()
 
     const html = renderToStaticMarkup(withProviders(createElement(ComputedWeights, { problem: draft, method: 'equal', result: w.value! })))
     expect(html).toContain('C1')

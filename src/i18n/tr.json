@@ -805,6 +805,11 @@
         "kernelWithCycles": "Üstünlük çekirdeği K (döngüler daraltıldıktan sonra): {{names}}",
         "emptyKernel": "Üstünlük çekirdeği K boş."
       },
+      "electreIIIVerdict": {
+        "rankFirst": "İlk sırada {{names}} (r̄ = {{meanRank}}: {{details}})",
+        "shareFirst": "{{names}} ilk sırayı paylaşıyor (r̄ = {{meanRank}}: {{details}})",
+        "distillationRank": "Damıtma sırası (r̄)"
+      },
       "byline": "Ağırlık: {{weights}}. Sıralama: {{ranking}}. {{m}} alternatif, {{n}} kriter.",
       "about": {
         "tool": "Araç",
@@ -1148,6 +1153,10 @@
         "others": "Diğer kriterler",
         "segment": "{{alternative}}, {{criterion}}: {{value}} (S = {{score}})",
         "readout": "{{alternative}}: {{criterion}} katkısı {{value}}, S = {{score}}"
+      },
+      "ahpRanking": {
+        "segment": "{{alternative}}, {{criterion}}: {{value}} (P = {{score}})",
+        "readout": "{{alternative}}: {{criterion}} katkısı {{value}}, P = {{score}}"
       },
       "vikor": {
         "title": "Grup faydası ve bireysel pişmanlık",
@@ -2391,9 +2400,6 @@
       "zero-column": "{{criterion}} kriterinin bütün değerleri 0, bu yüzden sıralamayı etkilemiyor.",
       "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, bu yüzden vektör normalize oranları alternatifler arasında neredeyse aynı kalıyor. Farkın gerçek olup olmadığını kontrol edin.",
       "negative-values": "{{criterion}} negatif değerler içeriyor; vektör normalizasyonu sütun normunda karelerini alıp işaretlerini koruduğundan MOORA öteleme-değişmez değildir."
-    },
-    "equal": {
-      "constant-column": "{{criterion}} kriteri tüm alternatiflerde sabittir; eşit ağırlıklandırma yine de 1/n ağırlık verir ve toplamsal sıralamalara sabit bir kayma ekler."
     }
   }
 }

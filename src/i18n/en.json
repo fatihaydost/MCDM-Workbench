@@ -805,6 +805,11 @@
         "kernelWithCycles": "Outranking kernel K (after condensing cycles): {{names}}",
         "emptyKernel": "Outranking kernel K is empty."
       },
+      "electreIIIVerdict": {
+        "rankFirst": "{{names}} ranks first (r̄ = {{meanRank}}: {{details}})",
+        "shareFirst": "{{names}} share first place (r̄ = {{meanRank}}: {{details}})",
+        "distillationRank": "Distillation rank (r̄)"
+      },
       "byline": "Weights: {{weights}}. Ranking: {{ranking}}. {{m}} alternatives, {{n}} criteria.",
       "about": {
         "tool": "Tool",
@@ -1148,6 +1153,10 @@
         "others": "Other criteria",
         "segment": "{{alternative}}, {{criterion}}: {{value}} (S = {{score}})",
         "readout": "{{alternative}}: {{criterion}} adds {{value}} to S = {{score}}"
+      },
+      "ahpRanking": {
+        "segment": "{{alternative}}, {{criterion}}: {{value}} (P = {{score}})",
+        "readout": "{{alternative}}: {{criterion}} adds {{value}} to P = {{score}}"
       },
       "vikor": {
         "title": "Group utility against individual regret",
@@ -2391,9 +2400,6 @@
       "zero-column": "Every value of {{criterion}} is 0, so it does not affect the ranking.",
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, so its vector-normalized ratios are nearly identical across alternatives. Check whether the difference is real.",
       "negative-values": "{{criterion}} has negative values; vector normalization squares them in the column norm while keeping their sign, so MOORA is not shift-invariant."
-    },
-    "equal": {
-      "constant-column": "Criterion {{criterion}} is constant across all alternatives; equal weighting still assigns it 1/n, which adds a constant offset to additive rankings."
     }
   }
 }

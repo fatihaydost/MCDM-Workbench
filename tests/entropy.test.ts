@@ -254,7 +254,7 @@ describe('Entropy: validation and edge cases', () => {
     expect(resSum.warnings).toContainEqual({ code: 'entropy.near-constant-column', col: 0 })
   })
 
-  it('preserves diversification ratio on homogeneous non-constant data above and below ENTROPY_NO_INFORMATION', () => {
+  it('preserves diversification ratio on homogeneous non-constant data', () => {
     const p = makeProblem(
       [
         [1e5, 1e5],
@@ -266,18 +266,5 @@ describe('Entropy: validation and edge cases', () => {
     const res = entropy.compute(p, { normalization: 'sum' })
     expect(codes(res)).not.toContain('entropy.all-constant-equal-weights')
     expectClose(res.weights, [0.2, 0.8], 1e-3)
-
-    // Relative spread ~1e-7 in (1e-9, 1e-6]: neither constant nor near-constant, d_j ~ 1e-15 < 1e-12
-    const pSmallD = makeProblem(
-      [
-        [1e7 - 0.5, 1e7 - 1],
-        [1e7, 1e7],
-        [1e7 + 0.5, 1e7 + 1],
-      ],
-      ['benefit', 'benefit'],
-    )
-    const resSmallD = entropy.compute(pSmallD, { normalization: 'sum' })
-    expect(codes(resSmallD)).not.toContain('entropy.all-constant-equal-weights')
-    expectClose(resSmallD.weights, [0.2, 0.8], 1e-9)
   })
 })

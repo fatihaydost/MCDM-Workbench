@@ -81,7 +81,6 @@ import {
 } from '../src/core/math'
 import { reweight } from '../src/core/reweight'
 import { rankScores, tied } from '../src/core/rank'
-import { ENTROPY_NO_INFORMATION } from '../src/core/methods/entropy'
 import {
   createRng,
   kendallTauB,
@@ -1105,7 +1104,7 @@ describe('Mathematician 1 Weighting, Judgements, and Numerical Algebra Audits', 
     }
     const res = entropy.compute(p, { normalization: 'sum' })
     const dStep = res.steps.find((s) => s.key === 'entropy.diversification')!
-    expect(sum(dStep.vector!)).toBeLessThan(ENTROPY_NO_INFORMATION)
+    expect(sum(dStep.vector!)).toBeLessThan(1e-12)
     expect(res.warnings?.some((w) => w.code === 'entropy.all-constant-equal-weights')).toBe(false)
     expect(res.weights).toEqual([1, 0])
   })

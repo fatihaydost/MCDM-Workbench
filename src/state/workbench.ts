@@ -641,13 +641,9 @@ function recall(p: DraftProblem): Setup | undefined {
   return r && r.alternatives === p.alternatives && r.criteria === p.criteria ? r.setup : undefined
 }
 
-let workbenchStoreApi: { getInitialState: () => WorkbenchState } | undefined
-
 export const useWorkbench = create<WorkbenchState>()(
   persist(
-    (set, get, store) => {
-      workbenchStoreApi = store
-      return {
+    (set, get) => ({
         ...initialWorkbench(),
 
       setStage: (stage) => set({ stage }),
@@ -1051,8 +1047,7 @@ export const useWorkbench = create<WorkbenchState>()(
         memorizeAlternativeJudgements(get().problem, altJudgementsOf(get()))
         set(initialWorkbench())
       },
-      }
-    },
+    }),
     {
       name: WORKBENCH_STORAGE_KEY,
       version: STORAGE_VERSION,
@@ -1096,10 +1091,6 @@ export const useWorkbench = create<WorkbenchState>()(
     },
   ),
 )
-
-if (workbenchStoreApi) {
-  workbenchStoreApi.getInitialState = () => useWorkbench.getState()
-}
 
 // ---------------------------------------------------------------------------------------------
 // Derived results. Pure functions of the data (testable without React); hooks memoize them.
@@ -1159,18 +1150,7 @@ export function computeWeights(
 
   if (data.weightMethod === 'equal') {
     if (n < 2) return { value: null, issues: issues.filter((x) => x.code === 'too-few-criteria') }
-    const res = equal.compute(problem, {})
-    const colWarnings = issues
-      .filter((x) => x.code === 'constant-column' && x.col !== undefined)
-      .map((x) => ({ code: 'equal.constant-column' as const, col: x.col! }))
-    const mergedWarnings = [...(res.warnings ?? [])]
-    for (const cw of colWarnings) {
-      if (!mergedWarnings.some((w) => w.code === cw.code && w.col === cw.col)) mergedWarnings.push(cw)
-    }
-    return {
-      value: mergedWarnings.length > 0 ? { ...res, warnings: mergedWarnings } : res,
-      issues: [],
-    }
+    return { value: equal.compute(problem, {}), issues: [] }
   }
 
   const method = getWeightingMethod(data.weightMethod)

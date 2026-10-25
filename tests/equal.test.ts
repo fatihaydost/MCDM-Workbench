@@ -115,21 +115,4 @@ describe('Equal weights: Roszkowska (2013) Table 4 & Table 6', () => {
     }
     expect(() => equal.compute(p0, {})).toThrow(RangeError)
   })
-
-  it('emits equal.constant-column warning for constant columns', () => {
-    const p = makeProblem(
-      [
-        [5, 10, 7],
-        [5, 20, 7 + 1e-13],
-        [5, 30, 7],
-      ],
-      ['benefit', 'cost', 'benefit'],
-    )
-    const res = equal.compute(p, {})
-    expect(res.weights).toEqual([1 / 3, 1 / 3, 1 / 3])
-    expect(res.warnings).toEqual([
-      { code: 'equal.constant-column', col: 0 },
-      { code: 'equal.constant-column', col: 2 },
-    ])
-  })
 })
