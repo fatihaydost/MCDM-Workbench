@@ -248,6 +248,7 @@ export const electreI: RankingMethod<ElectreIParams> = {
           if (ga >= gb - BOUNDARY_EPS) {
             wSum += weights[j]!
           }
+          if ((weights[j] ?? 0) <= 0) continue
           const loss = gb - ga
           if (loss > 0) {
             if (scale === 'global') {

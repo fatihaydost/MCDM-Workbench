@@ -30,6 +30,7 @@ export type MethodThumbProps =
       kind: 'compromise'
       points: readonly Point[]
       v: number
+      effV?: number | undefined
       /** Q(a') + DQ. */
       q: number
       inSet: readonly number[]
@@ -200,13 +201,14 @@ export function MethodThumb(props: MethodThumbProps) {
     )
   }
   if (props.kind === 'compromise') {
-    const { points, v, q, inSet } = props
+    const { points, v, effV, q, inSet } = props
+    const ev = effV ?? v
     const side = H - 2 * PAD
     const x0 = (W - side) / 2
     const X = (x: number) => x0 + x * side
     const Y = (y: number) => H - PAD - y * side
-    const region = isoQRegion(v, Math.min(q, 1.0000001))
-    const seg = q <= 1 ? isoQSegment(v, q) : null
+    const region = isoQRegion(ev, Math.min(q, 1.0000001))
+    const seg = q <= 1 ? isoQSegment(ev, q) : null
     return (
       <svg className={cls} width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
         {region.length > 2 && <path className={s.vikorBand} d={`M${region.map((p) => `${X(p.x)} ${Y(p.y)}`).join('L')}Z`} />}

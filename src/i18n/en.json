@@ -572,7 +572,7 @@
         "bwm": "Pick the most and least important criterion, then compare every other with these two (1‑9); 2n - 3 answers give the weights.",
         "ahp": "Compare the criteria two at a time on the 1‑9 scale; all n(n - 1) / 2 answers give the weights and the consistency ratio CR.",
         "roc": "Subjective weights from the importance order of the criteria (column 1 most important to column n least important), via ROC, Rank Sum or Rank Reciprocal.",
-        "swara": "Subjective weights from step-down importance ratios s_j between adjacent criteria in column order (k_j = 1 + s_j, q_j = q_{j-1} / k_j)."
+        "swara": "Subjective weights from step-down importance ratios s_j between adjacent criteria in importance order (k_j = 1 + s_j, q_j = q_{j-1} / k_j)."
       },
       "columns": {
         "criterion": "Criterion",
@@ -629,7 +629,7 @@
         "codas": "Scores each alternative by its Euclidean and Taxicab distances from the negative-ideal point, compared across every pair; a higher H is better.",
         "promethee-ii": "Compares every pair of alternatives on each criterion with a preference function and subtracts the entering flow from the leaving flow; a higher φ is better. Zeros and negative values are allowed.",
         "electre-i": "Tests every pair of alternatives for majority concordance (C ≥ ĉ) and bounded discordance (D ≤ d̂) to find the outranking kernel K, and ranks alternatives by normalized net concordance minus net discordance Φ. Zeros and negative values are allowed.",
-        "electre-iii": "Tests each pair with indifference, preference and veto thresholds to build fuzzy credibility σ(a, b) and distills descending and ascending rankings; a higher net credibility Φ is better. Zeros and negative values are allowed."
+        "electre-iii": "Tests each pair with indifference, preference and veto thresholds to build fuzzy credibility σ(a, b) and ranks alternatives by the average of descending and ascending distillation ranks (r̄); Φ = φ⁺ - φ⁻ in the table shows the net credibility flow. Zeros and negative values are allowed."
       },
       "columns": {
         "rank": "Rank",
@@ -800,6 +800,11 @@
       },
       "headline": "{{name}} ranks first ({{symbol}} = {{value}}).",
       "headlineTied": "{{names}} share first place ({{symbol}} = {{value}}).",
+      "electreIVerdict": {
+        "kernel": "Outranking kernel K: {{names}}",
+        "kernelWithCycles": "Outranking kernel K (after condensing cycles): {{names}}",
+        "emptyKernel": "Outranking kernel K is empty."
+      },
       "byline": "Weights: {{weights}}. Ranking: {{ranking}}. {{m}} alternatives, {{n}} criteria.",
       "about": {
         "tool": "Tool",
@@ -2325,7 +2330,7 @@
       "constant-column": "{{criterion}} has the same value for every alternative, so its LOPCOW weight is 0.",
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full weight. Check whether the difference is real.",
       "two-alternatives": "With 2 alternatives, every varying column has RMS equal to its sample standard deviation (PV = 0), so equal weights are used instead.",
-      "zero-pv-column": "{{criterion}} has RMS equal to its sample standard deviation (PV = 0), so its LOPCOW weight is 0.",
+      "zero-pv-column": "{{criterion}} has RMS equal to its sample standard deviation (PV = 0), so its LOPCOW weight is 0 (or shared equally if every criterion has PV = 0).",
       "all-constant-equal-weights": "Every criterion is constant, so equal weights are used instead.",
       "dominant-weight": "{{criterion}} takes more than half of the weight, so check whether its log RMS-to-spread ratio is real."
     },
@@ -2343,6 +2348,7 @@
       "constant-cost-criterion": "{{criterion}} has the same value for every alternative, so it adds the same cost share to every S-."
     },
     "codas": {
+      "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, so its linear-normalized values are nearly identical across alternatives. Check whether the difference is real.",
       "no-spread": "Every alternative has Euclidean distance 0 from the negative-ideal solution, so all alternatives tie at rank 1.",
       "taxicab-inactive": "No pair of alternatives differs in Euclidean distance by at least τ, so Taxicab distances never activate and CODAS ranks by Euclidean distance alone."
     },

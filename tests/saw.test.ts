@@ -165,12 +165,15 @@ describe('SAW: data requirements and edge cases', () => {
   it('rejects an unknown normalization', () => {
     expect(() => saw.compute(makeProblem([[1, 2], [3, 1]], types), w, { normalization: 'minmax' as never })).toThrow(RangeError)
   })
-  it('a constant column adds the same amount to every score and cannot change the ranking', () => {
+  it('a constant column adds the same amount to every score and cannot change the ranking (including 0.3 vs 0.1 + 0.2)', () => {
     const base = makeProblem([[1, 2], [3, 1], [2, 4]], types)
-    const withConst = makeProblem([[1, 2, 7], [3, 1, 7], [2, 4, 7]], [...types, 'benefit'])
+    const withConst = makeProblem([[1, 2, 0.3], [3, 1, 0.1 + 0.2], [2, 4, 0.3]], [...types, 'cost'])
     for (const normalization of ['linearMax', 'sum'] as const) {
       // Weights must sum to 1: the constant column gets 0.5 and the others half of theirs.
       const b = saw.compute(withConst, [0.25, 0.25, 0.5], { normalization })
+      const normKey = normalization === 'linearMax' ? 'saw.normalizedLinearMax' : 'saw.normalizedSum'
+      const constNormCol = step(b.steps, normKey).matrix!.map((row) => row[2]!)
+      expect(constNormCol).toEqual(normalization === 'linearMax' ? [1, 1, 1] : [1 / 3, 1 / 3, 1 / 3])
       // Its r is 1 (linear max) or 1/m (sum) for everyone.
       const added = normalization === 'linearMax' ? 0.5 : 0.5 / 3
       const ref = recompute(base.matrix, types, [0.25, 0.25], normalization).S

@@ -265,6 +265,21 @@ describe('CODAS - algebraic properties and edge cases', () => {
     expect(res.warnings).toContainEqual({ code: 'codas.no-spread' })
   })
 
+  it('emits codas.near-constant-column when an active column is near-constant', () => {
+    const pNear = makeProblem(
+      [
+        [10, 1],
+        [20, 1 + 1e-10],
+        [30, 1],
+      ],
+      ['benefit', 'cost'],
+    )
+    const res = codas.compute(pNear, [0.5, 0.5], {})
+    expect(res.warnings).toContainEqual({ code: 'codas.near-constant-column', col: 1 })
+    const resZeroW = codas.compute(pNear, [1, 0], {})
+    expect(resZeroW.warnings?.map((w) => w.code)).not.toContain('codas.near-constant-column')
+  })
+
   it('validates tau in [0.01, 0.1] and rejects non-positive matrix entries', () => {
     expect(() => codas.compute(problem, weights, { tau: 0 })).toThrow(RangeError)
     expect(() => codas.compute(problem, weights, { tau: 0.005 })).toThrow(RangeError)

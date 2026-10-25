@@ -88,16 +88,24 @@ function evalPreference(
 
 function defaultThresholds(
   range: number,
-  fn: PrometheePreferenceFunction,
+  type: PrometheeCriterionType,
 ): { q: number; p: number; s: number } {
-  switch (fn) {
+  switch (type) {
     case 'usual':
+    case 'I':
+    case 'u-shape':
+    case 'II':
       return { q: 0, p: 0, s: 0 }
     case 'v-shape':
+    case 'III':
+    case 'linear':
+    case 'V':
       return { q: 0, p: range, s: 0 }
     case 'level':
+    case 'IV':
       return { q: 0.2 * range, p: 0.6 * range, s: 0 }
     case 'gaussian':
+    case 'VI':
       return { q: 0, p: 0, s: 0.5 * range }
   }
 }
@@ -225,15 +233,10 @@ export const prometheeII: RankingMethod<PrometheeParams> = {
       const sign = criteria[j]!.type === 'benefit' ? 1 : -1
       const spec = specs?.[j]
       const type: PrometheeCriterionType = spec ? spec.type : fn
-      const defaults = defaultThresholds(range, fn)
-      const defaultP =
-        type === 'v-shape' || type === 'III' || type === 'linear' || type === 'V' || type === 'level' || type === 'IV'
-          ? range
-          : 0
-      const defaultS = type === 'gaussian' || type === 'VI' ? range / 2 : 0
-      const q = spec ? (spec.q ?? 0) : defaults.q
-      const p = spec ? (spec.p ?? defaultP) : defaults.p
-      const s = spec ? (spec.s ?? defaultS) : defaults.s
+      const defaults = defaultThresholds(range, type)
+      const q = spec ? (spec.q ?? defaults.q) : defaults.q
+      const p = spec ? (spec.p ?? defaults.p) : defaults.p
+      const s = spec ? (spec.s ?? defaults.s) : defaults.s
       const eps = BOUNDARY_EPS * Math.max(range, Math.abs(p), Math.abs(q), Math.abs(s), 1e-100)
       if ((type === 'level' || type === 'IV' || type === 'linear' || type === 'V') && q > p + eps) {
         throw new RangeError(`PROMETHEE II threshold q (${q}) exceeds p (${p}) on criterion ${j}`)

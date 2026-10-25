@@ -101,7 +101,7 @@ export const vikor: MethodContent = {
       'Output: S, R, Q (lower is better), three rankings, conditions C1 and C2, and the compromise set.',
     ],
     pitfalls: [
-      'If all S (or all R) are equal, that term of Q is undefined; it is set to 0, with a notice.',
+      'If all S (or all R) are equal, Q is rescaled to [0, 1] from the remaining varying term (or 0 when both are flat), with a notice.',
       'With 2 alternatives DQ = 1, so C1 needs a Q gap of 1.',
       'Q is relative to this alternative set (0 best, 1 worst); do not compare it across problems.',
     ],
@@ -124,7 +124,7 @@ export const vikor: MethodContent = {
       'Çıktı: S, R, Q (küçük olan iyi), üç sıralama, C1 ve C2 koşulları ve uzlaşık çözüm kümesi.',
     ],
     pitfalls: [
-      'Bütün S (ya da bütün R) değerleri eşitse Q\'nun o terimi tanımsızdır; 0 alınır ve uyarı gösterilir.',
+      'Bütün S (ya da bütün R) değerleri eşitse Q kalan değişen terim üzerinden [0, 1] aralığına ölçeklenir (ikisi de sabitse 0 alınır) ve uyarı gösterilir.',
       '2 alternatifte DQ = 1 olur; C1 için Q farkının 1 olması gerekir.',
       'Q bu alternatif kümesine göredir (0 en iyi, 1 en kötü); problemler arasında karşılaştırmayın.',
     ],

@@ -1,7 +1,17 @@
 // Excel import and export. SheetJS is passed in by the caller (a dynamic `import('xlsx')` in the UI),
 // so this module only needs its types and the library stays out of the main bundle.
 import type * as XLSX from 'xlsx'
-import { AHP_MAX_PAIRWISE_ALTERNATIVES, type AlternativeJudgements, type Judgements, type RankingResult, type Step, type WeightingResult } from '../../core'
+import {
+  AHP_MAX_PAIRWISE_ALTERNATIVES,
+  emptyJudgements,
+  SCALE,
+  setPair,
+  type AlternativeJudgements,
+  type Judgements,
+  type RankingResult,
+  type Step,
+  type WeightingResult,
+} from '../../core'
 import { gridToProblem, problemToGrid, tokenKey, type GridImportOptions, type ImportedProblem, type ImportResult, type TypeWords } from './grid'
 import { parseNumber, type DecimalSeparator } from './numbers'
 import { stepToTable, tableToCells, type Cell, type StepLabels } from './table'
@@ -18,12 +28,16 @@ export type XlsxImportOptions = GridImportOptions & {
 }
 
 export type XlsxImportResult = Omit<ImportResult, 'problem'> & {
-  problem: ImportedProblem & { weights?: number[] }
+  problem: ImportedProblem & { weights?: number[]; judgements?: Judgements }
   sheet: string
+  judgements?: Judgements
 }
 
 const PREFERRED_SHEET_KEYS = new Set(['decision matrix', 'karar matrisi', 'data', 'veri'])
 const WEIGHT_SHEET_KEYS = new Set(['weights', 'weight', 'agirliklar', 'agirlik', 'ağirliklar', 'ağirlik'])
+const JUDGEMENT_SHEET_KEYS = new Set(['judgements', 'judgments', 'yargilar', 'yargılar'])
+const BEST_KEYS = new Set(['best', 'en iyi', 'best criterion', 'en iyi kriter'])
+const WORST_KEYS = new Set(['worst', 'en kotu', 'en kötü', 'worst criterion', 'en kotu kriter'])
 const WEIGHT_MARKS = /^(?:weights?|agirlik(?:lar)?|ağirlik(?:lar)?|ağırlık(?:lar)?)(?:\s*\(.*\))?$/i
 
 export function isWeightRowLabel(cell: unknown): boolean {
@@ -182,7 +196,83 @@ export function importWorkbook(X: SheetJS, wb: WorkBook, opts: XlsxImportOptions
     }
   }
 
-  const problemWithWeights: ImportedProblem & { weights?: number[] } = { ...result.problem }
+  let extractedJudgements: Judgements | undefined
+  if (n > 0) {
+    const jSheetName = wb.SheetNames.find((s) => s !== name && JUDGEMENT_SHEET_KEYS.has(tokenKey(s)))
+    const jWs = jSheetName ? wb.Sheets[jSheetName] : undefined
+    if (jWs && jWs['!ref']) {
+      const jRows = X.utils.sheet_to_json<unknown[]>(jWs, { header: 1, raw: true, defval: null, blankrows: true })
+      const critNames = result.problem.criteria.map((c) => c.name.trim())
+      const critKeys = critNames.map((c) => tokenKey(c))
+      const matchCrit = (cell: unknown): number => {
+        if (cell === null || cell === undefined) return -1
+        const s = String(cell).trim()
+        const exact = critNames.indexOf(s)
+        if (exact >= 0) return exact
+        const k = tokenKey(s)
+        return k ? critKeys.indexOf(k) : -1
+      }
+      const headerIdx = jRows.findIndex(
+        (r) =>
+          Array.isArray(r) &&
+          r.length >= 1 + n &&
+          critNames.every((cn, j) => {
+            const cellStr = String(r[1 + j] ?? '').trim()
+            return cellStr === cn || (tokenKey(cellStr) !== '' && tokenKey(cellStr) === critKeys[j])
+          }),
+      )
+      if (headerIdx >= 0 && jRows.length >= headerIdx + 1 + n) {
+        let best: number | null = null
+        let worst: number | null = null
+        for (let r = 0; r < headerIdx; r++) {
+          const row = jRows[r]
+          if (!Array.isArray(row) || row.length < 2) continue
+          const k = tokenKey(String(row[0] ?? ''))
+          if (BEST_KEYS.has(k)) {
+            const idx = matchCrit(row[1])
+            if (idx >= 0) best = idx
+          } else if (WORST_KEYS.has(k)) {
+            const idx = matchCrit(row[1])
+            if (idx >= 0) worst = idx
+          }
+        }
+        let parsedJ: Judgements = {
+          ...emptyJudgements(n),
+          best,
+          worst: best !== null && best === worst ? null : worst,
+        }
+        let hasAny = best !== null || worst !== null
+        const toRatio = (cell: unknown) => {
+          const v = parseCellNumber(cell, result.decimal)
+          if (v === null || !(v > 0)) return null
+          return SCALE.find((s) => Math.abs(s - v) < 1e-3) ?? null
+        }
+        for (let i = 0; i < n; i++) {
+          for (let k = i + 1; k < n; k++) {
+            const ratio = toRatio(jRows[headerIdx + 1 + i]?.[1 + k])
+            if (ratio !== null) {
+              parsedJ = setPair(parsedJ, i, k, ratio)
+              hasAny = true
+            }
+          }
+        }
+        for (let i = 0; i < n; i++) {
+          for (let k = 0; k < i; k++) {
+            if (parsedJ.pairs[i]?.[k] === null) {
+              const ratio = toRatio(jRows[headerIdx + 1 + i]?.[1 + k])
+              if (ratio !== null) {
+                parsedJ = setPair(parsedJ, i, k, ratio)
+                hasAny = true
+              }
+            }
+          }
+        }
+        if (hasAny) extractedJudgements = parsedJ
+      }
+    }
+  }
+
+  const problemWithWeights: ImportedProblem & { weights?: number[]; judgements?: Judgements } = { ...result.problem }
   if (extractedWeights) {
     Object.defineProperty(problemWithWeights, 'weights', {
       value: extractedWeights,
@@ -191,8 +281,27 @@ export function importWorkbook(X: SheetJS, wb: WorkBook, opts: XlsxImportOptions
       writable: true,
     })
   }
+  if (extractedJudgements) {
+    Object.defineProperty(problemWithWeights, 'judgements', {
+      value: extractedJudgements,
+      enumerable: false,
+      configurable: true,
+      writable: true,
+    })
+    Object.defineProperty(problemWithWeights.matrix, 'judgements', {
+      value: extractedJudgements,
+      enumerable: false,
+      configurable: true,
+      writable: true,
+    })
+  }
 
-  return { ...result, problem: problemWithWeights, sheet: name }
+  return {
+    ...result,
+    problem: problemWithWeights,
+    sheet: name,
+    ...(extractedJudgements ? { judgements: extractedJudgements } : {}),
+  }
 }
 
 /** `readWorkbook` + `importWorkbook`. */
@@ -439,18 +548,28 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
     if (input.judgements.worst !== null && input.judgements.worst !== undefined && critNames[input.judgements.worst] !== undefined) {
       jRows.push([L.worst ?? 'Worst', critNames[input.judgements.worst]!])
     }
-    const crInput = input.weighting?.result.diagnostics?.crInput
-    if (typeof crInput === 'number' && Number.isFinite(crInput)) {
-      jRows.push(['CR', crInput])
+    const cr = input.weighting?.result.diagnostics?.crInput ?? input.weighting?.result.diagnostics?.cr
+    if (typeof cr === 'number' && Number.isFinite(cr)) {
+      jRows.push(['CR', cr])
     }
+    const bestIdx = input.judgements.best
+    const worstIdx = input.judgements.worst
+    const isBwmOnly =
+      bestIdx !== null &&
+      bestIdx !== undefined &&
+      worstIdx !== null &&
+      worstIdx !== undefined &&
+      (!input.weighting?.method || /^bwm\b/i.test(input.weighting.method.trim()))
     jRows.push(
       [L.criterion, ...critNames],
       ...critNames.map((name, i): Cell[] => [
         name,
         ...critNames.map((_, k) => {
           if (i === k) return 1
+          if (isBwmOnly && i !== bestIdx && k !== worstIdx) return null
           const direct = input.judgements!.pairs[i]?.[k] ?? null
           if (direct !== null) return finite(direct)
+          if (isBwmOnly) return null
           const inv = input.judgements!.pairs[k]?.[i] ?? null
           return inv !== null ? finite(1 / inv) : null
         }),

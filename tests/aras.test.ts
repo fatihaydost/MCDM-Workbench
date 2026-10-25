@@ -211,9 +211,13 @@ describe('ARAS validation', () => {
     ])
   })
 
-  it('blocks a non-positive or mis-sized custom optimal row', () => {
-    expect(thrown(() => aras.compute(f1, zavadskas.weights, { optimal: [15, 50, 0, 400, 0.05, 5] }))[0]?.code).toBe('non-positive-value')
-    expect(thrown(() => aras.compute(f1, zavadskas.weights, { optimal: [15, 50] }))[0]?.code).toBe('row-length-mismatch')
+  it('blocks a non-positive or mis-sized custom optimal row without a negative row index', () => {
+    const badCell = thrown(() => aras.compute(f1, zavadskas.weights, { optimal: [15, 50, 0, 400, 0.05, 5] }))[0]
+    expect(badCell).toEqual({ code: 'non-positive-value', severity: 'error', col: 2, value: 0 })
+    expect(badCell?.row).toBeUndefined()
+    const badLen = thrown(() => aras.compute(f1, zavadskas.weights, { optimal: [15, 50] }))[0]
+    expect(badLen).toEqual({ code: 'row-length-mismatch', severity: 'error', value: 2 })
+    expect(badLen?.row).toBeUndefined()
   })
 
   it('blocks a single alternative and weights that do not sum to 1', () => {

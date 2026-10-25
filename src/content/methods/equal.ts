@@ -15,8 +15,8 @@ export const equal: MethodContent = {
     venue: 'Psychological Bulletin 81(2), 95-106',
     doi: '10.1037/h0037613',
     note: {
-      en: 'Equal weights have no inventor; Dawes & Corrigan (1974) is the usual "unit weights" reference.',
-      tr: 'Eşit ağırlığın bir mucidi yoktur; "birim ağırlık" için genelde Dawes ve Corrigan (1974) gösterilir.',
+      en: 'Equal weights have no single inventor; Dawes & Corrigan (1974) and Einhorn & Hogarth (1975) are the classic "unit weights" references.',
+      tr: 'Eşit ağırlığın tek bir mucidi yoktur; "birim ağırlık" için genelde Dawes ve Corrigan (1974) ile Einhorn ve Hogarth (1975) gösterilir.',
     },
   },
   steps: [
@@ -52,6 +52,7 @@ export const equal: MethodContent = {
   },
   sources: [
     { label: 'Dawes & Corrigan (1974), Psychological Bulletin 81(2), 95-106', doi: '10.1037/h0037613' },
+    { label: 'Einhorn & Hogarth (1975), Organizational Behavior and Human Performance 13(2), 171-192', doi: '10.1016/0030-5073(75)90044-6' },
     { label: 'Roszkowska (2013), Optimum. Studia Ekonomiczne 5(65), 14-33', doi: '10.15290/ose.2013.05.65.02' },
     { label: 'Dua, Duc, Bao & Trung (2024), EUREKA: Physics and Engineering', doi: '10.21303/2461-4262.2024.003171' },
     { label: 'Keshavarz-Ghorabaee et al. (2021), Symmetry 13(4), 525', doi: '10.3390/sym13040525' },

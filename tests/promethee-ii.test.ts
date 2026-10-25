@@ -335,5 +335,11 @@ describe('PROMETHEE II — Mareschal (2015) algebraic identities & invariants', 
       criteriaFunctions: [{ type: 'gaussian' }, { type: 'VI' }],
     })
     expect(gSpecOmittedS.scores).toEqual(gDefault.scores)
+
+    const lDefault = prometheeII.compute(simple, w, { preferenceFunction: 'level' })
+    const lSpecOmittedQP = prometheeII.compute(simple, w, {
+      criteriaFunctions: [{ type: 'level' }, { type: 'IV' }],
+    })
+    expect(lSpecOmittedQP.scores).toEqual(lDefault.scores)
   })
 })

@@ -120,7 +120,9 @@ export function SwaraIdea({
 
   // Columns: name | s_j | strip (q_j chain in 0..1) | -> | weight + value.
   const W = Math.max(width, 280)
-  const sColW = Math.ceil(Math.max(44, ...sTexts.map((t) => estimateTextWidth(t, 12) + 10)))
+  const sColW = Math.ceil(
+    Math.max(44, Math.min(88, Math.max(estimateTextWidth(l.s, 12), ...sTexts.map((t) => estimateTextWidth(t, 12))) + 8)),
+  )
   const nameW = Math.ceil(
     Math.min(Math.max(...problem.criteria.map((_, j) => estimateTextWidth(displayName(j), 13))) + 12, W * 0.24),
   )

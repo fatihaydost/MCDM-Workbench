@@ -70,7 +70,10 @@ describe('examples match the published fixtures', () => {
     expect(ex.matrix).toEqual(diak.matrix)
     expect(ex.alternatives).toEqual(diak.alternatives)
     expect(ex.criteria.map((c) => c.type)).toEqual(diak.types)
-    expect(ex.published).toEqual([{ label: 'sd.weights', values: diak.published.weights, decimals: 3 }])
+    expect(ex.published).toEqual([
+      { label: 'sd.weights', values: diak.published.weights, decimals: 3 },
+      { label: 'critic.weights', values: [0.202, 0.481, 0.317], decimals: 3 },
+    ])
   })
   it('Keshavarz-Ghorabaee et al. 2021 (MEREC)', () => {
     const ex = getExample('keshavarz-2021-merec')!
@@ -242,7 +245,10 @@ describe('examples match the published fixtures', () => {
     expect(ex.alternatives).toEqual(rosz.alternatives)
     expect(ex.criteria.map((c) => c.type)).toEqual(rosz.types)
     expect(ex.weights).toBeUndefined()
-    expect(ex.published).toEqual([{ label: 'roc.weights', values: rosz.expected.weights, decimals: 4 }])
+    expect(ex.published).toEqual([
+      { label: 'roc.weights', values: rosz.expected.weights, decimals: 4 },
+      { label: 'equal.weights', values: [0.2, 0.2, 0.2, 0.2, 0.2], decimals: 4 },
+    ])
   })
   it('Goswami 2020 (PROMETHEE II, laptop selection)', () => {
     const ex = getExample('goswami-2020-laptops')!

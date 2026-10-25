@@ -572,7 +572,7 @@
         "bwm": "En önemli ve en önemsiz kriteri seçin, diğer her kriteri bu ikisiyle karşılaştırın (1‑9); 2n - 3 yanıt ağırlıkları verir.",
         "ahp": "Kriterleri 1‑9 ölçeğinde ikişer ikişer karşılaştırın; tüm n(n - 1) / 2 yanıt ağırlıkları ve tutarlılık oranı CR'yi verir.",
         "roc": "Kriterlerin önem sırasından (1. sütun en önemliden n. sütun en önemsize) ROC, Sıra Toplamı ya da Ters Sıra formülüyle öznel ağırlıklar.",
-        "swara": "Sütun sırasındaki ardışık kriterler arasındaki göreceli önem oranları s_j üzerinden öznel ağırlıklar (k_j = 1 + s_j, q_j = q_{j-1} / k_j)."
+        "swara": "Önem sırasındaki ardışık kriterler arasındaki göreceli önem oranları s_j üzerinden öznel ağırlıklar (k_j = 1 + s_j, q_j = q_{j-1} / k_j)."
       },
       "columns": {
         "criterion": "Kriter",
@@ -629,7 +629,7 @@
         "codas": "Her alternatifi negatif-ideal noktaya Öklid ve Taxicab uzaklıklarıyla bütün çiftler üzerinden karşılaştırarak puanlar; yüksek H daha iyidir.",
         "promethee-ii": "Her alternatif çiftini her kriterde bir tercih fonksiyonuyla karşılaştırır ve pozitif akıştan negatif akışı çıkarır; φ büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir.",
         "electre-i": "Her alternatif çiftini çoğunluk uyumu (C ≥ ĉ) ve sınırlı uyumsuzluk (D ≤ d̂) için sınayarak üstünlük çekirdeği K kümesini bulur ve alternatifleri normalize net uyum eksi net uyumsuzluk Φ skoruyla sıralar. Sıfır ve negatif değerlere izin verir.",
-        "electre-iii": "Her çifti farksızlık, tercih ve veto eşikleriyle sınayarak bulanık güvenilirlik σ(a, b) matrisini kurar, azalan ve artan damıtma sıralarını çıkarır; net güvenilirlik Φ büyüdükçe sıra yükselir. Sıfır ve negatif değerlere izin verir."
+        "electre-iii": "Her çifti farksızlık, tercih ve veto eşikleriyle sınayarak bulanık güvenilirlik σ(a, b) matrisini kurar ve alternatifleri azalan ile artan damıtma sıralarının ortalamasına (r̄) göre sıralar; tablodaki Φ = φ⁺ - φ⁻ net güvenilirlik akışını gösterir. Sıfır ve negatif değerlere izin verir."
       },
       "columns": {
         "rank": "Sıra",
@@ -647,7 +647,7 @@
         "powerSum": "Üs toplamı P",
         "benefitSum": "Fayda toplamı S+",
         "costSum": "Maliyet toplamı S-",
-        "arasOptimality": "Optimalite S",
+        "arasOptimality": "Optimallik S",
         "euclidean": "Öklid E",
         "taxicab": "Taxicab T",
         "positiveFlow": "Pozitif akış φ⁺",
@@ -800,6 +800,11 @@
       },
       "headline": "İlk sırada {{name}} ({{symbol}} = {{value}}).",
       "headlineTied": "İlk sırayı {{names}} paylaşıyor ({{symbol}} = {{value}}).",
+      "electreIVerdict": {
+        "kernel": "Üstünlük çekirdeği K: {{names}}",
+        "kernelWithCycles": "Üstünlük çekirdeği K (döngüler daraltıldıktan sonra): {{names}}",
+        "emptyKernel": "Üstünlük çekirdeği K boş."
+      },
       "byline": "Ağırlık: {{weights}}. Sıralama: {{ranking}}. {{m}} alternatif, {{n}} kriter.",
       "about": {
         "tool": "Araç",
@@ -1017,7 +1022,7 @@
         "optimalWeighted": "Ağırlıklı optimal satır x̂₀",
         "weighted": "Ağırlıklı paylar x̂",
         "optimalScore": "Optimal skor S₀",
-        "optimality": "Optimalite fonksiyonu S",
+        "optimality": "Optimallik fonksiyonu S",
         "utilityDegree": "Fayda derecesi K"
       },
       "codas": {
@@ -1957,7 +1962,7 @@
           "title": "Optimal satırdaki pay",
           "caption": "Kesikli satır A₀: her kriterin en iyi değeri, aynı m + 1 satırlık sütun toplamlarında normalize edilmiştir. Her çubuk S₀ ile karşılaştırılan S'dir; sağda K = S / S₀.",
           "steps": {
-            "s1": "Optimalite S: her çubuk bir alternatifin m + 1 satırlık sütun paylarının ağırlıklı toplamıdır.",
+            "s1": "Optimallik S: her çubuk bir alternatifin m + 1 satırlık sütun paylarının ağırlıklı toplamıdır.",
             "s2": "Optimal satır A₀: sütunların en iyi değerleri aynı ölçekte kendi toplamı S₀ değerini alır.",
             "s3": "Fayda derecesi K = S / S₀: her çubuk S₀ değerine bölünür, en yüksek K ilk sırada yer alır."
           }
@@ -2196,8 +2201,8 @@
       "optimalWeighted": "Ağırlıklı optimal satır x̂₀ = w x̄₀: her normalize kıyas payının kendi kriter ağırlığıyla çarpımı.",
       "weighted": "Ağırlıklı paylar x̂ = w x̄: her normalize pay kriter ağırlığıyla çarpılır.",
       "optimalScore": "Optimal skor S₀: optimal satır A₀ için ağırlıklı satır toplamı, tüm alternatiflerin kıyas noktası.",
-      "optimality": "Optimalite fonksiyonu S: her alternatifin ağırlıklı satır toplamı.",
-      "utilityDegree": "Fayda derecesi K = S / S₀: her alternatifin optimalitesinin optimal skora oranı. Değer büyüdükçe sıra yükselir."
+      "optimality": "Optimallik fonksiyonu S: her alternatifin ağırlıklı satır toplamı.",
+      "utilityDegree": "Fayda derecesi K = S / S₀: her alternatifin optimalliğinin optimal skora oranı. Değer büyüdükçe sıra yükselir."
     },
     "codas": {
       "normalized": "Doğrusal maks normalizasyonu: her değer sütun maksimumuna bölünür; maliyet kriterinde sütun minimumu değere bölünür, böylece en iyi değer 1 olur.",
@@ -2325,7 +2330,7 @@
       "constant-column": "{{criterion}} kriterinde her alternatifin değeri aynı, bu yüzden LOPCOW ağırlığı 0.",
       "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam ağırlık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
       "two-alternatives": "2 alternatifle her değişken sütunda karesel ortalama örneklem standart sapmasına eşittir (PV = 0), bu yüzden eşit ağırlık kullanıldı.",
-      "zero-pv-column": "{{criterion}} kriterinde karesel ortalama örneklem standart sapmasına eşittir (PV = 0), bu yüzden LOPCOW ağırlığı 0.",
+      "zero-pv-column": "{{criterion}} kriterinde karesel ortalama örneklem standart sapmasına eşittir (PV = 0), bu yüzden LOPCOW ağırlığı 0 olur (tüm kriterlerde PV = 0 ise eşit paylaşılır).",
       "all-constant-equal-weights": "Bütün kriterler sabit, bu yüzden eşit ağırlık kullanıldı.",
       "dominant-weight": "{{criterion}} ağırlığın yarısından fazlasını alıyor; RMS ve yayılım oranının gerçek olup olmadığına bakın."
     },
@@ -2343,6 +2348,7 @@
       "constant-cost-criterion": "{{criterion}} kriterinde her alternatifin değeri aynı olduğundan her S- toplamına eşit maliyet payı ekler."
     },
     "codas": {
+      "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, bu yüzden doğrusal normalize değerleri alternatifler arasında neredeyse aynı kalıyor. Farkın gerçek olup olmadığını kontrol edin.",
       "no-spread": "Bütün alternatiflerin negatif-ideal çözüme Öklid uzaklığı 0 olduğundan hepsi 1. sırayı paylaşıyor.",
       "taxicab-inactive": "Hiçbir alternatif çiftinin Öklid uzaklığı farkı τ eşiğine ulaşmadığından Taxicab uzaklıkları devreye girmiyor ve CODAS yalnız Öklid uzaklığıyla sıralıyor."
     },

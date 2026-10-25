@@ -270,14 +270,14 @@ describe('Entropy: validation and edge cases', () => {
     // Relative spread ~1e-7 in (1e-9, 1e-6]: neither constant nor near-constant, d_j ~ 1e-15 < 1e-12
     const pSmallD = makeProblem(
       [
+        [1e7 - 0.5, 1e7 - 1],
         [1e7, 1e7],
         [1e7 + 0.5, 1e7 + 1],
-        [1e7 + 1, 1e7 + 2],
       ],
       ['benefit', 'benefit'],
     )
     const resSmallD = entropy.compute(pSmallD, { normalization: 'sum' })
     expect(codes(resSmallD)).not.toContain('entropy.all-constant-equal-weights')
-    expectClose(resSmallD.weights, [0.2, 0.8], 5e-2)
+    expectClose(resSmallD.weights, [0.2, 0.8], 1e-9)
   })
 })

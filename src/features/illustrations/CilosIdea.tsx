@@ -79,12 +79,12 @@ export function CilosIdea({ problem, format = defaultFormat, labels, step, expla
   const nameW = Math.ceil(Math.min(Math.max(...problem.criteria.map((c) => estimateTextWidth(c.name, 13))) + 12, W * 0.26))
   const valueW = Math.ceil(Math.max(...weightTexts.map((t) => estimateTextWidth(t, 13))) + 8)
   const lossW = Math.ceil(Math.max(...lossTexts.map((t) => estimateTextWidth(t, 13))) + 8)
-  const free = Math.max(120, W - nameW - valueW - OP)
-  const stripW = free * 0.55
-  const weightW = free - stripW
+  const pad = 6
+  const free = Math.max(80, W - nameW - valueW - lossW - pad - OP)
+  const stripW = free * 0.55 + lossW + pad
+  const weightW = free * 0.45
   const x0 = nameW
   const x1 = x0 + stripW + OP
-  const pad = 6
   const maxLoss = Math.max(...parts.totalLoss) || 1
   const unit = Math.max(stripW - pad - lossW, 20) / maxLoss
   const maxWeight = Math.max(...parts.weights) || 1
@@ -96,7 +96,7 @@ export function CilosIdea({ problem, format = defaultFormat, labels, step, expla
     columns: [...problem.criteria.map((c) => c.name), l.totalLoss, l.weight],
     rows: problem.criteria.map((c, j) => ({
       label: c.name,
-      cells: [...parts.losses[j]!.map((p) => format(p)), lossTexts[j]!, weightTexts[j]!],
+      cells: [...problem.criteria.map((_, col) => format(parts.lossMatrix[j]?.[col] ?? 0)), lossTexts[j]!, weightTexts[j]!],
     })),
   }
 
@@ -152,7 +152,7 @@ export function CilosIdea({ problem, format = defaultFormat, labels, step, expla
               <path className={`${s.op} ${s.stageItem}`} data-off={off(3)} d={`M${x1 - OP + 5} ${y}h${OP - 10}m-3.5 -3.5 3.5 3.5 -3.5 3.5`} />
               <rect
                 className={`${s.bar} ${s.criticBar} ${s.stageItem}`}
-                data-off={off(3) || (parts.weights[j] === 0 ? '' : undefined)}
+                data-off={stage < 3 || parts.weights[j] === 0 ? '' : undefined}
                 data-highlight={on || undefined}
                 width={1}
                 height={1}

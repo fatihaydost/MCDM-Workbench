@@ -414,10 +414,10 @@ function Distances({ ends, dPlus, dMinus, off }: { ends: { from: Screen; plus: S
     <g aria-hidden="true" className={s.stageItem} data-off={off ? '' : undefined}>
       <Segment className={s.dist} from={ends.from} to={ends.plus} data-dist="plus" />
       <Segment className={`${s.dist} ${s.distMinus}`} from={ends.from} to={ends.minus} data-dist="minus" />
-      <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: pointCss(mid(ends.from, ends.plus)) }}>
+      <text className={s.distLabel} x={0} y={0} dx={6} dy={-10} style={{ transform: pointCss(mid(ends.from, ends.plus)) }}>
         {dPlus}
       </text>
-      <text className={s.distLabel} x={0} y={0} dx={6} dy={-6} style={{ transform: pointCss(mid(ends.from, ends.minus)) }}>
+      <text className={s.distLabel} x={0} y={0} dx={6} dy={14} style={{ transform: pointCss(mid(ends.from, ends.minus)) }}>
         {dMinus}
       </text>
     </g>
@@ -442,10 +442,18 @@ function planeDrawing(
   const P = (p: Point): Screen => ({ x: fit.x(p.x), y: fit.y(p.y) })
   const short = (v: number) => trimZeros(format(v))
   const xLabelW = box.right + 12
+  const ideal = P(proj.ideal)
+  const anti = P(proj.antiIdeal)
+  const obstacles: PlotBox[] = [
+    { left: ideal.x - 6, right: ideal.x + 6, top: ideal.y - 6, bottom: ideal.y + 6 },
+    { left: anti.x - 6, right: anti.x + 6, top: anti.y - 6, bottom: anti.y + 6 },
+    { left: box.left - 6, right: box.left + 6, top: box.bottom - 6, bottom: box.bottom + 6 },
+  ]
   return {
     height: fit.height,
     box,
     points: data.map(P),
+    obstacles,
     background: (
       <>
         {/* Rays of constant closeness through the origin. */}

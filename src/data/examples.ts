@@ -1,4 +1,4 @@
-import type { CriterionType } from '../core'
+import { judgementsFromBwm, type CriterionType, type Judgements } from '../core'
 import type { Lang } from '../i18n/lang'
 
 /** Text in both UI languages. */
@@ -42,6 +42,8 @@ export type ExampleDataset = {
   equalWeights?: true
   /** Method-specific parameters from the paper (e.g. SWARA step-down ratios or ELECTRE III thresholds). */
   methodParams?: Record<string, Record<string, unknown>>
+  /** Pairwise judgements from the paper (for BWM or AHP criteria weighting examples). */
+  judgements?: Judgements
   /** Published outputs, as printed (rounded as in the paper). */
   published: { label: string; values: number[] | number[][]; decimals: number }[]
 }
@@ -153,14 +155,14 @@ export const examples: readonly ExampleDataset[] = [
       en: 'Eight firms on three criteria, with negative profitability values. The paper that introduced CRITIC computes SD weights on the same data as its baseline.',
       tr: 'Sekiz firma, üç kriter; kârlılıkta negatif değerler var. CRITIC yöntemini tanıtan makale, aynı veride karşılaştırma tabanı olarak SD ağırlıklarını hesaplar.',
     },
-    referenceFor: ['sd'],
+    referenceFor: ['sd', 'critic'],
     citation: {
       authors: 'Diakoulaki, D.; Mavrotas, G.; Papayannakis, L.',
       year: 1995,
       title: 'Determining objective weights in multiple criteria problems: The CRITIC method',
       venue: 'Computers & Operations Research 22(7), 763-770',
       doi: '10.1016/0305-0548(94)00059-H',
-      tables: { en: 'Table 1 (input), Table 3 (output, row SD)', tr: 'Tablo 1 (girdi), Tablo 3 (çıktı, SD satırı)' },
+      tables: { en: 'Table 1 (input), Table 3 (output, rows CRITIC and SD)', tr: 'Tablo 1 (girdi), Tablo 3 (çıktı, CRITIC ve SD satırları)' },
     },
     alternatives: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
     criteria: [
@@ -179,7 +181,10 @@ export const examples: readonly ExampleDataset[] = [
       [-34.6, 3.31, 0.98],
     ],
     // Sec. 5 also prints σ = 0.263, 0.321, 0.358, the population SD; the workbench shows the sample SD (n - 1).
-    published: [{ label: 'sd.weights', values: [0.279, 0.341, 0.38], decimals: 3 }],
+    published: [
+      { label: 'sd.weights', values: [0.279, 0.341, 0.38], decimals: 3 },
+      { label: 'critic.weights', values: [0.202, 0.481, 0.317], decimals: 3 },
+    ],
   },
   {
     id: 'keshavarz-2021-merec',
@@ -963,7 +968,10 @@ export const examples: readonly ExampleDataset[] = [
       [20, 10, 3, 3, 20],
       [15, 8, 7, 4, 10],
     ],
-    published: [{ label: 'roc.weights', values: [0.4567, 0.2567, 0.1567, 0.09, 0.04], decimals: 4 }],
+    published: [
+      { label: 'roc.weights', values: [0.4567, 0.2567, 0.1567, 0.09, 0.04], decimals: 4 },
+      { label: 'equal.weights', values: [0.2, 0.2, 0.2, 0.2, 0.2], decimals: 4 },
+    ],
   },
   {
     id: 'goswami-2020-laptops',
@@ -1063,8 +1071,8 @@ export const examples: readonly ExampleDataset[] = [
       tr: 'Galway atıksu arıtma tesisi (Wang ve Triantaphyllou 2008)',
     },
     summary: {
-      en: 'Five candidate plant sites in Galway rated from 1 to 5 on seven benefit criteria. The paper reports the ELECTRE I concordance and discordance matrices and the outranking kernel.',
-      tr: "Galway'de yedi fayda kriterinde 1 ile 5 arasında puanlanan beş aday tesis alanı. Makale ELECTRE I uyum ve uyumsuzluk matrislerini ve üstünlük çekirdeğini veriyor.",
+      en: 'Five candidate plant sites in Galway rated from 1 to 5 on seven benefit criteria. Section 3.1 of the paper prints the concordance and discordance matrices C and D; the outranking kernel and net flows below are derived from them.',
+      tr: "Galway'de yedi fayda kriterinde 1 ile 5 arasında puanlanan beş aday tesis alanı. Makalenin 3.1 bölümü C uyum ve D uyumsuzluk matrislerini basar; aşağıdaki üstünlük çekirdeği ve net akışlar bunlardan hesaplanır.",
     },
     referenceFor: ['electre-i'],
     citation: {
@@ -1074,8 +1082,8 @@ export const examples: readonly ExampleDataset[] = [
       venue: 'Omega 36(1), 45-63',
       doi: '10.1016/j.omega.2005.12.003',
       tables: {
-        en: 'Section 3.1 (input, concordance and discordance matrices, outranking graph)',
-        tr: 'Bölüm 3.1 (girdi, uyum ve uyumsuzluk matrisleri, üstünlük grafı)',
+        en: 'Section 3.1 (input, concordance C and discordance D matrices printed; kernel and net flows derived)',
+        tr: 'Bölüm 3.1 (girdi, C uyum ve D uyumsuzluk matrisleri basılı; çekirdek ve net akışlar türetilmiş)',
       },
     },
     alternatives: ['A1', 'A2', 'A3', 'A4', 'A5'],
@@ -1096,6 +1104,7 @@ export const examples: readonly ExampleDataset[] = [
       [1, 1, 3, 5, 4, 1, 5],
     ],
     weights: [0.078, 0.118, 0.157, 0.314, 0.235, 0.039, 0.059],
+    // Section 3.1 prints the C and D matrices only; kernelVector, netConcordance and netDiscordance are computed from them.
     published: [
       { label: 'electre-i.kernel', values: [0, 1, 1, 0, 1], decimals: 0 },
       { label: 'electre-i.netConcordance', values: [-1.215, 1.293, 1.058, -1.881, 0.745], decimals: 3 },
@@ -1163,6 +1172,49 @@ export const examples: readonly ExampleDataset[] = [
     published: [
       { label: 'electre-iii.descending', values: [9, 10, 5, 2, 5, 11, 3, 5, 1, 4, 5], decimals: 0 },
       { label: 'electre-iii.ascending', values: [1, 6, 8, 4, 6, 11, 1, 10, 3, 5, 8], decimals: 0 },
+    ],
+  },
+  {
+    id: 'rezaei-2016-car',
+    name: {
+      en: 'Buying a car (Rezaei 2016)',
+      tr: 'Otomobil seçimi (Rezaei 2016)',
+    },
+    buttonLabel: { en: 'Car purchase', tr: 'Otomobil seçimi' },
+    summary: {
+      en: 'Five car-buying criteria where price is best and style is worst. The paper introduces the linear BWM model and solves the best-to-others and others-to-worst comparison vectors.',
+      tr: 'Fiyatın en önemli, stilin en önemsiz olduğu beş otomobil satın alma kriteri. Makale doğrusal BWM modelini tanıtır ve en iyinin diğerlerine ile diğerlerinin en kötüye karşılaştırma vektörlerini çözer.',
+    },
+    referenceFor: ['bwm'],
+    citation: {
+      authors: 'Rezaei, J.',
+      year: 2016,
+      title: 'Best-worst multi-criteria decision-making method: Some properties and a linear model',
+      venue: 'Omega 64, 126-130',
+      doi: '10.1016/j.omega.2015.12.001',
+      tables: {
+        en: 'Tables 2-4 (input), Sections 3-4 (output)',
+        tr: 'Tablo 2-4 (girdi), Bölüm 3-4 (çıktı)',
+      },
+    },
+    alternatives: ['Car A', 'Car B', 'Car C'],
+    localAlternatives: { tr: ['Araç A', 'Araç B', 'Araç C'] },
+    criteria: [
+      { name: { en: 'Quality', tr: 'Kalite' }, type: 'benefit' },
+      { name: { en: 'Price', tr: 'Fiyat' }, type: 'cost' },
+      { name: { en: 'Comfort', tr: 'Konfor' }, type: 'benefit' },
+      { name: { en: 'Safety', tr: 'Güvenlik' }, type: 'benefit' },
+      { name: { en: 'Style', tr: 'Stil' }, type: 'benefit' },
+    ],
+    matrix: [
+      [8, 22000, 7, 9, 6],
+      [7, 18000, 6, 8, 7],
+      [9, 26000, 8, 9, 8],
+    ],
+    judgements: judgementsFromBwm(5, 1, 4, [2, 1, 4, 2, 8], [4, 8, 2, 3, 1]),
+    published: [
+      { label: 'bwm.weights', values: [0.2457, 0.4224, 0.1207, 0.1638, 0.0474], decimals: 4 },
+      { label: 'bwm.xi', values: [0.069], decimals: 4 },
     ],
   },
 ]

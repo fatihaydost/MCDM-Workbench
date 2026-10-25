@@ -59,6 +59,19 @@ export function bwmSolve(
   const bo = bestToOthers
   const ow = othersToWorst
   const n = bo.length
+  if (
+    n < 2 ||
+    ow.length !== n ||
+    !Number.isInteger(best) ||
+    !Number.isInteger(worst) ||
+    best < 0 ||
+    best >= n ||
+    worst < 0 ||
+    worst >= n ||
+    best === worst
+  ) {
+    throw new RangeError('Invalid BWM dimensions or anchor indices')
+  }
   const aBW = bo[worst]!
   const D = Array.from({ length: n }, (_, i) => i).filter((i) => i !== best && i !== worst)
   const p = (i: number) => bo[i]! * ow[i]!
@@ -134,8 +147,9 @@ export function bwmSuggestion(
   _best: number,
   worst: number,
   j: number,
-): { side: Side; value: number } {
-  const aBW = bestToOthers[worst]!
+): { side: Side; value: number } | null {
+  const aBW = bestToOthers[worst] ?? null
+  if (aBW === null || bestToOthers[j] == null || othersToWorst[j] == null) return null
   let out: { side: Side; value: number } = { side: 'othersToWorst', value: 1 }
   let gap = Infinity
   const sides: [Side, number][] = [['othersToWorst', bestToOthers[j]!], ['bestToOthers', othersToWorst[j]!]]
@@ -208,7 +222,7 @@ export const bwm: WeightingMethod = {
     const threshold = liangThreshold(bo[W]!, n)
     const warnings: MethodWarning[] = []
     if (threshold && crInput > threshold.value) warnings.push({ code: 'bwm.inconsistent', col: mostInconsistent })
-    if (n > 9) warnings.push({ code: 'bwm.threshold-approximate' })
+    if (threshold?.approximate) warnings.push({ code: 'bwm.threshold-approximate' })
     return {
       weights,
       steps: [

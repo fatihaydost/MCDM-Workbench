@@ -143,6 +143,7 @@ export function EntropyIdea({ problem, params, format = defaultFormat, labels, s
           const x0 = k * (panelW + GAP)
           const on = j === hi
           const short = truncate(names[k]!, panelW, 13)
+          const d = parts.diversification[j] ?? 1 - parts.entropy[j]!
           return (
             <g key={j} data-criterion={j}>
               <text className={s.critName} x={x0} y={NAME}>
@@ -167,7 +168,7 @@ export function EntropyIdea({ problem, params, format = defaultFormat, labels, s
               </text>
               {/* 1 - e at its step; the weight line takes its place after it. */}
               <text className={`${s.barValue} ${s.stageItem} ${s.criticValue}`} data-off={between(2, 3)} x={x0} y={yW} dominantBaseline="central">
-                {`1 − e = ${format(1 - parts.entropy[j]!)}`}
+                {`1 − e = ${format(d)}`}
               </text>
               <text
                 className={`${s.barValue} ${s.stageItem} ${s.criticValue}`}
@@ -194,7 +195,7 @@ export function EntropyIdea({ problem, params, format = defaultFormat, labels, s
                   transform:
                     stage >= 3
                       ? `translate(${x0}px, ${yBar}px) scale(${Math.max((parts.weights[j]! / maxW) * panelW, 1)}, ${BAR})`
-                      : `translate(${x0 + parts.entropy[j]! * panelW}px, ${yBar}px) scale(${Math.max((1 - parts.entropy[j]!) * panelW, 1)}, ${BAR})`,
+                      : `translate(${x0 + parts.entropy[j]! * panelW}px, ${yBar}px) scale(${Math.max(d * panelW, 1)}, ${BAR})`,
                 }}
               />
             </g>

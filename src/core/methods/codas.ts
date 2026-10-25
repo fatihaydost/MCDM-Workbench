@@ -1,4 +1,4 @@
-import { column, linearMaxNormalize, maxOf, minOf, zeros } from '../math'
+import { column, isConstant, isNearConstant, linearMaxNormalize, maxOf, minOf, zeros } from '../math'
 import { rankScores } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult, Step } from '../types'
 import { assertValid, hasErrors, validateProblem, validateRequirements, validateWeights } from '../validate'
@@ -52,6 +52,13 @@ export const codas: RankingMethod<CodasParams> = {
 
     // Step 1 (Eq. 2): Linear max/min normalization
     const normalized = linearMaxNormalize(problem)
+    const warnings: MethodWarning[] = []
+    for (let j = 0; j < n; j++) {
+      const col = column(problem.matrix, j)
+      if (!isConstant(col) && isNearConstant(col) && (weights[j] ?? 0) > 0) {
+        warnings.push({ code: 'codas.near-constant-column', col: j })
+      }
+    }
 
     // Step 2 (Eq. 3): Weighted normalized matrix r_ij = w_j * n_ij
     const weighted = zeros(m, n)
@@ -99,7 +106,6 @@ export const codas: RankingMethod<CodasParams> = {
       }
     }
 
-    const warnings: MethodWarning[] = []
     const maxE = maxOf(euclidean)
     if (maxE <= 1e-12) {
       euclidean.fill(0)

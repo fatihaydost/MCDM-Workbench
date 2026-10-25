@@ -22,7 +22,7 @@ export const bwm: MethodContent = {
   steps: [
     {
       title: { en: 'Two comparison vectors', tr: 'İki karşılaştırma vektörü' },
-      tex: String.raw`a_B = (a_{B1}, \dots, a_{Bn}), \qquad a_W = (a_{1W}, \dots, a_{nW}), \qquad a_{BB} = a_{WW} = 1`,
+      tex: String.raw`a_B = (a_{B1}, \dots, a_{Bn}), \qquad a_W = (a_{1W}, \dots, a_{nW}), \qquad a_{BB} = a_{WW} = 1, \qquad a_{Bj},\, a_{jW} \in \{1, \dots, a_{BW}\}`,
       note: {
         en: 'B is the best (most important) criterion and W the worst, on a 1‑9 scale; a_BW must be the same number in both vectors.',
         tr: 'B en iyi (en önemli), W en kötü kriterdir, değerler 1‑9 ölçeğindedir; a_BW iki vektörde de aynı sayı olmalı.',
@@ -32,8 +32,8 @@ export const bwm: MethodContent = {
       title: { en: 'Linear model (default)', tr: 'Doğrusal model (varsayılan)' },
       tex: String.raw`\begin{aligned} &\min\ \xi^{L} \\ &\left|w_B - a_{Bj} w_j\right| \le \xi^{L},\ \ \left|w_j - a_{jW} w_W\right| \le \xi^{L}\ \ \forall j, \qquad \sum_j w_j = 1,\ \ w_j \ge 0 \end{aligned}`,
       note: {
-        en: 'Rezaei (2016): each absolute value becomes two linear inequalities, giving a linear program with a unique optimal weight vector; solved here in exact closed form via Ratandhara & Kumar (2026) without an external LP solver, and xi close to 0 means high consistency.',
-        tr: "Rezaei (2016): her mutlak değer iki doğrusal eşitsizliğe açılır ve tek optimal ağırlık vektörlü bir doğrusal program verir; burada Ratandhara ve Kumar (2026) kapalı form analitik formülüyle harici LP çözücü olmadan kesin çözülür ve 0'a yakın xi yüksek tutarlılık demektir.",
+        en: 'Rezaei (2016): each absolute value becomes two linear inequalities, giving a linear program with a unique optimal weight vector; solved here in exact closed form via Ratandhara & Kumar (2026) with v_W* = 1 without an external LP solver, and xi close to 0 means high consistency.',
+        tr: "Rezaei (2016): her mutlak değer iki doğrusal eşitsizliğe açılır ve tek optimal ağırlık vektörlü bir doğrusal program verir; burada Ratandhara ve Kumar (2026) kapalı form analitik formülüyle (v_W* = 1) harici LP çözücü olmadan kesin çözülür ve 0'a yakın xi yüksek tutarlılık demektir.",
       },
     },
     {
@@ -71,15 +71,15 @@ export const bwm: MethodContent = {
     {
       methodId: 'cocoso',
       text: {
-        en: 'BWM then CoCoSo or MABAC in recent studies (for example Telli & Ayçin 2021).',
-        tr: 'Son dönem çalışmalarda BWM ardından CoCoSo ya da MABAC (örneğin Telli ve Ayçin 2021).',
+        en: 'BWM then CoCoSo or MABAC in recent studies.',
+        tr: 'Son dönem çalışmalarda BWM ardından CoCoSo ya da MABAC.',
       },
     },
     {
       methodId: 'mabac',
       text: {
-        en: 'BWM then MABAC, for example Telli & Ayçin (2021) on warehouse location.',
-        tr: 'BWM ardından MABAC; örneğin Telli ve Ayçin (2021), depo yeri seçimi.',
+        en: 'BWM then MABAC, for example Telli & Ayçin (2021) on teacher selection.',
+        tr: 'BWM ardından MABAC; örneğin Telli ve Ayçin (2021), öğretmen seçimi.',
       },
     },
     {
@@ -103,10 +103,11 @@ export const bwm: MethodContent = {
     { label: 'Rezaei (2015), Omega 53, 49-57', doi: '10.1016/j.omega.2014.11.009' },
     { label: 'Rezaei (2016), Omega 64, 126-130', doi: '10.1016/j.omega.2015.12.001' },
     { label: 'Liang, Brunelli & Rezaei (2020), Omega 96, 102175', doi: '10.1016/j.omega.2019.102175' },
-    { label: 'Ratandhara & Kumar (2026), IMA Journal of Management Mathematics', doi: '10.1093/imaman/dpag027' },
+    { label: 'Ratandhara & Kumar (2026), IMA Journal of Management Mathematics, dpag027', doi: '10.1093/imaman/dpag027' },
     { label: 'Mi, Tang, Liao, Shen & Lev (2019), Omega 87, 205-225', doi: '10.1016/j.omega.2019.01.009' },
     { label: 'You et al. (2017), Sustainability 9(12), 2329', doi: '10.3390/su9122329' },
     { label: 'Gupta (2018), Journal of Air Transport Management 68, 35-47', doi: '10.1016/j.jairtraman.2017.06.001' },
+    { label: 'Telli & Ayçin (2021), BWM-MABAC teacher selection, Süleyman Demirel Üniversitesi Vizyoner Dergisi 12(31), 912-932', doi: '10.21076/vizyoner.824056' },
   ],
   en: {
     summary:

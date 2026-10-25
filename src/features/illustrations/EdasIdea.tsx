@@ -157,18 +157,26 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, ste
   const colour = (j: number) => (j < SAW_CATEGORY_COLOURS ? String(j + 1) : 'other')
   // The side heads sit against the line; when either full head would be cut, both shorten to "← SN" and "SP →".
   const full = center - 6 - estimateTextWidth(`← ${l.below}`, HEAD_FONT) >= 0 && center + 6 + estimateTextWidth(`${l.above} →`, HEAD_FONT) <= W
-  const belowText = full ? `← ${l.below}` : `← ${l.sn}`
-  const aboveText = full ? `${l.above} →` : `${l.sp} →`
+  const belowText = stage === 0 ? '← NDA' : full ? `← ${l.below}` : `← ${l.sn}`
+  const aboveText = stage === 0 ? 'PDA →' : full ? `${l.above} →` : `${l.sp} →`
   const belowX = Math.max(center - 6, estimateTextWidth(belowText, HEAD_FONT))
   const aboveX = Math.min(center + 6, W - estimateTextWidth(aboveText, HEAD_FONT))
 
-  const signed = (i: number, j: number) => (above[i]![j]! > 0 ? above[i]![j]! : -below[i]![j]!)
+  const signed = (i: number, j: number) => {
+    const v = above[i]![j]! > 0 ? above[i]![j]! : -below[i]![j]!
+    return Math.abs(v) < 5e-5 ? 0 : v
+  }
   const table: ChartTable = {
     corner: l.alternative,
     columns: [...critNames, l.sp, l.sn, l.score],
     rows: order.map((i) => ({
       label: names[i]!,
-      cells: [...critNames.map((_, j) => format(signed(i, j))), format(sp[i]!), format(sn[i]!), texts[i]!],
+      cells: [
+        ...critNames.map((_, j) => format(signed(i, j)).replace(/^[−-]0([.,]0+)$/, '0$1')),
+        format(sp[i]!),
+        format(sn[i]!),
+        texts[i]!,
+      ],
     })),
   }
 
@@ -359,7 +367,7 @@ export function EdasIdea({ problem, weights, format = defaultFormat, labels, ste
           </li>
         ))}
         {n > SAW_CATEGORY_COLOURS && (
-          <li className={s.sawLegendItem}>
+          <li className={s.sawLegendItem} data-on={(shown ? shown.j >= SAW_CATEGORY_COLOURS : focus.col >= SAW_CATEGORY_COLOURS) ? '' : undefined}>
             <svg width={12} height={12} aria-hidden className={s.sawSwatch}>
               <rect className={s.sawSeg} data-cat="other" width={12} height={12} />
             </svg>

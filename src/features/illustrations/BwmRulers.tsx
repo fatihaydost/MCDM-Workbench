@@ -122,12 +122,18 @@ export function BwmRulers(props: BwmRulersProps) {
   const stage = stepping ? Math.min(Math.max(step, 0), BWM_IDEA_STEPS - 1) : BWM_IDEA_STEPS - 1
   const off = (from: number) => (stage >= from ? undefined : '')
   const dash = '—'
+  const formatInt = (v: number | null | undefined) =>
+    v === null || v === undefined ? dash : Number.isInteger(v) ? String(v) : format(v)
   const table: ChartTable = {
     corner: l.criterion,
     columns: [l.fromBest, l.toWorst, l.weight],
     rows: order.map((j) => ({
       label: criteria[j]!,
-      cells: [fromBest[j], toWorst[j], weights?.[j] ?? null].map((v) => (v === null || v === undefined ? dash : format(v))),
+      cells: [
+        formatInt(fromBest[j]),
+        formatInt(toWorst[j]),
+        weights?.[j] === null || weights?.[j] === undefined ? dash : format(weights[j]!),
+      ],
     })),
   }
   const legendW = (x1 - x0) / 2

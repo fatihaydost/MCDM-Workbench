@@ -178,9 +178,14 @@ export function CodasIdea({
   const shown = active === null ? null : order[active]!
   const tauDecimals = Math.abs(Math.round(tau * 100) - tau * 100) > 1e-6 ? 3 : 2
   const tauFormatted = format(tau, tauDecimals)
-  const headText = stacked
-    ? `${l.euclidean} / ${l.taxicab} (ψ=1: ${activePairs}/${totalPairs})`
-    : `${l.euclidean} / ${l.taxicab} (τ = ${tauFormatted}, ψ = 1: ${activePairs}/${totalPairs}) →`
+  const rawHeadText =
+    stage === 0
+      ? l.euclidean
+      : stacked
+        ? `${l.euclidean} / ${l.taxicab} (ψ=1: ${activePairs}/${totalPairs})`
+        : `${l.euclidean} / ${l.taxicab} (τ = ${tauFormatted}, ψ = 1: ${activePairs}/${totalPairs}) →`
+  const maxHeadW = Math.max(24, (stage >= 2 ? zero - 12 : W) - distLeft)
+  const headText = truncate(rawHeadText, maxHeadW, 12)
 
   return (
     <ChartFigure titleId={`${uid}-title`} tableId={`${uid}-table`} title={l.title} showTable={l.showTable} table={table} plotRef={plotRef} className={className}>

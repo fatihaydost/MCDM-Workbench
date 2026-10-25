@@ -4,9 +4,12 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import {
   emptyAlternativeJudgements,
   emptyJudgements,
+  equal,
   getRankingMethod,
   getWeightingMethod,
   hasErrors,
+  MAX_MAGNITUDE,
+  MIN_MAGNITUDE,
   prepareRanking,
   ProblemValidationError,
   remapAlternativeJudgements,
@@ -59,6 +62,7 @@ export type DraftProblem = {
   criteria: Criterion[]
   matrix: (number | null)[][]
   weights?: number[]
+  judgements?: Judgements
 }
 
 export type WorkbenchData = {
@@ -89,7 +93,7 @@ export type WorkbenchActions = {
    */
   setProblem: (problem: DraftProblem) => void
   /** Replaces the problem with one read from a file and remembers the file name as the source. */
-  importProblem: (problem: DraftProblem, fileName: string, weights?: number[]) => void
+  importProblem: (problem: DraftProblem, fileName: string, weights?: number[], judgements?: Judgements) => void
   /** Loads a published example; criterion names in `lang`. Sets manual weights when the paper gives them. */
   /**
    * Loads a published example. `method` (a ranking method id the example is a reference for) picks which of its
@@ -416,16 +420,24 @@ export function isLocalization(p: Pick<DraftProblem, 'alternatives' | 'criteria'
 }
 
 const importedWeightsByMatrix = new WeakMap<object, number[]>()
+const importedJudgementsByMatrix = new WeakMap<object, Judgements>()
 
 export function registerImportedWeights(matrix: object, weights: number[] | undefined): void {
   if (weights && weights.length > 0) importedWeightsByMatrix.set(matrix, weights)
+}
+
+export function registerImportedJudgements(matrix: object, judgements: Judgements | undefined): void {
+  if (judgements) importedJudgementsByMatrix.set(matrix, judgements)
 }
 
 /**
  * Cleans per-criterion array parameters in `methodParams` so their lengths always match `n` criteria.
  * Invalid or stale-length array parameters are dropped so methods fall back cleanly to their defaults/presets.
  */
-export function sanitizeMethodParams(params: MethodParamsState | undefined, n: number): MethodParamsState {
+export function sanitizeMethodParams(
+  params: Readonly<Record<string, Readonly<Record<string, unknown>> | undefined>> | undefined,
+  n: number,
+): MethodParamsState {
   if (!params || typeof params !== 'object') return {}
   const out: MethodParamsState = {}
   for (const [methodId, raw] of Object.entries(params)) {
@@ -458,7 +470,16 @@ export function sanitizeMethodParams(params: MethodParamsState | undefined, n: n
     } else if (methodId === 'aras') {
       if (Array.isArray(next.optimal)) {
         const opt = next.optimal
-        const validOpt = opt.length === n && opt.every((v) => typeof v === 'number' && Number.isFinite(v) && v > 0)
+        const validOpt =
+          opt.length === n &&
+          opt.every(
+            (v) =>
+              typeof v === 'number' &&
+              Number.isFinite(v) &&
+              v > 0 &&
+              Math.abs(v) <= MAX_MAGNITUDE &&
+              (v === 0 || Math.abs(v) >= MIN_MAGNITUDE),
+          )
         if (!validOpt) delete next.optimal
       }
     } else if (methodId === 'electre-iii') {
@@ -483,7 +504,7 @@ export function sanitizeMethodParams(params: MethodParamsState | undefined, n: n
  * and `promethee-ii.criteriaFunctions` are adjusted in place so remaining criteria keep their settings without off-by-one shifts.
  */
 export function resizeMethodParamsOnCriterionChange(
-  params: MethodParamsState | undefined,
+  params: Readonly<Record<string, Readonly<Record<string, unknown>> | undefined>> | undefined,
   prevN: number,
   nextN: number,
   deletedIndex?: number,
@@ -602,10 +623,14 @@ function recall(p: DraftProblem): Setup | undefined {
   return r && r.alternatives === p.alternatives && r.criteria === p.criteria ? r.setup : undefined
 }
 
+let workbenchStoreApi: { getInitialState: () => WorkbenchState } | undefined
+
 export const useWorkbench = create<WorkbenchState>()(
   persist(
-    (set, get) => ({
-      ...initialWorkbench(),
+    (set, get, store) => {
+      workbenchStoreApi = store
+      return {
+        ...initialWorkbench(),
 
       setStage: (stage) => set({ stage }),
 
@@ -640,10 +665,15 @@ export const useWorkbench = create<WorkbenchState>()(
           return { problem, exampleId: null, importedFrom: null, methodParams, manualWeights, judgements, alternativeJudgements }
         }),
 
-      importProblem: (problem, fileName, weights) =>
+      importProblem: (problem, fileName, weights, importedJudgements) =>
         set((s) => {
           remember(s, true)
           const importedWeights = weights ?? problem.weights ?? importedWeightsByMatrix.get(problem.matrix)
+          const rawJudgements =
+            importedJudgements ??
+            problem.judgements ??
+            (problem.matrix as { judgements?: Judgements }).judgements ??
+            importedJudgementsByMatrix.get(problem.matrix)
           const n = problem.criteria.length
           const hasValidWeights =
             Array.isArray(importedWeights) &&
@@ -654,10 +684,15 @@ export const useWorkbench = create<WorkbenchState>()(
           const manualWeights = hasValidWeights
             ? [...importedWeights]
             : carryWeights(s.problem.criteria, s.manualWeights, problem.criteria, false)
-          const judgements = carryJudgements(s.problem.criteria, s.judgements, problem.criteria, false)
+          const judgements = rawJudgements
+            ? sanitizeJudgements(rawJudgements, n)
+            : carryJudgements(s.problem.criteria, s.judgements, problem.criteria, false)
           const alternativeJudgements = carryAlternativeJudgements(s.problem, s.alternativeJudgements, problem, false)
           if (Object.prototype.propertyIsEnumerable.call(problem, 'weights')) {
             delete (problem as { weights?: number[] }).weights
+          }
+          if (Object.prototype.propertyIsEnumerable.call(problem, 'judgements')) {
+            delete (problem as { judgements?: Judgements }).judgements
           }
           return {
             problem,
@@ -715,7 +750,10 @@ export const useWorkbench = create<WorkbenchState>()(
           importedFrom: null,
           weightMethod: reference ?? (ex.weights ? 'manual' : ex.equalWeights ? 'equal' : 'critic'),
           manualWeights: ex.weights ? [...ex.weights] : new Array<number | null>(ex.criteria.length).fill(null),
-          judgements: emptyJudgements(ex.criteria.length),
+          judgements:
+            'judgements' in ex && ex.judgements
+              ? sanitizeJudgements(structuredClone(ex.judgements), ex.criteria.length)
+              : emptyJudgements(ex.criteria.length),
           alternativeJudgements: emptyAlternativeJudgements(ex.criteria.length),
         })
       },
@@ -980,7 +1018,8 @@ export const useWorkbench = create<WorkbenchState>()(
         memorizeAlternativeJudgements(get().problem, altJudgementsOf(get()))
         set(initialWorkbench())
       },
-    }),
+      }
+    },
     {
       name: WORKBENCH_STORAGE_KEY,
       version: STORAGE_VERSION,
@@ -1024,6 +1063,10 @@ export const useWorkbench = create<WorkbenchState>()(
     },
   ),
 )
+
+if (workbenchStoreApi) {
+  workbenchStoreApi.getInitialState = () => useWorkbench.getState()
+}
 
 // ---------------------------------------------------------------------------------------------
 // Derived results. Pure functions of the data (testable without React); hooks memoize them.
@@ -1083,8 +1126,18 @@ export function computeWeights(
 
   if (data.weightMethod === 'equal') {
     if (n < 2) return { value: null, issues: issues.filter((x) => x.code === 'too-few-criteria') }
-    const weights = new Array<number>(n).fill(1 / n)
-    return { value: { weights, steps: [{ key: 'equal.weights', vector: weights, axes: 'criteria' }] }, issues: [] }
+    const res = equal.compute(problem, {})
+    const colWarnings = issues
+      .filter((x) => x.code === 'constant-column' && x.col !== undefined)
+      .map((x) => ({ code: 'equal.constant-column' as const, col: x.col! }))
+    const mergedWarnings = [...(res.warnings ?? [])]
+    for (const cw of colWarnings) {
+      if (!mergedWarnings.some((w) => w.code === cw.code && w.col === cw.col)) mergedWarnings.push(cw)
+    }
+    return {
+      value: mergedWarnings.length > 0 ? { ...res, warnings: mergedWarnings } : res,
+      issues: [],
+    }
   }
 
   const method = getWeightingMethod(data.weightMethod)

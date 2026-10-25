@@ -97,7 +97,7 @@ export const mabac: MethodContent = {
   },
   sources: [
     { label: 'Pamučar & Ćirović (2015), Expert Systems with Applications 42(6), 3016-3028', doi: '10.1016/j.eswa.2014.11.057' },
-    { label: 'Biswas & Das (2018), Management Science Letters 8, 121-130', doi: '10.5267/j.msl.2017.11.004' },
+    { label: 'Biswas & Das (2018), Management Science Letters 8(2), 121-130', doi: '10.5267/j.msl.2017.11.004' },
     { label: 'Çelik (2020), CRITIC-MABAC, İslam Ekonomisi ve Finansı Dergisi 6(2), 311-334', url: 'https://dergipark.org.tr/tr/download/article-file/1194510' },
     { label: 'pyDecision 5.1.8, mabac_method (ignores the weights; not a reference)', url: 'https://github.com/Valdecy/pyDecision' },
   ],

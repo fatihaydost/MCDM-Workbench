@@ -109,7 +109,7 @@ function AlgorithmStep({ n, step }: { n: number; step: { title: string; tex: str
 /** "Opricovic, S.; Tzeng, G.-H. (2004). Title..." -> "Opricovic, S.; Tzeng, G.-H. (2004)". */
 const sourceHead = (source: string): string => source.match(/^.*?\(\d{4}[a-z]?\)/)?.[0] ?? source
 
-function MethodArticle({ m }: { m: MethodContent }) {
+export function MethodArticle({ m }: { m: MethodContent }) {
   const { t } = useTranslation()
   const [lang] = useLang()
   const l = localizeMethod(m, lang)
@@ -266,11 +266,15 @@ function MethodArticle({ m }: { m: MethodContent }) {
                 <ol className="mt-2 flex list-decimal flex-col gap-2 pl-5 text-14 text-text marker:text-text-3">
                   <li>
                     {shortOrigin(m.origin, lang)}. {m.origin.title}. {m.origin.venue}.{' '}
-                    {m.origin.doi && (
+                    {m.origin.doi ? (
                       <a href={doiHref(m.origin.doi)} target="_blank" rel="noreferrer" className={cn(textLink, '[overflow-wrap:anywhere]')}>
                         doi:{m.origin.doi}
                       </a>
-                    )}
+                    ) : m.origin.url ? (
+                      <a href={m.origin.url} target="_blank" rel="noopener noreferrer" className={cn(textLink, '[overflow-wrap:anywhere]')}>
+                        {m.origin.url}
+                      </a>
+                    ) : null}
                     {l.originNote && <span className="mt-0.5 block text-13 text-text-2">{l.originNote}</span>}
                   </li>
                   {m.sources.map((s) => (

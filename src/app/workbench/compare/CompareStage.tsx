@@ -12,7 +12,7 @@ import { alternativeName, criterionName, placeIssue, tr } from '../shared'
 import { useCompareText } from './text'
 import { whySentences } from './why'
 
-const ECHO_NOTE_KEYS = new Set([
+export const ECHO_NOTE_KEYS = new Set([
   'copras_saw',
   'copras_ahp-ranking',
   'ahp-ranking_copras',
@@ -24,6 +24,7 @@ const ECHO_NOTE_KEYS = new Set([
   'promethee-ii_vikor',
   'waspas_saw',
   'waspas_marcos',
+  'marcos_saw',
 ])
 
 /**

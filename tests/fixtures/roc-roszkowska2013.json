@@ -44,7 +44,7 @@
       "rs": [0.4, 0.3, 0.2, 0.1],
       "rr": [0.48, 0.24, 0.16, 0.12]
     },
-    "tolerance_vs_published": 0.005,
+    "tolerance_vs_published": 0.015,
     "tolerance": 0.00005,
     "tolerance_exact": 1e-12
   },

@@ -60,15 +60,23 @@ export const merec: WeightingMethod = {
 
     // 2. Overall performance S_i and performance with criterion j removed S'_ij (divisor n either way).
     const rowTotal = absLog.map((row) => row.reduce((a, b) => a + b, 0))
+    const without = absLog.map((row) =>
+      row.map((_, j) => {
+        let s = 0
+        for (let k = 0; k < n; k++) if (k !== j) s += row[k]!
+        return s
+      }),
+    )
     const performance = rowTotal.map((r) => Math.log1p(r / n))
-    const removed = absLog.map((row, i) => row.map((l) => Math.log1p((rowTotal[i]! - l) / n)))
+    const removed = without.map((row) => row.map((w) => Math.log1p(w / n)))
 
-    // 3. Removal effect, cancellation-free: S_i - S'_ij = ln((n + R_i) / (n + R_i - L_ij)) = log1p(L / (n + R - L)).
+    // 3. Removal effect, cancellation-free: S_i - S'_ij = ln((n + R_i) / (n + withoutJ)) = log1p(L / (n + withoutJ)).
     const effect = Array.from({ length: n }, (_, j) => {
       let e = 0
       for (let i = 0; i < m; i++) {
         const l = absLog[i]![j]!
-        e += Math.log1p(l / (n + rowTotal[i]! - l))
+        const withoutJ = without[i]![j]!
+        e += Math.log1p(l / (n + withoutJ))
       }
       return e
     })

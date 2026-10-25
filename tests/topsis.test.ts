@@ -81,6 +81,43 @@ describe('TOPSIS: edge cases', () => {
     const nearAndNeg = topsis.compute(makeProblem([[-2, 1], [3, 1 + 1e-10], [4, 1]], ['benefit', 'benefit']), [0.5, 0.5], {})
     expect(nearAndNeg.warnings).toContainEqual({ code: 'topsis.negative-values', col: 0 })
     expect(nearAndNeg.warnings).toContainEqual({ code: 'topsis.near-constant-column', col: 1 })
+    const zeroWeightWarnings = topsis.compute(
+      makeProblem([[0, -2, 1], [0, 3, 2], [0, 4, 3]], ['benefit', 'benefit', 'benefit']),
+      [0, 0, 1],
+      {},
+    )
+    expect(zeroWeightWarnings.warnings).toEqual([])
+  })
+
+  it('all-constant columns: every alternative gets closeness 0.5, rank 1, and topsis.zero-distance warning', () => {
+    const res = topsis.compute(makeProblem([[5, 10, -3], [5, 10, -3], [5, 10, -3]], ['benefit', 'cost', 'benefit']), [0.2, 0.5, 0.3], {})
+    expect(res.scores).toEqual([0.5, 0.5, 0.5])
+    expect(res.ranking).toEqual([1, 1, 1])
+    expect(res.warnings).toContainEqual({ code: 'topsis.zero-distance' })
+  })
+
+  it('is invariant to permuting alternatives and criteria', () => {
+    const base = topsis.compute(makeProblem(f.matrix, f.types as CriterionType[]), f.weights, {})
+    const rowPerm = [2, 0, 1]
+    const permRows = topsis.compute(
+      makeProblem(rowPerm.map((i) => f.matrix[i]!), f.types as CriterionType[]),
+      f.weights,
+      {},
+    )
+    expectClose(permRows.scores, rowPerm.map((i) => base.scores[i]!), 1e-15)
+    expect(permRows.ranking).toEqual(rowPerm.map((i) => base.ranking[i]!))
+
+    const colPerm = [1, 0]
+    const permCols = topsis.compute(
+      makeProblem(
+        f.matrix.map((row) => colPerm.map((j) => row[j]!)),
+        colPerm.map((j) => f.types[j] as CriterionType),
+      ),
+      colPerm.map((j) => f.weights[j]!),
+      {},
+    )
+    expectClose(permCols.scores, base.scores, 1e-15)
+    expect(permCols.ranking).toEqual(base.ranking)
   })
 
   it('single alternative is rejected', () => {

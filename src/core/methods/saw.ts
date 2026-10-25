@@ -1,4 +1,4 @@
-import { column, linearMaxNormalize, sum, zeros } from '../math'
+import { column, isConstant, linearMaxNormalize, sum, zeros } from '../math'
 import { rankScores } from '../rank'
 import type { Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, hasErrors, validateProblem, validateRequirements, validateWeights } from '../validate'
@@ -20,6 +20,10 @@ export function sawSumNormalize(problem: Problem): number[][] {
   const r = zeros(m, n)
   for (let j = 0; j < n; j++) {
     const col = column(matrix, j)
+    if (isConstant(col)) {
+      for (let i = 0; i < m; i++) r[i]![j] = 1 / m
+      continue
+    }
     // Cost: min / x first (Podvezko Eq. 2); the constant min cancels in the share, so 1 / x gives the same r.
     const base = criteria[j]!.type === 'cost' ? col.map((x) => 1 / x) : col
     const total = sum(base)

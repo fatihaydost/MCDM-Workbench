@@ -144,7 +144,7 @@ export function OrdinalWeights({ problem, method }: Props) {
                         id={`wb-swara-s-${rankIdx}`}
                         aria-label={`${tr(t, 'workbench.ordinal.stepRatio', { defaultValue: 'Comparative ratio s' })} ${names[critIdx]}`}
                         value={sVec[rankIdx] ?? defaultRatio}
-                        decimals={3}
+                        decimals={4}
                         min={0}
                         max={2}
                         step={0.05}
@@ -193,9 +193,11 @@ export function OrdinalWeights({ problem, method }: Props) {
         }
       }
     } else {
-      const tmp = nextRanks[j]!
-      nextRanks[j] = nextRanks[b]!
-      nextRanks[b] = tmp
+      const rb = nextRanks[b]!
+      for (let idx = 0; idx < n; idx++) {
+        if (nextRanks[idx] === rb) nextRanks[idx] = r
+      }
+      nextRanks[j] = rb
     }
     const canonical = nextRanks.map((rk) => 1 + nextRanks.filter((other) => other < rk).length)
     setMethodParam('roc', 'ranks', canonical)

@@ -132,7 +132,6 @@ export function ElectreIIdea({
   const stepping = step !== null && step !== undefined
   const stage = stepping ? Math.min(Math.max(step, 0), ELECTRE_I_IDEA_STEPS - 1) : ELECTRE_I_IDEA_STEPS - 1
   const active = stepping ? null : activeRow
-  const kernelOff = stage >= 1 ? undefined : ''
   const scoreOff = stage >= 2 ? undefined : ''
 
   const { netConcordance, netDiscordance, kernel, scores, order } = parts
@@ -252,7 +251,7 @@ export function ElectreIIdea({
                 className={s.sawRow}
                 style={{ transform: `translate(0px, ${HEAD + row * rowStep}px)` }}
                 data-highlight={(stage >= 1 ? inK : row === 0) || undefined}
-                data-off={stage === 1 && !inK ? kernelOff : undefined}
+                data-off={stage === 1 && !inK ? '' : undefined}
                 data-testid="electre-i-row"
               >
                 <text className={s.sawName} x={0} y={stacked ? NAME_LINE / 2 : mid} dominantBaseline="central">

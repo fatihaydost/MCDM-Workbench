@@ -16,6 +16,18 @@ import { DECIMALS, stepAxisLabels, stepName, tr } from './shared'
 
 const PLACEHOLDER = 'KDSSYMBOLPLACEHOLDER'
 
+export function stepToLatex(
+  step: Step,
+  labels: { alternatives: readonly string[]; criteria: readonly string[] },
+  name: string,
+  symbol?: string | undefined,
+  digits: number = DECIMALS.step,
+): string {
+  const withPlaceholder = stepToTable(step, labels, { valueLabel: PLACEHOLDER })
+  const body = tableToLatex(withPlaceholder, { digits }).replace(/λ\s*=\s*([0-9.,]+)/g, '$\\lambda = $1$')
+  return `% ${name}\n${body.replace(PLACEHOLDER, () => symbol ?? escapeLatex(name))}`
+}
+
 type Copied = 'tsv' | 'latex' | 'failed' | null
 
 export type WorkedCalculationProps = {
@@ -207,10 +219,7 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, cri
       // Full precision, in the separator the user's spreadsheet expects.
       text = tableToTsv(table, { decimal: lang === 'tr' ? ',' : '.' })
     } else {
-      const withPlaceholder = stepToTable(step, labels, { valueLabel: PLACEHOLDER })
-      const symbol = content?.texSymbol
-      const body = tableToLatex(withPlaceholder, { digits: DECIMALS.step })
-      text = `% ${name}\n${body.replace(PLACEHOLDER, () => symbol ?? escapeLatex(name))}`
+      text = stepToLatex(step, labels, name, content?.texSymbol, DECIMALS.step)
     }
     let result: Copied = format
     try {
@@ -315,7 +324,7 @@ function StepBlock({ step, number, index, domId, current, onCurrent, labels, cri
 
 type Hover = { r: number; c: number } | null
 
-const NO_PEAK_STEPS = new Set<string>([
+export const NO_PEAK_STEPS = new Set<string>([
   'critic.correlation',
   'electre-i.concordance',
   'electre-i.discordance',
@@ -334,6 +343,7 @@ const NO_PEAK_STEPS = new Set<string>([
   'cilos.lossMatrix',
   'cilos.systemMatrix',
   'ahp.pairwiseMatrix',
+  'ahpRanking.consistency',
   'equal.weights',
   'edas.average',
   'aras.optimalRow',
@@ -349,7 +359,7 @@ const NO_PEAK_STEPS = new Set<string>([
   'swara.k',
 ])
 
-const MIN_PEAK_STEPS = new Set<string>([
+export const MIN_PEAK_STEPS = new Set<string>([
   'vikor.weightedDistance',
   'vikor.groupUtility',
   'vikor.individualRegret',
@@ -361,30 +371,25 @@ const MIN_PEAK_STEPS = new Set<string>([
   'edas.sn',
   'copras.sMinus',
   'moora.costSum',
-  'promethee.negativeFlow',
   'promethee-ii.negativeFlow',
-  'electre-i.discordance',
   'electre-i.netDiscordance',
   'electre-iii.descending',
   'electre-iii.ascending',
   'entropy.entropy',
   'cilos.totalLoss',
   'bwm.consistencyLocal',
-  'ahpRanking.consistency',
   'roc.ranks',
 ])
 
-const UNORIENTED_MATRIX_STEPS = new Set<string>([
+export const UNORIENTED_MATRIX_STEPS = new Set<string>([
   'topsis.normalized',
   'topsis.weighted',
   'moora.normalized',
   'moora.weighted',
-  'moora:normalized',
-  'moora:weighted',
   'copras.normalizedSum',
   'copras.weighted',
-  'copras:weighted',
   'electre-i.oriented',
+  'entropy.proportionsSum',
 ])
 
 /**

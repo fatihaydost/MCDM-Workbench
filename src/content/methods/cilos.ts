@@ -101,7 +101,7 @@ export const cilos: MethodContent = {
     { label: 'Pala (2021), Kafkas Üniversitesi İİBF Dergisi 12(23), 263-294', doi: '10.36543/kauiibfd.2021.013' },
     { label: 'Krishnan, Kasim, Hamid & Ghazali (2021), Symmetry 13(6), 973', doi: '10.3390/sym13060973' },
     { label: 'Mirkin (1974), Problema gruppovogo vybora, Nauka, Moscow' },
-    { label: 'Podvezko, Zavadskas & Podviezko (2020), Economic Computation and Economic Cybernetics Studies and Research 54(2)', doi: '10.24818/18423264/54.2.20.04' },
+    { label: 'Podvezko, Zavadskas & Podviezko (2020), Economic Computation and Economic Cybernetics Studies and Research 54(2), 59-75', doi: '10.24818/18423264/54.2.20.04' },
   ],
   en: {
     summary:
@@ -113,7 +113,7 @@ export const cilos: MethodContent = {
     whenNot: [
       'A constant criterion: zero loss column, singular linear system.',
       'One alternative is best on several criteria: duplicate rows destabilize.',
-      'Cost criteria contain zeros (min/x).',
+      'Any criterion contains zero or negative values (needs x > 0).',
     ],
     inputs: [
       'Decision matrix with positive values.',
@@ -136,7 +136,7 @@ export const cilos: MethodContent = {
     whenNot: [
       'Bir kriter sabit: kayıp sütunu sıfır, doğrusal sistem tekil olur.',
       'Bir alternatif birkaç kriterde birden en iyi: tekrarlanan satırlar sistemi hassaslaştırır.',
-      'Maliyet kriterlerinde sıfır var (min/x).',
+      'Kriterlerde sıfır ya da negatif değer var (x > 0 gerekir).',
     ],
     inputs: [
       'Pozitif değerli karar matrisi.',

@@ -785,6 +785,8 @@ describe('robustness helpers and chart layout', () => {
     const wangRows = removeCriteria(wangProb, wangEx.weights!, rankerFor(wangRun))
     expect(wangRows).toHaveLength(11)
     expect(wangRows.every((r) => !r.blocked && r.ranking.length === 11)).toBe(true)
+    const wangSweep = sweepWeight(wangProb, wangEx.weights!, rankerFor(wangRun), 0, { steps: 10 })
+    expectContiguous(wangSweep)
 
     // ARAS with params.optimal drops the removed criterion's optimal value without length mismatch
     const arasRun = {

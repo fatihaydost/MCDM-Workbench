@@ -37,15 +37,15 @@ function compute(problem: Problem, weights: number[], params: ArasParams = {}): 
   if (params?.optimal !== undefined) {
     const opt = params.optimal
     if (!Array.isArray(opt) || opt.length !== n) {
-      issues.push({ code: 'row-length-mismatch', severity: 'error', row: -1, value: Array.isArray(opt) ? opt.length : 0 })
+      issues.push({ code: 'row-length-mismatch', severity: 'error', value: Array.isArray(opt) ? opt.length : 0 })
     } else {
       opt.forEach((v, j) => {
         if (typeof v !== 'number' || !Number.isFinite(v)) {
-          issues.push({ code: 'invalid-cell', severity: 'error', row: -1, col: j })
+          issues.push({ code: 'invalid-cell', severity: 'error', col: j })
         } else if (v <= 0) {
-          issues.push({ code: 'non-positive-value', severity: 'error', row: -1, col: j, value: v })
+          issues.push({ code: 'non-positive-value', severity: 'error', col: j, value: v })
         } else if (Math.abs(v) > MAX_MAGNITUDE || Math.abs(v) < MIN_MAGNITUDE) {
-          issues.push({ code: 'value-out-of-range', severity: 'error', row: -1, col: j, value: v })
+          issues.push({ code: 'value-out-of-range', severity: 'error', col: j, value: v })
         }
       })
     }

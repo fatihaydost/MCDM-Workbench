@@ -325,11 +325,29 @@ describe('ELECTRE III — Threshold presets and parameter validation', () => {
 
     const tiny: Problem = {
       ...problem,
-      matrix: problem.matrix.map((row) => row.map((v) => v * 1e-50)),
+      matrix: problem.matrix.map((row) => row.map((v) => (v + 1) * 1e-50)),
     }
     const baseStd = electreIII.compute(problem, [...wang.weights], { thresholdPreset: 'standard' })
     const tinyStd = electreIII.compute(tiny, [...wang.weights], { thresholdPreset: 'standard' })
     expect(tinyStd.ranking).toEqual(baseStd.ranking)
     baseStd.scores.forEach((s, i) => expect(tinyStd.scores[i]).toBeCloseTo(s, 10))
+
+    // Sub-epsilon near-zero column [0, 1e-16, 0] is treated as constant and does not cause a false veto
+    const subEpsVeto: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2 (sub-epsilon)', type: 'benefit' },
+      ],
+      matrix: [
+        [30, 0],
+        [20, 1e-16],
+        [10, 0],
+      ],
+    }
+    const rSubEps = electreIII.compute(subEpsVeto, [0.8, 0.2], { thresholdPreset: 'veto' })
+    const credSubEps = rSubEps.steps.find((s) => s.key === 'electre-iii.credibility')!.matrix!
+    expect(credSubEps[0]![1]).toBe(1)
+    expect(rSubEps.ranking).toEqual([1, 2, 3])
   })
 })

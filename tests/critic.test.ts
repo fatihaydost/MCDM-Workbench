@@ -119,11 +119,47 @@ describe('CRITIC: edge cases', () => {
     expect(step(c.steps, 'critic.normalized').matrix![0]![0]).toBe(1) // min value is best for cost
   })
 
-  it('warns below 4 alternatives', () => {
+  it('warns below 4 alternatives only when at least 2 criteria vary', () => {
     const res = critic.compute(makeProblem([[1, 2], [3, 1], [2, 5]], ['benefit', 'benefit']), {})
     expect(res.warnings?.map((w) => w.code)).toContain('critic.few-alternatives')
+    const oneVarying3 = critic.compute(makeProblem([[1, 5], [3, 5], [2, 5]], ['benefit', 'benefit']), {})
+    expect(oneVarying3.warnings?.map((w) => w.code)).not.toContain('critic.few-alternatives')
     const two = critic.compute(makeProblem([[1, 2], [3, 1]], ['benefit', 'benefit']), {})
     expect(two.warnings?.map((w) => w.code)).toContain('critic.two-alternatives')
+  })
+
+  it('emits critic.dominant-weight only when varying > 2 and max weight > 0.5', () => {
+    // With 2 varying criteria, rho_12 = rho_21 forces any sigma_1 != sigma_2 problem to have max w > 0.5: no warning.
+    const twoVarying = critic.compute(
+      makeProblem(
+        [
+          [0, 0, 5],
+          [0, 0.5, 5],
+          [1, 0.5, 5],
+          [1, 1, 5],
+        ],
+        ['benefit', 'benefit', 'benefit'],
+      ),
+      {},
+    )
+    expect(Math.max(...twoVarying.weights)).toBeGreaterThan(0.5)
+    expect(twoVarying.warnings?.map((w) => w.code)).not.toContain('critic.dominant-weight')
+
+    // With 3 varying criteria where C1 negatively correlates with C2 & C3 (which are nearly identical), C1 > 0.5: warns.
+    const threeVarying = critic.compute(
+      makeProblem(
+        [
+          [0, 1, 1],
+          [0, 0.9, 0.85],
+          [1, 0.1, 0.15],
+          [1, 0, 0],
+        ],
+        ['benefit', 'benefit', 'benefit'],
+      ),
+      {},
+    )
+    expect(threeVarying.weights[0]).toBeGreaterThan(0.5)
+    expect(threeVarying.warnings).toContainEqual({ code: 'critic.dominant-weight', col: 0 })
   })
 
   it('single alternative is rejected instead of producing NaN', () => {

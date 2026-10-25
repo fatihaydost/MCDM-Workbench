@@ -1,6 +1,7 @@
 import { useId, useMemo, useState, type KeyboardEvent } from 'react'
 import { maxOf } from '../../core/math'
-import type { Problem } from '../../core/types'
+import type { ArasParams } from '../../core/methods/aras'
+import type { MethodParams, Problem } from '../../core/types'
 import { ChartFigure, type ChartTable } from '../charts/ChartFigure'
 import { estimateTextWidth, truncate } from '../charts/layout'
 import { useAnimateValues, useElementWidth } from '../charts/useElementWidth'
@@ -40,6 +41,7 @@ export const ARAS_OPTIMAL_BAR_LABELS_EN: ArasOptimalBarLabels = {
 export type ArasOptimalBarProps = {
   problem: Problem
   weights: readonly number[]
+  params?: ArasParams | MethodParams | undefined
   /** S, S₀ and K in the active locale with the given decimals. */
   format?: ((value: number, decimals: number) => string) | undefined
   labels?: Partial<ArasOptimalBarLabels>
@@ -81,6 +83,7 @@ const defaultFormat = (v: number, d: number) => v.toFixed(d)
 export function ArasOptimalBar({
   problem,
   weights,
+  params,
   format = defaultFormat,
   labels,
   step,
@@ -91,7 +94,7 @@ export function ArasOptimalBar({
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
   const animate = useAnimateValues(width)
-  const parts = useMemo(() => arasParts(problem, weights), [problem, weights])
+  const parts = useMemo(() => arasParts(problem, weights, (params ?? {}) as ArasParams), [problem, weights, params])
   const [active, setActive] = useState<number | null>(null)
   const [focusRow, setFocusRow] = useState(0)
   if (!parts) return null
@@ -289,3 +292,5 @@ export function ArasOptimalBar({
     </ChartFigure>
   )
 }
+
+export { ArasOptimalBar as ArasIdea }

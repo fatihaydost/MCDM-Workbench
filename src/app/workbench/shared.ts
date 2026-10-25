@@ -50,31 +50,45 @@ export const paramOptionLabel = (methodId: string, d: ParamDescriptor, option: s
  * the defaults. A number option reads workbench.params.<id>.<key>Variant with the value in the active locale
  * ("v = 0,70").
  */
-export function variantLabel(methodId: string, raw: Readonly<Record<string, MethodParamValue>> | undefined, t: TFunction): string {
+export function variantLabel(methodId: string, raw: Readonly<Record<string, unknown>> | undefined, t: TFunction): string {
   const method = getWeightingMethod(methodId) ?? getRankingMethod(methodId)
-  const rawObj = raw as Readonly<Record<string, unknown>> | undefined
+  const rawObj = raw
   const hasCustomElectre =
     methodId === 'electre-iii' &&
     (Array.isArray(rawObj?.q) || Array.isArray(rawObj?.p) || Array.isArray(rawObj?.v))
   const hasCustomPromethee = methodId === 'promethee-ii' && Array.isArray(rawObj?.criteriaFunctions)
-  return changedParams(method?.params, raw)
-    .filter(([d]) => !(hasCustomElectre && d.key === 'thresholdPreset') && !(hasCustomPromethee && d.key === 'preferenceFunction'))
+  const hasCustomSwaraOrder =
+    methodId === 'swara' &&
+    Array.isArray(rawObj?.order) &&
+    rawObj.order.some((idx, r) => idx !== r)
+  const hasCustomSwaraS = methodId === 'swara' && Array.isArray(rawObj?.s)
+  const parts = changedParams(method?.params, raw)
+    .filter(
+      ([d]) =>
+        !(hasCustomElectre && d.key === 'thresholdPreset') &&
+        !(hasCustomPromethee && d.key === 'preferenceFunction') &&
+        !(hasCustomSwaraS && d.key === 'stepRatio'),
+    )
     .map(([d, v]) =>
       d.kind === 'choice'
         ? tr(t, `workbench.params.${methodId}.${d.key}Variant.${String(v)}`)
         : tr(t, `workbench.params.${methodId}.${d.key}Variant`, { value: formatNumber(Number(v), isLang(i18n.resolvedLanguage) ? i18n.resolvedLanguage : 'en', 2) }),
     )
-    .join(', ')
+  if (hasCustomSwaraOrder || hasCustomSwaraS) {
+    const lang = isLang(i18n.resolvedLanguage) ? i18n.resolvedLanguage : 'en'
+    parts.push(tr(t, 'workbench.params.swara.customVariant', { defaultValue: lang === 'tr' ? 'özel' : 'custom' }))
+  }
+  return parts.join(', ')
 }
 
 /** The weighting method's name with its variant where the method is named as provenance: "Entropy (min-max)". */
-export function weightMethodFullLabel(m: WeightMethodId, raw: Readonly<Record<string, MethodParamValue>> | undefined, t: TFunction): string {
+export function weightMethodFullLabel(m: WeightMethodId, raw: Readonly<Record<string, unknown>> | undefined, t: TFunction): string {
   const variant = variantLabel(m, raw, t)
   return variant ? `${weightMethodLabel(m, t)} (${variant})` : weightMethodLabel(m, t)
 }
 
 /** The ranking method's name with its variant, where it is named as provenance: "SAW (sum)". */
-export function rankingMethodFullLabel(m: RankingMethodId, raw: Readonly<Record<string, MethodParamValue>> | undefined, t: TFunction): string {
+export function rankingMethodFullLabel(m: RankingMethodId, raw: Readonly<Record<string, unknown>> | undefined, t: TFunction): string {
   const variant = variantLabel(m, raw, t)
   const name = t(`workbench.rankingMethod.${m}`)
   return variant ? `${name} (${variant})` : name

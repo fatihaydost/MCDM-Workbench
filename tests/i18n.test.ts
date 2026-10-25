@@ -218,12 +218,13 @@ describe('i18n resources', () => {
       moora.compute({ ...p, matrix: [[0, 1], [0, 2], [0, 4]] }, [0.5, 0.5], {}),
     ]
     expect(mo.flatMap((x) => x.warnings ?? []).map((x) => x.code)).toEqual(['moora.zero-column'])
-    // BWM: the Demir & Bircan answers (F3, n = 9, inconsistent on K7) and n = 10 all ones (approximate threshold).
+    // BWM: the Demir & Bircan answers (F3, n = 9, inconsistent on K7) and n = 10 with aBW = 3 (approximate threshold).
     const bwmProblem = (n: number) => ({ ...p, criteria: Array.from({ length: n }, (_, j) => ({ name: `C${j + 1}`, type: 'benefit' as const })), matrix: [new Array<number>(n).fill(1), new Array<number>(n).fill(2)] })
-    const ones = new Array<number>(10).fill(1)
+    const aB10 = [1, 2, 2, 2, 2, 2, 2, 2, 2, 3]
+    const aW10 = [3, 2, 2, 2, 2, 2, 2, 2, 2, 1]
     const bw = [
       bwm.compute(bwmProblem(9), {}, judgementsFromBwm(9, f3.best, f3.worst, f3.bestToOthers, f3.othersToWorst)),
-      bwm.compute(bwmProblem(10), {}, judgementsFromBwm(10, 0, 9, ones, ones)),
+      bwm.compute(bwmProblem(10), {}, judgementsFromBwm(10, 0, 9, aB10, aW10)),
     ]
     expect(new Set(bw.flatMap((x) => x.warnings ?? []).map((x) => x.code))).toEqual(new Set(['bwm.inconsistent', 'bwm.threshold-approximate']))
     // AHP: inconsistent 3x3 (a_12 = 5, a_13 = 1/3, a_23 = 7) and n = 8 all ones (many-criteria).

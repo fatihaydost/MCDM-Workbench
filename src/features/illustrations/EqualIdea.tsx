@@ -155,7 +155,7 @@ export function EqualIdea({
               <text
                 className={`${s.barValue} ${s.stageItem}`}
                 data-off={off(2)}
-                x={xShare + 8}
+                x={x1 + 8}
                 y={y}
                 dominantBaseline="central"
               >

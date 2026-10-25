@@ -31,7 +31,7 @@ export const critic: WeightingMethod = {
     const { r, constant, nearConstant } = minMaxNormalize(problem)
     const allConstant = constant.every(Boolean)
     const varying = constant.filter((c) => !c).length
-    if (m > 2 && m < CRITIC_SMALL_M && !allConstant) warnings.push({ code: 'critic.few-alternatives' })
+    if (m > 2 && m < CRITIC_SMALL_M && varying >= 2) warnings.push({ code: 'critic.few-alternatives' })
     nearConstant.forEach((near, j) => near && warnings.push({ code: 'critic.near-constant-column', col: j }))
 
     // 2. Contrast: sample standard deviation per column.
@@ -77,7 +77,7 @@ export const critic: WeightingMethod = {
     const total = sum(information)
 
     const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
-    if (!allConstant && varying > 1 && !noConflict && weights[top]! > CRITIC_DOMINANT_WEIGHT) {
+    if (!allConstant && varying > 2 && !noConflict && weights[top]! > CRITIC_DOMINANT_WEIGHT) {
       warnings.push({ code: 'critic.dominant-weight', col: top })
     }
 

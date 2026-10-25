@@ -874,7 +874,7 @@ describe('DSS / KDS Analyst Findings and Robustness Edge Cases', () => {
   it('bwmSuggestion prioritizes othersToWorst side when both gaps are equal', () => {
     const bo = [1, 3, 6]
     const ow = [6, 3, 1]
-    const sugg = bwmSuggestion(bo, ow, 0, 2, 1)
+    const sugg = bwmSuggestion(bo, ow, 0, 2, 1)!
     // With equal gap (|3 * 2 - 6| = 0), 'othersToWorst' is checked first in the loop
     expect(sugg.side).toBe('othersToWorst')
     expect(sugg.value).toBe(2)

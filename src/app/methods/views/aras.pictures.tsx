@@ -24,10 +24,19 @@ function useArasLabels(): ArasOptimalBarLabels {
 }
 
 /** Ranking stage: the optimal row A₀ on top and every alternative's optimality S_i below it, K_i = S_i / S₀ beside it. */
-export function Stage({ problem, weights, className }: StagePictureProps) {
+export function Stage({ problem, weights, params, className }: StagePictureProps) {
   const labels = useArasLabels()
   const { format } = useNumberFormat(4)
-  return <ArasOptimalBar problem={problem} weights={weights} format={format} labels={labels} className={cn('max-w-[760px]', className)} />
+  return (
+    <ArasOptimalBar
+      problem={problem}
+      weights={weights}
+      params={params}
+      format={format}
+      labels={labels}
+      className={cn('max-w-[760px]', className)}
+    />
+  )
 }
 
 /** Method page: the same rows on the airlines example with a 3-step story (S, the optimal row A₀ at S₀, K = S / S₀). */

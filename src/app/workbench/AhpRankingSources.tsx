@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   AHP_MAX_PAIRWISE_ALTERNATIVES,
@@ -99,6 +99,21 @@ function CriterionPairwise({
     setAt({ key, index: null })
   }
 
+  // Between the card and the summary list the focused element unmounts: hand focus to the one that replaces it.
+  const slot = useRef<HTMLDivElement>(null)
+  const summary = complete && index === null
+  const wasSummary = useRef(summary)
+  useEffect(() => {
+    if (wasSummary.current === summary) return
+    wasSummary.current = summary
+    const el = slot.current
+    const target = summary
+      ? el?.querySelector<HTMLElement>('button')
+      : (el?.querySelector<HTMLElement>('[data-values] [aria-checked="true"]') ??
+        el?.querySelector<HTMLElement>('[data-values] button:not(:disabled)'))
+    target?.focus()
+  }, [summary])
+
   const words: ScaleWords = {
     1: t('workbench.pairwise.words.1'),
     3: t('workbench.pairwise.words.3'),
@@ -180,7 +195,7 @@ function CriterionPairwise({
         </Button>
       )}
       <div className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
-        <div className="min-w-0">
+        <div ref={slot} className="min-w-0">
           {question ? (
             <PairwiseCard
               question={question}

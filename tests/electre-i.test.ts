@@ -270,4 +270,39 @@ describe('ELECTRE I — graph kernel, edge cases & parameter validation', () => 
     expect(() => electreI.compute(p, [0.5, 0.5], { dHat: 1.1 })).toThrow(/dHat/)
     expect(() => electreI.compute(p, [0.5, 0.5], { discordanceScale: 'invalid' as never })).toThrow(/discordanceScale/)
   })
+
+  it('ignores zero-weight criteria when computing discordance and veto', () => {
+    const p: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'benefit' },
+        { name: 'C3 (zero weight)', type: 'benefit' },
+      ],
+      matrix: [
+        [20, 20, 0],
+        [10, 10, 1000],
+        [5, 5, 500],
+      ],
+    }
+    const pWithout: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'benefit' },
+      ],
+      matrix: [
+        [20, 20],
+        [10, 10],
+        [5, 5],
+      ],
+    }
+    for (const discordanceScale of ['global', 'range'] as const) {
+      const resWithZero = electreI.compute(p, [0.5, 0.5, 0], { discordanceScale })
+      const resWithout = electreI.compute(pWithout, [0.5, 0.5], { discordanceScale })
+      const dWithZero = resWithZero.steps.find((s) => s.key === 'electre-i.discordance')!.matrix!
+      expect(dWithZero[0]![1]).toBe(0)
+      expect(resWithZero.ranking).toEqual(resWithout.ranking)
+    }
+  })
 })

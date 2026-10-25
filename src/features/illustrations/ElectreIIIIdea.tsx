@@ -63,6 +63,8 @@ export type ElectreIIIIdeaLabels = {
   ascendingRank: string
   score: string
   row: (alternative: string, desc: string, asc: string, score: string) => string
+  incomparables?: ((pairs: string) => string) | string | undefined
+  incomparablesNone?: string | undefined
 }
 
 export const ELECTRE_III_IDEA_LABELS_EN: ElectreIIIIdeaLabels = {
@@ -73,6 +75,8 @@ export const ELECTRE_III_IDEA_LABELS_EN: ElectreIIIIdeaLabels = {
   ascendingRank: 'r↑',
   score: 'Φ',
   row: (a, desc, asc, sc) => `${a}: r↓ = ${desc}, r↑ = ${asc}, Φ = ${sc}`,
+  incomparables: (pairs) => `Incomparable pairs (r↓ vs r↑): ${pairs}`,
+  incomparablesNone: 'No incomparable pairs (r↓ and r↑ agree on all pairs).',
 }
 
 export type ElectreIIIIdeaProps = {
@@ -130,7 +134,7 @@ export function ElectreIIIIdea({
   const ascOff = stage >= 1 ? undefined : ''
   const scoreOff = stage >= 2 ? undefined : ''
 
-  const { descending, ascending, outgoing, incoming, scores, ranking, order } = parts
+  const { descending, ascending, outgoing, incoming, scores, ranking, order, incomparables } = parts
   const names = problem.alternatives
   const m = names.length
   const W = Math.max(width, 240)
@@ -186,6 +190,15 @@ export function ElectreIIIIdea({
   }
 
   const shown = active === null ? null : order[active]!
+  const incompPairsText = incomparables
+    .map(([a, b]) => `${names[a] ?? `#${a + 1}`} ∥ ${names[b] ?? `#${b + 1}`}`)
+    .join(', ')
+  const incompNote =
+    incomparables.length > 0
+      ? typeof l.incomparables === 'function'
+        ? l.incomparables(incompPairsText)
+        : (l.incomparables ?? `Incomparable pairs (r↓ vs r↑): ${incompPairsText}`)
+      : l.incomparablesNone
 
   return (
     <ChartFigure titleId={`${uid}-title`} tableId={`${uid}-table`} title={l.title} showTable={l.showTable} table={table} plotRef={plotRef} className={className}>
@@ -292,6 +305,16 @@ export function ElectreIIIIdea({
           })}
         </g>
       </svg>
+      {incompNote && (
+        <p
+          className={`picture-StageNote ${s.caption} ${s.stageItem}`}
+          data-off={scoreOff}
+          data-testid="electre-iii-incomparable"
+          data-count={incomparables.length}
+        >
+          {incompNote}
+        </p>
+      )}
       {(shown !== null || l.caption) && (
         <p className={s.caption} aria-live="polite">
           {shown !== null ? rowText(shown) : l.caption}

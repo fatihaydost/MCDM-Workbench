@@ -275,7 +275,7 @@ export default defineConfig(({ command, isPreview }) => ({
     },
   },
   test: {
-    include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
+    include: ['tests/**/*.test.{ts,tsx}', 'src/**/*.test.{ts,tsx}'],
     environment: 'node',
   },
 }))

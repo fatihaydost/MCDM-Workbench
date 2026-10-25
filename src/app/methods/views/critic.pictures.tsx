@@ -26,6 +26,7 @@ export function Stage({ problem }: StagePictureProps) {
           conflict: t('workbench.visual.critic.conflict'),
           weight: t('workbench.visual.critic.weight'),
           information: t('workbench.visual.critic.information'),
+          weightHead: (total) => t('methods.page.idea.critic.weightHead', { total }),
           showTable: t('workbench.chart.showTable'),
           criterion: t('workbench.criterion'),
         }}

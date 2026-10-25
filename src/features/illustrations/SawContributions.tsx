@@ -291,7 +291,7 @@ export function SawContributions({ problem, weights, params, parts: partsProp, f
           </li>
         ))}
         {n > SAW_CATEGORY_COLOURS && (
-          <li className={s.sawLegendItem}>
+          <li className={s.sawLegendItem} data-on={(shown ? shown.j >= SAW_CATEGORY_COLOURS : focus.col >= SAW_CATEGORY_COLOURS) ? '' : undefined}>
             <svg width={12} height={12} aria-hidden className={s.sawSwatch}>
               <rect className={s.sawSeg} data-cat="other" width={12} height={12} />
             </svg>

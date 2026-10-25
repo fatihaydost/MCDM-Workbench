@@ -32,9 +32,9 @@ export const bestIndex = (result: RankingResult): number => rankOrder(result)[0]
 /** Every alternative ranked first, in input order (more than one when the best score is tied). */
 export const leaders = (result: RankingResult): number[] => rankOrder(result).filter((i) => result.ranking[i] === 1)
 
-const RANKING_FAMILIES: readonly { key: 'distance' | 'additive' | 'outranking'; ids: readonly RankingMethodId[] }[] = [
-  { key: 'distance', ids: ['topsis', 'vikor', 'codas', 'mabac'] },
-  { key: 'additive', ids: ['saw', 'ahp-ranking', 'waspas', 'copras', 'moora', 'aras', 'marcos', 'edas', 'cocoso'] },
+export const RANKING_FAMILIES: readonly { key: 'distance' | 'additive' | 'outranking'; ids: readonly RankingMethodId[] }[] = [
+  { key: 'distance', ids: ['topsis', 'vikor', 'codas', 'mabac', 'edas'] },
+  { key: 'additive', ids: ['saw', 'ahp-ranking', 'waspas', 'copras', 'moora', 'aras', 'marcos', 'cocoso'] },
   { key: 'outranking', ids: ['promethee-ii', 'electre-i', 'electre-iii'] },
 ]
 

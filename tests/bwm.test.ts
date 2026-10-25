@@ -3,6 +3,7 @@ import {
   bwm,
   bwmAnswers,
   bwmProgress,
+  bwmSolve,
   bwmSuggestion,
   emptyJudgements,
   judgementsFromBwm,
@@ -140,13 +141,26 @@ describe('BWM: thresholds, suggestion, answers, validation, progress', () => {
     expect(liangThreshold(9, 12)).toEqual({ value: 0.3662, approximate: true })
     expect(liangThreshold(5, 2)).toBeNull()
   })
-  it('n = 10 warns that the threshold is approximate', () => {
+  it('n = 10 warns that the threshold is approximate only when a_BW >= 3', () => {
     const bo = [1, 2, 2, 2, 2, 2, 2, 2, 2, 4]
     const ow = [4, 2, 2, 2, 2, 2, 2, 2, 2, 1]
     expect(run(bo, ow, 0, 9).warnings).toContainEqual({ code: 'bwm.threshold-approximate' })
+    const bo2 = [1, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+    const ow2 = [2, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    expect(run(bo2, ow2, 0, 9).warnings).toEqual([])
   })
-  it('bwmSuggestion: a_BW 9, a_Bj 4, a_jW 4 → othersToWorst 2', () => {
+  it('bwmSuggestion: a_BW 9, a_Bj 4, a_jW 4 → othersToWorst 2; returns null on missing entries', () => {
     expect(bwmSuggestion([1, 4, 9], [9, 4, 1], 0, 2, 1)).toEqual({ side: 'othersToWorst', value: 2 })
+    expect(bwmSuggestion([1, 4, null], [9, 4, 1], 0, 2, 1)).toBeNull()
+    expect(bwmSuggestion([1, null, 9], [9, 4, 1], 0, 2, 1)).toBeNull()
+    expect(bwmSuggestion([1, 4, 9], [9, null, 1], 0, 2, 1)).toBeNull()
+  })
+  it('bwmSolve: rejects mismatched lengths or invalid best/worst indices', () => {
+    expect(() => bwmSolve([1, 2, 3], [3, 2, 1], 1, 1)).toThrow(RangeError)
+    expect(() => bwmSolve([1, 2, 3], [3, 2], 0, 2)).toThrow(RangeError)
+    expect(() => bwmSolve([1], [1], 0, 0)).toThrow(RangeError)
+    expect(() => bwmSolve([1, 2, 3], [3, 2, 1], -1, 2)).toThrow(RangeError)
+    expect(() => bwmSolve([1, 2, 3], [3, 2, 1], 0, 3)).toThrow(RangeError)
   })
   it('bwmAnswers: an answer above a_BW or in AHP direction is unanswered; raising a_BW brings it back', () => {
     const c = f1.cases[1]!

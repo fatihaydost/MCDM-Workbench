@@ -163,7 +163,7 @@ export const pipelines: readonly Pipeline[] = [
       en: 'Larger than SWARA-TOPSIS; a Lithuanian-school pattern.',
       tr: 'SWARA-TOPSIS\'ten büyük; Litvanya okuluna özgü bir kalıp.',
     },
-    examples: [],
+    examples: [{ label: 'Aytaç Adalı & Tuş Işık (2017), SWARA-WASPAS, International Journal of Pure and Applied Sciences 3(1), 67-77', doi: '10.29132/ijpas.305419' }],
   },
   {
     id: 'entropy-edas',
@@ -199,7 +199,7 @@ export const pipelines: readonly Pipeline[] = [
     coMentions: 93,
     tier: 'growing',
     evidence: { en: 'Fast-growing newer pairing.', tr: 'Hızla yayılan yeni bir eşleşme.' },
-    examples: [],
+    examples: [{ label: 'Krishnan, Kasim, Hamid & Ghazali (2021), Symmetry 13(6), 973', doi: '10.3390/sym13060973' }],
   },
   {
     id: 'critic-cocoso',
@@ -388,10 +388,10 @@ export const rankingRequirements: readonly RankingRequirement[] = [
     methodIds: ['codas'],
     normalization: { en: 'Linear max (x/max, min/x)', tr: 'Doğrusal maks (x/maks, min/x)' },
     negatives: 'no',
-    zeros: 'conditional',
+    zeros: 'no',
     note: {
-      en: 'From the method card: values must be 0 or more, and cost criteria strictly positive.',
-      tr: 'Yöntem kartından: değerler 0 ya da daha büyük olmalı, maliyet kriterleri kesinlikle pozitif.',
+      en: 'Every value must be strictly positive (linear max/min normalization blocks 0 and negative values).',
+      tr: 'Her değer kesinlikle pozitif olmalı (doğrusal maks/min normalizasyonu 0 ve negatif değerleri engeller).',
     },
     params: { en: 'Threshold tau, default 0.02', tr: 'Eşik tau, varsayılan 0,02' },
     output: { en: 'Assessment score H (sums to 0)', tr: 'Değerlendirme skoru H (toplamı 0)' },
@@ -585,8 +585,14 @@ export const weightingRequirements: readonly WeightingRequirement[] = [
   {
     methodId: 'merec',
     data: { en: 'Strictly positive (uses ln, min/x and x/max)', tr: 'Kesinlikle pozitif (ln, min/x ve x/maks kullanır)' },
-    normalization: null,
-    degenerate: { en: 'Zeros break the logarithm', tr: 'Sıfırlar logaritmayı bozar' },
+    normalization: {
+      en: 'Built-in inverse linear normalization (min/x for benefit, x/max for cost; worst = 1).',
+      tr: 'Yerleşik ters doğrusal normalizasyon (faydada min/x, maliyette x/maks; en kötü = 1).',
+    },
+    degenerate: {
+      en: 'Constant column: weight 0 (or 1/n if every column is constant); zeros break the logarithm',
+      tr: 'Sabit sütun: ağırlık 0 (bütün sütunlar sabitse 1/n); sıfırlar logaritmayı bozar',
+    },
     sources: [{ label: 'Keshavarz-Ghorabaee et al. (2021), Symmetry 13(4), 525', doi: '10.3390/sym13040525' }],
   },
   {
@@ -601,7 +607,7 @@ export const weightingRequirements: readonly WeightingRequirement[] = [
   },
   {
     methodId: 'cilos',
-    data: { en: 'Positive values; no zeros in cost criteria', tr: 'Pozitif değerler; maliyet kriterlerinde sıfır yok' },
+    data: { en: 'Strictly positive values (x > 0) across all criteria', tr: 'Tüm kriterlerde kesinlikle pozitif değerler (x > 0)' },
     normalization: { en: 'Built-in sum normalization.', tr: 'Yerleşik toplam normalizasyonu.' },
     degenerate: { en: 'Constant column: the linear system becomes singular', tr: 'Sabit sütun: doğrusal sistem tekilleşir' },
     sources: [{ label: 'Zavadskas et al. (2017), Sustainability 9(5), 702', doi: '10.3390/su9050702' }],
@@ -624,6 +630,7 @@ export const weightingRequirements: readonly WeightingRequirement[] = [
     sources: [
       { label: 'Rezaei (2015), Omega 53, 49-57', doi: '10.1016/j.omega.2014.11.009' },
       { label: 'Rezaei (2016), Omega 64, 126-130', doi: '10.1016/j.omega.2015.12.001' },
+      { label: 'Liang, Brunelli & Rezaei (2020), Omega 96, 102175', doi: '10.1016/j.omega.2019.102175' },
     ],
   },
   {
@@ -651,7 +658,10 @@ export const weightingRequirements: readonly WeightingRequirement[] = [
     data: { en: 'Only the number of criteria', tr: 'Yalnız kriter sayısı' },
     normalization: null,
     degenerate: { en: 'None', tr: 'Yok' },
-    sources: [],
+    sources: [
+      { label: 'Dawes & Corrigan (1974), Psychological Bulletin 81(2), 95-106', doi: '10.1037/h0037613' },
+      { label: 'Einhorn & Hogarth (1975), Organizational Behavior and Human Performance 13(2), 171-192', doi: '10.1016/0030-5073(75)90044-6' },
+    ],
   },
 ]
 
@@ -682,8 +692,8 @@ export const riskyCombinations: readonly RiskyCombination[] = [
       tr: 'Yayılım iki kez sayılabilir: yayılıma dayalı nesnel ağırlık ile uzaklığa dayalı sıralama',
     },
     text: {
-      en: 'Our reading of the formulas: Entropy, SD, CRITIC, MEREC, LOPCOW and CILOS weight criteria by their spread or removal effect, and TOPSIS (vector normalization), VIKOR, EDAS, MABAC, CoCoSo, CODAS and GRA also let a criterion with a larger normalized spread contribute more to the distances. In Entropy or SD then TOPSIS, the spread of a noisy criterion may therefore enter twice, once as an explicit weight and once implicitly. This is our analysis, not a published result.',
-      tr: 'Formüllerden bizim okumamız: Entropi, SD, CRITIC, MEREC, LOPCOW ve CILOS kriterleri yayılımlarına ya da çıkarılma etkilerine göre ağırlıklandırır; TOPSIS (vektör normalizasyonu), VIKOR, EDAS, MABAC, CoCoSo, CODAS ve GRA da normalize yayılımı büyük olan kriterin uzaklıklara daha çok katkı yapmasına izin verir. Bu yüzden Entropi ya da SD ardından TOPSIS kullanıldığında gürültülü bir kriterin yayılımı iki kez devreye girebilir: bir kez açık ağırlık olarak, bir kez örtük olarak. Bu yayımlanmış bir sonuç değil, bizim yorumumuz.',
+      en: 'Our reading of the formulas: Entropy, SD, CRITIC, MEREC and CILOS weight criteria by their spread or removal effect, and TOPSIS (vector normalization), MOORA, VIKOR, EDAS, MABAC, CoCoSo, CODAS and GRA also let a criterion with a larger normalized spread contribute more to the distances. In Entropy or SD then TOPSIS, the spread of a noisy criterion may therefore enter twice, once as an explicit weight and once implicitly. This is our analysis, not a published result.',
+      tr: 'Formüllerden bizim okumamız: Entropi, SD, CRITIC, MEREC ve CILOS kriterleri yayılımlarına ya da çıkarılma etkilerine göre ağırlıklandırır; TOPSIS (vektör normalizasyonu), MOORA, VIKOR, EDAS, MABAC, CoCoSo, CODAS ve GRA da normalize yayılımı büyük olan kriterin uzaklıklara daha çok katkı yapmasına izin verir. Bu yüzden Entropi ya da SD ardından TOPSIS kullanıldığında gürültülü bir kriterin yayılımı iki kez devreye girebilir: bir kez açık ağırlık olarak, bir kez örtük olarak. Bu yayımlanmış bir sonuç değil, bizim yorumumuz.',
     },
     basis: 'analysis',
     evidence: {
@@ -694,7 +704,7 @@ export const riskyCombinations: readonly RiskyCombination[] = [
       en: 'With objective dispersion weights, check the Robustness (Monte Carlo and weight sweep) and Compare stages, and watch for the dominant-weight (> 0.50) warning.',
       tr: 'Yayılıma dayalı nesnel ağırlıklarla Sağlamlık (Monte Carlo ve ağırlık taraması) ile Karşılaştırma aşamalarını inceleyin ve baskın ağırlık (> 0,50) uyarısına dikkat edin.',
     },
-    methodIds: ['entropy', 'sd', 'critic', 'lopcow', 'merec', 'cilos', 'topsis', 'vikor', 'edas', 'mabac', 'cocoso', 'codas'],
+    methodIds: ['entropy', 'sd', 'critic', 'merec', 'cilos', 'topsis', 'vikor', 'edas', 'mabac', 'cocoso', 'codas', 'moora'],
     sources: [
       { label: 'Choo, Schoner & Wedley (1999), Computers & Industrial Engineering 37, 527-541', doi: '10.1016/S0360-8352(00)00019-X' },
       { label: 'Mukhametzyanov (2021), DMAME 4(2), 76-105', doi: '10.31181/dmame210402076i' },
@@ -767,11 +777,11 @@ export const riskyCombinations: readonly RiskyCombination[] = [
     id: 'ratio-shifted',
     title: { en: 'Ratio-based methods on shifted data', tr: 'Kaydırılmış veride orana dayalı yöntemler' },
     text: {
-      en: 'SAW, WPM, WASPAS, COPRAS, ARAS, MARCOS, CODAS, MEREC and CILOS need positive data. Our analysis: silently shifting the data (x - min + 1) changes their rankings, so the site blocks them or requires an explicit, displayed shift.',
-      tr: 'SAW, WPM, WASPAS, COPRAS, ARAS, MARCOS, CODAS, MEREC ve CILOS pozitif veri ister. Bizim yorumumuz: veriyi sessizce kaydırmak (x - min + 1) bu yöntemlerin sıralamasını değiştirir; bu yüzden site bunları engeller ya da açıkça gösterilen bir kaydırma ister.',
+      en: 'SAW, WPM, WASPAS, COPRAS, ARAS, MARCOS, CODAS, AHP (table mode), MEREC and CILOS need positive data. Our analysis: silently shifting the data (x - min + 1) changes their rankings, so the site blocks them or requires an explicit, displayed shift.',
+      tr: 'SAW, WPM, WASPAS, COPRAS, ARAS, MARCOS, CODAS, AHP (tablo modu), MEREC ve CILOS pozitif veri ister. Bizim yorumumuz: veriyi sessizce kaydırmak (x - min + 1) bu yöntemlerin sıralamasını değiştirir; bu yüzden site bunları engeller ya da açıkça gösterilen bir kaydırma ister.',
     },
     basis: 'analysis',
-    methodIds: ['saw', 'waspas', 'copras', 'aras', 'marcos', 'codas', 'merec', 'cilos'],
+    methodIds: ['saw', 'waspas', 'copras', 'aras', 'marcos', 'codas', 'ahp', 'merec', 'cilos'],
     sources: [],
   },
   {
@@ -859,8 +869,8 @@ export const robustnessTechniques: readonly RobustnessTechnique[] = [
     id: 'parameters',
     title: { en: 'Parameter sensitivity', tr: 'Parametre duyarlılığı' },
     summary: {
-      en: 'One slider per method parameter with the same outputs as the weight change: PROMETHEE q, p and s; VIKOR v; WASPAS and CoCoSo λ; CODAS τ; ELECTRE thresholds; TOPSIS normalization and distance.',
-      tr: 'Her yöntem parametresi için bir kaydırıcı, ağırlık değişimiyle aynı çıktılar: PROMETHEE q, p ve s; VIKOR v; WASPAS ve CoCoSo λ; CODAS τ; ELECTRE eşikleri; TOPSIS normalizasyonu ve uzaklığı.',
+      en: 'One control per method parameter with the same outputs as the weight change: SAW normalization; VIKOR v; WASPAS and CoCoSo λ; CODAS τ; ELECTRE I and III thresholds; PROMETHEE II preference functions and q, p, s.',
+      tr: 'Her yöntem parametresi için bir kontrol, ağırlık değişimiyle aynı çıktılar: SAW normalizasyonu; VIKOR v; WASPAS ve CoCoSo λ; CODAS τ; ELECTRE I ve III eşikleri; PROMETHEE II tercih fonksiyonları ve q, p, s.',
     },
     tex: [],
     sources: [{ label: 'Więckowski & Sałabun (2023), Applied Soft Computing 148, 110915', doi: '10.1016/j.asoc.2023.110915' }],
@@ -1095,10 +1105,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'positive',
           label: { en: 'No, every value is positive', tr: 'Hayır, her değer pozitif' },
           recommend: {
-            methodIds: ['entropy', 'critic', 'merec', 'cilos'],
+            methodIds: ['entropy', 'sd', 'critic', 'merec', 'lopcow', 'cilos'],
             reason: {
-              en: 'Entropy weights by dispersion, CRITIC combines dispersion with conflict between criteria, MEREC measures how much removing a criterion changes the scores, and CILOS weights by how little a criterion loses when another criterion\'s winner is chosen.',
-              tr: 'Entropi yayılıma göre ağırlık verir, CRITIC yayılımı kriterler arası çatışmayla birleştirir, MEREC bir kriteri çıkarmanın puanları ne kadar değiştirdiğine bakar, CILOS ise başka bir kriterin birincisi seçildiğinde uğranan kaybın azlığına göre ağırlık verir.',
+              en: 'Entropy and SD weight by dispersion, CRITIC combines dispersion with conflict between criteria, MEREC measures how much removing a criterion changes the scores, LOPCOW dampens extreme spread with a log ratio of RMS to standard deviation, and CILOS weights by how little a criterion loses when another criterion\'s winner is chosen.',
+              tr: 'Entropi ve SD yayılıma göre ağırlık verir, CRITIC yayılımı kriterler arası çatışmayla birleştirir, MEREC bir kriteri çıkarmanın puanları ne kadar değiştirdiğine bakar, LOPCOW aşırı yayılımı RMS/standart sapma logaritmik oranıyla yumuşatır, CILOS ise başka bir kriterin birincisi seçildiğinde uğranan kaybın azlığına göre ağırlık verir.',
             },
           },
           next: RANKING_START,
@@ -1216,10 +1226,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'rank-negatives',
           label: { en: 'Yes, negative values', tr: 'Evet, negatif değerler' },
           recommend: {
-            methodIds: ['vikor', 'mabac', 'cocoso'],
+            methodIds: ['vikor', 'mabac', 'cocoso', 'moora'],
             reason: {
-              en: 'Their min-max or linear normalization accepts any sign; TOPSIS also computes with negatives, but its result then depends on where zero is.',
-              tr: 'Min-maks ya da doğrusal normalizasyonları her işareti kabul eder; TOPSIS negatif değerlerle de hesap yapar, ama sonucu sıfırın nerede olduğuna bağlı kalır.',
+              en: 'VIKOR, MABAC and CoCoSo use min-max or linear normalization that accepts any sign, and MOORA subtracts vector-normalized cost ratios from benefit ratios on signed data; TOPSIS also computes with negatives, but its result then depends on where zero is.',
+              tr: 'VIKOR, MABAC ve CoCoSo her işareti kabul eden min-maks ya da doğrusal normalizasyon kullanır, MOORA ise işaretli veride vektör-normalize maliyet oranlarını fayda oranlarından çıkarır; TOPSIS negatif değerlerle de hesap yapar, ama sonucu sıfırın nerede olduğuna bağlı kalır.',
             },
           },
         },
@@ -1229,8 +1239,8 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           recommend: {
             methodIds: ['topsis', 'vikor', 'edas', 'mabac', 'cocoso', 'moora'],
             reason: {
-              en: 'These accept zeros (TOPSIS and MOORA as long as no column is all zero, EDAS when column averages stay positive, and CoCoSo unless one alternative is worst on every criterion), while ratio-based methods (SAW, WASPAS, COPRAS, ARAS, MARCOS, CODAS) are excluded.',
-              tr: 'Bunlar sıfırı kabul eder (TOPSIS ve MOORA tamamı sıfır sütun olmadıkça, EDAS sütun ortalamaları pozitif kaldıkça, CoCoSo bir alternatif her kriterde en kötü olmadıkça); orana dayalı yöntemler (SAW, WASPAS, COPRAS, ARAS, MARCOS, CODAS) dışarıda kalır.',
+              en: 'These accept zeros (TOPSIS and MOORA as long as no column is all zero, EDAS when column averages stay positive, and CoCoSo unless one alternative is worst on every criterion), while ratio-based methods (SAW, WASPAS, COPRAS, ARAS, MARCOS, CODAS, and AHP in table mode) are excluded.',
+              tr: 'Bunlar sıfırı kabul eder (TOPSIS ve MOORA tamamı sıfır sütun olmadıkça, EDAS sütun ortalamaları pozitif kaldıkça, CoCoSo bir alternatif her kriterde en kötü olmadıkça); orana dayalı yöntemler (SAW, WASPAS, COPRAS, ARAS, MARCOS, CODAS ve tablo modunda AHP) dışarıda kalır.',
             },
           },
         },
@@ -1249,10 +1259,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'closeness',
           label: { en: 'Closeness to an ideal option, from 0 to 1', tr: 'İdeal seçeneğe yakınlık, 0 ile 1 arası' },
           recommend: {
-            methodIds: ['topsis', 'moora'],
+            methodIds: ['topsis'],
             reason: {
-              en: 'TOPSIS gives one 0-1 closeness score per alternative and is the most common partner of AHP and Entropy; MOORA uses the same vector normalization and subtracts weighted cost ratios from benefit ratios directly.',
-              tr: 'TOPSIS her alternatif için 0-1 arası tek bir yakınlık skoru verir ve AHP ile Entropinin en yaygın ortağıdır; MOORA aynı vektör normalizasyonunu kullanır ve ağırlıklı maliyet oranlarını fayda oranlarından doğrudan çıkarır.',
+              en: 'TOPSIS gives one 0-1 closeness score per alternative and is the most common partner of AHP, CRITIC and Entropy.',
+              tr: 'TOPSIS her alternatif için 0-1 arası tek bir yakınlık skoru verir ve AHP, CRITIC ile Entropinin en yaygın ortağıdır.',
             },
           },
         },
@@ -1260,10 +1270,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'compromise',
           label: { en: 'A compromise, with a check that the winner is clearly ahead', tr: 'Kazananın açık ara önde olup olmadığını denetleyen bir uzlaşı' },
           recommend: {
-            methodIds: ['vikor'],
+            methodIds: ['vikor', 'cocoso'],
             reason: {
-              en: 'VIKOR tests acceptable advantage and stability, and returns a compromise set when the winner is not clearly ahead.',
-              tr: 'VIKOR kabul edilebilir üstünlüğü ve kararlılığı sınar; kazanan açık ara önde değilse bir uzlaşık çözüm kümesi döndürür.',
+              en: 'VIKOR tests acceptable advantage and stability to return a compromise set when the winner is not clearly ahead, while CoCoSo combines three compromise readings of a weighted sum and a weighted power sum.',
+              tr: 'VIKOR kabul edilebilir üstünlüğü ve kararlılığı sınayarak kazanan açık ara önde değilse uzlaşık bir küme döndürür; CoCoSo ise ağırlıklı toplam ile ağırlıklı üs toplamının üç uzlaşı okumasını birleştirir.',
             },
           },
         },
@@ -1271,10 +1281,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'weighted-sum',
           label: { en: 'A weighted sum where every point can be traced', tr: 'Her puanı izlenebilen bir ağırlıklı toplam' },
           recommend: {
-            methodIds: ['saw', 'waspas', 'ahp'],
+            methodIds: ['saw', 'waspas', 'moora', 'mabac', 'ahp'],
             reason: {
-              en: 'SAW is the most transparent method, WASPAS blends it with the weighted product, and AHP synthesizes local priorities from the decision matrix or pairwise alternative comparisons.',
-              tr: 'SAW en şeffaf yöntemdir, WASPAS onu ağırlıklı çarpımla harmanlar, AHP ise karar matrisinden ya da ikili alternatif karşılaştırmalarından yerel öncelikleri birleştirir.',
+              en: 'SAW is the most transparent weighted sum, WASPAS blends it with the weighted product, MOORA subtracts vector-normalized cost ratios from benefit ratios, MABAC measures signed weighted distance from the border, and AHP synthesizes local priorities.',
+              tr: 'SAW en şeffaf ağırlıklı toplamdır, WASPAS onu ağırlıklı çarpımla harmanlar, MOORA vektör-normalize maliyet oranlarını fayda oranlarından çıkarır, MABAC sınıra olan işaretli ağırlıklı uzaklığı toplar, AHP ise yerel öncelikleri birleştirir.',
             },
           },
         },
@@ -1282,10 +1292,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'average',
           label: { en: 'Distance from the average or from the worst alternative', tr: 'Ortalama ya da en kötü alternatiften uzaklık' },
           recommend: {
-            methodIds: ['edas', 'codas'],
+            methodIds: ['edas', 'mabac', 'codas'],
             reason: {
-              en: 'EDAS measures positive and negative distance from the average solution; CODAS compares alternatives by their Euclidean and Taxicab distances from the negative-ideal point.',
-              tr: 'EDAS ortalama çözümden pozitif ve negatif uzaklığı ölçer; CODAS ise alternatifleri negatif ideal noktadan Öklid ve Taxicab uzaklıklarıyla karşılaştırır.',
+              en: 'EDAS measures positive and negative distance from the average solution, MABAC measures signed distance from each criterion\'s geometric-mean border, and CODAS compares alternatives by Euclidean and Taxicab distances from the negative-ideal point.',
+              tr: 'EDAS ortalama çözümden pozitif ve negatif uzaklığı ölçer, MABAC her kriterin geometrik ortalama sınırından işaretli uzaklığı toplar, CODAS ise alternatifleri negatif ideal noktadan Öklid ve Taxicab uzaklıklarıyla karşılaştırır.',
             },
           },
         },
@@ -1293,10 +1303,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'percent-target',
           label: { en: 'A percentage of a target or of the best', tr: 'Bir hedefin ya da en iyinin yüzdesi' },
           recommend: {
-            methodIds: ['aras', 'copras', 'marcos'],
+            methodIds: ['aras', 'copras', 'marcos', 'cocoso'],
             reason: {
-              en: 'ARAS reports each alternative as a percentage of an optimal alternative; COPRAS as a percentage of the best with benefits and costs summed separately; MARCOS measures utility relative to both the ideal and anti-ideal rows.',
-              tr: 'ARAS her alternatifi optimal bir alternatifin yüzdesi olarak verir; COPRAS fayda ve maliyetleri ayrı toplayarak en iyinin yüzdesi olarak sunar; MARCOS ise hem ideal hem anti-ideal satıra göre faydayı ölçer.',
+              en: 'ARAS reports each alternative as a percentage of an optimal alternative, COPRAS as a percentage of the best with benefits and costs summed separately, MARCOS measures utility relative to both the ideal and anti-ideal rows, and CoCoSo aggregates ratios against the total, the minimum and the maximum.',
+              tr: 'ARAS her alternatifi optimal bir alternatifin yüzdesi olarak verir, COPRAS fayda ve maliyetleri ayrı toplayarak en iyinin yüzdesi olarak sunar, MARCOS hem ideal hem anti-ideal satıra göre faydayı ölçer, CoCoSo ise toplama, en düşüğe ve en yükseğe göre oranları birleştirir.',
             },
           },
         },

@@ -17,7 +17,8 @@ import { moora } from '../../core/methods/moora'
 import { sd } from '../../core/methods/sd'
 import { saw, type SawParams } from '../../core/methods/saw'
 import { topsis } from '../../core/methods/topsis'
-import { vikor, vikorCompromise, vikorTerm, type VikorCompromise, type VikorParams } from '../../core/methods/vikor'
+import { vikor, vikorCompromise, vikorFlat, vikorTerm, type VikorCompromise, type VikorParams } from '../../core/methods/vikor'
+import { tied } from '../../core/rank'
 import type { AlternativeJudgements, Problem, RankingResult, Step, WeightingResult } from '../../core/types'
 import { scaleLinear, type Domain, type LinearScale } from '../charts/scale'
 
@@ -524,6 +525,11 @@ export type VikorParts = {
   sTerm: number[]
   rTerm: number[]
   v: number
+  /** Whether S or R is flat across alternatives, whether Q has no spread, and the effective v used for Q. */
+  sFlat: boolean
+  rFlat: boolean
+  noSpread: boolean
+  effV: number
   compromise: VikorCompromise
   /** Alternatives in Q order (ties keep input order), the same order as a' and a''. */
   order: number[]
@@ -540,9 +546,28 @@ export function vikorParts(problem: Problem, weights: readonly number[], params:
   const S = stepVector(result.steps, 'vikor.groupUtility')
   const R = stepVector(result.steps, 'vikor.individualRegret')
   const Q = result.scores
+  const v = result.diagnostics?.v ?? 0.5
+  const sFlat = vikorFlat(S)
+  const rFlat = vikorFlat(R)
+  const noSpread = (sFlat && rFlat) || (sFlat && v === 1) || (rFlat && v === 0)
+  const effV = sFlat && !rFlat ? 0 : rFlat && !sFlat ? 1 : v
   const compromise = vikorCompromise(S, R, Q)
   // The core's own terms and order, so the picture agrees with Q when S or R is flat only up to rounding.
-  return { result, S, R, Q, sTerm: vikorTerm(S), rTerm: vikorTerm(R), v: result.diagnostics?.v ?? 0.5, compromise, order: compromise.order }
+  return {
+    result,
+    S,
+    R,
+    Q,
+    sTerm: vikorTerm(S),
+    rTerm: vikorTerm(R),
+    v,
+    sFlat,
+    rFlat,
+    noSpread,
+    effV,
+    compromise,
+    order: compromise.order,
+  }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -904,8 +929,8 @@ export function lineCrossings(xs: readonly number[], a: readonly number[], b: re
   const out: Point[] = []
   let prev = -1
   for (let k = 0; k < xs.length; k++) {
+    if (tied(a[k]!, b[k]!)) continue
     const d = a[k]! - b[k]!
-    if (d === 0) continue
     if (prev >= 0 && Math.sign(d) !== Math.sign(a[prev]! - b[prev]!)) {
       if (k === prev + 1) {
         const d0 = a[prev]! - b[prev]!

@@ -85,7 +85,7 @@ export function vikorCompromise(S: readonly number[], R: readonly number[], Q: r
  * d_ij = w_j (f*_j - x_ij) / (f*_j - f-_j), S_i = Σ_j d_ij (group utility), R_i = max_j d_ij (individual regret).
  * Q_i = v (S_i - S*) / (S- - S*) + (1 - v) (R_i - R*) / (R- - R*), lower is better; score = Q, order 'asc'.
  * Guards (card §Pitfalls): a constant column has f* = f-, its d is 0 (notice); if every S is equal (up to rounding,
- * `vikorFlat`) the S term of Q is 0 (only the R term remains, weighted 1 - v, notice), and the same for R. C1, C2 and the compromise set: `vikorCompromise`.
+ * `vikorFlat`) Q is the R term alone on [0, 1] (so Q stays on the DQ scale, with a notice when 0 < v < 1), and the same when every R is equal. C1, C2 and the compromise set: `vikorCompromise`.
  * See docs/research/methods/vikor.md.
  */
 export const vikor: RankingMethod<VikorParams> = {

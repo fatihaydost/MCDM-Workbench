@@ -80,12 +80,12 @@ export function MerecIdea({ problem, format = defaultFormat, labels, step, expla
   const nameW = Math.ceil(Math.min(Math.max(...problem.criteria.map((c) => estimateTextWidth(c.name, 13))) + 12, W * 0.26))
   const valueW = Math.ceil(Math.max(...weightTexts.map((t) => estimateTextWidth(t, 13))) + 8)
   const effectW = Math.ceil(Math.max(...effectTexts.map((t) => estimateTextWidth(t, 13))) + 8)
-  const free = Math.max(120, W - nameW - valueW - OP)
-  const stripW = free * 0.55
-  const weightW = free - stripW
+  const pad = 6
+  const free = Math.max(80, W - nameW - valueW - effectW - pad - OP)
+  const stripW = free * 0.55 + effectW + pad
+  const weightW = free * 0.45
   const x0 = nameW
   const x1 = x0 + stripW + OP
-  const pad = 6
   const maxEffect = Math.max(...parts.effect) || 1
   const unit = Math.max(stripW - pad - effectW, 20) / maxEffect
   const maxWeight = Math.max(...parts.weights) || 1
@@ -155,7 +155,7 @@ export function MerecIdea({ problem, format = defaultFormat, labels, step, expla
               {/* The weight bar waits, hidden, on the stack of drops, so it comes out of it and is stretched. */}
               <rect
                 className={`${s.bar} ${s.criticBar} ${s.stageItem}`}
-                data-off={off(3) || (parts.weights[j] === 0 ? '' : undefined)}
+                data-off={stage < 3 || parts.weights[j] === 0 ? '' : undefined}
                 data-highlight={on || undefined}
                 width={1}
                 height={1}

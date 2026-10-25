@@ -67,8 +67,8 @@ export const cocoso: MethodContent = {
     {
       methodId: 'merec',
       text: {
-        en: 'MEREC then CoCoSo appears in recent Turkish studies (Özel Sönmez & Toktaş 2024, from a search snippet).',
-        tr: 'MEREC ardından CoCoSo yeni Türkçe çalışmalarda görülür (Özel Sönmez ve Toktaş 2024, yalnız arama özeti).',
+        en: 'MEREC then CoCoSo appears in recent Turkish studies (Özel Sönmez & Toktaş 2024).',
+        tr: 'MEREC ardından CoCoSo yeni Türkçe çalışmalarda görülür (Özel Sönmez ve Toktaş 2024).',
       },
     },
     {
@@ -91,7 +91,7 @@ export const cocoso: MethodContent = {
   sources: [
     { label: 'Yazdani, Zaraté, Zavadskas & Turskis (2019), Management Decision 57(9), 2501-2519', doi: '10.1108/MD-05-2017-0458' },
     { label: 'Akgül (2021), CRITIC-CoCoSo, Ekonomi ve Finansal Araştırmalar Dergisi 3(2), 71-90', url: 'https://dergipark.org.tr/tr/download/article-file/2114456' },
-    { label: 'Özel Sönmez & Toktaş (2024), MEREC-CoCoSo, Journal of Scientific Reports-A (search snippet only, not read)', doi: '10.59313/jsr-a.1420728' },
+    { label: 'Özel Sönmez, F., & Toktaş, P. (2024). Tedarikçi seçiminde CRITIC ve CoCoSo yöntemlerinin entegrasyonu. Journal of Scientific Reports-A, (57), 42-60.', doi: '10.59313/jsr-a.1420728' },
     { label: 'pyDecision 5.1.8, cocoso_method (adds 1 to all S or P when the minimum is 0; not adopted)', url: 'https://github.com/Valdecy/pyDecision' },
   ],
   en: {
@@ -103,9 +103,9 @@ export const cocoso: MethodContent = {
       'Being last on a criterion should cost more than in SAW.',
     ],
     whenNot: [
-      'One alternative is the worst on every criterion (blocked).',
+      'One alternative is worst on every criterion (all-worst-alternative error).',
+      'All criteria are constant: equal scores with cocoso.no-spread warning.',
       'You need a bounded score: k is not a percentage.',
-      'Only two criteria: an all-worst alternative is common then.',
     ],
     inputs: [
       'Decision matrix; zeros and negative values are allowed (SAW, WASPAS, COPRAS and MARCOS block them).',
@@ -127,9 +127,9 @@ export const cocoso: MethodContent = {
       "Bir kriterde sonuncu olmak SAW'dakinden daha pahalı olmalı.",
     ],
     whenNot: [
-      'Bir alternatif her kriterde en kötü (engellenir).',
+      'Bir alternatif her kriterde en kötü (all-worst-alternative hatası).',
+      'Tüm kriterler sabit: eşit puan ve cocoso.no-spread uyarısı.',
       'Sınırlı bir puan gerekiyor: k yüzde değildir.',
-      'Yalnız iki kriter: her yerde en kötü alternatif o zaman sık görülür.',
     ],
     inputs: [
       'Karar matrisi; sıfır ve negatif değerlere izin verilir (SAW, WASPAS, COPRAS ve MARCOS bunları engeller).',

@@ -163,8 +163,9 @@ function solveLinearSystem(matrix: number[][], rhs: number[]): number[] {
 }
 
 /**
- * Incomplete Logarithmic Least Squares (Bozóki, Fülöp & Rónyai 2010): solves L y = r on each connected component of
- * answered comparisons and normalizes exp(y) across the answered criteria. Criteria with no answers get NaN.
+ * Incomplete Logarithmic Least Squares (Bozóki, Fülöp & Rónyai 2010): solves L y = r when the answered comparisons
+ * form a single connected component and normalizes exp(y) across the answered criteria (criteria with no answers get NaN;
+ * returns null if no pairs are answered or if answered pairs form disconnected components).
  */
 export function ahpIncompleteLlsm(n: number, pairs: readonly (readonly (Ratio | null)[])[] | undefined): number[] | null {
   if (!pairs || n < 2) return null

@@ -232,7 +232,8 @@ export function pairFacts(problem: Problem, weights: number[], c: Comparison, i:
     if (other) top[2] = other
   }
   const decisive = top.map(({ col, better }) => ({ col, better }))
-  const d = c.runs.find((r) => r.methodId === 'vikor')?.result?.steps.find((s) => s.key === 'vikor.weightedDistance')
+  const vikorRes = c.runs.find((r) => r.methodId === 'vikor')?.result
+  const d = (vikorRes?.diagnostics?.v ?? 0.5) < 1 ? vikorRes?.steps.find((s) => s.key === 'vikor.weightedDistance') : undefined
   const rowA = d?.matrix?.[a]
   const rowB = d?.matrix?.[b]
   const ra = rowA ? maxOf(rowA) : 0

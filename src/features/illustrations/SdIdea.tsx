@@ -114,7 +114,7 @@ export function SdIdea({ problem, format = defaultFormat, labels, step, explain 
         aria-labelledby={`${uid}-title`}
         aria-describedby={`${uid}-table`}
       >
-        <text className={`${s.colHead} ${s.stageItem}`} data-off={off(1)} x={x0 + pad} y={HEAD - 10}>
+        <text className={`${s.colHead} ${s.stageItem}`} data-off={off(0)} x={x0 + pad} y={HEAD - 10}>
           {truncate(l.spread, stripW - pad, 12)}
         </text>
         <text className={`${s.colHead} ${s.stageItem}`} data-off={off(2)} x={x1} y={HEAD - 10}>
@@ -149,7 +149,7 @@ export function SdIdea({ problem, format = defaultFormat, labels, step, explain 
               {/* The weight bar waits, hidden, on the σ ruler, so the ruler becomes the bar. */}
               <rect
                 className={`${s.bar} ${s.criticBar} ${s.stageItem}`}
-                data-off={off(2)}
+                data-off={stage < 2 || parts.weights[j] === 0 ? '' : undefined}
                 data-highlight={on || undefined}
                 width={1}
                 height={1}

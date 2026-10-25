@@ -49,7 +49,7 @@ export type WaspasLambdaProps = {
   problem: Problem
   weights: readonly number[]
   /** The λ the ranking uses (the cursor). */
-  lambda: number
+  lambda?: number | undefined
   /** Number in the active locale with the given decimals. */
   format?: ((value: number, decimals: number) => string) | undefined
   labels?: Partial<WaspasLambdaLabels>
@@ -81,7 +81,7 @@ export function WaspasLambda({
   method = 'waspas',
   problem,
   weights,
-  lambda,
+  lambda = 0.5,
   format = defaultFormat,
   labels,
   step,
@@ -168,7 +168,12 @@ export function WaspasLambda({
   const yDecimals = stepDecimals((layout.yTicks[1] ?? 1) - (layout.yTicks[0] ?? 0))
   const drawOrder = names.map((_, i) => i).sort((a, b) => Number(leaders.has(a)) - Number(leaders.has(b)) || a - b)
   const cx = x(lambda)
-  const order = (k: number) => byRank(k).map((i) => names[i]).join(' > ')
+  const order = (k: number) => {
+    const ord = byRank(k)
+    return ord
+      .map((i, idx) => (idx === 0 ? names[i]! : `${ranksAt[k]![i] === ranksAt[k]![ord[idx - 1]!] ? ' = ' : ' > '}${names[i]!}`))
+      .join('')
+  }
 
   return (
     <ChartFigure
@@ -298,7 +303,7 @@ export function WaspasLambda({
         </g>
       </svg>
       {/* The focused point's own name says the same to a screen reader, so the readout is for the eyes only. */}
-      <p className={s.readout}>
+      <p className={s.readout} data-order={order(focus.k)}>
         {shownActive ? (
           <span className={s.readoutC} aria-hidden>
             {l.readout(grid(shownActive.k), order(shownActive.k))}

@@ -212,7 +212,7 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
       .replace(/\badds\s+[−-](\S+)\s+to\b/g, 'subtracts $1 from')
       .replace(/\badds\s+[−-]/g, 'subtracts ')
       .replace(/\bsubtracts\s+[−-]/g, 'adds ')
-      .replace(/S\+\s+değerine\s+[−-](\S+)\s+ekler/g, 'S+ değerinden $1 düşer')
+      .replace(/S\+\s+(?:değerine|toplamına)\s+[−-](\S+)\s+ekler/g, 'S+ değerinden $1 düşer')
       .replace(/[−-](\S+)\s+düşer/g, '$1 ekler')
   const readout = (i: number, j: number) => {
     const val = stage === 0 ? normalized[i]![j]! : parts.weighted[i]![j]!
@@ -378,7 +378,7 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
           </li>
         ))}
         {n > SAW_CATEGORY_COLOURS && (
-          <li className={s.sawLegendItem}>
+          <li className={s.sawLegendItem} data-on={(shown ? shown.j >= SAW_CATEGORY_COLOURS : focus.col >= SAW_CATEGORY_COLOURS) ? '' : undefined}>
             <svg width={12} height={12} aria-hidden className={s.sawSwatch}>
               <rect className={s.sawSeg} data-cat="other" width={12} height={12} />
             </svg>

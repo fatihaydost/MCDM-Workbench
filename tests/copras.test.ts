@@ -202,6 +202,20 @@ describe('COPRAS properties', () => {
     expect(after.ranking).toEqual([2, 3, 1])
     expect(after.warnings).toContainEqual({ code: 'copras.constant-cost-criterion', col: 2 })
 
+    const nearCost = copras.compute(
+      makeProblem([[1, 1, 1], [4, 6, 1 + 1e-10], [6, 4, 1]], ['benefit', 'cost', 'cost']),
+      [0.25, 0.25, 0.5],
+      {},
+    )
+    expect(nearCost.warnings).toContainEqual({ code: 'copras.constant-cost-criterion', col: 2 })
+
+    const allConst = copras.compute(
+      makeProblem([[5, 2, 1], [5, 2, 1], [5, 2, 1]], ['benefit', 'cost', 'cost']),
+      [0.25, 0.25, 0.5],
+      {},
+    )
+    expect(allConst.warnings).toEqual([])
+
     const m2 = copras.compute(makeProblem([[1, 2, 5], [4, 6, 5]], ['benefit', 'cost', 'cost']), [0.4, 0.3, 0.3], {})
     expect(m2.warnings).toEqual([])
   })

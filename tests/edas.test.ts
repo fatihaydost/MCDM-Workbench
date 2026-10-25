@@ -251,6 +251,9 @@ describe('EDAS: data rules and edge cases', () => {
     expect(codes(r)).toEqual(['edas.negative-values', 'edas.small-average'])
     expectClose(r.scores, [0, 1, 0.5003], 1e-4)
     expect(Math.max(...mat(r, 'edas.pda').map((row) => row[0]!))).toBeGreaterThan(30000)
+    // When weight is 0 on that column, negative-values and small-average warnings are suppressed.
+    const rZeroW = edas.compute(tiny, [0, 1], {})
+    expect(codes(rZeroW)).toEqual([])
   })
   it('validates the problem and the weights like every method', () => {
     expect(thrown(() => edas.compute(makeProblem([[1, 2]], two), [0.5, 0.5], {})).map((x) => x.code)).toEqual(['too-few-alternatives'])

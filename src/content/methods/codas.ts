@@ -82,7 +82,6 @@ export const codas: MethodContent = {
     },
   },
   sources: [
-    { label: 'Keshavarz Ghorabaee, Zavadskas, Turskis & Antucheviciene (2016), ECECSR 50(3), 25-44', url: 'https://ideas.repec.org/a/cys/ecocyb/v50y2016i3p25-44.html' },
     { label: 'Badi, Abdulshahed & Shetwan (2018), Decision Making: Applications in Management and Engineering 1(1), 1-12', doi: '10.31181/dmame180101b' },
     { label: 'Trung (2022), Applied Engineering Letters 7(2), 54-66', doi: '10.18485/aeletters.2022.7.2.2' },
     { label: 'pymcdm 1.4.0, pymcdm.methods.CODAS', url: 'https://gitlab.com/shekhand/mcda' },

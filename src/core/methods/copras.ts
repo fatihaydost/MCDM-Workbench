@@ -1,4 +1,4 @@
-import { column, isConstant, maxOf, sum } from '../math'
+import { column, isConstant, isNearConstant, maxOf, sum } from '../math'
 import { rankScores } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, hasErrors, validateProblem, validateRequirements, validateWeights } from '../validate'
@@ -38,10 +38,12 @@ export const copras: RankingMethod = {
 
     // 3. Relative significance (Eq. 5, simplified): the cost weight W_C handed out by the reciprocal of each S-.
     const m = matrix.length
+    const allConstant = criteria.every((_, j) => weights[j]! === 0 || isConstant(column(matrix, j)))
     const activeCostCount = weights.filter((w, j) => isCost[j] && w > 0).length
-    if (m > 2 && activeCostCount >= 2) {
+    if (!allConstant && m > 2 && activeCostCount >= 2) {
       for (let j = 0; j < n; j++) {
-        if (isCost[j] && weights[j]! > 0 && isConstant(column(matrix, j))) {
+        const col = column(matrix, j)
+        if (isCost[j] && weights[j]! > 0 && (isConstant(col) || isNearConstant(col))) {
           warnings.push({ code: 'copras.constant-cost-criterion', col: j })
         }
       }

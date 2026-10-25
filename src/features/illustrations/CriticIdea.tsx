@@ -21,7 +21,7 @@ export type CriticIdeaLabels = {
    * Optional head of the last column with the divisor, e.g. (9.4228) => "Weight = C / 9.4228"; default `weight`.
    * The method page uses it, so the picture shows the normalization; used only when ΣC > 0.
    */
-  weightHead?: ((total: string) => string) | undefined
+  weightHead?: ((total: string) => string) | string | undefined
   showTable: string
   /** Header of the first table column. */
   criterion: string
@@ -45,6 +45,8 @@ export type CriticIdeaProps = {
   /** Number format for the weight labels and the table (active locale, 4 decimals). */
   format?: ((value: number) => string) | undefined
   labels?: Partial<CriticIdeaLabels>
+  /** Optional head of the last column with the divisor (or via `labels.weightHead`). */
+  weightHead?: ((total: string) => string) | string | undefined
   /**
    * Step through the idea (IdeaSteps): null or undefined draws the full picture; 0 .. CRITIC_IDEA_STEPS - 1 draws that
    * step, the last one being the full picture.
@@ -76,7 +78,16 @@ const defaultFormat = (v: number) => v.toFixed(4)
  * times conflict (Σ(1 − ρ) as a bar), gives the weight (a bar with its value).
  * Every number comes from the core's CRITIC steps.
  */
-export function CriticIdea({ problem, highlight, format = defaultFormat, labels, step, explain = false, className }: CriticIdeaProps) {
+export function CriticIdea({
+  problem,
+  highlight,
+  format = defaultFormat,
+  labels,
+  weightHead: weightHeadProp,
+  step,
+  explain = false,
+  className,
+}: CriticIdeaProps) {
   const l = { ...CRITIC_IDEA_LABELS_EN, ...labels }
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
@@ -97,7 +108,13 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
   // The method page can step (step is null or a number there); only then do the information texts need room.
   const steppable = step !== undefined
   const total = parts.information.reduce((a, b) => a + b, 0)
-  const weightHead = l.weightHead && total > 0 ? l.weightHead(format(total)) : l.weight
+  const rawWeightHead = weightHeadProp ?? l.weightHead
+  const weightHead =
+    rawWeightHead && total > 0
+      ? typeof rawWeightHead === 'function'
+        ? rawWeightHead(format(total))
+        : rawWeightHead
+      : l.weight
 
   // Columns: name | strip | × | conflict | → | weight + value.
   const W = Math.max(width, 280)
@@ -214,7 +231,13 @@ export function CriticIdea({ problem, highlight, format = defaultFormat, labels,
                 d={`M${lo} ${y + 7}H${hiX}M${lo} ${y + 4.5}v5M${hiX} ${y + 4.5}v5`}
               />
               {/* σ's value, only at the contrast step, so the comparison can be read off the picture. */}
-              <text className={`${s.sigmaValue} ${s.stageItem}`} data-off={only(0)} x={hiX + 5} y={y + 7} dominantBaseline="central">
+              <text
+                className={`${s.sigmaValue} ${s.stageItem}`}
+                data-off={only(0)}
+                x={Math.min(hiX + 5, x1 - 4 - estimateTextWidth(format(sg), 11))}
+                y={y + 7}
+                dominantBaseline="central"
+              >
                 {format(sg)}
               </text>
               {/* × */}

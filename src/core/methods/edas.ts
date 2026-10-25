@@ -60,7 +60,7 @@ export const edas: RankingMethod = {
       if ((weights[j] ?? 0) > 0 && isNearConstant(col)) {
         warnings.push({ code: 'edas.near-constant-column', col: j })
       }
-      if (col.some((x) => x < 0)) {
+      if ((weights[j] ?? 0) > 0 && col.some((x) => x < 0)) {
         warnings.push({ code: 'edas.negative-values', col: j })
         if (av[j]! < EDAS_SMALL_AVERAGE * maxOf(col.map(Math.abs))) warnings.push({ code: 'edas.small-average', col: j })
       }

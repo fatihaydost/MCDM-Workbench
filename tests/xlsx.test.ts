@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx'
 import { describe, expect, it } from 'vitest'
-import { aras, bwm, electreI, electreIII, judgementsFromBwm, marcos, roc, type Problem } from '../src/core'
+import { ahp, aras, bwm, electreI, electreIII, judgementsFromBwm, judgementsFromUpper, marcos, roc, setPair, type Problem } from '../src/core'
 import { buildWorkbook, COMPUTED_NUMBER_FORMAT, importWorkbook, INTEGER_NUMBER_FORMAT, parseCellNumber } from '../src/features/io/xlsx'
 import { useWorkbench } from '../src/state/workbench'
 
@@ -190,5 +190,73 @@ describe('xlsx export and import', () => {
     const st = useWorkbench.getState()
     expect(st.manualWeights).toEqual([0.2, 0.5, 0.3])
     expect(st.weightMethod).toBe('manual')
+  })
+
+  it('writes CR for AHP, restricts BWM export to anchor cells (row best, col worst, diagonal), and round-trips Judgements on import', () => {
+    // 1. AHP writes diagnostics.cr to Judgements sheet and round-trips via importWorkbook / importProblem
+    const ahpJ = judgementsFromUpper(3, [3, 5, 2])
+    const ahpRes = ahp.compute(problem, {}, ahpJ)
+    const wbAhp = buildWorkbook(XLSX, {
+      problem,
+      weighting: { method: 'AHP', result: ahpRes },
+      judgements: ahpJ,
+    })
+    const ahpRows = XLSX.utils.sheet_to_json<unknown[]>(wbAhp.Sheets.Judgements!, { header: 1 })
+    const crRow = ahpRows.find((r) => r[0] === 'CR')
+    expect(crRow).toBeDefined()
+    expect(typeof crRow![1]).toBe('number')
+    expect(crRow![1]).toBeCloseTo(ahpRes.diagnostics!.cr as number, 6)
+
+    const importedAhp = importWorkbook(XLSX, wbAhp)
+    expect(importedAhp.judgements).toBeDefined()
+    expect(importedAhp.judgements!.pairs[0]![1]).toBe(3)
+    expect(importedAhp.judgements!.pairs[0]![2]).toBe(5)
+    expect(importedAhp.judgements!.pairs[1]![2]).toBe(2)
+
+    useWorkbench.getState().importProblem(importedAhp.problem, 'ahp.xlsx')
+    expect(useWorkbench.getState().judgements?.pairs[0]?.[1]).toBe(3)
+    expect(useWorkbench.getState().judgements?.pairs[0]?.[2]).toBe(5)
+    expect(useWorkbench.getState().judgements?.pairs[1]?.[2]).toBe(2)
+
+    // 2. BWM export writes only row best, col worst, and diagonal 1, omitting leftover non-anchor pairs
+    const problem4: Problem = {
+      alternatives: ['A1', 'A2'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'benefit' },
+        { name: 'C3', type: 'benefit' },
+        { name: 'C4', type: 'cost' },
+      ],
+      matrix: [
+        [10, 20, 30, 40],
+        [15, 25, 35, 45],
+      ],
+    }
+    // Best = 0 (C1), Worst = 3 (C4), plus a leftover non-anchor pair (1, 2) = 7 from an earlier AHP session
+    let bwmJ = judgementsFromBwm(4, 0, 3, [1, 2, 4, 8], [8, 4, 2, 1])
+    bwmJ = setPair(bwmJ, 1, 2, 7)
+    const bwmRes = bwm.compute(problem4, {}, bwmJ)
+    const wbBwm = buildWorkbook(XLSX, {
+      problem: problem4,
+      weighting: { method: 'BWM', result: bwmRes },
+      judgements: bwmJ,
+    })
+    const bwmRows = XLSX.utils.sheet_to_json<unknown[]>(wbBwm.Sheets.Judgements!, { header: 1, defval: null })
+    const headerIdx = bwmRows.findIndex((r) => r[0] === 'Criterion' && r[1] === 'C1')
+    expect(headerIdx).toBeGreaterThanOrEqual(0)
+    // Row 1 (C2, i=1), Col 3 (C3, k=2 -> sheet col index 3) is neither i===best(0) nor k===worst(3), so must be null
+    expect(bwmRows[headerIdx + 1 + 1]![1 + 2]).toBeNull()
+    expect(bwmRows[headerIdx + 1 + 2]![1 + 1]).toBeNull()
+    // Anchor cells are present: row 0 (best) and col 3 (worst -> sheet col index 4)
+    expect(bwmRows[headerIdx + 1 + 0]![1 + 1]).toBe(2)
+    expect(bwmRows[headerIdx + 1 + 1]![1 + 3]).toBe(4)
+
+    const importedBwm = importWorkbook(XLSX, wbBwm)
+    expect(importedBwm.judgements).toBeDefined()
+    expect(importedBwm.judgements!.best).toBe(0)
+    expect(importedBwm.judgements!.worst).toBe(3)
+    expect(importedBwm.judgements!.pairs[0]![1]).toBe(2)
+    expect(importedBwm.judgements!.pairs[1]![3]).toBe(4)
+    expect(importedBwm.judgements!.pairs[1]![2]).toBeNull()
   })
 })

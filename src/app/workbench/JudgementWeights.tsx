@@ -124,9 +124,17 @@ export function JudgementWeights({ problem, method, result }: Props) {
               currentSide === 'bestToOthers'
                 ? (answers?.othersToWorst[bwmFlagged] ?? null)
                 : (answers?.bestToOthers[bwmFlagged] ?? null)
-            return aBW !== null && otherVal !== null && otherVal > 0
-              ? Math.min(aBW, Math.max(1, Math.round(aBW / otherVal)))
-              : null
+            if (aBW === null || otherVal === null || otherVal <= 0) return null
+            let bestVal = 1
+            let bestGap = Number.POSITIVE_INFINITY
+            for (let v = 1; v <= aBW; v++) {
+              const g = Math.abs(otherVal * v - aBW)
+              if (g < bestGap) {
+                bestGap = g
+                bestVal = v
+              }
+            }
+            return bestVal
           })()
       : null
   const suggestedValue = isAhp ? (worstPair?.suggested ?? null) : bwmQuestionSuggestion
@@ -144,14 +152,6 @@ export function JudgementWeights({ problem, method, result }: Props) {
   const answer = (v: Ratio) => {
     if (!question || index === null) return
     setJudgement(question.a, question.b, v)
-    if (!isAhp && v === 1 && best !== null && worst !== null && ((question.a === best && question.b === worst) || (question.a === worst && question.b === best))) {
-      for (let j = 0; j < n; j++) {
-        if (j !== best && j !== worst) {
-          setJudgement(best, j, 1)
-          setJudgement(j, worst, 1)
-        }
-      }
-    }
     const next = useWorkbench.getState().judgements ?? judgements
     setAt({ key, index: nextUnanswered(questions, next.pairs, (q) => qMode(q, next), index) })
   }
@@ -220,7 +220,7 @@ export function JudgementWeights({ problem, method, result }: Props) {
 
   const consistency: Consistency | null = isAhp
     ? ahpProg && ahpProg.cr !== null && ahpProg.threshold !== null
-      ? { value: ahpProg.cr, threshold: ahpProg.threshold, approximate: false, inclusive: true }
+      ? { value: ahpProg.cr, threshold: ahpProg.threshold, approximate: ahpProg.thresholdApproximate, inclusive: true }
       : null
     : bwmProg && bwmProg.crInput !== null && bwmProg.threshold !== null && aBW !== 1
       ? { value: bwmProg.crInput, threshold: bwmProg.threshold.value, approximate: bwmProg.threshold.approximate }

@@ -183,9 +183,15 @@ export function ResultsStage() {
               return t('workbench.results.headline', { name: altNames[best], symbol: score.symbol, value: nf.format(result.scores[best]) })
             })()}
           </p>
-          {verdict && verdict.failed.length > 0 && (
+          {verdict && (verdict.failed.length > 0 || Boolean((verdict as { summary?: string }).summary || verdict.result)) && (
             <p className="max-w-[70ch] text-16 text-text" data-testid="results-vikor-verdict">
-              {verdict.failed.join(' ')} <span className="font-semibold">{verdict.result}.</span>
+              {verdict.failed.length > 0 ? (
+                <>
+                  {verdict.failed.join(' ')} <span className="font-semibold">{verdict.result}.</span>
+                </>
+              ) : (
+                <span className="font-semibold">{(verdict as { summary?: string }).summary ?? `${verdict.result}.`}</span>
+              )}
             </p>
           )}
           <p className="text-13 text-text-2">

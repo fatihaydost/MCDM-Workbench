@@ -257,11 +257,11 @@ export const electreIII: RankingMethod<ElectreIIIParams> = {
     const warnings: MethodWarning[] = []
     const constantCols = Array.from({ length: n }, (_, j) => {
       const col = column(matrix, j)
-      return isConstant(col) && (minOf(col) !== 0 || maxOf(col) === 0)
+      return isConstant(col)
     })
     const ranges = Array.from({ length: n }, (_, j) => {
       const col = column(matrix, j)
-      if ((weights[j] ?? 0) > 0 && !isConstant(col) && isNearConstant(col)) {
+      if (!constantCols[j] && isNearConstant(col) && (weights[j] ?? 0) > 0) {
         warnings.push({ code: 'electre-iii.near-constant-column', col: j })
       }
       return constantCols[j] ? 0 : maxOf(col) - minOf(col)

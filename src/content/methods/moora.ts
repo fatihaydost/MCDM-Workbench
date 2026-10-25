@@ -83,7 +83,6 @@ export const moora: MethodContent = {
     },
   },
   sources: [
-    { label: 'Brauers & Zavadskas (2006), Control and Cybernetics 35(2), 445-469', url: 'https://bibliotekanauki.pl/articles/969961.pdf' },
     { label: 'Brauers & Zavadskas (2010), Technological and Economic Development of Economy 16(1), 5-24', doi: '10.3846/tede.2010.01' },
     { label: 'Brauers & Zavadskas (2009), Technological and Economic Development of Economy 15(2), 352-375', doi: '10.3846/1392-8619.2009.15.352-375' },
     { label: 'Vujičić, Papić & Blagojević (2017), Tehnika 72(3), 422-429', doi: '10.5937/tehnika1703422V' },

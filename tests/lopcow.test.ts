@@ -163,7 +163,7 @@ describe('LOPCOW: properties and edge cases', () => {
       expect(res.warnings).toContainEqual({ code: 'lopcow.zero-pv-column', col: 0 })
     }
 
-    // Even when all varying columns are single-winner (total PV === 0), each varying column gets zero-pv-column warning
+    // When all varying columns are single-winner (total PV === 0), they share weight equally (1 / varying) and emit zero-pv-column
     const allZeroPv = run(
       [
         [10, 0, 5],

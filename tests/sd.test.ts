@@ -88,6 +88,51 @@ describe('SD: properties', () => {
     expect(codes(oneVarying)).not.toContain('sd.two-alternatives')
   })
   it('weights sum to 1', () => expect(Math.abs(sumOf(base) - 1)).toBeLessThan(1e-15))
+  it('emits sd.dominant-weight when a criterion exceeds 0.5 with at least 2 varying criteria', () => {
+    const dom = sd.compute(
+      makeProblem(
+        [
+          [0, 0, 5],
+          [0, 0.5, 5],
+          [0, 0.5, 5],
+          [1, 0.5, 5],
+          [1, 0.5, 5],
+          [1, 1, 5],
+        ],
+        ['benefit', 'benefit', 'benefit'],
+      ),
+      {},
+    )
+    expect(dom.weights[0]).toBeGreaterThan(0.5)
+    expect(dom.warnings).toContainEqual({ code: 'sd.dominant-weight', col: 0 })
+    const oneVar = sd.compute(makeProblem([[0, 5], [1, 5], [2, 5]], ['benefit', 'benefit']), {})
+    expect(codes(oneVar)).not.toContain('sd.dominant-weight')
+  })
+  it('is invariant to permuting alternatives and criteria', () => {
+    const rowPerm = [3, 0, 5, 1, 7, 2, 6, 4]
+    const permRows = sd.compute(
+      makeProblem(
+        rowPerm.map((i) => dm1[i]!),
+        mukTypes,
+      ),
+      {},
+    )
+    expectClose(permRows.weights, base, 1e-15)
+
+    const colPerm = [2, 4, 0, 3, 1]
+    const permCols = sd.compute(
+      makeProblem(
+        dm1.map((row) => colPerm.map((j) => row[j]!)),
+        colPerm.map((j) => mukTypes[j]!),
+      ),
+      {},
+    )
+    expectClose(
+      permCols.weights,
+      colPerm.map((j) => base[j]!),
+      1e-15,
+    )
+  })
   it('invalid input throws ProblemValidationError', () => {
     expect(() => sd.compute(makeProblem([[1, Number.NaN], [2, 3]], ['benefit', 'benefit']), {})).toThrow(ProblemValidationError)
   })

@@ -87,7 +87,7 @@ Given an $m \times n$ decision matrix $X = [x_{ij}]$ with $x_{ij} > 0$ (Zavadska
 
 ## Commonly combined with
 - **CILOS × Entropy → IDOCRIW**, then **EDAS / SAW / TOPSIS / COPRAS**: Zavadskas et al. (2017), DOI [10.3390/su9050702](https://doi.org/10.3390/su9050702).
-- **CILOS / IDOCRIW + TOPSIS**: Pala (2021), *Kafkas Üniversitesi İİBF Dergisi* 12(23), 263-294, DOI [10.36543/kauiibfd.2021.013](https://doi.org/10.36543/kauiibfd.2021.013).
+- **CILOS / IDOCRIW + MARCOS**: Pala (2021), *Kafkas Üniversitesi İİBF Dergisi* 12(23), 263-294, DOI [10.36543/kauiibfd.2021.013](https://doi.org/10.36543/kauiibfd.2021.013).
 - **CILOS / IDOCRIW + CoCoSo**: Çiftaslan & Rençber (2022), *KSÜ Sosyal Bilimler Dergisi* 19(1), 53-71, DOI [10.33437/ksusbd.1135258](https://doi.org/10.33437/ksusbd.1135258).
 - **CILOS compared alongside Entropy, IDOCRIW, CRITIC, D-CRITIC**: Krishnan et al. (2021), *Symmetry* 13(6), 973, DOI [10.3390/sym13060973](https://doi.org/10.3390/sym13060973).
 
@@ -178,7 +178,7 @@ Given an $m \times n$ decision matrix $X = [x_{ij}]$ with $x_{ij} > 0$ (Zavadska
 - Mirkin, B.G. (1974). *Problema gruppovogo vybora*. Nauka, Moscow, p. 256 — attribution verified via Zavadskas & Podvezko (2016) and Zavadskas et al. (2017).
 - Zavadskas, E.K. & Podvezko, V. (2016). "Integrated Determination of Objective CRIteria Weights in MCDM." *IJITDM* 15(2), 267-283, DOI [10.1142/S0219622016500036](https://doi.org/10.1142/S0219622016500036) — Crossref & OpenAlex metadata verified.
 - Zavadskas, E.K., Cavallaro, F., Podvezko, V., Ubarte, I., & Kaklauskas, A. (2017). "MCDM Assessment of a Healthy and Safe Built Environment According to Sustainable Development Principles: A Practical Neighborhood Approach in Vilnius." *Sustainability* 9(5), 702, DOI [10.3390/su9050702](https://doi.org/10.3390/su9050702) — full text read, Sec. 5.1.2, Tables 4, 8, 10, 12.
-- Pala, O. (2021). "BIST Ulaştırma Endeksinde IDOCRIW ve TOPSIS Yöntemleri ile Finansal Performans Analizi." *Kafkas Üniversitesi İktisadi ve İdari Bilimler Fakültesi Dergisi* 12(23), 263-294, DOI [10.36543/kauiibfd.2021.013](https://doi.org/10.36543/kauiibfd.2021.013) — full PDF read, Tables 3, 7, 8, 9, 10, 11.
+- Pala, O. (2021). "BIST Ulaştırma Endeksinde IDOCRIW ve MARCOS Yöntemleri ile Finansal Performans Analizi (IDOCRIW+MARCOS)." *Kafkas Üniversitesi İktisadi ve İdari Bilimler Fakültesi Dergisi* 12(23), 263-294, DOI [10.36543/kauiibfd.2021.013](https://doi.org/10.36543/kauiibfd.2021.013) — full PDF read, Tables 3, 7, 8, 9, 10, 11.
 - Çiftaslan, M.E. & Rençber, Ö.F. (2022). "IDOCRIW ve CoCoSo Yöntemleri ile Sistemik Önemli Bankaların Performanslarının İncelenmesi." *Kahramanmaraş Sütçü İmam Üniversitesi Sosyal Bilimler Dergisi* 19(1), 53-71, DOI [10.33437/ksusbd.1135258](https://doi.org/10.33437/ksusbd.1135258) — full PDF read, Tables 4, 7, 8, 9.
 - Krishnan, A.R., Kasim, M.M., Hamid, R., & Ghazali, M.F. (2021). *Symmetry* 13(6), 973, DOI [10.3390/sym13060973](https://doi.org/10.3390/sym13060973) — full text read, Table 5.
 - `pyDecision` source `pyDecision/algorithm/cilos.py` — read from GitHub master and audited.

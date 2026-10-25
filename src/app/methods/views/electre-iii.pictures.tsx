@@ -47,6 +47,14 @@ function useElectreIIILabels(): ElectreIIIIdeaLabels {
     ascendingRank: 'r↑',
     score: 'Φ',
     row: (alternative, desc, asc, score) => t('workbench.visual.electre-iii.row', { alternative, desc, asc, score }),
+    incomparables: (pairs) =>
+      t('workbench.visual.electre-iii.incomparables', {
+        pairs,
+        defaultValue: `Incomparable pairs (r↓ vs r↑): ${pairs}`,
+      }),
+    incomparablesNone: t('workbench.visual.electre-iii.incomparablesNone', {
+      defaultValue: 'No incomparable pairs (r↓ and r↑ agree on all pairs).',
+    }),
   }
 }
 

@@ -54,9 +54,10 @@
   },
   "echo": "{{method}}: {{of}} ile aynı sıra, bir kez sayılır",
   "echoNote": {
-    "copras_saw": "Etkin maliyet kriteri olmayan (ya da tek maliyet kriterli) COPRAS, SAW (Toplam) ile aynı hesaba indirgenir ve bir kez sayılır.",
-    "copras_ahp-ranking": "Tek etkin maliyet kriterli COPRAS ile tablodan türetilen AHP yerel öncelikleri aynı ağırlıklı payları hesaplar ve bir kez sayılır.",
-    "ahp-ranking_copras": "Tablodan türetilen AHP yerel öncelikleri ile tek etkin maliyet kriterli COPRAS aynı ağırlıklı payları hesaplar ve bir kez sayılır.",
+    "marcos_saw": "MARCOS, doğrusal-maks ağırlıklı toplamın pozitif bir sabit katıdır (K+ ve K− aynı S_i payını paylaşır); bu yüzden SAW (Doğrusal) ile birebir aynı sırayı verir.",
+    "copras_saw": "Etkin maliyet kriteri olmayan, tek maliyet kriterli veya yalnızca iki alternatifli COPRAS, SAW (Toplam) ile aynı hesaba indirgenir ve bir kez sayılır.",
+    "copras_ahp-ranking": "Etkin maliyet kriteri olmayan, tek etkin maliyet kriterli veya yalnızca iki alternatifli COPRAS ile tablodan türetilen AHP yerel öncelikleri aynı ağırlıklı payları hesaplar ve bir kez sayılır.",
+    "ahp-ranking_copras": "Tablodan türetilen AHP yerel öncelikleri ile etkin maliyet kriteri olmayan, tek etkin maliyet kriterli veya yalnızca iki alternatifli COPRAS aynı ağırlıklı payları hesaplar ve bir kez sayılır.",
     "vikor_mabac": "v = 1 (salt grup faydası S) ayarındaki VIKOR ile MABAC aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır.",
     "mabac_vikor": "MABAC ile v = 1 (salt grup faydası S) ayarındaki VIKOR aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır.",
     "promethee-ii_mabac": "Sütun açıklığı üzerinde V biçimli tercih fonksiyonlu PROMETHEE II ile MABAC aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır.",

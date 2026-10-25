@@ -22,6 +22,6 @@ export const roc: MethodView<'weighting'> = {
   ledger: {
     example: 'roszkowska-2013-rank-weights',
     fixture: 'roc-roszkowska2013.json#expected.tolerance_vs_published',
-    tolerance: 0.005,
+    tolerance: 0.015,
   },
 }

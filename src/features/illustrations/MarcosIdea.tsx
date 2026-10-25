@@ -337,7 +337,7 @@ export function MarcosSawLine({ problem, weights, format = defaultFormat, labels
             {l.y}
           </text>
           <line className={s.marcosLine} x1={x(0)} y1={y(0)} x2={x(1)} y2={y(c)} data-testid="marcos-line" data-c={c} />
-          <text className={s.marcosLineLabel} x={x(1)} y={y(c) - 12} textAnchor="end" dominantBaseline="central">
+          <text className={s.marcosLineLabel} x={x(1)} y={Math.max(PAD.top + 14, y(c) - 10)} textAnchor="end" dominantBaseline="central">
             {lineLabel}
           </text>
           {names.map((name, i) => (
