@@ -1,5 +1,5 @@
 import type { Problem, Step, WeightingMethod, WeightingResult } from '../types'
-import { assertValid, validateProblem } from '../validate'
+import { ProblemValidationError } from '../validate'
 
 /**
  * Step-wise Weight Assessment Ratio Analysis (SWARA).
@@ -154,9 +154,10 @@ export const swara: WeightingMethod<SwaraParams> = {
   ],
 
   compute(problem: Problem, params: SwaraParams = {}): WeightingResult {
-    assertValid(validateProblem(problem))
-
     const n = problem.criteria.length
+    if (n < 2) {
+      throw new ProblemValidationError([{ code: 'too-few-criteria', severity: 'error', value: n }])
+    }
     const sInput =
       params.s !== undefined
         ? params.s

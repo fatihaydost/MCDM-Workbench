@@ -666,16 +666,14 @@ describe('3. Constant, near-constant, and tied data states', () => {
         expect(progress.total).toBe(3)
       })
 
-      it('normalizes across disconnected components of size >= 2 without NaN', () => {
+      it('returns null across disconnected components of size >= 2', () => {
         // 4 criteria: Component A {0, 1} with a_01 = 2; Component B {2, 3} with a_23 = 4
         let j = emptyJudgements(4)
         j = setPair(j, 0, 1, 2)
         j = setPair(j, 2, 3, 4)
 
         const weights = ahpIncompleteLlsm(4, j.pairs)
-        expect(weights).not.toBeNull()
-        expect(weights!.every((w) => Number.isFinite(w) && !Number.isNaN(w))).toBe(true)
-        expect(weights!.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 10)
+        expect(weights).toBeNull()
       })
 
       it('handles connected cyclic incomplete comparisons without crash or NaN', () => {
@@ -790,7 +788,7 @@ describe('3. Constant, near-constant, and tied data states', () => {
 
       it('keeps entropy constant column at 0 weight when varying column has 1 ppm spread (< ENTROPY_NO_INFORMATION)', () => {
         // Col 0 is strictly constant. Col 1 varies by 1 ppm (10^6 to 10^6 + 1).
-        // Diversification d_1 ~ 1.8e-13 < ENTROPY_NO_INFORMATION (1e-12).
+        // Diversification d_1 ~ 1.8e-13 < ENTROPY_NO_INFORMATION (1e-12) but > Number.MIN_VALUE.
         const p1ppm = makeProblem(
           [
             [1000000, 1000000],
@@ -800,14 +798,14 @@ describe('3. Constant, near-constant, and tied data states', () => {
         )
         const res = entropy.compute(p1ppm, { normalization: 'sum' })
         expect(res.warnings).toContainEqual({ code: 'entropy.constant-column', col: 0 })
-        expect(res.warnings).toContainEqual({ code: 'entropy.all-constant-equal-weights' })
+        expect(res.warnings).not.toContainEqual({ code: 'entropy.all-constant-equal-weights' })
         expect(res.diagnostics?.constantColumns).toBe(1)
-        expect(res.diagnostics?.allConstant).toBe(1)
+        expect(res.diagnostics?.allConstant).toBe(0)
         // Strictly constant Col 0 stays at 0; varying Col 1 gets 1:
         expect(res.weights).toEqual([0, 1])
       })
 
-      it('emits lopcow.zero-pv-column only when a PV = 0 column actually receives 0 weight (total > 0)', () => {
+      it('emits lopcow.zero-pv-column on single-winner (PV = 0) columns even when total === 0', () => {
         // When one column has PV = 0 ([10, 0, 0]) and another has PV > 0 ([10, 5, 0]), total > 0 so col 0 gets weight 0:
         const pOneZeroPv = makeProblem(
           [
@@ -822,7 +820,7 @@ describe('3. Constant, near-constant, and tied data states', () => {
         expect(resOne.weights[1]).toBe(1)
         expect(resOne.warnings).toContainEqual({ code: 'lopcow.zero-pv-column', col: 0 })
 
-        // When ALL columns have PV = 0, total === 0 so they fall back to equal weights [0.5, 0.5] (not 0 weight):
+        // When ALL columns have PV = 0, total === 0 so they fall back to equal weights [0.5, 0.5] and still emit zero-pv-column:
         const pDegenerate = makeProblem(
           [
             [10, 0],
@@ -835,7 +833,10 @@ describe('3. Constant, near-constant, and tied data states', () => {
         const pv = step(res.steps, 'lopcow.pv').vector!
         expect(pv).toEqual([0, 0])
         expect(res.weights).toEqual([0.5, 0.5])
-        expect(res.warnings).toEqual([])
+        expect(res.warnings).toEqual([
+          { code: 'lopcow.zero-pv-column', col: 0 },
+          { code: 'lopcow.zero-pv-column', col: 1 },
+        ])
         expect(res.diagnostics?.allConstant).toBe(0)
       })
 

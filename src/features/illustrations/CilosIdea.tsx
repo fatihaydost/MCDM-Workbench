@@ -93,8 +93,11 @@ export function CilosIdea({ problem, format = defaultFormat, labels, step, expla
   const off = (from: number) => (stage >= from ? undefined : '')
   const table: ChartTable = {
     corner: l.criterion,
-    columns: [l.totalLoss, l.weight],
-    rows: problem.criteria.map((c, j) => ({ label: c.name, cells: [lossTexts[j]!, weightTexts[j]!] })),
+    columns: [...problem.criteria.map((c) => c.name), l.totalLoss, l.weight],
+    rows: problem.criteria.map((c, j) => ({
+      label: c.name,
+      cells: [...parts.losses[j]!.map((p) => format(p)), lossTexts[j]!, weightTexts[j]!],
+    })),
   }
 
   return (
@@ -149,14 +152,14 @@ export function CilosIdea({ problem, format = defaultFormat, labels, step, expla
               <path className={`${s.op} ${s.stageItem}`} data-off={off(3)} d={`M${x1 - OP + 5} ${y}h${OP - 10}m-3.5 -3.5 3.5 3.5 -3.5 3.5`} />
               <rect
                 className={`${s.bar} ${s.criticBar} ${s.stageItem}`}
-                data-off={off(3)}
+                data-off={off(3) || (parts.weights[j] === 0 ? '' : undefined)}
                 data-highlight={on || undefined}
                 width={1}
                 height={1}
                 style={{
                   transform:
                     stage >= 3
-                      ? `translate(${x1}px, ${y - 7}px) scale(${Math.max(ww, 1)}, 14)`
+                      ? `translate(${x1}px, ${y - 7}px) scale(${ww > 0 ? Math.max(ww, 1) : 0}, 14)`
                       : `translate(${x0 + pad}px, ${y - 6}px) scale(${Math.max(end - x0 - pad, 1)}, 12)`,
                 }}
               />

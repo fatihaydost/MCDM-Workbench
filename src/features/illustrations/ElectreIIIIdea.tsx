@@ -201,7 +201,7 @@ export function ElectreIIIIdea({
       >
         <g aria-hidden>
           <text className={b.head} x={flowLeft} y={HEAD / 2} textAnchor="start" dominantBaseline="central">
-            {`${l.descendingRank} / ${l.ascendingRank} →`}
+            {`Φ⁺ (${l.descendingRank}) / Φ⁻ (${l.ascendingRank}) →`}
           </text>
           <line className={b.zero} x1={flowLeft} x2={flowLeft} y1={HEAD} y2={height} />
           <text className={`${b.head} ${s.stageItem}`} data-off={scoreOff} x={zero} y={HEAD / 2} textAnchor="middle" dominantBaseline="central">

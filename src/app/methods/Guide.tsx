@@ -68,8 +68,12 @@ export function risksFor(
     if (r.id === 'ratio-shifted') {
       return !hasExplicitPositive && hasNonPositive && r.methodIds.some((id) => picked.has(id))
     }
-    const wIds = r.methodIds.filter((id) => methodMeta[id].family.startsWith('weighting'))
-    const rIds = r.methodIds.filter((id) => !methodMeta[id].family.startsWith('weighting'))
+    const wIds = r.methodIds.filter(
+      (id) => methodMeta[id].family.startsWith('weighting') && (id !== 'ahp' || !rankRecs || weightRecs?.has('ahp') || !rankRecs.has('ahp')),
+    )
+    const rIds = r.methodIds.filter(
+      (id) => !methodMeta[id].family.startsWith('weighting') || (id === 'ahp' && Boolean(rankRecs?.has('ahp'))),
+    )
     if (wIds.length > 0 && rIds.length > 0) {
       return wIds.some((id) => picked.has(id)) && rIds.some((id) => picked.has(id))
     }

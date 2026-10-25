@@ -202,9 +202,18 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
     el?.focus()
   }
 
-  const shown = active && !stepping ? { i: order[active.row]!, j: active.col } : null
+  const altAt = (r: number) => (stage >= 2 ? order[r]! : r)
+  const shown = active && !stepping ? { i: altAt(active.row), j: active.col } : null
   const legendCols = Array.from({ length: Math.min(n, SAW_CATEGORY_COLOURS) }, (_, j) => j)
-  const cleanSignedText = (text: string) => text.replace(/\+[−-]/g, '−').replace(/[−-][−-]/g, '+')
+  const cleanSignedText = (text: string) =>
+    text
+      .replace(/\+\s*[−-]/g, '−')
+      .replace(/[−-]\s*[−-]/g, '+')
+      .replace(/\badds\s+[−-](\S+)\s+to\b/g, 'subtracts $1 from')
+      .replace(/\badds\s+[−-]/g, 'subtracts ')
+      .replace(/\bsubtracts\s+[−-]/g, 'adds ')
+      .replace(/S\+\s+değerine\s+[−-](\S+)\s+ekler/g, 'S+ değerinden $1 düşer')
+      .replace(/[−-](\S+)\s+düşer/g, '$1 ekler')
   const readout = (i: number, j: number) => {
     const val = stage === 0 ? normalized[i]![j]! : parts.weighted[i]![j]!
     if (val === 0) return l.readoutZero(names[i]!, critNames[j]!)
@@ -267,22 +276,22 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
                 </text>
                 {segs.map((g) => {
                   const on = shown?.j === g.col
-                  const tabbable = !stepping && focus.row === row && focus.col === g.col
+                  const tabbable = !stepping && focus.row === place && focus.col === g.col
                   const rawVal = stage === 0 ? normalized[i]![g.col]! : parts.weighted[i]![g.col]!
-                  const absVal = format(Math.abs(rawVal))
+                  const fmtVal = format(rawVal)
                   const label =
                     g.side === 'at'
                       ? l.segmentZero(name, critNames[g.col]!, texts[i]!)
-                      : g.side === 'below'
-                        ? cleanSignedText(l.segmentCost(name, critNames[g.col]!, absVal, texts[i]!))
-                        : cleanSignedText(l.segmentBenefit(name, critNames[g.col]!, absVal, texts[i]!))
+                      : isCost[g.col]
+                        ? cleanSignedText(l.segmentCost(name, critNames[g.col]!, fmtVal, texts[i]!))
+                        : cleanSignedText(l.segmentBenefit(name, critNames[g.col]!, fmtVal, texts[i]!))
                   return (
                     <rect
                       key={g.col}
                       className={s.sawSeg}
                       data-cat={colour(g.col)}
                       data-on={on || undefined}
-                      data-row={row}
+                      data-row={place}
                       data-col={g.col}
                       data-side={g.side}
                       data-value={g.value}
@@ -295,10 +304,10 @@ export function MooraIdea({ problem, weights, format = defaultFormat, labels, st
                       tabIndex={tabbable ? 0 : -1}
                       role="img"
                       aria-label={label}
-                      onMouseEnter={() => setActive({ row, col: g.col })}
+                      onMouseEnter={() => setActive({ row: place, col: g.col })}
                       onFocus={() => {
-                        setFocusKey({ row, col: g.col })
-                        setActive({ row, col: g.col })
+                        setFocusKey({ row: place, col: g.col })
+                        setActive({ row: place, col: g.col })
                       }}
                       onBlur={() => setActive(null)}
                     />

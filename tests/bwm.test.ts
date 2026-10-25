@@ -180,9 +180,17 @@ describe('BWM: thresholds, suggestion, answers, validation, progress', () => {
     expect(codeOf(j)).toMatchObject({ code: 'judgements-incomplete', value: 1 })
     expect(() => bwm.compute(problemOf(1), {}, emptyJudgements(1))).toThrow(/too-few-criteria/)
   })
-  it('bwmProgress: provisional bars after a_BW and best-to-others (F1 ex2)', () => {
+  it('bwmProgress: provisional bars after a_BW and best-to-others (F1 ex2), using sqrt(a_BW) for unanswered middle criteria', () => {
     const c = f1.cases[1]!
     let j: Judgements = { ...emptyJudgements(5), best: f1.best, worst: f1.worst }
+    // Only a_BW = 8 answered so far: B gets 8, W gets 1, the 3 unanswered middle criteria get sqrt(8)
+    const jOnlyAnchor = setPair(j, f1.best, f1.worst, 8)
+    const pAnchor = bwmProgress(jOnlyAnchor, 5)
+    const mid = Math.sqrt(8)
+    const denom = 8 + 1 + 3 * mid
+    expect(pAnchor).toMatchObject({ answered: 1, total: 7, provisional: true })
+    expectClose(pAnchor.weights!, [mid / denom, 8 / denom, mid / denom, mid / denom, 1 / denom], 1e-12)
+
     c.bestToOthers.forEach((v, k) => k !== f1.best && (j = setPair(j, f1.best, k, v)))
     const p = bwmProgress(j, 5)
     expect(p).toMatchObject({ answered: 4, total: 7, provisional: true })

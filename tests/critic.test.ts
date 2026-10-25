@@ -1,8 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import { critic, ProblemValidationError, type CriterionType } from '../src/core'
 import krishnan from './fixtures/critic-krishnan2021.json'
+import diakoulaki from './fixtures/sd-diakoulaki1995.json'
 import xlsx from './fixtures/critic-xlsx.json'
 import { expectClose, makeProblem, step } from './helpers'
+
+describe('CRITIC: Diakoulaki, Mavrotas & Papayannakis 1995 (Computers & OR 22(7):763-770, Tables 1-3)', () => {
+  const res = critic.compute(
+    makeProblem(diakoulaki.matrix, diakoulaki.types as CriterionType[], diakoulaki.alternatives),
+    {},
+  )
+
+  it('reproduces the origin paper Table 3 CRITIC weights [0.202, 0.481, 0.317] within ±5e-4', () => {
+    expectClose(res.weights, [0.202, 0.481, 0.317], 5e-4)
+  })
+})
 
 describe('CRITIC: Krishnan et al. 2021 (Symmetry 13:973, Tables 1, 2, 5)', () => {
   const res = critic.compute(makeProblem(krishnan.matrix, krishnan.types as CriterionType[], krishnan.alternatives), {})

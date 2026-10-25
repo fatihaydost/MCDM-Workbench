@@ -58,7 +58,13 @@
     "copras_ahp-ranking": "Tek etkin maliyet kriterli COPRAS ile tablodan türetilen AHP yerel öncelikleri aynı ağırlıklı payları hesaplar ve bir kez sayılır.",
     "ahp-ranking_copras": "Tablodan türetilen AHP yerel öncelikleri ile tek etkin maliyet kriterli COPRAS aynı ağırlıklı payları hesaplar ve bir kez sayılır.",
     "vikor_mabac": "v = 1 (salt grup faydası S) ayarındaki VIKOR ile MABAC aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır.",
-    "mabac_vikor": "MABAC ile v = 1 (salt grup faydası S) ayarındaki VIKOR aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır."
+    "mabac_vikor": "MABAC ile v = 1 (salt grup faydası S) ayarındaki VIKOR aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır.",
+    "promethee-ii_mabac": "Sütun açıklığı üzerinde V biçimli tercih fonksiyonlu PROMETHEE II ile MABAC aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır.",
+    "mabac_promethee-ii": "MABAC ile sütun açıklığı üzerinde V biçimli tercih fonksiyonlu PROMETHEE II aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır.",
+    "vikor_promethee-ii": "v = 1 (salt grup faydası S) ayarındaki VIKOR ile sütun açıklığı üzerinde V biçimli tercih fonksiyonlu PROMETHEE II aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır.",
+    "promethee-ii_vikor": "Sütun açıklığı üzerinde V biçimli tercih fonksiyonlu PROMETHEE II ile v = 1 (salt grup faydası S) ayarındaki VIKOR aynı min-maks ağırlıklı toplamla sıralar ve bir kez sayılır.",
+    "waspas_saw": "λ = 1 ayarındaki WASPAS salt ağırlıklı toplam bileşenidir; SAW (Doğrusal) ile aynı sırayı verir ve bir kez sayılır.",
+    "waspas_marcos": "λ = 1 ayarındaki WASPAS ile MARCOS aynı doğrusal-maks ağırlıklı toplamla sıralar ve bir kez sayılır."
   },
   "sawLinear": "SAW (Doğrusal)",
   "sawSum": "SAW (Toplam)",

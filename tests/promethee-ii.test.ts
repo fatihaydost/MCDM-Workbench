@@ -263,12 +263,77 @@ describe('PROMETHEE II — Mareschal (2015) algebraic identities & invariants', 
     expect(resZeroWeight.warnings).toEqual([])
   })
 
-  it('rejects invalid preferenceFunction or mismatched criteriaFunctions length', () => {
+  it('rejects invalid preferenceFunction, invalid criterion type, or mismatched criteriaFunctions length', () => {
     expect(() =>
       prometheeII.compute(p, ex.weights!, { preferenceFunction: 'invalid' as never }),
     ).toThrow(/preferenceFunction/)
     expect(() =>
       prometheeII.compute(p, ex.weights!, { criteriaFunctions: [{ type: 'usual' }] }),
     ).toThrow(/criteriaFunctions length/)
+    expect(() =>
+      prometheeII.compute(p, ex.weights!, {
+        criteriaFunctions: p.criteria.map(() => ({ type: 'unknown' as never })),
+      }),
+    ).toThrow(RangeError)
+  })
+
+  it('zeroes out large-scale rounding-noise constant columns via isConstant and preserves scale invariance down to 1e-50', () => {
+    const noisyConst: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2 (noisy constant)', type: 'benefit' },
+      ],
+      matrix: [
+        [10, 1e6],
+        [20, 1e6 + 5e-7],
+        [30, 1e6],
+      ],
+    }
+    const rNoisy = prometheeII.compute(noisyConst, [0.5, 0.5], { preferenceFunction: 'usual' })
+    const rExact = prometheeII.compute(
+      { ...noisyConst, matrix: noisyConst.matrix.map((row) => [row[0]!, 1e6]) },
+      [0.5, 0.5],
+      { preferenceFunction: 'usual' },
+    )
+    expect(rNoisy.scores).toEqual(rExact.scores)
+
+    const tiny: Problem = {
+      ...p,
+      matrix: p.matrix.map((row) => row.map((v) => v * 1e-50)),
+    }
+    for (const fn of ['v-shape', 'usual', 'level', 'gaussian'] as const) {
+      const baseRes = prometheeII.compute(p, ex.weights!, { preferenceFunction: fn })
+      const tinyRes = prometheeII.compute(tiny, ex.weights!, { preferenceFunction: fn })
+      expect(tinyRes.ranking).toEqual(baseRes.ranking)
+      baseRes.scores.forEach((s, i) => expect(tinyRes.scores[i]).toBeCloseTo(s, 10))
+    }
+  })
+
+  it('uses range defaults when criteriaFunctions omit p (v-shape/linear/level) or s (gaussian)', () => {
+    const simple: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'benefit' },
+      ],
+      matrix: [
+        [0, 0],
+        [5, 5],
+        [10, 10],
+      ],
+    }
+    const w = [0.5, 0.5]
+    const vDefault = prometheeII.compute(simple, w, { preferenceFunction: 'v-shape' })
+    const vSpecOmittedP = prometheeII.compute(simple, w, {
+      criteriaFunctions: [{ type: 'v-shape' }, { type: 'linear' }],
+    })
+    expect(vSpecOmittedP.scores).toEqual(vDefault.scores)
+
+    const gDefault = prometheeII.compute(simple, w, { preferenceFunction: 'gaussian' })
+    const gSpecOmittedS = prometheeII.compute(simple, w, {
+      criteriaFunctions: [{ type: 'gaussian' }, { type: 'VI' }],
+    })
+    expect(gSpecOmittedS.scores).toEqual(gDefault.scores)
   })
 })

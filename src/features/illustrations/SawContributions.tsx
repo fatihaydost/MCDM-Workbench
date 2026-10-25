@@ -160,7 +160,8 @@ export function SawContributions({ problem, weights, params, parts: partsProp, f
     el?.focus()
   }
 
-  const shown = active ? { i: order[active.row]!, j: active.col } : null
+  const altAt = (r: number) => (stage >= 2 ? order[r]! : r)
+  const shown = active ? { i: altAt(active.row), j: active.col } : null
   const legendCols = Array.from({ length: Math.min(n, SAW_CATEGORY_COLOURS) }, (_, j) => j)
 
   return (
@@ -207,14 +208,14 @@ export function SawContributions({ problem, weights, params, parts: partsProp, f
                 </text>
                 {segs.map((g) => {
                   const on = shown?.j === g.col
-                  const tabbable = focus.row === row && focus.col === g.col
+                  const tabbable = focus.row === place && focus.col === g.col
                   return (
                     <rect
                       key={g.col}
                       className={s.sawSeg}
                       data-cat={colour(g.col)}
                       data-on={on || undefined}
-                      data-row={row}
+                      data-row={place}
                       data-col={g.col}
                       data-value={g.value}
                       data-testid="saw-segment"
@@ -227,10 +228,10 @@ export function SawContributions({ problem, weights, params, parts: partsProp, f
                       tabIndex={tabbable ? 0 : -1}
                       role="img"
                       aria-label={l.segment(name, critNames[g.col]!, format(g.value), texts[i]!)}
-                      onMouseEnter={() => setActive({ row, col: g.col })}
+                      onMouseEnter={() => setActive({ row: place, col: g.col })}
                       onFocus={() => {
-                        setFocusKey({ row, col: g.col })
-                        setActive({ row, col: g.col })
+                        setFocusKey({ row: place, col: g.col })
+                        setActive({ row: place, col: g.col })
                       }}
                       onBlur={() => setActive(null)}
                     />
@@ -268,7 +269,12 @@ export function SawContributions({ problem, weights, params, parts: partsProp, f
       <p className={s.readout}>
         {shown ? (
           <span className={s.readoutC} aria-hidden>
-            {l.readout(names[shown.i]!, critNames[shown.j]!, format(contributions[shown.i]![shown.j]!), texts[shown.i]!)}
+            {l.readout(
+              names[shown.i]!,
+              critNames[shown.j]!,
+              format((stage === 0 ? parts.normalized : contributions)[shown.i]![shown.j]!),
+              texts[shown.i]!,
+            )}
           </span>
         ) : (
           // Hidden, not removed, before the last step: the picture below keeps its place.

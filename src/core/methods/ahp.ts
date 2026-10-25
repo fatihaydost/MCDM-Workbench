@@ -1,6 +1,7 @@
 import { nearestScale, SCALE, toScale } from '../judgements'
 import { sum, zeros } from '../math'
 import { rankScores } from '../rank'
+import { sawSumNormalize } from './saw'
 import type {
   AlternativeJudgements,
   Judgements,
@@ -59,6 +60,7 @@ export type AhpProgress = {
   ci: number | null
   cr: number | null
   threshold: number | null
+  thresholdApproximate: boolean
   inconsistent: boolean
   worstPair: AhpWorstPair | null
 }
@@ -181,8 +183,11 @@ export function ahpIncompleteLlsm(n: number, pairs: readonly (readonly (Ratio | 
 
   const out = new Array<number>(n).fill(Number.NaN)
   const visited = new Array<boolean>(n).fill(false)
+  let components = 0
   for (let start = 0; start < n; start++) {
     if (visited[start] || adj[start]!.length === 0) continue
+    components++
+    if (components > 1) return null
     const comp: number[] = []
     const queue = [start]
     visited[start] = true
@@ -357,6 +362,7 @@ export function ahpProgress(
       ci,
       cr,
       threshold,
+      thresholdApproximate: n > 15,
       inconsistent,
       worstPair,
     }
@@ -371,6 +377,7 @@ export function ahpProgress(
     ci: null,
     cr: null,
     threshold: null,
+    thresholdApproximate: n > 15,
     inconsistent: false,
     worstPair: null,
   }
@@ -526,7 +533,7 @@ export const ahpRanking: RankingMethod<AhpParams> = {
         const { weights: pj, cr } = solveMatrix(A, params)
         crPerCriterion[j] = cr
         for (let i = 0; i < m; i++) local[i]![j] = pj[i]!
-        if (m >= 3 && cr >= AHP_CR_THRESHOLD) {
+        if (m >= 3 && (weights[j] ?? 0) > 0 && cr >= AHP_CR_THRESHOLD) {
           const worst = ahpWorstPair(A, pj)
           warnings.push({
             code: 'ahp.inconsistent',
@@ -546,10 +553,12 @@ export const ahpRanking: RankingMethod<AhpParams> = {
           })
         }
       } else {
-        const col = problem.matrix.map((row) => row[j]!)
-        const base = problem.criteria[j]!.type === 'cost' ? col.map((x) => 1 / x) : col
-        const total = sum(base)
-        for (let i = 0; i < m; i++) local[i]![j] = base[i]! / total
+        const colNorm = sawSumNormalize({
+          alternatives: problem.alternatives,
+          criteria: [problem.criteria[j]!],
+          matrix: problem.matrix.map((row) => [row[j]!]),
+        })
+        for (let i = 0; i < m; i++) local[i]![j] = colNorm[i]![0]!
       }
     }
 

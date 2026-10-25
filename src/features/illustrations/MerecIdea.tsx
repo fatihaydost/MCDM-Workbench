@@ -94,8 +94,11 @@ export function MerecIdea({ problem, format = defaultFormat, labels, step, expla
   const off = (from: number) => (stage >= from ? undefined : '')
   const table: ChartTable = {
     corner: l.criterion,
-    columns: [l.effect, l.weight],
-    rows: problem.criteria.map((c, j) => ({ label: c.name, cells: [effectTexts[j]!, weightTexts[j]!] })),
+    columns: [...problem.alternatives, l.effect, l.weight],
+    rows: problem.criteria.map((c, j) => ({
+      label: c.name,
+      cells: [...parts.drops[j]!.map((d) => format(d)), effectTexts[j]!, weightTexts[j]!],
+    })),
   }
 
   return (
@@ -152,14 +155,14 @@ export function MerecIdea({ problem, format = defaultFormat, labels, step, expla
               {/* The weight bar waits, hidden, on the stack of drops, so it comes out of it and is stretched. */}
               <rect
                 className={`${s.bar} ${s.criticBar} ${s.stageItem}`}
-                data-off={off(3)}
+                data-off={off(3) || (parts.weights[j] === 0 ? '' : undefined)}
                 data-highlight={on || undefined}
                 width={1}
                 height={1}
                 style={{
                   transform:
                     stage >= 3
-                      ? `translate(${x1}px, ${y - 7}px) scale(${Math.max(ww, 1)}, 14)`
+                      ? `translate(${x1}px, ${y - 7}px) scale(${ww > 0 ? Math.max(ww, 1) : 0}, 14)`
                       : `translate(${x0 + pad}px, ${y - 6}px) scale(${Math.max(end - x0 - pad, 1)}, 12)`,
                 }}
               />

@@ -18,8 +18,8 @@ export const critic: MethodContent = {
     venue: 'Computers & Operations Research 22(7), 763-770',
     doi: '10.1016/0305-0548(94)00059-H',
     note: {
-      en: 'The steps follow the open-access restatements by Krishnan et al. (2021) and Mukhametzyanov (2021), which agree with each other.',
-      tr: 'Adımlar, birbiriyle uyumlu iki açık erişimli anlatımı izler: Krishnan vd. (2021) ve Mukhametzyanov (2021).',
+      en: 'The steps follow Diakoulaki et al. (1995) directly and agree with the open-access restatements by Krishnan et al. (2021) and Mukhametzyanov (2021).',
+      tr: 'Adımlar doğrudan Diakoulaki vd. (1995) makalesini izler ve Krishnan vd. (2021) ile Mukhametzyanov (2021) anlatımlarıyla uyumludur.',
     },
   },
   steps: [

@@ -56,8 +56,8 @@ export const electreI: MethodContent = {
       title: { en: 'Net concordance, discordance, and score', tr: 'Net uyum, uyumsuzluk ve skor' },
       tex: String.raw`C_a = \sum_{b \ne a}\bigl(C(a,b) - C(b,a)\bigr), \quad D_a = \sum_{b \ne a}\bigl(D(a,b) - D(b,a)\bigr), \quad \Phi(a) = \frac{C_a - D_a}{2(m - 1)}`,
       note: {
-        en: 'Where a complete ranking is needed, the van Laarhoven and Pedrycz (1983) net concordance and net discordance indices rank alternatives by higher net concordance and lower net discordance.',
-        tr: 'Tam sıralama gerektiğinde van Laarhoven ve Pedrycz (1983) net uyum ve net uyumsuzluk indeksleri alternatifleri yüksek net uyum ve düşük net uyumsuzluğa göre sıralar.',
+        en: 'Where a complete ranking is needed, following van Delft and Nijkamp (1977) and Hwang and Yoon (1981), net concordance and net discordance indices rank alternatives by higher net concordance and lower net discordance.',
+        tr: 'Tam sıralama gerektiğinde van Delft ve Nijkamp (1977) ile Hwang ve Yoon (1981) izlenerek net uyum ve net uyumsuzluk indeksleri alternatifleri yüksek net uyum ve düşük net uyumsuzluğa göre sıralar.',
       },
     },
   ],

@@ -37,8 +37,9 @@ export const copras: RankingMethod = {
     const sMinus = d.map((row) => sum(row.filter((_, j) => isCost[j])))
 
     // 3. Relative significance (Eq. 5, simplified): the cost weight W_C handed out by the reciprocal of each S-.
+    const m = matrix.length
     const activeCostCount = weights.filter((w, j) => isCost[j] && w > 0).length
-    if (activeCostCount >= 2) {
+    if (m > 2 && activeCostCount >= 2) {
       for (let j = 0; j < n; j++) {
         if (isCost[j] && weights[j]! > 0 && isConstant(column(matrix, j))) {
           warnings.push({ code: 'copras.constant-cost-criterion', col: j })

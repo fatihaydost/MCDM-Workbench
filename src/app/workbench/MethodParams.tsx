@@ -61,7 +61,14 @@ function MethodParam({ methodId, d }: { methodId: string; d: ParamDescriptor }) 
   }
 
   const hasCustomSwaraS = methodId === 'swara' && d.key === 'stepRatio' && Array.isArray(rawParams?.s)
-  const current = hasCustomSwaraS ? '' : typeof value === 'string' ? value : d.default
+  const hasCustomElectreThresholds =
+    methodId === 'electre-iii' &&
+    d.key === 'thresholdPreset' &&
+    (Array.isArray(rawParams?.q) || Array.isArray(rawParams?.p) || Array.isArray(rawParams?.v))
+  const hasCustomPrometheeFuncs =
+    methodId === 'promethee-ii' && d.key === 'preferenceFunction' && Array.isArray(rawParams?.criteriaFunctions)
+  const hasCustomOverride = hasCustomSwaraS || hasCustomElectreThresholds || hasCustomPrometheeFuncs
+  const current = hasCustomOverride ? '' : typeof value === 'string' ? value : d.default
   const hintKey = `workbench.params.${methodId}.${d.key}Hints.${current}`
   return (
     <div className="flex flex-col gap-1">
@@ -71,7 +78,19 @@ function MethodParam({ methodId, d }: { methodId: string; d: ParamDescriptor }) 
       <SegmentedControl<string>
         aria-label={label}
         value={current}
-        onValueChange={(v) => setMethodParam(methodId, d.key, v)}
+        onValueChange={(v) => {
+          if (hasCustomElectreThresholds) {
+            setMethodParam(methodId, 'q', undefined)
+            setMethodParam(methodId, 'p', undefined)
+            setMethodParam(methodId, 'v', undefined)
+            setMethodParam(methodId, 'mode', undefined)
+          } else if (hasCustomPrometheeFuncs) {
+            setMethodParam(methodId, 'criteriaFunctions', undefined)
+          } else if (hasCustomSwaraS) {
+            setMethodParam(methodId, 's', undefined)
+          }
+          setMethodParam(methodId, d.key, v)
+        }}
         options={d.options.map((o) => ({ value: o, label: paramOptionLabel(methodId, d, o, t) }))}
         size="sm"
         className="self-start"
@@ -83,6 +102,34 @@ function MethodParam({ methodId, d }: { methodId: string; d: ParamDescriptor }) 
               ? 'Özel adım oranları s etkin; ön ayara dönmek için bir seçenek seçin.'
               : 'Custom step ratios s active; pick a preset to replace them.',
           })}
+        </p>
+      ) : hasCustomElectreThresholds ? (
+        <p className="text-13 text-text-3">
+          {tr(
+            t,
+            i18n.exists('workbench.params.electre-iii.thresholdPresetHints.custom')
+              ? 'workbench.params.electre-iii.thresholdPresetHints.custom'
+              : 'workbench.params.thresholdPresetHints.custom',
+            {
+              defaultValue: i18n.language?.startsWith('tr')
+                ? 'Özel kriter eşikleri (q, p, v) etkin; ön ayara dönmek için bir seçenek seçin.'
+                : 'Custom per-criterion thresholds (q, p, v) active; pick a preset to replace them.',
+            },
+          )}
+        </p>
+      ) : hasCustomPrometheeFuncs ? (
+        <p className="text-13 text-text-3">
+          {tr(
+            t,
+            i18n.exists('workbench.params.promethee-ii.preferenceFunctionHints.custom')
+              ? 'workbench.params.promethee-ii.preferenceFunctionHints.custom'
+              : 'workbench.params.preferenceFunctionHints.custom',
+            {
+              defaultValue: i18n.language?.startsWith('tr')
+                ? 'Özel kriter tercih fonksiyonları etkin; ön ayara dönmek için bir seçenek seçin.'
+                : 'Custom per-criterion preference functions active; pick a preset to replace them.',
+            },
+          )}
         </p>
       ) : (
         i18n.exists(hintKey) && <p className="text-13 text-text-3">{tr(t, hintKey)}</p>

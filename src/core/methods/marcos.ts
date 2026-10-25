@@ -1,4 +1,4 @@
-import { column, linearMaxNormalize, maxOf, minOf, sum } from '../math'
+import { column, isConstant, linearMaxNormalize, maxOf, minOf, sum } from '../math'
 import { rankScores } from '../rank'
 import type { Problem, RankingMethod, RankingResult } from '../types'
 import { assertValid, hasErrors, validateProblem, validateRequirements, validateWeights } from '../validate'
@@ -30,6 +30,7 @@ export const marcos: RankingMethod = {
     const r = linearMaxNormalize(problem)
     const aaiRow = problem.criteria.map((_, j) => {
       const col = column(matrix, j)
+      if (isConstant(col)) return 1
       return minOf(col) / maxOf(col)
     })
 
@@ -37,15 +38,15 @@ export const marcos: RankingMethod = {
     const v = r.map((row) => row.map((x, j) => x * weights[j]!))
     const s = v.map((row) => sum(row))
     const sAi = sum(weights)
-    const sAaai = sum(aaiRow.map((x, j) => x * weights[j]!))
+    const sAai = sum(aaiRow.map((x, j) => x * weights[j]!))
 
     // 5-6. Utility degrees and functions (Eqs. 7-8, 11-12, 10), literally as printed.
-    const kMinus = s.map((x) => x / sAaai)
+    const kMinus = s.map((x) => x / sAai)
     const kPlus = s.map((x) => x / sAi)
     const fKMinus = kPlus[0]! / (kPlus[0]! + kMinus[0]!)
     const fKPlus = kMinus[0]! / (kPlus[0]! + kMinus[0]!)
     const scores = s.map((_, i) => (kPlus[i]! + kMinus[i]!) / (1 + (1 - fKPlus) / fKPlus + (1 - fKMinus) / fKMinus))
-    const c = (sAaai + sAi) / (sAaai * sAaai + sAaai * sAi + sAi * sAi)
+    const c = (sAai + sAi) / (sAai * sAai + sAai * sAi + sAi * sAi)
 
     return {
       scores,
@@ -54,7 +55,7 @@ export const marcos: RankingMethod = {
       steps: [
         { key: 'marcos.normalized', matrix: r, axes: ['alternatives', 'criteria'] },
         { key: 'marcos.weighted', matrix: v, axes: ['alternatives', 'criteria'] },
-        { key: 'marcos.sAai', scalar: sAaai },
+        { key: 'marcos.sAai', scalar: sAai },
         { key: 'marcos.sAi', scalar: sAi },
         { key: 'marcos.s', vector: s, axes: 'alternatives' },
         { key: 'marcos.kMinus', vector: kMinus, axes: 'alternatives' },
@@ -63,7 +64,7 @@ export const marcos: RankingMethod = {
         { key: 'marcos.fKPlus', scalar: fKPlus },
         { key: 'marcos.utility', vector: scores, axes: 'alternatives' },
       ],
-      diagnostics: { sAaai, sAi, c },
+      diagnostics: { sAai, sAaai: sAai, sAi, c },
       warnings: [],
     }
   },

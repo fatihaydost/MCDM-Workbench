@@ -176,6 +176,11 @@ export function CodasIdea({
   }
 
   const shown = active === null ? null : order[active]!
+  const tauDecimals = Math.abs(Math.round(tau * 100) - tau * 100) > 1e-6 ? 3 : 2
+  const tauFormatted = format(tau, tauDecimals)
+  const headText = stacked
+    ? `${l.euclidean} / ${l.taxicab} (ψ=1: ${activePairs}/${totalPairs})`
+    : `${l.euclidean} / ${l.taxicab} (τ = ${tauFormatted}, ψ = 1: ${activePairs}/${totalPairs}) →`
 
   return (
     <ChartFigure titleId={`${uid}-title`} tableId={`${uid}-table`} title={l.title} showTable={l.showTable} table={table} plotRef={plotRef} className={className}>
@@ -193,7 +198,7 @@ export function CodasIdea({
       >
         <g aria-hidden>
           <text className={b.head} x={distLeft} y={HEAD / 2} textAnchor="start" dominantBaseline="central" data-testid="codas-tau-status">
-            {`${l.euclidean} / ${l.taxicab} (τ = ${format(tau, 3)}, ψ = 1: ${activePairs}/${totalPairs}) →`}
+            {headText}
           </text>
           <line className={b.zero} x1={distLeft} x2={distLeft} y1={HEAD} y2={height} />
           <text className={`${b.head} ${s.stageItem}`} data-off={scoreOff} x={zero} y={HEAD / 2} textAnchor="middle" dominantBaseline="central">
@@ -223,10 +228,11 @@ export function CodasIdea({
                 <rect
                   className={b.score}
                   data-sign="up"
-                  x={distLeft}
-                  y={mid - 8}
-                  width={eLen}
-                  height={6}
+                  x={0}
+                  y={0}
+                  width={1}
+                  height={1}
+                  style={{ transform: `translate(${distLeft}px, ${mid - 8}px) scale(${eLen}, 6)` }}
                   aria-hidden
                 />
                 {/* Taxicab distance bar T_i (bottom bar, lighter) */}
@@ -234,11 +240,12 @@ export function CodasIdea({
                   className={`${b.stick} ${s.stageItem}`}
                   data-sign="up"
                   data-off={taxicabOff}
-                  x={distLeft}
-                  y={mid + 2}
-                  width={tLen}
-                  height={5}
-                  opacity={0.55}
+                  x={0}
+                  y={0}
+                  width={1}
+                  height={1}
+                  style={{ transform: `translate(${distLeft}px, ${mid + 2}px) scale(${tLen}, 5)` }}
+                  fillOpacity={0.55}
                   aria-hidden
                 />
                 {/* Assessment score bar H_i from zero */}
@@ -284,11 +291,11 @@ export function CodasIdea({
           })}
         </g>
       </svg>
-      {(shown !== null || l.caption) && (
-        <p className={s.caption} aria-live="polite">
-          {shown !== null ? rowText(shown) : l.caption}
-        </p>
-      )}
+      <p className={s.caption} aria-live="polite">
+        <span className={stepping && stage < 2 ? 'invisible' : undefined}>
+          {shown !== null ? rowText(shown) : (l.caption ?? '\u00a0')}
+        </span>
+      </p>
     </ChartFigure>
   )
 }

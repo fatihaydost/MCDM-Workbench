@@ -142,8 +142,8 @@ export function SwaraIdea({
   const table: ChartTable = {
     corner: l.criterion,
     columns: [l.s, l.k, l.q, l.weight],
-    rows: problem.criteria.map((c, j) => ({
-      label: c.name,
+    rows: perm.map((j) => ({
+      label: displayName(j),
       cells: [
         sTexts[j]!,
         format(computed.k[j]!),
@@ -182,13 +182,11 @@ export function SwaraIdea({
           {truncate(l.weight, weightW + valueW, 12)}
         </text>
         <line className={s.rowRule} x1={0} x2={W} y1={HEAD - 0.5} y2={HEAD - 0.5} />
-        {problem.criteria.map((_c, j) => {
-          const y = HEAD + j * ROW + ROW / 2
-          const rankIdx = perm.indexOf(j)
+        {perm.map((j, rankIdx) => {
+          const y = HEAD + rankIdx * ROW + ROW / 2
           const isFirstRank = rankIdx === 0
-          const isAdjacentChain = rankIdx > 0 && perm[rankIdx - 1] === j - 1
           const qVal = computed.q[j]!
-          const prevQ = !isFirstRank && rankIdx > 0 ? computed.q[perm[rankIdx - 1]!]! : qVal
+          const prevQ = !isFirstRank ? computed.q[perm[rankIdx - 1]!]! : qVal
           const xZero = strip(0)
           const xQ = strip(Math.min(1, Math.max(0, qVal)))
           const xPrevQ = strip(Math.min(1, Math.max(0, prevQ)))
@@ -207,7 +205,7 @@ export function SwaraIdea({
               </text>
               <line className={s.stripBase} x1={xZero} x2={strip(1)} y1={y} y2={y} />
               {/* Stage 1+: step-down guide from previous ranked criterion's q and q_j ruler */}
-              {isAdjacentChain && xPrevQ > xQ + 0.5 ? (
+              {!isFirstRank && xPrevQ > xQ + 0.5 ? (
                 <path
                   className={`${s.op} ${s.stageItem}`}
                   data-off={off(1)}
@@ -251,7 +249,7 @@ export function SwaraIdea({
               >
                 {weightTexts[j]}
               </text>
-              {j < n - 1 ? <line className={s.rowRule} x1={0} x2={W} y1={y + ROW / 2 - 0.5} y2={y + ROW / 2 - 0.5} /> : null}
+              {rankIdx < n - 1 ? <line className={s.rowRule} x1={0} x2={W} y1={y + ROW / 2 - 0.5} y2={y + ROW / 2 - 0.5} /> : null}
             </g>
           )
         })}

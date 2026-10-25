@@ -274,7 +274,7 @@ export function AhpMatrix(props: AhpMatrixProps) {
 
         <line className={s.rowRule} x1={0} x2={W} y1={HEAD + n * ROW - 0.5} y2={HEAD + n * ROW - 0.5} />
         <text className={s.axisName} x={xGrid0} y={HEAD + n * ROW + 18}>
-          {truncate(l.matrix, gridW, 12)}
+          {truncate(showFittedInCell && stage >= 1 ? `${l.matrix} · ${l.fitted}` : l.matrix, gridW, 12)}
         </text>
         {worstPair ? (
           <text

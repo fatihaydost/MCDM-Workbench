@@ -58,7 +58,13 @@
     "copras_ahp-ranking": "COPRAS with a single active cost criterion and table-derived AHP local priorities compute the same weighted shares, so they are counted once.",
     "ahp-ranking_copras": "AHP with table-derived local priorities and COPRAS with a single active cost criterion compute the same weighted shares, so they are counted once.",
     "vikor_mabac": "VIKOR at v = 1 (pure group utility S) and MABAC both rank by the 0-1 weighted sum, so they are counted once.",
-    "mabac_vikor": "MABAC and VIKOR at v = 1 (pure group utility S) both rank by the 0-1 weighted sum, so they are counted once."
+    "mabac_vikor": "MABAC and VIKOR at v = 1 (pure group utility S) both rank by the 0-1 weighted sum, so they are counted once.",
+    "promethee-ii_mabac": "PROMETHEE II with the V-shape preference function over the column range and MABAC both rank by the 0-1 weighted sum, so they are counted once.",
+    "mabac_promethee-ii": "MABAC and PROMETHEE II with the V-shape preference function over the column range both rank by the 0-1 weighted sum, so they are counted once.",
+    "vikor_promethee-ii": "VIKOR at v = 1 (pure group utility S) and PROMETHEE II with the V-shape preference function over the column range both rank by the 0-1 weighted sum, so they are counted once.",
+    "promethee-ii_vikor": "PROMETHEE II with the V-shape preference function over the column range and VIKOR at v = 1 (pure group utility S) both rank by the 0-1 weighted sum, so they are counted once.",
+    "waspas_saw": "WASPAS at λ = 1 is purely the weighted sum component, so it gives the same order as SAW (Linear) and is counted once.",
+    "waspas_marcos": "WASPAS at λ = 1 and MARCOS both order by the linear-max weighted sum, so they are counted once."
   },
   "sawLinear": "SAW (Linear)",
   "sawSum": "SAW (Sum)",

@@ -193,13 +193,17 @@ describe('COPRAS properties', () => {
     const sm = vec(res.steps, 'copras.sMinus')
     expectClose(res.scores, [sp[0]! + sm[1]!, sp[1]! + sm[0]!], 1e-15)
   })
-  it('a constant cost column can change the ranking (unlike SAW): 1-3-2 becomes 2-3-1', () => {
+  it('a constant cost column can change the ranking for m > 2 (emits constant-cost-criterion), but not for m = 2', () => {
     const before = copras.compute(makeProblem([[1, 1], [4, 6], [6, 4]], ['benefit', 'cost']), [0.5, 0.5], {})
     expectClose(before.scores, [0.3984, 0.2406, 0.361], 5e-5)
     expect(before.ranking).toEqual([1, 3, 2])
     const after = copras.compute(makeProblem([[1, 1, 1], [4, 6, 1], [6, 4, 1]], ['benefit', 'cost', 'cost']), [0.25, 0.25, 0.5], {})
     expectClose(after.scores, [0.3405, 0.2895, 0.37], 5e-5)
     expect(after.ranking).toEqual([2, 3, 1])
+    expect(after.warnings).toContainEqual({ code: 'copras.constant-cost-criterion', col: 2 })
+
+    const m2 = copras.compute(makeProblem([[1, 2, 5], [4, 6, 5]], ['benefit', 'cost', 'cost']), [0.4, 0.3, 0.3], {})
+    expect(m2.warnings).toEqual([])
   })
   it('only cost criteria: S+ = 0, Q is the cost weight shared by 1 / S-, no notice', () => {
     const p = makeProblem(podvezko.matrix, ['cost', 'cost', 'cost', 'cost'])

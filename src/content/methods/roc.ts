@@ -83,11 +83,11 @@ export const roc: MethodContent = {
       'Ties are frequent: the formulas assume a strict ranking.',
     ],
     inputs: [
-      'A rank per criterion, 1 = most important, no ties.',
+      'A rank per criterion, 1 = most important; ties share the average weight of the positions they span.',
       'Formula: ROC (default), Rank Sum or Rank Reciprocal.',
     ],
     pitfalls: [
-      'Ties are undefined in the formulas; averaging the weights of the tied positions is a choice no source covers.',
+      'Tied criteria receive the average weight of the positions they span; if all tie, every weight is 1/n.',
       'n = 1 gives w = 1.',
       'Rank 1 means most important; pyDecision takes an ordered list of labels instead, which is easy to invert by mistake.',
     ],
@@ -103,11 +103,11 @@ export const roc: MethodContent = {
       'Eşitlikler sık: formüller kesin bir sıralama varsayar.',
     ],
     inputs: [
-      'Her kriter için bir sıra, 1 = en önemli, eşitlik yok.',
+      'Her kriter için bir sıra, 1 = en önemli; eşit sıralar kapladıkları konumların ortalama ağırlığını alır.',
       'Formül: ROC (varsayılan), sıra toplamı ya da ters sıra.',
     ],
     pitfalls: [
-      'Formüllerde eşitlik tanımsızdır; eşit sıradaki konumların ağırlıklarını ortalamak hiçbir kaynağın ele almadığı bir tercihtir.',
+      'Eşit sıradaki kriterler kapladıkları konumların ortalama ağırlığını alır; tümü eşitse her ağırlık 1/n olur.',
       'n = 1 için w = 1.',
       'Sıra 1 en önemli demektir; pyDecision bunun yerine sıralı etiket listesi alır, yanlışlıkla ters çevirmek kolaydır.',
     ],

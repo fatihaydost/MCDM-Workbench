@@ -61,7 +61,11 @@ export function Stage({ problem, weights, params, className }: StagePictureProps
     arr.map((x, j) => (typeof x === 'number' && mode?.[j] === 'rel' ? { rel: x } : (x as ThresholdSpec)))
   const q = Array.isArray(params.q) ? mapThresholds(params.q) : undefined
   const p = Array.isArray(params.p) ? mapThresholds(params.p) : undefined
-  const v = Array.isArray(params.v) ? (params.v as readonly (ThresholdSpec | null)[]) : undefined
+  const v = Array.isArray(params.v)
+    ? params.v.map((x, j) =>
+        x === null ? null : typeof x === 'number' && mode?.[j] === 'rel' ? { rel: x } : (x as ThresholdSpec),
+      )
+    : undefined
   return (
     <ElectreIIIIdea
       problem={problem}

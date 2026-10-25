@@ -166,7 +166,7 @@ export function bwmProgress(j: Judgements, n: number): BwmProgress {
       if (k === B) return aBW
       if (k === W) return 1
       const known = [b === null ? null : aBW / b, ow[k]!].filter((x): x is number => x !== null)
-      return known.length ? known.reduce((s, x) => s + x, 0) / known.length : 0
+      return known.length ? known.reduce((s, x) => s + x, 0) / known.length : Math.sqrt(aBW)
     })
     const sigma = v.reduce((s, x) => s + x, 0)
     weights = v.map((x) => x / sigma)

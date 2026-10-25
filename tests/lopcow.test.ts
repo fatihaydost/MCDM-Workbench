@@ -162,6 +162,19 @@ describe('LOPCOW: properties and edge cases', () => {
       expect(res.weights).toEqual([0, 1])
       expect(res.warnings).toContainEqual({ code: 'lopcow.zero-pv-column', col: 0 })
     }
+
+    // Even when all varying columns are single-winner (total PV === 0), each varying column gets zero-pv-column warning
+    const allZeroPv = run(
+      [
+        [10, 0, 5],
+        [0, 20, 5],
+        [0, 0, 5],
+      ],
+      ['benefit', 'benefit', 'benefit'],
+    )
+    expect(allZeroPv.weights).toEqual([0.5, 0.5, 0])
+    expect(allZeroPv.warnings).toContainEqual({ code: 'lopcow.zero-pv-column', col: 0 })
+    expect(allZeroPv.warnings).toContainEqual({ code: 'lopcow.zero-pv-column', col: 1 })
   })
 
   it('invalid input throws ProblemValidationError', () => {

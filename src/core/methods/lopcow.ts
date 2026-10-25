@@ -49,7 +49,7 @@ export const lopcow: WeightingMethod = {
     // 3. Weights; when all columns are constant fall back to 1/n, when every PV is 0 share equally among varying columns.
     const total = sum(pv)
     for (let j = 0; j < n; j++) {
-      if (m > 2 && total > 0 && !constant[j] && pv[j] === 0) warnings.push({ code: 'lopcow.zero-pv-column', col: j })
+      if (m > 2 && !constant[j] && pv[j] === 0) warnings.push({ code: 'lopcow.zero-pv-column', col: j })
     }
     const allConstant = constant.every(Boolean)
     if (allConstant) warnings.push({ code: 'lopcow.all-constant-equal-weights' })

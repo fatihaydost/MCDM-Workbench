@@ -44,7 +44,8 @@ export function Idea({ example, problem }: IdeaPictureProps) {
   const stepLabels = useStepLabels()
   const sentences = (['s1', 's2', 's3'] as const).map((k) => t(`methods.page.idea.codas.steps.${k}`))
   const shownTau = steps.step !== null ? CODAS_DEFAULT_TAU : tau
-  const tauText = format(shownTau, 2)
+  const tauDecimals = Math.abs(Math.round(shownTau * 100) - shownTau * 100) > 1e-6 ? 3 : 2
+  const tauText = format(shownTau, tauDecimals)
   return (
     <div className="flex flex-col gap-3">
       <div className="flex w-full max-w-[360px] flex-col gap-1">

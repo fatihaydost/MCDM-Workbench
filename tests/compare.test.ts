@@ -218,6 +218,30 @@ describe('compareRankings with method options', () => {
       { methodId: 'vikor', params: { v: 1 } },
     ])
     expect(vikorMabac.echoes).toEqual([{ methodId: 'vikor', of: 'mabac' }])
+
+    const twoAltsTwoCosts: Problem = {
+      alternatives: ['A1', 'A2'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'cost' },
+        { name: 'C3', type: 'cost' },
+      ],
+      matrix: [
+        [10, 4, 9],
+        [20, 8, 3],
+      ],
+    }
+    const m2Saw = compareRankings(twoAltsTwoCosts, [0.4, 0.3, 0.3], [
+      { methodId: 'saw', params: { normalization: 'sum' } },
+      { methodId: 'copras', params: {} },
+    ])
+    expect(m2Saw.echoes).toEqual([{ methodId: 'copras', of: 'saw' }])
+
+    const m2Ahp = compareRankings(twoAltsTwoCosts, [0.4, 0.3, 0.3], [
+      { methodId: 'ahp-ranking', params: {} },
+      { methodId: 'copras', params: {} },
+    ])
+    expect(m2Ahp.echoes).toEqual([{ methodId: 'copras', of: 'ahp-ranking' }])
   })
   it('has an EN and a TR message for the one-ranking case', () => {
     expect(en.onlyOneRanking).toMatch(/^Only one ranking: MARCOS/)

@@ -85,7 +85,7 @@ export const entropy: WeightingMethod<EntropyParams> = {
 
     // 5. Weights; with no diversification at all there is nothing to weigh: equal weights across varying columns (or all if all constant).
     const totalD = sum(d)
-    const allConstant = constant.every(Boolean) || totalD < ENTROPY_NO_INFORMATION
+    const allConstant = constant.every(Boolean) || totalD <= Number.MIN_VALUE
     if (allConstant) warnings.push({ code: 'entropy.all-constant-equal-weights' })
     const varying = constant.filter((c) => !c).length
     const weights = allConstant
@@ -96,7 +96,7 @@ export const entropy: WeightingMethod<EntropyParams> = {
 
     if (isMinMax && m === 2 && varying > 1) warnings.push({ code: 'entropy.two-alternatives-minmax' })
     const top = weights.reduce((best, w, j) => (w > weights[best]! ? j : best), 0)
-    if (!allConstant && totalD >= ENTROPY_NO_INFORMATION && varying > 1 && weights[top]! > ENTROPY_DOMINANT_WEIGHT) {
+    if (!allConstant && varying > 1 && weights[top]! > ENTROPY_DOMINANT_WEIGHT) {
       warnings.push({ code: 'entropy.dominant-weight', col: top })
     }
 

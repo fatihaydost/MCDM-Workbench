@@ -97,8 +97,8 @@ describe('share texts', () => {
 })
 
 describe('recomputable', () => {
-  it('offers no recompute for equal weights or for weights from answers', () => {
-    expect(recomputable('ahp')).toBeUndefined()
+  it('offers recompute for objective methods and AHP sub-matrices, but not for equal weights or BWM', () => {
+    expect(recomputable('ahp')?.id).toBe('ahp')
     expect(recomputable('bwm')).toBeUndefined()
     expect(recomputable('equal')).toBeUndefined()
     expect(recomputable('critic')?.id).toBe('critic')

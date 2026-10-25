@@ -7,11 +7,12 @@
  * problem), so any ranking method works unchanged and the analysis is of the variant the user chose.
  * Rankings are always the method's own `ranking` (competition ranks from rankScores: ties share, 1, 1, 3).
  */
+import { remapJudgements } from './judgements'
 import { reweight } from './reweight'
 import type { RankerFor } from './run'
 import { ProblemValidationError } from './validate'
 import type { ValidationIssue } from './validate'
-import type { MethodParams, MethodParamValue, Problem, WeightingMethod } from './types'
+import type { Judgements, MethodParams, MethodParamValue, Problem, WeightingMethod } from './types'
 
 // ---------- shared helpers ----------
 
@@ -596,6 +597,11 @@ export type RemovalRow = {
   blocked?: ValidationIssue[]
 }
 
+export type RemovalOptions = {
+  weightingParams?: MethodParams
+  judgements?: Judgements
+}
+
 /**
  * `weighting` is needed for 'recompute'; without it only 'renormalize' rows are returned. Skipped when n ≤ 2.
  * `opts.weightingParams` are the weighting options (default `{}`); `rankFor` prepares the ranking again on each reduced problem.
@@ -608,7 +614,7 @@ export function removeCriteria(
   weights: readonly number[],
   rankFor: RankerFor,
   weighting?: WeightingMethod,
-  opts?: { weightingParams?: MethodParams },
+  opts?: RemovalOptions,
 ): RemovalRow[] {
   const n = problem.criteria.length
   if (n <= 2) return []
@@ -701,7 +707,12 @@ export function removeCriteria(
     if (weighting) {
       try {
         const reducedParams = reduceWeightingParams(opts?.weightingParams, j)
-        rows.push(row(j, 'recompute', reduced, weighting.compute(reduced, reducedParams).weights))
+        const kept = Array.from({ length: n }, (_, c) => c).filter((c) => c !== j)
+        const reducedJudgements =
+          weighting.reads === 'judgements' && opts?.judgements
+            ? remapJudgements(opts.judgements, kept)
+            : undefined
+        rows.push(row(j, 'recompute', reduced, weighting.compute(reduced, reducedParams, reducedJudgements).weights))
       } catch (err) {
         if (!(err instanceof ProblemValidationError)) throw err
         rows.push({ j, mode: 'recompute', weights: new Array<number>(n).fill(0), ...blockedRow(err) })

@@ -18,6 +18,7 @@ function usePrometheeLabels(): PrometheeIdeaLabels {
     negativeFlow: 'φ⁻',
     score: 'φ',
     row: (alternative, pos, neg, score) => t('workbench.visual.promethee-ii.row', { alternative, pos, neg, score }),
+    incomparable: (pairs) => t('workbench.visual.promethee-ii.incomparable', { pairs }),
   }
 }
 
@@ -66,6 +67,7 @@ export function Idea({ example, problem }: IdeaPictureProps) {
           caption: t('methods.page.idea.promethee-ii.caption'),
           showTable: t('methods.page.idea.showTable'),
           alternative: t('methods.page.idea.alternative'),
+          incomparable: (pairs) => t('methods.page.idea.promethee-ii.incomparable', { pairs }),
         }}
         step={steps.step}
         explain={steps.explain}

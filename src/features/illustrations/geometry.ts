@@ -407,9 +407,15 @@ export function merecParts(problem: Problem): MerecParts | null {
   } catch {
     return null
   }
-  const s = stepVector(result.steps, 'merec.performance')
-  const removed = stepMatrix(result.steps, 'merec.performanceRemoved')
-  const drops = problem.criteria.map((_, j) => s.map((si, i) => Math.max(0, si - removed[i]![j]!)))
+  const absLog = stepMatrix(result.steps, 'merec.absLog')
+  const n = problem.criteria.length
+  const rowTotal = absLog.map((row) => row.reduce((a, b) => a + b, 0))
+  const drops = problem.criteria.map((_, j) =>
+    absLog.map((row, i) => {
+      const l = row[j]!
+      return Math.max(0, Math.log1p(l / (n + rowTotal[i]! - l)))
+    }),
+  )
   return { result, drops, effect: stepVector(result.steps, 'merec.removalEffect'), weights: result.weights }
 }
 

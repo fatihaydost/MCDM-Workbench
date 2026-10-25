@@ -176,34 +176,29 @@ export function OrdinalWeights({ problem, method }: Props) {
   const moveRoc = (pos: number, delta: -1 | 1) => {
     const target = pos + delta
     if (target < 0 || target >= n) return
-    const nextOrdered = [...ordered]
-    const a = nextOrdered[pos]!
-    const b = nextOrdered[target]!
-    const nextRanks = [...ranks]
-    if (nextRanks[a] !== nextRanks[b]) {
-      const tmp = nextRanks[a]!
-      nextRanks[a] = nextRanks[b]!
-      nextRanks[b] = tmp
-    } else {
-      const r = nextRanks[a]!
-      const upper = delta === 1 ? b : a
-      const lower = delta === 1 ? a : b
-      const hiPos = Math.max(pos, target)
-      const needsShift = nextRanks.some((rk) => rk > r && rk <= r + 1)
-      if (needsShift) {
-        for (let j = 0; j < n; j++) {
-          if (nextRanks[j]! > r) nextRanks[j] = Math.min(n, nextRanks[j]! + 1)
+    const j = ordered[pos]!
+    const b = ordered[target]!
+    const nextRanks = ranks.map((rk) => 1 + ranks.filter((other) => other < rk).length)
+    const r = nextRanks[j]!
+    const tiesAtR = nextRanks.filter((rk) => rk === r)
+    if (tiesAtR.length > 1) {
+      if (delta === 1) {
+        for (let idx = 0; idx < n; idx++) {
+          if (nextRanks[idx]! > r) nextRanks[idx] = nextRanks[idx]! + 1
+        }
+        nextRanks[j] = r + 1
+      } else {
+        for (let idx = 0; idx < n; idx++) {
+          if (idx !== j && nextRanks[idx]! >= r) nextRanks[idx] = nextRanks[idx]! + 1
         }
       }
-      nextRanks[upper] = r
-      nextRanks[lower] = Math.min(n, r + 1)
-      nextOrdered.forEach((critIdx, idx) => {
-        if (critIdx !== upper && critIdx !== lower && ranks[critIdx] === r && idx > hiPos) {
-          nextRanks[critIdx] = Math.min(n, r + 1)
-        }
-      })
+    } else {
+      const tmp = nextRanks[j]!
+      nextRanks[j] = nextRanks[b]!
+      nextRanks[b] = tmp
     }
-    setMethodParam('roc', 'ranks', nextRanks)
+    const canonical = nextRanks.map((rk) => 1 + nextRanks.filter((other) => other < rk).length)
+    setMethodParam('roc', 'ranks', canonical)
   }
 
   const changeRank = (critIdx: number, val: number | null) => {

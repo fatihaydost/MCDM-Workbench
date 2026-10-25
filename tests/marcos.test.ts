@@ -150,12 +150,40 @@ describe('MARCOS: edge cases', () => {
     expectClose(res.scores, [2 / 3, 2 / 3, 2 / 3], 1e-15)
     expect(res.ranking).toEqual([1, 1, 1])
   })
-  it('a constant column keeps the ranking but changes c', () => {
+  it('a constant column keeps the ranking but changes c, and rounding-noise constant columns get aaiRow = 1 and expose sAai in diagnostics', () => {
     const base = [[3, 5], [4, 2], [6, 4]]
     const b = marcos.compute(makeProblem(base.map((r) => [...r, 7]), ['benefit', 'cost', 'benefit']), [0.4, 0.3, 0.3], {})
     const c = marcos.compute(makeProblem(base, ['benefit', 'cost']), [0.4 / 0.7, 0.3 / 0.7], {})
     expect(b.ranking).toEqual(c.ranking)
     expect(b.diagnostics!.c).not.toBeCloseTo(c.diagnostics!.c!, 6)
+    expect(b.diagnostics!.sAai).toBe(b.diagnostics!.sAaai)
+
+    const noisy = marcos.compute(
+      makeProblem(
+        [
+          [3, 0.3],
+          [4, 0.1 + 0.2],
+          [6, 0.3],
+        ],
+        ['benefit', 'benefit'],
+      ),
+      [0.5, 0.5],
+      {},
+    )
+    const exact = marcos.compute(
+      makeProblem(
+        [
+          [3, 0.3],
+          [4, 0.3],
+          [6, 0.3],
+        ],
+        ['benefit', 'benefit'],
+      ),
+      [0.5, 0.5],
+      {},
+    )
+    expect(noisy.diagnostics!.sAai).toBe(exact.diagnostics!.sAai)
+    expect(noisy.scores).toEqual(exact.scores)
   })
   it('blocks zero and negative values and a single alternative', () => {
     expect(thrown(() => marcos.compute(makeProblem([[1, 0], [2, 3]], ['benefit', 'cost']), [0.5, 0.5], {}))).toEqual(['non-positive-value'])

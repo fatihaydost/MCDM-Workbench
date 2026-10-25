@@ -18,6 +18,12 @@ const ECHO_NOTE_KEYS = new Set([
   'ahp-ranking_copras',
   'vikor_mabac',
   'mabac_vikor',
+  'promethee-ii_mabac',
+  'mabac_promethee-ii',
+  'vikor_promethee-ii',
+  'promethee-ii_vikor',
+  'waspas_saw',
+  'waspas_marcos',
 ])
 
 /**

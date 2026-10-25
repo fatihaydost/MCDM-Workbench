@@ -1106,7 +1106,7 @@ describe('Mathematician 1 Weighting, Judgements, and Numerical Algebra Audits', 
     const res = entropy.compute(p, { normalization: 'sum' })
     const dStep = res.steps.find((s) => s.key === 'entropy.diversification')!
     expect(sum(dStep.vector!)).toBeLessThan(ENTROPY_NO_INFORMATION)
-    expect(res.warnings?.some((w) => w.code === 'entropy.all-constant-equal-weights')).toBe(true)
+    expect(res.warnings?.some((w) => w.code === 'entropy.all-constant-equal-weights')).toBe(false)
     expect(res.weights).toEqual([1, 0])
   })
 
@@ -1169,16 +1169,26 @@ describe('Mathematician 1 Weighting, Judgements, and Numerical Algebra Audits', 
     expect(weights[3]).toBeCloseTo(weights[4]!, 14)
   })
 
-  it('ahpIncompleteLlsm preserves intra-component ratios across disconnected subgraphs and leaves isolated nodes as NaN', () => {
+  it('ahpIncompleteLlsm returns null on disconnected subgraphs and leaves isolated nodes as NaN when connected', () => {
     // 5 criteria: Component 1 is {0, 1} with A_01 = 2; Component 2 is {2, 3} with A_23 = 3; Criterion 4 is isolated.
-    const pairs: (number | null)[][] = [
+    const disconnected: (number | null)[][] = [
       [1, 2, null, null, null],
       [1 / 2, 1, null, null, null],
       [null, null, 1, 3, null],
       [null, null, 1 / 3, 1, null],
       [null, null, null, null, 1],
     ]
-    const weights = ahpIncompleteLlsm(5, pairs)
+    expect(ahpIncompleteLlsm(5, disconnected)).toBeNull()
+
+    // Connect {0, 1, 2, 3} into a single tree while Criterion 4 remains isolated
+    const connected: (number | null)[][] = [
+      [1, 2, null, null, null],
+      [1 / 2, 1, 1, null, null],
+      [null, 1, 1, 3, null],
+      [null, null, 1 / 3, 1, null],
+      [null, null, null, null, 1],
+    ]
+    const weights = ahpIncompleteLlsm(5, connected)
     expect(weights).not.toBeNull()
     expect(weights).toHaveLength(5)
 

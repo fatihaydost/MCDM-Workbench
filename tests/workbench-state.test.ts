@@ -237,7 +237,7 @@ describe('examples match the published fixtures', () => {
   })
   it('Roszkowska 2013 (ROC, 5x5 criteria weighting)', () => {
     const ex = getExample('roszkowska-2013-rank-weights')!
-    expect(ex.referenceFor).toEqual(['roc'])
+    expect(ex.referenceFor).toEqual(['roc', 'equal'])
     expect(ex.matrix).toEqual(rosz.matrix)
     expect(ex.alternatives).toEqual(rosz.alternatives)
     expect(ex.criteria.map((c) => c.type)).toEqual(rosz.types)

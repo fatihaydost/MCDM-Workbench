@@ -15,8 +15,8 @@ export const bwm: MethodContent = {
     venue: 'Omega 53, 49-57',
     doi: '10.1016/j.omega.2014.11.009',
     note: {
-      en: 'The 2015 paper introduces the non-linear minimax model. The linear (LP) model with a unique solution is Rezaei (2016), Omega 64, 126-130, which this site solves in exact closed form without an LP solver via Ratandhara & Kumar (2025). The input-based consistency ratio is from Liang, Brunelli & Rezaei (2020).',
-      tr: "2015 makalesi doğrusal olmayan minimaks modeli tanıtır. Tek çözümlü doğrusal (LP) model Rezaei (2016), Omega 64, 126-130'dadır ve bu sitede Ratandhara ve Kumar (2025) kapalı form analitik çözümüyle LP çözücüsüz kesin olarak çözülür. Girdiye dayalı tutarlılık oranı Liang, Brunelli ve Rezaei (2020) kaynaklıdır.",
+      en: 'The 2015 paper introduces the non-linear minimax model. The linear (LP) model with a unique solution is Rezaei (2016), Omega 64, 126-130, which this site solves in exact closed form without an LP solver via Ratandhara & Kumar (2026). The input-based consistency ratio is from Liang, Brunelli & Rezaei (2020).',
+      tr: "2015 makalesi doğrusal olmayan minimaks modeli tanıtır. Tek çözümlü doğrusal (LP) model Rezaei (2016), Omega 64, 126-130'dadır ve bu sitede Ratandhara ve Kumar (2026) kapalı form analitik çözümüyle LP çözücüsüz kesin olarak çözülür. Girdiye dayalı tutarlılık oranı Liang, Brunelli ve Rezaei (2020) kaynaklıdır.",
     },
   },
   steps: [
@@ -32,8 +32,8 @@ export const bwm: MethodContent = {
       title: { en: 'Linear model (default)', tr: 'Doğrusal model (varsayılan)' },
       tex: String.raw`\begin{aligned} &\min\ \xi^{L} \\ &\left|w_B - a_{Bj} w_j\right| \le \xi^{L},\ \ \left|w_j - a_{jW} w_W\right| \le \xi^{L}\ \ \forall j, \qquad \sum_j w_j = 1,\ \ w_j \ge 0 \end{aligned}`,
       note: {
-        en: 'Rezaei (2016): each absolute value becomes two linear inequalities, giving a linear program with a unique optimal weight vector; solved here in exact closed form via Ratandhara & Kumar (2025) without an external LP solver, and xi close to 0 means high consistency.',
-        tr: "Rezaei (2016): her mutlak değer iki doğrusal eşitsizliğe açılır ve tek optimal ağırlık vektörlü bir doğrusal program verir; burada Ratandhara ve Kumar (2025) kapalı form analitik formülüyle harici LP çözücü olmadan kesin çözülür ve 0'a yakın xi yüksek tutarlılık demektir.",
+        en: 'Rezaei (2016): each absolute value becomes two linear inequalities, giving a linear program with a unique optimal weight vector; solved here in exact closed form via Ratandhara & Kumar (2026) without an external LP solver, and xi close to 0 means high consistency.',
+        tr: "Rezaei (2016): her mutlak değer iki doğrusal eşitsizliğe açılır ve tek optimal ağırlık vektörlü bir doğrusal program verir; burada Ratandhara ve Kumar (2026) kapalı form analitik formülüyle harici LP çözücü olmadan kesin çözülür ve 0'a yakın xi yüksek tutarlılık demektir.",
       },
     },
     {
@@ -69,6 +69,20 @@ export const bwm: MethodContent = {
       },
     },
     {
+      methodId: 'cocoso',
+      text: {
+        en: 'BWM then CoCoSo or MABAC in recent studies (for example Telli & Ayçin 2021).',
+        tr: 'Son dönem çalışmalarda BWM ardından CoCoSo ya da MABAC (örneğin Telli ve Ayçin 2021).',
+      },
+    },
+    {
+      methodId: 'mabac',
+      text: {
+        en: 'BWM then MABAC, for example Telli & Ayçin (2021) on warehouse location.',
+        tr: 'BWM ardından MABAC; örneğin Telli ve Ayçin (2021), depo yeri seçimi.',
+      },
+    },
+    {
       methodId: 'ahp',
       text: {
         en: 'BWM and AHP are competing subjective methods; Rezaei (2015) compares them.',
@@ -89,7 +103,7 @@ export const bwm: MethodContent = {
     { label: 'Rezaei (2015), Omega 53, 49-57', doi: '10.1016/j.omega.2014.11.009' },
     { label: 'Rezaei (2016), Omega 64, 126-130', doi: '10.1016/j.omega.2015.12.001' },
     { label: 'Liang, Brunelli & Rezaei (2020), Omega 96, 102175', doi: '10.1016/j.omega.2019.102175' },
-    { label: 'Ratandhara & Kumar (2025), Operations Research Forum 6, 22', doi: '10.1007/s43069-025-00422-1' },
+    { label: 'Ratandhara & Kumar (2026), IMA Journal of Management Mathematics', doi: '10.1093/imaman/dpag027' },
     { label: 'Mi, Tang, Liao, Shen & Lev (2019), Omega 87, 205-225', doi: '10.1016/j.omega.2019.01.009' },
     { label: 'You et al. (2017), Sustainability 9(12), 2329', doi: '10.3390/su9122329' },
     { label: 'Gupta (2018), Journal of Air Transport Management 68, 35-47', doi: '10.1016/j.jairtraman.2017.06.001' },
@@ -99,7 +113,7 @@ export const bwm: MethodContent = {
       'BWM compares the most important criterion with all others and all others with the least important (1‑9). That is only 2n - 3 judgements instead of n(n-1)/2 in AHP, with a consistency check.',
     whenToUse: [
       'Subjective weights with fewer questions than AHP.',
-      'Between 3 and 10 criteria.',
+      'Between 3 and 9 criteria.',
       'One decision maker, or a group agreed on one pair of vectors.',
     ],
     whenNot: [
@@ -123,7 +137,7 @@ export const bwm: MethodContent = {
       "BWM en önemli kriteri diğer hepsiyle, diğer hepsini de en önemsiz kriterle karşılaştırır (1‑9). AHP'deki n(n-1)/2 yerine yalnız 2n - 3 yargı gerekir ve tutarlılık da raporlanır.",
     whenToUse: [
       "AHP'den daha az soruyla öznel ağırlık.",
-      '3 ile 10 arası kriter.',
+      '3 ile 9 arası kriter.',
       'Tek karar verici ya da tek vektör çiftinde uzlaşmış bir grup.',
     ],
     whenNot: [

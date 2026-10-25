@@ -343,6 +343,8 @@ const NO_PEAK_STEPS = new Set<string>([
   'bwm.bestToOthers',
   'bwm.othersToWorst',
   'merec.performanceRemoved',
+  'lopcow.rms',
+  'lopcow.stdDev',
   'swara.s',
   'swara.k',
 ])
@@ -383,7 +385,6 @@ const UNORIENTED_MATRIX_STEPS = new Set<string>([
   'copras.weighted',
   'copras:weighted',
   'electre-i.oriented',
-  'entropy.proportionsSum',
 ])
 
 /**

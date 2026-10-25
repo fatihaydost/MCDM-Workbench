@@ -191,11 +191,11 @@ export function RocIdea({
                 #{formatRank(rVal)}
               </text>
               <line className={s.stripBase} x1={xZero} x2={strip(maxAll)} y1={y} y2={y} />
-              {/* Stage 0+: ROC ruler from 0 to w_j(ROC) and circle marker */}
+              {/* Stage 0+: active formula ruler from 0 to w_j(active) and ROC circle marker */}
               <path
                 className={s.sigma}
                 data-emph={formula === 'roc' ? '' : undefined}
-                d={`M${xZero} ${y}H${xRoc}`}
+                d={`M${xZero} ${y}H${xActive}`}
               />
               <circle className={s.stripDot} cx={xRoc} cy={y} r={4} />
               {/* Stage 1+: RS (square) and RR (diamond) markers on the same strip */}

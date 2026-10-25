@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { critic, electreIII, entropy, equal, merec, rankerFor, rankScores, roc, saw, swara, topsis, type MethodParams, type Problem, type RankingMethod } from '../src/core'
+import { ahp, aras, critic, electreIII, entropy, equal, judgementsFromUpper, merec, rankerFor, rankScores, roc, saw, swara, topsis, type MethodParams, type Problem, type RankingMethod } from '../src/core'
 import {
   createRng,
   DEFAULT_DELTAS,
@@ -728,7 +728,7 @@ describe('robustness helpers and chart layout', () => {
     expect(recomputable('equal')).toBeUndefined()
     expect(recomputable('roc')?.id).toBe('roc')
     expect(recomputable('swara')?.id).toBe('swara')
-    expect(recomputable('ahp')).toBeUndefined()
+    expect(recomputable('ahp')?.id).toBe('ahp')
     expect(recomputable('bwm')).toBeUndefined()
     expect(recomputable('critic')?.id).toBe('critic')
     expect(recomputable('entropy')?.id).toBe('entropy')
@@ -785,6 +785,26 @@ describe('robustness helpers and chart layout', () => {
     const wangRows = removeCriteria(wangProb, wangEx.weights!, rankerFor(wangRun))
     expect(wangRows).toHaveLength(11)
     expect(wangRows.every((r) => !r.blocked && r.ranking.length === 11)).toBe(true)
+
+    // ARAS with params.optimal drops the removed criterion's optimal value without length mismatch
+    const arasRun = {
+      methodId: aras.id,
+      params: { optimal: [15, 10, 12] } as unknown as MethodParams,
+    }
+    const arasRows = removeCriteria(p3, [0.4, 0.3, 0.3], rankerFor(arasRun))
+    expect(arasRows).toHaveLength(3)
+    expect(arasRows.every((r) => !r.blocked && r.ranking.length === 3)).toBe(true)
+
+    // AHP weighting recomputes on reduced judgements via remapJudgements when opts.judgements is supplied
+    const ahpJ = judgementsFromUpper(3, [2, 4, 2])
+    const ahpW = ahp.compute(p3, {}, ahpJ).weights
+    const ahpRows = removeCriteria(p3, ahpW, rankerOf(topsis), ahp, { judgements: ahpJ }).filter(
+      (r) => r.mode === 'recompute',
+    )
+    expect(ahpRows).toHaveLength(3)
+    expectClose(ahpRows[0]!.weights, [0, 2 / 3, 1 / 3], 1e-12)
+    expectClose(ahpRows[1]!.weights, [0.8, 0, 0.2], 1e-12)
+    expectClose(ahpRows[2]!.weights, [2 / 3, 1 / 3, 0], 1e-12)
   })
 
   it('layoutSweep keeps x domain at [0, 1] and clamps extreme endpoint spikes in y', () => {

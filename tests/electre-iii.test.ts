@@ -300,4 +300,36 @@ describe('ELECTRE III — Threshold presets and parameter validation', () => {
     }
     expect(() => electreIII.compute(invalid, [1], {})).toThrow(ProblemValidationError)
   })
+
+  it('zeroes out large-scale rounding-noise constant columns via isConstant and preserves scale invariance down to 1e-50', () => {
+    const noisyConst: Problem = {
+      alternatives: ['A1', 'A2', 'A3'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2 (noisy constant)', type: 'benefit' },
+      ],
+      matrix: [
+        [10, 1e6],
+        [20, 1e6 + 5e-7],
+        [30, 1e6],
+      ],
+    }
+    const rNoisy = electreIII.compute(noisyConst, [0.5, 0.5], { thresholdPreset: 'standard' })
+    const rExact = electreIII.compute(
+      { ...noisyConst, matrix: noisyConst.matrix.map((row) => [row[0]!, 1e6]) },
+      [0.5, 0.5],
+      { thresholdPreset: 'standard' },
+    )
+    expect(rNoisy.scores).toEqual(rExact.scores)
+    expect(rNoisy.ranking).toEqual(rExact.ranking)
+
+    const tiny: Problem = {
+      ...problem,
+      matrix: problem.matrix.map((row) => row.map((v) => v * 1e-50)),
+    }
+    const baseStd = electreIII.compute(problem, [...wang.weights], { thresholdPreset: 'standard' })
+    const tinyStd = electreIII.compute(tiny, [...wang.weights], { thresholdPreset: 'standard' })
+    expect(tinyStd.ranking).toEqual(baseStd.ranking)
+    baseStd.scores.forEach((s, i) => expect(tinyStd.scores[i]).toBeCloseTo(s, 10))
+  })
 })

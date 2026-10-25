@@ -163,7 +163,10 @@
         "claim": "Concordance C, discordance D, outranking graph S and kernel {A2, A3, A5} match {{citation}} Section 3.1 to {{decimals}} decimals; Soner and Önüt (2006) net concordance matches too."
       },
       "electre-iii": {
-        "claim": "All 121 credibility entries of Table 3 and both distillation chains match {{citation}} within 0.005."
+        "claim": "All 110 off-diagonal credibility entries of Table 3 and both distillation chains match {{citation}} within 0.005."
+      },
+      "equal": {
+        "claim": "All 1/n weights match {{citation}} Table 4 (column EW) exactly."
       }
     },
     "catalogue": {
@@ -410,7 +413,8 @@
           "v-shape": "Preference grows linearly from 0 to the column range; gives the same order as a min-max weighted sum.",
           "usual": "Any positive difference counts as full preference (1); gives the same order as a weighted Borda count.",
           "level": "Differences up to 20% of the column range are ignored, up to 60% count as 0.5, and larger differences count as 1.",
-          "gaussian": "Smooth S-shaped preference curve with inflection point at half the column range."
+          "gaussian": "Smooth S-shaped preference curve with inflection point at half the column range.",
+          "custom": "Each criterion uses its own preference function and thresholds from the loaded example."
         },
         "preferenceFunctionVariant": {
           "v-shape": "V-shape",
@@ -456,7 +460,8 @@
         "thresholdPresetHints": {
           "standard": "Gaps up to 10% of the column range are indifferent, up to 25% build partial preference, and larger gaps give strict preference without veto.",
           "strict": "Tighter indifference (5%) and preference (15%) zones on each column range without veto.",
-          "veto": "Adds a veto threshold at 60% of the column range so a large deficit on one criterion cuts credibility σ(a, b) down to 0."
+          "veto": "Adds a veto threshold at 60% of the column range so a large deficit on one criterion cuts credibility σ(a, b) down to 0.",
+          "custom": "Each criterion uses its own indifference, preference and veto thresholds from the loaded example."
         },
         "thresholdPresetVariant": {
           "standard": "standard",
@@ -1308,7 +1313,7 @@
       },
       "electre-iii": {
         "title": "Descending rank r↓, ascending rank r↑, and net credibility Φ",
-        "caption": "Left: descending rank r↓ (top, lower is better) and ascending rank r↑ (bottom, lower is better). Right: net credibility flow Φ around zero.",
+        "caption": "Left: leaving credibility Φ⁺ (top, green; with descending rank r↓) and entering credibility Φ⁻ (bottom, red; with ascending rank r↑). Right: net credibility flow Φ around zero.",
         "row": "{{alternative}}: r↓ = {{pos}}, r↑ = {{neg}}, Φ = {{score}}"
       }
     },
@@ -2018,7 +2023,7 @@
           "steps": {
             "s1": "Descending rank r↓: iterative qualification from the highest credibility cut down, picking the strongest options first.",
             "s2": "Ascending rank r↑: iterative elimination from the weakest options up; where r↓ and r↑ disagree, the pair is incomparable.",
-            "s3": "Net credibility Φ: leaving minus entering credibility around zero; options are ordered by average distillation rank (r↓ + r↑) / 2, with Φ breaking ties."
+            "s3": "Net credibility Φ: leaving minus entering credibility around zero; options are ordered by average distillation rank (r↓ + r↑) / 2."
           }
         }
       }
@@ -2291,8 +2296,8 @@
     "vikor": {
       "constant-column": "Every value of {{criterion}} is the same, so it adds nothing to S or R.",
       "near-constant-column": "{{criterion}} varies only by a rounding-sized amount, yet min-max stretches it to 0 to 1 and gives it a full distance. Check whether the difference is real.",
-      "equal-group-utility": "Every alternative has the same S, so Q comes from R alone and reaches at most 1 − v, which can make C1 harder to meet.",
-      "equal-regret": "Every alternative has the same R, so Q comes from S alone and reaches at most v, which can make C1 harder to meet.",
+      "equal-group-utility": "Every alternative has the same S, so Q is rescaled from R alone over 0 to 1.",
+      "equal-regret": "Every alternative has the same R, so Q is rescaled from S alone over 0 to 1.",
       "no-spread": "Every alternative has the same S and the same R, so all get Q = 0.",
       "tie-for-first": "More than one alternative has the lowest Q; they are listed in input order and all are in the compromise set."
     },

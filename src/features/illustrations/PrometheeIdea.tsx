@@ -293,7 +293,7 @@ export function PrometheeIdea({
         </g>
       </svg>
       {incomparables.length > 0 && (
-        <p className={s.caption} data-testid="promethee-ii-incomparable">
+        <p className={`${s.caption} ${s.stageItem}`} data-off={negOff} data-testid="promethee-ii-incomparable">
           {(l.incomparable ?? PROMETHEE_IDEA_LABELS_EN.incomparable!)(
             incomparables.map(([a, b]) => `${names[a]!} ↔ ${names[b]!}`).join(', '),
           )}

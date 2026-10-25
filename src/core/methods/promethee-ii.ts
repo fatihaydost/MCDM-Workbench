@@ -1,4 +1,4 @@
-import { column, isNearConstant, zeros } from '../math'
+import { column, isConstant, isNearConstant, zeros } from '../math'
 import { rankScores, TIE_TOLERANCE } from '../rank'
 import type { MethodWarning, Problem, RankingMethod, RankingResult, Step } from '../types'
 import { assertValid, validateProblem, validateWeights } from '../validate'
@@ -33,6 +33,20 @@ export type PrometheeParams = {
 }
 
 const VALID_FUNCTIONS: readonly PrometheePreferenceFunction[] = ['v-shape', 'usual', 'level', 'gaussian']
+const VALID_CRITERION_TYPES: readonly PrometheeCriterionType[] = [
+  'v-shape',
+  'usual',
+  'level',
+  'gaussian',
+  'u-shape',
+  'linear',
+  'I',
+  'II',
+  'III',
+  'IV',
+  'V',
+  'VI',
+]
 const BOUNDARY_EPS = 1e-12
 
 function evalPreference(
@@ -41,32 +55,33 @@ function evalPreference(
   q: number,
   p: number,
   s: number,
+  eps: number,
 ): number {
-  if (d <= BOUNDARY_EPS) return 0
+  if (d <= eps) return 0
   switch (type) {
     case 'usual':
     case 'I':
       return 1
     case 'u-shape':
     case 'II':
-      return d > q + BOUNDARY_EPS ? 1 : 0
+      return d > q + eps ? 1 : 0
     case 'v-shape':
     case 'III':
-      if (p <= BOUNDARY_EPS || d >= p - BOUNDARY_EPS) return 1
+      if (p <= eps || d >= p - eps) return 1
       return d / p
     case 'level':
     case 'IV':
-      if (d <= q + BOUNDARY_EPS) return 0
-      if (d <= p + BOUNDARY_EPS) return 0.5
+      if (d <= q + eps) return 0
+      if (d <= p + eps) return 0.5
       return 1
     case 'linear':
     case 'V':
-      if (d <= q + BOUNDARY_EPS) return 0
-      if (p <= q + BOUNDARY_EPS || d >= p - BOUNDARY_EPS) return 1
+      if (d <= q + eps) return 0
+      if (p <= q + eps || d >= p - eps) return 1
       return (d - q) / (p - q)
     case 'gaussian':
     case 'VI':
-      if (s <= BOUNDARY_EPS) return 1
+      if (s <= eps) return 1
       return 1 - Math.exp(-(d * d) / (2 * s * s))
   }
 }
@@ -149,12 +164,19 @@ export const prometheeII: RankingMethod<PrometheeParams> = {
     assertValid([...issues, ...validateWeights(weights, n)])
 
     const specs = params?.criteriaFunctions
-    if (specs && specs.length !== n) {
-      throw new RangeError(`PROMETHEE II criteriaFunctions length (${specs.length}) must match criteria count (${n})`)
+    if (specs !== undefined && (!Array.isArray(specs) || specs.length !== n)) {
+      throw new RangeError(
+        `PROMETHEE II criteriaFunctions length (${Array.isArray(specs) ? specs.length : typeof specs}) must match criteria count (${n})`,
+      )
     }
     if (specs) {
       for (let j = 0; j < n; j++) {
         const spec = specs[j]!
+        if (!spec || !VALID_CRITERION_TYPES.includes(spec.type)) {
+          throw new RangeError(
+            `PROMETHEE II criteriaFunctions[${j}].type must be one of ${VALID_CRITERION_TYPES.join(', ')}; got ${String(spec?.type)}`,
+          )
+        }
         if (spec.q !== undefined && (!Number.isFinite(spec.q) || spec.q < 0)) {
           throw new RangeError(`PROMETHEE II threshold q must be >= 0 on criterion ${j}`)
         }
@@ -169,9 +191,10 @@ export const prometheeII: RankingMethod<PrometheeParams> = {
         }
         if (
           (spec.type === 'level' || spec.type === 'IV' || spec.type === 'linear' || spec.type === 'V') &&
-          (spec.q ?? 0) > (spec.p ?? 0) + BOUNDARY_EPS
+          spec.p !== undefined &&
+          (spec.q ?? 0) > spec.p + BOUNDARY_EPS * Math.max(spec.q ?? 0, spec.p, 1e-100)
         ) {
-          throw new RangeError(`PROMETHEE II threshold q (${spec.q ?? 0}) exceeds p (${spec.p ?? 0}) on criterion ${j}`)
+          throw new RangeError(`PROMETHEE II threshold q (${spec.q ?? 0}) exceeds p (${spec.p}) on criterion ${j}`)
         }
       }
     }
@@ -197,15 +220,24 @@ export const prometheeII: RankingMethod<PrometheeParams> = {
         if (v > max) max = v
       }
       const range = max - min
-      if (range === 0) continue
+      if (range === 0 || isConstant(col)) continue
 
       const sign = criteria[j]!.type === 'benefit' ? 1 : -1
       const spec = specs?.[j]
       const type: PrometheeCriterionType = spec ? spec.type : fn
       const defaults = defaultThresholds(range, fn)
+      const defaultP =
+        type === 'v-shape' || type === 'III' || type === 'linear' || type === 'V' || type === 'level' || type === 'IV'
+          ? range
+          : 0
+      const defaultS = type === 'gaussian' || type === 'VI' ? range / 2 : 0
       const q = spec ? (spec.q ?? 0) : defaults.q
-      const p = spec ? (spec.p ?? 0) : defaults.p
-      const s = spec ? (spec.s ?? 0) : defaults.s
+      const p = spec ? (spec.p ?? defaultP) : defaults.p
+      const s = spec ? (spec.s ?? defaultS) : defaults.s
+      const eps = BOUNDARY_EPS * Math.max(range, Math.abs(p), Math.abs(q), Math.abs(s), 1e-100)
+      if ((type === 'level' || type === 'IV' || type === 'linear' || type === 'V') && q > p + eps) {
+        throw new RangeError(`PROMETHEE II threshold q (${q}) exceeds p (${p}) on criterion ${j}`)
+      }
 
       for (let a = 0; a < m; a++) {
         const xa = matrix[a]![j]!
@@ -213,8 +245,8 @@ export const prometheeII: RankingMethod<PrometheeParams> = {
         for (let b = 0; b < m; b++) {
           if (a === b) continue
           const d = sign * (xa - matrix[b]![j]!)
-          if (d > BOUNDARY_EPS) {
-            row[b]! += wj * evalPreference(d, type, q, p, s)
+          if (d > eps) {
+            row[b]! += wj * evalPreference(d, type, q, p, s, eps)
           }
         }
       }

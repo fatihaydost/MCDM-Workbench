@@ -62,8 +62,8 @@ export const entropy = {
       tr: 'Entropi ağırlıkları: her kriterin toplam çeşitlenme içindeki payı.',
       tex: String.raw`w_j = \frac{d_j}{\sum_{k=1}^{n} d_k}`,
       edgeCase: {
-        en: 'If the total is 0 (every column constant), every weight is 1/n.',
-        tr: 'Toplam 0 ise (bütün sütunlar sabit) her ağırlık 1/n olur.',
+        en: 'If the total is 0, varying columns share the weight equally (or 1/n).',
+        tr: 'Toplam 0 ise değişen sütunlar ağırlığı eşit paylaşır (tümü sabitse 1/n).',
       },
       symbol: 'w',
       texSymbol: '$w_j$',

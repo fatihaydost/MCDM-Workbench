@@ -79,7 +79,8 @@ function findEchoes(
     }
   }
   const activeCostCount = problem.criteria.filter((c, j) => c.type === 'cost' && (weights[j] ?? 0) > 0).length
-  if (activeCostCount <= 1 && ranked.has('copras')) {
+  const coprasIsSawSum = activeCostCount <= 1 || problem.alternatives.length === 2
+  if (coprasIsSawSum && ranked.has('copras')) {
     if (sawSum) echoes.push({ methodId: 'copras', of: 'saw' })
     else if (ahpFromTable) echoes.push({ methodId: 'copras', of: 'ahp-ranking' })
   }

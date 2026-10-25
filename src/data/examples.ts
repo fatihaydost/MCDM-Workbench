@@ -939,7 +939,7 @@ export const examples: readonly ExampleDataset[] = [
       en: 'Five alternatives on three benefit and two cost criteria ordered from most important (C1) to least important (C5). The paper compares ROC, Rank Reciprocal, Rank Sum and equal weights.',
       tr: 'En önemliden (C1) en önemsize (C5) sıralanmış üç fayda ve iki maliyet kriterinde beş alternatif. Makale ROC, ters sıra, sıra toplamı ve eşit ağırlıkları karşılaştırır.',
     },
-    referenceFor: ['roc'],
+    referenceFor: ['roc', 'equal'],
     citation: {
       authors: 'Roszkowska, E.',
       year: 2013,

@@ -35,15 +35,16 @@ export function RemovalSection({ problem, weights, run, weighting, weightingPara
   const nf = useNumberFormat(4)
   const uid = useId()
   const [mode, setMode] = useState<RemovalRow['mode']>('renormalize')
+  const judgements = useWorkbench((st) => st.judgements)
   const rawWeightingParams = useWorkbench((st) => (weighting ? st.methodParams?.[weighting.id] : undefined))
   const effectiveWeightingParams = useMemo(
     () => ({ ...rawWeightingParams, ...weightingParams }),
     [rawWeightingParams, weightingParams],
   )
-  const rows = useMemo(
-    () => removeCriteria(problem, weights, rankerFor(run), weighting, { weightingParams: effectiveWeightingParams }),
-    [problem, weights, run, weighting, effectiveWeightingParams],
-  )
+  const rows = useMemo(() => {
+    const opts = { weightingParams: effectiveWeightingParams, ...(judgements ? { judgements } : {}) }
+    return removeCriteria(problem, weights, rankerFor(run), weighting, opts)
+  }, [problem, weights, run, weighting, effectiveWeightingParams, judgements])
   const shown = rows.filter((r) => r.mode === (weighting ? mode : 'renormalize'))
   const leader = (ranking: readonly number[]) =>
     ranking

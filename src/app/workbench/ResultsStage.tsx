@@ -85,6 +85,8 @@ export function ResultsStage() {
     weight: t('workbench.results.workbook.weight'),
     score: score.name,
     rank: t('workbench.results.workbook.rank'),
+    best: t('workbench.visual.bwm.best'),
+    worst: t('workbench.visual.bwm.worst'),
     step: (key) => stepName(key, t),
     lambda: lambdaLabels((v) => nf.format(v, 1)),
   })
@@ -162,7 +164,7 @@ export function ResultsStage() {
 
   return (
     <div className="flex flex-col gap-10 pt-4">
-      <MethodWarnings warnings={result.warnings} problem={problem} />
+      <MethodWarnings warnings={[...(w.warnings ?? []), ...(result.warnings ?? [])]} problem={problem} />
       <section aria-labelledby="wb-results-headline" className="flex flex-col gap-5">
         <div className="flex flex-col gap-1">
           <p id="wb-results-headline" className="text-24 font-semibold text-text">

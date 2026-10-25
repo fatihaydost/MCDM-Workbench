@@ -27,7 +27,7 @@ export const equal: MethodContent = {
   ],
   combinedWith: [
     {
-      methodId: 'lopcow',
+      methodId: 'topsis',
       text: {
         en: 'Any ranking method, as the "no weighting" scenario: Dua et al. (2024) run MARA, RAM and PIV with mean weights next to Entropy, MEREC, LOPCOW and CRITIC.',
         tr: 'Herhangi bir sıralama yöntemiyle, "ağırlıksız" senaryo olarak: Dua vd. (2024) MARA, RAM ve PIV yöntemlerini Entropi, MEREC, LOPCOW ve CRITIC yanında ortalama ağırlıklarla da çalıştırır.',

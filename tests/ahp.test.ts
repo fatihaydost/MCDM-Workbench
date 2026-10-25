@@ -171,17 +171,31 @@ describe('AHP — edge cases, warnings and steps', () => {
     ])
   })
 
-  it('ahpProgress leaves unanswered criteria as NaN until they have at least one comparison', () => {
+  it('ahpProgress leaves unanswered criteria as NaN in a single connected component and returns null when answered pairs form disconnected components', () => {
     let j = emptyJudgements(4)
     expect(ahpProgress(prob(4), j).weights).toBeNull()
     j = setPair(j, 0, 1, 3)
     const p1 = ahpProgress(j, 4)
     expect(p1.answered).toBe(1)
     expect(p1.provisional).toBe(true)
+    expect(p1.thresholdApproximate).toBe(false)
     expect(p1.weights![0]).toBeCloseTo(0.75, 12)
     expect(p1.weights![1]).toBeCloseTo(0.25, 12)
     expect(Number.isNaN(p1.weights![2]!)).toBe(true)
     expect(Number.isNaN(p1.weights![3]!)).toBe(true)
+
+    // Adding an edge on a disjoint pair (2, 3) creates 2 disconnected components -> relative scale undefined -> null
+    const jDisconnected = setPair(j, 2, 3, 2)
+    expect(ahpIncompleteLlsm(4, jDisconnected.pairs)).toBeNull()
+    expect(ahpProgress(jDisconnected, 4).weights).toBeNull()
+
+    // Connecting the two components via (1, 2) restores a unique LLSM solution
+    const jConnected = setPair(jDisconnected, 1, 2, 4)
+    const wConnected = ahpIncompleteLlsm(4, jConnected.pairs)!
+    expect(wConnected.every((w) => Number.isFinite(w) && w > 0)).toBe(true)
+    expect(wConnected.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12)
+
+    expect(ahpProgress(emptyJudgements(16), 16).thresholdApproximate).toBe(true)
   })
 
   it('throws ProblemValidationError on too few criteria or incomplete judgements', () => {

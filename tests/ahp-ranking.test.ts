@@ -247,6 +247,10 @@ describe('AHP ranking — validation, m <= 7 cap, and per-criterion inconsistenc
       col: 1,
     })
     expect(res.warnings![0]!.extra?.cr).toBeGreaterThanOrEqual(0.1)
+
+    // Suppresses ahp.inconsistent when the criterion weight is 0
+    const resZeroWeight = ahpRanking.compute(p, [1, 0], {}, [null, badPairs])
+    expect(resZeroWeight.warnings).toEqual([])
   })
 })
 

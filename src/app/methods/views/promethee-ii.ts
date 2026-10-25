@@ -14,7 +14,7 @@ export const prometheeII: MethodView<'ranking'> = {
   // Each laptop model's net flow φ in rank order around zero: positive to the right, negative to the left.
   thumb: ({ problem, weights }) => {
     const res = method.compute(problem(EXAMPLE), weights(EXAMPLE), {})
-    const order = res.scores.map((_, i) => i).sort((a, b) => res.ranking[a]! - res.ranking[b]!)
+    const order = res.scores.map((_, i) => i).sort((a, b) => res.ranking[a]! - res.ranking[b]! || a - b)
     return { kind: 'diverging', rows: order.map((i) => ({ below: Math.max(-res.scores[i]!, 0), above: Math.max(res.scores[i]!, 0) })) }
   },
   columns: [

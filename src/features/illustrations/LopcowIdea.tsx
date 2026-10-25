@@ -188,7 +188,7 @@ export function LopcowIdea({ problem, format = defaultFormat, labels, step, expl
               {/* PV at step 2, then weight w = PV / ΣPV at step 3 (same relative bar lengths). */}
               <rect
                 className={`${s.bar} ${s.criticBar} ${s.stageItem}`}
-                data-off={off(2)}
+                data-off={off(2) || (parts.pv[j] === 0 ? '' : undefined)}
                 data-highlight={on || undefined}
                 width={1}
                 height={1}

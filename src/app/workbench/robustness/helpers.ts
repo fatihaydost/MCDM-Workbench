@@ -176,5 +176,5 @@ export function formatDelta(delta: number, lang: Lang): string {
 export function recomputable(weightMethod: WeightMethodId): WeightingMethod | undefined {
   if (weightMethod === 'equal') return undefined
   const method = getWeightingMethod(weightMethod)
-  return method?.reads === 'judgements' ? undefined : method
+  return method?.id === 'bwm' ? undefined : method
 }

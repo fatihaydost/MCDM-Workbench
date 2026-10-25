@@ -14,7 +14,7 @@ export const codas = {
     'codas.normalized': {
       en: 'Linear max normalized matrix: the best value of each column becomes 1.',
       tr: 'Doğrusal maks normalize matris: her sütunun en iyi değeri 1 olur.',
-      tex: String.raw`n_{ij} = \begin{cases} \dfrac{x_{ij}}{\max_k x_{kj}} & j \in J^{+} \\[2ex] \dfrac{\min_k x_{kj}}{x_{ij}} & j \in J^{-} \end{cases}, \qquad x_{ij} > 0`,
+      tex: String.raw`n_{ij} = \begin{cases} \dfrac{x_{ij}}{\max_i x_{ij}} & j \in J^{+} \\[2ex] \dfrac{\min_i x_{ij}}{x_{ij}} & j \in J^{-} \end{cases}, \qquad x_{ij} > 0`,
       edgeCase: {
         en: 'A constant positive column gets 1 in every row.',
         tr: 'Sabit pozitif bir sütun her satırda 1 alır.',
@@ -45,17 +45,18 @@ export const codas = {
     },
     'codas.taxicab': {
       en: 'Taxicab distance: the sum of absolute gaps from the negative-ideal point.',
-      tr: 'Taksi uzaklığı: negatif-ideal noktaya mutlak farkların toplamı.',
+      tr: 'Taxicab uzaklığı: negatif-ideal noktaya mutlak farkların toplamı.',
       tex: String.raw`T_i = \sum_{j=1}^{n} \left|r_{ij} - ns_j\right|`,
       symbol: 'T',
       texSymbol: '$T_i$',
     },
     'codas.relativeAssessment': {
       en: 'Relative assessment matrix: pairwise Euclidean gaps, plus Taxicab gaps above τ.',
-      tr: 'Göreli değerlendirme matrisi: ikili Öklid farkları ve τ üstünde Taksi farkları.',
+      tr: 'Göreli değerlendirme matrisi: ikili Öklid farkları ve τ üstünde Taxicab farkları.',
       tex: String.raw`h_{ik} = (E_i - E_k) + \psi(E_i - E_k)\,(T_i - T_k), \qquad \psi(x) = \begin{cases} 1 & |x| \ge \tau \\ 0 & |x| < \tau \end{cases}`,
       symbol: 'Ra',
       texSymbol: '$R_a$',
+      signed: true,
     },
     'codas.score': {
       en: 'Assessment score H: the row sum of relative assessments; higher ranks better.',
@@ -67,6 +68,7 @@ export const codas = {
       },
       symbol: 'H',
       texSymbol: '$H_i$',
+      signed: true,
     },
   },
 } satisfies MethodSteps

@@ -67,7 +67,16 @@ export function WeightsStage() {
 
   // Weights from answers do not read the matrix: missing answers are asked on the stage, only n < 2 blocks.
   const fromAnswers = getWeightingMethod(weightMethod)?.reads === 'judgements'
-  const dataBlocked = weights.value === null && weightMethod !== 'manual' && !(fromAnswers && problem.criteria.length >= 2)
+  const readsMatrix =
+    !fromAnswers &&
+    weightMethod !== 'equal' &&
+    weightMethod !== 'manual' &&
+    weightMethod !== 'swara' &&
+    weightMethod !== 'roc'
+  const dataBlocked =
+    weights.value === null &&
+    weightMethod !== 'manual' &&
+    (readsMatrix || problem.criteria.length < 2)
 
   return (
     <div className="flex flex-col gap-6 pt-4">
@@ -131,7 +140,17 @@ export function ComputedWeights({ problem, method, result }: { problem: DraftPro
   const params = useMethodParams(method)
   // Weights from answers draw their picture above the questions (JudgementWeights), not here again.
   const Picture = getWeightingMethod(method)?.reads === 'judgements' ? undefined : view.stage?.Component
-  const core = useMemo(() => toProblem(problem), [problem])
+  const core = useMemo(() => {
+    const p = toProblem(problem)
+    if ((method === 'swara' || method === 'roc') && p.criteria.length >= 2) {
+      return {
+        alternatives: p.alternatives.length >= 2 ? p.alternatives : ['A1', 'A2'],
+        criteria: p.criteria.map((c) => ({ name: c.name, type: c.type === 'cost' ? ('cost' as const) : ('benefit' as const) })),
+        matrix: Array.from({ length: Math.max(2, p.alternatives.length) }, () => new Array<number>(p.criteria.length).fill(0)),
+      }
+    }
+    return p
+  }, [problem, method])
   const n = problem.criteria.length
 
   return (

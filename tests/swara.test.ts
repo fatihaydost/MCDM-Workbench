@@ -160,12 +160,24 @@ describe('SWARA weighting (Keršulienė, Zavadskas & Turskis 2010)', () => {
     expect(() => swara.compute(p, { s: [0, -0.1, 0.04, 0.29, 0.02, 0.04] })).toThrow(RangeError)
   })
 
-  it('throws ProblemValidationError on an invalid problem', () => {
+  it('throws ProblemValidationError on too few criteria (n < 2) while ignoring matrix cells and m < 2', () => {
     const bad: Problem = {
       alternatives: ['OnlyOne'],
       criteria: [{ name: 'C1', type: 'benefit' }],
       matrix: [[1]],
     }
     expect(() => swara.compute(bad, {})).toThrow(ProblemValidationError)
+
+    const unpopulatedMatrix: Problem = {
+      alternatives: ['OnlyOne'],
+      criteria: [
+        { name: 'C1', type: 'benefit' },
+        { name: 'C2', type: 'cost' },
+        { name: 'C3', type: 'benefit' },
+      ],
+      matrix: [[Number.NaN, Number.NaN, Number.NaN]],
+    }
+    const res = swara.compute(unpopulatedMatrix, { s: [0, 0.25, 0.2] })
+    expect(res.weights.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12)
   })
 })

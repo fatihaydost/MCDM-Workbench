@@ -52,7 +52,13 @@ export const paramOptionLabel = (methodId: string, d: ParamDescriptor, option: s
  */
 export function variantLabel(methodId: string, raw: Readonly<Record<string, MethodParamValue>> | undefined, t: TFunction): string {
   const method = getWeightingMethod(methodId) ?? getRankingMethod(methodId)
+  const rawObj = raw as Readonly<Record<string, unknown>> | undefined
+  const hasCustomElectre =
+    methodId === 'electre-iii' &&
+    (Array.isArray(rawObj?.q) || Array.isArray(rawObj?.p) || Array.isArray(rawObj?.v))
+  const hasCustomPromethee = methodId === 'promethee-ii' && Array.isArray(rawObj?.criteriaFunctions)
   return changedParams(method?.params, raw)
+    .filter(([d]) => !(hasCustomElectre && d.key === 'thresholdPreset') && !(hasCustomPromethee && d.key === 'preferenceFunction'))
     .map(([d, v]) =>
       d.kind === 'choice'
         ? tr(t, `workbench.params.${methodId}.${d.key}Variant.${String(v)}`)

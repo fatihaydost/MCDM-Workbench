@@ -575,6 +575,24 @@ export function resizeMethodParamsOnCriterionChange(
         ranks: [...(next.roc.ranks as number[]), nextN],
       }
     }
+    if (next['electre-iii']) {
+      const e3 = { ...next['electre-iii'] }
+      delete e3.q
+      delete e3.p
+      delete e3.v
+      delete e3.mode
+      next['electre-iii'] = e3
+    }
+    if (next['promethee-ii'] && 'criteriaFunctions' in next['promethee-ii']) {
+      const p2 = { ...next['promethee-ii'] }
+      delete p2.criteriaFunctions
+      next['promethee-ii'] = p2
+    }
+    if (next.aras && 'optimal' in next.aras) {
+      const ar = { ...next.aras }
+      delete ar.optimal
+      next.aras = ar
+    }
   }
   return sanitizeMethodParams(next as MethodParamsState, nextN)
 }
@@ -1078,6 +1096,26 @@ export function computeWeights(
     const judgements = given && given.pairs.length === n ? given : emptyJudgements(n)
     try {
       return { value: method.compute(problem, paramsFor(data, method.id), judgements), issues: [] }
+    } catch (err) {
+      if (err instanceof ProblemValidationError) return { value: null, issues: err.issues }
+      if (err instanceof RangeError) return { value: null, issues }
+      throw err
+    }
+  }
+  if (data.weightMethod === 'swara' || data.weightMethod === 'roc') {
+    if (n < 2) return { value: null, issues: issues.filter((x) => x.code === 'too-few-criteria') }
+    const fallbackProblem: Problem = hasErrors(issues)
+      ? {
+          alternatives: ['A1', 'A2'],
+          criteria: data.problem.criteria.map((c) => ({
+            name: c.name,
+            type: c.type === 'cost' ? 'cost' : 'benefit',
+          })),
+          matrix: [new Array<number>(n).fill(0), new Array<number>(n).fill(0)],
+        }
+      : problem
+    try {
+      return { value: method.compute(fallbackProblem, paramsFor(data, method.id)), issues: [] }
     } catch (err) {
       if (err instanceof ProblemValidationError) return { value: null, issues: err.issues }
       if (err instanceof RangeError) return { value: null, issues }

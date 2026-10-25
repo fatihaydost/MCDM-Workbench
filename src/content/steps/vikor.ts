@@ -53,8 +53,8 @@ export const vikor = {
       tr: 'Uzlaşı indeksi Q, 0 ile 1 arasında; küçük olan önde sıralanır.',
       tex: String.raw`Q_i = v\, \frac{S_i - S^{*}}{S^{-} - S^{*}} + (1 - v)\, \frac{R_i - R^{*}}{R^{-} - R^{*}}, \qquad S^{*} = \min_i S_i,\ S^{-} = \max_i S_i`,
       edgeCase: {
-        en: 'If every S (or every R) is equal, that term is 0.',
-        tr: 'Bütün S (ya da bütün R) değerleri eşitse o terim 0 olur.',
+        en: 'If every S (or R) is equal, Q rescales the other to 0-1.',
+        tr: 'Bütün S (ya da R) eşitse Q diğer terimi 0-1 aralığına ölçekler.',
       },
       symbol: 'Q',
       texSymbol: '$Q_i$',

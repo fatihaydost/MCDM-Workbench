@@ -130,7 +130,7 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
   const barY = stacked ? NAME_LINE : (ROW - BAR) / 2
   const height = m * rowStep
   const best = order[0]!
-  const focus = { row: Math.min(focusKey.row, m - 1), col: focusKey.col }
+  const focus = { row: Math.min(focusKey.row, m - 1), col: stage >= 1 ? focusKey.col : 0 }
 
   const table: ChartTable = {
     corner: l.alternative,
@@ -140,7 +140,7 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
 
   const move = (e: KeyboardEvent<SVGGElement>) => {
     const next = { ...focus }
-    if (e.key === 'ArrowRight' || e.key === 'End') next.col = 1
+    if (e.key === 'ArrowRight' || e.key === 'End') next.col = stage >= 1 ? 1 : 0
     else if (e.key === 'ArrowLeft' || e.key === 'Home') next.col = 0
     else if (e.key === 'ArrowDown') next.row = Math.min(m - 1, focus.row + 1)
     else if (e.key === 'ArrowUp') next.row = Math.max(0, focus.row - 1)
@@ -154,7 +154,8 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
     e.currentTarget.querySelector<SVGElement>(`[data-row="${next.row}"][data-col="${next.col}"]`)?.focus()
   }
 
-  const shown = active ? { i: order[active.row]!, j: active.col } : null
+  const altAt = (r: number) => (stage >= 2 ? order[r]! : r)
+  const shown = active ? { i: altAt(active.row), j: active.col } : null
 
   return (
     <ChartFigure titleId={`${uid}-title`} tableId={`${uid}-table`} title={l.title} showTable={l.showTable} table={table} plotRef={plotRef} className={className}>
@@ -188,33 +189,40 @@ export function CoprasBonus({ problem, weights, format = defaultFormat, formatPe
                   {short !== name ? <title>{name}</title> : null}
                   {short}
                 </text>
-                {segs.map((g) => (
-                  <rect
-                    key={g.col}
-                    className={s.sawSeg}
-                    data-cat={PART_COLOURS[g.col]}
-                    data-on={shown?.j === g.col || undefined}
-                    data-row={row}
-                    data-col={g.col}
-                    data-value={g.value}
-                    data-testid="copras-segment"
-                    x={0}
-                    y={barY}
-                    width={1}
-                    height={BAR}
-                    // A zero part (no cost weight) keeps a hairline width, so its non-scaling focus ring still draws.
-                    style={{ transform: `translate(${g.x}px, 0px) scale(${Math.max(g.width, ZERO_WIDTH)}, 1)` }}
-                    tabIndex={focus.row === row && focus.col === g.col ? 0 : -1}
-                    role="img"
-                    aria-label={l.segment(name, partNames[g.col]!, format(g.value), texts[i]!, percents[i]!)}
-                    onMouseEnter={() => setActive({ row, col: g.col })}
-                    onFocus={() => {
-                      setFocusKey({ row, col: g.col })
-                      setActive({ row, col: g.col })
-                    }}
-                    onBlur={() => setActive(null)}
-                  />
-                ))}
+                {segs.map((g) => {
+                  const hiddenBonus = stage === 0 && g.col === 1
+                  return (
+                    <rect
+                      key={g.col}
+                      className={s.sawSeg}
+                      data-cat={PART_COLOURS[g.col]}
+                      data-on={shown?.j === g.col || undefined}
+                      data-row={place}
+                      data-col={g.col}
+                      data-value={g.value}
+                      data-testid="copras-segment"
+                      x={0}
+                      y={barY}
+                      width={1}
+                      height={BAR}
+                      // A zero part (no cost weight) keeps a hairline width, so its non-scaling focus ring still draws.
+                      style={{ transform: `translate(${g.x}px, 0px) scale(${Math.max(g.width, ZERO_WIDTH)}, 1)` }}
+                      tabIndex={!hiddenBonus && focus.row === place && focus.col === g.col ? 0 : -1}
+                      role="img"
+                      aria-label={l.segment(name, partNames[g.col]!, format(g.value), texts[i]!, percents[i]!)}
+                      onMouseEnter={hiddenBonus ? undefined : () => setActive({ row: place, col: g.col })}
+                      onFocus={
+                        hiddenBonus
+                          ? undefined
+                          : () => {
+                              setFocusKey({ row: place, col: g.col })
+                              setActive({ row: place, col: g.col })
+                            }
+                      }
+                      onBlur={() => setActive(null)}
+                    />
+                  )
+                })}
                 {segs[0]!.width > 0 && segs[1]!.width > 0 && (
                   <rect className={`${s.sawGap} ${s.stageItem}`} data-off={off(1)} x={-1} y={barY} width={2} height={BAR} style={{ transform: `translate(${segs[1]!.x}px, 0px)` }} aria-hidden />
                 )}

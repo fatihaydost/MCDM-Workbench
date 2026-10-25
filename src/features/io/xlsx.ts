@@ -213,6 +213,8 @@ export type WorkbookLabels = {
   weight: string
   score: string
   rank: string
+  best?: string
+  worst?: string
   /** Labels of the WASPAS λ grid (`lambdaLabels` in the UI's number format); default 'λ = 0.0' ... */
   lambda?: readonly string[]
   /** Title of a step block (usually the i18n label of the step key). */
@@ -229,12 +231,14 @@ export const DEFAULT_WORKBOOK_LABELS: WorkbookLabels = {
   weight: 'Weight',
   score: 'Score',
   rank: 'Rank',
+  best: 'Best',
+  worst: 'Worst',
   step: (key) => key,
 }
 
 export type WorkbookInput = {
   problem: ImportedProblem
-  weighting?: { method: string; result: Pick<WeightingResult, 'weights' | 'steps'> }
+  weighting?: { method: string; result: Pick<WeightingResult, 'weights' | 'steps' | 'diagnostics'> }
   ranking?: { method: string; result: Pick<RankingResult, 'scores' | 'ranking' | 'steps'> }
   judgements?: Judgements
   alternativeJudgements?: AlternativeJudgements
@@ -430,10 +434,14 @@ export function buildWorkbook(X: SheetJS, input: WorkbookInput): WorkBook {
     const critNames = problem.criteria.map((c) => c.name)
     jRows.push([input.weighting?.method ? `${input.weighting.method}: ${L.criterion}` : L.criterion])
     if (input.judgements.best !== null && input.judgements.best !== undefined && critNames[input.judgements.best] !== undefined) {
-      jRows.push(['Best', critNames[input.judgements.best]!])
+      jRows.push([L.best ?? 'Best', critNames[input.judgements.best]!])
     }
     if (input.judgements.worst !== null && input.judgements.worst !== undefined && critNames[input.judgements.worst] !== undefined) {
-      jRows.push(['Worst', critNames[input.judgements.worst]!])
+      jRows.push([L.worst ?? 'Worst', critNames[input.judgements.worst]!])
+    }
+    const crInput = input.weighting?.result.diagnostics?.crInput
+    if (typeof crInput === 'number' && Number.isFinite(crInput)) {
+      jRows.push(['CR', crInput])
     }
     jRows.push(
       [L.criterion, ...critNames],

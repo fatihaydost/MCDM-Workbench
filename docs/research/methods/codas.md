@@ -9,7 +9,7 @@
   - Trung, D. D. (2022). Expanding data normalization method to CODAS method for multi-criteria decision making. *Applied Engineering Letters*, 7(2), 54-66. DOI: `10.18485/aeletters.2022.7.2.2`.
   - Çınaroğlu, E. (2021). Entropi tabanlı CODAS ve EDAS yöntemleri ile İSO 500'deki otomotiv işletmelerinin performans analizi. *Bingöl Üniversitesi İktisadi ve İdari Bilimler Fakültesi Dergisi*, 5(1), 337-364. DOI: `10.33399/biibfad.868418`.
   - Akgün, M. (2022). CRITIC temelli CODAS yöntemi ile e-ticaret sitelerinin değerlendirilmesi. *Selçuk Üniversitesi Sosyal Bilimler Enstitüsü Dergisi*, (48), 338-356. DOI: `10.52642/susbed.1111547`.
-- **Verification script & output:** [`scripts/codas.py`](../scripts/codas.py), [`scripts/codas.out`](../scripts/codas.out)
+- **Verification script:** [`scripts/codas.py`](../scripts/codas.py)
 - **Test fixture:** [`tests/fixtures/codas-ghorabaee2016.json`](../../../tests/fixtures/codas-ghorabaee2016.json)
 
 ## 1. Intuition
@@ -183,4 +183,4 @@ Verified across 500 random positive problems in `scripts/codas.py`:
   6. `codas.relativeAssessment` (`kind: 'matrix'`, $h_{ik}$)
   7. `codas.score` (`kind: 'vector'`, $H_i$)
 - **Score order:** `order: 'desc'`.
-- **Reference example in `src/data/examples.ts`:** `ghorabaee-2016-robots` (7 industrial robots $\times$ 5 criteria, Keshavarz Ghorabaee et al. 2016, Tables 1-4, `referenceFor: ['codas']`).
+- **Reference example in `src/data/examples.ts`:** `badi-2018-suppliers` (6 steelmaking suppliers $\times$ 4 criteria, Badi, Abdulshahed & Shetwan 2018, Tables 1-5, `referenceFor: ['codas']`).

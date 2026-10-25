@@ -45,6 +45,9 @@ function evalThreshold(spec: ThresholdSpec, xA: number, xB: number): number {
     if (!Number.isFinite(spec) || spec < 0) throw new RangeError('ELECTRE III threshold must be a finite non-negative number')
     return spec
   }
+  if (typeof spec !== 'object' || spec === null) {
+    throw new RangeError('ELECTRE III threshold must be a finite non-negative number or threshold spec object')
+  }
   if ('abs' in spec) {
     if (!Number.isFinite(spec.abs) || spec.abs < 0) throw new RangeError('ELECTRE III abs threshold must be a finite non-negative number')
     return spec.abs
@@ -54,16 +57,16 @@ function evalThreshold(spec: ThresholdSpec, xA: number, xB: number): number {
   return spec.rel * Math.abs(refVal)
 }
 
-function partialConcordance(delta: number, q: number, p: number): number {
-  if (delta <= q + TIE_TOLERANCE) return 1
-  if (delta >= p - TIE_TOLERANCE) return 0
+function partialConcordance(delta: number, q: number, p: number, eps: number): number {
+  if (delta <= q + eps) return 1
+  if (delta >= p - eps) return 0
   return (p - delta) / (p - q)
 }
 
-function partialDiscordance(delta: number, p: number, v: number | null): number {
+function partialDiscordance(delta: number, p: number, v: number | null, eps: number): number {
   if (v === null) return 0
-  if (delta >= v - TIE_TOLERANCE) return 1
-  if (delta <= p + TIE_TOLERANCE) return 0
+  if (delta >= v - eps) return 1
+  if (delta <= p + eps) return 0
   return (delta - p) / (v - p)
 }
 
@@ -235,23 +238,33 @@ export const electreIII: RankingMethod<ElectreIIIParams> = {
     const m = matrix.length
     const n = criteria.length
 
-    if (params.q && params.q.length !== n) {
-      throw new RangeError(`ELECTRE III q length (${params.q.length}) must match criteria count (${n})`)
+    if (params.q !== undefined && (!Array.isArray(params.q) || params.q.length !== n)) {
+      throw new RangeError(
+        `ELECTRE III q length (${Array.isArray(params.q) ? params.q.length : typeof params.q}) must match criteria count (${n})`,
+      )
     }
-    if (params.p && params.p.length !== n) {
-      throw new RangeError(`ELECTRE III p length (${params.p.length}) must match criteria count (${n})`)
+    if (params.p !== undefined && (!Array.isArray(params.p) || params.p.length !== n)) {
+      throw new RangeError(
+        `ELECTRE III p length (${Array.isArray(params.p) ? params.p.length : typeof params.p}) must match criteria count (${n})`,
+      )
     }
-    if (params.v && params.v.length !== n) {
-      throw new RangeError(`ELECTRE III v length (${params.v.length}) must match criteria count (${n})`)
+    if (params.v !== undefined && (!Array.isArray(params.v) || params.v.length !== n)) {
+      throw new RangeError(
+        `ELECTRE III v length (${Array.isArray(params.v) ? params.v.length : typeof params.v}) must match criteria count (${n})`,
+      )
     }
 
     const warnings: MethodWarning[] = []
+    const constantCols = Array.from({ length: n }, (_, j) => {
+      const col = column(matrix, j)
+      return isConstant(col) && (minOf(col) !== 0 || maxOf(col) === 0)
+    })
     const ranges = Array.from({ length: n }, (_, j) => {
       const col = column(matrix, j)
       if ((weights[j] ?? 0) > 0 && !isConstant(col) && isNearConstant(col)) {
         warnings.push({ code: 'electre-iii.near-constant-column', col: j })
       }
-      return maxOf(col) - minOf(col)
+      return constantCols[j] ? 0 : maxOf(col) - minOf(col)
     })
 
     const presetQFactor = preset === 'strict' ? 0.05 : 0.1
@@ -276,7 +289,7 @@ export const electreIII: RankingMethod<ElectreIIIParams> = {
           const xB = matrix[b]![j]!
           const cType = criteria[j]!.type
           // Advantage of b over a on criterion j
-          const delta = cType === 'benefit' ? xB - xA : xA - xB
+          const delta = constantCols[j] ? 0 : cType === 'benefit' ? xB - xA : xA - xB
 
           const qj = params.q ? evalThreshold(params.q[j]!, xA, xB) : presetQFactor * ranges[j]!
           const pj = params.p ? evalThreshold(params.p[j]!, xA, xB) : presetPFactor * ranges[j]!
@@ -289,16 +302,17 @@ export const electreIII: RankingMethod<ElectreIIIParams> = {
               ? presetVFactor * ranges[j]!
               : null
 
-          if (qj > pj + TIE_TOLERANCE) {
+          const eps = TIE_TOLERANCE * Math.max(ranges[j]!, Math.abs(qj), Math.abs(pj), vj !== null ? Math.abs(vj) : 0, 1e-100)
+          if (qj > pj + eps) {
             throw new RangeError(`ELECTRE III indifference threshold q (${qj}) exceeds preference threshold p (${pj}) on criterion ${j}`)
           }
-          if (vj !== null && pj > vj + TIE_TOLERANCE) {
+          if (vj !== null && pj > vj + eps) {
             throw new RangeError(`ELECTRE III preference threshold p (${pj}) exceeds veto threshold v (${vj}) on criterion ${j}`)
           }
 
-          const cj = partialConcordance(delta, qj, pj)
+          const cj = constantCols[j] ? 1 : partialConcordance(delta, qj, pj, eps)
           cWeightedSum += weights[j]! * cj
-          dValues[j] = partialDiscordance(delta, pj, vj)
+          dValues[j] = constantCols[j] ? 0 : partialDiscordance(delta, pj, vj, eps)
         }
 
         const cab = wSum > 0 ? cWeightedSum / wSum : 0

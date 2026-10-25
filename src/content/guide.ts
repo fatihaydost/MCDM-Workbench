@@ -241,7 +241,7 @@ export const coMentionTable: {
     [585, 232, 90, 44, 51, 84, 62, 83, 67, 96, 81],
     [540, 128, 60, 18, 95, 55, 66, 93, 94, 91, 59],
     [201, 91, 29, 34, 12, 92, 154, 224, 94, 94, 41],
-    [130, 30, 22, 8, null, 28, 31, 58, 45, null, null],
+    [130, 30, 22, 8, null, 28, 31, 58, 45, 41, 26],
   ],
 }
 
@@ -336,8 +336,11 @@ export const rankingRequirements: readonly RankingRequirement[] = [
     methodIds: ['waspas'],
     normalization: { en: 'Linear max', tr: 'Doğrusal maks' },
     negatives: 'no',
-    zeros: 'conditional',
-    note: { en: 'A zero makes the product part 0 for that alternative.', tr: 'Sıfır, o alternatif için çarpım kısmını 0 yapar.' },
+    zeros: 'no',
+    note: {
+      en: 'Ratio-based, and a zero would make the product part 0; every value must be above 0.',
+      tr: 'Orana dayalıdır ve sıfır çarpım kısmını 0 yapardı; her değer 0\'dan büyük olmalı.',
+    },
     params: { en: 'λ in [0, 1], default 0.5', tr: 'λ [0, 1] aralığında, varsayılan 0,5' },
     output: { en: 'Score', tr: 'Skor' },
   },
@@ -398,8 +401,11 @@ export const rankingRequirements: readonly RankingRequirement[] = [
     methodIds: ['copras'],
     normalization: { en: 'Sum (x / sum x)', tr: 'Toplam (x / toplam x)' },
     negatives: 'no',
-    zeros: 'conditional',
-    note: { en: 'An alternative with S- = 0 divides by zero.', tr: 'S- = 0 olan alternatif sıfıra böler.' },
+    zeros: 'no',
+    note: {
+      en: 'Values must be strictly positive (an alternative with S- = 0 divides by zero).',
+      tr: 'Değerler kesinlikle pozitif olmalı (S- = 0 olan alternatif sıfıra böler).',
+    },
     params: null,
     output: { en: 'Q and utility degree in %', tr: 'Q ve yüzde olarak fayda derecesi' },
   },
@@ -501,6 +507,22 @@ export const rankingRequirements: readonly RankingRequirement[] = [
     },
     output: { en: 'Kernel (I) or partial pre-order (III)', tr: 'Çekirdek (I) ya da kısmi ön sıralama (III)' },
   },
+  {
+    label: 'AHP',
+    methodIds: ['ahp'],
+    normalization: { en: 'Column sum (matrix mode) or pairwise eigenvectors', tr: 'Sütun toplamı (matris kipi) ya da ikili özvektörler' },
+    negatives: 'no',
+    zeros: 'no',
+    note: {
+      en: 'Matrix mode requires positive values (cost via 1/x); pairwise mode uses positive reciprocal 1-9 matrices per criterion.',
+      tr: 'Matris kipi pozitif değerler ister (maliyette 1/x); ikili kip kriter başına pozitif karşılıklı 1-9 matrisi kullanır.',
+    },
+    params: {
+      en: 'Scoring mode (matrix or pairwise) and derivation (eigenvector or LLSM)',
+      tr: 'Puanlama kipi (matris ya da ikili) ve türetme (özvektör ya da LLSM)',
+    },
+    output: { en: 'Global priority score (sums to 1)', tr: 'Genel öncelik skoru (toplamı 1)' },
+  },
 ]
 
 export const constantColumnRule: Bilingual = {
@@ -596,8 +618,8 @@ export const weightingRequirements: readonly WeightingRequirement[] = [
     data: { en: 'Best-to-others and others-to-worst vectors', tr: 'En iyiden diğerlerine ve diğerlerinden en kötüye vektörleri' },
     normalization: null,
     degenerate: {
-      en: 'Needs a linear program (linear model) or a non-linear solver; the non-linear model can have many optima',
-      tr: 'Doğrusal program (doğrusal model) ya da doğrusal olmayan çözücü gerekir; doğrusal olmayan modelin birden çok en iyi çözümü olabilir',
+      en: 'a_BW = 1 gives equal weights 1/n; CR^I above the Liang et al. (2020) threshold asks to revise',
+      tr: 'a_BW = 1 eşit ağırlık (1/n) verir; CR^I Liang vd. (2020) eşiğini aşarsa gözden geçirme ister',
     },
     sources: [
       { label: 'Rezaei (2015), Omega 53, 49-57', doi: '10.1016/j.omega.2014.11.009' },
@@ -660,8 +682,8 @@ export const riskyCombinations: readonly RiskyCombination[] = [
       tr: 'Yayılım iki kez sayılabilir: yayılıma dayalı nesnel ağırlık ile uzaklığa dayalı sıralama',
     },
     text: {
-      en: 'Our reading of the formulas: Entropy, SD and CRITIC give more weight to criteria whose values are more spread out, and TOPSIS (vector normalization), VIKOR and GRA also let a criterion with a larger normalized spread contribute more to the distances. In Entropy or SD then TOPSIS, the spread of a noisy criterion may therefore enter twice, once as an explicit weight and once implicitly. This is our analysis, not a published result.',
-      tr: 'Formüllerden bizim okumamız: Entropi, SD ve CRITIC değerleri daha çok yayılan kriterlere daha çok ağırlık verir; TOPSIS (vektör normalizasyonu), VIKOR ve GRA da normalize yayılımı büyük olan kriterin uzaklıklara daha çok katkı yapmasına izin verir. Bu yüzden Entropi ya da SD ardından TOPSIS kullanıldığında gürültülü bir kriterin yayılımı iki kez devreye girebilir: bir kez açık ağırlık olarak, bir kez örtük olarak. Bu yayımlanmış bir sonuç değil, bizim yorumumuz.',
+      en: 'Our reading of the formulas: Entropy, SD, CRITIC, MEREC, LOPCOW and CILOS weight criteria by their spread or removal effect, and TOPSIS (vector normalization), VIKOR, EDAS, MABAC, CoCoSo, CODAS and GRA also let a criterion with a larger normalized spread contribute more to the distances. In Entropy or SD then TOPSIS, the spread of a noisy criterion may therefore enter twice, once as an explicit weight and once implicitly. This is our analysis, not a published result.',
+      tr: 'Formüllerden bizim okumamız: Entropi, SD, CRITIC, MEREC, LOPCOW ve CILOS kriterleri yayılımlarına ya da çıkarılma etkilerine göre ağırlıklandırır; TOPSIS (vektör normalizasyonu), VIKOR, EDAS, MABAC, CoCoSo, CODAS ve GRA da normalize yayılımı büyük olan kriterin uzaklıklara daha çok katkı yapmasına izin verir. Bu yüzden Entropi ya da SD ardından TOPSIS kullanıldığında gürültülü bir kriterin yayılımı iki kez devreye girebilir: bir kez açık ağırlık olarak, bir kez örtük olarak. Bu yayımlanmış bir sonuç değil, bizim yorumumuz.',
     },
     basis: 'analysis',
     evidence: {
@@ -672,7 +694,7 @@ export const riskyCombinations: readonly RiskyCombination[] = [
       en: 'With objective dispersion weights, check the Robustness (Monte Carlo and weight sweep) and Compare stages, and watch for the dominant-weight (> 0.50) warning.',
       tr: 'Yayılıma dayalı nesnel ağırlıklarla Sağlamlık (Monte Carlo ve ağırlık taraması) ile Karşılaştırma aşamalarını inceleyin ve baskın ağırlık (> 0,50) uyarısına dikkat edin.',
     },
-    methodIds: ['entropy', 'sd', 'critic', 'lopcow', 'merec', 'cilos', 'topsis', 'vikor', 'mabac', 'cocoso', 'codas'],
+    methodIds: ['entropy', 'sd', 'critic', 'lopcow', 'merec', 'cilos', 'topsis', 'vikor', 'edas', 'mabac', 'cocoso', 'codas'],
     sources: [
       { label: 'Choo, Schoner & Wedley (1999), Computers & Industrial Engineering 37, 527-541', doi: '10.1016/S0360-8352(00)00019-X' },
       { label: 'Mukhametzyanov (2021), DMAME 4(2), 76-105', doi: '10.31181/dmame210402076i' },
@@ -734,8 +756,8 @@ export const riskyCombinations: readonly RiskyCombination[] = [
     id: 'dispersion-in-outranking',
     title: { en: 'Dispersion-based weights in outranking methods', tr: 'Üstünlük (outranking) yöntemlerinde yayılıma dayalı ağırlıklar' },
     text: {
-      en: 'In ELECTRE, weights are voting powers that do not depend on the scales, not trade-off coefficients (Figueira, Mousseau & Roy 2005). Entropy or CRITIC weights computed on a normalized matrix, combined with thresholds in raw units, mix two meanings. Allowed, but label it.',
-      tr: "ELECTRE'de ağırlıklar ödünleşim katsayısı değil, ölçeklerden bağımsız oy gücüdür (Figueira, Mousseau ve Roy 2005). Normalize matris üzerinde hesaplanan Entropi ya da CRITIC ağırlıklarını ham birimdeki eşiklerle birlikte kullanmak iki farklı anlamı karıştırır. Kullanabilirsiniz, ama bunu belirtin.",
+      en: 'In ELECTRE and PROMETHEE, weights are voting powers or relative importances that do not depend on the scales, not trade-off coefficients (Figueira, Mousseau & Roy 2005). Objective dispersion weights (Entropy, CRITIC, SD, LOPCOW, MEREC, CILOS) computed on a normalized matrix, combined with thresholds in raw units, mix two meanings. Allowed, but label it.',
+      tr: "ELECTRE ve PROMETHEE'de ağırlıklar ödünleşim katsayısı değil, ölçeklerden bağımsız oy gücü ya da göreli önemdir (Figueira, Mousseau ve Roy 2005). Normalize matris üzerinde hesaplanan yayılıma dayalı nesnel ağırlıkları (Entropi, CRITIC, SD, LOPCOW, MEREC, CILOS) ham birimdeki eşiklerle birlikte kullanmak iki farklı anlamı karıştırır. Kullanabilirsiniz, ama bunu belirtin.",
     },
     basis: 'sourced',
     methodIds: ['electre-i', 'electre-iii', 'promethee-ii', 'entropy', 'critic', 'sd', 'lopcow', 'merec', 'cilos'],
@@ -837,8 +859,8 @@ export const robustnessTechniques: readonly RobustnessTechnique[] = [
     id: 'parameters',
     title: { en: 'Parameter sensitivity', tr: 'Parametre duyarlılığı' },
     summary: {
-      en: 'One slider per method parameter with the same outputs as the weight change: PROMETHEE q, p and s; VIKOR v; WASPAS and CoCoSo λ; ELECTRE thresholds; TOPSIS normalization and distance.',
-      tr: 'Her yöntem parametresi için bir kaydırıcı, ağırlık değişimiyle aynı çıktılar: PROMETHEE q, p ve s; VIKOR v; WASPAS ve CoCoSo λ; ELECTRE eşikleri; TOPSIS normalizasyonu ve uzaklığı.',
+      en: 'One slider per method parameter with the same outputs as the weight change: PROMETHEE q, p and s; VIKOR v; WASPAS and CoCoSo λ; CODAS τ; ELECTRE thresholds; TOPSIS normalization and distance.',
+      tr: 'Her yöntem parametresi için bir kaydırıcı, ağırlık değişimiyle aynı çıktılar: PROMETHEE q, p ve s; VIKOR v; WASPAS ve CoCoSo λ; CODAS τ; ELECTRE eşikleri; TOPSIS normalizasyonu ve uzaklığı.',
     },
     tex: [],
     sources: [{ label: 'Więckowski & Sałabun (2023), Applied Soft Computing 148, 110915', doi: '10.1016/j.asoc.2023.110915' }],
@@ -1049,10 +1071,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'negatives',
           label: { en: 'Yes, negative values', tr: 'Evet, negatif değerler' },
           recommend: {
-            methodIds: ['lopcow', 'sd'],
+            methodIds: ['lopcow', 'sd', 'critic'],
             reason: {
-              en: 'Both start with min-max normalization, which accepts any sign; LOPCOW gives flatter weights than Entropy, and SD is the simplest baseline.',
-              tr: 'İkisi de her işareti kabul eden min-maks normalizasyonuyla başlar; LOPCOW Entropiden daha düz ağırlık verir, SD ise en basit karşılaştırma tabanıdır.',
+              en: 'All three start with min-max normalization, which accepts any sign; LOPCOW gives flatter weights than Entropy, SD is the simplest baseline, and CRITIC also downweights correlated criteria.',
+              tr: 'Üçü de her işareti kabul eden min-maks normalizasyonuyla başlar; LOPCOW Entropiden daha düz ağırlık verir, SD en basit tabandır, CRITIC ise ilişkili kriterlerin ağırlığını da düşürür.',
             },
           },
           next: RANKING_START,
@@ -1061,10 +1083,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'zeros',
           label: { en: 'Zeros, but no negatives', tr: 'Sıfırlar var, negatif yok' },
           recommend: {
-            methodIds: ['sd', 'entropy'],
+            methodIds: ['sd', 'entropy', 'critic'],
             reason: {
-              en: 'SD takes zeros as they are; Entropy computes with them (0 ln 0 = 0) but a column with only a few non-zero values can take most of the weight, and MEREC is excluded because it takes the logarithm of every value.',
-              tr: 'SD sıfırları olduğu gibi alır; Entropi de sıfırlarla hesaplar (0 ln 0 = 0) ama yalnız birkaç değeri sıfırdan farklı olan bir sütun ağırlığın çoğunu alabilir, MEREC ise her değerin logaritmasını aldığı için dışarıda kalır.',
+              en: 'SD and CRITIC take zeros as they are; Entropy computes with them (0 ln 0 = 0) though a sparse column can take most of the weight, while MEREC is excluded because it takes the logarithm of every value.',
+              tr: 'SD ve CRITIC sıfırları olduğu gibi alır; Entropi de sıfırlarla hesaplar (0 ln 0 = 0) ancak seyrek bir sütun ağırlığın çoğunu alabilir, MEREC ise her değerin logaritmasını aldığı için dışarıda kalır.',
             },
           },
           next: RANKING_START,
@@ -1073,10 +1095,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'positive',
           label: { en: 'No, every value is positive', tr: 'Hayır, her değer pozitif' },
           recommend: {
-            methodIds: ['entropy', 'merec', 'cilos'],
+            methodIds: ['entropy', 'critic', 'merec', 'cilos'],
             reason: {
-              en: 'Entropy weights by dispersion and turns erratic on very homogeneous data; MEREC weights by how much removing a criterion changes the scores; CILOS weights by how little a criterion loses when another criterion\'s winner is chosen.',
-              tr: 'Entropi yayılıma göre ağırlık verir ve çok homojen veride oynaklaşır; MEREC bir kriteri çıkarmanın puanları ne kadar değiştirdiğine bakar; CILOS ise başka bir kriterin birincisi seçildiğinde uğranan kaybın azlığına göre ağırlık verir.',
+              en: 'Entropy weights by dispersion, CRITIC combines dispersion with conflict between criteria, MEREC measures how much removing a criterion changes the scores, and CILOS weights by how little a criterion loses when another criterion\'s winner is chosen.',
+              tr: 'Entropi yayılıma göre ağırlık verir, CRITIC yayılımı kriterler arası çatışmayla birleştirir, MEREC bir kriteri çıkarmanın puanları ne kadar değiştirdiğine bakar, CILOS ise başka bir kriterin birincisi seçildiğinde uğranan kaybın azlığına göre ağırlık verir.',
             },
           },
           next: RANKING_START,
@@ -1205,10 +1227,10 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
           id: 'rank-zeros',
           label: { en: 'Zeros, but no negatives', tr: 'Sıfırlar var, negatif yok' },
           recommend: {
-            methodIds: ['topsis', 'vikor', 'mabac', 'moora'],
+            methodIds: ['topsis', 'vikor', 'edas', 'mabac', 'cocoso', 'moora'],
             reason: {
-              en: 'These accept zeros (TOPSIS and MOORA as long as no column is all zero), while ratio-based methods (WASPAS, COPRAS, ARAS, MARCOS) are excluded.',
-              tr: 'Bunlar sıfırı kabul eder (TOPSIS ve MOORA, tamamı sıfır olan sütun olmadıkça); orana dayalı yöntemler (WASPAS, COPRAS, ARAS, MARCOS) dışarıda kalır.',
+              en: 'These accept zeros (TOPSIS and MOORA as long as no column is all zero, EDAS when column averages stay positive, and CoCoSo unless one alternative is worst on every criterion), while ratio-based methods (SAW, WASPAS, COPRAS, ARAS, MARCOS, CODAS) are excluded.',
+              tr: 'Bunlar sıfırı kabul eder (TOPSIS ve MOORA tamamı sıfır sütun olmadıkça, EDAS sütun ortalamaları pozitif kaldıkça, CoCoSo bir alternatif her kriterde en kötü olmadıkça); orana dayalı yöntemler (SAW, WASPAS, COPRAS, ARAS, MARCOS, CODAS) dışarıda kalır.',
             },
           },
         },
@@ -1258,7 +1280,7 @@ export const decisionTree: { start: string; nodes: readonly GuideNode[] } = {
         },
         {
           id: 'average',
-          label: { en: 'Better or worse than the average alternative', tr: 'Ortalama alternatiften iyi ya da kötü olmak' },
+          label: { en: 'Distance from the average or from the worst alternative', tr: 'Ortalama ya da en kötü alternatiften uzaklık' },
           recommend: {
             methodIds: ['edas', 'codas'],
             reason: {

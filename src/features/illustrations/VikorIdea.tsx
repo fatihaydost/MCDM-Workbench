@@ -168,9 +168,10 @@ export function VikorIdea({
   )
   const sFlat = vikorFlat(S)
   const rFlat = vikorFlat(R)
+  const noSpread = (sFlat && rFlat) || (sFlat && parts.v === 1) || (rFlat && parts.v === 0)
   const effV = sFlat && !rFlat ? 0 : rFlat && !sFlat ? 1 : parts.v
-  const seg = isoQSegment(effV, Math.min(thr, 1))
-  const region = thr >= 1 ? isoQRegion(effV, 1.0000001) : isoQRegion(effV, thr)
+  const seg = noSpread ? null : isoQSegment(effV, Math.min(thr, 1))
+  const region = noSpread ? [] : thr >= 1 ? isoQRegion(effV, 1.0000001) : isoQRegion(effV, thr)
   const regionPath = region.length > 2 ? `M${region.map((p) => `${px(p.x)} ${py(p.y)}`).join('L')}Z` : ''
   const linePathD = seg && thr <= 1 ? `M${px(seg[0].x)} ${py(seg[0].y)}L${px(seg[1].x)} ${py(seg[1].y)}` : ''
 
@@ -334,7 +335,7 @@ export function VikorIdea({
           })}
         </g>
       </svg>
-      <ul className={s.vikorVerdict} data-testid="vikor-verdict">
+      <ul className={`${s.vikorVerdict} ${s.stageItem}`} data-off={off(2)} data-testid="vikor-verdict">
         {verdict.map((x) => (
           <li key={x.id} data-ok={x.ok || undefined} data-testid={`vikor-${x.id}`}>
             {x.ok ? <Check aria-hidden className={s.vikorIcon} weight="bold" /> : <X aria-hidden className={s.vikorIcon} weight="bold" />}
@@ -342,7 +343,7 @@ export function VikorIdea({
           </li>
         ))}
       </ul>
-      <p className={s.vikorResult} data-testid="vikor-result">
+      <p className={`${s.vikorResult} ${s.stageItem}`} data-off={off(2)} data-testid="vikor-result">
         {l.result(compromise.set.map((i) => names[i]!))}
       </p>
       {l.caption && <p className={s.caption}>{l.caption}</p>}

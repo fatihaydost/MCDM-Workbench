@@ -163,7 +163,10 @@
         "claim": "Uyum C, uyumsuzluk D, üstünlük grafı S ve {A2, A3, A5} çekirdeği {{citation}} Bölüm 3.1 ile {{decimals}} basamağa kadar aynı; Soner ve Önüt (2006) net uyum değerleri de örtüşüyor."
       },
       "electre-iii": {
-        "claim": "Tablo 3 içindeki 121 güvenilirlik değerinin tamamı ve iki damıtma zinciri {{citation}} ile 0,005 fark içinde örtüşüyor."
+        "claim": "Tablo 3 içindeki köşegen dışı 110 güvenilirlik değerinin tamamı ve iki damıtma zinciri {{citation}} ile 0,005 fark içinde örtüşüyor."
+      },
+      "equal": {
+        "claim": "1/n ağırlıklarının tamamı {{citation}} Tablo 4 (EW sütunu) ile birebir aynı."
       }
     },
     "catalogue": {
@@ -410,7 +413,8 @@
           "v-shape": "Tercih 0'dan sütun açıklığına kadar doğrusal artar; min-maks ağırlıklı toplamla aynı sırayı verir.",
           "usual": "Her pozitif fark tam tercih (1) sayılır; ağırlıklı Borda puanıyla aynı sırayı verir.",
           "level": "Sütun açıklığının %20'sine kadar farklar yok sayılır, %60'ına kadar 0,5, üstü 1 sayılır.",
-          "gaussian": "Bükülme noktası sütun açıklığının yarısında olan yumuşak S biçimli tercih eğrisi."
+          "gaussian": "Bükülme noktası sütun açıklığının yarısında olan yumuşak S biçimli tercih eğrisi.",
+          "custom": "Her kriter, yüklenen örnekteki kendi tercih fonksiyonunu ve eşiklerini kullanır."
         },
         "preferenceFunctionVariant": {
           "v-shape": "V biçimli",
@@ -456,7 +460,8 @@
         "thresholdPresetHints": {
           "standard": "Sütun açıklığının %10'una kadar farklar farksız sayılır, %25'ine kadar kısmi tercih oluşturur, üstü vetosuz tam tercih verir.",
           "strict": "Her sütun açıklığında vetosuz daha dar farksızlık (%5) ve tercih (%15) bölgeleri kullanır.",
-          "veto": "Sütun açıklığının %60'ına bir veto eşiği ekler; tek bir kriterdeki büyük gerilik güvenilirlik σ(a, b) değerini 0'a indirir."
+          "veto": "Sütun açıklığının %60'ına bir veto eşiği ekler; tek bir kriterdeki büyük gerilik güvenilirlik σ(a, b) değerini 0'a indirir.",
+          "custom": "Her kriter, yüklenen örnekteki kendi farksızlık, tercih ve veto eşiklerini kullanır."
         },
         "thresholdPresetVariant": {
           "standard": "standart",
@@ -1308,7 +1313,7 @@
       },
       "electre-iii": {
         "title": "Azalan sıra r↓, artan sıra r↑ ve net güvenilirlik Φ",
-        "caption": "Sol: azalan sıra r↓ (üst, düşük daha iyi) ve artan sıra r↑ (alt, düşük daha iyi). Sağ: sıfır etrafında net güvenilirlik akışı Φ.",
+        "caption": "Sol: çıkan güvenilirlik Φ⁺ (üst, yeşil; yanında azalan sıra r↓) ve giren güvenilirlik Φ⁻ (alt, kırmızı; yanında artan sıra r↑). Sağ: sıfır etrafında net güvenilirlik akışı Φ.",
         "row": "{{alternative}}: r↓ = {{pos}}, r↑ = {{neg}}, Φ = {{score}}"
       }
     },
@@ -2018,7 +2023,7 @@
           "steps": {
             "s1": "Azalan sıra r↓: en yüksek güvenilirlik kesiminden aşağıya doğru yinelemeli nitelik kazandırma, en güçlü seçenekleri önce seçer.",
             "s2": "Artan sıra r↑: en zayıf seçeneklerden yukarıya doğru yinelemeli eleme; r↓ ile r↑ çeliştiğinde çift karşılaştırılamaz olur.",
-            "s3": "Net güvenilirlik Φ: sıfır etrafında çıkan eksi giren güvenilirlik; seçenekler ortalama damıtma sırası (r↓ + r↑) / 2 ile dizilir, eşitlikleri Φ bozar."
+            "s3": "Net güvenilirlik Φ: sıfır etrafında çıkan eksi giren güvenilirlik; seçenekler ortalama damıtma sırası (r↓ + r↑) / 2 ile dizilir."
           }
         }
       }
@@ -2291,8 +2296,8 @@
     "vikor": {
       "constant-column": "{{criterion}} kriterinin bütün değerleri aynı; S'ye ve R'ye bir şey katmıyor.",
       "near-constant-column": "{{criterion}} yalnız yuvarlama boyutunda değişiyor, ama min-maks onu 0 ile 1 arasına gerip tam uzaklık veriyor. Farkın gerçek olup olmadığını kontrol edin.",
-      "equal-group-utility": "Bütün alternatiflerin S değeri aynı; Q yalnız R'den geliyor ve en fazla 1 − v olabiliyor; bu, C1'i sağlamayı zorlaştırabilir.",
-      "equal-regret": "Bütün alternatiflerin R değeri aynı; Q yalnız S'den geliyor ve en fazla v olabiliyor; bu, C1'i sağlamayı zorlaştırabilir.",
+      "equal-group-utility": "Bütün alternatiflerin S değeri aynı; Q yalnız R üzerinden 0 ile 1 aralığına ölçeklenir.",
+      "equal-regret": "Bütün alternatiflerin R değeri aynı; Q yalnız S üzerinden 0 ile 1 aralığına ölçeklenir.",
       "no-spread": "Bütün alternatiflerin S ve R değerleri aynı; hepsi Q = 0 alıyor.",
       "tie-for-first": "Birden fazla alternatif en küçük Q değerini paylaşıyor; girdi sırasıyla listelenir ve hepsi uzlaşık kümededir."
     },

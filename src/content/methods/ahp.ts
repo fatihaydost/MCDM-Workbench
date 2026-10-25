@@ -48,8 +48,8 @@ export const ahp: MethodContent = {
       title: { en: 'Consistency index and ratio', tr: 'Tutarlılık indeksi ve oranı' },
       tex: String.raw`CI = \frac{\lambda_{\max} - n}{n - 1}, \qquad CR = \frac{CI}{RI_n}, \qquad CR \le 0.10`,
       note: {
-        en: 'Random index RI: n = 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45, 10: 1.49; for n = 1 or 2, CR is not applicable.',
-        tr: 'Rastgele indeks RI: n = 3: 0,58, 4: 0,90, 5: 1,12, 6: 1,24, 7: 1,32, 8: 1,41, 9: 1,45, 10: 1,49; n = 1 veya 2 için CR anlamsızdır.',
+        en: 'Random index RI: n = 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45, 10: 1.49, 11: 1.51, 12: 1.48, 13: 1.56, 14: 1.57, 15: 1.59, and the Alonso & Lamata (2006) linear fit above 15; for n = 1 or 2, CR is not applicable.',
+        tr: 'Rastgele indeks RI: n = 3: 0,58, 4: 0,90, 5: 1,12, 6: 1,24, 7: 1,32, 8: 1,41, 9: 1,45, 10: 1,49, 11: 1,51, 12: 1,48, 13: 1,56, 14: 1,57, 15: 1,59 ve n > 15 için Alonso ve Lamata (2006) doğrusal yaklaşımı; n = 1 veya 2 için CR anlamsızdır.',
       },
     },
   ],

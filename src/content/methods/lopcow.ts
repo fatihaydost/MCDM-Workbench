@@ -31,8 +31,8 @@ export const lopcow: MethodContent = {
       title: { en: 'Percentage value', tr: 'Yüzde değer' },
       tex: String.raw`PV_j = \left|\, 100 \cdot \ln\!\left(\frac{\sqrt{\frac{1}{m}\sum_{i=1}^{m} r_{ij}^2}}{\sigma_j}\right) \right|`,
       note: {
-        en: 'Root mean square over the sample standard deviation (divisor m - 1), a form backed by one reproduction rather than by the origin text.',
-        tr: 'Karesel ortalamanın örneklem standart sapmasına (bölen m - 1) oranı; bu biçim özgün metinle değil, bir yeniden üretimle desteklenir.',
+        en: 'The origin paper gives the RMS-to-standard-deviation ratio; numerical reproduction on Keleş (2023) confirms the sample standard deviation (divisor m - 1).',
+        tr: 'Özgün makale karesel ortalamanın standart sapmaya oranını verir; Keleş (2023) üzerindeki sayısal yeniden üretim örneklem standart sapmasını (bölen m - 1) doğrular.',
       },
     },
     {
@@ -51,6 +51,13 @@ export const lopcow: MethodContent = {
       text: {
         en: 'LOPCOW then CRADIS: Keleş (2023), G7 and Turkish power-centre cities.',
         tr: 'LOPCOW ardından CRADIS: Keleş (2023), G7 ve Türkiye güç merkezi şehirleri.',
+      },
+    },
+    {
+      methodId: 'topsis',
+      text: {
+        en: 'LOPCOW then TOPSIS or MARCOS as a benchmark in objective-weighting comparisons (for example Dua et al. 2024).',
+        tr: 'Nesnel ağırlıklandırma karşılaştırmalarında kıyas olarak LOPCOW ardından TOPSIS ya da MARCOS (örneğin Dua vd. 2024).',
       },
     },
     {

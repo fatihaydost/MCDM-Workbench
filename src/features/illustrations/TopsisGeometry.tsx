@@ -16,6 +16,7 @@ import {
   pointCss,
   referenceGuides,
   topsisProjection,
+  type PlotBox,
   type Point,
   type TopsisProjection,
 } from './geometry'
@@ -263,6 +264,7 @@ export function TopsisGeometry({
     shortNames.map((n) => estimateTextWidth(n, 12) * 1.1),
     { width, height },
     proj.closeness.map((_, i) => i).sort((a, b) => proj.closeness[b]! - proj.closeness[a]! || a - b),
+    drawing.obstacles ? { obstacles: drawing.obstacles } : undefined,
   )
 
   const caption = shownView === 'distances' ? l.planeCaption : l.caption
@@ -394,6 +396,7 @@ type Drawing = {
   height: number
   box: { left: number; right: number; top: number; bottom: number }
   points: Screen[]
+  obstacles?: PlotBox[] | undefined
   background: ReactNode
   /** Where the selected point's D+ and D- lines end: A+ and A- in the criterion plane, the axes in the distance plane. */
   distances: (sel: Screen) => { plus: Screen; minus: Screen }
@@ -503,12 +506,31 @@ function criteriaDrawing(
   const P = (p: Point): Screen => ({ x: fit.x(p.x), y: fit.y(p.y) })
   const ideal = P(proj.ideal)
   const anti = P(proj.antiIdeal)
-  const refLabelW = Math.max(estimateTextWidth(l.ideal, 12), estimateTextWidth(l.antiIdeal, 12))
+  const idealLabelW = estimateTextWidth(l.ideal, 12)
+  const antiLabelW = estimateTextWidth(l.antiIdeal, 12)
+  const refLabelW = Math.max(idealLabelW, antiLabelW)
+  const idealEnd = ideal.x + 10 + refLabelW > width
+  const idealX = idealEnd ? ideal.x - 10 : ideal.x + 10
+  const idealY = ideal.y - 10
+  const antiEnd = anti.x + 10 + refLabelW > width
+  const antiX = antiEnd ? anti.x - 10 : anti.x + 10
+  const antiY = anti.y + 18
+  const textBox = (x: number, y: number, w: number, end: boolean): PlotBox => {
+    const left = end ? x - w : x
+    return { left, right: left + w, top: y - 12 * 0.8, bottom: y + 12 * 0.25 }
+  }
+  const obstacles: PlotBox[] = [
+    { left: ideal.x - 6, right: ideal.x + 6, top: ideal.y - 6, bottom: ideal.y + 6 },
+    textBox(idealX, idealY, idealLabelW, idealEnd),
+    { left: anti.x - 6, right: anti.x + 6, top: anti.y - 6, bottom: anti.y + 6 },
+    textBox(antiX, antiY, antiLabelW, antiEnd),
+  ]
   const labelW = box.right - box.left
   return {
     height: fit.height,
     box,
     points: proj.points.map(P),
+    obstacles,
     background: (
       <>
         {/* Axes: values grow right and up; the labels say which direction is better. */}
@@ -532,18 +554,18 @@ function criteriaDrawing(
           <path className={s.refMark} d={`M${ideal.x} ${ideal.y - 6}l6 6-6 6-6-6z`} />
           <text
             className={s.refLabel}
-            x={ideal.x + 10 + refLabelW > width ? ideal.x - 10 : ideal.x + 10}
-            y={ideal.y - 10}
-            textAnchor={ideal.x + 10 + refLabelW > width ? 'end' : 'start'}
+            x={idealX}
+            y={idealY}
+            textAnchor={idealEnd ? 'end' : 'start'}
           >
             {l.ideal}
           </text>
           <path className={s.refMark} d={`M${anti.x} ${anti.y - 6}l6 6-6 6-6-6z`} />
           <text
             className={s.refLabel}
-            x={anti.x + 10 + refLabelW > width ? anti.x - 10 : anti.x + 10}
-            y={anti.y + 18}
-            textAnchor={anti.x + 10 + refLabelW > width ? 'end' : 'start'}
+            x={antiX}
+            y={antiY}
+            textAnchor={antiEnd ? 'end' : 'start'}
           >
             {l.antiIdeal}
           </text>
