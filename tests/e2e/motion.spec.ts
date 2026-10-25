@@ -191,6 +191,7 @@ test('the tab indicator slides and ends under the selected tab', async ({ page }
 test('a theme change lands in one frame, without transitions', async ({ page }) => {
   await page.goto('/methods/topsis') // light system scheme
   await page.getByRole('button', { name: /^Theme/ }).click()
+  await expect(page.getByRole('menu')).toBeVisible()
   await settled(page)
   const result = page.evaluate(
     () =>

@@ -69,7 +69,7 @@ function ThemeMenu() {
   const Icon = themeIcons[mode]
   const modeLabel = t(`nav.theme.${mode}`)
   const warm = () => {
-    void loadThemeDropdown().then((Comp) => setState((s) => (s.Comp ? s : { Comp, defaultOpen: false })))
+    void loadThemeDropdown()
   }
   const open = () => {
     void loadThemeDropdown().then((Comp) => setState({ Comp, defaultOpen: true }))
