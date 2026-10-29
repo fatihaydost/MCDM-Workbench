@@ -80,5 +80,9 @@
     "title": "Yöntemlere göre sıra matrisi",
     "description": "Satırlar Borda uzlaşı sırasını izler, birinci sıralar vurgulanır ve bir satıra tıklamak onu yukarıda karşılaştırır.",
     "borda": "Borda"
+  },
+  "correlation": {
+    "title": "İkili sıra korelasyonu (Kendall τ_b)",
+    "description": "Hücreler bağımsız yöntemler arasındaki bağ düzeltmeli sıra uyumunu -1 (tam ters) ile 1 (birebir aynı) arasında gösterir."
   }
 }

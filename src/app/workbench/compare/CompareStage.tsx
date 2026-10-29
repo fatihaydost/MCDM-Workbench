@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { COMPARE_ORDER, compareRankings, defaultPair, identicalRankings, pairFacts, type Comparison } from '../../../core'
+import { COMPARE_ORDER, compareRankings, defaultPair, identicalRankings, pairFacts, rankCorrelationMatrix, type Comparison } from '../../../core'
+import { Heatmap } from '../../../features/charts'
 import { RankLines, type RankLinesColumn } from '../../../features/illustrations/RankLines'
 import { useNumberFormat } from '../../../i18n'
 import { isEmptyProblem, runFor, toProblem, useWeights, useWorkbench } from '../../../state/workbench'
@@ -145,6 +146,11 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
     return { methodId: r.methodId, label, ranking: r.result.ranking, note }
   })
   const { echoes, firstPlace, kendallW, ranked, runs } = comparison
+  const correlation = useMemo(() => rankCorrelationMatrix(comparison), [comparison])
+  const correlationLabels = useMemo(
+    () => correlation.methods.map((id) => tr(t, `workbench.rankingMethod.${id}`)),
+    [correlation.methods, t],
+  )
 
   return (
     <div className="flex flex-col gap-3" data-testid="compare-ready">
@@ -252,6 +258,21 @@ function CompareReady({ comparison, weights }: { comparison: Comparison; weights
           </section>
         )
       })()}
+      {correlation.methods.length >= 2 && (
+        <section className="mt-3 max-w-[1040px]" data-testid="compare-correlation">
+          <Heatmap
+            title={tc('correlation.title')}
+            description={tc('correlation.description')}
+            rowLabels={correlationLabels}
+            colLabels={correlationLabels}
+            values={correlation.matrix}
+            scale="diverging"
+            domain={[-1, 1]}
+            format={(v) => nf.format(v, 2)}
+            tableLabels={{ show: t('workbench.chart.showTable'), corner: t('workbench.rankingMethod.label') }}
+          />
+        </section>
+      )}
       <CompareRankMatrix
         columns={columns}
         borda={comparison.borda?.ranking ?? null}

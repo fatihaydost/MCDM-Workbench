@@ -4,8 +4,10 @@ import {
   compareRankings,
   defaultPair,
   identicalRankings,
+  kendallTauB,
   kendallW,
   pairFacts,
+  rankCorrelationMatrix,
   rankingMethods,
   type Comparison,
   type Problem,
@@ -49,6 +51,42 @@ describe('kendallW', () => {
   it('applies the tie correction', () => {
     // mid-ranks [1.5, 1.5, 3] and [1, 2, 3]: S = 6.5, T = 6, W = 78 / (4 * 24 - 2 * 6)
     expect(kendallW([[1, 1, 3], [1, 2, 3]])).toBeCloseTo(78 / 84, 12)
+  })
+})
+
+describe('kendallTauB and rankCorrelationMatrix', () => {
+  it('returns 1 for identical rankings or when both rankings are all tied, and -1 when strictly reversed', () => {
+    expect(kendallTauB([1, 2, 3, 4], [1, 2, 3, 4])).toBe(1)
+    expect(kendallTauB([1, 1, 3], [1, 1, 3])).toBe(1)
+    expect(kendallTauB([1, 1, 1], [1, 1, 1])).toBe(1)
+    expect(kendallTauB([1, 2, 3, 4], [4, 3, 2, 1])).toBe(-1)
+  })
+  it('handles ties in one or both rankings and is symmetric', () => {
+    // [1, 1, 3] vs [1, 2, 3]: 2 concordant pairs, 0 discordant, uA = 2, uB = 3 -> 2 / sqrt(6)
+    expect(kendallTauB([1, 1, 3], [1, 2, 3])).toBeCloseTo(2 / Math.sqrt(6), 12)
+    expect(kendallTauB([1, 2, 3], [1, 1, 3])).toBeCloseTo(2 / Math.sqrt(6), 12)
+    expect(kendallTauB([1, 2, 3], [3, 1, 1])).toBeCloseTo(-2 / Math.sqrt(6), 12)
+    expect(kendallTauB([1, 1, 1], [1, 2, 3])).toBe(0)
+  })
+  it('computes a symmetric N x N correlation matrix across independent ranked methods excluding echoes', () => {
+    const c = compareRankings(problem(), ex.weights!, allRuns)
+    const { methods, matrix } = rankCorrelationMatrix(c)
+    // 16 ranked minus 2 echoes (marcos, promethee-ii) = 14 independent methods
+    expect(methods).toHaveLength(14)
+    expect(methods).not.toContain('marcos')
+    expect(methods).not.toContain('promethee-ii')
+    expect(matrix).toHaveLength(14)
+    for (let i = 0; i < methods.length; i++) {
+      expect(matrix[i]).toHaveLength(14)
+      expect(matrix[i]![i]).toBe(1)
+      for (let j = i + 1; j < methods.length; j++) {
+        expect(matrix[i]![j]).toBeCloseTo(matrix[j]![i]!, 12)
+        expect(matrix[i]![j]).toBeGreaterThanOrEqual(-1)
+        expect(matrix[i]![j]).toBeLessThanOrEqual(1)
+      }
+    }
+    // TOPSIS (index 0) and EDAS (index 3) produce identical rankings on the reference problem
+    expect(matrix[methods.indexOf('topsis')]![methods.indexOf('edas')]).toBe(1)
   })
 })
 
