@@ -1,18 +1,31 @@
 import { DownloadSimple, Printer } from '@phosphor-icons/react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { COMPARE_ORDER, compareRankings } from '../../core'
 import { doiUrl, formatCitation, getExample, shortCitation } from '../../data/examples'
 import { Heatmap } from '../../features/charts'
 import { buildWorkbook, exportCsv, lambdaLabels, writeWorkbook, type WorkbookLabels } from '../../features/io'
 import { useNumberFormat } from '../../i18n'
-import { isEmptyProblem, useRanking, useWeights, useWorkbench } from '../../state/workbench'
+import { isEmptyProblem, runFor, toProblem, useRanking, useWeights, useWorkbench } from '../../state/workbench'
 import { Button, EmptyState, Notice } from '../../ui'
-import { methodViews } from '../methods/views'
+import { methodViews, preloadActiveStagePictures } from '../methods/views'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
 import { PrintReport } from './PrintReport'
 import { bestIndex, leaders, RankingTable } from './RankingStage'
-import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, rankingMethodFullLabel, scoreWords, stepName, weightMethodFullLabel } from './shared'
+import { computeExecutiveMetrics } from './report/reportMetrics'
+import { ReportPreviewModal } from './report/ReportPreviewModal'
+import {
+  alternativeName,
+  criterionName,
+  DECIMALS,
+  downloadBlob,
+  findStep,
+  rankingMethodFullLabel,
+  scoreWords,
+  stepName,
+  weightMethodFullLabel,
+} from './shared'
 import { WeightsChart } from './WeightsStage'
 
 type Busy = 'xlsx' | null
@@ -24,9 +37,10 @@ export function ResultsStage() {
   const format2 = useCallback((v: number) => nf.format(v, DECIMALS.correlation), [nf])
   const problem = useWorkbench((s) => s.problem)
   const weightMethod = useWorkbench((s) => s.weightMethod)
-  const weightParams = useWorkbench((s) => s.methodParams?.[s.weightMethod])
+  const methodParams = useWorkbench((s) => s.methodParams)
+  const weightParams = methodParams?.[weightMethod]
   const rankingMethod = useWorkbench((s) => s.rankingMethod)
-  const rankingParams = useWorkbench((s) => s.methodParams?.[s.rankingMethod])
+  const rankingParams = methodParams?.[rankingMethod]
   const judgements = useWorkbench((s) => s.judgements)
   const alternativeJudgements = useWorkbench((s) => s.alternativeJudgements)
   const exampleId = useWorkbench((s) => s.exampleId)
@@ -36,11 +50,43 @@ export function ResultsStage() {
   const { goTo } = useWorkbenchNav()
   const [busy, setBusy] = useState<Busy>(null)
   const [failed, setFailed] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [includeAppendix, setIncludeAppendix] = useState(false)
   const names = useMemo(() => problem.criteria.map((_, j) => criterionName(problem.criteria, j, t)), [problem, t])
 
+  useEffect(() => {
+    void preloadActiveStagePictures([weightMethod, rankingMethod])
+  }, [weightMethod, rankingMethod])
+
+  const empty = isEmptyProblem(problem)
   const result = ranking.value
   const w = weights.value
-  if (isEmptyProblem(problem)) {
+  const coreProblem = useMemo(() => (empty ? null : toProblem(problem)), [empty, problem])
+
+  const reportComparison = useMemo(() => {
+    if (!coreProblem || !w || !result) return undefined
+    return compareRankings(
+      coreProblem,
+      w.weights,
+      COMPARE_ORDER.map((id) => runFor({ methodParams, alternativeJudgements }, id)),
+    )
+  }, [coreProblem, w, result, methodParams, alternativeJudgements])
+
+  const reportMetrics = useMemo(() => {
+    if (!coreProblem || !w || !result) return undefined
+    return computeExecutiveMetrics({
+      problem: coreProblem,
+      weights: w,
+      result,
+      weightMethod,
+      rankingMethod,
+      methodParams,
+      judgements,
+      alternativeJudgements,
+    })
+  }, [coreProblem, w, result, weightMethod, rankingMethod, methodParams, judgements, alternativeJudgements])
+
+  if (empty) {
     // A first visit: one sentence and one way forward, no list of problems yet.
     return (
       <EmptyState
@@ -69,6 +115,22 @@ export function ResultsStage() {
   // A method's own answer (VIKOR: a compromise set when C1 or C2 fails): the summary and the file say so.
   const verdict = methodViews[rankingMethod].verdict?.(result, altNames, t, format4) ?? null
   const correlation = weightMethod === 'critic' ? findStep(w.steps, 'critic.correlation')?.matrix : undefined
+
+  const triggerPrint = () => {
+    const prevTitle = document.title
+    const date = new Date().toISOString().slice(0, 10)
+    document.title = `MCDM-Report-${weightMethod.toUpperCase()}-${rankingMethod.toUpperCase()}-${date}`
+    const restore = () => {
+      document.title = prevTitle
+      window.removeEventListener('afterprint', restore)
+    }
+    window.addEventListener('afterprint', restore)
+    try {
+      window.print()
+    } finally {
+      setTimeout(restore, 1000)
+    }
+  }
 
   const workbookLabels = (): Partial<WorkbookLabels> => ({
     sheets: {
@@ -164,17 +226,42 @@ export function ResultsStage() {
   )
 
   return (
-    <div className="flex flex-col gap-10 pt-4 print:gap-4 print:pt-0">
-      <MethodWarnings warnings={[...(w.warnings ?? []), ...(result.warnings ?? [])]} problem={problem} />
+    <div data-print-block className="flex flex-col gap-10 pt-4 print:gap-0 print:pt-0">
+      <div className="no-print">
+        <MethodWarnings warnings={[...(w.warnings ?? []), ...(result.warnings ?? [])]} problem={problem} />
+      </div>
       <PrintReport
         problem={problem}
         weights={w}
         result={result}
+        weightMethod={weightMethod}
         weightLabel={weightLabel}
         rankingLabel={rankingLabel}
         rankingMethod={rankingMethod}
         verdict={verdict}
+        includeAppendix={includeAppendix}
+        {...(reportComparison ? { comparison: reportComparison } : {})}
+        {...(reportMetrics ? { metrics: reportMetrics } : {})}
       />
+      {previewOpen && (
+        <ReportPreviewModal
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+          problem={problem}
+          weights={w}
+          result={result}
+          weightMethod={weightMethod}
+          rankingMethod={rankingMethod}
+          weightLabel={weightLabel}
+          rankingLabel={rankingLabel}
+          verdict={verdict}
+          includeAppendix={includeAppendix}
+          onIncludeAppendixChange={setIncludeAppendix}
+          onPrint={triggerPrint}
+          {...(reportComparison ? { comparison: reportComparison } : {})}
+          {...(reportMetrics ? { metrics: reportMetrics } : {})}
+        />
+      )}
       <section aria-labelledby="wb-results-headline" className="no-print flex flex-col gap-5">
         <div className="flex flex-col gap-1">
           <p id="wb-results-headline" className="text-24 font-semibold text-text">
@@ -221,7 +308,7 @@ export function ResultsStage() {
           <Button icon={<DownloadSimple aria-hidden />} onClick={downloadCsv}>
             {t('workbench.results.downloadCsv')}
           </Button>
-          <Button icon={<Printer aria-hidden />} onClick={() => window.print()} data-testid="print-report-button">
+          <Button icon={<Printer aria-hidden />} onClick={() => setPreviewOpen(true)} data-testid="print-report-button">
             {t('workbench.results.print.button')}
           </Button>
           <span aria-live="polite" className="sr-only">

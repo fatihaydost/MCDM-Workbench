@@ -115,7 +115,7 @@ describe('ReportCharts (Executive Report SVG micro-charts)', () => {
     expect(emptyHtml).toContain('Identical weighted contributions.')
   })
 
-  it('StabilityBandSparkbar renders viewBox="0 0 88 14" with safe band and weight tick, plus neutral fallback when interval is null', () => {
+  it('StabilityBandSparkbar renders viewBox="0 0 36 11" with safe band and weight tick, plus neutral fallback when interval is null', () => {
     const html = renderToStaticMarkup(
       <StabilityBandSparkbar
         weight={0.35}
@@ -124,14 +124,14 @@ describe('ReportCharts (Executive Report SVG micro-charts)', () => {
       />,
     )
 
-    expect(html).toContain('viewBox="0 0 88 14"')
+    expect(html).toContain('viewBox="0 0 36 11"')
     expect(html).toContain('aria-label="Safe band [0.15, 0.75]"')
     expect(html).toContain('var(--data-accent)')
 
     const nullHtml = renderToStaticMarkup(
       <StabilityBandSparkbar weight={0.35} interval={null} ariaLabel="No sweep interval" />,
     )
-    expect(nullHtml).toContain('viewBox="0 0 88 14"')
+    expect(nullHtml).toContain('viewBox="0 0 36 11"')
     expect(nullHtml).not.toContain('data-testid="sparkbar-band"')
   })
 

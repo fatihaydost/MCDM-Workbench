@@ -8,6 +8,7 @@ import { ahpProgress, bwmSuggestion, judgementsFromBwm, judgementsFromUpper, MAX
 import { equal as equalContent } from '../src/content/methods/equal'
 import { MethodArticle, preloadIdea } from '../src/app/methods/MethodPage'
 import { OrdinalWeights } from '../src/app/workbench/OrdinalWeights'
+import { PrintReport } from '../src/app/workbench/PrintReport'
 import { RANKING_FAMILIES } from '../src/app/workbench/RankingStage'
 import { ResultsStage } from '../src/app/workbench/ResultsStage'
 import { ComputedWeights } from '../src/app/workbench/WeightsStage'
@@ -238,19 +239,61 @@ describe('Workbench UI, State Store, and WorkedCalculation fixes (Work Package 3
     expect(html).toContain('href="https://gallica.bnf.fr/ark:/12148/bpt6k775950"')
   })
 
-  it('9. ResultsStage renders print report button and single-page print summary block with agreement and robustness', () => {
+  it('9. ResultsStage renders executive 2-page report preview button, KPI cards, micro-charts, and robustness dashboard', () => {
     const st = useWorkbench.getState()
     st.loadExample('krishnan-2021-smartphones', 'en', 'topsis')
     const html = renderToStaticMarkup(withProviders(createElement(ResultsStage)))
     expect(html).toContain('data-testid="print-report-button"')
-    expect(html).toContain('Print report (PDF)')
+    expect(html).toContain('Report preview (PDF)')
     expect(html).toContain('data-testid="print-report"')
+    expect(html).toContain('data-testid="report-page-1"')
+    expect(html).toContain('data-testid="report-page-2"')
+    expect(html).not.toContain('data-testid="report-page-appendix"')
     expect(html).toContain('data-testid="print-verdict"')
+    expect(html).toContain('data-testid="report-kpi-grid"')
+    expect(html).toContain('data-testid="report-profile-section"')
+    expect(html).toContain('data-testid="report-head-to-head-section"')
     expect(html).toContain('data-testid="print-weights-section"')
     expect(html).toContain('data-testid="print-ranking-section"')
     expect(html).toContain('data-testid="print-robustness-summary"')
     expect(html).toContain("Kendall&#x27;s W =")
     expect(html).toContain('Borda consensus leader:')
     expect(html).toContain('Weight stability (±5%, ±10%, ±20%):')
+  })
+
+  it('10. PrintReport renders compromise verdict styling and horizontally banded raw matrix when includeAppendix is enabled', () => {
+    const st = useWorkbench.getState()
+    st.loadExample('opricovic-2004-hydropower', 'en', 'vikor')
+    const problem = useWorkbench.getState().problem
+    const weights = computeWeights({ problem, weightMethod: 'critic', manualWeights: [] }).value!
+    const html = renderToStaticMarkup(
+      withProviders(
+        createElement(PrintReport, {
+          problem,
+          weights,
+          result: {
+            scores: [0.02, 0.03, 0.4, 0.7, 0.9, 1],
+            ranking: [1, 2, 3, 4, 5, 6],
+            order: 'asc',
+            steps: [],
+          },
+          weightMethod: 'critic',
+          rankingMethod: 'vikor',
+          weightLabel: 'CRITIC',
+          rankingLabel: 'VIKOR (v = 0.50)',
+          verdict: {
+            set: [0, 1],
+            failed: ['Acceptable advantage (C1) is not met.'],
+            result: 'Compromise set: A1, A2',
+            about: [],
+          },
+          includeAppendix: true,
+        }),
+      ),
+    )
+    expect(html).toContain('data-tone="compromise"')
+    expect(html).toContain('Compromise / conditional result')
+    expect(html).toContain('data-testid="report-page-appendix"')
+    expect(html).toContain('data-testid="report-raw-matrix"')
   })
 })

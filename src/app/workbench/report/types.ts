@@ -183,9 +183,9 @@ export type ComputeExecutiveMetricsInput = {
   result: RankingResult
   weightMethod: WeightMethodId
   rankingMethod: RankingMethodId
-  methodParams?: Record<string, MethodParams | undefined>
-  judgements?: Judgements
-  alternativeJudgements?: AlternativeJudgements
+  methodParams?: Partial<Record<string, MethodParams | undefined>> | undefined
+  judgements?: Judgements | undefined
+  alternativeJudgements?: AlternativeJudgements | undefined
 }
 
 export type ReportDocumentProps = {
@@ -197,7 +197,7 @@ export type ReportDocumentProps = {
   weightLabel: string
   rankingLabel: string
   verdict: Verdict | null
-  includeAppendix?: boolean
-  comparison?: Comparison
-  metrics?: ExecutiveReportMetrics
+  includeAppendix?: boolean | undefined
+  comparison?: Comparison | undefined
+  metrics?: ExecutiveReportMetrics | undefined
 }

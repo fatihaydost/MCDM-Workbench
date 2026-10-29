@@ -977,3 +977,71 @@ test('a language switch is not an undo step; undo back to an unchanged example w
   await expect(grid).toContainText('Litvanya')
   await expect(grid).not.toContainText('Lithuania')
 })
+
+test('Results: executive A4 report preview renders 2 bounded white sheets in dark mode, toggles appendix, and triggers print', async ({ page }) => {
+  await page.goto('/app?example=krishnan-2021-smartphones&stage=results')
+  await expect(stageHeading(page, 'Results')).toBeVisible()
+  await expect(page.getByTestId('ranking-row').first()).toBeVisible()
+
+  // Activate Dark Mode on <html> to verify .report-sheet isolates light paper tokens on screen.
+  await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'))
+
+  await page.getByTestId('print-report-button').click()
+  const modal = page.locator('#report-preview-modal')
+  await expect(modal).toBeVisible()
+
+  const page1 = modal.getByTestId('report-page-1')
+  const page2 = modal.getByTestId('report-page-2')
+  await expect(page1).toBeVisible()
+  await expect(page2).toBeVisible()
+  await expect(modal.getByTestId('report-page-appendix')).toHaveCount(0)
+
+  // Both sheets must stay strictly bounded to a single A4 page (297mm ~= 1122.5px at 96dpi) with zero overflow.
+  const box1 = await page1.boundingBox()
+  const box2 = await page2.boundingBox()
+  expect(box1).not.toBeNull()
+  expect(box2).not.toBeNull()
+  expect(box1!.height).toBeLessThanOrEqual(1130)
+  expect(box2!.height).toBeLessThanOrEqual(1130)
+
+  // Verify paper background stays pure white even while the app is in Dark Mode.
+  const paperLuminance = await page1.evaluate((el) => {
+    const c = document.createElement('canvas')
+    c.width = 1
+    c.height = 1
+    const ctx = c.getContext('2d')!
+    ctx.fillStyle = getComputedStyle(el).backgroundColor
+    ctx.fillRect(0, 0, 1, 1)
+    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
+    return (r! + g! + b!) / 3
+  })
+  expect(paperLuminance).toBeGreaterThan(250)
+
+  // Verify Page 1 & Page 2 visual charts render inside the preview.
+  await expect(page1.locator('svg').first()).toBeVisible()
+  await expect(page2.getByTestId('rank-lines')).toBeVisible()
+
+  // Real Chromium vector PDF output while modal is open: must hide Radix portal and produce EXACTLY 2 A4 pages.
+  const pdf2Pages = await page.pdf({ format: 'A4', printBackground: true })
+  const countPdfPages = (buf: Buffer) => (buf.toString('latin1').match(/\/Type\s*\/Page\b/g) ?? []).length
+  expect(countPdfPages(pdf2Pages)).toBe(2)
+
+  // Toggle Audit Appendix on and verify Page 3+ raw decision matrix appears and prints as >= 3 pages.
+  await modal.getByTestId('report-appendix-toggle').check()
+  const appendix = modal.getByTestId('report-page-appendix')
+  await expect(appendix).toBeVisible()
+  await expect(appendix.getByTestId('report-raw-matrix')).toBeVisible()
+  const pdfWithAppendix = await page.pdf({ format: 'A4', printBackground: true })
+  expect(countPdfPages(pdfWithAppendix)).toBeGreaterThanOrEqual(3)
+
+  // Intercept window.print() and verify descriptive PDF filename title is set during print.
+  await page.evaluate(() => {
+    ;(window as unknown as { __printedTitle?: string }).__printedTitle = ''
+    window.print = () => {
+      ;(window as unknown as { __printedTitle?: string }).__printedTitle = document.title
+    }
+  })
+  await modal.getByTestId('report-confirm-print').click()
+  const printedTitle = await page.evaluate(() => (window as unknown as { __printedTitle?: string }).__printedTitle)
+  expect(printedTitle).toMatch(/^MCDM-Report-CRITIC-TOPSIS-\d{4}-\d{2}-\d{2}$/)
+})

@@ -10,25 +10,10 @@ import { viewOf } from '../../methods/views'
 import { useWorkbenchNav } from '../nav'
 import { BlockedByIssues } from '../parts'
 import { alternativeName, criterionName, placeIssue, tr } from '../shared'
-import { useCompareText } from './text'
+import { ECHO_NOTE_KEYS, useCompareText } from './text'
 import { whySentences } from './why'
 
-export const ECHO_NOTE_KEYS = new Set([
-  'copras_saw',
-  'copras_ahp-ranking',
-  'ahp-ranking_copras',
-  'ahp-ranking_saw',
-  'saw_ahp-ranking',
-  'vikor_mabac',
-  'mabac_vikor',
-  'promethee-ii_mabac',
-  'mabac_promethee-ii',
-  'vikor_promethee-ii',
-  'promethee-ii_vikor',
-  'waspas_saw',
-  'waspas_marcos',
-  'marcos_saw',
-])
+export { ECHO_NOTE_KEYS }
 
 /**
  * Compare: every ranking method on the same data and weights, each with its own saved options. Read only: nothing

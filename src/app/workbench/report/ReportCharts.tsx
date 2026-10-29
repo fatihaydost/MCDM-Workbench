@@ -260,8 +260,8 @@ export function StabilityBandSparkbar(props: {
   ariaLabel: string
 }): JSX.Element {
   const { weight, interval, ariaLabel } = props
-  const pad = 4
-  const trackW = 80
+  const pad = 2
+  const trackW = 32
   const clamp01 = (v: number) => Math.max(0, Math.min(1, Number.isFinite(v) ? v : 0))
   const wX = round2(pad + clamp01(weight) * trackW)
 
@@ -275,18 +275,18 @@ export function StabilityBandSparkbar(props: {
 
   return (
     <svg
-      width={88}
-      height={14}
-      viewBox="0 0 88 14"
+      width={36}
+      height={11}
+      viewBox="0 0 36 11"
       role="img"
       aria-label={ariaLabel}
-      className="inline-block align-middle overflow-visible"
+      className="block shrink-0"
     >
-      <rect x={pad} y={5} width={trackW} height={4} rx={1.5} fill="var(--surface-2)" />
+      <rect x={pad} y={3.5} width={trackW} height={4} rx={1.5} fill="var(--surface-2)" />
       {interval !== null && (
         <rect
           x={bandX}
-          y={3.5}
+          y={2}
           width={bandW}
           height={7}
           rx={1.5}
@@ -300,8 +300,8 @@ export function StabilityBandSparkbar(props: {
       <line
         x1={wX}
         x2={wX}
-        y1={1.5}
-        y2={12.5}
+        y1={1}
+        y2={10}
         stroke={interval !== null ? 'var(--data-accent)' : 'var(--text-2)'}
         strokeWidth={1.75}
         strokeLinecap="round"

@@ -303,6 +303,41 @@
   display: none !important;
 }
 
+.report-stage-slot figcaption,
+.report-stage-slot button,
+.report-stage-slot > div > figure:nth-child(n + 2),
+.report-ranklines-slot figcaption,
+.report-ranklines-slot p {
+  display: none !important;
+}
+
+.report-stage-slot figure,
+.report-ranklines-slot figure {
+  gap: 0 !important;
+}
+
+.report-stage-slot svg {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100%;
+  max-height: 46mm;
+  margin-inline: auto;
+}
+
+.report-stage-slot[data-slot='weighting'] svg {
+  max-height: 43mm;
+}
+
+.report-ranklines-slot svg {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100%;
+  max-height: 62mm;
+  margin-inline: auto;
+}
+
 .report-sheet .overflow-auto,
 .report-sheet .overflow-x-auto {
   overflow: visible !important;

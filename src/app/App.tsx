@@ -93,7 +93,7 @@ export function App({ ssrPath }: { ssrPath?: string | undefined } = {}) {
   return (
     <Router base={ROUTER_BASE} {...(ssrPath !== undefined && { ssrPath })}>
       <ScrollToTopOnNavigate />
-      <div className="flex min-h-dvh flex-col">
+      <div data-print-block className="flex min-h-dvh flex-col">
         <TopBar />
         <Switch>
           <Route path="/">

@@ -90,7 +90,7 @@ export function WorkbenchLayout({ stage, onStageChange, stageMeta, explanation, 
   const stageLabel = (s: Stage) => t(`workbench.stages.${s}`)
 
   return (
-    <div className="flex min-h-0 flex-1">
+    <div data-print-block className="flex min-h-0 flex-1">
       {/* Rail, md and up */}
       <nav
         aria-label={t('workbench.stagesLabel')}
@@ -120,7 +120,7 @@ export function WorkbenchLayout({ stage, onStageChange, stageMeta, explanation, 
         </ol>
       </nav>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div data-print-block className="flex min-w-0 flex-1 flex-col">
         {/* Stage switcher, under md */}
         <nav
           ref={switcher}
