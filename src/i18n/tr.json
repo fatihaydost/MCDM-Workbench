@@ -834,6 +834,18 @@
         "vikorC1": "Kabul edilebilir avantaj (C1)",
         "vikorC2": "Kabul edilebilir kararlılık (C2)",
         "vikorSet": "Uzlaşık çözüm kümesi"
+      },
+      "print": {
+        "button": "Rapor yazdır (PDF)",
+        "title": "Karar analizi raporu",
+        "verdictTitle": "Sonuç",
+        "weightsTitle": "Kriter ağırlıkları",
+        "rankingTitle": "Tam sıralama",
+        "summaryTitle": "Yöntemler arası uyum ve sağlamlık",
+        "kendallW": "Kendall W = {{w}} ({{count}} yöntem)",
+        "bordaLeader": "Borda uzlaşı lideri: {{name}}",
+        "firstPlaceAgreement": "{{of}} yöntemin {{n}} tanesinde birinci: {{name}}",
+        "weightStability": "Ağırlık kararlılığı (±%5, ±%10, ±%20): birinci {{total}} oynatmanın {{held}} tanesinde korundu"
       }
     },
     "calc": {

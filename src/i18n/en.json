@@ -834,6 +834,18 @@
         "vikorC1": "Acceptable advantage (C1)",
         "vikorC2": "Acceptable stability (C2)",
         "vikorSet": "Compromise set"
+      },
+      "print": {
+        "button": "Print report (PDF)",
+        "title": "Decision analysis report",
+        "verdictTitle": "Result",
+        "weightsTitle": "Criteria weights",
+        "rankingTitle": "Full ranking",
+        "summaryTitle": "Cross-method agreement and robustness",
+        "kendallW": "Kendall's W = {{w}} ({{count}} methods)",
+        "bordaLeader": "Borda consensus leader: {{name}}",
+        "firstPlaceAgreement": "First place in {{n}} of {{of}} methods: {{name}}",
+        "weightStability": "Weight stability (±5%, ±10%, ±20%): first place held in {{held}} of {{total}} nudges"
       }
     },
     "calc": {
