@@ -37,5 +37,5 @@ export function usePageMeta(title: string, description: string): void {
   }, [title, description])
 }
 
-/** Underlined text link in the body copy. */
-export const textLink = 'underline decoration-line-strong underline-offset-2 transition-colors hover:decoration-text'
+/** Underlined text link in the body copy (with comfortable vertical tap padding on small touch screens). */
+export const textLink = 'underline decoration-line-strong underline-offset-2 transition-colors hover:decoration-text max-sm:inline-block max-sm:py-1'

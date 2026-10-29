@@ -80,6 +80,13 @@
         "ranking": "Ranking method",
         "results": "Result",
         "robustness": "Robustness"
+      },
+      "robustnessCard": {
+        "title": "Sensitivity and cross-method checks built in",
+        "lead": "Sweep any criterion weight from 0 to 1, run 10,000 Monte Carlo draws, or compare all 16 ranking methods side by side to see where the first place switches.",
+        "openRobustness": "Open robustness stage",
+        "openCompare": "Compare 16 methods",
+        "aria": "TOPSIS closeness curves for phones C, D and E as the weight of price sweeps from 0 to 1"
       }
     },
     "verified": {

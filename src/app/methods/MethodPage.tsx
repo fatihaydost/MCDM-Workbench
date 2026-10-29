@@ -6,6 +6,7 @@ import { isMethodId, methodMeta } from '../../content/methods/catalog'
 import { loadMethod } from '../../content/methods/load'
 import { localizeMethod, type MethodContent } from '../../content/types'
 import { examples } from '../../data/examples'
+import { MethodGlyph } from '../../features/illustrations/MethodGlyph'
 import { useLang } from '../../i18n'
 import { buttonClasses } from '../../ui/Button'
 import { cn } from '../../ui/cn'
@@ -134,7 +135,7 @@ export function MethodArticle({ m }: { m: MethodContent }) {
           {t('methods.backToCatalog')}
         </Link>
 
-        <div className="mt-6">
+        <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,760px)_280px] lg:items-start lg:justify-between lg:gap-12">
           <article className="flex min-w-0 max-w-[760px] flex-col gap-12">
             <header className="flex flex-col gap-5">
               <div className="flex flex-col gap-1">
@@ -287,6 +288,35 @@ export function MethodArticle({ m }: { m: MethodContent }) {
             </Section>
           </article>
 
+          <aside aria-label={l.name} className="hidden lg:sticky lg:top-20 lg:flex lg:flex-col lg:gap-6">
+            <div className="flex flex-col gap-3 rounded-control border border-line bg-surface p-4">
+              <div className="flex items-center gap-2.5 text-text-2">
+                <MethodGlyph family={m.family} size={28} />
+                <span className="text-13 font-medium text-text">{t(`methods.families.${m.family}`)}</span>
+              </div>
+              <p className="text-13 text-text-2">{shortOrigin(m.origin, lang)}</p>
+              {workbenchExamples[0] && (
+                <Link
+                  href={`/app?example=${workbenchExamples[0].id}&method=${m.id}`}
+                  className={buttonClasses({ variant: 'primary', className: 'w-full justify-center' })}
+                >
+                  {t('methods.page.reference.open')}
+                </Link>
+              )}
+            </div>
+
+            <nav aria-label={l.name} className="flex flex-col gap-1 border-l border-line pl-3">
+              {SECTIONS.map((s) => (
+                <a
+                  key={s}
+                  href={`#${s}`}
+                  className="py-1 text-13 text-text-2 no-underline transition-colors hover:text-text"
+                >
+                  {s === 'reference' && !available ? t('methods.page.reference.researchTitle') : sectionTitle(s)}
+                </a>
+              ))}
+            </nav>
+          </aside>
         </div>
       </main>
       <SiteFooter privacy={false} />

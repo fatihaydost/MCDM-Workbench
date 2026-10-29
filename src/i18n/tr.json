@@ -80,6 +80,13 @@
         "ranking": "Sıralama",
         "results": "Sonuç",
         "robustness": "Sağlamlık"
+      },
+      "robustnessCard": {
+        "title": "Duyarlılık ve yöntemler arası karşılaştırma yerleşik",
+        "lead": "Herhangi bir kriter ağırlığını 0'dan 1'e tarayın, 10.000 Monte Carlo çekilişi koşturun veya 16 sıralama yöntemini yan yana karşılaştırarak birincinin nerede değiştiğini görün.",
+        "openRobustness": "Sağlamlık aşamasını açın",
+        "openCompare": "16 yöntemi karşılaştırın",
+        "aria": "Fiyat ağırlığı 0'dan 1'e taranırken C, D ve E telefonlarının TOPSIS yakınlık eğrileri"
       }
     },
     "verified": {
