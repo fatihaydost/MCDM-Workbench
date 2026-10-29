@@ -1,4 +1,4 @@
-import { useId, useMemo } from 'react'
+import { useCallback, useId, useMemo, useState } from 'react'
 import { ChartFigure } from './ChartFigure'
 import s from './charts.module.css'
 import { estimateTextWidth, heatPaint, layoutHeatmap, type HeatScale } from './layout'
@@ -47,7 +47,15 @@ export type HeatmapProps = {
 export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, format, emptyText = '', description, tableLabels, className, fade = false, columnsTitle, muteZero = false }: HeatmapProps) {
   const uid = useId()
   const [plotRef, width] = useElementWidth<HTMLDivElement>()
-  const tokens = useHeatTokens()
+  const [hostEl, setHostEl] = useState<HTMLDivElement | null>(null)
+  const ref = useCallback(
+    (node: HTMLDivElement | null) => {
+      plotRef(node)
+      setHostEl(node)
+    },
+    [plotRef],
+  )
+  const tokens = useHeatTokens(hostEl)
   const text = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? format(v) : emptyText)
   const rowPeaks = useMemo(
     () =>
@@ -79,7 +87,7 @@ export function Heatmap({ title, rowLabels, colLabels, values, scale, domain, fo
       description={description}
       showTable={tableLabels.show}
       table={table}
-      plotRef={plotRef}
+      plotRef={ref}
       className={className}
     >
       <svg
