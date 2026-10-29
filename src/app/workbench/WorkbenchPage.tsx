@@ -3,6 +3,7 @@ import { lazy, Suspense, use, useCallback, useEffect, useLayoutEffect, useMemo, 
 import { useTranslation } from 'react-i18next'
 import { loadMethod } from '../../content/methods/load'
 import { getExample } from '../../data/examples'
+import { decodeShareState } from '../../features/io/share'
 import { useLang } from '../../i18n'
 import { compareRankings, getRankingMethod, rankingMethods } from '../../core'
 import { isEmptyProblem, runFor, STAGES, toProblem, useMethodParams, useRanking, useValidation, useWeights, useWorkbench, type Stage } from '../../state/workbench'
@@ -54,12 +55,16 @@ function preloadInitialStage(): Promise<unknown> {
   if (typeof window === 'undefined') return Promise.resolve()
   const state = useWorkbench.getState()
   const params = new URLSearchParams(window.location.search)
+  const shared = decodeShareState(params.get('s'))
   const exId = params.get('example')
   const methodParam = params.get('method')
   const stageParam = params.get('stage')
   const ex = exId ? getExample(exId) : undefined
-  const activeStage: Stage = isStage(stageParam) ? stageParam : ex ? 'data' : state.stage
-  const activeIds = new Set<ViewId>([state.weightMethod, state.rankingMethod])
+  const activeStage: Stage = shared ? shared.stage : isStage(stageParam) ? stageParam : ex ? 'data' : state.stage
+  const activeIds = new Set<ViewId>([
+    shared ? shared.weightMethod : state.weightMethod,
+    shared ? shared.rankingMethod : state.rankingMethod,
+  ])
   if (ex) {
     activeIds.add(ex.equalWeights ? 'equal' : 'critic')
     for (const ref of ex.referenceFor) {
@@ -113,12 +118,22 @@ function RobustnessSkeleton() {
 function useQueryBootstrap() {
   const [lang] = useLang()
   const loadExample = useWorkbench((s) => s.loadExample)
+  const loadSharedState = useWorkbench((s) => s.loadSharedState)
   const setStage = useWorkbench((s) => s.setStage)
   const done = useRef(false)
   useLayoutEffect(() => {
     if (done.current) return
     done.current = true
     const params = new URLSearchParams(window.location.search)
+    const shareParam = params.get('s')
+    if (shareParam !== null) {
+      const shared = decodeShareState(shareParam)
+      if (shared) loadSharedState(shared)
+      params.delete('s')
+      const rest = params.toString()
+      window.history.replaceState(window.history.state, '', `${window.location.pathname}${rest ? `?${rest}` : ''}${window.location.hash}`)
+      return
+    }
     const example = params.get('example')
     const stage = params.get('stage')
     if (!example && !stage) return
@@ -131,7 +146,7 @@ function useQueryBootstrap() {
     params.delete('stage')
     const rest = params.toString()
     window.history.replaceState(window.history.state, '', `${window.location.pathname}${rest ? `?${rest}` : ''}${window.location.hash}`)
-  }, [lang, loadExample, setStage])
+  }, [lang, loadExample, loadSharedState, setStage])
 }
 
 /**

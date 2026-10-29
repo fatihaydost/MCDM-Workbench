@@ -1,7 +1,8 @@
-import { SidebarSimple } from '@phosphor-icons/react'
+import { Check, LinkSimple, SidebarSimple } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { STAGES, type Stage } from '../../state/workbench'
+import { buildShareUrl } from '../../features/io/share'
+import { isEmptyProblem, STAGES, useWorkbench, type Stage } from '../../state/workbench'
 import { Button, cn, Dialog, DialogContent, DialogTrigger, SegmentedControl } from '../../ui'
 
 /** True at >= 1280 px, where the explanation panel is a fixed right column. */
@@ -42,6 +43,24 @@ export function WorkbenchLayout({ stage, onStageChange, stageMeta, explanation, 
   const { t } = useTranslation()
   const wide = useWide()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const empty = useWorkbench((s) => isEmptyProblem(s.problem))
+  const [copied, setCopied] = useState(false)
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(copyTimer.current), [])
+
+  const copyShareLink = async () => {
+    const state = useWorkbench.getState()
+    if (isEmptyProblem(state.problem)) return
+    const url = buildShareUrl(state)
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      clearTimeout(copyTimer.current)
+      copyTimer.current = setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard blocked
+    }
+  }
   // Six stages do not fit a phone: the switcher scrolls inside its bar, and the open stage is kept in view.
   const switcher = useRef<HTMLElement>(null)
   // A fade on the right edge says there are more stages to scroll to.
@@ -124,18 +143,33 @@ export function WorkbenchLayout({ stage, onStageChange, stageMeta, explanation, 
         <main id="main" tabIndex={-1} className="min-w-0 flex-1 px-4 pb-10 outline-none md:px-6">
           <div className="flex items-center justify-between gap-4 pt-4">
             <h1 className="text-20 font-semibold text-text">{stageLabel(stage)}</h1>
-            {!wide && (
-              <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm" icon={<SidebarSimple aria-hidden />}>
-                    {t('workbench.explanation.open')}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent placement="sheet" id="explanation-sheet" title={t('workbench.explanation.title')}>
-                  <div className="text-14 text-text-2">{explanation}</div>
-                </DialogContent>
-              </Dialog>
-            )}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={copied ? <Check aria-hidden /> : <LinkSimple aria-hidden />}
+                disabled={empty}
+                onClick={() => void copyShareLink()}
+                data-testid="workbench-copy-link"
+              >
+                {copied ? t('workbench.share.copied') : t('workbench.share.copyLink')}
+              </Button>
+              <span aria-live="polite" className="sr-only">
+                {copied ? t('workbench.share.copied') : ''}
+              </span>
+              {!wide && (
+                <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" icon={<SidebarSimple aria-hidden />}>
+                      {t('workbench.explanation.open')}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent placement="sheet" id="explanation-sheet" title={t('workbench.explanation.title')}>
+                    <div className="text-14 text-text-2">{explanation}</div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
           </div>
           {children}
         </main>

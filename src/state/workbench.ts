@@ -109,6 +109,21 @@ export type WorkbenchActions = {
    * ranking methods opens, e.g. the VIKOR page's link to the Opricovic and Tzeng example that TOPSIS shares.
    */
   loadExample: (id: string, lang: Lang, method?: string) => void
+  /** Restores a full workbench state decoded from a shared URL (`?s=`). */
+  loadSharedState: (
+    payload: Pick<
+      WorkbenchData,
+      | 'problem'
+      | 'weightMethod'
+      | 'rankingMethod'
+      | 'manualWeights'
+      | 'methodParams'
+      | 'judgements'
+      | 'alternativeJudgements'
+      | 'stage'
+      | 'exampleId'
+    >,
+  ) => void
   /** While a loaded example is unchanged, writes its alternative and criterion names in `lang` (language switch). */
   localizeExample: (lang: Lang) => void
   /** Empty m x n table with default names (A1.., C1..). */
@@ -804,6 +819,31 @@ export const useWorkbench = create<WorkbenchState>()(
               ? sanitizeJudgements(structuredClone(ex.judgements), ex.criteria.length)
               : emptyJudgements(ex.criteria.length),
           alternativeJudgements: emptyAlternativeJudgements(ex.criteria.length),
+        })
+      },
+
+      loadSharedState: (payload) => {
+        remember(get(), true)
+        memorize(get().problem.criteria, get().manualWeights)
+        memorizeJudgements(get().problem.criteria, judgementsOf(get()))
+        memorizeAlternativeJudgements(get().problem, altJudgementsOf(get()))
+        const m = payload.problem.alternatives.length
+        const n = payload.problem.criteria.length
+        set({
+          problem: {
+            alternatives: [...payload.problem.alternatives],
+            criteria: payload.problem.criteria.map((c) => ({ name: c.name, type: c.type })),
+            matrix: payload.problem.matrix.map((row) => [...row]),
+          },
+          weightMethod: payload.weightMethod,
+          rankingMethod: payload.rankingMethod,
+          manualWeights: fitWeights(payload.manualWeights, n),
+          methodParams: sanitizeMethodParams(payload.methodParams, n),
+          judgements: sanitizeJudgements(payload.judgements, n),
+          alternativeJudgements: sanitizeAlternativeJudgements(payload.alternativeJudgements, m, n),
+          stage: payload.stage,
+          exampleId: payload.exampleId,
+          importedFrom: null,
         })
       },
 
