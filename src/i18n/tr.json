@@ -234,6 +234,10 @@
       "title": "Açıklama",
       "open": "Açıklamayı göster"
     },
+    "share": {
+      "copyLink": "Bağlantıyı kopyala",
+      "copied": "Kopyalandı"
+    },
     "alternative": "Alternatif",
     "alternatives": "Alternatifler",
     "criterion": "Kriter",

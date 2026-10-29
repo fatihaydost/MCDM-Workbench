@@ -234,6 +234,10 @@
       "title": "Explanation",
       "open": "Show explanation"
     },
+    "share": {
+      "copyLink": "Copy link",
+      "copied": "Copied"
+    },
     "alternative": "Alternative",
     "alternatives": "Alternatives",
     "criterion": "Criterion",
