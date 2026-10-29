@@ -231,3 +231,69 @@
     opacity: 1;
   }
 }
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm;
+  }
+
+  :root,
+  :root[data-theme='dark'] {
+    color-scheme: light;
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f4f5f7;
+    --line: #d5d8de;
+    --line-strong: #9aa1ae;
+    --text: #111418;
+    --text-2: #3b424d;
+    --text-3: #5c6470;
+    --accent: #185868;
+    --accent-bg: #eef5f7;
+  }
+
+  body {
+    min-height: 0;
+    background: #ffffff !important;
+    color: #111418 !important;
+    font-size: 12px;
+    line-height: 16px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  header:not(.print-only header),
+  nav,
+  aside,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: flex !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  table {
+    border-collapse: collapse;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  tr,
+  thead,
+  tbody,
+  section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-only th,
+  .print-only td {
+    display: table-cell !important;
+  }
+}

@@ -53,7 +53,7 @@ export function CalculationToggle({
   const [open, setOpen] = useState(false)
   const regionId = useId()
   return (
-    <section className="flex flex-col gap-4">
+    <section className="no-print flex flex-col gap-4">
       <div>
         <Button
           aria-expanded={open}
@@ -79,7 +79,7 @@ export function SectionTitle({ children, as: H = 'h2', className }: { children: 
 export function ContinueBar({ to, onContinue, children }: { to: Exclude<Stage, 'data'>; onContinue: () => void; children?: ReactNode }) {
   const { t } = useTranslation()
   return (
-    <div className="flex flex-wrap items-center gap-3 border-t border-line pt-4">
+    <div className="no-print flex flex-wrap items-center gap-3 border-t border-line pt-4">
       <Button variant="primary" iconEnd={<ArrowRight aria-hidden />} onClick={onContinue}>
         {t(`workbench.continue.${to}`)}
       </Button>

@@ -96,7 +96,7 @@ export function TopBar() {
   const { t } = useTranslation()
   const [inWorkbench] = useRoute('/app/*?')
   return (
-    <header className="sticky top-0 z-30 shrink-0 border-b border-line bg-bg">
+    <header className="no-print sticky top-0 z-30 shrink-0 border-b border-line bg-bg">
       <div
         className={cn(
           'flex h-15 items-center gap-1 sm:gap-2',

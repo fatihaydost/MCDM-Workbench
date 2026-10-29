@@ -121,8 +121,8 @@ export function WorkbenchLayout({ stage, onStageChange, stageMeta, explanation, 
           />
         </nav>
 
-        <main id="main" tabIndex={-1} className="min-w-0 flex-1 px-4 pb-10 outline-none md:px-6">
-          <div className="flex items-center justify-between gap-4 pt-4">
+        <main id="main" tabIndex={-1} className="min-w-0 flex-1 px-4 pb-10 outline-none md:px-6 print:px-0 print:pb-0">
+          <div className="no-print flex items-center justify-between gap-4 pt-4">
             <h1 className="text-20 font-semibold text-text">{stageLabel(stage)}</h1>
             {!wide && (
               <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>

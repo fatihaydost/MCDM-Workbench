@@ -1,4 +1,4 @@
-import { DownloadSimple } from '@phosphor-icons/react'
+import { DownloadSimple, Printer } from '@phosphor-icons/react'
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { doiUrl, formatCitation, getExample, shortCitation } from '../../data/examples'
@@ -10,6 +10,7 @@ import { Button, EmptyState, Notice } from '../../ui'
 import { methodViews } from '../methods/views'
 import { useWorkbenchNav } from './nav'
 import { BlockedByIssues, CalculationToggle, ContinueBar, MethodWarnings, SectionTitle } from './parts'
+import { PrintReport } from './PrintReport'
 import { bestIndex, leaders, RankingTable } from './RankingStage'
 import { alternativeName, criterionName, DECIMALS, downloadBlob, findStep, rankingMethodFullLabel, scoreWords, stepName, weightMethodFullLabel } from './shared'
 import { WeightsChart } from './WeightsStage'
@@ -163,9 +164,18 @@ export function ResultsStage() {
   )
 
   return (
-    <div className="flex flex-col gap-10 pt-4">
+    <div className="flex flex-col gap-10 pt-4 print:gap-4 print:pt-0">
       <MethodWarnings warnings={[...(w.warnings ?? []), ...(result.warnings ?? [])]} problem={problem} />
-      <section aria-labelledby="wb-results-headline" className="flex flex-col gap-5">
+      <PrintReport
+        problem={problem}
+        weights={w}
+        result={result}
+        weightLabel={weightLabel}
+        rankingLabel={rankingLabel}
+        rankingMethod={rankingMethod}
+        verdict={verdict}
+      />
+      <section aria-labelledby="wb-results-headline" className="no-print flex flex-col gap-5">
         <div className="flex flex-col gap-1">
           <p id="wb-results-headline" className="text-24 font-semibold text-text">
             {(() => {
@@ -204,12 +214,15 @@ export function ResultsStage() {
             {source}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="no-print flex flex-wrap items-center gap-2">
           <Button variant="primary" icon={<DownloadSimple aria-hidden />} onClick={() => void downloadXlsx()} disabled={busy !== null}>
             {busy === 'xlsx' ? t('workbench.results.preparing') : t('workbench.results.downloadXlsx')}
           </Button>
           <Button icon={<DownloadSimple aria-hidden />} onClick={downloadCsv}>
             {t('workbench.results.downloadCsv')}
+          </Button>
+          <Button icon={<Printer aria-hidden />} onClick={() => window.print()} data-testid="print-report-button">
+            {t('workbench.results.print.button')}
           </Button>
           <span aria-live="polite" className="sr-only">
             {busy ? t('workbench.results.preparing') : ''}
@@ -223,14 +236,14 @@ export function ResultsStage() {
       </section>
 
       {/* Results is the summary: the score bars and the method's picture stay on Ranking. */}
-      <section className="flex flex-col gap-3">
+      <section className="no-print flex flex-col gap-3">
         <SectionTitle>
           <span id="wb-results-ranking">{t('workbench.results.rankingTitle')}</span>
         </SectionTitle>
         <RankingTable problem={problem} result={result} method={rankingMethod} id="wb-results-ranking" compact />
       </section>
 
-      <section className="grid grid-cols-1 items-start gap-8 xl:grid-cols-2">
+      <section className="no-print grid grid-cols-1 items-start gap-8 xl:grid-cols-2">
         <WeightsChart names={names} weights={w.weights} format={format4} className="min-w-0" />
         {correlation && (
           <Heatmap
@@ -248,7 +261,7 @@ export function ResultsStage() {
         )}
       </section>
 
-      <section aria-labelledby="wb-calculation" className="flex flex-col gap-3">
+      <section aria-labelledby="wb-calculation" className="no-print flex flex-col gap-3">
         <SectionTitle>
           <span id="wb-calculation">{t('workbench.results.calculationTitle')}</span>
         </SectionTitle>
