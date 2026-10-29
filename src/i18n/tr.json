@@ -93,7 +93,7 @@
       "title": "Yayımlanmış sonuçlarla doğrulandı",
       "lead": "Test takımı yayımlanmış örnekleri yeniden hesaplar ve basılı her basamağı karşılaştırır.",
       "matched": "Neyin eşleştiği",
-      "toleranceNote": "Tolerans, son basılı basamağın yarım birimidir.",
+      "toleranceNote": "Tolerans nereden gelir? Akademik makaleler sonuç tablolarını belirli bir ondalık basamağa yuvarlayarak basar (örneğin 4 ondalıklı 0,6033 değeri ±0,00005 yuvarlama payı taşır); listedeki her tolerans ilgili yayının basılı yuvarlama sınırıdır.",
       "critic": {
         "claim": "Ağırlıklar ve standart sapmalar {{citation}} ile {{decimals}} basamağa kadar aynı."
       },
@@ -109,8 +109,8 @@
       "vikor": {
         "claim": "S, R, Q ve uzlaşık çözüm A2 {{citation}} ile {{decimals}} basamağa kadar aynı; iki birim gösteriminde de."
       },
-      "also": "Ayrıca test edilenler: ilk ders projesindeki elle çözülmüş CRITIC tablosu, her ara matris {{tol}} içinde; CRITIC ardından TOPSIS zincirinin ilk Python koduyla eşliği, {{tol}} içinde. Tablo ve Python kodu bağımsız kaynak değildir.",
-      "alsoTitle": "Diğer kontroller",
+      "also": "Ek doğrulama: makale tablolarının yanında permütasyon, ölçek ve kaydırma değişmezlikleri, cebirsel yöntem eşdeğerlikleri (MARCOS ve doğrusal SAW, V-tipi PROMETHEE II ve MABAC, dağıtımsal AHP ve toplam SAW) ile sabit sütun ve uç değer sınır koşulları da otomatik test takımında sınanır.",
+      "alsoTitle": "Nasıl doğrulanıyor?",
       "tolerance": "Tolerans {{tol}}",
       "edas": {
         "claim": "47 değerlendirme skoru ve Tablo 2'nin bütün hücreleri, makalenin yuvarladığı gibi yuvarlanınca {{citation}} ile {{decimals}} basamağa kadar aynı."

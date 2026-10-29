@@ -108,13 +108,13 @@ Otomatik test takımı (**57 test dosyası, 1.732 birim testi**) hakemli makalel
 | ELECTRE I | Roy (1968), *RIRO* 2(V1):57; Wang ve Triantaphyllou (2008), *Omega* 36(1):45, Bölüm 3.1 (Galway atıksu arıtma tesisi, 5 aday alan, 7 kriter); Soner ve Önüt (2006), *Gazi Üniv. Müh. Mim. Fak. Der.* 21(3):579 | uyum C, uyumsuzluk D, üstünlük grafı S, SCC döngü daraltmalı çekirdek K = {A2, A3, A5} ve net uyum / uyumsuzluk | ±0,0005 |
 | ELECTRE III | Roy (1978), *Cahiers du CERO* 20(1):3; Wang ve Triantaphyllou (2008), *Omega* 36(1):45, Bölüm 3.2, Tablo 2-3 (11 atık yakma stratejisi, 11 kriter, 110 köşegen dışı güvenilirlik hücresi) | sözde kriter uyumu C, güvenilirlik matrisi σ(a, b), azalan ve artan damıtma ön-sıralamaları ve karşılaştırılamazlıklar | ±0,005 |
 
-Ayrıca CRITIC yöntemi ilk ders projesindeki elle çözülmüş hesap tablosuyla (`legacy/CRITIC(2).xlsx`) ve CRITIC + TOPSIS zincirinin tamamı ilk Python koduyla $10^{-12}$ hassasiyette doğrulanmaktadır. Test verileri [`tests/fixtures/`](tests/fixtures) altındadır.
+[`tests/fixtures/`](tests/fixtures) altındaki yayımlanmış makale tablolarına ek olarak; permütasyon, ölçek ve kaydırma değişmezlikleri, yöntemler arası cebirsel eşdeğerlikler ve uç/dejenere girdi sınır koşulları da otomatik test takımında doğrulanmaktadır.
 
 ## Teknoloji yığını
 
 - **Arayüz ve durum yönetimi:** React 19, TypeScript, Vite, Zustand, Wouter, Tailwind CSS 4, Radix UI
 - **Matematik, tablolar ve çok dillilik:** Saf TypeScript çekirdeği (`src/core/`), KaTeX, SheetJS (`.xlsx` içe/dışa aktarma), i18next (`tr` / `en`)
-- **Doğrulama:** Vitest (1.732 birim, değişmezlik ve literatür doğrulama testi) ve Playwright (uçtan uca ve axe-core erişilebilirlik testleri)
+- **Doğrulama:** Vitest (65 test dosyasında 1.867 birim, değişmezlik ve literatür doğrulama testi) ve Playwright (uçtan uca ve axe-core erişilebilirlik testleri)
 - **Dağıtım:** GitHub Pages üzerinde statik derleme
 
 ## Yerelde çalıştırma
@@ -134,10 +134,6 @@ pnpm build    # TypeScript kontrolü + üretim paketi
 - [Tasarım ilkeleri (`docs/design/DESIGN.md`)](docs/design/DESIGN.md)
 - [Uygulama yol haritası (`docs/design/PLAN.md`)](docs/design/PLAN.md)
 - [Yöntem araştırma dosyaları (`docs/research/`)](docs/research/)
-
-## Proje geçmişi
-
-CRITIC ve TOPSIS için Flask tabanlı bir ders projesi olarak başladı; ilk sürüm değiştirilmeden [`legacy/`](legacy) klasöründe korunmaktadır.
 
 ## Lisans
 

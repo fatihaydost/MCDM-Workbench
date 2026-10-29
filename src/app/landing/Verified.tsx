@@ -5,7 +5,6 @@ import { getJudgementExample } from '../../data/judgementExamples'
 import { formatNumber, useLang, type Lang } from '../../i18n'
 // Tolerances are the test fixtures' (each method view's `ledger`, checked against the fixture by views.test.ts), so the
 // page cannot drift from what the tests check.
-import xlsx from '../../../tests/fixtures/critic-xlsx.json'
 import { methodViews, type ViewId } from '../methods/views'
 import { textLink } from './usePageMeta'
 
@@ -16,13 +15,6 @@ type Row = { method: Exclude<ViewId, 'equal' | 'manual' | 'ahp-ranking'>; citati
 function formatTolerance(tol: number, lang: Lang): string {
   const decimals = Math.max(0, Math.ceil(-Math.log10(tol)))
   return `±${formatNumber(tol, lang, decimals)}`
-}
-
-/** "±10⁻¹²" for the tiny parity tolerances. */
-function formatPower(tol: number): string {
-  const exp = Math.round(Math.log10(tol))
-  const sup: Record<string, string> = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' }
-  return `±10${String(exp).replace(/./g, (c) => sup[c] ?? c)}`
 }
 
 /** Printed decimals a half-unit tolerance stands for: 0.00005 -> 4, 0.0005 -> 3. */
@@ -83,7 +75,7 @@ export function Verified() {
       <details className="text-13 text-text-2">
         <summary className="cursor-pointer hover:text-text">{t('landing.verified.alsoTitle')}</summary>
         <p className="mt-2 max-w-[80ch]">{t('landing.verified.toleranceNote')}</p>
-        <p className="mt-1 max-w-[80ch]">{t('landing.verified.also', { tol: formatPower(xlsx.expected.tolerance) })}</p>
+        <p className="mt-1 max-w-[80ch]">{t('landing.verified.also')}</p>
       </details>
     </section>
   )

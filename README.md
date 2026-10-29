@@ -108,13 +108,13 @@ The automated test suite (**57 test files, 1,732 unit tests**) recomputes publis
 | ELECTRE I | Roy (1968), *RIRO* 2(V1):57; Wang and Triantaphyllou (2008), *Omega* 36(1):45, Section 3.1 (Galway wastewater treatment plant, 5 sites, 7 criteria); Soner and Önüt (2006), *J. Fac. Eng. Arch. Gazi Univ.* 21(3):579 | concordance C, discordance D, outranking graph S, SCC-condensed kernel K = {A2, A3, A5} and net concordance / discordance | ±0.0005 |
 | ELECTRE III | Roy (1978), *Cahiers du CERO* 20(1):3; Wang and Triantaphyllou (2008), *Omega* 36(1):45, Section 3.2, Tables 2-3 (11 waste incineration strategies, 11 criteria, 110 off-diagonal credibility cells) | pseudo-criterion concordance C, credibility σ(a, b), descending and ascending distillation pre-orders and incomparabilities | ±0.005 |
 
-CRITIC is also checked against the hand-solved spreadsheet from the original coursework (`legacy/CRITIC(2).xlsx`) and the full CRITIC + TOPSIS chain against the legacy Python code, both to $10^{-12}$. Reference fixtures live in [`tests/fixtures/`](tests/fixtures).
+Alongside the published literature tables in [`tests/fixtures/`](tests/fixtures), the suite verifies permutation, scale, and shift invariants, exact algebraic equivalences across methods, and boundary conditions across degenerate or extreme inputs.
 
 ## Tech stack
 
 - **UI & state:** React 19, TypeScript, Vite, Zustand, Wouter, Tailwind CSS 4, Radix UI
 - **Math, tables & i18n:** Pure TypeScript core (`src/core/`), KaTeX, SheetJS (`.xlsx` import/export), i18next (`en` / `tr`)
-- **Verification:** Vitest (1,732 unit, property, invariant, and literature fixture tests) and Playwright (end-to-end & axe-core accessibility tests)
+- **Verification:** Vitest (1,867 unit, property, invariant, and literature fixture tests across 65 test files) and Playwright (end-to-end & axe-core accessibility tests)
 - **Deployment:** Static build on GitHub Pages
 
 ## Run locally
@@ -134,10 +134,6 @@ pnpm build    # TypeScript check + production bundle
 - [Design system & product principles](docs/design/DESIGN.md)
 - [Implementation roadmap](docs/design/PLAN.md)
 - [Method research dossiers (`docs/research/`)](docs/research/)
-
-## Project history
-
-Started as a Flask coursework app for CRITIC and TOPSIS; that original version is preserved unchanged in [`legacy/`](legacy).
 
 ## License
 

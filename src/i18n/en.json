@@ -93,7 +93,7 @@
       "title": "Checked against published results",
       "lead": "The test suite recomputes the published examples and compares every printed digit.",
       "matched": "What matched",
-      "toleranceNote": "The tolerance is half a unit of the last printed digit.",
+      "toleranceNote": "Where the tolerance comes from: papers print results rounded to a fixed number of decimals (for example, a 4-decimal value like 0.6033 carries a ±0.00005 rounding margin), so each tolerance above equals the rounding precision of that publication.",
       "critic": {
         "claim": "Weights and standard deviations match {{citation}} to {{decimals}} decimals."
       },
@@ -109,8 +109,8 @@
       "vikor": {
         "claim": "S, R, Q and the compromise A2 match {{citation}} to {{decimals}} decimals, in both unit encodings."
       },
-      "also": "Also tested: the hand-solved CRITIC spreadsheet from the original coursework, every intermediate matrix within {{tol}}, and parity of CRITIC then TOPSIS with the original Python code within {{tol}}. The spreadsheet and the Python code are not independent references.",
-      "alsoTitle": "Other checks",
+      "also": "Additional checks: alongside published paper tables, the automated test suite verifies permutation, scale and shift invariants, exact algebraic equivalences across methods (MARCOS with linear SAW, V-shape PROMETHEE II with MABAC, distributive AHP with sum SAW), and constant-column or extreme-value boundary cases.",
+      "alsoTitle": "How verification works",
       "tolerance": "Tolerance {{tol}}",
       "edas": {
         "claim": "All 47 appraisal scores and every cell of Table 2 match {{citation}} to {{decimals}} decimals, rounded as the paper did."
