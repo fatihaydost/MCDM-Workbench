@@ -7,7 +7,8 @@ import { useNumberFormat } from '../../i18n'
 import { runFor, toProblem, useWorkbench, type DraftProblem, type RankingMethodId } from '../../state/workbench'
 import { Table, TBody, Td, Th, THead, Tr } from '../../ui'
 import type { Verdict } from '../methods/views'
-import { bestIndex, leaders, RankingTable } from './RankingStage'
+import { rankOrder } from '../ranking/order'
+import { bestIndex, leaders } from './RankingStage'
 import { heldCount } from './robustness/helpers'
 import { useRobustnessSummary } from './robustnessSummary'
 import { alternativeName, criterionName, DECIMALS, scoreWords } from './shared'
@@ -175,7 +176,26 @@ export function PrintReport({
 
       <section className="flex flex-col gap-1.5" data-testid="print-ranking-section">
         <h2 className="text-14 font-semibold text-text">{t('workbench.results.print.rankingTitle')}</h2>
-        <RankingTable problem={problem} result={result} method={rankingMethod} />
+        <Table density="compact" stickyHeader={false} className="w-full">
+          <THead>
+            <Tr>
+              <Th numeric>{t('workbench.ranking.columns.rank')}</Th>
+              <Th>{t('workbench.alternative')}</Th>
+              <Th numeric>{ `${score.name} (${score.symbol})`}</Th>
+            </Tr>
+          </THead>
+          <TBody>
+            {rankOrder(result.ranking).map((i) => (
+              <Tr key={i}>
+                <Td numeric>{result.ranking[i]}</Td>
+                <Th scope="row">{altNames[i]}</Th>
+                <Td numeric className="font-medium">
+                  {nf.format(result.scores[i] ?? 0)}
+                </Td>
+              </Tr>
+            ))}
+          </TBody>
+        </Table>
       </section>
 
       <section
