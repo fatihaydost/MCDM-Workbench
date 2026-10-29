@@ -80,5 +80,9 @@
     "title": "Rank matrix by method",
     "description": "Rows follow the Borda consensus order, rank 1 cells are highlighted, and clicking a row compares it above.",
     "borda": "Borda"
+  },
+  "correlation": {
+    "title": "Pairwise rank correlation (Kendall's τ_b)",
+    "description": "Cells show tie-corrected rank agreement from -1 (reversed) to 1 (identical) across independent methods."
   }
 }

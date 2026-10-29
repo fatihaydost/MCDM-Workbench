@@ -143,6 +143,45 @@ export function kendallW(rankings: number[][]): number {
   return denom === 0 ? 1 : Math.max(0, Math.min(1, (12 * S) / denom)) // every ranking all tied: identical, full agreement
 }
 
+/**
+ * Tie-corrected Kendall's τ_b on two rankings in [-1, 1]:
+ * τ_b = (C − D) / √((n_0 − n_1)(n_0 − n_2)), where n_0 − n_k is the count of untied pairs in ranking k.
+ */
+export function kendallTauB(rA: readonly number[], rB: readonly number[]): number {
+  const n = Math.min(rA.length, rB.length)
+  let c = 0
+  let d = 0
+  let uA = 0
+  let uB = 0
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const dA = rA[i]! - rA[j]!
+      const dB = rB[i]! - rB[j]!
+      if (dA !== 0) uA++
+      if (dB !== 0) uB++
+      const prod = dA * dB
+      if (prod > 0) c++
+      else if (prod < 0) d++
+    }
+  }
+  if (uA === 0 && uB === 0) return 1
+  if (uA === 0 || uB === 0) return 0
+  return Math.max(-1, Math.min(1, (c - d) / Math.sqrt(uA * uB)))
+}
+
+/** Symmetric N × N Kendall τ_b matrix across the independent (non-echo) ranked methods. */
+export function rankCorrelationMatrix(comparison: Comparison): { methods: string[]; matrix: number[][] } {
+  const counted = comparison.runs.filter(
+    (r): r is MethodRun & { result: RankingResult } =>
+      r.result !== null && !comparison.echoes.some((e) => e.methodId === r.methodId),
+  )
+  const methods = counted.map((r) => r.methodId)
+  const matrix = counted.map((a, i) =>
+    counted.map((b, j) => (i === j ? 1 : kendallTauB(a.result.ranking, b.result.ranking))),
+  )
+  return { methods, matrix }
+}
+
 export function compareRankings(problem: Problem, weights: number[], runs: RankingRun[]): Comparison {
   const results: MethodRun[] = runs.map((run) => {
     const { issues, rank } = prepareRanking(problem, run)
