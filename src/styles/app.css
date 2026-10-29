@@ -232,31 +232,140 @@
   }
 }
 
+/*
+ * A4 Executive & Method Report sheets: always resolve light-mode paper tokens in OKLCH
+ * (both on screen in Dark Mode and under @media print) so SVGs and useHeatTokens() render
+ * identically on paper.
+ */
+.report-sheet {
+  color-scheme: light;
+  --bg: oklch(1 0 0);
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.962 0.004 250);
+  --line: oklch(0.905 0.005 250);
+  --line-strong: oklch(0.8 0.008 250);
+  --text: oklch(0.225 0.01 255);
+  --text-2: oklch(0.42 0.012 255);
+  --text-3: oklch(0.51 0.012 255);
+  --accent: oklch(0.47 0.08 218);
+  --accent-hover: oklch(0.42 0.08 218);
+  --accent-fg: oklch(0.985 0.005 218);
+  --accent-bg: oklch(0.945 0.022 218);
+  --danger: oklch(0.52 0.17 27);
+  --danger-bg: oklch(0.962 0.024 27);
+  --warning: oklch(0.52 0.11 70);
+  --warning-bg: oklch(0.965 0.04 85);
+  --ok: oklch(0.5 0.1 155);
+  --ok-bg: oklch(0.962 0.03 155);
+  --data-context: oklch(0.62 0.008 250);
+  --data-accent: var(--accent);
+  --data-heat-0: oklch(0.975 0.004 218);
+  --data-heat-1: oklch(0.47 0.08 218);
+  --data-negative: oklch(0.6 0.09 22);
+  --data-cat-1: oklch(0.61 0.16 260);
+  --data-cat-2: oklch(0.46 0.16 30);
+  --data-cat-3: oklch(0.61 0.1 180);
+  --data-cat-4: oklch(0.46 0.12 310);
+  --data-cat-5: oklch(0.58 0.12 80);
+  --data-cat-6: oklch(0.44 0.14 285);
+  --data-cat-7: oklch(0.58 0.13 145);
+  --data-cat-8: oklch(0.52 0.15 350);
+  background: var(--surface);
+  color: var(--text);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.report-preview-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.report-preview-stage .report-sheet {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 11mm 13mm;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-float);
+}
+
+.report-sheet svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.report-sheet [role='radiogroup'],
+.report-sheet details,
+.report-sheet [data-idea-controls] {
+  display: none !important;
+}
+
+.report-sheet .overflow-auto,
+.report-sheet .overflow-x-auto {
+  overflow: visible !important;
+}
+
 @media print {
   @page {
     size: A4 portrait;
-    margin: 12mm 14mm;
+    margin: 10mm 12mm;
   }
 
   :root,
   :root[data-theme='dark'] {
     color-scheme: light;
-    --bg: #ffffff;
-    --surface: #ffffff;
-    --surface-2: #f4f5f7;
-    --line: #d5d8de;
-    --line-strong: #9aa1ae;
-    --text: #111418;
-    --text-2: #3b424d;
-    --text-3: #5c6470;
-    --accent: #185868;
-    --accent-bg: #eef5f7;
+    --bg: oklch(1 0 0);
+    --surface: oklch(1 0 0);
+    --surface-2: oklch(0.962 0.004 250);
+    --line: oklch(0.905 0.005 250);
+    --line-strong: oklch(0.8 0.008 250);
+    --text: oklch(0.225 0.01 255);
+    --text-2: oklch(0.42 0.012 255);
+    --text-3: oklch(0.51 0.012 255);
+    --accent: oklch(0.47 0.08 218);
+    --accent-hover: oklch(0.42 0.08 218);
+    --accent-fg: oklch(0.985 0.005 218);
+    --accent-bg: oklch(0.945 0.022 218);
+    --danger: oklch(0.52 0.17 27);
+    --danger-bg: oklch(0.962 0.024 27);
+    --warning: oklch(0.52 0.11 70);
+    --warning-bg: oklch(0.965 0.04 85);
+    --ok: oklch(0.5 0.1 155);
+    --ok-bg: oklch(0.962 0.03 155);
+    --data-context: oklch(0.62 0.008 250);
+    --data-accent: var(--accent);
+    --data-heat-0: oklch(0.975 0.004 218);
+    --data-heat-1: oklch(0.47 0.08 218);
+    --data-negative: oklch(0.6 0.09 22);
+    --data-cat-1: oklch(0.61 0.16 260);
+    --data-cat-2: oklch(0.46 0.16 30);
+    --data-cat-3: oklch(0.61 0.1 180);
+    --data-cat-4: oklch(0.46 0.12 310);
+    --data-cat-5: oklch(0.58 0.12 80);
+    --data-cat-6: oklch(0.44 0.14 285);
+    --data-cat-7: oklch(0.58 0.13 145);
+    --data-cat-8: oklch(0.52 0.15 350);
+  }
+
+  html,
+  body,
+  #root,
+  main,
+  [data-print-block] {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   body {
-    min-height: 0;
-    background: #ffffff !important;
-    color: #111418 !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
     font-size: 12px;
     line-height: 16px;
     -webkit-print-color-adjust: exact;
@@ -266,28 +375,63 @@
   header:not(.print-only header),
   nav,
   aside,
-  .no-print {
+  .no-print,
+  [data-radix-portal] {
     display: none !important;
   }
 
   .print-only {
-    display: flex !important;
+    display: block !important;
   }
 
-  main {
+  .report-sheet:not(.report-appendix-sheet) {
+    width: 100% !important;
+    min-height: 0 !important;
+    max-height: 276mm !important;
+    overflow: hidden !important;
     padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .report-sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .report-appendix-sheet {
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  .report-appendix-sheet table,
+  .report-appendix-sheet tbody,
+  .report-appendix-sheet section {
+    break-inside: auto;
+    page-break-inside: auto;
   }
 
   table {
     border-collapse: collapse;
+  }
+
+  thead {
+    display: table-header-group;
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
   tr,
-  thead,
-  tbody,
-  section {
+  .report-matrix-band {
     break-inside: avoid;
     page-break-inside: avoid;
   }
